@@ -26,6 +26,7 @@ interface ExploredRoom {
   x: number;
   y: number;
   isCurrentRoom: boolean;
+  isExplored: boolean;
 }
 
 interface RoomConnection {
@@ -63,6 +64,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       return <MapPin className="w-3 h-3 text-blue-400" />;
     }
     
+    // Show question mark for unexplored rooms
+    if (room.isExplored === false) {
+      return <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">?</div>;
+    }
+    
     switch (room.type) {
       case 'entrance':
         return <Home className="w-3 h-3 text-green-400" />;
@@ -82,6 +88,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const getRoomColor = (room: ExploredRoom) => {
     if (room.isCurrentRoom) {
       return "bg-blue-600/30 border-blue-400";
+    }
+    
+    // Unexplored rooms have a distinct muted appearance
+    if (room.isExplored === false) {
+      return "bg-slate-800/40 border-slate-600/60 opacity-60";
     }
     
     switch (room.type) {
