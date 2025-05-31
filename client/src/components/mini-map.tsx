@@ -170,34 +170,85 @@ export default function MiniMap({ crawler }: MiniMapProps) {
               
               return (
                 <div className="inline-block border border-slate-600 bg-slate-900/50 p-2 rounded">
-                  <div className="grid gap-0.5" style={{ gridTemplateColumns: `repeat(${maxX - minX + 1}, 1fr)` }}>
-                    {Array.from({ length: (maxY - minY + 1) * (maxX - minX + 1) }, (_, index) => {
-                      const row = Math.floor(index / (maxX - minX + 1));
-                      const col = index % (maxX - minX + 1);
-                      const x = minX + col;
-                      const y = minY + row;
-                      const room = roomMap.get(`${x},${y}`);
+                  <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${(maxX - minX + 1) * 2 - 1}, 1fr)` }}>
+                    {Array.from({ length: ((maxY - minY + 1) * 2 - 1) * ((maxX - minX + 1) * 2 - 1) }, (_, index) => {
+                      const gridWidth = (maxX - minX + 1) * 2 - 1;
+                      const row = Math.floor(index / gridWidth);
+                      const col = index % gridWidth;
                       
-                      if (room) {
-                        return (
-                          <div
-                            key={`${x}-${y}`}
-                            className={`w-6 h-6 border rounded text-xs flex items-center justify-center ${getRoomColor(room)} ${
-                              room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset' : ''
-                            }`}
-                            title={`${room.name} (${x}, ${y})`}
-                          >
-                            {getRoomIcon(room)}
-                          </div>
-                        );
+                      const isRoomRow = row % 2 === 0;
+                      const isRoomCol = col % 2 === 0;
+                      
+                      if (isRoomRow && isRoomCol) {
+                        // This is a room position
+                        const roomRow = Math.floor(row / 2);
+                        const roomCol = Math.floor(col / 2);
+                        const x = minX + roomCol;
+                        const y = maxY - roomRow; // Flip Y coordinate so north is up
+                        const room = roomMap.get(`${x},${y}`);
+                        
+                        if (room) {
+                          return (
+                            <div
+                              key={`${x}-${y}`}
+                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center ${getRoomColor(room)} ${
+                                room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset' : ''
+                              }`}
+                              title={`${room.name} (${x}, ${y})`}
+                            >
+                              {getRoomIcon(room)}
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div
+                              key={`${x}-${y}`}
+                              className="w-6 h-6 bg-slate-800 border border-slate-700 rounded opacity-30"
+                              title={`Unexplored (${x}, ${y})`}
+                            />
+                          );
+                        }
+                      } else if (isRoomRow && !isRoomCol) {
+                        // Horizontal connection space
+                        const roomRow = Math.floor(row / 2);
+                        const leftCol = Math.floor(col / 2);
+                        const rightCol = leftCol + 1;
+                        const leftX = minX + leftCol;
+                        const rightX = minX + rightCol;
+                        const y = maxY - roomRow;
+                        const leftRoom = roomMap.get(`${leftX},${y}`);
+                        const rightRoom = roomMap.get(`${rightX},${y}`);
+                        
+                        if (leftRoom && rightRoom) {
+                          return (
+                            <div key={`h-${leftX}-${rightX}-${y}`} className="w-6 h-6 flex items-center justify-center">
+                              <div className="w-4 h-0.5 bg-slate-500"></div>
+                            </div>
+                          );
+                        }
+                        return <div key={`h-empty-${col}-${row}`} className="w-6 h-6" />;
+                      } else if (!isRoomRow && isRoomCol) {
+                        // Vertical connection space
+                        const roomCol = Math.floor(col / 2);
+                        const topRow = Math.floor(row / 2);
+                        const bottomRow = topRow + 1;
+                        const x = minX + roomCol;
+                        const topY = maxY - topRow;
+                        const bottomY = maxY - bottomRow;
+                        const topRoom = roomMap.get(`${x},${topY}`);
+                        const bottomRoom = roomMap.get(`${x},${bottomY}`);
+                        
+                        if (topRoom && bottomRoom) {
+                          return (
+                            <div key={`v-${x}-${topY}-${bottomY}`} className="w-6 h-6 flex items-center justify-center">
+                              <div className="w-0.5 h-4 bg-slate-500"></div>
+                            </div>
+                          );
+                        }
+                        return <div key={`v-empty-${col}-${row}`} className="w-6 h-6" />;
                       } else {
-                        return (
-                          <div
-                            key={`${x}-${y}`}
-                            className="w-6 h-6 bg-slate-800 border border-slate-700 rounded opacity-30"
-                            title={`Unexplored (${x}, ${y})`}
-                          />
-                        );
+                        // Intersection space
+                        return <div key={`intersection-${col}-${row}`} className="w-6 h-6" />;
                       }
                     })}
                   </div>
