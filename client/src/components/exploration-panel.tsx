@@ -43,6 +43,12 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   // Use the live crawler data if available, otherwise fall back to the prop
   const crawler = crawlers?.find((c: CrawlerWithDetails) => c.id === initialCrawler.id) || initialCrawler;
 
+  // Fetch current room data to check if exploration is allowed
+  const { data: roomData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    retry: false,
+  });
+
   const exploreMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/explore`);
@@ -294,24 +300,32 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
 
         {/* Exploration Action */}
         <div className="space-y-3">
-          <Button 
-            onClick={handleExplore}
-            disabled={isExploring || crawler.energy < 10 || !crawler.isAlive}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            size="lg"
-          >
-            {isExploring ? (
-              <>
-                <Clock className="w-4 h-4 mr-2 animate-spin" />
-                Exploring...
-              </>
-            ) : (
-              <>
-                <MapPin className="w-4 h-4 mr-2" />
-                Explore Floor {crawler.currentFloor} (-10 Energy)
-              </>
-            )}
-          </Button>
+          {roomData?.room?.isSafe ? (
+            <div className="text-center p-4 bg-green-900/20 border border-green-600/30 rounded-lg">
+              <Shield className="w-6 h-6 mx-auto mb-2 text-green-400" />
+              <p className="text-sm text-green-400">Safe Room</p>
+              <p className="text-xs text-slate-400">No encounters here - perfect for resting</p>
+            </div>
+          ) : (
+            <Button 
+              onClick={handleExplore}
+              disabled={isExploring || crawler.energy < 10 || !crawler.isAlive}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
+              {isExploring ? (
+                <>
+                  <Clock className="w-4 h-4 mr-2 animate-spin" />
+                  Exploring...
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Search Room (-10 Energy)
+                </>
+              )}
+            </Button>
+          )}
           
           {crawler.energy < 10 && (
             <p className="text-sm text-amber-400 text-center">
