@@ -147,7 +147,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       <CardContent>
         <div className="space-y-2">
           {/* Compact grid map */}
-          <div className="relative">
+          <div className="flex justify-center">
             {/* Calculate visible area around current room */}
             {(() => {
               const currentRoom = exploredRooms.find(r => r.isCurrentRoom);
@@ -169,7 +169,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
               });
               
               return (
-                <div className="inline-block border border-slate-600 bg-slate-900/50 p-2 rounded">
+                <div className="border border-slate-600 bg-slate-900/50 p-2 rounded">
                   <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${(maxX - minX + 1) * 2 - 1}, 1fr)` }}>
                     {Array.from({ length: ((maxY - minY + 1) * 2 - 1) * ((maxX - minX + 1) * 2 - 1) }, (_, index) => {
                       const gridWidth = (maxX - minX + 1) * 2 - 1;
@@ -191,12 +191,17 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                           return (
                             <div
                               key={`${x}-${y}`}
-                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center ${getRoomColor(room)} ${
+                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center relative ${getRoomColor(room)} ${
                                 room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset' : ''
                               }`}
                               title={`${room.name} (${x}, ${y})`}
                             >
                               {getRoomIcon(room)}
+                              {room.isCurrentRoom && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full flex items-center justify-center">
+                                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                </div>
+                              )}
                             </div>
                           );
                         } else {
@@ -251,16 +256,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                         return <div key={`intersection-${col}-${row}`} className="w-6 h-6" />;
                       }
                     })}
-                  </div>
-                  
-                  {/* Compass in bottom right */}
-                  <div className="absolute bottom-1 right-1 text-xs text-slate-400">
-                    <div className="text-center">N</div>
-                    <div className="flex justify-between">
-                      <span>W</span>
-                      <span>E</span>
-                    </div>
-                    <div className="text-center">S</div>
                   </div>
                 </div>
               );
