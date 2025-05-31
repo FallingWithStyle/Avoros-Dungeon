@@ -1938,7 +1938,7 @@ export class DatabaseStorage implements IStorage {
       enteredAt: new Date()
     });
 
-    return { success: true, newRoom, energyCost };
+    return { success: true, newRoom };
   }
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
