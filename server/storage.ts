@@ -109,7 +109,7 @@ export interface IStorage {
   getRoom(roomId: number): Promise<Room | undefined>;
   createRoomConnection(fromRoomId: number, toRoomId: number, direction: string): Promise<RoomConnection>;
   getAvailableDirections(roomId: number): Promise<string[]>;
-  moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string }>;
+  moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string; energyCost?: number }>;
   getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined>;
   getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]>;
   getExploredRooms(crawlerId: number): Promise<any[]>;
@@ -1759,6 +1759,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Debug function to reset all crawlers for a user
+  private async isRoomSafe(roomId: number): Promise<boolean> {
+    // A room is considered safe if:
+    // 1. It has no active encounters
+    // 2. It's not a trap room with active threats
+    // 3. It's not currently occupied by hostile NPCs or monsters
+    
+    // Check for active encounters in this room
+    const activeEncounters = await db.select()
+      .from(encounters)
+      .where(and(
+        eq(encounters.floorId, 1), // Current floor
+        sql`${encounters.result}->>'roomId' = ${roomId}`,
+        eq(encounters.status, 'active')
+      ));
+
+    // If there are active encounters, room is not safe
+    if (activeEncounters.length > 0) {
+      return false;
+    }
+
+    // Get room details to check room type
+    const room = await this.getRoom(roomId);
+    if (!room) {
+      return false;
+    }
+
+    // Certain room types are considered inherently safe once cleared
+    const safeRoomTypes = ['normal', 'entrance', 'rest', 'safe', 'cleared'];
+    const dangerousRoomTypes = ['trap', 'boss', 'elite', 'puzzle'];
+
+    // If it's a dangerous room type, it's not safe for reduced energy travel
+    if (dangerousRoomTypes.includes(room.type)) {
+      return false;
+    }
+
+    // Otherwise, consider it safe (normal rooms, entrance, etc.)
+    return true;
+  }
+
   async resetUserCrawlers(userId: string): Promise<void> {
     // Get all crawler IDs for this user
     const userCrawlers = await db.select({ id: crawlers.id }).from(crawlers).where(eq(crawlers.sponsorId, userId));
@@ -1873,6 +1912,41 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Destination room not found" };
     }
 
+    // Check if this room has been previously explored by this crawler
+    const previousVisit = await db.select()
+      .from(crawlerPositions)
+      .where(and(
+        eq(crawlerPositions.crawlerId, crawlerId),
+        eq(crawlerPositions.roomId, connection.toRoomId)
+      ))
+      .limit(1);
+
+    // Calculate energy cost - reduced for safe, previously explored rooms
+    let energyCost = 10; // Default movement cost
+    
+    if (previousVisit.length > 0) {
+      // Check if room is safe (no active threats)
+      const isSafeRoom = await this.isRoomSafe(connection.toRoomId);
+      if (isSafeRoom) {
+        energyCost = 5; // Half energy cost for safe, explored rooms
+      }
+    }
+
+    // Get current crawler to check/update energy
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) {
+      return { success: false, error: "Crawler not found" };
+    }
+
+    if (crawler.energy < energyCost) {
+      return { success: false, error: `Not enough energy. Need ${energyCost}, have ${crawler.energy}` };
+    }
+
+    // Deduct energy cost
+    await this.updateCrawler(crawlerId, {
+      energy: Math.max(0, crawler.energy - energyCost)
+    });
+
     // Always insert a new position record to create movement history
     // This allows us to track all rooms the crawler has visited
     await db.insert(crawlerPositions).values({
@@ -1881,7 +1955,7 @@ export class DatabaseStorage implements IStorage {
       enteredAt: new Date()
     });
 
-    return { success: true, newRoom };
+    return { success: true, newRoom, energyCost };
   }
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
