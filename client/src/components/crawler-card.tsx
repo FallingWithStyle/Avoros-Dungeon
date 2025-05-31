@@ -104,10 +104,10 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Class Description */}
+        {/* Main Stat */}
         <div className="mb-4 p-3 bg-slate-800/20 rounded-lg border border-slate-700/30">
-          <div className="text-xs text-slate-400 mb-1">Class Specialty</div>
-          <p className="text-sm text-slate-300">{crawler.class.description}</p>
+          <div className="text-xs text-slate-400 mb-1">Primary Attribute</div>
+          <div className="text-lg font-bold text-yellow-400">{crawler.class.mainStat.toUpperCase()}</div>
         </div>
 
         {/* Background Story */}
