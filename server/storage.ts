@@ -276,19 +276,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
-    const stats = this.generateRandomStats();
-    const competencies = this.generateRandomCompetencies();
-    const background = this.generateCrawlerBackground();
-    
     const [crawler] = await db
       .insert(crawlers)
-      .values({
-        ...crawlerData,
-        ...stats,
-        background,
-        competencies,
-        level: 0, // All crawlers start at Level 0
-      })
+      .values(crawlerData)
       .returning();
 
     // Give them some random starting equipment
