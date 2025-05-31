@@ -42,23 +42,6 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   // Use the live crawler data if available, otherwise fall back to the prop
   const crawler = crawlers?.find((c: CrawlerWithDetails) => c.id === initialCrawler.id) || initialCrawler;
 
-  // Don't render exploration panel for dead crawlers
-  if (!crawler.isAlive) {
-    return (
-      <Card className="bg-gray-800/50 border-red-600/30">
-        <CardHeader>
-          <CardTitle className="text-red-400 flex items-center gap-2">
-            <Heart className="w-5 h-5" />
-            {crawler.name} - Deceased
-          </CardTitle>
-          <CardDescription className="text-gray-400">
-            This crawler has perished in the dungeon. Floor exploration is no longer available.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   const exploreMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/explore`);
@@ -134,6 +117,23 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
 
   const energyPercentage = (crawler.energy / crawler.maxEnergy) * 100;
   const healthPercentage = (crawler.health / crawler.maxHealth) * 100;
+
+  // Show memorial for dead crawlers
+  if (!crawler.isAlive) {
+    return (
+      <Card className="bg-gray-800/50 border-red-600/30">
+        <CardHeader>
+          <CardTitle className="text-red-400 flex items-center gap-2">
+            <Heart className="w-5 h-5" />
+            {crawler.name} - Deceased
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            This crawler has perished in the dungeon. Floor exploration is no longer available.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-game-surface border-game-border">
