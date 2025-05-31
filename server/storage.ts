@@ -633,20 +633,11 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Cannot explore - insufficient energy or crawler is dead");
     }
 
-    // Deduct energy
-    await this.updateCrawler(crawlerId, { 
-      energy: crawler.energy - 10,
-      status: "exploring"
-    });
-
     // Generate encounter based on floor and crawler capabilities
     const encounter = await this.generateEncounter(crawler);
     
-    // Process encounter based on type
+    // Process encounter based on type (this will handle energy and health updates)
     const result = await this.processEncounter(crawler, encounter);
-    
-    // Update crawler status back to active
-    await this.updateCrawler(crawlerId, { status: "active" });
     
     return result;
   }
@@ -872,25 +863,40 @@ export class DatabaseStorage implements IStorage {
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) return;
     
+    // Apply energy cost for exploration (always costs 10 energy)
+    const newEnergy = Math.max(0, crawler.energy - 10);
+    
+    // Apply damage from encounters
     const newHealth = Math.max(0, crawler.health - rewards.damage);
+    
+    // Apply rewards
     const newCredits = crawler.credits + rewards.credits;
     const newExperience = crawler.experience + rewards.experience;
     const isAlive = newHealth > 0;
     
+    // Update crawler with all changes
     await this.updateCrawler(crawlerId, {
+      energy: newEnergy,
       health: newHealth,
       credits: newCredits,
       experience: newExperience,
-      isAlive: isAlive
+      isAlive: isAlive,
+      status: "active"
     });
     
-    // Create activity log
+    // Create detailed activity log
+    let logMessage = `${crawler.name} explored and`;
+    if (rewards.damage > 0) {
+      logMessage += ` took ${rewards.damage} damage,`;
+    }
+    logMessage += ` gained ${rewards.experience} XP and ${rewards.credits} credits`;
+    
     await this.createActivity({
       userId: crawler.sponsorId,
       crawlerId: crawler.id,
       type: 'exploration',
-      message: `${crawler.name} gained ${rewards.experience} XP and ${rewards.credits} credits`,
-      details: rewards
+      message: logMessage,
+      details: { ...rewards, energyUsed: 10 }
     });
   }
 
