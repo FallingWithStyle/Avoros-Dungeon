@@ -22,6 +22,7 @@ import {
 
 interface RoomNavigationProps {
   crawler: CrawlerWithDetails;
+  energyDisabled?: boolean;
 }
 
 interface Room {
@@ -39,7 +40,7 @@ interface RoomData {
   playersInRoom: CrawlerWithDetails[];
 }
 
-export default function RoomNavigation({ crawler }: RoomNavigationProps) {
+export default function RoomNavigation({ crawler, energyDisabled = false }: RoomNavigationProps) {
   const { toast } = useToast();
   const [pendingDirection, setPendingDirection] = useState<string | null>(null);
 
@@ -53,7 +54,10 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
   // Movement mutation
   const moveMutation = useMutation({
     mutationFn: async (direction: string) => {
-      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { direction });
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { 
+        direction,
+        debugEnergyDisabled: energyDisabled 
+      });
     },
     onSuccess: () => {
       // Refresh room data and mini-map
@@ -93,8 +97,8 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
       return;
     }
     
-    // Check energy
-    if (crawler.energy < 10) {
+    // Check energy (unless disabled for debug)
+    if (!energyDisabled && crawler.energy < 10) {
       toast({
         title: "Not enough energy",
         description: "You need at least 10 energy to move between rooms.",
