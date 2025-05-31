@@ -161,7 +161,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
 
         {/* Stats */}
         <div>
-          <h4 className="font-semibold text-slate-200 mb-3">Combat Stats</h4>
+          <h4 className="font-semibold text-slate-200 mb-3">Stats</h4>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -186,10 +186,24 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-purple-400" />
-                <span className="text-sm">Tech</span>
+                <Brain className="w-4 h-4 text-purple-400" />
+                <span className="text-sm">Wit</span>
               </div>
-              <span className="text-sm font-mono text-purple-400">{crawler.tech}</span>
+              <span className="text-sm font-mono text-purple-400">{crawler.wit}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-pink-400" />
+                <span className="text-sm">Charisma</span>
+              </div>
+              <span className="text-sm font-mono text-pink-400">{crawler.charisma}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Archive className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm">Memory</span>
+              </div>
+              <span className="text-sm font-mono text-cyan-400">{crawler.memory}</span>
             </div>
           </div>
         </div>
