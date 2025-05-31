@@ -37,7 +37,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
   }, [isAuthenticated, isLoading, toast]);
 
   const { data: crawler, isLoading: crawlerLoading } = useQuery<CrawlerWithDetails>({
-    queryKey: ["/api/crawlers", crawlerId],
+    queryKey: [`/api/crawlers/${crawlerId}`],
     enabled: isAuthenticated && !!crawlerId,
   });
 
