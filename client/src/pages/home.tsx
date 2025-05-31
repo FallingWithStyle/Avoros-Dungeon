@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare } from "lucide-react";
+import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { showErrorToast } from "@/lib/errorToast";
 import CrawlerSelection from "@/components/crawler-selection";
 import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
@@ -60,23 +61,7 @@ export default function Home() {
     },
     onError: (error) => {
       console.error("Crawler creation error:", error);
-      const errorMessage = `Failed to sponsor crawler: ${error.message}`;
-      toast({
-        title: "Sponsorship Failed",
-        description: (
-          <div className="flex items-center gap-2">
-            <span>{errorMessage}</span>
-            <button
-              onClick={() => navigator.clipboard.writeText(errorMessage)}
-              className="text-xs bg-red-800 hover:bg-red-700 px-2 py-1 rounded"
-              title="Copy error message"
-            >
-              Copy
-            </button>
-          </div>
-        ),
-        variant: "destructive",
-      });
+      showErrorToast("Sponsorship Failed", error);
     },
   });
 
