@@ -38,8 +38,10 @@ export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
     },
     onSuccess: (encounter) => {
       setIsExploring(false);
+      // Force immediate refresh of crawler data
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+      queryClient.refetchQueries({ queryKey: ["/api/crawlers"] });
       
       // Show encounter result
       toast({
