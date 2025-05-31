@@ -749,21 +749,21 @@ export class DatabaseStorage implements IStorage {
             {
               id: "hack",
               text: "Attempt to hack the security system",
-              requirements: { tech: 10 },
+              requirements: { wit: 8 },
               riskLevel: "medium",
-              primaryStat: "tech"
+              primaryStat: "wit"
             },
             {
               id: "force",
               text: "Break it open with brute force",
-              requirements: { attack: 8 },
+              requirements: { attack: 6 },
               riskLevel: "high",
               primaryStat: "attack"
             },
             {
               id: "bypass",
               text: "Look for hidden maintenance access",
-              requirements: { speed: 6 },
+              requirements: { speed: 4 },
               riskLevel: "low",
               primaryStat: "speed"
             },
@@ -773,6 +773,60 @@ export class DatabaseStorage implements IStorage {
               requirements: {},
               riskLevel: "none",
               primaryStat: "none"
+            }
+          ]
+        },
+        {
+          title: "Abandoned Equipment Locker",
+          description: `A military-style locker sits half-buried in debris. The lock appears damaged but functional.`,
+          choices: [
+            {
+              id: "pick_lock",
+              text: "Carefully pick the lock",
+              requirements: { wit: 5 },
+              riskLevel: "low",
+              primaryStat: "wit"
+            },
+            {
+              id: "smash",
+              text: "Smash it open with available tools",
+              requirements: { attack: 4 },
+              riskLevel: "medium",
+              primaryStat: "attack"
+            },
+            {
+              id: "examine",
+              text: "Examine for traps before opening",
+              requirements: { memory: 3 },
+              riskLevel: "none",
+              primaryStat: "memory"
+            }
+          ]
+        },
+        {
+          title: "Glowing Crystal Formation",
+          description: `Strange crystals emit a soft blue glow. They might be valuable energy sources.`,
+          choices: [
+            {
+              id: "harvest",
+              text: "Carefully harvest the crystals",
+              requirements: { wit: 6 },
+              riskLevel: "medium",
+              primaryStat: "wit"
+            },
+            {
+              id: "break_off",
+              text: "Break off a piece quickly",
+              requirements: { speed: 4 },
+              riskLevel: "high",
+              primaryStat: "speed"
+            },
+            {
+              id: "study",
+              text: "Study the formation first",
+              requirements: { memory: 4 },
+              riskLevel: "low",
+              primaryStat: "memory"
             }
           ]
         }

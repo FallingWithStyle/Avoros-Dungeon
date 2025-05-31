@@ -90,6 +90,24 @@ export default function Home() {
     },
   });
 
+  // Debug energy restoration
+  const restoreEnergyMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeCrawler) throw new Error("No active crawler");
+      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/restore-energy`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      toast({
+        title: "Energy Restored",
+        description: "Crawler energy has been restored to 100%.",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Energy Restore Failed", error);
+    },
+  });
+
   if (crawlersLoading) {
     return (
       <div className="min-h-screen bg-slate-900 p-6">
@@ -283,19 +301,35 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                onClick={() => resetCrawlersMutation.mutate()}
-                disabled={resetCrawlersMutation.isPending}
-                variant="destructive"
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {resetCrawlersMutation.isPending ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                )}
-                Reset All Crawlers
-              </Button>
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => resetCrawlersMutation.mutate()}
+                  disabled={resetCrawlersMutation.isPending}
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {resetCrawlersMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  Reset All Crawlers
+                </Button>
+                
+                <Button
+                  onClick={() => restoreEnergyMutation.mutate()}
+                  disabled={restoreEnergyMutation.isPending || !activeCrawler}
+                  variant="outline"
+                  className="border-green-600/30 text-green-400 hover:bg-green-600/10"
+                >
+                  {restoreEnergyMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Zap className="w-4 h-4 mr-2" />
+                  )}
+                  Restore Energy (100%)
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
