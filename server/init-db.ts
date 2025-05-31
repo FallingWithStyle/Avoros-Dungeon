@@ -17,6 +17,7 @@ export async function initializeDatabase() {
         baseWit: 10,
         baseCharisma: 8,
         baseMemory: 12,
+        baseLuck: 5,
       },
       {
         name: "Scholar",
@@ -28,6 +29,7 @@ export async function initializeDatabase() {
         baseWit: 30,
         baseCharisma: 15,
         baseMemory: 25,
+        baseLuck: 5,
       },
       {
         name: "Social Engineer",
@@ -39,6 +41,7 @@ export async function initializeDatabase() {
         baseWit: 18,
         baseCharisma: 30,
         baseMemory: 20,
+        baseLuck: 5,
       },
     ]).onConflictDoNothing();
 
