@@ -54,7 +54,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   return (
     <Card className="bg-game-surface border-game-border">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with avatar, name, and status */}
+        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
               <AvatarImage src={getAvatarUrl()} alt={crawler.name} />
@@ -63,8 +64,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-white">{crawler.name}</h3>
-              <p className="text-sm text-slate-400">{crawler.class.name}</p>
+              <h3 className="font-semibold text-white text-lg">{crawler.name}</h3>
+              <p className="text-sm text-slate-400 font-medium">{crawler.class.name}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -75,14 +76,55 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        <div className="space-y-3">
+        {/* Core Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">ATK</div>
+            <div className="text-lg font-bold text-red-400">{crawler.attack}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">DEF</div>
+            <div className="text-lg font-bold text-blue-400">{crawler.defense}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">SPD</div>
+            <div className="text-lg font-bold text-green-400">{crawler.speed}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">WIT</div>
+            <div className="text-lg font-bold text-purple-400">{crawler.wit}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">CHA</div>
+            <div className="text-lg font-bold text-yellow-400">{crawler.charisma}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-slate-400 mb-1">MEM</div>
+            <div className="text-lg font-bold text-cyan-400">{crawler.memory}</div>
+          </div>
+        </div>
+
+        {/* Class Description */}
+        <div className="mb-4 p-3 bg-slate-800/20 rounded-lg border border-slate-700/30">
+          <div className="text-xs text-slate-400 mb-1">Class Specialty</div>
+          <p className="text-sm text-slate-300">{crawler.class.description}</p>
+        </div>
+
+        {/* Background Story */}
+        <div className="mb-4 p-3 bg-amber-900/10 rounded-lg border border-amber-700/30">
+          <div className="text-xs text-amber-400 mb-1">Background</div>
+          <p className="text-sm text-slate-300 leading-relaxed">{crawler.background}</p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="space-y-2 mb-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-300">Floor</span>
+            <span className="text-sm text-slate-400">Floor</span>
             <span className="text-sm font-mono text-crawler font-bold">{crawler.currentFloor}</span>
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-300">Health</span>
+            <span className="text-sm text-slate-400">Health</span>
             <div className="flex items-center space-x-2">
               <div className="w-20 h-2 bg-game-bg rounded-full overflow-hidden">
                 <Progress value={healthPercent} className="h-full" />
@@ -94,12 +136,18 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-300">Credits Earned</span>
+            <span className="text-sm text-slate-400">Energy</span>
+            <span className="text-sm font-mono text-blue-400">{crawler.energy}/{crawler.maxEnergy}</span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-slate-400">Credits</span>
             <span className="text-sm font-mono text-green-400">{crawler.credits.toLocaleString()}</span>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-game-border">
+        {/* Action Button */}
+        <div className="pt-4 border-t border-game-border">
           {crawler.isAlive && crawler.status === 'active' ? (
             <Button
               onClick={handleEnterCrawlerMode}
