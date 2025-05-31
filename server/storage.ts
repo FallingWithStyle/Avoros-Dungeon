@@ -698,11 +698,11 @@ export class DatabaseStorage implements IStorage {
               primaryStat: "speed"
             },
             {
-              id: "tech",
-              text: "Use technological gadgets to distract it",
-              requirements: { tech: 8 },
+              id: "wit",
+              text: "Use clever tactics to outmaneuver it",
+              requirements: { wit: 6 },
               riskLevel: "medium",
-              primaryStat: "tech"
+              primaryStat: "wit"
             }
           ]
         },
@@ -734,9 +734,9 @@ export class DatabaseStorage implements IStorage {
             {
               id: "ambush",
               text: "Use the environment to set up an ambush",
-              requirements: { tech: 6, speed: 6 },
+              requirements: { wit: 6, speed: 6 },
               riskLevel: "high",
-              primaryStat: "tech"
+              primaryStat: "wit"
             }
           ]
         }
@@ -1425,6 +1425,13 @@ export class DatabaseStorage implements IStorage {
   private calculateChoiceSuccess(crawler: any, choice: any, meetsRequirements: boolean): number {
     let baseChance = 0.6; // Base 60% success rate
 
+    // Calculate challenge level based on requirements
+    const challengeLevel = this.getChoiceChallengeLevel(choice);
+    
+    // Apply luck mechanics
+    const luckBonus = this.calculateLuckBonus(crawler, choice, challengeLevel);
+    baseChance += luckBonus;
+
     // Requirements bonus/penalty
     if (meetsRequirements) {
       baseChance += 0.3; // +30% if requirements met
@@ -1432,10 +1439,14 @@ export class DatabaseStorage implements IStorage {
       baseChance -= 0.4; // -40% if requirements not met
     }
 
-    // Stat bonus based on primary stat
+    // Multi-stat bonus based on all relevant stats
     if (choice.primaryStat !== 'none') {
-      const statValue = crawler[choice.primaryStat] || 0;
-      baseChance += Math.min(statValue * 0.02, 0.2); // Up to +20% bonus
+      const primaryStatValue = crawler[choice.primaryStat] || 0;
+      baseChance += Math.min(primaryStatValue * 0.02, 0.2); // Up to +20% bonus from primary stat
+      
+      // Small bonus from other relevant stats
+      const secondaryBonus = this.calculateSecondaryStatBonus(crawler, choice);
+      baseChance += secondaryBonus;
     }
 
     // Competency bonus
@@ -1451,6 +1462,42 @@ export class DatabaseStorage implements IStorage {
     }
 
     return Math.max(0.1, Math.min(0.95, baseChance)); // Clamp between 10% and 95%
+  }
+
+  private getChoiceChallengeLevel(choice: any): number {
+    // Calculate total challenge based on requirements
+    const requirements = choice.requirements || {};
+    return Object.values(requirements).reduce((sum: number, value: any) => sum + (value || 0), 0);
+  }
+
+  private calculateLuckBonus(crawler: any, choice: any, challengeLevel: number): number {
+    const luck = crawler.luck || 0;
+    const primaryStat = crawler[choice.primaryStat] || 0;
+    
+    // Luck mechanics: +1 if luck > challenge, -1 if skill + luck < challenge
+    if (luck > challengeLevel) {
+      return 0.1; // +10% success chance
+    } else if ((primaryStat + luck) < challengeLevel) {
+      return -0.1; // -10% success chance
+    }
+    
+    return 0; // No luck bonus/penalty
+  }
+
+  private calculateSecondaryStatBonus(crawler: any, choice: any): number {
+    const allStats = ['attack', 'defense', 'speed', 'wit', 'charisma', 'memory'];
+    const primaryStat = choice.primaryStat;
+    let bonus = 0;
+    
+    // Small bonus from non-primary stats (max 5% total)
+    allStats.forEach(stat => {
+      if (stat !== primaryStat) {
+        const statValue = crawler[stat] || 0;
+        bonus += Math.min(statValue * 0.005, 0.01); // Up to 1% per stat
+      }
+    });
+    
+    return Math.min(bonus, 0.05); // Cap at 5% total secondary bonus
   }
 
   private generateChoiceResults(crawler: any, choice: any, encounterType: string, isSuccess: boolean): any {
