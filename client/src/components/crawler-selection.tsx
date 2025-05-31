@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CrawlerCandidate {
   id: string;
+  name: string;
   stats: {
     health: number;
     maxHealth: number;
@@ -33,13 +34,12 @@ interface CrawlerCandidate {
 }
 
 interface CrawlerSelectionProps {
-  onSelect: (candidate: CrawlerCandidate, name: string) => void;
+  onSelect: (candidate: CrawlerCandidate) => void;
   onCancel: () => void;
 }
 
 export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectionProps) {
   const [selectedCandidate, setSelectedCandidate] = useState<CrawlerCandidate | null>(null);
-  const [crawlerName, setCrawlerName] = useState("");
   const { toast } = useToast();
 
   const { data: candidates, isLoading, refetch } = useQuery({
@@ -67,8 +67,8 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
   }
 
   const handleSelect = () => {
-    if (selectedCandidate && crawlerName.trim()) {
-      onSelect(selectedCandidate, crawlerName.trim());
+    if (selectedCandidate) {
+      onSelect(selectedCandidate);
     }
   };
 
@@ -106,14 +106,14 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-blue-400" />
-                  <CardTitle className="text-lg">Level {candidate.level} Recruit</CardTitle>
+                  <CardTitle className="text-lg">{candidate.name}</CardTitle>
                 </div>
                 <Badge variant="outline" className="border-green-600/30 text-green-400">
                   {candidate.topAbility.name}
                 </Badge>
               </div>
               <CardDescription className="text-sm text-slate-400">
-                {candidate.topAbility.description}
+                Level {candidate.level} • {candidate.topAbility.description}
               </CardDescription>
             </CardHeader>
             
@@ -208,27 +208,16 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
           <CardHeader>
             <CardTitle className="text-green-400">Confirm Selection</CardTitle>
             <CardDescription>
-              Give your chosen crawler a name to complete the sponsorship agreement.
+              Ready to sponsor {selectedCandidate.name}? This will create an official sponsorship agreement.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="crawler-name">Crawler Name</Label>
-              <Input
-                id="crawler-name"
-                value={crawlerName}
-                onChange={(e) => setCrawlerName(e.target.value)}
-                placeholder="Enter crawler name..."
-                className="bg-game-bg border-game-border"
-              />
-            </div>
             <div className="flex gap-2">
               <Button 
                 onClick={handleSelect}
-                disabled={!crawlerName.trim()}
                 className="bg-green-600 hover:bg-green-700"
               >
-                Sponsor This Crawler
+                Sponsor {selectedCandidate.name}
               </Button>
               <Button 
                 variant="outline" 
