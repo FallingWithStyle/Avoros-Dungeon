@@ -299,11 +299,9 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Equipment & Info */}
-          <div className="lg:col-span-1">
-            <Card className="bg-game-surface border-game-border">
+            {/* Equipment Section */}
+            <Card className="bg-game-surface border-game-border mt-6">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <i className="fas fa-shield-alt mr-2 text-green-400"></i>
@@ -319,8 +317,11 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            <Card className="bg-game-surface border-game-border mt-6">
+          {/* Floor Info & Mini-map */}
+          <div className="lg:col-span-1">
+            <Card className="bg-game-surface border-game-border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <i className="fas fa-info-circle mr-2 text-blue-400"></i>
@@ -347,6 +348,19 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     </p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Mini-map Section */}
+            <Card className="bg-game-surface border-game-border mt-6">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <i className="fas fa-map mr-2 text-green-400"></i>
+                  Mini-Map
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MiniMap crawler={crawler} />
               </CardContent>
             </Card>
           </div>
