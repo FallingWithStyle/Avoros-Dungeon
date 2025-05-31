@@ -40,13 +40,38 @@ export default function Home() {
   const activeCrawlers = crawlers?.filter((c: CrawlerWithDetails) => c.isAlive) || [];
   const deadCrawlers = crawlers?.filter((c: CrawlerWithDetails) => !c.isAlive) || [];
 
-  const handleCrawlerSelect = (candidate: any, name: string) => {
-    // Implementation will be added when needed
-    setShowCrawlerSelection(false);
-    toast({
-      title: "Crawler Created",
-      description: `${name} has been sponsored and is ready for dungeon exploration!`,
-    });
+  const createCrawlerMutation = useMutation({
+    mutationFn: async (candidate: any) => {
+      return apiRequest("/api/crawlers", {
+        method: "POST",
+        body: JSON.stringify({
+          name: candidate.name,
+          stats: candidate.stats,
+          competencies: candidate.competencies,
+          background: candidate.background,
+          startingEquipment: candidate.startingEquipment
+        }),
+      });
+    },
+    onSuccess: (newCrawler) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      setShowCrawlerSelection(false);
+      toast({
+        title: "Crawler Sponsored",
+        description: `${newCrawler.name} has been sponsored and is ready for dungeon exploration!`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Sponsorship Failed",
+        description: "Failed to sponsor crawler. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCrawlerSelect = (candidate: any) => {
+    createCrawlerMutation.mutate(candidate);
   };
 
   const handleSetActiveCrawler = (crawler: CrawlerWithDetails) => {
