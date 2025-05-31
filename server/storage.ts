@@ -51,6 +51,9 @@ export interface IStorage {
   getAvailableSecondarySponsorships(): Promise<CrawlerWithDetails[]>;
   resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number): Promise<User>;
   
+  // Crawler generation
+  generateCrawlerCandidates(count?: number): Promise<any[]>;
+  
   // Crawler classes
   getCrawlerClasses(): Promise<CrawlerClass[]>;
   
@@ -136,12 +139,96 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Crawler operations
+  private generateRandomStats() {
+    // Base stats for Level 0 crawlers with some randomization
+    const baseHealth = 80 + Math.floor(Math.random() * 40); // 80-120
+    const baseAttack = 8 + Math.floor(Math.random() * 7); // 8-15
+    const baseDefense = 5 + Math.floor(Math.random() * 5); // 5-10
+    const baseSpeed = 6 + Math.floor(Math.random() * 8); // 6-14
+    const baseTech = 4 + Math.floor(Math.random() * 12); // 4-16
+    
+    return {
+      health: baseHealth,
+      maxHealth: baseHealth,
+      attack: baseAttack,
+      defense: baseDefense,
+      speed: baseSpeed,
+      tech: baseTech,
+    };
+  }
+
+  private generateRandomCompetencies(): string[] {
+    const allCompetencies = [
+      "Scavenging", "Lock Picking", "Electronics", "First Aid", "Stealth",
+      "Combat Reflexes", "Jury Rigging", "Negotiation", "Intimidation", "Hacking",
+      "Demolitions", "Survival", "Leadership", "Marksmanship", "Athletics",
+      "Engineering", "Chemistry", "Psychology", "Linguistics", "Navigation"
+    ];
+    
+    // Give each crawler 2-4 random competencies
+    const numCompetencies = 2 + Math.floor(Math.random() * 3);
+    const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numCompetencies);
+  }
+
+  private generateCrawlerBackground(): string {
+    const backgrounds = [
+      "Former corporate security guard who volunteered after losing their job to automation",
+      "Ex-military engineer discharged after questioning orders during a colony uprising",
+      "Underground hacker who got caught and chose the dungeon over prison",
+      "Academic researcher studying xenoarchaeology who needed funding for their studies",
+      "Street medic from the outer colonies seeking to escape mounting debt",
+      "Washed-up pilot whose reflexes aren't what they used to be but still has pride",
+      "Corporate whistleblower hiding from assassination attempts",
+      "Former gang member trying to go legitimate and support their family",
+      "Displaced miner after their asteroid was depleted, looking for a new start",
+      "Lab technician who accidentally caused an incident and needs to disappear",
+      "Failed entrepreneur who lost everything and sees this as their last chance",
+      "Religious zealot convinced the dungeon holds divine secrets"
+    ];
+    
+    return backgrounds[Math.floor(Math.random() * backgrounds.length)];
+  }
+
   async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
+    const stats = this.generateRandomStats();
+    const competencies = this.generateRandomCompetencies();
+    const background = this.generateCrawlerBackground();
+    
     const [crawler] = await db
       .insert(crawlers)
-      .values(crawlerData)
+      .values({
+        ...crawlerData,
+        ...stats,
+        background,
+        competencies,
+        level: 0, // All crawlers start at Level 0
+      })
       .returning();
+
+    // Give them some random starting equipment
+    await this.assignRandomStartingEquipment(crawler.id);
+
     return crawler;
+  }
+
+  private async assignRandomStartingEquipment(crawlerId: number): Promise<void> {
+    const availableEquipment = await db.select().from(equipment);
+    
+    // Give 1-3 random pieces of basic equipment
+    const numItems = 1 + Math.floor(Math.random() * 3);
+    const basicEquipment = availableEquipment.filter(eq => eq.rarity === 'common');
+    
+    for (let i = 0; i < numItems; i++) {
+      const randomEquipment = basicEquipment[Math.floor(Math.random() * basicEquipment.length)];
+      if (randomEquipment) {
+        await db.insert(crawlerEquipment).values({
+          crawlerId: crawlerId,
+          equipmentId: randomEquipment.id,
+          equipped: i === 0, // Equip the first item
+        });
+      }
+    }
   }
 
   async getCrawlersBySponssor(sponsorId: string): Promise<CrawlerWithDetails[]> {
@@ -461,6 +548,50 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Generate crawler candidates for selection
+  async generateCrawlerCandidates(count = 3): Promise<any[]> {
+    const candidates = [];
+    const availableEquipment = await db.select().from(equipment);
+    const basicEquipment = availableEquipment.filter(eq => eq.rarity === 'common');
+
+    for (let i = 0; i < count; i++) {
+      const stats = this.generateRandomStats();
+      const competencies = this.generateRandomCompetencies();
+      const background = this.generateCrawlerBackground();
+      
+      // Generate some starting equipment for preview
+      const numItems = 1 + Math.floor(Math.random() * 3);
+      const startingEquipment = [];
+      for (let j = 0; j < numItems; j++) {
+        const randomEquipment = basicEquipment[Math.floor(Math.random() * basicEquipment.length)];
+        if (randomEquipment && !startingEquipment.find(e => e.id === randomEquipment.id)) {
+          startingEquipment.push(randomEquipment);
+        }
+      }
+
+      // Determine top ability based on highest stat
+      const statValues = [
+        { name: 'Combat', value: stats.attack, description: 'Excels in direct confrontation' },
+        { name: 'Defense', value: stats.defense, description: 'Survives through resilience' },
+        { name: 'Speed', value: stats.speed, description: 'Fast and agile movement' },
+        { name: 'Tech', value: stats.tech, description: 'Masters technology and hacking' }
+      ];
+      const topAbility = statValues.reduce((max, stat) => stat.value > max.value ? stat : max);
+
+      candidates.push({
+        id: `candidate_${i}`,
+        stats,
+        competencies,
+        background,
+        startingEquipment,
+        topAbility,
+        level: 0
+      });
+    }
+
+    return candidates;
   }
 }
 

@@ -314,6 +314,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Crawler generation
+  app.get('/api/crawlers/candidates', isAuthenticated, async (req, res) => {
+    try {
+      const count = parseInt(req.query.count as string) || 3;
+      const candidates = await storage.generateCrawlerCandidates(count);
+      res.json(candidates);
+    } catch (error) {
+      console.error("Error generating crawler candidates:", error);
+      res.status(500).json({ message: "Failed to generate crawler candidates" });
+    }
+  });
+
   // Equipment
   app.get('/api/equipment', async (req, res) => {
     try {
