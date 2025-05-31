@@ -45,10 +45,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     retry: false,
   });
 
-  // Debug: log the room data to see what types we're getting
-  if (exploredRooms) {
-    console.log('Explored rooms data:', exploredRooms);
-  }
+
 
   // Track room changes for smooth transitions
   useEffect(() => {
@@ -85,8 +82,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         return <Skull className="w-3 h-3 text-red-400" />;
       case 'exit':
         return <DoorOpen className="w-3 h-3 text-purple-400" />;
+      case 'normal':
+        return <div className="w-2 h-2 bg-slate-300 rounded-full" />;
       default:
-        return <div className="w-3 h-3 bg-slate-400 rounded-full" />;
+        return <div className="w-2 h-2 bg-slate-400 rounded-full" />;
     }
   };
 
