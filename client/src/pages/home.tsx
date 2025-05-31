@@ -15,6 +15,7 @@ import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
 import MiniMap from "@/components/mini-map-new";
 import ExplorationPanel from "@/components/exploration-panel";
+import CrawlerCard from "@/components/crawler-card";
 import { useAuth } from "@/hooks/useAuth";
 import type { CrawlerWithDetails } from "@shared/schema";
 
@@ -194,43 +195,11 @@ export default function Home() {
                     )}
                   </div>
                 ) : (
-                  <div className="grid gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activeCrawlers.map((crawler: CrawlerWithDetails) => (
-                      <Card 
-                        key={crawler.id} 
-                        className={`bg-slate-700 border-slate-600 cursor-pointer transition-colors ${
-                          activeCrawler?.id === crawler.id ? 'border-blue-500 bg-slate-600' : 'hover:bg-slate-650'
-                        }`}
-                        onClick={() => handleSetActiveCrawler(crawler)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold text-lg">{crawler.name}</h3>
-                              <div className="flex items-center gap-2 text-sm text-slate-400">
-                                <Badge variant="outline" className="border-blue-600/30 text-blue-400">
-                                  Level {crawler.level}
-                                </Badge>
-                                <Badge variant="outline" className="border-green-600/30 text-green-400">
-                                  Floor {crawler.currentFloor}
-                                </Badge>
-                                <span>•</span>
-                                <span>{crawler.class?.name || 'Unclassed'}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm">
-                              <div className="flex items-center gap-1">
-                                <Zap className="w-4 h-4 text-yellow-400" />
-                                <span>{crawler.energy}/{crawler.maxEnergy}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <TrendingUp className="w-4 h-4 text-green-400" />
-                                <span>{crawler.experience.toLocaleString()} XP</span>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <div key={crawler.id} onClick={() => handleSetActiveCrawler(crawler)}>
+                        <CrawlerCard crawler={crawler} />
+                      </div>
                     ))}
                   </div>
                 )}
