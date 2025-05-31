@@ -147,10 +147,22 @@ export default function Home() {
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-blue-400 flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Active Crawlers ({activeCrawlers.length})
-                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-blue-400 flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Active Crawlers ({activeCrawlers.length})
+                    </CardTitle>
+                    {activeCrawler && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="text-slate-400 hover:text-slate-200"
+                      >
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </Button>
+                    )}
+                  </div>
                   {canCreatePrimary && (
                     <Button
                       onClick={() => setShowCrawlerSelection(true)}
@@ -226,7 +238,7 @@ export default function Home() {
             </Card>
 
             {/* Exploration Panel */}
-            {activeCrawler && (
+            {activeCrawler && isExpanded && (
               <ExplorationPanel crawler={activeCrawler} />
             )}
 
@@ -262,6 +274,11 @@ export default function Home() {
 
           {/* Right Column - Social & Stats */}
           <div className="space-y-6">
+            
+            {/* Mini-map for active crawler */}
+            {activeCrawler && isExpanded && (
+              <MiniMap crawler={activeCrawler} />
+            )}
             
             {/* Activity Feed */}
             <Card className="bg-slate-800 border-slate-700">
