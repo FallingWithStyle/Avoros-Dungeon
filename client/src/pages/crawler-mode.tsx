@@ -275,14 +275,14 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 <div className="bg-game-bg rounded-lg p-4 h-64 overflow-y-auto mb-4 border border-game-border">
                   <div className="space-y-2 font-mono text-sm">
                     <div className="text-blue-400">
-                      >>> {crawler.name} stands ready on Floor {crawler.currentFloor}
+                      {'>>>'} {crawler.name} stands ready on Floor {crawler.currentFloor}
                     </div>
                     <div className="text-slate-300">
                       The shadows whisper of dangers ahead. What will you do?
                     </div>
                     {gameLog.map((entry, index) => (
                       <div key={index} className="text-green-400">
-                        >>> {entry}
+                        {'>>>'} {entry}
                       </div>
                     ))}
                   </div>

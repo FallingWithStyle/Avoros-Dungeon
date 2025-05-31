@@ -87,6 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crawlerId: newCrawler.id,
         type: 'crawler_created',
         message: `${newCrawler.name} has entered the dungeon!`,
+        details: null,
       });
 
       res.json(newCrawler);
@@ -149,6 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             crawlerId,
             type: 'combat_start',
             message: `${crawler.name} encountered ${randomEnemy.name} on Floor ${crawler.currentFloor}`,
+            details: null,
           });
         }
       }
@@ -162,6 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           crawlerId,
           type: 'exploration',
           message: `${crawler.name} is exploring Floor ${crawler.currentFloor}`,
+          details: null,
         });
       }
 
@@ -194,6 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crawlerId,
         type: 'floor_advance',
         message: `${crawler.name} advanced to Floor ${updatedCrawler.currentFloor}`,
+        details: null,
       });
 
       res.json(updatedCrawler);

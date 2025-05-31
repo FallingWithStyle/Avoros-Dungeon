@@ -86,18 +86,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Generate corporation name if not provided
+    const corporationName = userData.corporationName || this.generateCorporationName();
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        corporationName,
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
           ...userData,
+          corporationName,
           updatedAt: new Date(),
         },
       })
       .returning();
     return user;
+  }
+
+  private generateCorporationName(): string {
+    const prefixes = [
+      "Stellar", "Cosmic", "Quantum", "Neural", "Cyber", "Nano", "Void", "Dark", 
+      "Prime", "Omega", "Alpha", "Beta", "Gamma", "Delta", "Nexus", "Core",
+      "Apex", "Matrix", "Vector", "Phoenix", "Titan", "Nova", "Orbital", "Galactic"
+    ];
+    
+    const suffixes = [
+      "Industries", "Corporation", "Enterprises", "Dynamics", "Systems", "Technologies",
+      "Solutions", "Consortium", "Holdings", "Syndicate", "Alliance", "Collective",
+      "Federation", "Empire", "Conglomerate", "Group", "Labs", "Works"
+    ];
+    
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    
+    return `${prefix} ${suffix}`;
   }
 
   // Crawler operations
