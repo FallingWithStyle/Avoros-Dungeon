@@ -6,6 +6,9 @@ import {
   equipmentTypes,
   crawlerEquipment,
   floors,
+  rooms,
+  roomConnections,
+  crawlerPositions,
   enemies,
   encounters,
   activities,
@@ -27,6 +30,9 @@ import {
   type MarketplaceListing,
   type MarketplaceListingWithDetails,
   type Floor,
+  type Room,
+  type RoomConnection,
+  type CrawlerPosition,
   type Enemy,
   type Encounter,
   type Season,
@@ -96,6 +102,16 @@ export interface IStorage {
   
   // Encounter choice processing
   processEncounterChoice(crawlerId: number, choiceId: string, encounterData: any): Promise<any>;
+  
+  // Room and mapping operations
+  createRoom(floorId: number, x: number, y: number, type: string, name: string, description: string): Promise<Room>;
+  getRoomsForFloor(floorId: number): Promise<Room[]>;
+  getRoom(roomId: number): Promise<Room | undefined>;
+  createRoomConnection(fromRoomId: number, toRoomId: number, direction: string): Promise<RoomConnection>;
+  getAvailableDirections(roomId: number): Promise<string[]>;
+  moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string }>;
+  getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined>;
+  getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]>;
   
   // Debug functions
   resetUserCrawlers(userId: string): Promise<void>;
@@ -1753,6 +1769,126 @@ export class DatabaseStorage implements IStorage {
         lastPrimarySponsorshipSeason: 0 
       })
       .where(eq(users.id, userId));
+  }
+
+  // Room and mapping operations
+  async createRoom(floorId: number, x: number, y: number, type: string, name: string, description: string): Promise<Room> {
+    const [room] = await db.insert(rooms).values({
+      floorId,
+      x,
+      y,
+      type,
+      name,
+      description,
+      isSafe: type === 'safe',
+      hasLoot: type === 'treasure'
+    }).returning();
+    return room;
+  }
+
+  async getRoomsForFloor(floorId: number): Promise<Room[]> {
+    return await db.select().from(rooms).where(eq(rooms.floorId, floorId));
+  }
+
+  async getRoom(roomId: number): Promise<Room | undefined> {
+    const [room] = await db.select().from(rooms).where(eq(rooms.id, roomId));
+    return room;
+  }
+
+  async createRoomConnection(fromRoomId: number, toRoomId: number, direction: string): Promise<RoomConnection> {
+    const [connection] = await db.insert(roomConnections).values({
+      fromRoomId,
+      toRoomId,
+      direction
+    }).returning();
+    return connection;
+  }
+
+  async getAvailableDirections(roomId: number): Promise<string[]> {
+    const connections = await db.select()
+      .from(roomConnections)
+      .where(eq(roomConnections.fromRoomId, roomId));
+    return connections.map(conn => conn.direction);
+  }
+
+  async moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
+    // Get current position
+    const [currentPosition] = await db.select()
+      .from(crawlerPositions)
+      .where(eq(crawlerPositions.crawlerId, crawlerId))
+      .orderBy(desc(crawlerPositions.enteredAt))
+      .limit(1);
+
+    if (!currentPosition) {
+      return { success: false, error: "Crawler position not found" };
+    }
+
+    // Find connection in the given direction
+    const [connection] = await db.select()
+      .from(roomConnections)
+      .where(and(
+        eq(roomConnections.fromRoomId, currentPosition.roomId),
+        eq(roomConnections.direction, direction)
+      ));
+
+    if (!connection) {
+      return { success: false, error: `No exit ${direction} from current room` };
+    }
+
+    // Check if connection is locked
+    if (connection.isLocked) {
+      return { success: false, error: `The ${direction} exit is locked` };
+    }
+
+    // Get the destination room
+    const newRoom = await this.getRoom(connection.toRoomId);
+    if (!newRoom) {
+      return { success: false, error: "Destination room not found" };
+    }
+
+    // Move crawler to new room
+    await db.insert(crawlerPositions).values({
+      crawlerId,
+      roomId: connection.toRoomId
+    });
+
+    return { success: true, newRoom };
+  }
+
+  async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
+    const [position] = await db.select({
+      room: rooms
+    })
+    .from(crawlerPositions)
+    .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
+    .where(eq(crawlerPositions.crawlerId, crawlerId))
+    .orderBy(desc(crawlerPositions.enteredAt))
+    .limit(1);
+
+    return position?.room;
+  }
+
+  async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
+    const crawlerIds = await db.select({
+      crawlerId: crawlerPositions.crawlerId
+    })
+    .from(crawlerPositions)
+    .where(eq(crawlerPositions.roomId, roomId));
+
+    if (crawlerIds.length === 0) {
+      return [];
+    }
+
+    // Get detailed crawler info for each player in the room
+    const crawlersInRoom: CrawlerWithDetails[] = [];
+    for (const { crawlerId } of crawlerIds) {
+      const crawler = await this.getCrawler(crawlerId);
+      if (crawler) {
+        crawlersInRoom.push(crawler);
+      }
+    }
+
+    return crawlersInRoom;
   }
 }
 
