@@ -1930,13 +1930,13 @@ export class DatabaseStorage implements IStorage {
       console.log(`First visit to room ${connection.toRoomId}, energy cost: ${energyCost}`);
     }
     
-    console.log(`Final energy cost: ${energyCost}, crawler current energy: ${crawler.energy}`);
-
     // Get current crawler to check/update energy
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) {
       return { success: false, error: "Crawler not found" };
     }
+
+    console.log(`Final energy cost: ${energyCost}, crawler current energy: ${crawler.energy}`);
 
     if (crawler.energy < energyCost) {
       return { success: false, error: `Not enough energy. Need ${energyCost}, have ${crawler.energy}` };
