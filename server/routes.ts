@@ -33,6 +33,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Crawler candidates route (must come before the :id route)
+  app.get('/api/crawlers/candidates', isAuthenticated, async (req: any, res) => {
+    try {
+      const candidates = await storage.generateCrawlerCandidates(3);
+      res.json(candidates);
+    } catch (error) {
+      console.error("Error generating crawler candidates:", error);
+      res.status(500).json({ message: "Failed to fetch crawler candidates" });
+    }
+  });
+
   app.get('/api/crawlers/:id', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
