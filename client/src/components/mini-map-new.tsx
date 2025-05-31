@@ -11,7 +11,7 @@ import {
   Skull, 
   DoorOpen,
   Home,
-  ArrowUp,
+  ArrowDown,
   Maximize2,
   ZoomIn,
   ZoomOut,
@@ -117,7 +117,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       case 'exit':
         return <Skull className="w-3 h-3 text-red-400" />;
       case 'stairs':
-        return <ArrowUp className="w-3 h-3 text-purple-400" />;
+        return <ArrowDown className="w-3 h-3 text-purple-400" />;
       default:
         return <div className="w-3 h-3 bg-slate-600 rounded" />;
     }
@@ -350,7 +350,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <span>Entrance</span>
               </div>
               <div className="flex items-center gap-1">
-                <ArrowUp className="w-3 h-3 text-purple-400" />
+                <ArrowDown className="w-3 h-3 text-purple-400" />
                 <span>Stairs</span>
               </div>
             </div>
@@ -400,10 +400,6 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return <MapPin className="w-6 h-6 text-blue-400" />;
-    }
-    
     if (!room.isExplored) {
       return <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">?</div>;
     }
@@ -419,7 +415,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       case 'exit':
         return <Skull className="w-6 h-6 text-red-400" />;
       case 'stairs':
-        return <ArrowUp className="w-6 h-6 text-purple-400" />;
+        return <ArrowDown className="w-6 h-6 text-purple-400" />;
       default:
         return <div className="w-6 h-6 bg-slate-600 rounded" />;
     }
@@ -529,6 +525,9 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
                       title={`${room.name} (${x}, ${y})`}
                     >
                       {getRoomIcon(room)}
+                      {room.isCurrentRoom && (
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-400 rounded-full border border-blue-200 animate-pulse" />
+                      )}
                     </div>
                   );
                 } else {

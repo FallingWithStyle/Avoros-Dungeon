@@ -248,19 +248,21 @@ async function initializeRooms() {
     { x: 1, y: -2, name: "Bone Chapel", description: "A macabre shrine constructed entirely from human remains. Unholy power lingers.", type: "normal" },
     { x: 0, y: -3, name: "Forgotten Crypts", description: "Deeper tombs where shadows seem to move of their own accord.", type: "normal" },
     
-    // Staircases - 12 total scattered throughout the floor
-    { x: 2, y: 4, name: "North Tower Stairs", description: "A spiral staircase leading upward. Cool air flows down from above.", type: "stairs" },
-    { x: 4, y: 2, name: "East Wing Ascent", description: "Marble steps lead to higher levels. Elegant but crumbling.", type: "stairs" },
-    { x: 3, y: 1, name: "Market Tower Steps", description: "Stone stairs worn smooth by countless merchants' feet.", type: "stairs" },
-    { x: 3, y: 4, name: "Noble Quarter Stairs", description: "Grand stairs with ornate railings. Built for the wealthy.", type: "stairs" },
-    { x: -3, y: 1, name: "Craftsman's Ascent", description: "Sturdy wooden stairs built by master carpenters.", type: "stairs" },
-    { x: -4, y: 2, name: "West Tower Steps", description: "A winding staircase disappearing into darkness above.", type: "stairs" },
-    { x: -2, y: 4, name: "Workshop Upper Access", description: "Metal stairs leading to higher workshop levels.", type: "stairs" },
-    { x: -1, y: 5, name: "Barracks Tower", description: "Military stairs leading to defensive positions.", type: "stairs" },
-    { x: 1, y: 5, name: "Training Tower Steps", description: "Steps leading to advanced training facilities.", type: "stairs" },
-    { x: 1, y: -3, name: "Crypt Ascension", description: "Ancient stone steps leading up from the burial depths.", type: "stairs" },
-    { x: -1, y: -3, name: "Sacred Stairs", description: "Holy steps carved with protective runes.", type: "stairs" },
-    { x: 0, y: -4, name: "Deep Sanctuary Steps", description: "The deepest staircase, leading to mysteries unknown.", type: "stairs" },
+    // Single staircase - extremely rare (1/1000 rooms)
+    { x: 0, y: -4, name: "Deep Sanctuary Steps", description: "The deepest staircase, leading downward into mysteries unknown.", type: "stairs" },
+    
+    // Convert former staircases to normal/treasure rooms
+    { x: 2, y: 4, name: "North Tower Chamber", description: "A circular room in an ancient tower. Tapestries hang from stone walls.", type: "normal" },
+    { x: 4, y: 2, name: "East Wing Gallery", description: "An elegant hallway with marble columns. Portraits watch from gilded frames.", type: "normal" },
+    { x: 3, y: 1, name: "Market Tower Vault", description: "A secured chamber where merchants once stored their most valuable goods.", type: "treasure" },
+    { x: 3, y: 4, name: "Noble Quarter Library", description: "Shelves of ancient tomes and scrolls. Knowledge is power.", type: "treasure" },
+    { x: -3, y: 1, name: "Craftsman's Storage", description: "Rare materials and unfinished masterworks fill this workshop annex.", type: "treasure" },
+    { x: -4, y: 2, name: "West Tower Armory", description: "Weapon racks and armor stands guard ancient military secrets.", type: "normal" },
+    { x: -2, y: 4, name: "Workshop Archive", description: "Technical blueprints and mechanical diagrams cover every surface.", type: "normal" },
+    { x: -1, y: 5, name: "Barracks Command", description: "Strategic maps and military orders remain pinned to planning tables.", type: "normal" },
+    { x: 1, y: 5, name: "Training Equipment Room", description: "Practice weapons and combat training gear await new recruits.", type: "normal" },
+    { x: 1, y: -3, name: "Crypt Memorial", description: "Ancient burial chambers with ornate stone coffins and memorial plaques.", type: "normal" },
+    { x: -1, y: -3, name: "Sacred Chamber", description: "A holy sanctuary carved with protective runes and blessed symbols.", type: "normal" },
     
     // Additional atmospheric rooms
     { x: -3, y: 3, name: "Spinner's Alcove", description: "A cozy corner where weavers once worked by candlelight.", type: "normal" },
