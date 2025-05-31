@@ -43,6 +43,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     retry: false,
+    refetchInterval: 2000, // Refresh every 2 seconds to ensure current room updates
   });
 
 
