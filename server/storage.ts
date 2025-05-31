@@ -1872,11 +1872,24 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Destination room not found" };
     }
 
-    // Move crawler to new room
-    await db.insert(crawlerPositions).values({
-      crawlerId,
-      roomId: connection.toRoomId
-    });
+    // Update crawler position (or insert if none exists)
+    const existingPositions = await db.select().from(crawlerPositions).where(eq(crawlerPositions.crawlerId, crawlerId));
+    
+    if (existingPositions.length > 0) {
+      // Update existing position
+      await db.update(crawlerPositions)
+        .set({ 
+          roomId: connection.toRoomId,
+          enteredAt: new Date()
+        })
+        .where(eq(crawlerPositions.crawlerId, crawlerId));
+    } else {
+      // Insert new position if none exists
+      await db.insert(crawlerPositions).values({
+        crawlerId,
+        roomId: connection.toRoomId
+      });
+    }
 
     return { success: true, newRoom };
   }
