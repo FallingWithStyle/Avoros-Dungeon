@@ -148,8 +148,6 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
     <div className="space-y-4">
       <RoomNavigation crawler={crawler} />
       
-      <MiniMap crawler={crawler} />
-      
       <Card className="bg-game-surface border-game-border">
         <CardHeader>
           <div className="flex items-center justify-between">

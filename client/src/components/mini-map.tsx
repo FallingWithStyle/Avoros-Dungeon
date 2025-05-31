@@ -169,13 +169,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                   const room = grid[roomRow]?.[roomCol];
 
                   if (!room) {
-                    return <div key={key} className="w-6 h-6" />;
+                    return <div key={key} className="w-4 h-4" />;
                   }
 
                   return (
                     <div
                       key={key}
-                      className={`w-6 h-6 border rounded flex items-center justify-center ${getRoomColor(room)}`}
+                      className={`w-4 h-4 border rounded flex items-center justify-center text-xs ${getRoomColor(room)}`}
                       title={room.name}
                     >
                       {getRoomIcon(room)}
@@ -191,12 +191,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
                   if (leftRoom && rightRoom) {
                     return (
-                      <div key={key} className="w-6 h-6 flex items-center justify-center">
-                        <div className="w-4 h-0.5 bg-slate-500"></div>
+                      <div key={key} className="w-4 h-4 flex items-center justify-center">
+                        <div className="w-3 h-0.5 bg-slate-500"></div>
                       </div>
                     );
                   }
-                  return <div key={key} className="w-6 h-6" />;
+                  return <div key={key} className="w-4 h-4" />;
                 } else if (!isRoomRow && isRoomCol) {
                   // This is a vertical connection space
                   const roomCol = Math.floor(col / 2);
@@ -207,15 +207,15 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
                   if (topRoom && bottomRoom) {
                     return (
-                      <div key={key} className="w-6 h-6 flex items-center justify-center">
-                        <div className="w-0.5 h-4 bg-slate-500"></div>
+                      <div key={key} className="w-4 h-4 flex items-center justify-center">
+                        <div className="w-0.5 h-3 bg-slate-500"></div>
                       </div>
                     );
                   }
-                  return <div key={key} className="w-6 h-6" />;
+                  return <div key={key} className="w-4 h-4" />;
                 } else {
                   // This is an intersection space
-                  return <div key={key} className="w-6 h-6" />;
+                  return <div key={key} className="w-4 h-4" />;
                 }
               })
             ).flat()}

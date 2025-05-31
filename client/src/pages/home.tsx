@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw } from "lucide-react";
+import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -13,6 +13,7 @@ import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
 import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
+import MiniMap from "@/components/mini-map";
 import ExplorationPanel from "@/components/exploration-panel";
 import { useAuth } from "@/hooks/useAuth";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -22,6 +23,7 @@ export default function Home() {
   const { toast } = useToast();
   const [showCrawlerSelection, setShowCrawlerSelection] = useState(false);
   const [activeCrawler, setActiveCrawler] = useState<CrawlerWithDetails | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { data: crawlers, isLoading: crawlersLoading } = useQuery({
     queryKey: ["/api/crawlers"],
@@ -40,6 +42,14 @@ export default function Home() {
 
   const activeCrawlers = crawlers?.filter((c: CrawlerWithDetails) => c.isAlive) || [];
   const deadCrawlers = crawlers?.filter((c: CrawlerWithDetails) => !c.isAlive) || [];
+
+  // Auto-expand if there's only one active crawler
+  useEffect(() => {
+    if (activeCrawlers.length === 1 && !activeCrawler) {
+      setActiveCrawler(activeCrawlers[0]);
+      setIsExpanded(true);
+    }
+  }, [activeCrawlers, activeCrawler]);
 
   const createCrawlerMutation = useMutation({
     mutationFn: async (candidate: any) => {
