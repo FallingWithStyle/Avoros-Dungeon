@@ -76,6 +76,7 @@ export interface IStorage {
   
   // Credits and transactions
   updateUserCredits(userId: string, amount: number): Promise<User>;
+  updateUserActiveCrawler(userId: string, crawlerId: number): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -367,6 +368,18 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         credits: sql`${users.credits} + ${amount}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserActiveCrawler(userId: string, crawlerId: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        activeCrawlerId: crawlerId,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
