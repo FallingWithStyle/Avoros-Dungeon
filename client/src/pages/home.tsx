@@ -62,9 +62,10 @@ export default function Home() {
       });
     },
     onError: (error) => {
+      console.error("Crawler creation error:", error);
       toast({
         title: "Sponsorship Failed",
-        description: "Failed to sponsor crawler. Please try again.",
+        description: `Failed to sponsor crawler: ${error.message}`,
         variant: "destructive",
       });
     },

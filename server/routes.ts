@@ -116,6 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         speed: stats.speed,
         tech: stats.tech,
         competencies,
+        abilities: [], // Start with no special abilities
         background,
         currentFloor: 1,
         energy: 100,
