@@ -72,7 +72,9 @@ export const crawlers = pgTable("crawlers", {
   id: serial("id").primaryKey(),
   sponsorId: varchar("sponsor_id").notNull().references(() => users.id),
   name: varchar("name", { length: 50 }).notNull(),
-  classId: integer("class_id").notNull().references(() => crawlerClasses.id),
+  background: text("background").notNull(), // Brief story/background
+  classId: integer("class_id").references(() => crawlerClasses.id), // Null until they choose a class
+  level: integer("level").default(0).notNull(), // Start at Level 0
   currentFloor: integer("current_floor").default(1).notNull(),
   health: integer("health").notNull(),
   maxHealth: integer("max_health").notNull(),
@@ -82,6 +84,7 @@ export const crawlers = pgTable("crawlers", {
   tech: integer("tech").notNull(),
   credits: integer("credits").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
+  competencies: text("competencies").array().notNull(), // Array of starting competencies
   status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead
   isAlive: boolean("is_alive").default(true).notNull(),
   sponsorshipType: varchar("sponsorship_type").default("primary").notNull(), // "primary" or "secondary"
