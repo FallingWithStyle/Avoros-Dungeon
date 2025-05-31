@@ -10,6 +10,7 @@ import ActivityFeed from "@/components/activity-feed";
 import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
 import MobileMenu from "@/components/mobile-menu";
+import SeasonStatus from "@/components/season-status";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
