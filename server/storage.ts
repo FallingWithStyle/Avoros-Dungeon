@@ -38,7 +38,7 @@ import {
   type Season,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, asc } from "drizzle-orm";
+import { eq, desc, and, sql, asc, like, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -1932,7 +1932,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExploredRooms(crawlerId: number): Promise<any[]> {
-    // Get all rooms the crawler has been to (from position history)
+    // Get current position
     const currentPosition = await db.select()
       .from(crawlerPositions)
       .where(eq(crawlerPositions.crawlerId, crawlerId))
@@ -1943,18 +1943,83 @@ export class DatabaseStorage implements IStorage {
     }
 
     const currentRoomId = currentPosition[0].roomId;
-
-    // For now, we'll get all rooms on the current floor since we don't track room visit history
-    // In a full implementation, you'd want to track which rooms have been visited
     const currentRoom = await this.getRoom(currentRoomId);
     if (!currentRoom) {
       return [];
     }
 
-    const roomsOnFloor = await this.getRoomsForFloor(currentRoom.floorId);
+    // For now, create a simple visited rooms set
+    // Starting with current room + entrance (room 6) as visited
+    const visitedRoomIds = new Set<number>();
+    visitedRoomIds.add(currentRoomId);
+    visitedRoomIds.add(6); // Always include entrance
+
+    // Get recent activities to find visited rooms from movement history
+    const crawler = await this.getCrawler(crawlerId);
+    if (crawler) {
+      const recentActivities = await db.select()
+        .from(activities)
+        .where(and(
+          eq(activities.userId, crawler.sponsorId),
+          eq(activities.crawlerId, crawlerId)
+        ))
+        .orderBy(desc(activities.createdAt))
+        .limit(50);
+
+      // Extract room IDs from any movement or exploration activities
+      recentActivities.forEach(activity => {
+        if (activity.details && typeof activity.details === 'object') {
+          const details = activity.details as any;
+          if (details.roomId) {
+            visitedRoomIds.add(details.roomId);
+          }
+          if (details.fromRoomId) {
+            visitedRoomIds.add(details.fromRoomId);
+          }
+          if (details.toRoomId) {
+            visitedRoomIds.add(details.toRoomId);
+          }
+        }
+      });
+    }
+
+    // Get room details for all visited rooms
+    const visitedRooms = await db.select()
+      .from(rooms)
+      .where(sql`${rooms.id} = ANY(${Array.from(visitedRoomIds)})`);
+
+    // Find adjacent unexplored rooms from all visited rooms
+    const adjacentUnexploredRooms: any[] = [];
+    const adjacentRoomIds = new Set<number>();
     
-    // For demo purposes, show all rooms but mark only visited ones
-    return roomsOnFloor.map(room => ({
+    for (const roomId of Array.from(visitedRoomIds)) {
+      const connections = await db.select()
+        .from(roomConnections)
+        .where(eq(roomConnections.fromRoomId, roomId));
+
+      for (const connection of connections) {
+        if (!visitedRoomIds.has(connection.toRoomId) && !adjacentRoomIds.has(connection.toRoomId)) {
+          adjacentRoomIds.add(connection.toRoomId);
+          const adjacentRoom = await this.getRoom(connection.toRoomId);
+          if (adjacentRoom) {
+            adjacentUnexploredRooms.push({
+              id: adjacentRoom.id,
+              name: '???',
+              type: 'unexplored',
+              isSafe: false,
+              hasLoot: false,
+              x: adjacentRoom.x,
+              y: adjacentRoom.y,
+              isCurrentRoom: false,
+              isExplored: false
+            });
+          }
+        }
+      }
+    }
+
+    // Combine visited rooms with adjacent unexplored rooms
+    const exploredRoomData = visitedRooms.map(room => ({
       id: room.id,
       name: room.name,
       type: room.type,
@@ -1962,8 +2027,11 @@ export class DatabaseStorage implements IStorage {
       hasLoot: room.hasLoot,
       x: room.x,
       y: room.y,
-      isCurrentRoom: room.id === currentRoomId
+      isCurrentRoom: room.id === currentRoomId,
+      isExplored: true
     }));
+
+    return [...exploredRoomData, ...adjacentUnexploredRooms];
   }
 }
 
