@@ -404,11 +404,14 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       return <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">?</div>;
     }
     
+    // Check for safe rooms first (by isSafe property)
+    if (room.isSafe) {
+      return <Shield className="w-6 h-6 text-green-400" />;
+    }
+    
     switch (room.type) {
       case 'entrance':
         return <Home className="w-6 h-6 text-green-400" />;
-      case 'safe':
-        return <Shield className="w-6 h-6 text-green-400" />;
       case 'treasure':
         return <Gem className="w-6 h-6 text-yellow-400" />;
       case 'boss':
