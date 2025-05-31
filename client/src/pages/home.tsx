@@ -73,6 +73,23 @@ export default function Home() {
     setActiveCrawler(crawler);
   };
 
+  // Debug reset functionality
+  const resetCrawlersMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/debug/reset-crawlers");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      toast({
+        title: "Reset Complete",
+        description: "All crawlers have been reset successfully.",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Reset Failed", error);
+    },
+  });
+
   if (crawlersLoading) {
     return (
       <div className="min-h-screen bg-slate-900 p-6">
@@ -251,6 +268,36 @@ export default function Home() {
             </Card>
 
           </div>
+        </div>
+
+        {/* Debug Section (Development Only) */}
+        <div className="container mx-auto mt-8">
+          <Card className="bg-red-900/20 border-red-600/30">
+            <CardHeader>
+              <CardTitle className="text-red-400 flex items-center gap-2">
+                <RefreshCw className="w-5 h-5" />
+                Debug Controls
+              </CardTitle>
+              <CardDescription className="text-red-300">
+                Development tools - these will be removed in production
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => resetCrawlersMutation.mutate()}
+                disabled={resetCrawlersMutation.isPending}
+                variant="destructive"
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {resetCrawlersMutation.isPending ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
+                Reset All Crawlers
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Crawler Selection Modal */}
