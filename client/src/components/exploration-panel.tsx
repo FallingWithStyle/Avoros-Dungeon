@@ -33,7 +33,7 @@ export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
 
   const exploreMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/crawlers/${crawler.id}/explore`, "POST");
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/explore`);
     },
     onSuccess: (encounter) => {
       setIsExploring(false);
@@ -48,9 +48,21 @@ export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
     },
     onError: (error) => {
       setIsExploring(false);
+      const errorMessage = `Unable to explore: ${error.message}`;
       toast({
         title: "Exploration Failed",
-        description: "Unable to explore at this time. Check your energy levels.",
+        description: (
+          <div className="flex items-center gap-2">
+            <span>{errorMessage}</span>
+            <button
+              onClick={() => navigator.clipboard.writeText(errorMessage)}
+              className="text-xs bg-red-800 hover:bg-red-700 px-2 py-1 rounded"
+              title="Copy error message"
+            >
+              Copy
+            </button>
+          </div>
+        ),
         variant: "destructive",
       });
     },
