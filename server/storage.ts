@@ -214,7 +214,49 @@ export class DatabaseStorage implements IStorage {
     return shuffled.slice(0, numCompetencies);
   }
 
+  private generatePreDungeonJob(): string {
+    const jobs = [
+      // Mundane jobs
+      "office clerk", "cashier", "data entry specialist", "customer service representative",
+      "insurance adjuster", "tax preparer", "filing clerk", "receptionist", "bookkeeper",
+      "security guard", "janitor", "mail carrier", "bus driver", "parking attendant",
+      "inventory manager", "call center operator", "copy machine technician", "payroll clerk",
+      "administrative assistant", "quality control inspector", "warehouse worker", "delivery driver",
+      
+      // Professional jobs
+      "accountant", "lawyer", "teacher", "nurse", "engineer", "architect", "dentist",
+      "pharmacist", "veterinarian", "therapist", "consultant", "project manager",
+      "marketing specialist", "sales representative", "human resources coordinator",
+      "graphic designer", "web developer", "database administrator", "financial advisor",
+      
+      // Weird/unusual jobs
+      "professional line waiter", "cheese sculptor", "pet psychic", "fortune cookie writer",
+      "professional apologizer", "social media influencer for plants", "elevator music composer",
+      "professional mourner", "dog food taster", "golf ball diver", "ostrich babysitter",
+      "professional sleeper", "fortune teller for pets", "bubble wrap quality tester",
+      "professional Netflix watcher", "chicken sexer", "paint drying observer", "food stylist",
+      "professional cuddler", "grass growing supervisor", "professional queue holder",
+      
+      // Sci-fi/fantastic jobs  
+      "space traffic controller", "alien interpreter", "robot therapist", "time travel agent",
+      "interdimensional courier", "gravity adjuster", "memory editor", "dream architect",
+      "virtual reality tester", "hologram maintenance technician", "teleporter calibrator",
+      "artificial intelligence trainer", "parallel universe monitor", "cosmic weather forecaster",
+      "quantum entanglement specialist", "nano-technology farmer", "digital ghost hunter",
+      "synthetic emotion designer", "planetary atmosphere engineer", "galactic tour guide",
+      
+      // Blue collar with a twist
+      "underwater welder", "professional food critic", "wine tester", "mattress tester",
+      "theme park ride tester", "video game tester", "chocolate taster", "perfume evaluator",
+      "fireworks technician", "special effects coordinator", "stunt double", "voice actor",
+      "professional wrestler", "circus performer", "street performer", "wedding planner"
+    ];
+    
+    return jobs[Math.floor(Math.random() * jobs.length)];
+  }
+
   private generateCrawlerBackground(): string {
+    const job = this.generatePreDungeonJob();
     const desperateBackgrounds = [
       "Hiding from ex-partner's criminal associates who want them dead",
       "Fled into the dungeon after witnessing a corporate assassination", 
@@ -283,13 +325,16 @@ export class DatabaseStorage implements IStorage {
 
     // Mix of desperation levels for variety - 40% desperate, 50% wacky, 10% tragic
     const roll = Math.random();
+    let reason;
     if (roll < 0.4) {
-      return desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
+      reason = desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
     } else if (roll < 0.9) {
-      return wackyBackgrounds[Math.floor(Math.random() * wackyBackgrounds.length)];
+      reason = wackyBackgrounds[Math.floor(Math.random() * wackyBackgrounds.length)];
     } else {
-      return tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
+      reason = tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
     }
+    
+    return `Former ${job}. ${reason}`;
   }
 
   async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
