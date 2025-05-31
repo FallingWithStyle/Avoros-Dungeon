@@ -54,6 +54,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Exploration routes
+  app.post('/api/crawlers/:id/explore', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(403).json({ message: "Not authorized to control this crawler" });
+      }
+      
+      const encounter = await storage.exploreFloor(crawlerId);
+      res.json(encounter);
+    } catch (error) {
+      console.error("Error during exploration:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   app.post('/api/crawlers', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

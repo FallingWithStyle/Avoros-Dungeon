@@ -161,7 +161,7 @@ export const npcs = pgTable("npcs", {
   description: text("description").notNull(),
   personality: varchar("personality", { length: 50 }).notNull(), // quirky, hostile, helpful, mysterious, etc.
   dialogue: text("dialogue").array().notNull(), // Array of possible dialogue lines
-  services: text("services").array().default("{}").notNull(), // trade, information, quests, etc.
+  services: text("services").array().notNull(), // trade, information, quests, etc.
   floorRange: text("floor_range").default("1-5").notNull(), // "1-3", "5-10", etc.
   rarity: varchar("rarity", { length: 20 }).default("common").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
