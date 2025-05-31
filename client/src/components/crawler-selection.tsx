@@ -1,14 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { RefreshCw, User, Zap, Shield, Gauge, Cpu, Package } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { User, Zap, Shield, Gauge, Cpu, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface CrawlerCandidate {
@@ -42,18 +38,21 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
   const [selectedCandidate, setSelectedCandidate] = useState<CrawlerCandidate | null>(null);
   const { toast } = useToast();
 
-  const { data: candidates, isLoading, refetch } = useQuery({
+  const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["/api/crawlers/candidates"],
   });
 
-  // Removed regenerate mutation since we now show 30 candidates at once
+  // Debug logging
+  console.log("Candidates data:", candidates);
+  console.log("Is loading:", isLoading);
+  console.log("Error:", error);
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
-          <p className="text-slate-400">Generating crawler candidates...</p>
+          <p className="text-slate-400">Generating 30 crawler candidates...</p>
         </div>
       </div>
     );
@@ -66,14 +65,14 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
   };
 
   return (
-    <div className="space-y-6 px-6">
+    <div className="space-y-6 px-8 py-6">
       <div className="text-center">
         <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
         <p className="text-slate-400">Choose from these 30 Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
-        {candidates?.map((candidate: CrawlerCandidate) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto pr-2">
+        {Array.isArray(candidates) && candidates.map((candidate: CrawlerCandidate) => (
           <Card 
             key={candidate.id}
             className={`cursor-pointer transition-all border-2 ${
