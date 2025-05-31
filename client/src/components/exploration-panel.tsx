@@ -47,6 +47,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
     },
     onSuccess: (encounter) => {
       setIsExploring(false);
+      console.log("Received encounter:", encounter);
       setCurrentEncounter(encounter);
     },
     onError: (error) => {
