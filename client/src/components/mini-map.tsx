@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   MapPin, 
   Shield, 
@@ -9,7 +11,11 @@ import {
   Skull, 
   DoorOpen,
   Home,
-  ArrowUp
+  ArrowUp,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
 
@@ -38,6 +44,11 @@ interface RoomConnection {
 export default function MiniMap({ crawler }: MiniMapProps) {
   const [isMoving, setIsMoving] = useState(false);
   const [previousCurrentRoom, setPreviousCurrentRoom] = useState<ExploredRoom | null>(null);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
 
   // Fetch explored rooms for this crawler
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
@@ -48,19 +59,52 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
 
 
-  // Track room changes for smooth transitions
+  // Track room changes for smooth transitions and reset pan
   useEffect(() => {
     if (exploredRooms) {
       const currentRoom = exploredRooms.find(room => room.isCurrentRoom);
       if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
         setIsMoving(true);
+        
+        // Reset pan offset when player moves
+        if (resetPanOnNextMove) {
+          setPanOffset({ x: 0, y: 0 });
+          setResetPanOnNextMove(false);
+        }
+        
         setTimeout(() => setIsMoving(false), 800); // 800ms transition for smoother feel
       }
       if (currentRoom) {
         setPreviousCurrentRoom(currentRoom);
       }
     }
-  }, [exploredRooms, previousCurrentRoom]);
+  }, [exploredRooms, previousCurrentRoom, resetPanOnNextMove]);
+
+  // Handle mouse dragging for pan
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) { // Left click only
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+      setResetPanOnNextMove(true); // Mark that we should reset pan on next movement
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   const getRoomIcon = (room: ExploredRoom) => {
     if (room.isCurrentRoom) {
@@ -177,6 +221,22 @@ export default function MiniMap({ crawler }: MiniMapProps) {
           <Badge variant="outline" className="ml-auto text-xs">
             Floor {crawler.currentFloor}
           </Badge>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-2">
+                <Maximize2 className="w-3 h-3" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] bg-game-panel border-game-border">
+              <DialogHeader>
+                <DialogTitle className="text-slate-200 flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Dungeon Map - Floor {crawler.currentFloor}
+                </DialogTitle>
+              </DialogHeader>
+              <ExpandedMapView exploredRooms={exploredRooms} />
+            </DialogContent>
+          </Dialog>
         </CardTitle>
       </CardHeader>
       <CardContent>
