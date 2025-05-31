@@ -32,8 +32,11 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  credits: integer("credits").default(10000).notNull(),
+  corporationName: varchar("corporation_name").notNull(),
+  corporationType: varchar("corporation_type").default("Mining Consortium").notNull(), // Mining Consortium, Tech Corp, Military Contractor, etc.
+  credits: integer("credits").default(50000).notNull(),
   sponsorReputation: integer("sponsor_reputation").default(0).notNull(),
+  activeCrawlerId: integer("active_crawler_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
