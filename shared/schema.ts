@@ -67,6 +67,7 @@ export const crawlerClasses = pgTable("crawler_classes", {
   baseWit: integer("base_wit").notNull(),
   baseCharisma: integer("base_charisma").notNull(),
   baseMemory: integer("base_memory").notNull(),
+  baseLuck: integer("base_luck").notNull(),
 });
 
 // Crawlers
@@ -86,6 +87,7 @@ export const crawlers = pgTable("crawlers", {
   wit: integer("wit").notNull(),
   charisma: integer("charisma").notNull(),
   memory: integer("memory").notNull(),
+  luck: integer("luck").notNull(),
   credits: integer("credits").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
   energy: integer("energy").default(100).notNull(),

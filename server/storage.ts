@@ -168,6 +168,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     const health = 60 + Math.floor(Math.random() * 20); // 60-80
+    const luck = Math.floor(Math.random() * 6); // 0-5 luck (hidden from players)
     
     return {
       health,
@@ -178,6 +179,7 @@ export class DatabaseStorage implements IStorage {
       wit: stats[3],
       charisma: stats[4],
       memory: stats[5],
+      luck,
     };
   }
 
