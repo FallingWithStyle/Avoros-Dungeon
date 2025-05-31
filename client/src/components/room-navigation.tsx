@@ -53,7 +53,7 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
   // Movement mutation
   const moveMutation = useMutation({
     mutationFn: async (direction: string) => {
-      return await apiRequest(`/api/crawlers/${crawler.id}/move`, "POST", { direction });
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { direction });
     },
     onSuccess: () => {
       // Refresh room data

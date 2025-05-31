@@ -1779,6 +1779,11 @@ export class DatabaseStorage implements IStorage {
         await db.delete(crawlerEquipment).where(eq(crawlerEquipment.crawlerId, crawlerId));
       }
       
+      // Delete crawler positions
+      for (const crawlerId of crawlerIds) {
+        await db.delete(crawlerPositions).where(eq(crawlerPositions.crawlerId, crawlerId));
+      }
+      
       // Finally delete the crawlers
       await db.delete(crawlers).where(eq(crawlers.sponsorId, userId));
     }
