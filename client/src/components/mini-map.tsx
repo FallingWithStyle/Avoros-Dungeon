@@ -34,11 +34,10 @@ interface RoomConnection {
 }
 
 export default function MiniMap({ crawler }: MiniMapProps) {
-  // Fetch explored rooms for this crawler with polling
+  // Fetch explored rooms for this crawler
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     retry: false,
-    refetchInterval: 2000, // Refresh every 2 seconds
   });
 
   const getRoomIcon = (room: ExploredRoom) => {
