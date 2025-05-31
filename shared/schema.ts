@@ -11,7 +11,7 @@ import {
   decimal,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { z } from "zod";
 
 // Session storage table (required for Replit Auth)
@@ -84,12 +84,16 @@ export const crawlers = pgTable("crawlers", {
   tech: integer("tech").notNull(),
   credits: integer("credits").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
+  energy: integer("energy").default(100).notNull(),
+  maxEnergy: integer("max_energy").default(100).notNull(),
   competencies: text("competencies").array().notNull(), // Array of starting competencies
-  status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead
+  abilities: text("abilities").array().notNull(), // Unlocked special abilities
+  status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead, exploring
   isAlive: boolean("is_alive").default(true).notNull(),
   sponsorshipType: varchar("sponsorship_type").default("primary").notNull(), // "primary" or "secondary"
   seasonNumber: integer("season_number").default(1).notNull(),
   lastAction: timestamp("last_action").defaultNow(),
+  lastEnergyRegen: timestamp("last_energy_regen").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -150,15 +154,31 @@ export const enemies = pgTable("enemies", {
   maxFloor: integer("max_floor").default(100),
 });
 
-// Combat encounters
+// NPCs in the dungeon
+export const npcs = pgTable("npcs", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  personality: varchar("personality", { length: 50 }).notNull(), // quirky, hostile, helpful, mysterious, etc.
+  dialogue: text("dialogue").array().notNull(), // Array of possible dialogue lines
+  services: text("services").array().default("{}").notNull(), // trade, information, quests, etc.
+  floorRange: text("floor_range").default("1-5").notNull(), // "1-3", "5-10", etc.
+  rarity: varchar("rarity", { length: 20 }).default("common").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+});
+
+// Combat encounters and exploration events
 export const encounters = pgTable("encounters", {
   id: serial("id").primaryKey(),
   crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
   floorId: integer("floor_id").notNull().references(() => floors.id),
+  type: varchar("type", { length: 20 }).default("combat").notNull(), // combat, npc, treasure, trap, event
   enemyId: integer("enemy_id").references(() => enemies.id),
-  encounterType: varchar("encounter_type", { length: 20 }).notNull(), // combat, treasure, event, shop
+  npcId: integer("npc_id").references(() => npcs.id),
+  energyCost: integer("energy_cost").default(10).notNull(),
   status: varchar("status", { length: 20 }).default("active"), // active, completed, failed
   result: jsonb("result"), // stores encounter outcome details
+  storyText: text("story_text"), // Custom encounter description
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });
