@@ -1268,54 +1268,55 @@ export class DatabaseStorage implements IStorage {
     return crawler;
   }
 
-  private generateCrawlerName(): string {
+  private generateHumanName(): string {
     const firstNames = [
-      // Classic sci-fi inspired
-      "Zara", "Kai", "Nova", "Orion", "Luna", "Vega", "Atlas", "Iris", "Juno", "Neo",
-      "Zoe", "Rex", "Ivy", "Axel", "Echo", "Nyx", "Vale", "Sage", "Remy", "Wren",
+      // Male names
+      "Aaron", "Adam", "Adrian", "Albert", "Alexander", "Andrew", "Anthony", "Arthur", "Benjamin", "Brian",
+      "Bruce", "Carl", "Charles", "Christopher", "Daniel", "David", "Dennis", "Donald", "Douglas", "Earl",
+      "Edward", "Eric", "Eugene", "Frank", "Gary", "George", "Gerald", "Gregory", "Harold", "Henry",
+      "Jack", "James", "Jason", "Jeffrey", "Jerry", "John", "Joseph", "Joshua", "Kenneth", "Kevin",
+      "Lawrence", "Mark", "Matthew", "Michael", "Nicholas", "Patrick", "Paul", "Peter", "Philip", "Raymond",
+      "Richard", "Robert", "Roger", "Ronald", "Russell", "Samuel", "Scott", "Stephen", "Steven", "Thomas",
+      "Timothy", "Walter", "Wayne", "William", "Eugene", "Leonard", "Stanley", "Ralph", "Frank", "Louis",
       
-      // Tech-themed
-      "Cipher", "Binary", "Pixel", "Vector", "Matrix", "Logic", "Cache", "Query", "Debug", "Syntax",
-      "Pascal", "Java", "Ruby", "Swift", "Ada", "Grace", "Tesla", "Edison", "Turing", "Lovelace",
-      
-      // Edgy/dystopian
-      "Raven", "Shadow", "Blade", "Frost", "Storm", "Void", "Ash", "Steel", "Flint", "Onyx",
-      "Crimson", "Slate", "Ember", "Wraith", "Phantom", "Viper", "Hawk", "Rogue", "Rebel", "Riot",
-      
-      // Retro-futuristic
-      "Cosmo", "Astro", "Rocket", "Jet", "Flash", "Sonic", "Turbo", "Nitro", "Cyber", "Chrome",
-      "Neon", "Laser", "Plasma", "Quasar", "Nebula", "Comet", "Meteor", "Galaxy", "Starlight", "Zenith",
-      
-      // Mysterious/mystical
-      "Enigma", "Mystic", "Oracle", "Seer", "Rune", "Spell", "Charm", "Spirit", "Ghost", "Mirage",
-      "Prism", "Crystal", "Diamond", "Pearl", "Opal", "Jade", "Amber", "Scarlet", "Indigo", "Violet"
+      // Female names
+      "Alice", "Amanda", "Amy", "Andrea", "Angela", "Anna", "Anne", "Barbara", "Betty", "Beverly",
+      "Brenda", "Carol", "Catherine", "Christine", "Cynthia", "Deborah", "Diana", "Donna", "Dorothy", "Elizabeth",
+      "Emily", "Frances", "Francine", "Helen", "Janet", "Janice", "Jean", "Jennifer", "Jessica", "Joan",
+      "Joyce", "Judith", "Julie", "Karen", "Katherine", "Kathleen", "Kelly", "Kimberly", "Laura", "Linda",
+      "Lisa", "Margaret", "Maria", "Marie", "Martha", "Mary", "Michelle", "Nancy", "Nicole", "Pamela",
+      "Patricia", "Rachel", "Rebecca", "Ruth", "Sandra", "Sarah", "Sharon", "Stephanie", "Susan", "Teresa",
+      "Virginia", "Wanda", "Gloria", "Rose", "Evelyn", "Mildred", "Florence", "Irene", "Grace", "Carolyn"
     ];
     
     const lastNames = [
-      // Corporate/industrial
-      "Steele", "Cross", "Stone", "Black", "Grey", "White", "Gold", "Silver", "Iron", "Chrome",
-      "Sharp", "Quick", "Swift", "Stark", "Kane", "Knox", "Vale", "Ward", "Nash", "Reed",
-      
-      // Tech surnames
-      "Zero", "One", "Binary", "Data", "Code", "Byte", "Bit", "Core", "Link", "Net",
-      "Wire", "Chip", "Drive", "Port", "Node", "Grid", "Sync", "Loop", "Stack", "Hash",
-      
-      // Nature/elements (corrupted)
-      "Frost", "Blaze", "Storm", "Thunder", "Lightning", "Quake", "Tide", "Wind", "Fire", "Ice",
-      "Thorn", "Fang", "Claw", "Wing", "Scale", "Bone", "Blood", "Venom", "Toxin", "Acid",
-      
-      // Apocalyptic
-      "Doom", "Bane", "Ruin", "Chaos", "Void", "Null", "Error", "Crash", "Burn", "Scar",
-      "Wreck", "Break", "Tear", "Cut", "Slash", "Strike", "Bolt", "Shot", "Blast", "Bang",
-      
-      // Numbers/designations
-      "Seven", "Nine", "Thirteen", "Prime", "Alpha", "Beta", "Gamma", "Delta", "Omega", "Zeta",
-      "X1", "X7", "X9", "V2", "V5", "Z3", "Z8", "R4", "R6", "Q1"
+      "Adams", "Allen", "Anderson", "Baker", "Barnes", "Bell", "Bennett", "Brooks", "Brown", "Butler",
+      "Campbell", "Carter", "Clark", "Collins", "Cooper", "Cox", "Davis", "Edwards", "Evans", "Fisher",
+      "Foster", "Garcia", "Gray", "Green", "Hall", "Harris", "Henderson", "Hill", "Howard", "Hughes",
+      "Jackson", "James", "Johnson", "Jones", "Kelly", "King", "Lee", "Lewis", "Long", "Lopez",
+      "Martin", "Martinez", "McArthur", "Miller", "Mitchell", "Moore", "Morgan", "Morris", "Murphy", "Nelson",
+      "Parker", "Patterson", "Perez", "Peterson", "Phillips", "Powell", "Price", "Reed", "Richardson", "Roberts",
+      "Robinson", "Rodriguez", "Rogers", "Ross", "Russell", "Sanchez", "Scott", "Simmons", "Smith", "Stewart",
+      "Taylor", "Thomas", "Thompson", "Turner", "Walker", "Ward", "Washington", "Watson", "White", "Williams",
+      "Wilson", "Wood", "Wright", "Young", "Armstrong", "Bryant", "Crawford", "Duncan", "Ferguson", "Fletcher",
+      "Graham", "Hampton", "Harrison", "Irving", "Lawson", "Maxwell", "Preston", "Sullivan", "Thornton", "Vaughn",
+      "Blackwood", "Fairfax", "Goodwin", "Harrington", "Lancaster", "Mansfield", "Montgomery", "Pemberton",
+      "Sinclair", "Whitmore", "Worthington", "Ashford", "Bradford", "Donovan", "Grayson", "Hartwell"
     ];
     
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     return `${firstName} ${lastName}`;
+  }
+
+  private generateCrawlerName(species: string = "human", planetType: string = "earth-like"): string {
+    // For now, only human names are implemented
+    // Future species will have their own name generation methods
+    switch (species) {
+      case "human":
+      default:
+        return this.generateHumanName();
+    }
   }
 
   private generateStartingEquipment(background: string): any[] {
@@ -1446,7 +1447,9 @@ export class DatabaseStorage implements IStorage {
       const stats = this.generateRandomStats();
       const competencies = this.generateRandomCompetencies();
       const background = this.generateCrawlerBackground();
-      const name = this.generateCrawlerName();
+      const species = "human"; // All crawlers are human for now
+      const planetType = "earth-like"; // All from earth-like planets for now
+      const name = this.generateCrawlerName(species, planetType);
       const startingEquipment = this.generateStartingEquipment(background);
 
       // Determine top ability based on highest stat
@@ -1468,6 +1471,8 @@ export class DatabaseStorage implements IStorage {
         background,
         startingEquipment,
         topAbility,
+        species,
+        planetType,
         level: 1
       });
     }

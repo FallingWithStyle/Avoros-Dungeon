@@ -100,6 +100,8 @@ export const crawlers = pgTable("crawlers", {
   seasonNumber: integer("season_number").default(1).notNull(),
   lastAction: timestamp("last_action").defaultNow(),
   lastEnergyRegen: timestamp("last_energy_regen").defaultNow(),
+  planetType: varchar("planet_type").default("earth-like").notNull(),
+  species: varchar("species").default("human").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
