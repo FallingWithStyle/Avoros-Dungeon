@@ -93,6 +93,9 @@ export interface IStorage {
   // Credits and transactions
   updateUserCredits(userId: string, amount: number): Promise<User>;
   updateUserActiveCrawler(userId: string, crawlerId: number): Promise<User>;
+  
+  // Debug functions
+  resetUserCrawlers(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -942,6 +945,26 @@ export class DatabaseStorage implements IStorage {
     }
 
     return candidates;
+  }
+
+  // Debug function to reset all crawlers for a user
+  async resetUserCrawlers(userId: string): Promise<void> {
+    // Delete all crawler equipment first
+    const userCrawlers = await db.select({ id: crawlers.id }).from(crawlers).where(eq(crawlers.sponsorId, userId));
+    for (const crawler of userCrawlers) {
+      await db.delete(crawlerEquipment).where(eq(crawlerEquipment.crawlerId, crawler.id));
+    }
+    
+    // Delete all crawlers owned by the user
+    await db.delete(crawlers).where(eq(crawlers.sponsorId, userId));
+    
+    // Reset user's primary sponsorship status
+    await db.update(users)
+      .set({ 
+        primarySponsorshipUsed: false,
+        lastPrimarySponsorshipSeason: 0 
+      })
+      .where(eq(users.id, userId));
   }
 }
 
