@@ -157,10 +157,12 @@ export class DatabaseStorage implements IStorage {
       Math.floor(Math.random() * 6), // 0-5
       Math.floor(Math.random() * 6), // 0-5
       Math.floor(Math.random() * 6), // 0-5
+      Math.floor(Math.random() * 6), // 0-5
+      Math.floor(Math.random() * 6), // 0-5
     ];
     
     // Give one stat a chance to be higher
-    const highlightStat = Math.floor(Math.random() * 4);
+    const highlightStat = Math.floor(Math.random() * 6);
     if (Math.random() < 0.3) { // 30% chance for a higher stat
       stats[highlightStat] = 6 + Math.floor(Math.random() * 3); // 6-8
     }
@@ -173,7 +175,9 @@ export class DatabaseStorage implements IStorage {
       attack: stats[0],
       defense: stats[1], 
       speed: stats[2],
-      tech: stats[3],
+      wit: stats[3],
+      charisma: stats[4],
+      memory: stats[5],
     };
   }
 
