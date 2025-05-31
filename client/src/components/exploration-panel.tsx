@@ -286,6 +286,15 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
                         default: return 'text-blue-400';
                       }
                     };
+
+                    const getRiskDescription = (risk: string) => {
+                      switch (risk) {
+                        case 'high': return 'High chance of damage if failed';
+                        case 'medium': return 'Moderate consequences if failed';
+                        case 'low': return 'Minor consequences if failed';
+                        default: return 'Safe choice';
+                      }
+                    };
                     
                     return (
                       <Button
@@ -306,20 +315,39 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
                           </span>
                         </div>
                         
+                        <div className="text-xs text-slate-500 mb-2">
+                          {getRiskDescription(choice.riskLevel)}
+                        </div>
+                        
                         {Object.keys(choice.requirements || {}).length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {Object.entries(choice.requirements || {}).map(([stat, required]) => (
-                              <span 
-                                key={stat}
-                                className={`text-xs px-2 py-1 rounded ${
-                                  crawler[stat] >= required
-                                    ? 'bg-green-600/20 text-green-400'
-                                    : 'bg-red-600/20 text-red-400'
-                                }`}
-                              >
-                                {stat}: {required}
-                              </span>
-                            ))}
+                          <div className="w-full">
+                            <div className="text-xs text-slate-400 mb-1">Requirements:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(choice.requirements || {}).map(([stat, required]) => {
+                                const playerStat = crawler[stat] || 0;
+                                const meets = playerStat >= required;
+                                return (
+                                  <span 
+                                    key={stat}
+                                    className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${
+                                      meets
+                                        ? 'bg-green-600/20 text-green-400'
+                                        : 'bg-red-600/20 text-red-400'
+                                    }`}
+                                  >
+                                    <span className="capitalize">{stat}</span>
+                                    <span>{required}</span>
+                                    <span className="text-slate-300">({playerStat})</span>
+                                    {meets ? '✓' : '✗'}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                            {!meetsRequirements && (
+                              <div className="text-xs text-red-400 mt-1">
+                                ⚠ Low success chance due to unmet requirements
+                              </div>
+                            )}
                           </div>
                         )}
                       </Button>
