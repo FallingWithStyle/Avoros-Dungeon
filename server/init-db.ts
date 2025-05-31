@@ -1,5 +1,6 @@
 import { db } from "./db";
-import { crawlerClasses, equipment, equipmentTypes, floors, enemies } from "@shared/schema";
+import { crawlerClasses, equipment, equipmentTypes, floors, enemies, crawlers } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export async function initializeDatabase() {
   try {
@@ -173,6 +174,7 @@ export async function initializeDatabase() {
       },
     ]).onConflictDoNothing();
 
+    await initializeRooms();
     console.log("Database initialized successfully!");
   } catch (error) {
     console.error("Error initializing database:", error);
@@ -194,4 +196,101 @@ function getFloorDescription(floor: number): string {
   if (floor <= 30) return "Reality begins to warp as dark energy permeates the environment.";
   if (floor <= 40) return "The boundaries between dimensions grow thin and unstable.";
   return "The deepest reaches where few have ventured and fewer have returned.";
+}
+
+async function initializeRooms() {
+  const { rooms, roomConnections, crawlerPositions } = await import("@shared/schema");
+  
+  // Check if rooms already exist
+  const existingRooms = await db.select().from(rooms).limit(1);
+  if (existingRooms.length > 0) {
+    return; // Rooms already initialized
+  }
+
+  // Get floor 1
+  const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+  if (!floor1) return;
+
+  // Create entrance room
+  const [entranceRoom] = await db.insert(rooms).values({
+    floorId: floor1.id,
+    x: 0,
+    y: 0,
+    name: "Dungeon Entrance",
+    description: "A heavy stone archway marks the entrance to the dungeon. Ancient runes glow faintly on the walls, and you can hear distant echoes from deeper within.",
+    type: "entrance",
+    isExplored: true,
+    isSafe: true
+  }).returning();
+
+  // Create connected rooms
+  const [corridorRoom] = await db.insert(rooms).values({
+    floorId: floor1.id,
+    x: 0,
+    y: 1,
+    name: "Echoing Corridor",
+    description: "A long stone corridor stretches before you. Your footsteps echo ominously, and shadows dance in the torchlight.",
+    type: "normal"
+  }).returning();
+
+  const [guardPostRoom] = await db.insert(rooms).values({
+    floorId: floor1.id,
+    x: 1,
+    y: 0,
+    name: "Abandoned Guard Post",
+    description: "This room once housed dungeon guards. Rusty weapons hang from hooks, and a cold hearth sits empty.",
+    type: "normal"
+  }).returning();
+
+  const [safeRoom] = await db.insert(rooms).values({
+    floorId: floor1.id,
+    x: 0,
+    y: 2,
+    name: "Forgotten Shrine",
+    description: "A small shrine dedicated to some forgotten deity. The air feels peaceful here, offering respite from the dangers beyond.",
+    type: "safe",
+    isSafe: true
+  }).returning();
+
+  const [treasureRoom] = await db.insert(rooms).values({
+    floorId: floor1.id,
+    x: 1,
+    y: 1,
+    name: "Hidden Vault",
+    description: "A secret chamber filled with ancient treasures. Gold glints in the darkness, but danger may lurk nearby.",
+    type: "treasure",
+    hasLoot: true
+  }).returning();
+
+  // Create room connections
+  await db.insert(roomConnections).values([
+    // From entrance
+    { fromRoomId: entranceRoom.id, toRoomId: corridorRoom.id, direction: "north" },
+    { fromRoomId: entranceRoom.id, toRoomId: guardPostRoom.id, direction: "east" },
+    
+    // Reverse connections
+    { fromRoomId: corridorRoom.id, toRoomId: entranceRoom.id, direction: "south" },
+    { fromRoomId: guardPostRoom.id, toRoomId: entranceRoom.id, direction: "west" },
+    
+    // From corridor
+    { fromRoomId: corridorRoom.id, toRoomId: safeRoom.id, direction: "north" },
+    { fromRoomId: corridorRoom.id, toRoomId: treasureRoom.id, direction: "east" },
+    
+    // Reverse connections
+    { fromRoomId: safeRoom.id, toRoomId: corridorRoom.id, direction: "south" },
+    { fromRoomId: treasureRoom.id, toRoomId: corridorRoom.id, direction: "west" },
+    
+    // From guard post to treasure room
+    { fromRoomId: guardPostRoom.id, toRoomId: treasureRoom.id, direction: "north" },
+    { fromRoomId: treasureRoom.id, toRoomId: guardPostRoom.id, direction: "south" }
+  ]);
+
+  // Place all new crawlers in the entrance room by default
+  const allCrawlers = await db.select().from(crawlers);
+  for (const crawler of allCrawlers) {
+    await db.insert(crawlerPositions).values({
+      crawlerId: crawler.id,
+      roomId: entranceRoom.id
+    });
+  }
 }
