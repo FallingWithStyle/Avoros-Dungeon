@@ -52,10 +52,10 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   };
 
   return (
-    <Card className="bg-game-surface border-game-border">
-      <CardContent className="p-6">
-        {/* Header with avatar, name, and status */}
-        <div className="flex items-start justify-between mb-4">
+    <Card className="bg-game-surface border-game-border h-full flex flex-col">
+      <CardContent className="p-6 flex-1 flex flex-col">
+        {/* Header with avatar, name, and status - Fixed height */}
+        <div className="flex items-start justify-between mb-4 h-16">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
               <AvatarImage src={getAvatarUrl()} alt={crawler.name} />
@@ -64,7 +64,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-white text-lg">{crawler.name}</h3>
+              <h3 className="font-semibold text-white text-lg leading-tight">{crawler.name}</h3>
               <p className="text-sm text-slate-400 font-medium">{crawler.class.name}</p>
             </div>
           </div>
@@ -76,8 +76,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Core Stats Grid */}
-        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+        {/* Core Stats Grid - Fixed height */}
+        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50 h-20">
           <div className="text-center">
             <div className="text-xs text-slate-400 mb-1">ATK</div>
             <div className="text-lg font-bold text-red-400">{crawler.attack}</div>
@@ -104,20 +104,14 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Main Stat */}
-        <div className="mb-4 p-3 bg-slate-800/20 rounded-lg border border-slate-700/30">
-          <div className="text-xs text-slate-400 mb-1">Primary Attribute</div>
-          <div className="text-lg font-bold text-yellow-400">{crawler.class.mainStat.toUpperCase()}</div>
-        </div>
-
-        {/* Background Story */}
-        <div className="mb-4 p-3 bg-amber-900/10 rounded-lg border border-amber-700/30">
+        {/* Background Story - Fixed height with overflow handling */}
+        <div className="mb-4 p-3 bg-amber-900/10 rounded-lg border border-amber-700/30 h-24 overflow-hidden">
           <div className="text-xs text-amber-400 mb-1">Background</div>
-          <p className="text-sm text-slate-300 leading-relaxed">{crawler.background}</p>
+          <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{crawler.background}</p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="space-y-2 mb-4">
+        {/* Quick Stats - Fixed height */}
+        <div className="space-y-2 mb-4 h-20">
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Floor</span>
             <span className="text-sm font-mono text-crawler font-bold">{crawler.currentFloor}</span>
@@ -146,8 +140,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-4 border-t border-game-border">
+        {/* Action Button - Fixed at bottom */}
+        <div className="pt-4 border-t border-game-border mt-auto">
           {crawler.isAlive && crawler.status === 'active' ? (
             <Button
               onClick={handleEnterCrawlerMode}
