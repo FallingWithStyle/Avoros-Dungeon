@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { showErrorToast } from "@/lib/errorToast";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface ExplorationPanelProps {
@@ -48,23 +49,7 @@ export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
     },
     onError: (error) => {
       setIsExploring(false);
-      const errorMessage = `Unable to explore: ${error.message}`;
-      toast({
-        title: "Exploration Failed",
-        description: (
-          <div className="flex items-center gap-2">
-            <span>{errorMessage}</span>
-            <button
-              onClick={() => navigator.clipboard.writeText(errorMessage)}
-              className="text-xs bg-red-800 hover:bg-red-700 px-2 py-1 rounded"
-              title="Copy error message"
-            >
-              Copy
-            </button>
-          </div>
-        ),
-        variant: "destructive",
-      });
+      showErrorToast("Exploration Failed", error);
     },
   });
 
