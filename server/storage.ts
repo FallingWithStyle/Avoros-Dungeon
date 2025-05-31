@@ -43,6 +43,12 @@ export interface IStorage {
   getCrawler(id: number): Promise<CrawlerWithDetails | undefined>;
   updateCrawler(id: number, updates: Partial<Crawler>): Promise<Crawler>;
   
+  // Season operations
+  getCurrentSeason(): Promise<Season | undefined>;
+  canCreatePrimaryCrawler(userId: string): Promise<boolean>;
+  getAvailableSecondarySponsorships(): Promise<CrawlerWithDetails[]>;
+  resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number): Promise<User>;
+  
   // Crawler classes
   getCrawlerClasses(): Promise<CrawlerClass[]>;
   

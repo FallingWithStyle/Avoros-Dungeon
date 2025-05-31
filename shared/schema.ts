@@ -25,6 +25,18 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Game seasons
+export const seasons = pgTable("seasons", {
+  id: serial("id").primaryKey(),
+  seasonNumber: integer("season_number").notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(false).notNull(),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
@@ -37,6 +49,8 @@ export const users = pgTable("users", {
   credits: integer("credits").default(50000).notNull(),
   sponsorReputation: integer("sponsor_reputation").default(0).notNull(),
   activeCrawlerId: integer("active_crawler_id"),
+  primarySponsorshipUsed: boolean("primary_sponsorship_used").default(false).notNull(),
+  lastPrimarySponsorshipSeason: integer("last_primary_sponsorship_season").default(1).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -70,6 +84,8 @@ export const crawlers = pgTable("crawlers", {
   experience: integer("experience").default(0).notNull(),
   status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead
   isAlive: boolean("is_alive").default(true).notNull(),
+  sponsorshipType: varchar("sponsorship_type").default("primary").notNull(), // "primary" or "secondary"
+  seasonNumber: integer("season_number").default(1).notNull(),
   lastAction: timestamp("last_action").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -334,6 +350,11 @@ export const insertMarketplaceListingSchema = createInsertSchema(marketplaceList
   createdAt: true,
 });
 
+export const insertSeasonSchema = createInsertSchema(seasons).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -349,6 +370,7 @@ export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
+export type Season = typeof seasons.$inferSelect;
 
 // Extended types with relations
 export type CrawlerWithDetails = Crawler & {
