@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import RoomNavigation from "./room-navigation";
 import { 
   Zap, 
   Sword, 
@@ -137,23 +138,26 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   }
 
   return (
-    <Card className="bg-game-surface border-game-border">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-blue-400 flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              Floor {crawler.currentFloor} - {crawler.name}
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Level {crawler.level} Crawler
-            </CardDescription>
+    <div className="space-y-4">
+      <RoomNavigation crawler={crawler} />
+      
+      <Card className="bg-game-surface border-game-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-blue-400 flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Floor {crawler.currentFloor} - {crawler.name}
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Level {crawler.level} Crawler
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="border-green-600/30 text-green-400">
+              {crawler.status}
+            </Badge>
           </div>
-          <Badge variant="outline" className="border-green-600/30 text-green-400">
-            {crawler.status}
-          </Badge>
-        </div>
-      </CardHeader>
+        </CardHeader>
       
       <CardContent className="space-y-6">
         {/* Status Bars */}
@@ -437,6 +441,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }
