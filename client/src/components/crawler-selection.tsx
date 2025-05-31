@@ -213,14 +213,9 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setSelectedCandidate(null)}>
           <Card className="bg-game-surface border-blue-500 border-2 w-96 mx-4" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <User className="w-6 h-6 text-blue-400" />
-                  <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
-                </div>
-                <Badge variant="outline" className="border-green-600/30 text-green-400">
-                  {selectedCandidate.topAbility.name}
-                </Badge>
+              <div className="flex items-center gap-2">
+                <User className="w-6 h-6 text-blue-400" />
+                <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
                 Level {selectedCandidate.level} • {selectedCandidate.topAbility.description}
