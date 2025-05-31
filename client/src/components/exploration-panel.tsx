@@ -30,6 +30,7 @@ interface ExplorationPanelProps {
 
 export default function ExplorationPanel({ crawler: initialCrawler }: ExplorationPanelProps) {
   const [isExploring, setIsExploring] = useState(false);
+  const [currentEncounter, setCurrentEncounter] = useState<any>(null);
   const { toast } = useToast();
 
   // Fetch live crawler data to ensure real-time updates
@@ -46,20 +47,38 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
     },
     onSuccess: (encounter) => {
       setIsExploring(false);
+      setCurrentEncounter(encounter);
+    },
+    onError: (error) => {
+      setIsExploring(false);
+      showErrorToast("Exploration Failed", error);
+    },
+  });
+
+  const choiceMutation = useMutation({
+    mutationFn: async ({ choiceId, encounterData }: { choiceId: string; encounterData: any }) => {
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/choose`, {
+        choiceId,
+        encounterData
+      });
+    },
+    onSuccess: (result) => {
       // Force immediate refresh of crawler data
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.refetchQueries({ queryKey: ["/api/crawlers"] });
       
-      // Show encounter result
+      // Show result and clear encounter
       toast({
-        title: "Encounter!",
-        description: encounter.storyText || `You encountered a ${encounter.type}!`,
+        title: result.success ? "Success!" : "Failed!",
+        description: result.message,
+        variant: result.success ? "default" : "destructive",
       });
+      
+      setCurrentEncounter(null);
     },
     onError: (error) => {
-      setIsExploring(false);
-      showErrorToast("Exploration Failed", error);
+      showErrorToast("Choice Failed", error);
     },
   });
 
@@ -209,40 +228,104 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
 
         <Separator className="bg-game-border" />
 
-        {/* Exploration Action */}
-        <div className="space-y-3">
-          <Button 
-            onClick={handleExplore}
-            disabled={isExploring || crawler.energy < 10 || !crawler.isAlive}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            size="lg"
-          >
-            {isExploring ? (
-              <>
-                <Clock className="w-4 h-4 mr-2 animate-spin" />
-                Exploring...
-              </>
-            ) : (
-              <>
-                <MapPin className="w-4 h-4 mr-2" />
-                Explore Floor {crawler.currentFloor} (-10 Energy)
-              </>
+        {/* Exploration Action or Encounter Choices */}
+        {currentEncounter ? (
+          <div className="space-y-4">
+            <div className="bg-game-border/20 rounded-lg p-4 border border-game-border">
+              <h3 className="text-lg font-semibold text-slate-200 mb-2">{currentEncounter.title}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed mb-4">{currentEncounter.description}</p>
+              
+              <div className="space-y-2">
+                {currentEncounter.choices?.map((choice: any) => {
+                  const meetsRequirements = Object.entries(choice.requirements || {}).every(
+                    ([stat, required]) => crawler[stat] >= required
+                  );
+                  
+                  const getRiskColor = (risk: string) => {
+                    switch (risk) {
+                      case 'high': return 'text-red-400';
+                      case 'medium': return 'text-yellow-400';
+                      case 'low': return 'text-green-400';
+                      default: return 'text-blue-400';
+                    }
+                  };
+                  
+                  return (
+                    <Button
+                      key={choice.id}
+                      onClick={() => choiceMutation.mutate({ choiceId: choice.id, encounterData: currentEncounter })}
+                      disabled={choiceMutation.isPending}
+                      className={`w-full text-left p-4 h-auto flex flex-col items-start ${
+                        meetsRequirements 
+                          ? 'bg-slate-800 hover:bg-slate-700 border-slate-600' 
+                          : 'bg-slate-900 hover:bg-slate-800 border-slate-700 opacity-75'
+                      }`}
+                      variant="outline"
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="font-medium text-slate-200">{choice.text}</span>
+                        <span className={`text-xs ${getRiskColor(choice.riskLevel)}`}>
+                          {choice.riskLevel === 'none' ? 'Safe' : `${choice.riskLevel} risk`}
+                        </span>
+                      </div>
+                      
+                      {Object.keys(choice.requirements || {}).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Object.entries(choice.requirements || {}).map(([stat, required]) => (
+                            <span 
+                              key={stat}
+                              className={`text-xs px-2 py-1 rounded ${
+                                crawler[stat] >= required
+                                  ? 'bg-green-600/20 text-green-400'
+                                  : 'bg-red-600/20 text-red-400'
+                              }`}
+                            >
+                              {stat}: {required}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Button 
+              onClick={handleExplore}
+              disabled={isExploring || crawler.energy < 10 || !crawler.isAlive}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
+              {isExploring ? (
+                <>
+                  <Clock className="w-4 h-4 mr-2 animate-spin" />
+                  Exploring...
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Explore Floor {crawler.currentFloor} (-10 Energy)
+                </>
+              )}
+            </Button>
+            
+            {crawler.energy < 10 && (
+              <p className="text-sm text-amber-400 text-center">
+                <Clock className="w-3 h-3 inline mr-1" />
+                Energy regenerates over time
+              </p>
             )}
-          </Button>
-          
-          {crawler.energy < 10 && (
-            <p className="text-sm text-amber-400 text-center">
-              <Clock className="w-3 h-3 inline mr-1" />
-              Energy regenerates over time
-            </p>
-          )}
-          
-          {!crawler.isAlive && (
-            <p className="text-sm text-red-400 text-center">
-              This crawler has died and cannot explore
-            </p>
-          )}
-        </div>
+            
+            {!crawler.isAlive && (
+              <p className="text-sm text-red-400 text-center">
+                This crawler has died and cannot explore
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
