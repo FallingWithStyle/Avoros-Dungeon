@@ -63,9 +63,9 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
                 {crawler.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-semibold text-white text-lg leading-tight">{crawler.name}</h3>
-              <p className="text-sm text-slate-400 font-medium">{crawler.class.name}</p>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-white text-lg leading-tight truncate">{crawler.name}</h3>
+              <p className="text-sm text-slate-400 font-medium truncate">{crawler.class.name}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -104,10 +104,17 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Background Story - Fixed height with overflow handling */}
+        {/* Background Story - Fixed height with strict text clipping */}
         <div className="mb-4 p-3 bg-amber-900/10 rounded-lg border border-amber-700/30 h-24 overflow-hidden">
           <div className="text-xs text-amber-400 mb-1">Background</div>
-          <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{crawler.background}</p>
+          <p className="text-sm text-slate-300 leading-tight overflow-hidden text-ellipsis" 
+             style={{
+               display: '-webkit-box',
+               WebkitLineClamp: 3,
+               WebkitBoxOrient: 'vertical'
+             }}>
+            {crawler.background}
+          </p>
         </div>
 
         {/* Quick Stats - Fixed height */}
