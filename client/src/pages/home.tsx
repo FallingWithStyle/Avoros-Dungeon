@@ -133,8 +133,13 @@ export default function Home() {
         
         <main className="flex-1 p-6 pb-20 lg:pb-6">
           <div className="mb-8">
+            {/* Season Status */}
+            <div className="mb-6">
+              <SeasonStatus />
+            </div>
+            
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-white">Command Center</h2>
+              <h2 className="text-3xl font-bold text-white">Corporation Dashboard</h2>
               
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>

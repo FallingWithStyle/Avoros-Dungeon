@@ -279,6 +279,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Season routes
+  app.get('/api/season/current', isAuthenticated, async (req, res) => {
+    try {
+      const season = await storage.getCurrentSeason();
+      if (!season) {
+        return res.status(404).json({ message: "No active season found" });
+      }
+      res.json(season);
+    } catch (error) {
+      console.error("Error fetching current season:", error);
+      res.status(500).json({ message: "Failed to fetch current season" });
+    }
+  });
+
+  app.get('/api/season/can-create-primary', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const canCreate = await storage.canCreatePrimaryCrawler(userId);
+      res.json({ canCreate });
+    } catch (error) {
+      console.error("Error checking primary sponsorship eligibility:", error);
+      res.status(500).json({ message: "Failed to check eligibility" });
+    }
+  });
+
+  app.get('/api/season/secondary-sponsorships', isAuthenticated, async (req, res) => {
+    try {
+      const availableCrawlers = await storage.getAvailableSecondarySponsorships();
+      res.json(availableCrawlers);
+    } catch (error) {
+      console.error("Error fetching secondary sponsorships:", error);
+      res.status(500).json({ message: "Failed to fetch secondary sponsorships" });
+    }
+  });
+
   // Equipment
   app.get('/api/equipment', async (req, res) => {
     try {
