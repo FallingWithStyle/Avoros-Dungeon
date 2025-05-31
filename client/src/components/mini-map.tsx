@@ -7,7 +7,8 @@ import {
   Gem, 
   Skull, 
   DoorOpen,
-  Home
+  Home,
+  ArrowUp
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
 
