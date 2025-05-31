@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         energy: 100,
         maxEnergy: 100,
         experience: 0,
-        level: 0,
+        level: 1, // Level up to 1 upon selection with 3 stat points to distribute
         credits: 0,
         isAlive: true,
       });
@@ -357,6 +357,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error resetting crawlers:", error);
       res.status(500).json({ message: "Failed to reset crawlers" });
+    }
+  });
+
+  // DEBUG: Restore crawler energy (temporary for development)
+  app.post('/api/crawlers/:id/restore-energy', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+      
+      if (!crawler) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Update crawler energy to 100%
+      await storage.updateCrawler(crawlerId, { 
+        energy: 100,
+        lastEnergyRegen: new Date()
+      });
+      
+      res.json({ message: "Energy restored successfully" });
+    } catch (error) {
+      console.error("Restore energy error:", error);
+      res.status(500).json({ message: "Failed to restore energy" });
     }
   });
 
