@@ -11,6 +11,7 @@ import {
   activities,
   chatMessages,
   marketplaceListings,
+  seasons,
   type UpsertUser,
   type User,
   type InsertCrawler,
@@ -28,6 +29,7 @@ import {
   type Floor,
   type Enemy,
   type Encounter,
+  type Season,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, asc } from "drizzle-orm";
@@ -387,6 +389,74 @@ export class DatabaseStorage implements IStorage {
       .set({
         activeCrawlerId: crawlerId,
         updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Season operations
+  async getCurrentSeason(): Promise<Season | undefined> {
+    const [season] = await db
+      .select()
+      .from(seasons)
+      .where(eq(seasons.isActive, true))
+      .limit(1);
+    return season;
+  }
+
+  async canCreatePrimaryCrawler(userId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+
+    const currentSeason = await this.getCurrentSeason();
+    if (!currentSeason) return false;
+
+    // Check if user has already used their primary sponsorship this season
+    if (user.primarySponsorshipUsed && user.lastPrimarySponsorshipSeason === currentSeason.seasonNumber) {
+      return false;
+    }
+
+    // Check if user has an active crawler
+    const activeCrawlers = await db
+      .select()
+      .from(crawlers)
+      .where(and(
+        eq(crawlers.sponsorId, userId),
+        eq(crawlers.isAlive, true),
+        eq(crawlers.sponsorshipType, "primary")
+      ));
+
+    return activeCrawlers.length === 0;
+  }
+
+  async getAvailableSecondarySponsorships(): Promise<CrawlerWithDetails[]> {
+    // Return crawlers looking for secondary sponsors (e.g., those whose primary sponsors have died)
+    const availableCrawlers = await db
+      .select({
+        crawler: crawlers,
+        class: crawlerClasses,
+      })
+      .from(crawlers)
+      .leftJoin(crawlerClasses, eq(crawlers.classId, crawlerClasses.id))
+      .where(and(
+        eq(crawlers.isAlive, true),
+        eq(crawlers.status, "seeking_sponsor")
+      ));
+
+    return availableCrawlers.map(row => ({
+      ...row.crawler,
+      class: row.class!,
+      equipment: [] // Secondary sponsors can't modify equipment initially
+    }));
+  }
+
+  async resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        primarySponsorshipUsed: false,
+        lastPrimarySponsorshipSeason: seasonNumber
       })
       .where(eq(users.id, userId))
       .returning();
