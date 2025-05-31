@@ -288,6 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
+      // Check minimum energy requirement (will be validated properly in moveToRoom)
       if (crawler.energy < 5) {
         return res.status(400).json({ message: "Not enough energy to move" });
       }
@@ -298,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: result.error || "Cannot move in that direction" });
       }
 
-      // Energy is already deducted in moveToRoom function
+      // Energy is deducted in moveToRoom function based on room visit history
 
       await storage.createActivity({
         userId: req.user.claims.sub,
