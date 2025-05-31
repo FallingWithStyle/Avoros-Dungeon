@@ -425,17 +425,17 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return "bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-400/20";
-    }
-    
     if (!room.isExplored) {
       return "bg-slate-800/50 border-slate-600/50";
     }
     
+    // Check for safe rooms first (by isSafe property)
+    if (room.isSafe) {
+      return "bg-green-600/20 border-green-600/50";
+    }
+    
     switch (room.type) {
       case 'entrance':
-      case 'safe':
         return "bg-green-600/20 border-green-600/50";
       case 'treasure':
         return "bg-yellow-600/20 border-yellow-600/50";
@@ -529,7 +529,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
                     >
                       {getRoomIcon(room)}
                       {room.isCurrentRoom && (
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-400 rounded-full border border-blue-200 animate-pulse" />
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
                       )}
                     </div>
                   );
