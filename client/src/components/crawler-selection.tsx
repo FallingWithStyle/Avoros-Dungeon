@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Zap, Shield, Gauge, Cpu, Package } from "lucide-react";
+import { User, Zap, Shield, Gauge, Brain, Users, Archive, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface CrawlerCandidate {
@@ -16,7 +16,9 @@ interface CrawlerCandidate {
     attack: number;
     defense: number;
     speed: number;
-    tech: number;
+    wit: number;
+    charisma: number;
+    memory: number;
   };
   competencies: string[];
   background: string;
@@ -135,10 +137,24 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Cpu className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm">Tech</span>
+                      <Brain className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm">Wit</span>
                     </div>
-                    <span className="text-sm font-mono">{candidate.stats.tech}</span>
+                    <span className="text-sm font-mono">{candidate.stats.wit}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-pink-400" />
+                      <span className="text-sm">Charisma</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.charisma}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Archive className="w-4 h-4 text-cyan-400" />
+                      <span className="text-sm">Memory</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.memory}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -240,10 +256,24 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
-                      <Cpu className="w-3 h-3 text-purple-400" />
-                      <span className="text-xs">Tech</span>
+                      <Brain className="w-3 h-3 text-purple-400" />
+                      <span className="text-xs">Wit</span>
                     </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.tech}</span>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.wit}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3 text-pink-400" />
+                      <span className="text-xs">Charisma</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.charisma}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Archive className="w-3 h-3 text-cyan-400" />
+                      <span className="text-xs">Memory</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.memory}</span>
                   </div>
                 </div>
               </div>
