@@ -64,7 +64,9 @@ export const crawlerClasses = pgTable("crawler_classes", {
   baseAttack: integer("base_attack").notNull(),
   baseDefense: integer("base_defense").notNull(),
   baseSpeed: integer("base_speed").notNull(),
-  baseTech: integer("base_tech").notNull(),
+  baseWit: integer("base_wit").notNull(),
+  baseCharisma: integer("base_charisma").notNull(),
+  baseMemory: integer("base_memory").notNull(),
 });
 
 // Crawlers
@@ -81,7 +83,9 @@ export const crawlers = pgTable("crawlers", {
   attack: integer("attack").notNull(),
   defense: integer("defense").notNull(),
   speed: integer("speed").notNull(),
-  tech: integer("tech").notNull(),
+  wit: integer("wit").notNull(),
+  charisma: integer("charisma").notNull(),
+  memory: integer("memory").notNull(),
   credits: integer("credits").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
   energy: integer("energy").default(100).notNull(),
@@ -113,7 +117,9 @@ export const equipment = pgTable("equipment", {
   attackBonus: integer("attack_bonus").default(0),
   defenseBonus: integer("defense_bonus").default(0),
   speedBonus: integer("speed_bonus").default(0),
-  techBonus: integer("tech_bonus").default(0),
+  witBonus: integer("wit_bonus").default(0),
+  charismaBonus: integer("charisma_bonus").default(0),
+  memoryBonus: integer("memory_bonus").default(0),
   healthBonus: integer("health_bonus").default(0),
   rarity: varchar("rarity", { length: 20 }).default("common"), // common, uncommon, rare, epic, legendary
   price: integer("price").notNull(),
