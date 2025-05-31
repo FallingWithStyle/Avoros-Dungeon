@@ -1873,24 +1873,13 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Destination room not found" };
     }
 
-    // Update crawler position (or insert if none exists)
-    const existingPositions = await db.select().from(crawlerPositions).where(eq(crawlerPositions.crawlerId, crawlerId));
-    
-    if (existingPositions.length > 0) {
-      // Update existing position
-      await db.update(crawlerPositions)
-        .set({ 
-          roomId: connection.toRoomId,
-          enteredAt: new Date()
-        })
-        .where(eq(crawlerPositions.crawlerId, crawlerId));
-    } else {
-      // Insert new position if none exists
-      await db.insert(crawlerPositions).values({
-        crawlerId,
-        roomId: connection.toRoomId
-      });
-    }
+    // Always insert a new position record to create movement history
+    // This allows us to track all rooms the crawler has visited
+    await db.insert(crawlerPositions).values({
+      crawlerId,
+      roomId: connection.toRoomId,
+      enteredAt: new Date()
+    });
 
     return { success: true, newRoom };
   }
@@ -1909,7 +1898,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
-    const crawlerIds = await db.select({
+    // Get crawlers who are currently in this room (most recent position for each crawler)
+    // For now, let's get all distinct crawlers who have been in this room
+    // This is a simplified approach to avoid complex SQL grouping issues
+    const crawlerIds = await db.selectDistinct({
       crawlerId: crawlerPositions.crawlerId
     })
     .from(crawlerPositions)
@@ -1943,27 +1935,26 @@ export class DatabaseStorage implements IStorage {
     }
 
     const currentRoomId = currentPosition[0].roomId;
-    const currentRoom = await this.getRoom(currentRoomId);
-    if (!currentRoom) {
-      return [];
-    }
 
-    // For now, simulate a visited rooms tracking
-    // Starting with current room + entrance as visited
+    // Get ALL rooms this crawler has visited by checking position history
+    // We need to track unique room visits
+    const visitedPositions = await db.select({
+      roomId: crawlerPositions.roomId,
+      room: rooms
+    })
+    .from(crawlerPositions)
+    .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
+    .where(eq(crawlerPositions.crawlerId, crawlerId));
+
+    // Create a map of unique visited rooms
+    const visitedRoomsMap = new Map();
     const visitedRoomIds = new Set<number>();
-    visitedRoomIds.add(currentRoomId);
-    visitedRoomIds.add(6); // Always include entrance
-
-    // Get the current room and entrance room details
-    const currentRoomDetails = await this.getRoom(currentRoomId);
-    const entranceRoom = await this.getRoom(6);
     
-    const visitedRooms = [];
-    if (currentRoomDetails) {
-      visitedRooms.push(currentRoomDetails);
-    }
-    if (entranceRoom && entranceRoom.id !== currentRoomId) {
-      visitedRooms.push(entranceRoom);
+    for (const position of visitedPositions) {
+      if (!visitedRoomsMap.has(position.roomId)) {
+        visitedRoomsMap.set(position.roomId, position.room);
+        visitedRoomIds.add(position.roomId);
+      }
     }
 
     // Find adjacent unexplored rooms from current room
@@ -1992,8 +1983,8 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Combine visited rooms with adjacent unexplored rooms
-    const exploredRoomData = visitedRooms.map(room => ({
+    // Convert visited rooms to the expected format
+    const exploredRoomData = Array.from(visitedRoomsMap.values()).map(room => ({
       id: room.id,
       name: room.name,
       type: room.type,
