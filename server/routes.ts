@@ -523,6 +523,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DEBUG: Regenerate dungeon layout
+  app.post('/api/debug/regenerate-dungeon', isAuthenticated, async (req: any, res) => {
+    try {
+      const { initializeDatabase } = await import('./init-db');
+      await initializeDatabase();
+      res.json({ message: "Dungeon layout regenerated with new room distribution" });
+    } catch (error) {
+      console.error("Error regenerating dungeon:", error);
+      res.status(500).json({ message: "Failed to regenerate dungeon" });
+    }
+  });
+
   // Room and mapping routes
   app.get('/api/crawlers/:id/current-room', isAuthenticated, async (req: any, res) => {
     try {

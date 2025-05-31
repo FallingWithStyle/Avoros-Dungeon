@@ -119,6 +119,23 @@ export default function Home() {
     },
   });
 
+  // Debug dungeon regeneration
+  const regenerateDungeonMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/debug/regenerate-dungeon");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      toast({
+        title: "Dungeon Regenerated",
+        description: "New dungeon layout with updated room distribution applied.",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Regeneration Failed", error);
+    },
+  });
+
   if (crawlersLoading) {
     return (
       <div className="min-h-screen bg-slate-900 p-6">
@@ -310,6 +327,20 @@ export default function Home() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                   )}
                   Reset All Crawlers
+                </Button>
+                
+                <Button
+                  onClick={() => regenerateDungeonMutation.mutate()}
+                  disabled={regenerateDungeonMutation.isPending}
+                  variant="outline"
+                  className="border-purple-600/30 text-purple-400 hover:bg-purple-600/10"
+                >
+                  {regenerateDungeonMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  Regenerate Dungeon
                 </Button>
                 
                 <Button
