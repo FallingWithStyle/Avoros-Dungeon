@@ -189,7 +189,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private generateCrawlerBackground(): string {
-    const backgrounds = [
+    const desperateBackgrounds = [
       "Hiding from ex-partner's criminal associates who want them dead",
       "Fled into the dungeon after witnessing a corporate assassination", 
       "Chasing their missing sibling who entered the dungeon weeks ago",
@@ -203,8 +203,67 @@ export class DatabaseStorage implements IStorage {
       "Trying to disappear after their research caused a containment breach",
       "Following their mentor who vanished into the dungeon with vital information"
     ];
-    
-    return backgrounds[Math.floor(Math.random() * backgrounds.length)];
+
+    const wackyBackgrounds = [
+      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a galaxy-wide manhunt",
+      "Used to run an underground origami club that accidentally became a resistance movement",
+      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
+      "Librarian who discovered that late fees were being used to fund illegal weapons research",
+      "Freelance mime who broke character at the wrong moment and saw too much",
+      "Pet groomer whose client's 'dog' turned out to be an escaped genetic experiment",
+      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
+      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
+      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
+      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
+      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
+      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
+      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
+      "Dog walker who overheard the wrong conversation in the wrong corporate park",
+      "Amateur beekeeper whose honey business was a front for something much bigger (they had no idea)",
+      "Former mall Santa who saw executives discussing 'naughty list eliminations' and thought they meant something else",
+      "Freelance translator who accidentally translated a corporate love letter that was actually assassination orders",
+      "Part-time tour guide whose historical facts about corporate buildings were apparently classified information",
+      "Uber driver who picked up the wrong passenger at the wrong time and heard the wrong phone call",
+      "Karaoke host whose song requests app was secretly monitoring corporate communications",
+      "Personal trainer whose client confessed to war crimes during a particularly intense workout",
+      "Flower delivery person who delivered the wrong bouquet to the wrong office and saw too much",
+      "Professional cosplayer whose costume was too realistic and got them mistaken for an actual corporate spy",
+      "Food truck owner whose lunch rush happened to coincide with an illegal corporate meeting in the park",
+      "Freelance furniture assembler who found corporate secrets hidden inside IKEA boxes",
+      "Amateur archaeologist who dug up corporate waste in their backyard and connected the wrong dots",
+      "Part-time janitor who cleaned the wrong office on the wrong night and emptied the wrong trash",
+      "Etsy seller whose handmade crafts accidentally incorporated corporate microchips they found on the street",
+      "Professional cat sitter whose feline client belonged to a corporate whistleblower",
+      "Escape room designer whose puzzles were based on real corporate security flaws (oops)",
+      "Food blogger whose restaurant review accidentally described a corporate money laundering operation",
+      "Freelance cartographer whose maps revealed corporate illegal dumping sites by pure coincidence",
+      "Amateur radio operator who intercepted the wrong frequency at the wrong time",
+      "Professional gift wrapper whose artistic paper folding skills revealed hidden corporate documents",
+      "Part-time children's birthday entertainer who performed at a corporate executive's house during a business meeting"
+    ];
+
+    const tragicBackgrounds = [
+      "Their entire extended family was killed in a 'gas leak' explosion after their uncle asked too many questions at work",
+      "Woke up to find their memory of the last three years had been surgically removed, and this seemed safer than staying",
+      "Their hometown was evacuated for 'routine maintenance' and never reopened - they're the only one who made it out",
+      "Former corporate executive who grew a conscience too late and is now running from their former colleagues",
+      "Their identical twin was murdered and replaced by a corporate doppelganger - they're next",
+      "Discovered their late parents' charity was actually a human trafficking front and corporate assassins came calling",
+      "Their genetic code was patented by a corporation and they're technically corporate property now",
+      "Former corporate lawyer who found out their adoption agency was actually a corporate breeding program",
+      "Their art therapy sessions were being used to identify and eliminate potential dissidents",
+      "Learned their life insurance policy had a 'corporate termination clause' that kicked in last Tuesday"
+    ];
+
+    // Mix of desperation levels for variety - 40% desperate, 50% wacky, 10% tragic
+    const roll = Math.random();
+    if (roll < 0.4) {
+      return desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
+    } else if (roll < 0.9) {
+      return wackyBackgrounds[Math.floor(Math.random() * wackyBackgrounds.length)];
+    } else {
+      return tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
+    }
   }
 
   async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
@@ -881,39 +940,127 @@ export class DatabaseStorage implements IStorage {
   }
 
   private generateStartingEquipment(background: string): any[] {
-    // Basic survival gear that anyone might have
-    const basicGear = [
+    // Varied equipment pools for more interesting combinations
+    const survivalGear = [
       { name: "Emergency Rations", description: "Compressed nutrition bars" },
-      { name: "Flashlight", description: "Battery-powered light source" },
-      { name: "First Aid Kit", description: "Basic medical supplies" },
-      { name: "Multi-tool", description: "Swiss army knife equivalent" },
-      { name: "Water Purification Tablets", description: "Makes questionable water safer" }
+      { name: "Nutrient Paste", description: "Emergency food rations" },
+      { name: "Water Recycler", description: "Converts moisture into drinking water" },
+      { name: "Thermal Blanket", description: "Reflective emergency shelter" },
+      { name: "Multi-tool", description: "Basic cutting and repair implement" },
+      { name: "Credit Chip", description: "Contains 50 emergency credits" },
+      { name: "Stim Pack", description: "Basic medical supplies" },
+      { name: "Flashlight", description: "Battery-powered illumination" },
+      { name: "Water Purification Tablets", description: "Makes questionable water safer" },
+      { name: "Rope Coil", description: "20 meters of synthetic climbing rope" },
+      { name: "Fire Starter", description: "Magnesium striker with tinder" }
     ];
-    
-    // Maybe one additional item based on background
+
+    const personalItems = [
+      { name: "Wedding Ring", description: "Worn platinum band, still warm" },
+      { name: "Family Photo", description: "Cracked holoframe showing happier times" },
+      { name: "Lucky Dice", description: "Clearly haven't been working lately" },
+      { name: "Diary", description: "Half-burned journal with torn pages" },
+      { name: "Pocket Watch", description: "Stopped at the exact moment everything went wrong" },
+      { name: "House Key", description: "To a home that no longer exists" },
+      { name: "Love Letters", description: "From someone who's probably dead now" },
+      { name: "Childhood Toy", description: "A stuffed animal, one eye missing" },
+      { name: "Concert Ticket", description: "For a show that never happened" },
+      { name: "Business Card", description: "Your old job, your old life" }
+    ];
+
+    const weirdItems = [
+      { name: "Rubber Duck", description: "Squeaks ominously when pressed" },
+      { name: "Magic 8-Ball", description: "All answers are 'Outlook not so good'" },
+      { name: "Broken Violin", description: "Missing three strings and hope" },
+      { name: "Expired Lottery Ticket", description: "Would have won 10 million credits" },
+      { name: "Pet Rock", description: "Named Gerald, good listener" },
+      { name: "Fake Mustache", description: "For when you need to be someone else" },
+      { name: "Unopened Fortune Cookie", description: "Too afraid to read the fortune" },
+      { name: "Mood Ring", description: "Permanently stuck on 'despair'" },
+      { name: "Snow Globe", description: "Contains tiny city that looks suspiciously like home" },
+      { name: "Rubber Chicken", description: "Makes realistic screaming sounds" },
+      { name: "Whoopee Cushion", description: "Because even apocalypses need comedy" },
+      { name: "Origami Crane", description: "Made from eviction notice" }
+    ];
+
     const contextualGear = [];
     if (background.includes("clinic") || background.includes("medical")) {
-      contextualGear.push({ name: "Medical Scanner", description: "Handheld diagnostic device" });
-    } else if (background.includes("research") || background.includes("experiments")) {
-      contextualGear.push({ name: "Data Pad", description: "Encrypted research notes" });
-    } else if (background.includes("security") || background.includes("criminal")) {
-      // Very rarely, someone might have a basic weapon
-      if (Math.random() < 0.15) { // 15% chance
-        contextualGear.push({ name: "Ceramic Knife", description: "Small, undetectable blade" });
-      }
+      contextualGear.push(
+        { name: "Medical Scanner", description: "Handheld diagnostic device" },
+        { name: "Expired Painkillers", description: "Better than nothing" },
+        { name: "Tongue Depressor", description: "Wooden stick of hope" },
+        { name: "Stethoscope", description: "Listen to your heart break" }
+      );
+    } else if (background.includes("research") || background.includes("experiment")) {
+      contextualGear.push(
+        { name: "Data Pad", description: "Encrypted research notes" },
+        { name: "Safety Goggles", description: "Cracked but still protective" },
+        { name: "Test Tube", description: "Contains unidentified green liquid" },
+        { name: "Lab Notebook", description: "Documenting the end of the world" }
+      );
+    } else if (background.includes("security") || background.includes("criminal") || background.includes("gang")) {
+      contextualGear.push(
+        { name: "Ceramic Shiv", description: "Prison-made cutting tool" },
+        { name: "Brass Knuckles", description: "Dented but functional" },
+        { name: "Lock Pick Set", description: "For when doors don't cooperate" },
+        { name: "Fake ID", description: "Someone else's face, your new life" }
+      );
+    } else if (background.includes("restaurant") || background.includes("food") || background.includes("chef")) {
+      contextualGear.push(
+        { name: "Chef's Knife", description: "Sharp and well-maintained" },
+        { name: "Spice Packet", description: "Makes anything taste better" },
+        { name: "Grease-Stained Apron", description: "Smells like home cooking" },
+        { name: "Recipe Book", description: "Grandmother's secret techniques" }
+      );
+    } else if (background.includes("tech") || background.includes("hacker") || background.includes("programmer")) {
+      contextualGear.push(
+        { name: "Portable Hard Drive", description: "Contains someone else's secrets" },
+        { name: "Jury-Rigged Phone", description: "Can probably hack a toaster" },
+        { name: "Circuit Board", description: "Might be useful for something" },
+        { name: "USB Drive", description: "Labeled 'DO NOT OPEN'" }
+      );
+    } else if (background.includes("teacher") || background.includes("school") || background.includes("student")) {
+      contextualGear.push(
+        { name: "Red Pen", description: "For marking final grades" },
+        { name: "Textbook", description: "Everything you need to know (apparently not)" },
+        { name: "Apple", description: "For the teacher you'll never see again" },
+        { name: "Report Card", description: "All A's, fat lot of good it did" }
+      );
     }
     
-    // Return 2-3 basic items plus maybe one contextual item
-    const equipment = [...basicGear.slice(0, 2 + Math.floor(Math.random() * 2))];
-    if (contextualGear.length > 0 && Math.random() < 0.4) {
-      equipment.push(contextualGear[0]);
+    // Build equipment list with more variety
+    const equipment = [];
+    
+    // 2-3 survival items
+    equipment.push(...this.shuffleArray(survivalGear).slice(0, 2 + Math.floor(Math.random() * 2)));
+    
+    // Always include one personal item for emotional depth
+    equipment.push(...this.shuffleArray(personalItems).slice(0, 1));
+    
+    // 60% chance of weird item for personality
+    if (Math.random() < 0.6) {
+      equipment.push(...this.shuffleArray(weirdItems).slice(0, 1));
+    }
+    
+    // Include contextual gear if available
+    if (contextualGear.length > 0 && Math.random() < 0.7) {
+      equipment.push(...this.shuffleArray(contextualGear).slice(0, 1));
     }
     
     return equipment;
   }
 
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
   // Generate crawler candidates for selection
-  async generateCrawlerCandidates(count = 3): Promise<any[]> {
+  async generateCrawlerCandidates(count = 30): Promise<any[]> {
     const candidates = [];
 
     for (let i = 0; i < count; i++) {

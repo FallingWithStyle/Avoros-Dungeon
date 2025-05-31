@@ -46,14 +46,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
     queryKey: ["/api/crawlers/candidates"],
   });
 
-  const regenerateMutation = useMutation({
-    mutationFn: () => apiRequest("/api/crawlers/candidates", { method: "GET" }),
-    onSuccess: (newCandidates) => {
-      queryClient.setQueryData(["/api/crawlers/candidates"], newCandidates);
-      setSelectedCandidate(null);
-      setCrawlerName("");
-    },
-  });
+  // Removed regenerate mutation since we now show 30 candidates at once
 
   if (isLoading) {
     return (
@@ -73,25 +66,13 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
-          <p className="text-slate-400">Choose from these Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => regenerateMutation.mutate()}
-          disabled={regenerateMutation.isPending}
-          className="border-game-border"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${regenerateMutation.isPending ? 'animate-spin' : ''}`} />
-          Generate New Options
-        </Button>
+    <div className="space-y-6 px-6">
+      <div className="text-center">
+        <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
+        <p className="text-slate-400">Choose from these 30 Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto">
         {candidates?.map((candidate: CrawlerCandidate) => (
           <Card 
             key={candidate.id}
