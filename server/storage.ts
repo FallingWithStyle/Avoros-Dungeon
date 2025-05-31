@@ -1921,10 +1921,16 @@ export class DatabaseStorage implements IStorage {
     // Calculate energy cost - reduced for previously explored rooms
     let energyCost = 10; // Default movement cost for new rooms
     
+    console.log(`Energy calculation: crawlerId=${crawlerId}, roomId=${connection.toRoomId}, previousVisits=${previousVisit.length}`);
     if (previousVisit.length > 0) {
       // Reduced energy cost for rooms you've already explored
       energyCost = 5; // Half energy cost for previously visited rooms
+      console.log(`Energy cost reduced to ${energyCost} for previously visited room`);
+    } else {
+      console.log(`First visit to room ${connection.toRoomId}, energy cost: ${energyCost}`);
     }
+    
+    console.log(`Final energy cost: ${energyCost}, crawler current energy: ${crawler.energy}`);
 
     // Get current crawler to check/update energy
     const crawler = await this.getCrawler(crawlerId);
