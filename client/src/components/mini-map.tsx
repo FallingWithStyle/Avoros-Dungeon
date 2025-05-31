@@ -45,6 +45,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     retry: false,
   });
 
+  // Debug: log the room data to see what types we're getting
+  if (exploredRooms) {
+    console.log('Explored rooms data:', exploredRooms);
+  }
+
   // Track room changes for smooth transitions
   useEffect(() => {
     if (exploredRooms) {
