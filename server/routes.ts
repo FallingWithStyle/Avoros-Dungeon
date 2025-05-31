@@ -526,8 +526,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DEBUG: Regenerate dungeon layout
   app.post('/api/debug/regenerate-dungeon', isAuthenticated, async (req: any, res) => {
     try {
+      const { db } = await import('./db');
+      const { rooms, roomConnections, crawlerPositions } = await import('@shared/schema');
+      
+      // Clear existing room data
+      await db.delete(crawlerPositions);
+      await db.delete(roomConnections);
+      await db.delete(rooms);
+      
+      // Reinitialize with new layout
       const { initializeDatabase } = await import('./init-db');
       await initializeDatabase();
+      
       res.json({ message: "Dungeon layout regenerated with new room distribution" });
     } catch (error) {
       console.error("Error regenerating dungeon:", error);
