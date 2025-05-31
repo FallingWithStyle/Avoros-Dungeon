@@ -1924,10 +1924,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExploredRooms(crawlerId: number): Promise<any[]> {
-    // Get current position
+    // Get current position (most recent entry)
     const currentPosition = await db.select()
       .from(crawlerPositions)
       .where(eq(crawlerPositions.crawlerId, crawlerId))
+      .orderBy(desc(crawlerPositions.enteredAt))
       .limit(1);
 
     if (currentPosition.length === 0) {
