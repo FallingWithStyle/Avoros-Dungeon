@@ -166,66 +166,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/crawlers/:id/explore', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const crawler = await storage.getCrawler(crawlerId);
+      const result = await storage.exploreFloor(crawlerId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error during exploration:", error);
+      res.status(500).json({ message: "Failed to explore" });
+    }
+  });
+
+  // New endpoint for making choices in encounters
+  app.post('/api/crawlers/:id/choose', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { choiceId, encounterData } = req.body;
       
+      const crawler = await storage.getCrawler(crawlerId);
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
         return res.status(404).json({ message: "Crawler not found" });
       }
 
-      if (!crawler.isAlive || crawler.status !== 'active') {
-        return res.status(400).json({ message: "Crawler is not available for exploration" });
-      }
-
-      // Check for existing active encounter
-      const activeEncounter = await storage.getActiveEncounter(crawlerId);
-      if (activeEncounter) {
-        return res.status(400).json({ message: "Crawler is already in an encounter" });
-      }
-
-      // Get current floor info
-      const floor = await storage.getFloor(crawler.currentFloor);
-      if (!floor) {
-        return res.status(400).json({ message: "Invalid floor" });
-      }
-
-      // Random encounter type
-      const encounterChance = Math.random();
-      let encounter;
-
-      if (encounterChance < 0.6) {
-        // Combat encounter
-        const enemies = await storage.getEnemiesForFloor(crawler.currentFloor);
-        if (enemies.length > 0) {
-          const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-          encounter = await storage.createEncounter(crawlerId, floor.id, randomEnemy.id);
-          
-          await storage.createActivity({
-            userId: req.user.claims.sub,
-            crawlerId,
-            type: 'combat_start',
-            message: `${crawler.name} encountered ${randomEnemy.name} on Floor ${crawler.currentFloor}`,
-            details: null,
-          });
-        }
-      }
-
-      if (!encounter) {
-        // Exploration or other encounter
-        encounter = await storage.createEncounter(crawlerId, floor.id);
-        
-        await storage.createActivity({
-          userId: req.user.claims.sub,
-          crawlerId,
-          type: 'exploration',
-          message: `${crawler.name} is exploring Floor ${crawler.currentFloor}`,
-          details: null,
-        });
-      }
-
-      res.json(encounter);
+      const result = await storage.processEncounterChoice(crawlerId, choiceId, encounterData);
+      res.json(result);
     } catch (error) {
-      console.error("Error starting exploration:", error);
-      res.status(500).json({ message: "Failed to start exploration" });
+      console.error("Error processing choice:", error);
+      res.status(500).json({ message: "Failed to process choice" });
     }
   });
 

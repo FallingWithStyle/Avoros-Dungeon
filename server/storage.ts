@@ -94,6 +94,9 @@ export interface IStorage {
   updateUserCredits(userId: string, amount: number): Promise<User>;
   updateUserActiveCrawler(userId: string, crawlerId: number): Promise<User>;
   
+  // Encounter choice processing
+  processEncounterChoice(crawlerId: number, choiceId: string, encounterData: any): Promise<any>;
+  
   // Debug functions
   resetUserCrawlers(userId: string): Promise<void>;
 }
@@ -649,12 +652,244 @@ export class DatabaseStorage implements IStorage {
     const encounterType = this.weightedRandom(encounterTypes, weights);
     const floor = await this.getFloor(crawler.currentFloor);
     
+    // Generate choice-based encounter with multiple options
+    const encounterData = this.generateChoiceEncounter(encounterType, crawler);
+    
     return {
       type: encounterType,
       crawlerId: crawler.id,
       floorId: floor?.id || 1,
       energyCost: 10,
-      storyText: this.generateEncounterStory(encounterType, crawler)
+      ...encounterData
+    };
+  }
+
+  private generateChoiceEncounter(type: string, crawler: any): any {
+    const encounters = {
+      combat: [
+        {
+          title: "Hostile Creature",
+          description: `A snarling beast blocks ${crawler.name}'s path through the narrow corridor. Its eyes gleam with predatory hunger, and escape routes are limited.`,
+          choices: [
+            {
+              id: "attack",
+              text: "Attack directly with weapons",
+              requirements: { attack: 8 },
+              riskLevel: "high",
+              primaryStat: "attack"
+            },
+            {
+              id: "defensive",
+              text: "Take a defensive stance and wait for an opening",
+              requirements: { defense: 6 },
+              riskLevel: "medium",
+              primaryStat: "defense"
+            },
+            {
+              id: "stealth",
+              text: "Attempt to sneak past quietly",
+              requirements: { speed: 10 },
+              riskLevel: "low",
+              primaryStat: "speed"
+            },
+            {
+              id: "tech",
+              text: "Use technological gadgets to distract it",
+              requirements: { tech: 8 },
+              riskLevel: "medium",
+              primaryStat: "tech"
+            }
+          ]
+        },
+        {
+          title: "Armed Scavenger",
+          description: `Another crawler emerges from the shadows, weapon drawn. They look desperate and hostile, eyeing ${crawler.name}'s equipment hungrily.`,
+          choices: [
+            {
+              id: "intimidate",
+              text: "Try to intimidate them into backing down",
+              requirements: { attack: 12 },
+              riskLevel: "medium",
+              primaryStat: "attack"
+            },
+            {
+              id: "negotiate",
+              text: "Offer to trade something valuable",
+              requirements: {},
+              riskLevel: "low",
+              primaryStat: "none"
+            },
+            {
+              id: "flee",
+              text: "Run before they can react",
+              requirements: { speed: 8 },
+              riskLevel: "medium",
+              primaryStat: "speed"
+            },
+            {
+              id: "ambush",
+              text: "Use the environment to set up an ambush",
+              requirements: { tech: 6, speed: 6 },
+              riskLevel: "high",
+              primaryStat: "tech"
+            }
+          ]
+        }
+      ],
+      treasure: [
+        {
+          title: "Secured Cache",
+          description: `${crawler.name} discovers a locked corporate supply cache. Advanced security systems protect valuable contents within.`,
+          choices: [
+            {
+              id: "hack",
+              text: "Attempt to hack the security system",
+              requirements: { tech: 10 },
+              riskLevel: "medium",
+              primaryStat: "tech"
+            },
+            {
+              id: "force",
+              text: "Break it open with brute force",
+              requirements: { attack: 8 },
+              riskLevel: "high",
+              primaryStat: "attack"
+            },
+            {
+              id: "bypass",
+              text: "Look for hidden maintenance access",
+              requirements: { speed: 6 },
+              riskLevel: "low",
+              primaryStat: "speed"
+            },
+            {
+              id: "leave",
+              text: "Leave it alone - too risky",
+              requirements: {},
+              riskLevel: "none",
+              primaryStat: "none"
+            }
+          ]
+        }
+      ],
+      trap: [
+        {
+          title: "Pressure Plate Corridor",
+          description: `The floor ahead is littered with suspicious tiles. Some look recently disturbed, and ${crawler.name} can see scorch marks on the walls.`,
+          choices: [
+            {
+              id: "careful",
+              text: "Move very slowly and test each step",
+              requirements: { speed: 4 },
+              riskLevel: "low",
+              primaryStat: "speed"
+            },
+            {
+              id: "tech_scan",
+              text: "Use sensors to map the safe path",
+              requirements: { tech: 8 },
+              riskLevel: "none",
+              primaryStat: "tech"
+            },
+            {
+              id: "sprint",
+              text: "Sprint across as fast as possible",
+              requirements: { speed: 12 },
+              riskLevel: "high",
+              primaryStat: "speed"
+            },
+            {
+              id: "tank",
+              text: "Walk through and absorb any damage",
+              requirements: { defense: 10 },
+              riskLevel: "medium",
+              primaryStat: "defense"
+            }
+          ]
+        }
+      ],
+      npc: [
+        {
+          title: "Mysterious Trader",
+          description: `A hooded figure sits beside valuable-looking equipment. They gesture ${crawler.name} over with promises of rare technology and useful information.`,
+          choices: [
+            {
+              id: "trade_credits",
+              text: "Offer credits for their best item",
+              requirements: {},
+              riskLevel: "low",
+              primaryStat: "none"
+            },
+            {
+              id: "negotiate",
+              text: "Try to get a better deal through charm",
+              requirements: {},
+              riskLevel: "medium",
+              primaryStat: "none"
+            },
+            {
+              id: "rob",
+              text: "Attempt to take what you want by force",
+              requirements: { attack: 10 },
+              riskLevel: "high",
+              primaryStat: "attack"
+            },
+            {
+              id: "info",
+              text: "Ask for information about deeper floors",
+              requirements: {},
+              riskLevel: "none",
+              primaryStat: "none"
+            }
+          ]
+        }
+      ],
+      event: [
+        {
+          title: "Ancient Terminal",
+          description: `${crawler.name} finds a still-functioning terminal displaying cryptic data about the dungeon's deeper levels. The information could be valuable, but accessing it might trigger security protocols.`,
+          choices: [
+            {
+              id: "download",
+              text: "Download all available data",
+              requirements: { tech: 8 },
+              riskLevel: "medium",
+              primaryStat: "tech"
+            },
+            {
+              id: "selective",
+              text: "Carefully extract only specific files",
+              requirements: { tech: 12 },
+              riskLevel: "low",
+              primaryStat: "tech"
+            },
+            {
+              id: "observe",
+              text: "Simply read what's on screen without touching",
+              requirements: {},
+              riskLevel: "none",
+              primaryStat: "none"
+            },
+            {
+              id: "destroy",
+              text: "Destroy the terminal to prevent others from using it",
+              requirements: { attack: 6 },
+              riskLevel: "none",
+              primaryStat: "attack"
+            }
+          ]
+        }
+      ]
+    };
+
+    const typeEncounters = encounters[type] || encounters.event;
+    const selectedEncounter = typeEncounters[Math.floor(Math.random() * typeEncounters.length)];
+    
+    return {
+      title: selectedEncounter.title,
+      description: selectedEncounter.description,
+      choices: selectedEncounter.choices,
+      storyText: selectedEncounter.description
     };
   }
 
@@ -1130,6 +1365,176 @@ export class DatabaseStorage implements IStorage {
     }
 
     return candidates;
+  }
+
+  // Process encounter choice and return results
+  async processEncounterChoice(crawlerId: number, choiceId: string, encounterData: any): Promise<any> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) throw new Error("Crawler not found");
+
+    const choice = encounterData.choices.find((c: any) => c.id === choiceId);
+    if (!choice) throw new Error("Invalid choice");
+
+    // Check if crawler meets requirements
+    const meetsRequirements = this.checkChoiceRequirements(crawler, choice.requirements);
+    
+    // Calculate success based on stats and competencies
+    const successChance = this.calculateChoiceSuccess(crawler, choice, meetsRequirements);
+    const isSuccess = Math.random() < successChance;
+
+    // Generate results based on choice outcome
+    const results = this.generateChoiceResults(crawler, choice, encounterData.type, isSuccess);
+    
+    // Apply results to crawler
+    await this.applyCrawlerUpdates(crawlerId, results);
+
+    // Create activity log
+    await this.createActivity({
+      userId: crawler.sponsorId,
+      crawlerId: crawler.id,
+      type: 'encounter_choice',
+      message: `${crawler.name} ${choice.text.toLowerCase()} - ${isSuccess ? 'Success!' : 'Failed!'}`,
+      details: { choice: choiceId, success: isSuccess, results }
+    });
+
+    return {
+      success: isSuccess,
+      results,
+      choice: choice,
+      encounterType: encounterData.type,
+      message: this.generateOutcomeMessage(crawler, choice, isSuccess, results)
+    };
+  }
+
+  private checkChoiceRequirements(crawler: any, requirements: any): boolean {
+    for (const [stat, required] of Object.entries(requirements)) {
+      if (crawler[stat] < required) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private calculateChoiceSuccess(crawler: any, choice: any, meetsRequirements: boolean): number {
+    let baseChance = 0.6; // Base 60% success rate
+
+    // Requirements bonus/penalty
+    if (meetsRequirements) {
+      baseChance += 0.3; // +30% if requirements met
+    } else {
+      baseChance -= 0.4; // -40% if requirements not met
+    }
+
+    // Stat bonus based on primary stat
+    if (choice.primaryStat !== 'none') {
+      const statValue = crawler[choice.primaryStat] || 0;
+      baseChance += Math.min(statValue * 0.02, 0.2); // Up to +20% bonus
+    }
+
+    // Competency bonus
+    const competencyBonus = this.applyCompetencyBonus(crawler, choice.primaryStat);
+    baseChance += competencyBonus * 0.01; // 1% per competency point
+
+    // Risk level adjustment
+    switch (choice.riskLevel) {
+      case 'none': baseChance = 1.0; break;
+      case 'low': baseChance += 0.1; break;
+      case 'medium': break; // no change
+      case 'high': baseChance -= 0.1; break;
+    }
+
+    return Math.max(0.1, Math.min(0.95, baseChance)); // Clamp between 10% and 95%
+  }
+
+  private generateChoiceResults(crawler: any, choice: any, encounterType: string, isSuccess: boolean): any {
+    const baseFloorMultiplier = 1 + (crawler.currentFloor * 0.1);
+    
+    if (!isSuccess) {
+      // Failed attempts usually result in damage and minimal rewards
+      return {
+        credits: Math.floor(Math.random() * 10),
+        experience: 5,
+        equipment: [],
+        damage: Math.floor((10 + Math.random() * 15) * baseFloorMultiplier)
+      };
+    }
+
+    // Successful outcomes vary by encounter type and choice risk
+    let baseRewards = {
+      credits: 20,
+      experience: 15,
+      equipment: [],
+      damage: 0
+    };
+
+    // Encounter type modifiers
+    switch (encounterType) {
+      case 'combat':
+        baseRewards.experience += 20;
+        baseRewards.credits += 15;
+        if (choice.riskLevel === 'high') baseRewards.damage = Math.floor(5 * baseFloorMultiplier);
+        break;
+      case 'treasure':
+        baseRewards.credits += 40;
+        baseRewards.experience += 10;
+        break;
+      case 'npc':
+        baseRewards.credits += 25;
+        baseRewards.experience += 25;
+        break;
+      case 'trap':
+        baseRewards.experience += 15;
+        baseRewards.credits += 10;
+        break;
+      case 'event':
+        baseRewards.experience += 30;
+        baseRewards.credits += 15;
+        break;
+    }
+
+    // Risk/reward scaling
+    switch (choice.riskLevel) {
+      case 'high':
+        baseRewards.credits *= 1.5;
+        baseRewards.experience *= 1.3;
+        break;
+      case 'medium':
+        baseRewards.credits *= 1.2;
+        baseRewards.experience *= 1.1;
+        break;
+      case 'low':
+        baseRewards.credits *= 0.8;
+        baseRewards.experience *= 0.9;
+        break;
+    }
+
+    // Apply floor scaling
+    baseRewards.credits = Math.floor(baseRewards.credits * baseFloorMultiplier);
+    baseRewards.experience = Math.floor(baseRewards.experience * baseFloorMultiplier);
+
+    return baseRewards;
+  }
+
+  private generateOutcomeMessage(crawler: any, choice: any, isSuccess: boolean, results: any): string {
+    const action = choice.text.toLowerCase();
+    
+    if (!isSuccess) {
+      return `${crawler.name} attempted to ${action} but failed! Took ${results.damage} damage but gained some experience from the attempt.`;
+    }
+
+    let message = `${crawler.name} successfully chose to ${action}!`;
+    
+    if (results.credits > 0) {
+      message += ` Gained ${results.credits} credits`;
+    }
+    if (results.experience > 0) {
+      message += ` and ${results.experience} experience`;
+    }
+    if (results.damage > 0) {
+      message += ` but took ${results.damage} damage in the process`;
+    }
+    
+    return message + '.';
   }
 
   // Debug function to reset all crawlers for a user
