@@ -267,10 +267,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
             <div className="font-medium text-slate-300 mb-2">Legend:</div>
             <div className="grid grid-cols-2 gap-1 text-slate-400">
               <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-blue-400" />
-                <span>Current</span>
-              </div>
-              <div className="flex items-center gap-1">
                 <Shield className="w-3 h-3 text-green-400" />
                 <span>Safe</span>
               </div>
@@ -281,6 +277,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
               <div className="flex items-center gap-1">
                 <Home className="w-3 h-3 text-green-400" />
                 <span>Entrance</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <ArrowUp className="w-3 h-3 text-purple-400" />
+                <span>Stairs</span>
               </div>
             </div>
           </div>
