@@ -43,8 +43,8 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-300">
-                Control your sponsored crawlers through text-based encounters,
-                combat, and exploration. Death is permanent - make every choice count.
+                Your corporation gets one shot - sponsor a single crawler through
+                deadly encounters and exploration. Death means starting over.
               </p>
             </CardContent>
           </Card>
@@ -58,8 +58,8 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-300">
-                Climb the leaderboards, trade equipment, and build your reputation
-                as the most successful sponsor in the galaxy.
+                Compete with other corporations, trade resources, and build your
+                corporate reputation as the premier dungeon exploration enterprise.
               </p>
             </CardContent>
           </Card>
@@ -71,12 +71,12 @@ export default function Landing() {
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
             onClick={() => window.location.href = "/api/login"}
           >
-            <i className="fas fa-rocket mr-2"></i>
-            Enter the Command Center
+            <i className="fas fa-building mr-2"></i>
+            Establish Your Corporation
           </Button>
           
           <p className="text-sm text-slate-400">
-            Join the intergalactic crawler division and begin your journey
+            Register your corporation and begin crawler operations
           </p>
         </div>
 
