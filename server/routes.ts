@@ -36,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Crawler candidates route (must come before the :id route)
   app.get('/api/crawlers/candidates', isAuthenticated, async (req: any, res) => {
     try {
-      const candidates = await storage.generateCrawlerCandidates(3);
+      const candidates = await storage.generateCrawlerCandidates(30);
       res.json(candidates);
     } catch (error) {
       console.error("Error generating crawler candidates:", error);
