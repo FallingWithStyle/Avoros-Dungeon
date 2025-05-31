@@ -923,15 +923,47 @@ export class DatabaseStorage implements IStorage {
 
   private generateCrawlerName(): string {
     const firstNames = [
-      "Alex", "Jordan", "Casey", "Riley", "Morgan", "Avery", "Quinn", "Sage", "River", "Phoenix",
-      "Kai", "Rowan", "Ellis", "Drew", "Blake", "Cameron", "Finley", "Reese", "Emery", "Hayden",
-      "Nova", "Zara", "Juno", "Raven", "Echo", "Sage", "Wren", "Onyx", "Vale", "Storm"
+      // Classic sci-fi inspired
+      "Zara", "Kai", "Nova", "Orion", "Luna", "Vega", "Atlas", "Iris", "Juno", "Neo",
+      "Zoe", "Rex", "Ivy", "Axel", "Echo", "Nyx", "Vale", "Sage", "Remy", "Wren",
+      
+      // Tech-themed
+      "Cipher", "Binary", "Pixel", "Vector", "Matrix", "Logic", "Cache", "Query", "Debug", "Syntax",
+      "Pascal", "Java", "Ruby", "Swift", "Ada", "Grace", "Tesla", "Edison", "Turing", "Lovelace",
+      
+      // Edgy/dystopian
+      "Raven", "Shadow", "Blade", "Frost", "Storm", "Void", "Ash", "Steel", "Flint", "Onyx",
+      "Crimson", "Slate", "Ember", "Wraith", "Phantom", "Viper", "Hawk", "Rogue", "Rebel", "Riot",
+      
+      // Retro-futuristic
+      "Cosmo", "Astro", "Rocket", "Jet", "Flash", "Sonic", "Turbo", "Nitro", "Cyber", "Chrome",
+      "Neon", "Laser", "Plasma", "Quasar", "Nebula", "Comet", "Meteor", "Galaxy", "Starlight", "Zenith",
+      
+      // Mysterious/mystical
+      "Enigma", "Mystic", "Oracle", "Seer", "Rune", "Spell", "Charm", "Spirit", "Ghost", "Mirage",
+      "Prism", "Crystal", "Diamond", "Pearl", "Opal", "Jade", "Amber", "Scarlet", "Indigo", "Violet"
     ];
     
     const lastNames = [
-      "Chen", "Martinez", "O'Brien", "Singh", "Volkov", "Nakamura", "Hassan", "Kowalski", "Santos", "Kim",
-      "Petrov", "Garcia", "Thompson", "Andersson", "Liu", "Okafor", "Reyes", "Johansson", "Patel", "Cruz",
-      "Blackwood", "Sterling", "Cross", "Stone", "Rivers", "Vale", "Frost", "Grey", "Wolf", "Sharp"
+      // Corporate/industrial
+      "Steele", "Cross", "Stone", "Black", "Grey", "White", "Gold", "Silver", "Iron", "Chrome",
+      "Sharp", "Quick", "Swift", "Stark", "Kane", "Knox", "Vale", "Ward", "Nash", "Reed",
+      
+      // Tech surnames
+      "Zero", "One", "Binary", "Data", "Code", "Byte", "Bit", "Core", "Link", "Net",
+      "Wire", "Chip", "Drive", "Port", "Node", "Grid", "Sync", "Loop", "Stack", "Hash",
+      
+      // Nature/elements (corrupted)
+      "Frost", "Blaze", "Storm", "Thunder", "Lightning", "Quake", "Tide", "Wind", "Fire", "Ice",
+      "Thorn", "Fang", "Claw", "Wing", "Scale", "Bone", "Blood", "Venom", "Toxin", "Acid",
+      
+      // Apocalyptic
+      "Doom", "Bane", "Ruin", "Chaos", "Void", "Null", "Error", "Crash", "Burn", "Scar",
+      "Wreck", "Break", "Tear", "Cut", "Slash", "Strike", "Bolt", "Shot", "Blast", "Bang",
+      
+      // Numbers/designations
+      "Seven", "Nine", "Thirteen", "Prime", "Alpha", "Beta", "Gamma", "Delta", "Omega", "Zeta",
+      "X1", "X7", "X9", "V2", "V5", "Z3", "Z8", "R4", "R6", "Q1"
     ];
     
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -1072,10 +1104,10 @@ export class DatabaseStorage implements IStorage {
 
       // Determine top ability based on highest stat
       const statValues = [
-        { name: 'Combat', value: stats.attack, description: 'Excels in direct confrontation' },
-        { name: 'Defense', value: stats.defense, description: 'Survives through resilience' },
-        { name: 'Speed', value: stats.speed, description: 'Fast and agile movement' },
-        { name: 'Tech', value: stats.tech, description: 'Masters technology and hacking' }
+        { name: 'Combat', value: stats.attack, description: 'Direct confrontation' },
+        { name: 'Defense', value: stats.defense, description: 'Survival specialist' },
+        { name: 'Speed', value: stats.speed, description: 'Agile movement' },
+        { name: 'Tech', value: stats.tech, description: 'Tech specialist' }
       ];
       const topAbility = statValues.reduce((max, stat) => stat.value > max.value ? stat : max);
 
