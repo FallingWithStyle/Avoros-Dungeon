@@ -145,20 +145,29 @@ export class DatabaseStorage implements IStorage {
 
   // Crawler operations
   private generateRandomStats() {
-    // Base stats for Level 0 crawlers with some randomization
-    const baseHealth = 80 + Math.floor(Math.random() * 40); // 80-120
-    const baseAttack = 8 + Math.floor(Math.random() * 7); // 8-15
-    const baseDefense = 5 + Math.floor(Math.random() * 5); // 5-10
-    const baseSpeed = 6 + Math.floor(Math.random() * 8); // 6-14
-    const baseTech = 4 + Math.floor(Math.random() * 12); // 4-16
+    // Most stats 0-5, with one potentially higher (max 8)
+    const stats = [
+      Math.floor(Math.random() * 6), // 0-5
+      Math.floor(Math.random() * 6), // 0-5
+      Math.floor(Math.random() * 6), // 0-5
+      Math.floor(Math.random() * 6), // 0-5
+    ];
+    
+    // Give one stat a chance to be higher
+    const highlightStat = Math.floor(Math.random() * 4);
+    if (Math.random() < 0.3) { // 30% chance for a higher stat
+      stats[highlightStat] = 6 + Math.floor(Math.random() * 3); // 6-8
+    }
+    
+    const health = 60 + Math.floor(Math.random() * 20); // 60-80
     
     return {
-      health: baseHealth,
-      maxHealth: baseHealth,
-      attack: baseAttack,
-      defense: baseDefense,
-      speed: baseSpeed,
-      tech: baseTech,
+      health,
+      maxHealth: health,
+      attack: stats[0],
+      defense: stats[1], 
+      speed: stats[2],
+      tech: stats[3],
     };
   }
 
@@ -178,18 +187,18 @@ export class DatabaseStorage implements IStorage {
 
   private generateCrawlerBackground(): string {
     const backgrounds = [
-      "Former corporate security guard who volunteered after losing their job to automation",
-      "Ex-military engineer discharged after questioning orders during a colony uprising",
-      "Underground hacker who got caught and chose the dungeon over prison",
-      "Academic researcher studying xenoarchaeology who needed funding for their studies",
-      "Street medic from the outer colonies seeking to escape mounting debt",
-      "Washed-up pilot whose reflexes aren't what they used to be but still has pride",
-      "Corporate whistleblower hiding from assassination attempts",
-      "Former gang member trying to go legitimate and support their family",
-      "Displaced miner after their asteroid was depleted, looking for a new start",
-      "Lab technician who accidentally caused an incident and needs to disappear",
-      "Failed entrepreneur who lost everything and sees this as their last chance",
-      "Religious zealot convinced the dungeon holds divine secrets"
+      "Hiding from ex-partner's criminal associates who want them dead",
+      "Fled into the dungeon after witnessing a corporate assassination", 
+      "Chasing their missing sibling who entered the dungeon weeks ago",
+      "Escaping massive gambling debts to dangerous loan sharks",
+      "On the run after accidentally uncovering illegal genetic experiments",
+      "Homeless and desperate after being evicted from the colony slums",
+      "Seeking their missing child who was kidnapped by dungeon cultists",
+      "Fleeing after their underground clinic was raided by corporate security",
+      "Running from a bounty hunter hired by their former employer",
+      "Lost everything in a rigged business deal and has nowhere else to go",
+      "Trying to disappear after their research caused a containment breach",
+      "Following their mentor who vanished into the dungeon with vital information"
     ];
     
     return backgrounds[Math.floor(Math.random() * backgrounds.length)];
@@ -850,26 +859,66 @@ export class DatabaseStorage implements IStorage {
     return crawler;
   }
 
+  private generateCrawlerName(): string {
+    const firstNames = [
+      "Alex", "Jordan", "Casey", "Riley", "Morgan", "Avery", "Quinn", "Sage", "River", "Phoenix",
+      "Kai", "Rowan", "Ellis", "Drew", "Blake", "Cameron", "Finley", "Reese", "Emery", "Hayden",
+      "Nova", "Zara", "Juno", "Raven", "Echo", "Sage", "Wren", "Onyx", "Vale", "Storm"
+    ];
+    
+    const lastNames = [
+      "Chen", "Martinez", "O'Brien", "Singh", "Volkov", "Nakamura", "Hassan", "Kowalski", "Santos", "Kim",
+      "Petrov", "Garcia", "Thompson", "Andersson", "Liu", "Okafor", "Reyes", "Johansson", "Patel", "Cruz",
+      "Blackwood", "Sterling", "Cross", "Stone", "Rivers", "Vale", "Frost", "Grey", "Wolf", "Sharp"
+    ];
+    
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    return `${firstName} ${lastName}`;
+  }
+
+  private generateStartingEquipment(background: string): any[] {
+    // Basic survival gear that anyone might have
+    const basicGear = [
+      { name: "Emergency Rations", description: "Compressed nutrition bars" },
+      { name: "Flashlight", description: "Battery-powered light source" },
+      { name: "First Aid Kit", description: "Basic medical supplies" },
+      { name: "Multi-tool", description: "Swiss army knife equivalent" },
+      { name: "Water Purification Tablets", description: "Makes questionable water safer" }
+    ];
+    
+    // Maybe one additional item based on background
+    const contextualGear = [];
+    if (background.includes("clinic") || background.includes("medical")) {
+      contextualGear.push({ name: "Medical Scanner", description: "Handheld diagnostic device" });
+    } else if (background.includes("research") || background.includes("experiments")) {
+      contextualGear.push({ name: "Data Pad", description: "Encrypted research notes" });
+    } else if (background.includes("security") || background.includes("criminal")) {
+      // Very rarely, someone might have a basic weapon
+      if (Math.random() < 0.15) { // 15% chance
+        contextualGear.push({ name: "Ceramic Knife", description: "Small, undetectable blade" });
+      }
+    }
+    
+    // Return 2-3 basic items plus maybe one contextual item
+    const equipment = [...basicGear.slice(0, 2 + Math.floor(Math.random() * 2))];
+    if (contextualGear.length > 0 && Math.random() < 0.4) {
+      equipment.push(contextualGear[0]);
+    }
+    
+    return equipment;
+  }
+
   // Generate crawler candidates for selection
   async generateCrawlerCandidates(count = 3): Promise<any[]> {
     const candidates = [];
-    const availableEquipment = await db.select().from(equipment);
-    const basicEquipment = availableEquipment.filter(eq => eq.rarity === 'common');
 
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
       const competencies = this.generateRandomCompetencies();
       const background = this.generateCrawlerBackground();
-      
-      // Generate some starting equipment for preview
-      const numItems = 1 + Math.floor(Math.random() * 3);
-      const startingEquipment = [];
-      for (let j = 0; j < numItems; j++) {
-        const randomEquipment = basicEquipment[Math.floor(Math.random() * basicEquipment.length)];
-        if (randomEquipment && !startingEquipment.find(e => e.id === randomEquipment.id)) {
-          startingEquipment.push(randomEquipment);
-        }
-      }
+      const name = this.generateCrawlerName();
+      const startingEquipment = this.generateStartingEquipment(background);
 
       // Determine top ability based on highest stat
       const statValues = [
@@ -882,6 +931,7 @@ export class DatabaseStorage implements IStorage {
 
       candidates.push({
         id: `candidate_${i}`,
+        name,
         stats,
         competencies,
         background,
