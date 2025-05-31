@@ -13,7 +13,7 @@ export default function GameHeader() {
     if (user?.firstName || user?.lastName) {
       return `${user.firstName || ''} ${user.lastName || ''}`.trim();
     }
-    return user?.email?.split('@')[0] || 'Commander';
+    return user?.email?.split('@')[0] || 'CEO';
   };
 
   return (
@@ -26,7 +26,7 @@ export default function GameHeader() {
               Dungeon Depths
             </h1>
             <div className="hidden md:block text-sm text-slate-400">
-              Intergalactic Crawler Division
+              Corporate Crawler Consortium
             </div>
           </div>
 
@@ -37,7 +37,7 @@ export default function GameHeader() {
                 size="sm"
                 className="bg-sponsor text-white hover:bg-sponsor/90"
               >
-                <i className="fas fa-crown mr-2"></i>Sponsor
+                <i className="fas fa-building mr-2"></i>Corporate
               </Button>
               <Button
                 size="sm"
