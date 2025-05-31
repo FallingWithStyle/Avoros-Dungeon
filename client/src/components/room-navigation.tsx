@@ -56,8 +56,9 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { direction });
     },
     onSuccess: () => {
-      // Refresh room data
+      // Refresh room data and mini-map
       queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/current-room`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`] });
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       setPendingDirection(null);
       toast({
