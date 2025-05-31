@@ -268,8 +268,8 @@ export default function Home() {
             {/* Leaderboard */}
             <Leaderboard />
 
-            {/* Chat Panel */}
-            <Card className="bg-slate-800 border-slate-700">
+            {/* TODO: Chat Panel - temporarily hidden, add functionality or remove later */}
+            {/* <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
                 <CardTitle className="text-green-400 flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
@@ -279,7 +279,7 @@ export default function Home() {
               <CardContent>
                 <ChatPanel />
               </CardContent>
-            </Card>
+            </Card> */}
 
           </div>
         </div>

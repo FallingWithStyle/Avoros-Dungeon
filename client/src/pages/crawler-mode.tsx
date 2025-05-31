@@ -8,7 +8,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import MiniMap from "@/components/mini-map";
+import MiniMap from "@/components/mini-map-new";
 import type { CrawlerWithDetails, Encounter } from "@shared/schema";
 
 interface CrawlerModeProps {
@@ -74,41 +74,10 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
     },
   });
 
-  const advanceFloorMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", `/api/crawlers/${crawlerId}/advance-floor`);
-    },
-    onSuccess: () => {
-      setGameLog(prev => [...prev, `${crawler?.name} advances to the next floor!`]);
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers", crawlerId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to advance floor. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+  // TODO: Add advance floor mutation when staircase discovery is implemented
 
   const handleExplore = () => {
     exploreMutation.mutate();
-  };
-
-  const handleAdvanceFloor = () => {
-    advanceFloorMutation.mutate();
   };
 
   const handleReturnToSponsor = () => {
@@ -238,8 +207,8 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     <span className="text-sm font-mono text-green-400">{crawler.speed}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-300">Tech</span>
-                    <span className="text-sm font-mono text-purple-400">{crawler.tech}</span>
+                    <span className="text-sm text-slate-300">Wit</span>
+                    <span className="text-sm font-mono text-purple-400">{crawler.wit}</span>
                   </div>
                 </div>
 
@@ -290,11 +259,11 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Button
                     onClick={handleExplore}
                     disabled={exploreMutation.isPending || crawler.status !== 'active'}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     {exploreMutation.isPending ? (
                       <>
@@ -308,24 +277,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                       </>
                     )}
                   </Button>
-
-                  <Button
-                    onClick={handleAdvanceFloor}
-                    disabled={advanceFloorMutation.isPending || crawler.status !== 'active'}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    {advanceFloorMutation.isPending ? (
-                      <>
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                        Advancing...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-arrow-down mr-2"></i>
-                        Next Floor
-                      </>
-                    )}
-                  </Button>
+                  {/* TODO: Add "Next Floor" button when staircase is found */}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-4">
