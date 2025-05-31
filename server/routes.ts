@@ -381,6 +381,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DEBUG: Reset crawlers (temporary for development)
+  app.post('/api/debug/reset-crawlers', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.resetUserCrawlers(userId);
+      res.json({ message: "All crawlers reset successfully" });
+    } catch (error) {
+      console.error("Error resetting crawlers:", error);
+      res.status(500).json({ message: "Failed to reset crawlers" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time features
