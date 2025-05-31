@@ -1,343 +1,251 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import GameHeader from "@/components/game-header";
-import Sidebar from "@/components/sidebar";
-import CrawlerCard from "@/components/crawler-card";
+import CrawlerSelection from "@/components/crawler-selection";
+import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
 import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
-import MobileMenu from "@/components/mobile-menu";
-import SeasonStatus from "@/components/season-status";
-import CrawlerSelection from "@/components/crawler-selection";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import type { CrawlerWithDetails, ActivityWithDetails } from "@shared/schema";
-
-
+import ExplorationPanel from "@/components/exploration-panel";
+import { useAuth } from "@/hooks/useAuth";
+import type { CrawlerWithDetails } from "@shared/schema";
 
 export default function Home() {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showCrawlerSelection, setShowCrawlerSelection] = useState(false);
+  const [activeCrawler, setActiveCrawler] = useState<CrawlerWithDetails | null>(null);
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: crawlers, isLoading: crawlersLoading } = useQuery<CrawlerWithDetails[]>({
+  const { data: crawlers, isLoading: crawlersLoading } = useQuery({
     queryKey: ["/api/crawlers"],
-    enabled: isAuthenticated,
   });
 
-  const { data: activities, isLoading: activitiesLoading } = useQuery<ActivityWithDetails[]>({
+  const { data: activities, isLoading: activitiesLoading } = useQuery({
     queryKey: ["/api/activities"],
-    enabled: isAuthenticated,
   });
 
-  const { data: crawlerClasses } = useQuery<CrawlerClass[]>({
-    queryKey: ["/api/crawler-classes"],
+  const { data: season } = useQuery({
+    queryKey: ["/api/season/current"],
   });
 
-  const form = useForm<z.infer<typeof createCrawlerFormSchema>>({
-    resolver: zodResolver(createCrawlerFormSchema),
-    defaultValues: {
-      name: "",
-      classId: 0,
-    },
-  });
+  const canCreatePrimary = season && (!user?.primarySponsorshipUsed || 
+    user?.lastPrimarySponsorshipSeason !== season.seasonNumber);
 
-  const createCrawlerMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof createCrawlerFormSchema>) => {
-      await apiRequest("POST", "/api/crawlers", data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Crawler deployed successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
-      setIsCreateDialogOpen(false);
-      form.reset();
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to create crawler. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+  const activeCrawlers = crawlers?.filter((c: CrawlerWithDetails) => c.isAlive) || [];
+  const deadCrawlers = crawlers?.filter((c: CrawlerWithDetails) => !c.isAlive) || [];
 
-  const onSubmit = (data: z.infer<typeof createCrawlerFormSchema>) => {
-    createCrawlerMutation.mutate(data);
+  const handleCrawlerSelect = (candidate: any, name: string) => {
+    // Implementation will be added when needed
+    setShowCrawlerSelection(false);
+    toast({
+      title: "Crawler Created",
+      description: `${name} has been sponsored and is ready for dungeon exploration!`,
+    });
   };
 
-  if (isLoading) {
+  const handleSetActiveCrawler = (crawler: CrawlerWithDetails) => {
+    setActiveCrawler(crawler);
+  };
+
+  if (crawlersLoading) {
     return (
-      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-4xl text-blue-400 mb-4"></i>
-          <p className="text-slate-300">Loading command center...</p>
+      <div className="min-h-screen bg-slate-900 p-6">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-slate-400">Loading your crawlers...</div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="bg-game-bg text-slate-100 min-h-screen">
-      <GameHeader />
-      
-      <div className="flex min-h-screen">
-        <Sidebar />
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <div className="container mx-auto px-4 py-6 space-y-6">
         
-        <main className="flex-1 p-6 pb-20 lg:pb-6">
-          <div className="mb-8">
-            {/* Season Status */}
-            <div className="mb-6">
-              <SeasonStatus />
-            </div>
+        {/* Season Status */}
+        <SeasonStatus />
+        
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Crawler Management */}
+          <div className="lg:col-span-2 space-y-6">
             
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-white">Corporation Dashboard</h2>
-              
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700 text-white">
-                    <i className="fas fa-plus mr-2"></i>
-                    Deploy New Crawler
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-game-surface border-game-border text-white">
-                  <DialogHeader>
-                    <DialogTitle>Deploy New Crawler</DialogTitle>
-                  </DialogHeader>
-                  
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Crawler Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter crawler name..." 
-                                className="bg-game-bg border-game-border text-white"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="classId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Crawler Class</FormLabel>
-                            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                              <FormControl>
-                                <SelectTrigger className="bg-game-bg border-game-border text-white">
-                                  <SelectValue placeholder="Select a class" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="bg-game-surface border-game-border">
-                                {crawlerClasses?.map((cls) => (
-                                  <SelectItem key={cls.id} value={cls.id.toString()}>
-                                    {cls.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <div className="flex justify-end space-x-2 pt-4">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => setIsCreateDialogOpen(false)}
-                          className="border-game-border text-slate-300 hover:bg-game-bg"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="submit" 
-                          disabled={createCrawlerMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          {createCrawlerMutation.isPending ? (
-                            <>
-                              <i className="fas fa-spinner fa-spin mr-2"></i>
-                              Deploying...
-                            </>
-                          ) : (
-                            "Deploy Crawler"
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Active Crawlers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-              {crawlersLoading ? (
-                // Loading skeletons
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="bg-game-surface rounded-xl p-6 border border-game-border">
-                    <div className="animate-pulse">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-12 h-12 bg-game-bg rounded-lg"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 bg-game-bg rounded w-24"></div>
-                          <div className="h-3 bg-game-bg rounded w-20"></div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="h-3 bg-game-bg rounded"></div>
-                        <div className="h-3 bg-game-bg rounded"></div>
-                        <div className="h-3 bg-game-bg rounded"></div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : crawlers && crawlers.length > 0 ? (
-                crawlers.map((crawler) => (
-                  <CrawlerCard key={crawler.id} crawler={crawler} />
-                ))
-              ) : (
-                <div className="col-span-full bg-game-surface rounded-xl p-8 border border-game-border text-center">
-                  <i className="fas fa-user-plus text-4xl text-slate-400 mb-4"></i>
-                  <h3 className="text-xl font-semibold text-white mb-2">No Crawlers Deployed</h3>
-                  <p className="text-slate-400 mb-4">
-                    Deploy your first crawler to begin exploring the dungeon depths.
-                  </p>
-                  <Button 
-                    onClick={() => setIsCreateDialogOpen(true)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <i className="fas fa-plus mr-2"></i>
-                    Deploy First Crawler
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Stats and Activity Feed */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <ActivityFeed activities={activities} isLoading={activitiesLoading} />
-              </div>
-              
-              <div className="space-y-6">
-                {/* Quick Actions */}
-                <div className="bg-game-surface rounded-xl p-6 border border-game-border">
-                  <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                  <div className="space-y-3">
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                      <i className="fas fa-heart mr-2"></i>
-                      Buy Health Packs
-                    </Button>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      <i className="fas fa-arrow-up mr-2"></i>
-                      Upgrade Equipment
-                    </Button>
-                    <Button 
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                      onClick={() => setIsCreateDialogOpen(true)}
+            {/* Active Crawlers */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-blue-400 flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Active Crawlers ({activeCrawlers.length})
+                  </CardTitle>
+                  {canCreatePrimary && (
+                    <Button
+                      onClick={() => setShowCrawlerSelection(true)}
+                      className="bg-green-600 hover:bg-green-700"
                     >
-                      <i className="fas fa-user-plus mr-2"></i>
-                      Recruit Crawler
+                      <Plus className="w-4 h-4 mr-2" />
+                      Sponsor New Crawler
                     </Button>
-                  </div>
+                  )}
                 </div>
+              </CardHeader>
+              <CardContent>
+                {activeCrawlers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="text-slate-400 mb-4">No active crawlers</div>
+                    {canCreatePrimary ? (
+                      <Button
+                        onClick={() => setShowCrawlerSelection(true)}
+                        variant="outline"
+                        className="border-green-600/30 text-green-400 hover:bg-green-600/10"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Sponsor Your First Crawler
+                      </Button>
+                    ) : (
+                      <div className="text-sm text-amber-400">
+                        Wait for the next season to sponsor a new primary crawler
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {activeCrawlers.map((crawler: CrawlerWithDetails) => (
+                      <Card 
+                        key={crawler.id} 
+                        className={`bg-slate-700 border-slate-600 cursor-pointer transition-colors ${
+                          activeCrawler?.id === crawler.id ? 'border-blue-500 bg-slate-600' : 'hover:bg-slate-650'
+                        }`}
+                        onClick={() => handleSetActiveCrawler(crawler)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg">{crawler.name}</h3>
+                              <div className="flex items-center gap-2 text-sm text-slate-400">
+                                <Badge variant="outline" className="border-blue-600/30 text-blue-400">
+                                  Level {crawler.level}
+                                </Badge>
+                                <Badge variant="outline" className="border-green-600/30 text-green-400">
+                                  Floor {crawler.currentFloor}
+                                </Badge>
+                                <span>•</span>
+                                <span>{crawler.class?.name || 'Unclassed'}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1">
+                                <Zap className="w-4 h-4 text-yellow-400" />
+                                <span>{crawler.energy}/{crawler.maxEnergy}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4 text-green-400" />
+                                <span>{crawler.experience.toLocaleString()} XP</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                {/* Market Highlights */}
-                <div className="bg-game-surface rounded-xl p-6 border border-game-border">
-                  <h3 className="text-lg font-semibold text-white mb-4">Market Highlights</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white">Plasma Rifle Mk-III</p>
-                        <p className="text-xs text-slate-400">+25 Attack, +10 Tech</p>
+            {/* Exploration Panel */}
+            {activeCrawler && (
+              <ExplorationPanel crawler={activeCrawler} />
+            )}
+
+            {/* Dead Crawlers Memorial */}
+            {deadCrawlers.length > 0 && (
+              <Card className="bg-slate-800 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-red-400 flex items-center gap-2">
+                    Fallen Crawlers ({deadCrawlers.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-2">
+                    {deadCrawlers.map((crawler: CrawlerWithDetails) => (
+                      <div key={crawler.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded border border-red-900/20">
+                        <div>
+                          <div className="font-medium text-slate-300">{crawler.name}</div>
+                          <div className="text-sm text-slate-500">
+                            Reached Floor {crawler.currentFloor} • Level {crawler.level}
+                          </div>
+                        </div>
+                        <Badge variant="destructive" className="opacity-60">
+                          KIA
+                        </Badge>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-mono text-green-400">2,450 cr</p>
-                        <p className="text-xs text-slate-400">3 available</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white">Nano-Armor Vest</p>
-                        <p className="text-xs text-slate-400">+30 Defense, +5 Speed</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-mono text-green-400">1,890 cr</p>
-                        <p className="text-xs text-slate-400">7 available</p>
-                      </div>
-                    </div>
-                    <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white">
-                      View All Items
-                    </Button>
+                    ))}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+            )}
+
+          </div>
+
+          {/* Right Column - Social & Stats */}
+          <div className="space-y-6">
+            
+            {/* Activity Feed */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-purple-400 flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActivityFeed 
+                  activities={activities} 
+                  isLoading={activitiesLoading} 
+                />
+              </CardContent>
+            </Card>
+
+            {/* Leaderboard */}
+            <Leaderboard />
+
+            {/* Chat Panel */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-green-400 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Corporate Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChatPanel />
+              </CardContent>
+            </Card>
+
+          </div>
+        </div>
+
+        {/* Crawler Selection Modal */}
+        {showCrawlerSelection && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-slate-800 rounded-lg border border-slate-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <CrawlerSelection
+                onSelect={handleCrawlerSelect}
+                onCancel={() => setShowCrawlerSelection(false)}
+              />
             </div>
           </div>
-        </main>
+        )}
 
-        {/* Right Panel */}
-        <aside className="w-80 bg-game-surface border-l border-game-border hidden xl:block">
-          <div className="h-1/2 border-b border-game-border">
-            <ChatPanel />
-          </div>
-          <div className="h-1/2">
-            <Leaderboard />
-          </div>
-        </aside>
       </div>
-
-      <MobileMenu />
     </div>
   );
 }
