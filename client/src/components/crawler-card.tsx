@@ -52,10 +52,10 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   };
 
   return (
-    <Card className="bg-game-surface border-game-border h-full flex flex-col">
-      <CardContent className="p-6 flex-1 flex flex-col">
-        {/* Header with avatar, name, and status - Fixed height */}
-        <div className="flex items-start justify-between mb-4 h-16">
+    <Card className="bg-game-surface border-game-border h-[500px]">
+      <CardContent className="p-6 h-full grid grid-rows-[auto_1fr_auto_auto_auto] gap-4">
+        {/* Header with avatar, name, and status */}
+        <div className="flex items-start justify-between h-16">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
               <AvatarImage src={getAvatarUrl()} alt={crawler.name} />
@@ -76,8 +76,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Core Stats Grid - Fixed height */}
-        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50 h-20">
+        {/* Core Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
           <div className="text-center">
             <div className="text-xs text-slate-400 mb-1">ATK</div>
             <div className="text-lg font-bold text-red-400">{crawler.attack}</div>
@@ -104,8 +104,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Background Story - Fixed height with strict text clipping */}
-        <div className="mb-4 p-3 bg-amber-900/10 rounded-lg border border-amber-700/30 h-24 overflow-hidden">
+        {/* Background Story - Flexible height in grid */}
+        <div className="p-3 bg-amber-900/10 rounded-lg border border-amber-700/30 overflow-hidden">
           <div className="text-xs text-amber-400 mb-1">Background</div>
           <p className="text-sm text-slate-300 leading-tight overflow-hidden text-ellipsis" 
              style={{
@@ -117,8 +117,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </p>
         </div>
 
-        {/* Quick Stats - Fixed height */}
-        <div className="space-y-2 mb-4 h-20">
+        {/* Quick Stats */}
+        <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Floor</span>
             <span className="text-sm font-mono text-crawler font-bold">{crawler.currentFloor}</span>
@@ -147,8 +147,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Action Button - Fixed at bottom */}
-        <div className="pt-4 border-t border-game-border mt-auto">
+        {/* Action Button */}
+        <div className="pt-4 border-t border-game-border">
           {crawler.isAlive && crawler.status === 'active' ? (
             <Button
               onClick={handleEnterCrawlerMode}
