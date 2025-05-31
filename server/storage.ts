@@ -1924,7 +1924,7 @@ export class DatabaseStorage implements IStorage {
     return connections.map(conn => conn.direction);
   }
 
-  async moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
+  async moveToRoom(crawlerId: number, direction: string, debugEnergyDisabled?: boolean): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
     // Get current position
     const [currentPosition] = await db.select()
       .from(crawlerPositions)
