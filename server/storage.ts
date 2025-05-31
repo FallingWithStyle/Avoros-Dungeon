@@ -1421,7 +1421,7 @@ export class DatabaseStorage implements IStorage {
         background,
         startingEquipment,
         topAbility,
-        level: 0
+        level: 1
       });
     }
 
