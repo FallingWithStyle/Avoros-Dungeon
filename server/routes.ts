@@ -383,6 +383,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Room and mapping routes
+  app.get('/api/crawlers/:id/current-room', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const room = await storage.getCrawlerCurrentRoom(crawlerId);
+      
+      if (!room) {
+        return res.status(404).json({ message: "Current room not found" });
+      }
+
+      const availableDirections = await storage.getAvailableDirections(room.id);
+      const playersInRoom = await storage.getPlayersInRoom(room.id);
+      
+      res.json({
+        room,
+        availableDirections,
+        playersInRoom
+      });
+    } catch (error) {
+      console.error("Get current room error:", error);
+      res.status(500).json({ message: "Failed to get current room" });
+    }
+  });
+
+  app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { direction } = req.body;
+      
+      if (!direction) {
+        return res.status(400).json({ message: "Direction is required" });
+      }
+
+      const result = await storage.moveToRoom(crawlerId, direction);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
+
+      // Get updated room info
+      const availableDirections = await storage.getAvailableDirections(result.newRoom!.id);
+      const playersInRoom = await storage.getPlayersInRoom(result.newRoom!.id);
+      
+      res.json({
+        success: true,
+        room: result.newRoom,
+        availableDirections,
+        playersInRoom
+      });
+    } catch (error) {
+      console.error("Move crawler error:", error);
+      res.status(500).json({ message: "Failed to move crawler" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time features
