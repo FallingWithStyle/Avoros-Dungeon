@@ -206,6 +206,15 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               </div>
               <span className="text-sm font-mono text-cyan-400">{crawler.memory}</span>
             </div>
+            
+            {/* Debug: Show hidden luck stat */}
+            <div className="flex items-center justify-between p-2 bg-red-900/20 border border-red-600/30 rounded">
+              <div className="flex items-center gap-2">
+                <span className="text-red-400">🍀</span>
+                <span className="text-xs text-red-400">Luck (DEBUG)</span>
+              </div>
+              <span className="text-xs font-mono text-red-400">{crawler.luck}</span>
+            </div>
           </div>
         </div>
 
