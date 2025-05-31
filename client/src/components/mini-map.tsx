@@ -26,6 +26,12 @@ interface ExploredRoom {
   isCurrentRoom: boolean;
 }
 
+interface RoomConnection {
+  fromRoomId: number;
+  toRoomId: number;
+  direction: string;
+}
+
 export default function MiniMap({ crawler }: MiniMapProps) {
   // Fetch explored rooms for this crawler
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
@@ -118,12 +124,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const gridWidth = maxX - minX + 1;
   const gridHeight = maxY - minY + 1;
 
-  // Create a 2D grid to position rooms
+  // Create a 2D grid to position rooms (flip Y axis to put north at top)
   const grid: (ExploredRoom | null)[][] = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill(null));
   
   exploredRooms.forEach(room => {
     const gridX = room.x - minX;
-    const gridY = room.y - minY;
+    const gridY = (maxY - room.y); // Flip Y coordinate so north is at top
     grid[gridY][gridX] = room;
   });
 
@@ -140,29 +146,79 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {/* Grid display */}
+          {/* Grid display with connections */}
           <div 
-            className="grid gap-1 max-w-full overflow-auto"
+            className="relative grid gap-0 max-w-full overflow-auto"
             style={{ 
-              gridTemplateColumns: `repeat(${gridWidth}, 1fr)`,
+              gridTemplateColumns: `repeat(${gridWidth * 2 - 1}, 1fr)`,
+              gridTemplateRows: `repeat(${gridHeight * 2 - 1}, 1fr)`,
               aspectRatio: gridWidth / gridHeight > 2 ? '2/1' : 'auto'
             }}
           >
-            {grid.flat().map((room, index) => {
-              if (!room) {
-                return <div key={index} className="w-6 h-6" />;
-              }
+            {/* Render rooms and connections */}
+            {Array.from({ length: gridHeight * 2 - 1 }, (_, row) => 
+              Array.from({ length: gridWidth * 2 - 1 }, (_, col) => {
+                const isRoomRow = row % 2 === 0;
+                const isRoomCol = col % 2 === 0;
+                const key = `cell-${row}-${col}`;
 
-              return (
-                <div
-                  key={room.id}
-                  className={`w-6 h-6 border rounded flex items-center justify-center ${getRoomColor(room)}`}
-                  title={room.name}
-                >
-                  {getRoomIcon(room)}
-                </div>
-              );
-            })}
+                if (isRoomRow && isRoomCol) {
+                  // This is a room position
+                  const roomRow = Math.floor(row / 2);
+                  const roomCol = Math.floor(col / 2);
+                  const room = grid[roomRow]?.[roomCol];
+
+                  if (!room) {
+                    return <div key={key} className="w-6 h-6" />;
+                  }
+
+                  return (
+                    <div
+                      key={key}
+                      className={`w-6 h-6 border rounded flex items-center justify-center ${getRoomColor(room)}`}
+                      title={room.name}
+                    >
+                      {getRoomIcon(room)}
+                    </div>
+                  );
+                } else if (isRoomRow && !isRoomCol) {
+                  // This is a horizontal connection space
+                  const roomRow = Math.floor(row / 2);
+                  const leftCol = Math.floor(col / 2);
+                  const rightCol = leftCol + 1;
+                  const leftRoom = grid[roomRow]?.[leftCol];
+                  const rightRoom = grid[roomRow]?.[rightCol];
+
+                  if (leftRoom && rightRoom) {
+                    return (
+                      <div key={key} className="w-6 h-6 flex items-center justify-center">
+                        <div className="w-4 h-0.5 bg-slate-500"></div>
+                      </div>
+                    );
+                  }
+                  return <div key={key} className="w-6 h-6" />;
+                } else if (!isRoomRow && isRoomCol) {
+                  // This is a vertical connection space
+                  const roomCol = Math.floor(col / 2);
+                  const topRow = Math.floor(row / 2);
+                  const bottomRow = topRow + 1;
+                  const topRoom = grid[topRow]?.[roomCol];
+                  const bottomRoom = grid[bottomRow]?.[roomCol];
+
+                  if (topRoom && bottomRoom) {
+                    return (
+                      <div key={key} className="w-6 h-6 flex items-center justify-center">
+                        <div className="w-0.5 h-4 bg-slate-500"></div>
+                      </div>
+                    );
+                  }
+                  return <div key={key} className="w-6 h-6" />;
+                } else {
+                  // This is an intersection space
+                  return <div key={key} className="w-6 h-6" />;
+                }
+              })
+            ).flat()}
           </div>
 
           {/* Legend */}
