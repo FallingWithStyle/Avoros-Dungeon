@@ -1347,7 +1347,9 @@ export class DatabaseStorage implements IStorage {
         { name: 'Combat', value: stats.attack, description: 'Direct confrontation' },
         { name: 'Defense', value: stats.defense, description: 'Survival specialist' },
         { name: 'Speed', value: stats.speed, description: 'Agile movement' },
-        { name: 'Tech', value: stats.tech, description: 'Tech specialist' }
+        { name: 'Wit', value: stats.wit, description: 'Problem solving' },
+        { name: 'Charisma', value: stats.charisma, description: 'Social influence' },
+        { name: 'Memory', value: stats.memory, description: 'Information retention' }
       ];
       const topAbility = statValues.reduce((max, stat) => stat.value > max.value ? stat : max);
 
