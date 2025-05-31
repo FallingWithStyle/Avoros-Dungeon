@@ -1,0 +1,246 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { RefreshCw, User, Zap, Shield, Gauge, Cpu, Package } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface CrawlerCandidate {
+  id: string;
+  stats: {
+    health: number;
+    maxHealth: number;
+    attack: number;
+    defense: number;
+    speed: number;
+    tech: number;
+  };
+  competencies: string[];
+  background: string;
+  startingEquipment: any[];
+  topAbility: {
+    name: string;
+    value: number;
+    description: string;
+  };
+  level: number;
+}
+
+interface CrawlerSelectionProps {
+  onSelect: (candidate: CrawlerCandidate, name: string) => void;
+  onCancel: () => void;
+}
+
+export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectionProps) {
+  const [selectedCandidate, setSelectedCandidate] = useState<CrawlerCandidate | null>(null);
+  const [crawlerName, setCrawlerName] = useState("");
+  const { toast } = useToast();
+
+  const { data: candidates, isLoading, refetch } = useQuery({
+    queryKey: ["/api/crawlers/candidates"],
+  });
+
+  const regenerateMutation = useMutation({
+    mutationFn: () => apiRequest("/api/crawlers/candidates", { method: "GET" }),
+    onSuccess: (newCandidates) => {
+      queryClient.setQueryData(["/api/crawlers/candidates"], newCandidates);
+      setSelectedCandidate(null);
+      setCrawlerName("");
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
+          <p className="text-slate-400">Generating crawler candidates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSelect = () => {
+    if (selectedCandidate && crawlerName.trim()) {
+      onSelect(selectedCandidate, crawlerName.trim());
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
+          <p className="text-slate-400">Choose from these Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => regenerateMutation.mutate()}
+          disabled={regenerateMutation.isPending}
+          className="border-game-border"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${regenerateMutation.isPending ? 'animate-spin' : ''}`} />
+          Generate New Options
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {candidates?.map((candidate: CrawlerCandidate) => (
+          <Card 
+            key={candidate.id}
+            className={`cursor-pointer transition-all border-2 ${
+              selectedCandidate?.id === candidate.id 
+                ? 'border-blue-500 bg-blue-500/10' 
+                : 'border-game-border hover:border-slate-600'
+            } bg-game-surface`}
+            onClick={() => setSelectedCandidate(candidate)}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-blue-400" />
+                  <CardTitle className="text-lg">Level {candidate.level} Recruit</CardTitle>
+                </div>
+                <Badge variant="outline" className="border-green-600/30 text-green-400">
+                  {candidate.topAbility.name}
+                </Badge>
+              </div>
+              <CardDescription className="text-sm text-slate-400">
+                {candidate.topAbility.description}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {/* Background */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-2">Background</h4>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  {candidate.background}
+                </p>
+              </div>
+
+              <Separator className="bg-game-border" />
+
+              {/* Stats */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-3">Statistics</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-red-400" />
+                      <span className="text-sm">Attack</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.attack}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm">Defense</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.defense}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-yellow-400" />
+                      <span className="text-sm">Speed</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.speed}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm">Tech</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.tech}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-green-400" />
+                      <span className="text-sm">Health</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.health}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-game-border" />
+
+              {/* Competencies */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-2">Competencies</h4>
+                <div className="flex flex-wrap gap-1">
+                  {candidate.competencies.map((comp, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {comp}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Starting Equipment */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-2 flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Starting Equipment
+                </h4>
+                <div className="space-y-1">
+                  {candidate.startingEquipment.map((equipment, index) => (
+                    <div key={index} className="text-sm text-slate-400">
+                      • {equipment.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {selectedCandidate && (
+        <Card className="bg-game-surface border-game-border">
+          <CardHeader>
+            <CardTitle className="text-green-400">Confirm Selection</CardTitle>
+            <CardDescription>
+              Give your chosen crawler a name to complete the sponsorship agreement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="crawler-name">Crawler Name</Label>
+              <Input
+                id="crawler-name"
+                value={crawlerName}
+                onChange={(e) => setCrawlerName(e.target.value)}
+                placeholder="Enter crawler name..."
+                className="bg-game-bg border-game-border"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleSelect}
+                disabled={!crawlerName.trim()}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Sponsor This Crawler
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={onCancel}
+                className="border-game-border"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
