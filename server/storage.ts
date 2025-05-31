@@ -1566,7 +1566,7 @@ export class DatabaseStorage implements IStorage {
 
   private checkChoiceRequirements(crawler: any, requirements: any): boolean {
     for (const [stat, required] of Object.entries(requirements)) {
-      if (crawler[stat] < required) {
+      if (crawler[stat] < (required as number)) {
         return false;
       }
     }
