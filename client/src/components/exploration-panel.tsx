@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import RoomNavigation from "./room-navigation";
+import MiniMap from "./mini-map";
 import { 
   Zap, 
   Sword, 
@@ -146,6 +147,8 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   return (
     <div className="space-y-4">
       <RoomNavigation crawler={crawler} />
+      
+      <MiniMap crawler={crawler} />
       
       <Card className="bg-game-surface border-game-border">
         <CardHeader>
