@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,11 +35,28 @@ interface RoomConnection {
 }
 
 export default function MiniMap({ crawler }: MiniMapProps) {
+  const [isMoving, setIsMoving] = useState(false);
+  const [previousCurrentRoom, setPreviousCurrentRoom] = useState<ExploredRoom | null>(null);
+
   // Fetch explored rooms for this crawler
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     retry: false,
   });
+
+  // Track room changes for smooth transitions
+  useEffect(() => {
+    if (exploredRooms) {
+      const currentRoom = exploredRooms.find(room => room.isCurrentRoom);
+      if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
+        setIsMoving(true);
+        setTimeout(() => setIsMoving(false), 300); // 300ms transition
+      }
+      if (currentRoom) {
+        setPreviousCurrentRoom(currentRoom);
+      }
+    }
+  }, [exploredRooms, previousCurrentRoom]);
 
   const getRoomIcon = (room: ExploredRoom) => {
     if (room.isCurrentRoom) {
@@ -192,14 +210,16 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                           return (
                             <div
                               key={`${x}-${y}`}
-                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center relative ${getRoomColor(room)} ${
-                                room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset' : ''
+                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center relative transition-all duration-300 ease-out ${getRoomColor(room)} ${
+                                room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset transform scale-105' : ''
                               }`}
                               title={`${room.name} (${x}, ${y})`}
                             >
                               {getRoomIcon(room)}
                               {room.isCurrentRoom && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full flex items-center justify-center">
+                                <div className={`absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full flex items-center justify-center transition-all duration-300 ease-out ${
+                                  isMoving ? 'scale-110 shadow-lg shadow-blue-400/50' : 'scale-100'
+                                }`}>
                                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                                 </div>
                               )}
