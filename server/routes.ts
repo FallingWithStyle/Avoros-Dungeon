@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
-      if (crawler.energy < 10) {
+      if (crawler.energy < 5) {
         return res.status(400).json({ message: "Not enough energy to move" });
       }
 
@@ -298,10 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: result.error || "Cannot move in that direction" });
       }
 
-      // Deduct energy for movement
-      await storage.updateCrawler(crawlerId, {
-        energy: Math.max(0, crawler.energy - 10)
-      });
+      // Energy is already deducted in moveToRoom function
 
       await storage.createActivity({
         userId: req.user.claims.sub,
