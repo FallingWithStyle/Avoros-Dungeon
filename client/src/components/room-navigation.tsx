@@ -15,7 +15,7 @@ import {
   ArrowLeft, 
   ArrowRight,
   Shield,
-  Treasure,
+  Gem,
   Users,
   Zap
 } from "lucide-react";
@@ -53,11 +53,7 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
   // Movement mutation
   const moveMutation = useMutation({
     mutationFn: async (direction: string) => {
-      return await apiRequest(`/api/crawlers/${crawler.id}/move`, {
-        method: "POST",
-        body: JSON.stringify({ direction }),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest(`/api/crawlers/${crawler.id}/move`, "POST", { direction });
     },
     onSuccess: () => {
       // Refresh room data
@@ -171,7 +167,7 @@ export default function RoomNavigation({ crawler }: RoomNavigationProps) {
 
   const getRoomTypeIcon = (room: Room) => {
     if (room.isSafe) return <Shield className="h-4 w-4 text-green-500" />;
-    if (room.hasLoot) return <Treasure className="h-4 w-4 text-yellow-500" />;
+    if (room.hasLoot) return <Gem className="h-4 w-4 text-yellow-500" />;
     return <MapPin className="h-4 w-4 text-gray-500" />;
   };
 
