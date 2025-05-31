@@ -65,7 +65,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
   };
 
   return (
-    <div className="space-y-6 px-8 py-6">
+    <div className="relative space-y-6 px-8 py-6">
       <div className="text-center">
         <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
         <p className="text-slate-400">Choose from these 30 Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
@@ -183,32 +183,105 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
         ))}
       </div>
 
+      {/* Semi-transparent overlay for selected crawler */}
       {selectedCandidate && (
-        <Card className="bg-game-surface border-game-border">
-          <CardHeader>
-            <CardTitle className="text-green-400">Confirm Selection</CardTitle>
-            <CardDescription>
-              Ready to sponsor {selectedCandidate.name}? This will create an official sponsorship agreement.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleSelect}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                Sponsor {selectedCandidate.name}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={onCancel}
-                className="border-game-border"
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setSelectedCandidate(null)}>
+          <Card className="bg-game-surface border-blue-500 border-2 w-96 mx-4" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-6 h-6 text-blue-400" />
+                  <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
+                </div>
+                <Badge variant="outline" className="border-green-600/30 text-green-400">
+                  {selectedCandidate.topAbility.name}
+                </Badge>
+              </div>
+              <CardDescription className="text-slate-400">
+                Level {selectedCandidate.level} • {selectedCandidate.topAbility.description}
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {/* Background */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-2">Background</h4>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  {selectedCandidate.background}
+                </p>
+              </div>
+
+              <Separator className="bg-game-border" />
+
+              {/* Stats */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-3">Key Statistics</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-red-400" />
+                      <span className="text-xs">Attack</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.attack}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Shield className="w-3 h-3 text-blue-400" />
+                      <span className="text-xs">Defense</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.defense}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Gauge className="w-3 h-3 text-yellow-400" />
+                      <span className="text-xs">Speed</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.speed}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Cpu className="w-3 h-3 text-purple-400" />
+                      <span className="text-xs">Tech</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.tech}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-game-border" />
+
+              {/* Competencies */}
+              <div>
+                <h4 className="font-semibold text-slate-200 mb-2">Competencies</h4>
+                <div className="flex flex-wrap gap-1">
+                  {selectedCandidate.competencies.map((comp, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs bg-slate-700 text-slate-300">
+                      {comp}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button 
+                  onClick={handleSelect}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  size="lg"
+                >
+                  Sponsor {selectedCandidate.name}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedCandidate(null)}
+                  className="border-game-border"
+                >
+                  Back
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
