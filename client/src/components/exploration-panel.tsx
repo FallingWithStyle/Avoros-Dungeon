@@ -70,10 +70,11 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.refetchQueries({ queryKey: ["/api/crawlers"] });
       
-      // Show result and clear encounter
+      // Show result with gain/loss summary
+      const summaryText = result.results?.summary ? ` (${result.results.summary})` : '';
       toast({
         title: result.success ? "Success!" : "Failed!",
-        description: result.message,
+        description: result.message + summaryText,
         variant: result.success ? "default" : "destructive",
       });
       

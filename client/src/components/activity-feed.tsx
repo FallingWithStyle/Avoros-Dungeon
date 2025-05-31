@@ -24,6 +24,8 @@ export default function ActivityFeed({ activities, isLoading }: ActivityFeedProp
         return 'fas fa-search text-gray-400';
       case 'combat_start':
         return 'fas fa-fist-raised text-orange-400';
+      case 'encounter_choice':
+        return 'fas fa-dice text-cyan-400';
       default:
         return 'fas fa-info-circle text-blue-400';
     }

@@ -1547,70 +1547,124 @@ export class DatabaseStorage implements IStorage {
   private generateChoiceResults(crawler: any, choice: any, encounterType: string, isSuccess: boolean): any {
     const baseFloorMultiplier = 1 + (crawler.currentFloor * 0.1);
     
+    let results = {
+      credits: 0,
+      experience: 0,
+      equipment: [],
+      damage: 0,
+      itemsLost: [],
+      itemsGained: [],
+      summary: ""
+    };
+    
     if (!isSuccess) {
       // Failed attempts usually result in damage and minimal rewards
-      return {
-        credits: Math.floor(Math.random() * 10),
-        experience: 5,
-        equipment: [],
-        damage: Math.floor((10 + Math.random() * 15) * baseFloorMultiplier)
-      };
+      results.credits = Math.floor(Math.random() * 10);
+      results.experience = this.getFailureXP(choice, encounterType);
+      results.damage = Math.floor((10 + Math.random() * 15) * baseFloorMultiplier);
+      
+      // Trading failures might still lose items
+      if (choice.text.toLowerCase().includes('trade') && crawler.equipment?.length > 0) {
+        const randomItem = crawler.equipment[Math.floor(Math.random() * crawler.equipment.length)];
+        results.itemsLost.push(randomItem.equipment?.name || 'Unknown item');
+      }
+      
+      results.summary = `Lost ${results.damage} health${results.itemsLost.length > 0 ? `, lost ${results.itemsLost.join(', ')}` : ''}`;
+      return results;
     }
 
-    // Successful outcomes vary by encounter type and choice risk
-    let baseRewards = {
-      credits: 20,
-      experience: 15,
-      equipment: [],
-      damage: 0
-    };
+    // Base successful rewards based on action difficulty
+    const baseXP = this.getSuccessXP(choice, encounterType);
+    results.experience = Math.floor(baseXP * baseFloorMultiplier);
+    results.credits = Math.floor((15 + Math.random() * 20) * baseFloorMultiplier);
 
-    // Encounter type modifiers
+    // Handle trading actions - consume items from inventory
+    if (choice.text.toLowerCase().includes('trade') || choice.text.toLowerCase().includes('offer')) {
+      if (crawler.equipment?.length > 0) {
+        const randomItem = crawler.equipment[Math.floor(Math.random() * crawler.equipment.length)];
+        results.itemsLost.push(randomItem.equipment?.name || 'Unknown item');
+        
+        // Trading success often gives better credit rewards
+        results.credits = Math.floor(results.credits * 1.5);
+      }
+    }
+
+    // Encounter type specific bonuses
     switch (encounterType) {
       case 'combat':
-        baseRewards.experience += 20;
-        baseRewards.credits += 15;
-        if (choice.riskLevel === 'high') baseRewards.damage = Math.floor(5 * baseFloorMultiplier);
+        if (choice.text.toLowerCase().includes('ambush')) {
+          results.experience += Math.floor(15 * baseFloorMultiplier); // Ambush bonus XP
+        }
+        if (choice.riskLevel === 'high') {
+          results.damage = Math.floor(5 * baseFloorMultiplier);
+        }
         break;
       case 'treasure':
-        baseRewards.credits += 40;
-        baseRewards.experience += 10;
+        results.credits += Math.floor(25 * baseFloorMultiplier);
         break;
       case 'npc':
-        baseRewards.credits += 25;
-        baseRewards.experience += 25;
-        break;
-      case 'trap':
-        baseRewards.experience += 15;
-        baseRewards.credits += 10;
-        break;
-      case 'event':
-        baseRewards.experience += 30;
-        baseRewards.credits += 15;
+        results.credits += Math.floor(15 * baseFloorMultiplier);
         break;
     }
 
-    // Risk/reward scaling
+    // Generate summary
+    let summaryParts = [];
+    if (results.credits > 0) summaryParts.push(`+${results.credits} credits`);
+    if (results.experience > 0) summaryParts.push(`+${results.experience} XP`);
+    if (results.itemsLost.length > 0) summaryParts.push(`lost ${results.itemsLost.join(', ')}`);
+    if (results.itemsGained.length > 0) summaryParts.push(`gained ${results.itemsGained.join(', ')}`);
+    if (results.damage > 0) summaryParts.push(`-${results.damage} health`);
+    
+    results.summary = summaryParts.join(', ') || 'No significant changes';
+
+    return results;
+  }
+
+  // Helper method to calculate XP for failed actions
+  private getFailureXP(choice: any, encounterType: string): number {
+    const baseFailureXP = 5;
+    
+    // Higher risk actions give more XP even when failed
+    let multiplier = 1;
     switch (choice.riskLevel) {
-      case 'high':
-        baseRewards.credits *= 1.5;
-        baseRewards.experience *= 1.3;
-        break;
-      case 'medium':
-        baseRewards.credits *= 1.2;
-        baseRewards.experience *= 1.1;
-        break;
-      case 'low':
-        baseRewards.credits *= 0.8;
-        baseRewards.experience *= 0.9;
-        break;
+      case 'high': multiplier = 1.5; break;
+      case 'medium': multiplier = 1.2; break;
+      case 'low': multiplier = 1.0; break;
     }
+    
+    return Math.floor(baseFailureXP * multiplier);
+  }
 
-    // Apply floor scaling
-    baseRewards.credits = Math.floor(baseRewards.credits * baseFloorMultiplier);
-    baseRewards.experience = Math.floor(baseRewards.experience * baseFloorMultiplier);
-
-    return baseRewards;
+  // Helper method to calculate XP for successful actions based on difficulty
+  private getSuccessXP(choice: any, encounterType: string): number {
+    let baseXP = 15;
+    
+    // Different encounter types give different base XP
+    switch (encounterType) {
+      case 'combat': 
+        baseXP = choice.text.toLowerCase().includes('ambush') ? 40 : 25;
+        break;
+      case 'treasure': baseXP = 20; break;
+      case 'npc': baseXP = 25; break;
+      case 'trap': baseXP = 22; break;
+      case 'event': baseXP = 30; break;
+    }
+    
+    // Risk level affects XP rewards
+    switch (choice.riskLevel) {
+      case 'high': baseXP *= 1.4; break;
+      case 'medium': baseXP *= 1.2; break;
+      case 'low': baseXP *= 0.8; break;
+    }
+    
+    // Action type affects XP (combat actions > trade > escape)
+    if (choice.text.toLowerCase().includes('run') || choice.text.toLowerCase().includes('flee')) {
+      baseXP *= 0.6; // Running gives less XP
+    } else if (choice.text.toLowerCase().includes('trade') || choice.text.toLowerCase().includes('offer')) {
+      baseXP *= 0.8; // Trading gives moderate XP
+    }
+    
+    return Math.floor(baseXP);
   }
 
   private generateOutcomeMessage(crawler: any, choice: any, isSuccess: boolean, results: any): string {
