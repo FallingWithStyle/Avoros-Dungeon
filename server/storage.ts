@@ -1158,6 +1158,25 @@ export class DatabaseStorage implements IStorage {
     const newExperience = crawler.experience + rewards.experience;
     const isAlive = newHealth > 0;
     
+    // Remove items that were lost in trading
+    if (rewards.itemsLost && rewards.itemsLost.length > 0) {
+      for (const lostItemName of rewards.itemsLost) {
+        // Find the item in crawler's equipment and remove it
+        const equipmentToRemove = await db
+          .select()
+          .from(crawlerEquipment)
+          .innerJoin(equipment, eq(crawlerEquipment.equipmentId, equipment.id))
+          .where(eq(crawlerEquipment.crawlerId, crawlerId))
+          .limit(1);
+          
+        if (equipmentToRemove.length > 0) {
+          await db
+            .delete(crawlerEquipment)
+            .where(eq(crawlerEquipment.id, equipmentToRemove[0].crawler_equipment.id));
+        }
+      }
+    }
+    
     // Update crawler with all changes
     await this.updateCrawler(crawlerId, {
       energy: newEnergy,
@@ -1576,7 +1595,19 @@ export class DatabaseStorage implements IStorage {
     // Base successful rewards based on action difficulty
     const baseXP = this.getSuccessXP(choice, encounterType);
     results.experience = Math.floor(baseXP * baseFloorMultiplier);
-    results.credits = Math.floor((15 + Math.random() * 20) * baseFloorMultiplier);
+    
+    // Only certain actions should give credits
+    const actionText = choice.text.toLowerCase();
+    const givesCredits = actionText.includes('trade') || 
+                        actionText.includes('sell') || 
+                        actionText.includes('loot') || 
+                        actionText.includes('search') ||
+                        actionText.includes('ambush') ||
+                        encounterType === 'treasure';
+                        
+    if (givesCredits) {
+      results.credits = Math.floor((10 + Math.random() * 15) * baseFloorMultiplier);
+    }
 
     // Handle trading actions - consume items from inventory
     if (choice.text.toLowerCase().includes('trade') || choice.text.toLowerCase().includes('offer')) {
@@ -1584,8 +1615,8 @@ export class DatabaseStorage implements IStorage {
         const randomItem = crawler.equipment[Math.floor(Math.random() * crawler.equipment.length)];
         results.itemsLost.push(randomItem.equipment?.name || 'Unknown item');
         
-        // Trading success often gives better credit rewards
-        results.credits = Math.floor(results.credits * 1.5);
+        // Trading success gives better credit rewards
+        results.credits = Math.floor((results.credits || 10) * 1.8);
       }
     }
 
