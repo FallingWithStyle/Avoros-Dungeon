@@ -1958,18 +1958,20 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Find adjacent unexplored rooms from current room
-    const connections = await db.select()
+    // Find ALL adjacent rooms from ALL visited rooms (persistent fog of war)
+    const allConnections = await db.select()
       .from(roomConnections)
-      .where(eq(roomConnections.fromRoomId, currentRoomId));
+      .where(inArray(roomConnections.fromRoomId, Array.from(visitedRoomIds)));
 
-    const adjacentUnexploredRooms: any[] = [];
+    const discoveredUnexploredRooms: any[] = [];
+    const discoveredRoomIds = new Set<number>();
     
-    for (const connection of connections) {
-      if (!visitedRoomIds.has(connection.toRoomId)) {
+    for (const connection of allConnections) {
+      if (!visitedRoomIds.has(connection.toRoomId) && !discoveredRoomIds.has(connection.toRoomId)) {
         const adjacentRoom = await this.getRoom(connection.toRoomId);
         if (adjacentRoom) {
-          adjacentUnexploredRooms.push({
+          discoveredRoomIds.add(connection.toRoomId);
+          discoveredUnexploredRooms.push({
             id: adjacentRoom.id,
             name: '???',
             type: 'unexplored',
@@ -1997,7 +1999,7 @@ export class DatabaseStorage implements IStorage {
       isExplored: true
     }));
 
-    return [...exploredRoomData, ...adjacentUnexploredRooms];
+    return [...exploredRoomData, ...discoveredUnexploredRooms];
   }
 }
 
