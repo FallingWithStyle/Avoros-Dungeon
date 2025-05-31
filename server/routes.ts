@@ -57,6 +57,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/crawlers', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Check if user already has an active crawler (one crawler per sponsor)
+      const existingCrawlers = await storage.getCrawlersBySponssor(userId);
+      if (existingCrawlers.length > 0) {
+        return res.status(400).json({ message: "You already have an active crawler. Each corporation can only sponsor one crawler at a time." });
+      }
+      
       const crawlerData = insertCrawlerSchema.parse({
         ...req.body,
         sponsorId: userId,
@@ -81,12 +88,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tech: crawlerClass.baseTech,
       });
 
+      // Update user's active crawler ID
+      await storage.updateUserActiveCrawler(userId, newCrawler.id);
+
       // Create activity
       await storage.createActivity({
         userId,
         crawlerId: newCrawler.id,
         type: 'crawler_created',
-        message: `${newCrawler.name} has entered the dungeon!`,
+        message: `${newCrawler.name} has entered the dungeon sponsored by their corporation!`,
         details: null,
       });
 

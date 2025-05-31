@@ -11,10 +11,10 @@ export default function Landing() {
             Dungeon Depths
           </h1>
           <p className="text-xl text-slate-300 mb-2">
-            Intergalactic Crawler Division
+            Corporate Crawler Consortium
           </p>
           <p className="text-lg text-slate-400">
-            Command crawlers. Survive the depths. Build your legacy.
+            Lead your corporation. Sponsor a crawler. Claim the depths.
           </p>
         </div>
 
@@ -22,14 +22,14 @@ export default function Landing() {
           <Card className="bg-game-surface border-game-border">
             <CardHeader>
               <CardTitle className="text-sponsor flex items-center justify-center">
-                <i className="fas fa-crown mr-2"></i>
-                Sponsor & Command
+                <i className="fas fa-building mr-2"></i>
+                Corporate Leadership
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-slate-300">
-                Take on the role of an intergalactic sponsor, managing and equipping
-                crawlers for their dangerous descent into the dungeon depths.
+                Lead a powerful corporation and sponsor a single elite crawler
+                for the most dangerous corporate venture - dungeon exploration.
               </p>
             </CardContent>
           </Card>
