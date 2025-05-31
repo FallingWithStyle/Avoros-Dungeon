@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import MiniMap from "@/components/mini-map-new";
+import RoomNavigation from "@/components/room-navigation";
 import type { CrawlerWithDetails, Encounter } from "@shared/schema";
 
 interface CrawlerModeProps {
@@ -171,7 +172,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
       </header>
 
       <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Crawler Stats */}
           <div className="lg:col-span-1">
             <Card className="bg-game-surface border-game-border">
@@ -317,6 +318,11 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Middle Column - Room Navigation */}
+          <div className="lg:col-span-1">
+            <RoomNavigation crawler={crawler} />
           </div>
 
           {/* Floor Info & Mini-map */}
