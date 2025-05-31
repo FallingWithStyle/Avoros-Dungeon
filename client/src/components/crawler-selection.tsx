@@ -163,6 +163,15 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                     </div>
                     <span className="text-sm font-mono">{candidate.stats.health}</span>
                   </div>
+                  
+                  {/* Debug: Show hidden luck stat */}
+                  <div className="flex items-center justify-between p-2 bg-red-900/20 border border-red-600/30 rounded">
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-400">🍀</span>
+                      <span className="text-xs text-red-400">Luck (DEBUG)</span>
+                    </div>
+                    <span className="text-xs font-mono text-red-400">{candidate.stats.luck}</span>
+                  </div>
                 </div>
               </div>
 
