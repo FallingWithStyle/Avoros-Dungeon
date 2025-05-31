@@ -949,14 +949,29 @@ export class DatabaseStorage implements IStorage {
 
   // Debug function to reset all crawlers for a user
   async resetUserCrawlers(userId: string): Promise<void> {
-    // Delete all crawler equipment first
+    // Get all crawler IDs for this user
     const userCrawlers = await db.select({ id: crawlers.id }).from(crawlers).where(eq(crawlers.sponsorId, userId));
-    for (const crawler of userCrawlers) {
-      await db.delete(crawlerEquipment).where(eq(crawlerEquipment.crawlerId, crawler.id));
-    }
+    const crawlerIds = userCrawlers.map(c => c.id);
     
-    // Delete all crawlers owned by the user
-    await db.delete(crawlers).where(eq(crawlers.sponsorId, userId));
+    if (crawlerIds.length > 0) {
+      // Delete activities first (foreign key constraint)
+      for (const crawlerId of crawlerIds) {
+        await db.delete(activities).where(eq(activities.crawlerId, crawlerId));
+      }
+      
+      // Delete encounters
+      for (const crawlerId of crawlerIds) {
+        await db.delete(encounters).where(eq(encounters.crawlerId, crawlerId));
+      }
+      
+      // Delete crawler equipment
+      for (const crawlerId of crawlerIds) {
+        await db.delete(crawlerEquipment).where(eq(crawlerEquipment.crawlerId, crawlerId));
+      }
+      
+      // Finally delete the crawlers
+      await db.delete(crawlers).where(eq(crawlers.sponsorId, userId));
+    }
     
     // Reset user's primary sponsorship status
     await db.update(users)
