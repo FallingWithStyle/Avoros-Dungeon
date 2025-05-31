@@ -13,7 +13,7 @@ import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
 import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
-import MiniMap from "@/components/mini-map";
+import MiniMap from "@/components/mini-map-new";
 import ExplorationPanel from "@/components/exploration-panel";
 import { useAuth } from "@/hooks/useAuth";
 import type { CrawlerWithDetails } from "@shared/schema";
