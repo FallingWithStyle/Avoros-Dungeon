@@ -147,6 +147,40 @@ export const floors = pgTable("floors", {
   minRecommendedLevel: integer("min_recommended_level").default(1),
 });
 
+// Rooms within each floor
+export const rooms = pgTable("rooms", {
+  id: serial("id").primaryKey(),
+  floorId: integer("floor_id").notNull().references(() => floors.id),
+  x: integer("x").notNull(), // Grid position X
+  y: integer("y").notNull(), // Grid position Y
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  type: varchar("type", { length: 30 }).default("normal").notNull(), // normal, safe, boss, treasure, trap, entrance, exit
+  isExplored: boolean("is_explored").default(false).notNull(),
+  hasLoot: boolean("has_loot").default(false).notNull(),
+  isSafe: boolean("is_safe").default(false).notNull(), // Safe rooms for leveling/resting
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Room connections (which rooms connect to which)
+export const roomConnections = pgTable("room_connections", {
+  id: serial("id").primaryKey(),
+  fromRoomId: integer("from_room_id").notNull().references(() => rooms.id),
+  toRoomId: integer("to_room_id").notNull().references(() => rooms.id),
+  direction: varchar("direction", { length: 10 }).notNull(), // north, south, east, west
+  isLocked: boolean("is_locked").default(false).notNull(),
+  keyRequired: varchar("key_required", { length: 50 }), // Optional key requirement
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Player positions in rooms
+export const crawlerPositions = pgTable("crawler_positions", {
+  id: serial("id").primaryKey(),
+  crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
+  roomId: integer("room_id").notNull().references(() => rooms.id),
+  enteredAt: timestamp("entered_at").defaultNow(),
+});
+
 // Enemies
 export const enemies = pgTable("enemies", {
   id: serial("id").primaryKey(),
@@ -273,6 +307,41 @@ export const crawlerEquipmentRelations = relations(crawlerEquipment, ({ one }) =
 
 export const floorsRelations = relations(floors, ({ many }) => ({
   encounters: many(encounters),
+  rooms: many(rooms),
+}));
+
+export const roomsRelations = relations(rooms, ({ one, many }) => ({
+  floor: one(floors, {
+    fields: [rooms.floorId],
+    references: [floors.id],
+  }),
+  crawlerPositions: many(crawlerPositions),
+  connectionsFrom: many(roomConnections, { relationName: "fromRoom" }),
+  connectionsTo: many(roomConnections, { relationName: "toRoom" }),
+}));
+
+export const roomConnectionsRelations = relations(roomConnections, ({ one }) => ({
+  fromRoom: one(rooms, {
+    fields: [roomConnections.fromRoomId],
+    references: [rooms.id],
+    relationName: "fromRoom",
+  }),
+  toRoom: one(rooms, {
+    fields: [roomConnections.toRoomId],
+    references: [rooms.id],
+    relationName: "toRoom",
+  }),
+}));
+
+export const crawlerPositionsRelations = relations(crawlerPositions, ({ one }) => ({
+  crawler: one(crawlers, {
+    fields: [crawlerPositions.crawlerId],
+    references: [crawlers.id],
+  }),
+  room: one(rooms, {
+    fields: [crawlerPositions.roomId],
+    references: [rooms.id],
+  }),
 }));
 
 export const enemiesRelations = relations(enemies, ({ many }) => ({
@@ -386,6 +455,21 @@ export const insertSeasonSchema = createInsertSchema(seasons).omit({
   createdAt: true,
 });
 
+export const insertRoomSchema = createInsertSchema(rooms).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRoomConnectionSchema = createInsertSchema(roomConnections).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCrawlerPositionSchema = createInsertSchema(crawlerPositions).omit({
+  id: true,
+  enteredAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -396,6 +480,9 @@ export type Equipment = typeof equipment.$inferSelect;
 export type EquipmentType = typeof equipmentTypes.$inferSelect;
 export type CrawlerEquipment = typeof crawlerEquipment.$inferSelect;
 export type Floor = typeof floors.$inferSelect;
+export type Room = typeof rooms.$inferSelect;
+export type RoomConnection = typeof roomConnections.$inferSelect;
+export type CrawlerPosition = typeof crawlerPositions.$inferSelect;
 export type Enemy = typeof enemies.$inferSelect;
 export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
