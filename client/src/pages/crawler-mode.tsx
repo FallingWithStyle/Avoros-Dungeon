@@ -236,7 +236,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-game-border">
+                <div className={`grid ${import.meta.env.DEV ? 'grid-cols-2' : 'grid-cols-1'} gap-4 pt-4 border-t border-game-border`}>
                   <Button
                     variant="outline"
                     onClick={handleReturnToSponsor}
@@ -245,20 +245,22 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     <i className="fas fa-arrow-left mr-2"></i>
                     Return
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowDebug(!showDebug)}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  >
-                    <i className="fas fa-bug mr-2"></i>
-                    Debug
-                  </Button>
+                  {import.meta.env.DEV && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowDebug(!showDebug)}
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      <i className="fas fa-bug mr-2"></i>
+                      Debug
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Debug Panel */}
-            {showDebug && (
+            {/* Debug Panel - Development Only */}
+            {import.meta.env.DEV && showDebug && (
               <Card className="bg-game-surface border-game-border border-orange-500/50">
                 <CardHeader>
                   <CardTitle className="text-orange-400 flex items-center">
