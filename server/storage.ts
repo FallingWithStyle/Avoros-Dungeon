@@ -1760,33 +1760,16 @@ export class DatabaseStorage implements IStorage {
 
   // Debug function to reset all crawlers for a user
   private async isRoomSafe(roomId: number): Promise<boolean> {
-    // A room is considered safe if:
-    // 1. It has no active encounters
-    // 2. It's not a trap room with active threats
-    // 3. It's not currently occupied by hostile NPCs or monsters
+    // For now, consider all previously visited rooms as safe for reduced energy cost
+    // This is a simplified approach since we don't have detailed encounter tracking
     
-    // Check for active encounters in this room
-    const activeEncounters = await db.select()
-      .from(encounters)
-      .where(and(
-        eq(encounters.floorId, 1), // Current floor
-        sql`${encounters.result}->>'roomId' = ${roomId}`,
-        eq(encounters.status, 'active')
-      ));
-
-    // If there are active encounters, room is not safe
-    if (activeEncounters.length > 0) {
-      return false;
-    }
-
     // Get room details to check room type
     const room = await this.getRoom(roomId);
     if (!room) {
       return false;
     }
 
-    // Certain room types are considered inherently safe once cleared
-    const safeRoomTypes = ['normal', 'entrance', 'rest', 'safe', 'cleared'];
+    // Certain room types are considered inherently dangerous for reduced energy travel
     const dangerousRoomTypes = ['trap', 'boss', 'elite', 'puzzle'];
 
     // If it's a dangerous room type, it's not safe for reduced energy travel
