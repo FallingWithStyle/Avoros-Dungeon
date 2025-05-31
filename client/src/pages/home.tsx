@@ -42,7 +42,7 @@ export default function Home() {
 
   const createCrawlerMutation = useMutation({
     mutationFn: async (candidate: any) => {
-      return apiRequest("/api/crawlers", "POST", {
+      return apiRequest("POST", "/api/crawlers", {
         name: candidate.name,
         stats: candidate.stats,
         competencies: candidate.competencies,
