@@ -88,39 +88,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/crawlers', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
-      // Check if user already has an active crawler (one crawler per sponsor)
-      const existingCrawlers = await storage.getCrawlersBySponssor(userId);
-      if (existingCrawlers.length > 0) {
-        return res.status(400).json({ message: "You already have an active crawler. Each corporation can only sponsor one crawler at a time." });
-      }
-      
-      const crawlerData = insertCrawlerSchema.parse({
-        ...req.body,
-        sponsorId: userId,
-      });
+      const { name, stats, competencies, background } = req.body;
 
-      // Get crawler class to set base stats
+      // Check if user can create primary crawler
+      const canCreate = await storage.canCreatePrimaryCrawler(userId);
+      if (!canCreate) {
+        return res.status(400).json({ message: "Primary sponsorship already used this season" });
+      }
+
+      // Get the default crawler class (assuming ID 1 exists)
       const classes = await storage.getCrawlerClasses();
-      const crawlerClass = classes.find(c => c.id === crawlerData.classId);
+      const defaultClass = classes[0];
       
-      if (!crawlerClass) {
-        return res.status(400).json({ message: "Invalid crawler class" });
+      if (!defaultClass) {
+        return res.status(500).json({ message: "No crawler classes available" });
       }
 
-      // Set initial stats based on class
+      // Create crawler with the generated stats and info
       const newCrawler = await storage.createCrawler({
-        ...crawlerData,
-        health: crawlerClass.baseHealth,
-        maxHealth: crawlerClass.baseHealth,
-        attack: crawlerClass.baseAttack,
-        defense: crawlerClass.baseDefense,
-        speed: crawlerClass.baseSpeed,
-        tech: crawlerClass.baseTech,
+        name,
+        classId: defaultClass.id,
+        sponsorId: userId,
+        health: stats.health,
+        maxHealth: stats.maxHealth,
+        attack: stats.attack,
+        defense: stats.defense,
+        speed: stats.speed,
+        tech: stats.tech,
+        competencies,
+        background,
+        currentFloor: 1,
+        energy: 100,
+        maxEnergy: 100,
+        experience: 0,
+        level: 0,
+        credits: 0,
+        isAlive: true,
       });
 
-      // Update user's active crawler ID
+      // Update user's active crawler ID and mark primary sponsorship as used
       await storage.updateUserActiveCrawler(userId, newCrawler.id);
+      
+      const currentSeason = await storage.getCurrentSeason();
+      if (currentSeason) {
+        await storage.resetUserPrimarySponsorshipForNewSeason(userId, currentSeason.seasonNumber);
+      }
 
       // Create activity
       await storage.createActivity({
