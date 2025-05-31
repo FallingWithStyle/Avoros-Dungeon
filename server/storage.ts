@@ -300,7 +300,28 @@ export class DatabaseStorage implements IStorage {
     // Give them some random starting equipment
     await this.assignRandomStartingEquipment(crawler.id);
 
+    // Place crawler in the entrance room (floor 1)
+    await this.placeCrawlerInEntranceRoom(crawler.id);
+
     return crawler;
+  }
+
+  private async placeCrawlerInEntranceRoom(crawlerId: number): Promise<void> {
+    // Find the entrance room on floor 1
+    const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+    if (!floor1) return;
+
+    const [entranceRoom] = await db
+      .select()
+      .from(rooms)
+      .where(and(eq(rooms.floorId, floor1.id), eq(rooms.type, 'entrance')));
+
+    if (entranceRoom) {
+      await db.insert(crawlerPositions).values({
+        crawlerId: crawlerId,
+        roomId: entranceRoom.id
+      });
+    }
   }
 
   private async assignRandomStartingEquipment(crawlerId: number): Promise<void> {

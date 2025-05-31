@@ -228,6 +228,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Room navigation routes
+  app.get('/api/crawlers/:id/current-room', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+      
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const room = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      const availableDirections = await storage.getAvailableDirections(room.id);
+      const playersInRoom = await storage.getPlayersInRoom(room.id);
+
+      res.json({
+        room,
+        availableDirections,
+        playersInRoom
+      });
+    } catch (error) {
+      console.error("Error fetching current room:", error);
+      res.status(500).json({ message: "Failed to fetch current room" });
+    }
+  });
+
+  app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { direction } = req.body;
+      const crawler = await storage.getCrawler(crawlerId);
+      
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      if (!crawler.isAlive) {
+        return res.status(400).json({ message: "Dead crawlers cannot move" });
+      }
+
+      if (crawler.energy < 10) {
+        return res.status(400).json({ message: "Not enough energy to move" });
+      }
+
+      const result = await storage.moveToRoom(crawlerId, direction);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error || "Cannot move in that direction" });
+      }
+
+      // Deduct energy for movement
+      await storage.updateCrawler(crawlerId, {
+        energy: Math.max(0, crawler.energy - 10)
+      });
+
+      await storage.createActivity({
+        userId: req.user.claims.sub,
+        crawlerId,
+        type: 'room_movement',
+        message: `${crawler.name} moved ${direction} to ${result.newRoom?.name}`,
+        details: null,
+      });
+
+      res.json({ success: true, newRoom: result.newRoom });
+    } catch (error) {
+      console.error("Error moving crawler:", error);
+      res.status(500).json({ message: "Failed to move crawler" });
+    }
+  });
+
   // Activities
   app.get('/api/activities', isAuthenticated, async (req: any, res) => {
     try {
