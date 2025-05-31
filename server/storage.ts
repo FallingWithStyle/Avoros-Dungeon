@@ -468,9 +468,9 @@ export class DatabaseStorage implements IStorage {
         crawlerId,
         floorId,
         enemyId,
-        encounterType: enemyId ? 'combat' : 'exploration',
+        type: enemyId ? 'combat' : 'exploration',
         status: 'active',
-      })
+      } as any)
       .returning();
     return encounter;
   }
@@ -1014,7 +1014,7 @@ export class DatabaseStorage implements IStorage {
       ]
     };
 
-    const typeEncounters = encounters[type] || encounters.event;
+    const typeEncounters = (encounters as any)[type] || encounters.event;
     const selectedEncounter = typeEncounters[Math.floor(Math.random() * typeEncounters.length)];
     
     return {
@@ -1090,7 +1090,7 @@ export class DatabaseStorage implements IStorage {
       ]
     };
     
-    const typeStories = stories[type] || stories.event;
+    const typeStories = (stories as any)[type] || stories.event;
     return typeStories[Math.floor(Math.random() * typeStories.length)];
   }
 
@@ -1218,8 +1218,8 @@ export class DatabaseStorage implements IStorage {
       event: ['Engineering', 'Chemistry', 'Hacking']
     };
     
-    const relevantCompetencies = competencyBonuses[encounterType] || [];
-    const bonusCount = crawler.competencies.filter(comp => 
+    const relevantCompetencies = (competencyBonuses as any)[encounterType] || [];
+    const bonusCount = crawler.competencies.filter((comp: any) => 
       relevantCompetencies.includes(comp)
     ).length;
     
@@ -1291,7 +1291,7 @@ export class DatabaseStorage implements IStorage {
     if (!crawler) throw new Error("Crawler not found");
     
     const now = new Date();
-    const lastRegen = new Date(crawler.lastEnergyRegen || crawler.createdAt);
+    const lastRegen = new Date((crawler.lastEnergyRegen || crawler.createdAt) as string | Date);
     const timeDiff = now.getTime() - lastRegen.getTime();
     const minutesPassed = Math.floor(timeDiff / 60000);
     
