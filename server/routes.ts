@@ -117,6 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         wit: stats.wit,
         charisma: stats.charisma,
         memory: stats.memory,
+        luck: stats.luck,
         competencies,
         abilities: [], // Start with no special abilities
         background,
