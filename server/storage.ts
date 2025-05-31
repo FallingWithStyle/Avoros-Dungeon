@@ -2125,6 +2125,23 @@ export class DatabaseStorage implements IStorage {
 
     return [...exploredRoomData, ...discoveredUnexploredRooms];
   }
+
+  async resetCrawlerToEntrance(crawlerId: number): Promise<void> {
+    // Find the entrance room (room with type 'entrance')
+    const [entranceRoom] = await db.select()
+      .from(rooms)
+      .where(eq(rooms.type, 'entrance'))
+      .limit(1);
+
+    if (entranceRoom) {
+      // Add new position record at entrance
+      await db.insert(crawlerPositions).values({
+        crawlerId,
+        roomId: entranceRoom.id,
+        enteredAt: new Date()
+      });
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

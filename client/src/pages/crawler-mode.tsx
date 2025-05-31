@@ -348,7 +348,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
 
           {/* Middle Column - Room Navigation */}
           <div className="space-y-6">
-            <RoomNavigation crawler={crawler} />
+            <RoomNavigation crawler={crawler} energyDisabled={energyDisabled} />
           </div>
 
           {/* Right Column - Floor Info & Mini-map */}
