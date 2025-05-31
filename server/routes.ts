@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const { direction } = req.body;
+      const { direction, debugEnergyDisabled } = req.body;
       const crawler = await storage.getCrawler(crawlerId);
       
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
@@ -288,12 +288,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
-      // Check minimum energy requirement (will be validated properly in moveToRoom)
-      if (crawler.energy < 5) {
+      // Check minimum energy requirement (unless debug mode is enabled)
+      if (!debugEnergyDisabled && crawler.energy < 5) {
         return res.status(400).json({ message: "Not enough energy to move" });
       }
 
-      const result = await storage.moveToRoom(crawlerId, direction);
+      const result = await storage.moveToRoom(crawlerId, direction, debugEnergyDisabled);
       
       if (!result.success) {
         return res.status(400).json({ message: result.error || "Cannot move in that direction" });
