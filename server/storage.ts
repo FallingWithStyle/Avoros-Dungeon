@@ -1777,6 +1777,20 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
 
+    // Check if there are any active encounters in this room
+    const activeEncounters = await db.select()
+      .from(encounters)
+      .where(and(
+        eq(encounters.floorId, room.floorId),
+        eq(encounters.status, 'active')
+      ))
+      .limit(1);
+
+    // If there are active encounters, room is not safe
+    if (activeEncounters.length > 0) {
+      return false;
+    }
+
     // Otherwise, consider it safe (normal rooms, entrance, etc.)
     return true;
   }
@@ -1904,15 +1918,12 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
 
-    // Calculate energy cost - reduced for safe, previously explored rooms
-    let energyCost = 10; // Default movement cost
+    // Calculate energy cost - reduced for previously explored rooms
+    let energyCost = 10; // Default movement cost for new rooms
     
     if (previousVisit.length > 0) {
-      // Check if room is safe (no active threats)
-      const isSafeRoom = await this.isRoomSafe(connection.toRoomId);
-      if (isSafeRoom) {
-        energyCost = 5; // Half energy cost for safe, explored rooms
-      }
+      // Reduced energy cost for rooms you've already explored
+      energyCost = 5; // Half energy cost for previously visited rooms
     }
 
     // Get current crawler to check/update energy

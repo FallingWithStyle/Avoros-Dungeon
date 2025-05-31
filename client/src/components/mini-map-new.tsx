@@ -226,7 +226,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-5xl max-h-[90vh] bg-game-panel border-game-border">
+            <DialogContent className="max-w-4xl h-[80vh] bg-game-panel border-game-border p-6">
               <DialogHeader>
                 <DialogTitle className="text-slate-200 flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
@@ -471,7 +471,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   });
 
   return (
-    <div className="h-96 flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Controls */}
       <div className="flex items-center gap-2 mb-4">
         <Button onClick={zoomIn} size="sm" variant="outline">
