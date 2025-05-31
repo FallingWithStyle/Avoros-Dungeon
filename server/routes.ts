@@ -316,6 +316,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoints
+  app.post('/api/crawlers/:id/debug/heal', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const healedCrawler = await storage.updateCrawler(crawlerId, {
+        health: crawler.maxHealth,
+        energy: crawler.maxEnergy
+      });
+
+      res.json({ message: "Crawler healed", crawler: healedCrawler });
+    } catch (error) {
+      console.error("Error healing crawler:", error);
+      res.status(500).json({ message: "Failed to heal crawler" });
+    }
+  });
+
+  app.post('/api/crawlers/:id/debug/reset', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Reset crawler to entrance and restore health/energy
+      const resetCrawler = await storage.updateCrawler(crawlerId, {
+        health: crawler.maxHealth,
+        energy: crawler.maxEnergy,
+        status: 'active'
+      });
+
+      // Move crawler back to entrance room
+      await storage.resetCrawlerToEntrance(crawlerId);
+
+      res.json({ message: "Crawler reset to entrance", crawler: resetCrawler });
+    } catch (error) {
+      console.error("Error resetting crawler:", error);
+      res.status(500).json({ message: "Failed to reset crawler" });
+    }
+  });
+
   // Activities
   app.get('/api/activities', isAuthenticated, async (req: any, res) => {
     try {
