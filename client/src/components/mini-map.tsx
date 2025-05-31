@@ -146,30 +146,74 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {/* Simplified room list view */}
-          <div className="space-y-2">
-            {exploredRooms.map((room) => (
-              <div
-                key={room.id}
-                className={`flex items-center gap-3 p-2 rounded border ${getRoomColor(room)} ${
-                  room.isCurrentRoom ? 'ring-2 ring-blue-400' : ''
-                }`}
-              >
-                <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center border rounded">
-                  {getRoomIcon(room)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate">{room.name}</div>
-                  <div className="text-xs text-slate-400">
-                    {room.type.charAt(0).toUpperCase() + room.type.slice(1)} Room
-                    {room.isCurrentRoom && <span className="ml-2 text-blue-400">← Current</span>}
+          {/* Compact grid map */}
+          <div className="relative">
+            {/* Calculate visible area around current room */}
+            {(() => {
+              const currentRoom = exploredRooms.find(r => r.isCurrentRoom);
+              if (!currentRoom) return <div className="text-slate-400">No current room</div>;
+              
+              const centerX = currentRoom.x;
+              const centerY = currentRoom.y;
+              const radius = 3; // Show 7x7 grid around current room
+              
+              const minX = centerX - radius;
+              const maxX = centerX + radius;
+              const minY = centerY - radius;
+              const maxY = centerY + radius;
+              
+              // Create a map of coordinates to rooms
+              const roomMap = new Map();
+              exploredRooms.forEach(room => {
+                roomMap.set(`${room.x},${room.y}`, room);
+              });
+              
+              return (
+                <div className="inline-block border border-slate-600 bg-slate-900/50 p-2 rounded">
+                  <div className="grid gap-0.5" style={{ gridTemplateColumns: `repeat(${maxX - minX + 1}, 1fr)` }}>
+                    {Array.from({ length: (maxY - minY + 1) * (maxX - minX + 1) }, (_, index) => {
+                      const row = Math.floor(index / (maxX - minX + 1));
+                      const col = index % (maxX - minX + 1);
+                      const x = minX + col;
+                      const y = minY + row;
+                      const room = roomMap.get(`${x},${y}`);
+                      
+                      if (room) {
+                        return (
+                          <div
+                            key={`${x}-${y}`}
+                            className={`w-6 h-6 border rounded text-xs flex items-center justify-center ${getRoomColor(room)} ${
+                              room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset' : ''
+                            }`}
+                            title={`${room.name} (${x}, ${y})`}
+                          >
+                            {getRoomIcon(room)}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div
+                            key={`${x}-${y}`}
+                            className="w-6 h-6 bg-slate-800 border border-slate-700 rounded opacity-30"
+                            title={`Unexplored (${x}, ${y})`}
+                          />
+                        );
+                      }
+                    })}
+                  </div>
+                  
+                  {/* Compass in bottom right */}
+                  <div className="absolute bottom-1 right-1 text-xs text-slate-400">
+                    <div className="text-center">N</div>
+                    <div className="flex justify-between">
+                      <span>W</span>
+                      <span>E</span>
+                    </div>
+                    <div className="text-center">S</div>
                   </div>
                 </div>
-                <div className="flex-shrink-0 text-xs text-slate-500">
-                  ({room.x}, {room.y})
-                </div>
-              </div>
-            ))}
+              );
+            })()}
           </div>
 
           {/* Legend */}
