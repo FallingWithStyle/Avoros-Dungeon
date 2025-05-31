@@ -226,7 +226,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] bg-game-panel border-game-border">
+            <DialogContent className="max-w-5xl max-h-[90vh] bg-game-panel border-game-border">
               <DialogHeader>
                 <DialogTitle className="text-slate-200 flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
@@ -242,8 +242,8 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         <div className="space-y-2">
           <div className="flex justify-center">
             <div 
-              className="border border-slate-600 bg-slate-900/50 p-2 rounded relative overflow-hidden"
-              style={{ height: '200px', width: '100%' }}
+              className="border border-slate-600 bg-slate-900/50 p-2 rounded relative overflow-hidden mx-auto"
+              style={{ height: '250px', width: '250px' }}
             >
               <div 
                 className="absolute inset-0 cursor-move select-none flex items-center justify-center"
@@ -490,7 +490,8 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
 
       {/* Map container */}
       <div 
-        className="flex-1 overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative"
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto"
+        style={{ height: '600px', width: '600px' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
