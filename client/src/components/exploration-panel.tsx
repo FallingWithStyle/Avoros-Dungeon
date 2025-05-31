@@ -28,9 +28,17 @@ interface ExplorationPanelProps {
   crawler: CrawlerWithDetails;
 }
 
-export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
+export default function ExplorationPanel({ crawler: initialCrawler }: ExplorationPanelProps) {
   const [isExploring, setIsExploring] = useState(false);
   const { toast } = useToast();
+
+  // Fetch live crawler data to ensure real-time updates
+  const { data: crawlers } = useQuery({
+    queryKey: ["/api/crawlers"],
+  });
+  
+  // Use the live crawler data if available, otherwise fall back to the prop
+  const crawler = crawlers?.find((c: CrawlerWithDetails) => c.id === initialCrawler.id) || initialCrawler;
 
   const exploreMutation = useMutation({
     mutationFn: async () => {
