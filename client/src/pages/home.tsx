@@ -42,15 +42,12 @@ export default function Home() {
 
   const createCrawlerMutation = useMutation({
     mutationFn: async (candidate: any) => {
-      return apiRequest("/api/crawlers", {
-        method: "POST",
-        body: JSON.stringify({
-          name: candidate.name,
-          stats: candidate.stats,
-          competencies: candidate.competencies,
-          background: candidate.background,
-          startingEquipment: candidate.startingEquipment
-        }),
+      return apiRequest("/api/crawlers", "POST", {
+        name: candidate.name,
+        stats: candidate.stats,
+        competencies: candidate.competencies,
+        background: candidate.background,
+        startingEquipment: candidate.startingEquipment
       });
     },
     onSuccess: (newCrawler) => {
@@ -63,9 +60,21 @@ export default function Home() {
     },
     onError: (error) => {
       console.error("Crawler creation error:", error);
+      const errorMessage = `Failed to sponsor crawler: ${error.message}`;
       toast({
         title: "Sponsorship Failed",
-        description: `Failed to sponsor crawler: ${error.message}`,
+        description: (
+          <div className="flex items-center gap-2">
+            <span>{errorMessage}</span>
+            <button
+              onClick={() => navigator.clipboard.writeText(errorMessage)}
+              className="text-xs bg-red-800 hover:bg-red-700 px-2 py-1 rounded"
+              title="Copy error message"
+            >
+              Copy
+            </button>
+          </div>
+        ),
         variant: "destructive",
       });
     },
