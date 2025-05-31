@@ -67,6 +67,11 @@ export interface IStorage {
   getActiveEncounter(crawlerId: number): Promise<Encounter | undefined>;
   updateEncounter(id: number, updates: Partial<Encounter>): Promise<Encounter>;
   
+  // Exploration
+  exploreFloor(crawlerId: number): Promise<any>;
+  regenerateEnergy(crawlerId: number): Promise<Crawler>;
+  applyCompetencyBonus(crawler: any, encounterType: string): number;
+  
   // Floors and enemies
   getFloor(floorNumber: number): Promise<Floor | undefined>;
   getEnemiesForFloor(floorNumber: number): Promise<Enemy[]>;
@@ -548,6 +553,301 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Exploration mechanics
+  async exploreFloor(crawlerId: number): Promise<any> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler || crawler.energy < 10 || !crawler.isAlive) {
+      throw new Error("Cannot explore - insufficient energy or crawler is dead");
+    }
+
+    // Deduct energy
+    await this.updateCrawler(crawlerId, { 
+      energy: crawler.energy - 10,
+      status: "exploring"
+    });
+
+    // Generate encounter based on floor and crawler capabilities
+    const encounter = await this.generateEncounter(crawler);
+    
+    // Process encounter based on type
+    const result = await this.processEncounter(crawler, encounter);
+    
+    // Update crawler status back to active
+    await this.updateCrawler(crawlerId, { status: "active" });
+    
+    return result;
+  }
+
+  private async generateEncounter(crawler: any): Promise<any> {
+    const encounterTypes = ['combat', 'treasure', 'npc', 'trap', 'event'];
+    const weights = this.getEncounterWeights(crawler);
+    
+    const encounterType = this.weightedRandom(encounterTypes, weights);
+    const floor = await this.getFloor(crawler.currentFloor);
+    
+    return {
+      type: encounterType,
+      crawlerId: crawler.id,
+      floorId: floor?.id || 1,
+      energyCost: 10,
+      storyText: this.generateEncounterStory(encounterType, crawler)
+    };
+  }
+
+  private getEncounterWeights(crawler: any): number[] {
+    // Base weights [combat, treasure, npc, trap, event]
+    let weights = [40, 20, 15, 15, 10];
+    
+    // Modify based on competencies
+    if (crawler.competencies?.includes('Scavenging')) weights[1] += 10; // More treasure
+    if (crawler.competencies?.includes('Stealth')) weights[3] -= 5; // Fewer traps
+    if (crawler.competencies?.includes('Negotiation')) weights[2] += 10; // More NPCs
+    if (crawler.competencies?.includes('Combat Reflexes')) weights[0] += 5; // More combat
+    
+    // Modify based on stats
+    if (crawler.tech > 12) weights[4] += 5; // More events for high-tech crawlers
+    if (crawler.speed > 12) weights[3] -= 3; // Avoid traps with high speed
+    
+    return weights;
+  }
+
+  private weightedRandom(items: string[], weights: number[]): string {
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    const random = Math.random() * totalWeight;
+    
+    let currentWeight = 0;
+    for (let i = 0; i < items.length; i++) {
+      currentWeight += weights[i];
+      if (random <= currentWeight) {
+        return items[i];
+      }
+    }
+    return items[0];
+  }
+
+  private generateEncounterStory(type: string, crawler: any): string {
+    const stories = {
+      combat: [
+        `${crawler.name} encounters a hostile creature in the dimly lit corridor!`,
+        `A mechanical guardian emerges from the shadows, weapons charging!`,
+        `${crawler.name} stumbles into a territorial beast's den!`,
+        `Warning alarms blare as security drones detect an intruder!`
+      ],
+      treasure: [
+        `${crawler.name} discovers a hidden cache of valuable equipment!`,
+        `Ancient technology gleams from within a forgotten storage unit!`,
+        `A previous crawler's abandoned gear lies scattered nearby!`,
+        `${crawler.name} finds a corporate supply drop that went off-course!`
+      ],
+      npc: [
+        `A mysterious figure approaches ${crawler.name} in the darkness...`,
+        `${crawler.name} encounters another crawler who seems friendly!`,
+        `An eccentric merchant has set up shop in this unlikely location!`,
+        `A strange being offers ${crawler.name} information about the depths below!`
+      ],
+      trap: [
+        `${crawler.name} narrowly avoids a pressure plate trap!`,
+        `Ancient security systems activate around ${crawler.name}!`,
+        `The floor gives way beneath ${crawler.name}'s feet!`,
+        `Poison gas begins to fill the chamber!`
+      ],
+      event: [
+        `${crawler.name} discovers a fascinating piece of dungeon lore!`,
+        `Strange energies in this area seem to affect ${crawler.name}!`,
+        `A holographic message from a previous expedition plays nearby!`,
+        `${crawler.name} finds evidence of the dungeon's mysterious past!`
+      ]
+    };
+    
+    const typeStories = stories[type] || stories.event;
+    return typeStories[Math.floor(Math.random() * typeStories.length)];
+  }
+
+  private async processEncounter(crawler: any, encounter: any): Promise<any> {
+    let rewards = { credits: 0, experience: 0, equipment: [], damage: 0 };
+    
+    switch (encounter.type) {
+      case 'combat':
+        rewards = await this.processCombatEncounter(crawler);
+        break;
+      case 'treasure':
+        rewards = await this.processTreasureEncounter(crawler);
+        break;
+      case 'npc':
+        rewards = await this.processNpcEncounter(crawler);
+        break;
+      case 'trap':
+        rewards = await this.processTrapEncounter(crawler);
+        break;
+      case 'event':
+        rewards = await this.processEventEncounter(crawler);
+        break;
+    }
+    
+    // Apply rewards and damage
+    await this.applyCrawlerUpdates(crawler.id, rewards);
+    
+    return {
+      ...encounter,
+      result: rewards,
+      storyText: encounter.storyText
+    };
+  }
+
+  private async processCombatEncounter(crawler: any): Promise<any> {
+    const baseReward = Math.floor(crawler.currentFloor * 10);
+    const attackBonus = this.applyCompetencyBonus(crawler, 'combat');
+    
+    // Simple combat resolution
+    const combatPower = crawler.attack + attackBonus;
+    const enemyPower = 15 + (crawler.currentFloor * 2);
+    
+    if (combatPower >= enemyPower) {
+      return {
+        credits: baseReward + Math.floor(Math.random() * 50),
+        experience: 25 + Math.floor(Math.random() * 25),
+        equipment: [],
+        damage: Math.max(0, enemyPower - crawler.defense)
+      };
+    } else {
+      return {
+        credits: Math.floor(baseReward * 0.3),
+        experience: 10,
+        equipment: [],
+        damage: Math.max(5, enemyPower - crawler.defense + 10)
+      };
+    }
+  }
+
+  private async processTreasureEncounter(crawler: any): Promise<any> {
+    const scavengingBonus = this.applyCompetencyBonus(crawler, 'treasure');
+    const baseCredits = Math.floor(crawler.currentFloor * 15);
+    
+    return {
+      credits: baseCredits + scavengingBonus + Math.floor(Math.random() * 100),
+      experience: 15 + Math.floor(Math.random() * 15),
+      equipment: [], // Could add equipment finding logic here
+      damage: 0
+    };
+  }
+
+  private async processNpcEncounter(crawler: any): Promise<any> {
+    const negotiationBonus = this.applyCompetencyBonus(crawler, 'npc');
+    
+    return {
+      credits: Math.floor(Math.random() * 50) + negotiationBonus,
+      experience: 20 + Math.floor(Math.random() * 20),
+      equipment: [],
+      damage: 0
+    };
+  }
+
+  private async processTrapEncounter(crawler: any): Promise<any> {
+    const avoidanceBonus = this.applyCompetencyBonus(crawler, 'trap');
+    const techBonus = Math.floor(crawler.tech / 2);
+    
+    const avoidChance = (crawler.speed + avoidanceBonus + techBonus) / 100;
+    
+    if (Math.random() < avoidChance) {
+      return {
+        credits: 0,
+        experience: 10, // Experience for avoiding trap
+        equipment: [],
+        damage: 0
+      };
+    } else {
+      return {
+        credits: 0,
+        experience: 5,
+        equipment: [],
+        damage: 15 + Math.floor(crawler.currentFloor * 2)
+      };
+    }
+  }
+
+  private async processEventEncounter(crawler: any): Promise<any> {
+    const techBonus = this.applyCompetencyBonus(crawler, 'event');
+    
+    return {
+      credits: Math.floor(Math.random() * 30),
+      experience: 30 + techBonus,
+      equipment: [],
+      damage: 0
+    };
+  }
+
+  applyCompetencyBonus(crawler: any, encounterType: string): number {
+    if (!crawler.competencies) return 0;
+    
+    const competencyBonuses = {
+      combat: ['Combat Reflexes', 'Marksmanship', 'Athletics'],
+      treasure: ['Scavenging', 'Lock Picking', 'Electronics'],
+      npc: ['Negotiation', 'Psychology', 'Linguistics'],
+      trap: ['Stealth', 'Electronics', 'Engineering'],
+      event: ['Engineering', 'Chemistry', 'Hacking']
+    };
+    
+    const relevantCompetencies = competencyBonuses[encounterType] || [];
+    const bonusCount = crawler.competencies.filter(comp => 
+      relevantCompetencies.includes(comp)
+    ).length;
+    
+    return bonusCount * 5; // 5 point bonus per relevant competency
+  }
+
+  private async applyCrawlerUpdates(crawlerId: number, rewards: any): Promise<void> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) return;
+    
+    const newHealth = Math.max(0, crawler.health - rewards.damage);
+    const newCredits = crawler.credits + rewards.credits;
+    const newExperience = crawler.experience + rewards.experience;
+    const isAlive = newHealth > 0;
+    
+    await this.updateCrawler(crawlerId, {
+      health: newHealth,
+      credits: newCredits,
+      experience: newExperience,
+      isAlive: isAlive
+    });
+    
+    // Create activity log
+    await this.createActivity({
+      userId: crawler.sponsorId,
+      crawlerId: crawler.id,
+      type: 'exploration',
+      message: `${crawler.name} gained ${rewards.experience} XP and ${rewards.credits} credits`,
+      details: rewards
+    });
+  }
+
+  async regenerateEnergy(crawlerId: number): Promise<Crawler> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) throw new Error("Crawler not found");
+    
+    const now = new Date();
+    const lastRegen = new Date(crawler.lastEnergyRegen || crawler.createdAt);
+    const timeDiff = now.getTime() - lastRegen.getTime();
+    const minutesPassed = Math.floor(timeDiff / 60000);
+    
+    // Regenerate 1 energy per minute, max energy cap
+    const energyToRestore = Math.min(minutesPassed, crawler.maxEnergy - crawler.energy);
+    
+    if (energyToRestore > 0) {
+      const [updatedCrawler] = await db
+        .update(crawlers)
+        .set({
+          energy: crawler.energy + energyToRestore,
+          lastEnergyRegen: now
+        })
+        .where(eq(crawlers.id, crawlerId))
+        .returning();
+      return updatedCrawler;
+    }
+    
+    return crawler;
   }
 
   // Generate crawler candidates for selection
