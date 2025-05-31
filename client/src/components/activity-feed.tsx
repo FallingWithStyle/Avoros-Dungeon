@@ -47,6 +47,8 @@ export default function ActivityFeed({ activities, isLoading }: ActivityFeedProp
         return 'bg-gray-600';
       case 'combat_start':
         return 'bg-orange-600';
+      case 'encounter_choice':
+        return 'bg-cyan-600';
       default:
         return 'bg-blue-600';
     }
@@ -103,6 +105,11 @@ export default function ActivityFeed({ activities, isLoading }: ActivityFeedProp
                     <p className="text-sm text-white">{activity.message}</p>
                     <span className="text-xs text-slate-400">{formatTimeAgo(activity.createdAt!)}</span>
                   </div>
+                  {activity.type === 'encounter_choice' && activity.details?.results?.summary && (
+                    <p className="text-xs text-cyan-300 mt-1 font-mono">
+                      {activity.details.results.summary}
+                    </p>
+                  )}
                   {activity.crawler && (
                     <p className="text-xs text-slate-400 mt-1">
                       <span className="text-crawler font-medium">{activity.crawler.name}</span>
