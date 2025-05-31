@@ -50,7 +50,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       const currentRoom = exploredRooms.find(room => room.isCurrentRoom);
       if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
         setIsMoving(true);
-        setTimeout(() => setIsMoving(false), 300); // 300ms transition
+        setTimeout(() => setIsMoving(false), 800); // 800ms transition for smoother feel
       }
       if (currentRoom) {
         setPreviousCurrentRoom(currentRoom);
@@ -210,15 +210,15 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                           return (
                             <div
                               key={`${x}-${y}`}
-                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center relative transition-all duration-300 ease-out ${getRoomColor(room)} ${
+                              className={`w-6 h-6 border rounded text-xs flex items-center justify-center relative transition-all duration-700 ease-in-out ${getRoomColor(room)} ${
                                 room.isCurrentRoom ? 'ring-2 ring-blue-400 ring-inset transform scale-105' : ''
                               }`}
                               title={`${room.name} (${x}, ${y})`}
                             >
                               {getRoomIcon(room)}
                               {room.isCurrentRoom && (
-                                <div className={`absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full flex items-center justify-center transition-all duration-300 ease-out ${
-                                  isMoving ? 'scale-110 shadow-lg shadow-blue-400/50' : 'scale-100'
+                                <div className={`absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full flex items-center justify-center transition-all duration-700 ease-in-out ${
+                                  isMoving ? 'scale-125 shadow-lg shadow-blue-400/60 animate-pulse' : 'scale-100'
                                 }`}>
                                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                                 </div>
