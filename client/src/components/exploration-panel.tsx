@@ -33,10 +33,7 @@ export default function ExplorationPanel({ crawler }: ExplorationPanelProps) {
 
   const exploreMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/crawlers/${crawler.id}/explore`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest(`/api/crawlers/${crawler.id}/explore`, "POST");
     },
     onSuccess: (encounter) => {
       setIsExploring(false);
