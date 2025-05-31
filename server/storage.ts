@@ -639,10 +639,9 @@ export class DatabaseStorage implements IStorage {
     // Generate encounter based on floor and crawler capabilities
     const encounter = await this.generateEncounter(crawler);
     
-    // Process encounter based on type (this will handle energy and health updates)
-    const result = await this.processEncounter(crawler, encounter);
-    
-    return result;
+    // Return the encounter for the frontend to display choices
+    // Don't process it automatically anymore
+    return encounter;
   }
 
   private async generateEncounter(crawler: any): Promise<any> {
