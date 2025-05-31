@@ -1,85 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import MiniMap from "@/components/mini-map-new";
 import RoomNavigation from "@/components/room-navigation";
-import type { CrawlerWithDetails, Encounter } from "@shared/schema";
+import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CrawlerModeProps {
   crawlerId: string;
 }
 
 export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
-  const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [gameLog, setGameLog] = useState<string[]>([]);
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
+  // Fetch crawler data
   const { data: crawler, isLoading: crawlerLoading } = useQuery<CrawlerWithDetails>({
     queryKey: [`/api/crawlers/${crawlerId}`],
-    enabled: isAuthenticated && !!crawlerId,
+    enabled: !!crawlerId,
   });
-
-  const exploreMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/crawlers/${crawlerId}/explore`);
-      return response.json();
-    },
-    onSuccess: (encounter: Encounter) => {
-      const message = encounter.encounterType === 'combat' 
-        ? `${crawler?.name} encountered an enemy!` 
-        : `${crawler?.name} explores the current floor...`;
-      
-      setGameLog(prev => [...prev, message]);
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers", crawlerId] });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to explore. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // TODO: Add advance floor mutation when staircase discovery is implemented
-
-  const handleExplore = () => {
-    exploreMutation.mutate();
-  };
 
   const handleReturnToSponsor = () => {
     setLocation("/");
@@ -117,84 +59,69 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
     );
   }
 
-  if (!crawler.isAlive) {
-    return (
-      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
-        <Card className="bg-game-surface border-game-border">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <i className="fas fa-skull text-4xl text-red-400 mb-4"></i>
-              <h2 className="text-xl font-bold text-white mb-2">{crawler.name} is Dead</h2>
-              <p className="text-slate-400 mb-4">
-                This crawler has fallen in the dungeon depths. Their journey has ended.
-              </p>
-              <Button onClick={handleReturnToSponsor} className="bg-blue-600 hover:bg-blue-700">
-                Return to Command Center
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const healthPercent = (crawler.health / crawler.maxHealth) * 100;
+  const energyPercent = (crawler.energy / crawler.maxEnergy) * 100;
 
   return (
     <div className="min-h-screen bg-game-bg text-slate-100">
       {/* Header */}
       <header className="bg-game-surface border-b border-game-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={handleReturnToSponsor}
-                className="text-slate-300 hover:text-white"
-              >
-                <i className="fas fa-arrow-left mr-2"></i>
-                Return to Command
-              </Button>
-              <div className="border-l border-game-border pl-4">
-                <h1 className="text-xl font-bold text-crawler">{crawler.name}</h1>
-                <p className="text-sm text-slate-400">{crawler.class.name} • Floor {crawler.currentFloor}</p>
+              <i className="fas fa-user-ninja text-3xl text-crawler"></i>
+              <div>
+                <h1 className="text-2xl font-bold text-white">{crawler.name}</h1>
+                <p className="text-slate-400">
+                  Level {crawler.level} {crawler.class?.name || 'Crawler'} • Floor {crawler.currentFloor}
+                </p>
               </div>
             </div>
-            
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <div className="text-sm text-slate-300">Credits</div>
-                <div className="text-lg font-mono text-green-400">{crawler.credits.toLocaleString()}</div>
+                <p className="text-sm text-slate-400">Status</p>
+                <p className="text-white font-medium capitalize">{crawler.status}</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main Content - 3 Column Layout */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Crawler Stats */}
-          <div className="lg:col-span-1">
+          
+          {/* Left Column - Crawler Status & Equipment */}
+          <div className="space-y-6">
+            {/* Crawler Status */}
             <Card className="bg-game-surface border-game-border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
-                  <i className="fas fa-user-ninja mr-2 text-crawler"></i>
+                  <i className="fas fa-heart mr-2 text-red-400"></i>
                   Crawler Status
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Health Bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-slate-300">Health</span>
                     <span className="text-white">{crawler.health}/{crawler.maxHealth}</span>
                   </div>
-                  <Progress 
-                    value={healthPercent} 
-                    className="h-2"
-                  />
+                  <Progress value={healthPercent} className="h-2" />
                 </div>
 
-                <div className="space-y-2">
+                {/* Energy Bar */}
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-300">Energy</span>
+                    <span className="text-white">{crawler.energy}/{crawler.maxEnergy}</span>
+                  </div>
+                  <Progress value={energyPercent} className="h-2" />
+                </div>
+
+                {/* Stats */}
+                <div className="space-y-2 pt-2 border-t border-game-border">
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-300">Attack</span>
                     <span className="text-sm font-mono text-red-400">{crawler.attack}</span>
@@ -211,98 +138,51 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     <span className="text-sm text-slate-300">Wit</span>
                     <span className="text-sm font-mono text-purple-400">{crawler.wit}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-slate-300">Charisma</span>
+                    <span className="text-sm font-mono text-pink-400">{crawler.charisma}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-slate-300">Memory</span>
+                    <span className="text-sm font-mono text-cyan-400">{crawler.memory}</span>
+                  </div>
                 </div>
 
-                <div className="pt-4 border-t border-game-border">
+                {/* Progress Info */}
+                <div className="pt-2 border-t border-game-border">
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-300">Experience</span>
                     <span className="text-sm font-mono text-yellow-400">{crawler.experience}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-300">Status</span>
-                    <span className={`text-sm font-medium ${
-                      crawler.status === 'active' ? 'text-green-400' : 
-                      crawler.status === 'resting' ? 'text-yellow-400' : 'text-red-400'
-                    }`}>
-                      {crawler.status.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Game Interface */}
-          <div className="lg:col-span-2">
-            <Card className="bg-game-surface border-game-border">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <i className="fas fa-dungeon mr-2 text-blue-400"></i>
-                  Floor {crawler.currentFloor} - The Depths
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Game Log */}
-                <div className="bg-game-bg rounded-lg p-4 h-64 overflow-y-auto mb-4 border border-game-border">
-                  <div className="space-y-2 font-mono text-sm">
-                    <div className="text-blue-400">
-                      {'>>>'} {crawler.name} stands ready on Floor {crawler.currentFloor}
-                    </div>
-                    <div className="text-slate-300">
-                      The shadows whisper of dangers ahead. What will you do?
-                    </div>
-                    {gameLog.map((entry, index) => (
-                      <div key={index} className="text-green-400">
-                        {'>>>'} {entry}
-                      </div>
-                    ))}
+                    <span className="text-sm text-slate-300">Credits</span>
+                    <span className="text-sm font-mono text-green-400">{crawler.credits}</span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-2">
-                  <Button
-                    onClick={handleExplore}
-                    disabled={exploreMutation.isPending || crawler.status !== 'active'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {exploreMutation.isPending ? (
-                      <>
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                        Exploring...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-search mr-2"></i>
-                        Explore
-                      </>
-                    )}
-                  </Button>
-                  {/* TODO: Add "Next Floor" button when staircase is found */}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-game-border">
                   <Button
                     variant="outline"
-                    className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
+                    onClick={handleReturnToSponsor}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
                   >
-                    <i className="fas fa-medkit mr-2"></i>
-                    Rest & Heal
+                    <i className="fas fa-arrow-left mr-2"></i>
+                    Return
                   </Button>
-
                   <Button
                     variant="outline"
-                    className="border-yellow-600 text-yellow-400 hover:bg-yellow-600 hover:text-white"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
                   >
-                    <i className="fas fa-backpack mr-2"></i>
-                    Inventory
+                    <i className="fas fa-cog mr-2"></i>
+                    Settings
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Equipment Section */}
-            <Card className="bg-game-surface border-game-border mt-6">
+            {/* Equipment */}
+            <Card className="bg-game-surface border-game-border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <i className="fas fa-shield-alt mr-2 text-green-400"></i>
@@ -310,32 +190,35 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center text-slate-400 py-8">
-                    <i className="fas fa-box-open text-3xl mb-2"></i>
-                    <p className="text-sm">No equipment equipped</p>
-                  </div>
+                <div className="text-center text-slate-400 py-8">
+                  <i className="fas fa-box-open text-3xl mb-2"></i>
+                  <p className="text-sm">No equipment equipped</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Middle Column - Room Navigation */}
-          <div className="lg:col-span-1">
+          <div className="space-y-6">
             <RoomNavigation crawler={crawler} />
           </div>
 
-          {/* Floor Info & Mini-map */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Floor Info & Mini-map */}
+          <div className="space-y-6">
+            {/* Floor Info */}
             <Card className="bg-game-surface border-game-border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <i className="fas fa-info-circle mr-2 text-blue-400"></i>
-                  Floor Info
+                  Floor Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-300">Current Floor</span>
+                    <span className="text-red-400 font-medium">Floor {crawler.currentFloor}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-slate-300">Difficulty</span>
                     <span className="text-red-400 font-medium">Level {crawler.currentFloor}</span>
@@ -357,8 +240,8 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
               </CardContent>
             </Card>
 
-            {/* Mini-map Section */}
-            <Card className="bg-game-surface border-game-border mt-6">
+            {/* Mini-map */}
+            <Card className="bg-game-surface border-game-border">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <i className="fas fa-map mr-2 text-green-400"></i>
@@ -370,6 +253,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
               </CardContent>
             </Card>
           </div>
+
         </div>
       </div>
     </div>
