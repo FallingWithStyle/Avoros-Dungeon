@@ -42,6 +42,23 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   // Use the live crawler data if available, otherwise fall back to the prop
   const crawler = crawlers?.find((c: CrawlerWithDetails) => c.id === initialCrawler.id) || initialCrawler;
 
+  // Don't render exploration panel for dead crawlers
+  if (!crawler.isAlive) {
+    return (
+      <Card className="bg-gray-800/50 border-red-600/30">
+        <CardHeader>
+          <CardTitle className="text-red-400 flex items-center gap-2">
+            <Heart className="w-5 h-5" />
+            {crawler.name} - Deceased
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            This crawler has perished in the dungeon. Floor exploration is no longer available.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   const exploreMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/explore`);
@@ -81,6 +98,23 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
     },
     onError: (error) => {
       showErrorToast("Choice Failed", error);
+    },
+  });
+
+  const restoreEnergyMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/restore-energy`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      toast({
+        title: "Energy Restored",
+        description: "Crawler energy has been restored to 100%.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Energy Restore Failed", error);
     },
   });
 
@@ -286,6 +320,25 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               This crawler has died and cannot explore
             </p>
           )}
+        </div>
+
+        {/* Debug Section */}
+        <div className="bg-red-900/20 border border-red-600/30 rounded p-3">
+          <h4 className="text-red-400 text-sm font-medium mb-2">Debug Controls</h4>
+          <div className="space-y-2">
+            <Button
+              onClick={() => restoreEnergyMutation.mutate()}
+              disabled={restoreEnergyMutation.isPending}
+              variant="outline"
+              size="sm"
+              className="w-full border-red-600/30 text-red-400 hover:bg-red-600/10"
+            >
+              {restoreEnergyMutation.isPending ? "Restoring..." : "Restore Energy to 100%"}
+            </Button>
+            <p className="text-xs text-red-300">
+              Hidden Luck: {crawler.luck || 0}
+            </p>
+          </div>
         </div>
 
         {/* Encounter Modal */}

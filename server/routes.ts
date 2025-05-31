@@ -130,6 +130,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAlive: true,
       });
 
+      // Add 3 stat points for level 1 (distributed automatically)
+      const leveledUpCrawler = await storage.updateCrawler(newCrawler.id, {
+        attack: newCrawler.attack + 1,
+        defense: newCrawler.defense + 1,
+        speed: newCrawler.speed + 1
+      });
+
       // Update user's active crawler ID and mark primary sponsorship as used
       await storage.updateUserActiveCrawler(userId, newCrawler.id);
       
@@ -147,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: null,
       });
 
-      res.json(newCrawler);
+      res.json(leveledUpCrawler);
     } catch (error) {
       console.error("Error creating crawler:", error);
       res.status(500).json({ message: "Failed to create crawler" });
