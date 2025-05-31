@@ -1986,16 +1986,20 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Crawler not found" };
     }
 
-    console.log(`Final energy cost: ${energyCost}, crawler current energy: ${crawler.energy}`);
+    console.log(`Final energy cost: ${energyCost}, crawler current energy: ${crawler.energy}, debugEnergyDisabled: ${debugEnergyDisabled}`);
 
-    if (crawler.energy < energyCost) {
+    if (!debugEnergyDisabled && crawler.energy < energyCost) {
       return { success: false, error: `Not enough energy. Need ${energyCost}, have ${crawler.energy}` };
     }
 
-    // Deduct energy cost
-    await this.updateCrawler(crawlerId, {
-      energy: Math.max(0, crawler.energy - energyCost)
-    });
+    // Deduct energy cost (unless debug mode is enabled)
+    if (!debugEnergyDisabled) {
+      await this.updateCrawler(crawlerId, {
+        energy: Math.max(0, crawler.energy - energyCost)
+      });
+    } else {
+      console.log(`Debug mode enabled: skipping energy deduction of ${energyCost}`);
+    }
 
     // Always insert a new position record to create movement history
     // This allows us to track all rooms the crawler has visited
