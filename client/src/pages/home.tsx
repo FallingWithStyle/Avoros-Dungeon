@@ -11,23 +11,14 @@ import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
 import MobileMenu from "@/components/mobile-menu";
 import SeasonStatus from "@/components/season-status";
+import CrawlerSelection from "@/components/crawler-selection";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCrawlerSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import type { CrawlerWithDetails, CrawlerClass, ActivityWithDetails } from "@shared/schema";
-import { z } from "zod";
+import type { CrawlerWithDetails, ActivityWithDetails } from "@shared/schema";
 
-const createCrawlerFormSchema = insertCrawlerSchema.pick({
-  name: true,
-  classId: true,
-});
+
 
 export default function Home() {
   const { toast } = useToast();
