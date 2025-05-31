@@ -112,6 +112,7 @@ export interface IStorage {
   moveToRoom(crawlerId: number, direction: string): Promise<{ success: boolean; newRoom?: Room; error?: string }>;
   getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined>;
   getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]>;
+  getExploredRooms(crawlerId: number): Promise<any[]>;
   
   // Debug functions
   resetUserCrawlers(userId: string): Promise<void>;
@@ -1928,6 +1929,41 @@ export class DatabaseStorage implements IStorage {
     }
 
     return crawlersInRoom;
+  }
+
+  async getExploredRooms(crawlerId: number): Promise<any[]> {
+    // Get all rooms the crawler has been to (from position history)
+    const currentPosition = await db.select()
+      .from(crawlerPositions)
+      .where(eq(crawlerPositions.crawlerId, crawlerId))
+      .limit(1);
+
+    if (currentPosition.length === 0) {
+      return [];
+    }
+
+    const currentRoomId = currentPosition[0].roomId;
+
+    // For now, we'll get all rooms on the current floor since we don't track room visit history
+    // In a full implementation, you'd want to track which rooms have been visited
+    const currentRoom = await this.getRoom(currentRoomId);
+    if (!currentRoom) {
+      return [];
+    }
+
+    const roomsOnFloor = await this.getRoomsForFloor(currentRoom.floorId);
+    
+    // For demo purposes, show all rooms but mark only visited ones
+    return roomsOnFloor.map(room => ({
+      id: room.id,
+      name: room.name,
+      type: room.type,
+      isSafe: room.isSafe,
+      hasLoot: room.hasLoot,
+      x: room.x,
+      y: room.y,
+      isCurrentRoom: room.id === currentRoomId
+    }));
   }
 }
 

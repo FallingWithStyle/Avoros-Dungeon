@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import MiniMap from "@/components/mini-map";
 import type { CrawlerWithDetails, Encounter } from "@shared/schema";
 
 interface CrawlerModeProps {
