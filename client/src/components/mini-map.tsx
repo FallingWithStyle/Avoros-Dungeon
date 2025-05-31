@@ -146,79 +146,30 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {/* Grid display with connections */}
-          <div 
-            className="relative grid gap-0 max-w-full overflow-auto"
-            style={{ 
-              gridTemplateColumns: `repeat(${gridWidth * 2 - 1}, 1fr)`,
-              gridTemplateRows: `repeat(${gridHeight * 2 - 1}, 1fr)`,
-              aspectRatio: gridWidth / gridHeight > 2 ? '2/1' : 'auto'
-            }}
-          >
-            {/* Render rooms and connections */}
-            {Array.from({ length: gridHeight * 2 - 1 }, (_, row) => 
-              Array.from({ length: gridWidth * 2 - 1 }, (_, col) => {
-                const isRoomRow = row % 2 === 0;
-                const isRoomCol = col % 2 === 0;
-                const key = `cell-${row}-${col}`;
-
-                if (isRoomRow && isRoomCol) {
-                  // This is a room position
-                  const roomRow = Math.floor(row / 2);
-                  const roomCol = Math.floor(col / 2);
-                  const room = grid[roomRow]?.[roomCol];
-
-                  if (!room) {
-                    return <div key={key} className="w-4 h-4" />;
-                  }
-
-                  return (
-                    <div
-                      key={key}
-                      className={`w-4 h-4 border rounded flex items-center justify-center text-xs ${getRoomColor(room)}`}
-                      title={room.name}
-                    >
-                      {getRoomIcon(room)}
-                    </div>
-                  );
-                } else if (isRoomRow && !isRoomCol) {
-                  // This is a horizontal connection space
-                  const roomRow = Math.floor(row / 2);
-                  const leftCol = Math.floor(col / 2);
-                  const rightCol = leftCol + 1;
-                  const leftRoom = grid[roomRow]?.[leftCol];
-                  const rightRoom = grid[roomRow]?.[rightCol];
-
-                  if (leftRoom && rightRoom) {
-                    return (
-                      <div key={key} className="w-4 h-4 flex items-center justify-center">
-                        <div className="w-3 h-0.5 bg-slate-500"></div>
-                      </div>
-                    );
-                  }
-                  return <div key={key} className="w-4 h-4" />;
-                } else if (!isRoomRow && isRoomCol) {
-                  // This is a vertical connection space
-                  const roomCol = Math.floor(col / 2);
-                  const topRow = Math.floor(row / 2);
-                  const bottomRow = topRow + 1;
-                  const topRoom = grid[topRow]?.[roomCol];
-                  const bottomRoom = grid[bottomRow]?.[roomCol];
-
-                  if (topRoom && bottomRoom) {
-                    return (
-                      <div key={key} className="w-4 h-4 flex items-center justify-center">
-                        <div className="w-0.5 h-3 bg-slate-500"></div>
-                      </div>
-                    );
-                  }
-                  return <div key={key} className="w-4 h-4" />;
-                } else {
-                  // This is an intersection space
-                  return <div key={key} className="w-4 h-4" />;
-                }
-              })
-            ).flat()}
+          {/* Simplified room list view */}
+          <div className="space-y-2">
+            {exploredRooms.map((room) => (
+              <div
+                key={room.id}
+                className={`flex items-center gap-3 p-2 rounded border ${getRoomColor(room)} ${
+                  room.isCurrentRoom ? 'ring-2 ring-blue-400' : ''
+                }`}
+              >
+                <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center border rounded">
+                  {getRoomIcon(room)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate">{room.name}</div>
+                  <div className="text-xs text-slate-400">
+                    {room.type.charAt(0).toUpperCase() + room.type.slice(1)} Room
+                    {room.isCurrentRoom && <span className="ml-2 text-blue-400">← Current</span>}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-xs text-slate-500">
+                  ({room.x}, {room.y})
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Legend */}
