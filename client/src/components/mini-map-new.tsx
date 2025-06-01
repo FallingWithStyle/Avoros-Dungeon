@@ -198,14 +198,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     );
   }
 
-  const centerX = currentRoom.x;
-  const centerY = currentRoom.y;
-  const radius = 3;
-  
-  const minX = centerX - radius;
-  const maxX = centerX + radius;
-  const minY = centerY - radius;
-  const maxY = centerY + radius;
+  // Calculate bounds to show all explored rooms
+  const allX = exploredRooms.map(r => r.x);
+  const allY = exploredRooms.map(r => r.y);
+  const minX = Math.min(...allX);
+  const maxX = Math.max(...allX);
+  const minY = Math.min(...allY);
+  const maxY = Math.max(...allY);
   
   const roomMap = new Map();
   exploredRooms.forEach(room => {
