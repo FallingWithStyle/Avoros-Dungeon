@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertCrawlerSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertCrawlerSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -381,30 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat
-  app.get('/api/chat/messages', isAuthenticated, async (req, res) => {
-    try {
-      const limit = parseInt(req.query.limit as string) || 50;
-      const messages = await storage.getRecentChatMessages(limit);
-      res.json(messages);
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-      res.status(500).json({ message: "Failed to fetch chat messages" });
-    }
-  });
 
-  app.post('/api/chat/messages', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { message } = insertChatMessageSchema.parse(req.body);
-      
-      const chatMessage = await storage.createChatMessage(userId, message);
-      res.json(chatMessage);
-    } catch (error) {
-      console.error("Error sending chat message:", error);
-      res.status(500).json({ message: "Failed to send message" });
-    }
-  });
 
   // Leaderboards
   app.get('/api/leaderboards/crawlers', async (req, res) => {
