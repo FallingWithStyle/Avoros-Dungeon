@@ -122,6 +122,12 @@ export function MiniMap({ crawler }: { crawler: any }) {
     queryEnabled: !!crawler?.id
   });
 
+  if (exploredRooms && Array.isArray(exploredRooms)) {
+    console.log('Explored rooms data:', exploredRooms);
+    const currentRoomInData = exploredRooms.find(r => r.isCurrentRoom);
+    console.log('Current room found:', currentRoomInData);
+  }
+
   // All effect hooks at the top - always called
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
