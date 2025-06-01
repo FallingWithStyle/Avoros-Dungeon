@@ -8,6 +8,14 @@ export default function HeaderNavigation() {
   const { user } = useAuth();
   const [location] = useLocation();
 
+  // Determine the crawler navigation URL based on user's active crawler
+  const getCrawlerHref = () => {
+    if (user?.activeCrawlerId) {
+      return `/crawler/${user.activeCrawlerId}`;
+    }
+    return "/"; // Fallback to sponsor page if no active crawler
+  };
+
   const navItems = [
     {
       href: "/",
@@ -16,10 +24,11 @@ export default function HeaderNavigation() {
       description: "Corporation Overview"
     },
     {
-      href: "/crawler",
+      href: getCrawlerHref(),
       label: "Crawler",
       icon: Bot,
-      description: "Active Crawler Control"
+      description: "Active Crawler Control",
+      disabled: !user?.activeCrawlerId
     },
     {
       href: "/account",
@@ -52,6 +61,23 @@ export default function HeaderNavigation() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
+                const disabled = item.disabled;
+                
+                if (disabled) {
+                  return (
+                    <Button
+                      key={item.label}
+                      variant="ghost"
+                      size="sm"
+                      disabled
+                      className="flex items-center gap-2 text-amber-300/30 cursor-not-allowed"
+                      title="No active crawler - create or activate a crawler from the Sponsor page"
+                    >
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </Button>
+                  );
+                }
                 
                 return (
                   <Link key={item.href} href={item.href}>
