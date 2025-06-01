@@ -13,8 +13,7 @@ import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
 import ChatPanel from "@/components/chat-panel";
 import Leaderboard from "@/components/leaderboard";
-import MiniMap from "@/components/mini-map-new";
-import ExplorationPanel from "@/components/exploration-panel";
+
 import CrawlerCard from "@/components/crawler-card";
 import DebugPanel from "@/components/debug-panel";
 import { useAuth } from "@/hooks/useAuth";
@@ -174,10 +173,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Exploration Panel */}
-            {activeCrawler && isExpanded && (
-              <ExplorationPanel crawler={activeCrawler} />
-            )}
+
 
             {/* Dead Crawlers Memorial */}
             {deadCrawlers.length > 0 && (
@@ -212,10 +208,7 @@ export default function Home() {
           {/* Right Column - Social & Stats */}
           <div className="space-y-6">
             
-            {/* Mini-map for active crawler */}
-            {activeCrawler && isExpanded && (
-              <MiniMap crawler={activeCrawler} />
-            )}
+
             
             {/* Activity Feed */}
             <Card className="bg-slate-800 border-slate-700">
