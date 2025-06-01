@@ -274,6 +274,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get crawler's explored rooms
+  app.get('/api/crawlers/:id/explored-rooms', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+      
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const exploredRooms = await storage.getExploredRooms(crawlerId);
+      res.json(exploredRooms);
+    } catch (error) {
+      console.error("Error fetching explored rooms:", error);
+      res.status(500).json({ message: "Failed to fetch explored rooms" });
+    }
+  });
+
   // Get crawler's map knowledge (enhanced map data)
   app.get('/api/crawlers/:id/map-knowledge', isAuthenticated, async (req: any, res) => {
     try {
