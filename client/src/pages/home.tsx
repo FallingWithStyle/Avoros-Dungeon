@@ -4,14 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Users, Activity, TrendingUp, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Users, Activity, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
 import CrawlerSelection from "@/components/crawler-selection";
 import SeasonStatus from "@/components/season-status";
 import ActivityFeed from "@/components/activity-feed";
-import ChatPanel from "@/components/chat-panel";
+
 import Leaderboard from "@/components/leaderboard";
 
 import CrawlerCard from "@/components/crawler-card";
@@ -229,18 +229,7 @@ export default function Home() {
             {/* Leaderboard */}
             <Leaderboard />
 
-            {/* TODO: Chat Panel - temporarily hidden, add functionality or remove later */}
-            {/* <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-green-400 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Corporate Chat
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChatPanel />
-              </CardContent>
-            </Card> */}
+
 
           </div>
         </div>
