@@ -122,6 +122,18 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     const roomGridX = (currentRoom.x - minX) * 2;
     const roomGridY = (maxY - currentRoom.y) * 2;
     
+    console.log("Current room coords:", { x: currentRoom.x, y: currentRoom.y });
+    console.log("Grid calculation:", { 
+      roomX: currentRoom.x, 
+      minX, 
+      gridX: currentRoom.x - minX, 
+      finalGridX: roomGridX,
+      roomY: currentRoom.y,
+      maxY,
+      gridY: maxY - currentRoom.y,
+      finalGridY: roomGridY
+    });
+    
     console.log("Room grid position:", { roomGridX, roomGridY });
     
     // Calculate the pixel position of the current room

@@ -1,0 +1,124 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=4pDuajsVLKx3' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=4pDuajsVLKx3' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=84144ba6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+mini-map-new.tsx:84 centerOnCrawler: No room data available
+mini-map-new.tsx:90 centerOnCrawler: No current room found in 219 rooms
+mini-map-new.tsx:91 Available rooms: (219) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+mini-map-new.tsx:95 centerOnCrawler: Current room Abandoned Fortress Entrance at 0 0
+mini-map-new.tsx:116 Grid bounds: {minX: -1, maxX: 1, minY: -1, maxY: 1}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Abandoned Fortress Entrance at 0 0
+mini-map-new.tsx:116 Grid bounds: {minX: -1, maxX: 1, minY: -1, maxY: 1}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Abandoned Fortress Entrance at 0 0
+mini-map-new.tsx:116 Grid bounds: {minX: -1, maxX: 1, minY: -1, maxY: 1}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Guard Chamber at -1 0
+mini-map-new.tsx:116 Grid bounds: {minX: -2, maxX: 1, minY: -1, maxY: 1}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Inner Courtyard North at -1 1
+mini-map-new.tsx:116 Grid bounds: {minX: -2, maxX: 1, minY: -1, maxY: 1}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 0}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 0}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 110}
+mini-map-new.tsx:95 centerOnCrawler: Current room West Junction at -2 1
+mini-map-new.tsx:116 Grid bounds: {minX: -3, maxX: 1, minY: -1, maxY: 2}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Officers Quarters at -3 1
+mini-map-new.tsx:116 Grid bounds: {minX: -4, maxX: 1, minY: -1, maxY: 2}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Washroom at -3 2
+mini-map-new.tsx:116 Grid bounds: {minX: -4, maxX: 1, minY: -1, maxY: 3}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Washroom at -3 2
+mini-map-new.tsx:116 Grid bounds: {minX: -4, maxX: 1, minY: -1, maxY: 3}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Washroom at -3 2
+mini-map-new.tsx:116 Grid bounds: {minX: -4, maxX: 1, minY: -1, maxY: 3}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Training Complex Entry at -4 2
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 3}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Training Complex Entry at -4 2
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 3}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Combat Arena at -4 3
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 4}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+@radix-ui_react-dialog.js?v=84144ba6:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=84144ba6:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=84144ba6:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=84144ba6:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=84144ba6:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=84144ba6:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=84144ba6:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=84144ba6:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=84144ba6:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=84144ba6:19416
+commitRoot @ chunk-RPCDYKBN.js?v=84144ba6:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+mini-map-new.tsx:95 centerOnCrawler: Current room Viewing Gallery at -4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Viewing Gallery at -4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Viewing Gallery at -4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:131 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:144 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:150 Setting pan offset: {centerX: 54, centerY: 54}
