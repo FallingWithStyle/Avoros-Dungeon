@@ -238,15 +238,15 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   }
 
   // Calculate bounds to show all rooms
-  const allX = roomsData.map(r => r.x);
-  const allY = roomsData.map(r => r.y);
+  const allX = displayRooms.map(r => r.x);
+  const allY = displayRooms.map(r => r.y);
   const minX = Math.min(...allX);
   const maxX = Math.max(...allX);
   const minY = Math.min(...allY);
   const maxY = Math.max(...allY);
   
   const roomMap = new Map();
-  roomsData.forEach(room => {
+  displayRooms.forEach(room => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
 
@@ -257,7 +257,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           <MapPin className="w-4 h-4" />
           Mini-Map
           <Badge variant="outline" className="ml-auto text-xs">
-            {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
+            {showFullMap ? "Full Floor" : `${displayRooms?.length || 0} Explored`}
           </Badge>
           <Dialog>
             <DialogTrigger asChild>
@@ -272,7 +272,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
                   Dungeon Map - Floor {crawler.currentFloor}
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={roomsData || []} />
+              <ExpandedMapView exploredRooms={displayRooms || []} />
             </DialogContent>
           </Dialog>
         </CardTitle>
