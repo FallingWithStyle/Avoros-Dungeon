@@ -45,11 +45,10 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms for this crawler
+  // Fetch explored rooms for this crawler (always enabled for current room detection)
   const { data: exploredRooms, isLoading: exploredLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     refetchInterval: 2000, // Refresh every 2 seconds
-    enabled: !showFullMap,
   });
 
   // Fetch all rooms for full map mode
