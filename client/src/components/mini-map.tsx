@@ -63,86 +63,13 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   const roomsData = showFullMap ? allRooms : exploredRooms;
   const isLoading = showFullMap ? allRoomsLoading : exploredLoading;
 
-  // Reusable centering function
+  // Simple centering function
   const centerOnCrawler = useCallback(() => {
-    // Use the processed displayRooms instead of raw roomsData
-    let dataToUse = roomsData;
-    
-    // If we're in the main component rendering, use displayRooms
-    if (showFullMap && allRooms && exploredRooms) {
-      const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
-      const currentRoomId = exploredCurrentRoom?.id;
-      
-      dataToUse = allRooms.map(room => ({
-        ...room,
-        isCurrentRoom: room.id === currentRoomId,
-        isExplored: exploredRooms.some(er => er.id === room.id) ? true : false
-      }));
-    }
-    
-    if (!dataToUse || dataToUse.length === 0) {
-      console.log("centerOnCrawler: No room data available");
-      return;
-    }
-    
-    const currentRoom = dataToUse.find(room => room.isCurrentRoom);
     if (!currentRoom) {
-      console.log("centerOnCrawler: No current room found in", dataToUse.length, "rooms");
-      console.log("Available rooms:", dataToUse.map(r => ({ id: r.id, name: r.name, isCurrentRoom: r.isCurrentRoom })));
+      console.log("centerOnCrawler: No current room found");
       return;
     }
 
-    console.log("centerOnCrawler: Current room", currentRoom.name, "at", currentRoom.x, currentRoom.y);
-
-    // For centering, always use the displayed rooms, not the full dataset
-    const displayedRooms = showFullMap ? 
-      (allRooms && exploredRooms ? 
-        allRooms.map(room => ({
-          ...room,
-          isCurrentRoom: room.id === exploredRooms.find(r => r.isCurrentRoom)?.id,
-          isExplored: exploredRooms.some(er => er.id === room.id)
-        })).filter(room => room.isExplored || room.isCurrentRoom) // Only show explored rooms in the grid calculation
-        : []
-      ) : exploredRooms || [];
-
-    // Calculate room grid bounds using displayed rooms only
-    const allX = displayedRooms.map(r => r.x);
-    const allY = displayedRooms.map(r => r.y);
-    const minX = Math.min(...allX);
-    const maxX = Math.max(...allX);
-    const minY = Math.min(...allY);
-    const maxY = Math.max(...allY);
-    
-    console.log("Grid bounds:", { minX, maxX, minY, maxY });
-    
-    // Room size in the grid (w-6 h-6 = 24px + gap-1 = 4px)
-    const roomSize = 28;
-    
-    // Calculate where the current room is in the grid (accounting for Y-flip)
-    const roomGridX = (currentRoom.x - minX) * 2;
-    const roomGridY = (maxY - currentRoom.y) * 2;
-    
-    console.log("Current room coords:", { x: currentRoom.x, y: currentRoom.y });
-    console.log("Grid calculation:", { 
-      roomX: currentRoom.x, 
-      minX, 
-      gridX: currentRoom.x - minX, 
-      finalGridX: roomGridX,
-      roomY: currentRoom.y,
-      maxY,
-      gridY: maxY - currentRoom.y,
-      finalGridY: roomGridY
-    });
-    
-    console.log("Room grid position:", { roomGridX, roomGridY });
-    
-    // Calculate the pixel position of the current room
-    const roomPixelX = roomGridX * roomSize;
-    const roomPixelY = roomGridY * roomSize;
-    
-    console.log("Room pixel position:", { roomPixelX, roomPixelY });
-    
-    // Get the container dimensions
     const container = mapRef.current;
     if (!container) {
       console.log("centerOnCrawler: No container ref");
@@ -153,20 +80,38 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     const containerWidth = containerRect.width;
     const containerHeight = containerRect.height;
     
-    console.log("Container dimensions:", { containerWidth, containerHeight });
+    // Use the displayed rooms for bounds calculation
+    const allX = displayRooms.map(r => r.x);
+    const allY = displayRooms.map(r => r.y);
+    const minX = Math.min(...allX);
+    const maxX = Math.max(...allX);
+    const minY = Math.min(...allY);
+    const maxY = Math.max(...allY);
     
-    // Center the current room in the view
-    const centerX = containerWidth / 2 - roomPixelX - roomSize / 2;
-    const centerY = containerHeight / 2 - roomPixelY - roomSize / 2;
+    // Room size matches the CSS (28px includes gap)
+    const roomSize = 28;
     
-    // Ensure the calculated offset keeps the room within visible bounds
-    const maxOffset = Math.max(containerWidth, containerHeight) / 4; // Allow some panning but not too far
-    const clampedCenterX = Math.max(-maxOffset, Math.min(maxOffset, centerX));
-    const clampedCenterY = Math.max(-maxOffset, Math.min(maxOffset, centerY));
+    // Calculate the current room's position in the grid
+    const roomGridX = (currentRoom.x - minX) * 2; // *2 for connections
+    const roomGridY = (maxY - currentRoom.y) * 2; // Y is flipped
+    const roomPixelX = roomGridX * roomSize;
+    const roomPixelY = roomGridY * roomSize;
     
-    console.log("Setting pan offset:", { centerX, centerY, clampedCenterX, clampedCenterY });
-    setPanOffset({ x: clampedCenterX, y: clampedCenterY });
-  }, [roomsData, showFullMap, allRooms, exploredRooms]);
+    // Simple centering calculation
+    const centerX = (containerWidth / 2) - roomPixelX - (roomSize / 2);
+    const centerY = (containerHeight / 2) - roomPixelY - (roomSize / 2);
+    
+    console.log("Simple centering:", { 
+      room: currentRoom.name,
+      coords: [currentRoom.x, currentRoom.y],
+      bounds: [minX, maxX, minY, maxY],
+      grid: [roomGridX, roomGridY],
+      pixel: [roomPixelX, roomPixelY],
+      center: [centerX, centerY]
+    });
+    
+    setPanOffset({ x: centerX, y: centerY });
+  }, [displayRooms, currentRoom]);
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
