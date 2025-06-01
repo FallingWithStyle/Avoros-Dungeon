@@ -182,91 +182,12 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     <i className="fas fa-arrow-left mr-2"></i>
                     Return
                   </Button>
-                  {import.meta.env.DEV && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowDebug(!showDebug)}
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                      <i className="fas fa-bug mr-2"></i>
-                      Debug
-                    </Button>
-                  )}
+
                 </div>
               </CardContent>
             </Card>
 
-            {/* Debug Panel - Development Only */}
-            {import.meta.env.DEV && showDebug && (
-              <Card className="bg-game-surface border-game-border border-orange-500/50">
-                <CardHeader>
-                  <CardTitle className="text-orange-400 flex items-center">
-                    <i className="fas fa-bug mr-2"></i>
-                    Debug Controls
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Energy Toggle */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-white">Disable Energy Usage</p>
-                      <p className="text-xs text-slate-400">Move without consuming energy</p>
-                    </div>
-                    <Switch
-                      checked={energyDisabled}
-                      onCheckedChange={setEnergyDisabled}
-                    />
-                  </div>
-                  
-                  <Separator className="bg-slate-600" />
-                  
-                  {/* Debug Actions */}
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => healMutation.mutate()}
-                      disabled={healMutation.isPending}
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
-                    >
-                      {healMutation.isPending ? (
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                      ) : (
-                        <i className="fas fa-heart mr-2"></i>
-                      )}
-                      Restore Health/Energy
-                    </Button>
-                    
-                    <Button
-                      onClick={() => resetMutation.mutate()}
-                      disabled={resetMutation.isPending}
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
-                    >
-                      {resetMutation.isPending ? (
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                      ) : (
-                        <i className="fas fa-undo mr-2"></i>
-                      )}
-                      Reset to Entrance
-                    </Button>
-                  </div>
-                  
-                  {energyDisabled && (
-                    <div className="p-2 bg-orange-900/30 border border-orange-600/30 rounded">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="border-orange-500 text-orange-400">
-                          <i className="fas fa-exclamation-triangle mr-1"></i>
-                          DEBUG MODE
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-orange-300 mt-1">Energy usage disabled</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Equipment */}
             <Card className="bg-game-surface border-game-border">
@@ -343,6 +264,9 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
 
         </div>
       </div>
+      
+      {/* Global Debug Panel */}
+      <DebugPanel activeCrawler={crawler} />
     </div>
   );
 }
