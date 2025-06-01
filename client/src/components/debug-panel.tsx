@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Zap, RotateCcw, Heart, Shield, Map } from "lucide-react";
+import { RefreshCw, Zap, RotateCcw, Heart, Shield } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -10,7 +10,6 @@ import type { CrawlerWithDetails } from "@shared/schema";
 
 interface DebugPanelProps {
   activeCrawler?: CrawlerWithDetails;
-  onMapModeChange?: (showFullMap: boolean) => void;
 }
 
 // Global debug mode flag - set to true for development, false for production
@@ -19,13 +18,9 @@ const IS_DEBUG_MODE = true;
 // Global energy disabled state - disabled by default for debug mode
 let globalEnergyDisabled = true;
 
-// Global map mode state - show full map by default for debugging
-let globalShowFullMap = true;
-
-export default function DebugPanel({ activeCrawler, onMapModeChange }: DebugPanelProps) {
+export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(globalEnergyDisabled);
-  const [showFullMap, setShowFullMap] = useState(globalShowFullMap);
 
   // Get current room data to show coordinates
   const { data: roomData } = useQuery({
@@ -41,17 +36,6 @@ export default function DebugPanel({ activeCrawler, onMapModeChange }: DebugPane
     toast({
       title: newState ? "Energy Usage Disabled" : "Energy Usage Enabled",
       description: newState ? "Movement will not consume energy" : "Movement will consume energy normally",
-    });
-  };
-
-  const toggleMapMode = () => {
-    const newState = !showFullMap;
-    setShowFullMap(newState);
-    globalShowFullMap = newState;
-    onMapModeChange?.(newState);
-    toast({
-      title: newState ? "Full Map Revealed" : "Explored Only Mode",
-      description: newState ? "Showing all 219 rooms for debugging" : "Showing only explored rooms",
     });
   };
 
@@ -251,20 +235,6 @@ export default function DebugPanel({ activeCrawler, onMapModeChange }: DebugPane
               )}
               Heal Crawler
             </Button>
-            
-            <Button
-              onClick={toggleMapMode}
-              variant="outline"
-              size="sm"
-              className={`${
-                showFullMap 
-                  ? "border-cyan-600/30 text-cyan-400 hover:bg-cyan-600/10" 
-                  : "border-gray-600/30 text-gray-400 hover:bg-gray-600/10"
-              }`}
-            >
-              <Map className="w-3 h-3 mr-2" />
-              {showFullMap ? "Full Map Revealed" : "Explored Only"}
-            </Button>
           </div>
           
           {/* Debug Information */}
@@ -286,8 +256,5 @@ export default function DebugPanel({ activeCrawler, onMapModeChange }: DebugPane
 
 // Function to get current energy disabled state
 export const isEnergyDisabled = () => globalEnergyDisabled;
-
-// Function to get current map mode state
-export const isFullMapMode = () => globalShowFullMap;
 
 export { IS_DEBUG_MODE };
