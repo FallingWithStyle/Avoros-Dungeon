@@ -103,7 +103,7 @@ export function MiniMap({ crawler }: { crawler: any }) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   // All query hooks at the top - always called
-  const { data: exploredRooms, isLoading: exploredLoading } = useQuery({
+  const { data: exploredRooms, isLoading: exploredLoading, error: exploredError } = useQuery({
     queryKey: ['/api/crawlers', crawler?.id, 'explored-rooms'],
     enabled: !!crawler?.id,
   });
@@ -111,6 +111,15 @@ export function MiniMap({ crawler }: { crawler: any }) {
   const { data: allRooms, isLoading: allRoomsLoading } = useQuery({
     queryKey: ['/api/floors', crawler?.currentFloor, 'rooms'],
     enabled: showFullMap && !!crawler?.currentFloor,
+  });
+
+  // Debug logging
+  console.log('MiniMap Debug:', {
+    crawlerId: crawler?.id,
+    exploredRooms,
+    exploredLoading,
+    exploredError,
+    queryEnabled: !!crawler?.id
   });
 
   // All effect hooks at the top - always called
