@@ -287,4 +287,7 @@ export default function DebugPanel({ activeCrawler, onMapModeChange }: DebugPane
 // Function to get current energy disabled state
 export const isEnergyDisabled = () => globalEnergyDisabled;
 
+// Function to get current map mode state
+export const isFullMapMode = () => globalShowFullMap;
+
 export { IS_DEBUG_MODE };
