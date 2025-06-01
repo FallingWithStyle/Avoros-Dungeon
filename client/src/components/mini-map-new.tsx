@@ -161,7 +161,8 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     }
   };
 
-  if (isLoading) {
+  // Only show loading for full map mode when it's specifically loading
+  if (showFullMap && allRoomsLoading) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -171,7 +172,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-slate-400">Loading map...</div>
+          <div className="text-sm text-slate-400">Loading full floor map...</div>
         </CardContent>
       </Card>
     );
