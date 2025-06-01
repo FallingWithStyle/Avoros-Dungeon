@@ -142,6 +142,9 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
         case 'd':
           direction = 'east';
           break;
+        case 'q':
+          direction = 'staircase';
+          break;
         default:
           return;
       }
