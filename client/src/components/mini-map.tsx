@@ -63,10 +63,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   });
 
   // Fetch all rooms for full map mode
-  const { data: allRooms, isLoading: isLoadingAllRooms } = useQuery<any[]>({
+  const { data: allRooms, isLoading: isLoadingAllRooms, error: allRoomsError } = useQuery<any[]>({
     queryKey: [`/api/debug/rooms/${crawler.currentFloor}`],
     retry: false,
     enabled: showFullMap,
+  });
+
+  // Debug logging
+  console.log("MiniMap Debug Info:", {
+    showFullMap,
+    globalShowFullMap: isFullMapMode(),
+    allRoomsData: allRooms?.length,
+    allRoomsError,
+    isLoadingAllRooms
   });
 
   // Update show full map state when debug mode changes
