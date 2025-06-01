@@ -281,9 +281,9 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                             {getRoomIcon(room)}
                             {room.isCurrentRoom && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-2 h-2 bg-blue-400/60 rounded-full shadow-lg shadow-blue-400/30" 
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full shadow-lg shadow-blue-400/40" 
                                      style={{
-                                       animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                                       animation: 'slowPulse 4s ease-in-out infinite'
                                      }} />
                               </div>
                             )}
