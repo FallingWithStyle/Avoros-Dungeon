@@ -21,6 +21,7 @@ import { CrawlerWithDetails } from "@shared/schema";
 
 interface MiniMapProps {
   crawler: CrawlerWithDetails;
+  showFullMap?: boolean;
 }
 
 interface ExploredRoom {
@@ -35,7 +36,7 @@ interface ExploredRoom {
   isExplored: boolean;
 }
 
-export default function MiniMap({ crawler }: MiniMapProps) {
+export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) {
   const [isMoving, setIsMoving] = useState(false);
   const [previousCurrentRoom, setPreviousCurrentRoom] = useState<ExploredRoom | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -45,15 +46,26 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Fetch explored rooms for this crawler
-  const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
+  const { data: exploredRooms, isLoading: exploredLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     refetchInterval: 2000, // Refresh every 2 seconds
+    enabled: !showFullMap,
   });
+
+  // Fetch all rooms for full map mode
+  const { data: allRooms, isLoading: allRoomsLoading } = useQuery<ExploredRoom[]>({
+    queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
+    enabled: showFullMap,
+  });
+
+  // Use appropriate data based on mode
+  const roomsData = showFullMap ? allRooms : exploredRooms;
+  const isLoading = showFullMap ? allRoomsLoading : exploredLoading;
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
-    if (exploredRooms) {
-      const currentRoom = exploredRooms.find(room => room.isCurrentRoom);
+    if (roomsData) {
+      const currentRoom = roomsData.find(room => room.isCurrentRoom);
       if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
         setIsMoving(true);
         
@@ -69,7 +81,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         setPreviousCurrentRoom(currentRoom);
       }
     }
-  }, [exploredRooms, previousCurrentRoom, resetPanOnNextMove]);
+  }, [roomsData, previousCurrentRoom, resetPanOnNextMove]);
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -165,42 +177,45 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     );
   }
 
-  if (!exploredRooms || exploredRooms.length === 0) {
+  if (!roomsData || roomsData.length === 0) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-200 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             Mini-Map
+            <Badge variant="outline" className="ml-auto text-xs">
+              {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-slate-400">No rooms explored yet</div>
+          <div className="text-sm text-slate-400">
+            {showFullMap ? "Loading floor map..." : "No rooms explored yet"}
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  const currentRoom = exploredRooms.find(r => r.isCurrentRoom);
-  if (!currentRoom) {
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            Mini-Map
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-slate-400">No current room</div>
-        </CardContent>
-      </Card>
-    );
+  // For full map mode, we need to find the current room from explored rooms
+  let currentRoom: ExploredRoom | undefined;
+  if (showFullMap && allRooms && exploredRooms) {
+    currentRoom = exploredRooms.find(r => r.isCurrentRoom);
+    // Mark the current room in the full map data
+    if (currentRoom) {
+      const fullMapCurrentRoom = allRooms.find(r => r.id === currentRoom.id);
+      if (fullMapCurrentRoom) {
+        fullMapCurrentRoom.isCurrentRoom = true;
+      }
+    }
+  } else {
+    currentRoom = roomsData.find(r => r.isCurrentRoom);
   }
 
-  // Calculate bounds to show all explored rooms
-  const allX = exploredRooms.map(r => r.x);
-  const allY = exploredRooms.map(r => r.y);
+  // Calculate bounds to show all rooms
+  const allX = roomsData.map(r => r.x);
+  const allY = roomsData.map(r => r.y);
   const minX = Math.min(...allX);
   const maxX = Math.max(...allX);
   const minY = Math.min(...allY);

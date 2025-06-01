@@ -292,6 +292,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all rooms on a floor (for debug full map mode)
+  app.get('/api/floors/:floorNumber/rooms', isAuthenticated, async (req: any, res) => {
+    try {
+      const floorNumber = parseInt(req.params.floorNumber);
+      const allRooms = await storage.getRoomsForFloor(floorNumber);
+      
+      // Convert to the same format as explored rooms for compatibility
+      const roomsWithMetadata = allRooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        type: room.type,
+        x: room.x,
+        y: room.y,
+        isSafe: room.type === 'entrance' || room.type === 'safe',
+        hasLoot: room.type === 'treasure',
+        isCurrentRoom: false,
+        isExplored: false, // Mark as unexplored for visual distinction
+      }));
+      
+      res.json(roomsWithMetadata);
+    } catch (error) {
+      console.error("Error fetching floor rooms:", error);
+      res.status(500).json({ message: "Failed to fetch floor rooms" });
+    }
+  });
+
   app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
