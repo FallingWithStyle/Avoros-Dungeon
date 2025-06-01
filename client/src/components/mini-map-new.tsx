@@ -160,7 +160,13 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     const centerY = containerHeight / 2 - roomPixelY - roomSize / 2;
     
     console.log("Setting pan offset:", { centerX, centerY });
+    console.log("Current pan offset before change:", panOffset);
     setPanOffset({ x: centerX, y: centerY });
+    
+    // Log after a brief delay to see if it was applied
+    setTimeout(() => {
+      console.log("Pan offset after change:", { x: centerX, y: centerY });
+    }, 100);
   }, [roomsData, showFullMap, allRooms, exploredRooms]);
 
   // Track room changes for smooth transitions and reset pan

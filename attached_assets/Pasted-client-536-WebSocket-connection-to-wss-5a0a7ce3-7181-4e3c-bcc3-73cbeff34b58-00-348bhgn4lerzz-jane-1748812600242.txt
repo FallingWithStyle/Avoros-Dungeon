@@ -1,0 +1,142 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=aVpLHxvWS_F_' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=aVpLHxvWS_F_' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=84144ba6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+mini-map-new.tsx:84 centerOnCrawler: No room data available
+mini-map-new.tsx:90 centerOnCrawler: No current room found in 219 rooms
+mini-map-new.tsx:91 Available rooms: (219) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+mini-map-new.tsx:95 centerOnCrawler: Current room Viewing Gallery at -4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -5, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Current room coords: {x: -4, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -4, minX: -5, gridX: 1, finalGridX: 2, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Forgotten Room at -5 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Current room coords: {x: -5, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -5, minX: -6, gridX: 1, finalGridX: 2, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 2, roomGridY: 2}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 56, roomPixelY: 56}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: 54, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Descent to Ancient Crypts at -5 5
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 5}
+mini-map-new.tsx:125 Current room coords: {x: -5, y: 5}
+mini-map-new.tsx:126 Grid calculation: {roomX: -5, minX: -6, gridX: 1, finalGridX: 2, roomY: 5, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 2, roomGridY: 0}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 56, roomPixelY: 0}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: 54, centerY: 110}
+mini-map-new.tsx:95 centerOnCrawler: Current room Secret Passage at -4 5
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: -4, y: 5}
+mini-map-new.tsx:126 Grid calculation: {roomX: -4, minX: -6, gridX: 2, finalGridX: 4, roomY: 5, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 4, roomGridY: 2}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 112, roomPixelY: 56}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -2, centerY: 54}
+mini-map-new.tsx:95 centerOnCrawler: Current room Viewing Gallery at -4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: -4, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -4, minX: -6, gridX: 2, finalGridX: 4, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 4, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 112, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -2, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Equipment Shed at -3 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: -3, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -3, minX: -6, gridX: 3, finalGridX: 6, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 6, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 168, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -58, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Instructor Quarters at -2 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: -2, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -2, minX: -6, gridX: 4, finalGridX: 8, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 8, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 224, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -114, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Treasury Vault at -1 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: -1, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: -1, minX: -6, gridX: 5, finalGridX: 10, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 10, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 280, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -170, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Commanders Office at 0 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 1, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 0, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 0, minX: -6, gridX: 6, finalGridX: 12, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 12, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 336, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -226, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room War Room at 1 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 2, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 1, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 1, minX: -6, gridX: 7, finalGridX: 14, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 14, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 392, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -282, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Upper Watchtower at 2 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 3, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 2, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 2, minX: -6, gridX: 8, finalGridX: 16, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 16, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 448, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -338, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Signal Room at 3 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 4, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 3, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 3, minX: -6, gridX: 9, finalGridX: 18, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 18, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 504, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -394, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Ammunition Hoist at 4 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 5, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 4, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 4, minX: -6, gridX: 10, finalGridX: 20, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 20, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 560, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -450, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Ballista Platform at 4 3
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 5, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 4, y: 3}
+mini-map-new.tsx:126 Grid calculation: {roomX: 4, minX: -6, gridX: 10, finalGridX: 20, roomY: 3, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 20, roomGridY: 6}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 560, roomPixelY: 168}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -450, centerY: -58}
+mini-map-new.tsx:95 centerOnCrawler: Current room Secret Passage at 5 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 6, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 5, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 5, minX: -6, gridX: 11, finalGridX: 22, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 22, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 616, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -506, centerY: -2}
+mini-map-new.tsx:95 centerOnCrawler: Current room Forgotten Room at 6 4
+mini-map-new.tsx:116 Grid bounds: {minX: -6, maxX: 6, minY: -1, maxY: 6}
+mini-map-new.tsx:125 Current room coords: {x: 6, y: 4}
+mini-map-new.tsx:126 Grid calculation: {roomX: 6, minX: -6, gridX: 12, finalGridX: 24, roomY: 4, …}
+mini-map-new.tsx:137 Room grid position: {roomGridX: 24, roomGridY: 4}
+mini-map-new.tsx:143 Room pixel position: {roomPixelX: 672, roomPixelY: 112}
+mini-map-new.tsx:156 Container dimensions: {containerWidth: 248, containerHeight: 248}
+mini-map-new.tsx:162 Setting pan offset: {centerX: -562, centerY: -2}
