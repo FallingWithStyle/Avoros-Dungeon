@@ -543,6 +543,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all rooms for a floor (debug endpoint)
+  app.get('/api/debug/rooms/:floorId', async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const rooms = await storage.getRoomsForFloor(floorId);
+      
+      // Transform rooms to match the ExploredRoom interface for consistency
+      const transformedRooms = rooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        type: room.type,
+        isSafe: true, // Assume safe for debug view
+        hasLoot: false, // Don't show loot markers in debug view
+        x: room.x,
+        y: room.y,
+        isCurrentRoom: false, // Will be set by client
+        isExplored: true // Mark all as explored in debug mode
+      }));
+      
+      res.json(transformedRooms);
+    } catch (error) {
+      console.error("Error fetching floor rooms:", error);
+      res.status(500).json({ message: "Failed to fetch floor rooms" });
+    }
+  });
+
   // DEBUG: Regenerate dungeon layout
   app.post('/api/debug/regenerate-dungeon', isAuthenticated, async (req: any, res) => {
     try {
