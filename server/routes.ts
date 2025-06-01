@@ -543,9 +543,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.delete(roomConnections);
       await db.delete(rooms);
       
-      // Reinitialize with new layout
-      const { initializeDatabase } = await import('./init-db');
-      await initializeDatabase();
+      // Generate full 10-floor dungeon
+      const { generateFullDungeon } = await import('./dungeon-generator');
+      await generateFullDungeon();
       
       // Reset all crawlers to entrance room
       const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
