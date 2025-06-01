@@ -2099,15 +2099,27 @@ export class DatabaseStorage implements IStorage {
     .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
     .where(eq(crawlerPositions.crawlerId, crawlerId));
 
+    console.log(`Found ${visitedPositions.length} position records for crawler ${crawlerId}`);
+
     // Create a map of unique visited rooms
     const visitedRoomsMap = new Map();
     const visitedRoomIds = new Set<number>();
     
     for (const position of visitedPositions) {
       if (!visitedRoomsMap.has(position.roomId)) {
+        console.log(`Adding room ${position.roomId} (${position.room.name}) to visited rooms`);
         visitedRoomsMap.set(position.roomId, position.room);
         visitedRoomIds.add(position.roomId);
       }
+    }
+    
+    console.log(`Total unique rooms visited: ${visitedRoomsMap.size}`);
+    console.log(`Room IDs: ${Array.from(visitedRoomIds).join(', ')}`);
+    
+    // If we have multiple rooms but map shows only one, there's an issue
+    if (visitedPositions.length > 1 && visitedRoomsMap.size <= 1) {
+      console.error('WARNING: Multiple position records but only 1 unique room found!');
+      console.error('Sample position:', visitedPositions[0]);
     }
 
     // Find ALL adjacent rooms from ALL visited rooms (persistent fog of war)
