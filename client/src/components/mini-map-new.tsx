@@ -68,9 +68,38 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
       if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
         setIsMoving(true);
         
-        // Reset pan offset when player moves
-        if (resetPanOnNextMove) {
-          setPanOffset({ x: 0, y: 0 });
+        // Auto-center on player when they move
+        if (resetPanOnNextMove || !resetPanOnNextMove) {
+          // Calculate the center position for the current room
+          const mapWidth = 250; // Container width
+          const mapHeight = 250; // Container height
+          
+          // Calculate room grid bounds
+          const allX = roomsData.map(r => r.x);
+          const allY = roomsData.map(r => r.y);
+          const minX = Math.min(...allX);
+          const maxX = Math.max(...allX);
+          const minY = Math.min(...allY);
+          const maxY = Math.max(...allY);
+          
+          // Room size in the grid (including spacing)
+          const roomSize = 16; // 12px room + 4px gap
+          const totalGridWidth = ((maxX - minX + 1) * 2 - 1) * roomSize;
+          const totalGridHeight = ((maxY - minY + 1) * 2 - 1) * roomSize;
+          
+          // Calculate where the current room is in the grid
+          const roomGridX = (currentRoom.x - minX) * 2;
+          const roomGridY = (currentRoom.y - minY) * 2;
+          
+          // Calculate the pixel position of the current room
+          const roomPixelX = roomGridX * roomSize;
+          const roomPixelY = roomGridY * roomSize;
+          
+          // Center the current room in the view
+          const centerX = mapWidth / 2 - roomPixelX - roomSize / 2;
+          const centerY = mapHeight / 2 - roomPixelY - roomSize / 2;
+          
+          setPanOffset({ x: centerX, y: centerY });
           setResetPanOnNextMove(false);
         }
         
@@ -81,6 +110,43 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
       }
     }
   }, [roomsData, previousCurrentRoom, resetPanOnNextMove]);
+
+  // Auto-center on initial load or when switching between explored/full map modes
+  useEffect(() => {
+    if (roomsData && roomsData.length > 0) {
+      const currentRoom = roomsData.find(room => room.isCurrentRoom);
+      if (currentRoom) {
+        // Calculate the center position for the current room
+        const mapWidth = 250;
+        const mapHeight = 250;
+        
+        // Calculate room grid bounds
+        const allX = roomsData.map(r => r.x);
+        const allY = roomsData.map(r => r.y);
+        const minX = Math.min(...allX);
+        const maxX = Math.max(...allX);
+        const minY = Math.min(...allY);
+        const maxY = Math.max(...allY);
+        
+        // Room size in the grid (including spacing)
+        const roomSize = 16;
+        
+        // Calculate where the current room is in the grid
+        const roomGridX = (currentRoom.x - minX) * 2;
+        const roomGridY = (currentRoom.y - minY) * 2;
+        
+        // Calculate the pixel position of the current room
+        const roomPixelX = roomGridX * roomSize;
+        const roomPixelY = roomGridY * roomSize;
+        
+        // Center the current room in the view
+        const centerX = mapWidth / 2 - roomPixelX - roomSize / 2;
+        const centerY = mapHeight / 2 - roomPixelY - roomSize / 2;
+        
+        setPanOffset({ x: centerX, y: centerY });
+      }
+    }
+  }, [showFullMap, roomsData]);
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
