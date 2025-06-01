@@ -1,0 +1,101 @@
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { Building2, Bot, User, Settings } from "lucide-react";
+
+export default function HeaderNavigation() {
+  const { user } = useAuth();
+  const [location] = useLocation();
+
+  const navItems = [
+    {
+      href: "/",
+      label: "Sponsor",
+      icon: Building2,
+      description: "Corporation Overview"
+    },
+    {
+      href: "/crawler",
+      label: "Crawler",
+      icon: Bot,
+      description: "Active Crawler Control"
+    },
+    {
+      href: "/account",
+      label: "Account",
+      icon: User,
+      description: "Profile & Settings"
+    }
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return location === "/" || location === "/home";
+    }
+    if (href === "/crawler") {
+      return location.startsWith("/crawler");
+    }
+    return location === href;
+  };
+
+  return (
+    <header className="border-b border-amber-600/20 bg-gradient-to-r from-amber-950/30 to-orange-900/20 backdrop-blur-sm">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <div className="text-xl font-bold text-amber-300">
+              Dungeon Depths
+            </div>
+            
+            <nav className="flex items-center space-x-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant={active ? "secondary" : "ghost"}
+                      size="sm"
+                      className={`flex items-center gap-2 ${
+                        active 
+                          ? "bg-amber-600/20 text-amber-200 border border-amber-600/30" 
+                          : "text-amber-300/70 hover:text-amber-200 hover:bg-amber-600/10"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            {user && (
+              <div className="flex items-center space-x-2 text-sm text-amber-200/70">
+                <span>{user.email || "Anonymous"}</span>
+                <Badge variant="outline" className="border-amber-600/30 text-amber-300">
+                  Credits: {user.credits || 0}
+                </Badge>
+              </div>
+            )}
+            
+            <Link href="/api/logout">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-amber-300/70 hover:text-amber-200 hover:bg-amber-600/10"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
