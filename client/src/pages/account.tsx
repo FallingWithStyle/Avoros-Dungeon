@@ -40,7 +40,7 @@ export default function Account() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-amber-950/20 to-orange-900/30 p-4">
+    <div className="bg-gradient-to-b from-gray-900 via-amber-950/20 to-orange-900/30 p-4">
       <div className="container mx-auto max-w-4xl space-y-6">
         
         {/* Account Overview */}
