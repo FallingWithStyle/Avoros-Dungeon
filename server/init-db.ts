@@ -1,199 +1,82 @@
 import { db } from "./db";
-import { crawlerClasses, equipment, equipmentTypes, floors, enemies, crawlers } from "@shared/schema";
-import { eq, lte } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 
 export async function initializeDatabase() {
-  try {
-    console.log("Initializing database with game data...");
+  console.log("Initializing database with game data...");
+  
+  // Initialize floors first
+  await initializeFloors();
+  
+  // Initialize rooms
+  await initializeRooms();
+  
+  // Initialize crawler classes
+  await initializeCrawlerClasses();
+  
+  // Initialize equipment types
+  await initializeEquipmentTypes();
+  
+  // Initialize equipment
+  await initializeEquipment();
+  
+  // Initialize enemies
+  await initializeEnemies();
+  
+  // Initialize seasons
+  await initializeSeasons();
 
-    // Insert crawler classes
-    await db.insert(crawlerClasses).values([
-      {
-        name: "Combat Veteran",
-        description: "Former military personnel with extensive combat training. High attack and defense capabilities.",
-        baseHealth: 120,
-        baseAttack: 25,
-        baseDefense: 20,
-        baseSpeed: 15,
-        baseWit: 10,
-        baseCharisma: 8,
-        baseMemory: 12,
-        baseLuck: 5,
-      },
-      {
-        name: "Scholar",
-        description: "Expert in problem-solving and information processing. High mental stats.",
-        baseHealth: 80,
-        baseAttack: 15,
-        baseDefense: 12,
-        baseSpeed: 22,
-        baseWit: 30,
-        baseCharisma: 15,
-        baseMemory: 25,
-        baseLuck: 5,
-      },
-      {
-        name: "Social Engineer",
-        description: "Masters of persuasion and manipulation. High charisma and social skills.",
-        baseHealth: 100,
-        baseAttack: 18,
-        baseDefense: 15,
-        baseSpeed: 28,
-        baseWit: 18,
-        baseCharisma: 30,
-        baseMemory: 20,
-        baseLuck: 5,
-      },
-    ]).onConflictDoNothing();
+  console.log("Database initialized successfully!");
+}
 
-    // Insert equipment types
-    await db.insert(equipmentTypes).values([
-      { name: "Assault Rifle", slot: "weapon" },
-      { name: "Plasma Cannon", slot: "weapon" },
-      { name: "Combat Armor", slot: "armor" },
-      { name: "Tech Augmentation", slot: "accessory" },
-    ]).onConflictDoNothing();
+async function initializeFloors() {
+  const { floors } = await import("@shared/schema");
+  
+  // Check if floors already exist
+  const existingFloors = await db.select().from(floors).limit(1);
+  if (existingFloors.length > 0) {
+    return; // Floors already initialized
+  }
 
-    // Insert basic equipment
-    await db.insert(equipment).values([
-      {
-        typeId: 1,
-        name: "Makeshift Shiv",
-        description: "Crude improvised weapon",
-        attackBonus: 5,
-        price: 50,
-        rarity: "common",
-        minFloor: 1,
-      },
-      {
-        typeId: 2,
-        name: "Neural Enhancer",
-        description: "Basic cognitive augmentation device",
-        attackBonus: 2,
-        witBonus: 8,
-        price: 800,
-        rarity: "uncommon",
-        minFloor: 3,
-      },
-      {
-        typeId: 3,
-        name: "Patched Vest",
-        description: "Worn protective clothing",
-        defenseBonus: 5,
-        healthBonus: 15,
-        price: 200,
-        rarity: "common",
-        minFloor: 1,
-      },
-      {
-        typeId: 4,
-        name: "Charm Bracelet",
-        description: "Enhances personal magnetism",
-        charismaBonus: 6,
-        speedBonus: 2,
-        price: 600,
-        rarity: "rare",
-        minFloor: 2,
-      },
-    ]).onConflictDoNothing();
+  // Create floors 1-10 with unique themes
+  const floorData = [];
+  for (let i = 1; i <= 10; i++) {
+    floorData.push({
+      floorNumber: i,
+      name: getFloorName(i),
+      description: getFloorDescription(i),
+      dangerLevel: Math.min(i, 10),
+      isActive: true
+    });
+  }
 
-    // Insert floors
-    const floorData = [];
-    for (let i = 1; i <= 50; i++) {
-      floorData.push({
-        floorNumber: i,
-        name: `Level ${i} - ${getFloorName(i)}`,
-        description: getFloorDescription(i),
-        difficulty: Math.floor(i / 5) + 1,
-        minRecommendedLevel: i,
-      });
-    }
-    await db.insert(floors).values(floorData).onConflictDoNothing();
-
-    // Insert enemies
-    await db.insert(enemies).values([
-      {
-        name: "Security Drone",
-        description: "Automated defense system",
-        health: 50,
-        attack: 12,
-        defense: 8,
-        speed: 18,
-        creditsReward: 100,
-        experienceReward: 25,
-        minFloor: 1,
-        maxFloor: 10,
-      },
-      {
-        name: "Mutant Scavenger",
-        description: "Twisted creature lurking in the depths",
-        health: 80,
-        attack: 18,
-        defense: 10,
-        speed: 15,
-        creditsReward: 150,
-        experienceReward: 40,
-        minFloor: 3,
-        maxFloor: 15,
-      },
-      {
-        name: "Corrupted AI Core",
-        description: "Malevolent artificial intelligence",
-        health: 120,
-        attack: 25,
-        defense: 15,
-        speed: 20,
-        creditsReward: 300,
-        experienceReward: 75,
-        minFloor: 8,
-        maxFloor: 25,
-      },
-      {
-        name: "Void Stalker",
-        description: "Interdimensional predator",
-        health: 200,
-        attack: 35,
-        defense: 25,
-        speed: 30,
-        creditsReward: 500,
-        experienceReward: 120,
-        minFloor: 15,
-        maxFloor: 35,
-      },
-      {
-        name: "Dungeon Guardian",
-        description: "Ancient protector of the deepest levels",
-        health: 400,
-        attack: 50,
-        defense: 40,
-        speed: 25,
-        creditsReward: 1000,
-        experienceReward: 250,
-        minFloor: 25,
-        maxFloor: 50,
-      },
-    ]).onConflictDoNothing();
-
-    await initializeRooms();
-    console.log("Database initialized successfully!");
-  } catch (error) {
-    console.error("Error initializing database:", error);
-    throw error;
+  // Insert all floors
+  for (const floor of floorData) {
+    await db.insert(floors).values(floor);
   }
 }
 
 function getFloorName(floor: number): string {
-  if (floor <= 10) return "Upper Chambers";
-  if (floor <= 20) return "Industrial Complex";
-  if (floor <= 30) return "Corrupted Sectors";
-  if (floor <= 40) return "Void Territories";
-  return "The Abyss";
+  const names = [
+    "", // 0 placeholder
+    "Ruined Castle Grounds",
+    "Ancient Crypts", 
+    "Alchemical Laboratories",
+    "Prison Complex",
+    "Flooded Caverns",
+    "Mechanical Workshop", 
+    "Crystal Mines",
+    "Ancient Temple",
+    "Dragon's Lair",
+    "Cosmic Observatory"
+  ];
+  return names[floor] || `Deep Level ${floor}`;
 }
 
 function getFloorDescription(floor: number): string {
-  if (floor <= 10) return "The initial levels of the dungeon, still showing signs of civilization.";
-  if (floor <= 20) return "Abandoned industrial facilities with malfunctioning machinery.";
-  if (floor <= 30) return "Reality begins to warp as dark energy permeates the environment.";
+  if (floor <= 5) return "The upper levels show signs of recent civilization and decay.";
+  if (floor <= 10) return "Deeper chambers reveal stranger and more dangerous mysteries.";
+  if (floor <= 20) return "The architecture becomes increasingly alien and hostile.";
+  if (floor <= 30) return "Few adventurers have reported back from these depths.";
   if (floor <= 40) return "The boundaries between dimensions grow thin and unstable.";
   return "The deepest reaches where few have ventured and fewer have returned.";
 }
@@ -207,7 +90,7 @@ async function initializeRooms() {
     return; // Rooms already initialized
   }
 
-  // Get floor 1
+  // Get floor 1 only for now - we'll add more floors later
   const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
   if (!floor1) return;
 
@@ -218,66 +101,44 @@ async function initializeRooms() {
     { x: 0, y: 1, name: "Grand Atrium", description: "A vast circular chamber with a cracked domed ceiling. Dried fountains suggest this was once magnificent.", type: "normal" },
     { x: 0, y: 2, name: "Central Crossroads", description: "Four wide passages branch off in cardinal directions. Adventurer graffiti covers the walls.", type: "normal" },
     
-    // Northern Borough - The Quarters
-    { x: 0, y: 3, name: "Barracks Entrance", description: "Heavy iron gates hang askew. Beyond, you glimpse rows of moldering bunks.", type: "normal" },
-    { x: -1, y: 4, name: "Soldier Dormitory", description: "Rotting bunk beds and personal effects scattered about. A sense of abandonment permeates the air.", type: "normal" },
-    { x: 0, y: 4, name: "Officer's Quarters", description: "More luxurious chambers with decaying tapestries. A treasure chest sits in the corner.", type: "treasure" },
-    { x: 1, y: 4, name: "Weapons Cache", description: "Rusty weapon racks line the walls. Some equipment might still be salvageable.", type: "treasure" },
-    { x: 0, y: 5, name: "Training Grounds", description: "A large open area with practice dummies and combat circles worn into the floor.", type: "normal" },
+    // Eastern Wing - Guard Quarters
+    { x: 1, y: 0, name: "Guard Post", description: "Rusty weapon racks line the walls. A skeleton in armor slumps against a desk.", type: "normal" },
+    { x: 2, y: 0, name: "Armory Remains", description: "Broken weapons and corroded armor pieces scattered across stone shelves.", type: "normal" },
+    { x: 1, y: 1, name: "Barracks Hall", description: "Rows of moldy beds with personal effects still scattered about.", type: "normal" },
+    { x: 2, y: 1, name: "Officers' Quarters", description: "A private chamber with maps pinned to walls and a locked chest.", type: "normal" },
     
-    // Eastern Borough - The Markets
-    { x: 1, y: 2, name: "Merchant Quarter Gate", description: "An ornate archway decorated with coin motifs leads into the old trading district.", type: "normal" },
-    { x: 2, y: 2, name: "Main Bazaar", description: "Empty stalls and broken displays hint at the bustling marketplace this once was.", type: "normal" },
-    { x: 3, y: 2, name: "Jeweler's Workshop", description: "Delicate tools and gem fragments litter workbenches. A secret safe might remain.", type: "treasure" },
-    { x: 2, y: 1, name: "Money Changer's Vault", description: "A heavily reinforced room with an open vault door. Coins spill across the floor.", type: "treasure" },
-    { x: 2, y: 3, name: "Tavern Commons", description: "Overturned tables and broken bottles. The smell of stale ale still lingers.", type: "normal" },
-    { x: 3, y: 3, name: "Inn's Upper Floor", description: "Private rooms for wealthy travelers. Silk curtains hang in tatters.", type: "normal" },
+    // Western Wing - Servants' Area
+    { x: -1, y: 0, name: "Kitchen Ruins", description: "Massive stone ovens and rusted pots. The smell of ancient cooking fires lingers.", type: "normal" },
+    { x: -2, y: 0, name: "Food Storage", description: "Empty barrels and grain sacks turned to dust. Rat bones crunch underfoot.", type: "normal" },
+    { x: -1, y: 1, name: "Servants' Hall", description: "Simple wooden tables and benches, now warped and rotting.", type: "normal" },
+    { x: -2, y: 1, name: "Scullery", description: "Stone sinks filled with stagnant water. Moss grows on every surface.", type: "normal" },
     
-    // Western Borough - The Workshops
-    { x: -1, y: 2, name: "Artisan District", description: "Workshop doors stand open, revealing abandoned forges and looms.", type: "normal" },
-    { x: -2, y: 2, name: "Blacksmith Forge", description: "A massive forge dominates the room. Unfinished weapons lie cooling on the anvil.", type: "normal" },
-    { x: -3, y: 2, name: "Master Smith's Chamber", description: "The finest crafting tools and rare materials. A hidden compartment gleams.", type: "treasure" },
-    { x: -2, y: 1, name: "Tool Workshop", description: "Precision instruments and mechanical devices in various states of completion.", type: "normal" },
-    { x: -2, y: 3, name: "Textile Mill", description: "Looms and spinning wheels stand silent. Bolts of rare fabric remain untouched.", type: "treasure" },
-    { x: -1, y: 3, name: "Carpenter's Hall", description: "Wood shavings and half-finished furniture. The scent of sawdust fills the air.", type: "normal" },
+    // Northern Wing - Living Quarters
+    { x: 0, y: 3, name: "Noble Quarters", description: "Ornate but decaying chambers with torn tapestries and broken furniture.", type: "normal" },
+    { x: 1, y: 3, name: "Guest Chambers", description: "Once-fine rooms now home to spider webs and dust.", type: "normal" },
+    { x: -1, y: 3, name: "Library Ruins", description: "Collapsed bookshelves and scattered pages. Some tomes might still be readable.", type: "normal" },
+    { x: 0, y: 4, name: "Great Hall", description: "A massive chamber with a collapsed roof. Moonlight streams through the gaps.", type: "normal" },
     
-    // Southern Borough - The Depths
-    { x: 0, y: -1, name: "Lower Passage", description: "A descending corridor carved from living rock. The air grows colder.", type: "normal" },
-    { x: 0, y: -2, name: "Ancient Catacombs", description: "Stone sarcophagi line the walls. Ancient bones peer through cracks.", type: "normal" },
-    { x: -1, y: -2, name: "Tomb of the First Guardian", description: "An elaborate burial chamber with mystical symbols. Dark energy emanates from within.", type: "treasure" },
-    { x: 1, y: -2, name: "Bone Chapel", description: "A macabre shrine constructed entirely from human remains. Unholy power lingers.", type: "normal" },
-    { x: 0, y: -3, name: "Forgotten Crypts", description: "Deeper tombs where shadows seem to move of their own accord.", type: "normal" },
+    // Southern Wing - Administrative
+    { x: 0, y: -1, name: "Records Room", description: "Shelves of moldering documents and ledgers. Some contain interesting historical notes.", type: "normal" },
+    { x: 1, y: -1, name: "Treasury Antechamber", description: "Heavy doors stand ajar. Scratch marks suggest something tried to get in... or out.", type: "normal" },
+    { x: -1, y: -1, name: "Clerk's Office", description: "Desks covered in paperwork from a bygone era. An abacus sits perfectly preserved.", type: "normal" },
+    { x: 0, y: -2, name: "Courthouse", description: "A formal chamber with a judge's bench. Ancient scales of justice hang broken.", type: "normal" },
     
-    // Single staircase - extremely rare (1/1000 rooms)
-    { x: 0, y: -4, name: "Deep Sanctuary Steps", description: "The deepest staircase, leading downward into mysteries unknown.", type: "stairs" },
+    // Eastern Extensions
+    { x: 3, y: 0, name: "Stables", description: "Empty horse stalls with rotting hay. Harnesses hang from rusted hooks.", type: "normal" },
+    { x: 3, y: 1, name: "Blacksmith Shop", description: "A cold forge with anvil and hammers. Half-finished weapons lie abandoned.", type: "normal" },
+    { x: 2, y: 2, name: "Training Yard", description: "An open area with weapon dummies and practice targets.", type: "normal" },
     
-    // Convert former staircases to normal/treasure rooms
-    { x: 2, y: 4, name: "North Tower Chamber", description: "A circular room in an ancient tower. Tapestries hang from stone walls.", type: "normal" },
-    { x: 4, y: 2, name: "East Wing Gallery", description: "An elegant hallway with marble columns. Portraits watch from gilded frames.", type: "normal" },
-    { x: 3, y: 1, name: "Market Tower Vault", description: "A secured chamber where merchants once stored their most valuable goods.", type: "treasure" },
-    { x: 3, y: 4, name: "Noble Quarter Library", description: "Shelves of ancient tomes and scrolls. Knowledge is power.", type: "treasure" },
-    { x: -3, y: 1, name: "Craftsman's Storage", description: "Rare materials and unfinished masterworks fill this workshop annex.", type: "treasure" },
-    { x: -4, y: 2, name: "West Tower Armory", description: "Weapon racks and armor stands guard ancient military secrets.", type: "normal" },
-    { x: -2, y: 4, name: "Workshop Archive", description: "Technical blueprints and mechanical diagrams cover every surface.", type: "normal" },
-    { x: -1, y: 5, name: "Barracks Command", description: "Strategic maps and military orders remain pinned to planning tables.", type: "normal" },
-    { x: 1, y: 5, name: "Training Equipment Room", description: "Practice weapons and combat training gear await new recruits.", type: "normal" },
-    { x: 1, y: -3, name: "Crypt Memorial", description: "Ancient burial chambers with ornate stone coffins and memorial plaques.", type: "normal" },
-    { x: -1, y: -3, name: "Sacred Chamber", description: "A holy sanctuary carved with protective runes and blessed symbols.", type: "normal" },
+    // Western Extensions  
+    { x: -3, y: 0, name: "Wine Cellar", description: "Broken bottles and wine-stained walls. The air smells of fermentation.", type: "normal" },
+    { x: -3, y: 1, name: "Root Cellar", description: "Stone shelves once held vegetables. Now only mold and darkness remain.", type: "normal" },
+    { x: -2, y: 2, name: "Pantry", description: "Empty shelves and mouse holes. A few ceramic jars sit intact.", type: "normal" },
     
-    // Additional atmospheric rooms
-    { x: -3, y: 3, name: "Spinner's Alcove", description: "A cozy corner where weavers once worked by candlelight.", type: "normal" },
-    { x: 4, y: 3, name: "Noble's Private Study", description: "Books and scrolls fill elegant shelves. Knowledge awaits the curious.", type: "treasure" },
-    { x: 1, y: 1, name: "Guard Checkpoint", description: "A watchtower position overlooking multiple passages.", type: "normal" },
-    { x: -1, y: 1, name: "Artisan's Gallery", description: "Displays of the finest crafted goods. Some pieces retain their value.", type: "treasure" },
-    { x: 4, y: 1, name: "Merchant Prince's Office", description: "Luxury appointments and trade documents. A vault door stands ajar.", type: "treasure" },
-    { x: -3, y: 4, name: "Master's Private Forge", description: "A personal smithy with experimental alloys and rare metals.", type: "treasure" },
-    { x: 2, y: 0, name: "Eastern Gatehouse", description: "Defensive position guarding the market approaches.", type: "normal" },
-    { x: -2, y: 0, name: "Western Gatehouse", description: "A fortified checkpoint protecting the artisan quarter.", type: "normal" },
-    { x: 0, y: 6, name: "North Tower Base", description: "The foundation of a great tower. Structural supports reach skyward.", type: "normal" },
-    { x: 2, y: -1, name: "Memorial Garden", description: "A peaceful courtyard with withered plants and memorial stones.", type: "normal", isSafe: true },
-    
-    // Single staircase - extremely rare (1/1000 rooms)
-    { x: 0, y: -4, name: "Deep Sanctuary Steps", description: "The deepest staircase, leading downward into mysteries unknown.", type: "stairs" },
+    // Northern Extensions
+    { x: 1, y: 4, name: "Chapel", description: "Broken pews face a defaced altar. Stained glass windows lie shattered.", type: "normal" },
+    { x: -1, y: 4, name: "Art Gallery", description: "Empty frames hang askew on cracked walls. One painting remains, depicting a dark figure.", type: "normal" },
+    { x: 0, y: 5, name: "Spiral Staircase", description: "Stone steps wind downward into darkness. The air grows colder below.", type: "stairs" }
   ];
 
   // Insert all rooms
@@ -290,41 +151,258 @@ async function initializeRooms() {
     insertedRooms.push(insertedRoom);
   }
 
-  // Create a map for quick room lookup by coordinates
+  // Create a map of coordinates to rooms for easy lookup
   const roomsByCoords = new Map();
   insertedRooms.forEach(room => {
     roomsByCoords.set(`${room.x},${room.y}`, room);
   });
 
-  // Create room connections based on adjacency
+  // Create connections between adjacent rooms
   const connections = [];
-  
   for (const room of insertedRooms) {
-    // Check all four directions
+    // Check north, south, east, west
     const directions = [
-      { dx: 0, dy: 1, dir: "north" },
-      { dx: 1, dy: 0, dir: "east" }, 
-      { dx: 0, dy: -1, dir: "south" },
-      { dx: -1, dy: 0, dir: "west" }
+      { dx: 0, dy: 1, direction: 'north' },
+      { dx: 0, dy: -1, direction: 'south' },
+      { dx: 1, dy: 0, direction: 'east' },
+      { dx: -1, dy: 0, direction: 'west' }
     ];
-    
-    for (const { dx, dy, dir } of directions) {
-      const adjacentX = room.x + dx;
-      const adjacentY = room.y + dy;
-      const adjacentRoom = roomsByCoords.get(`${adjacentX},${adjacentY}`);
+
+    for (const { dx, dy, direction } of directions) {
+      const adjacentKey = `${room.x + dx},${room.y + dy}`;
+      const adjacentRoom = roomsByCoords.get(adjacentKey);
       
       if (adjacentRoom) {
         connections.push({
           fromRoomId: room.id,
           toRoomId: adjacentRoom.id,
-          direction: dir
+          direction
         });
       }
     }
   }
 
   // Insert all connections
-  if (connections.length > 0) {
-    await db.insert(roomConnections).values(connections).onConflictDoNothing();
+  for (const connection of connections) {
+    await db.insert(roomConnections).values(connection);
   }
+}
+
+async function initializeCrawlerClasses() {
+  const { crawlerClasses } = await import("@shared/schema");
+  
+  // Check if classes already exist
+  const existingClasses = await db.select().from(crawlerClasses).limit(1);
+  if (existingClasses.length > 0) {
+    return; // Classes already initialized
+  }
+
+  const classes = [
+    {
+      name: "Survivor",
+      description: "Hardy individuals who've learned to adapt and endure against all odds.",
+      startingStats: JSON.stringify({ attack: 2, defense: 3, speed: 2, wit: 2, charisma: 1, memory: 2 }),
+      competencies: JSON.stringify(["Survival", "Scavenging"]),
+      rarity: "common"
+    },
+    {
+      name: "Scavenger",
+      description: "Resourceful explorers who excel at finding useful items in dangerous places.",
+      startingStats: JSON.stringify({ attack: 1, defense: 2, speed: 3, wit: 3, charisma: 2, memory: 1 }),
+      competencies: JSON.stringify(["Scavenging", "Trap Detection"]),
+      rarity: "common"
+    },
+    {
+      name: "Brawler",
+      description: "Tough fighters who prefer direct confrontation over subtlety.",
+      startingStats: JSON.stringify({ attack: 4, defense: 3, speed: 1, wit: 1, charisma: 1, memory: 2 }),
+      competencies: JSON.stringify(["Combat", "Intimidation"]),
+      rarity: "common"
+    },
+    {
+      name: "Trickster",
+      description: "Clever manipulators who use wit and charm to overcome obstacles.",
+      startingStats: JSON.stringify({ attack: 1, defense: 1, speed: 3, wit: 4, charisma: 3, memory: 0 }),
+      competencies: JSON.stringify(["Deception", "Trap Detection"]),
+      rarity: "uncommon"
+    },
+    {
+      name: "Scholar",
+      description: "Educated individuals who rely on knowledge and careful planning.",
+      startingStats: JSON.stringify({ attack: 0, defense: 1, speed: 2, wit: 3, charisma: 2, memory: 4 }),
+      competencies: JSON.stringify(["Research", "Ancient Lore"]),
+      rarity: "uncommon"
+    },
+    {
+      name: "Mystic",
+      description: "Enigmatic figures with an uncanny understanding of supernatural forces.",
+      startingStats: JSON.stringify({ attack: 1, defense: 2, speed: 2, wit: 4, charisma: 3, memory: 0 }),
+      competencies: JSON.stringify(["Supernatural", "Intuition"]),
+      rarity: "rare"
+    }
+  ];
+
+  for (const crawlerClass of classes) {
+    await db.insert(crawlerClasses).values(crawlerClass);
+  }
+}
+
+async function initializeEquipmentTypes() {
+  const { equipmentTypes } = await import("@shared/schema");
+  
+  // Check if equipment types already exist
+  const existingTypes = await db.select().from(equipmentTypes).limit(1);
+  if (existingTypes.length > 0) {
+    return; // Equipment types already initialized
+  }
+
+  const types = [
+    { name: "Weapon", description: "Items used for combat and defense" },
+    { name: "Armor", description: "Protective gear and clothing" },
+    { name: "Tool", description: "Utility items and equipment" },
+    { name: "Consumable", description: "Single-use items and supplies" },
+    { name: "Accessory", description: "Jewelry, trinkets, and enhancement items" }
+  ];
+
+  for (const type of types) {
+    await db.insert(equipmentTypes).values(type);
+  }
+}
+
+async function initializeEquipment() {
+  const { equipment, equipmentTypes } = await import("@shared/schema");
+  
+  // Check if equipment already exists
+  const existingEquipment = await db.select().from(equipment).limit(1);
+  if (existingEquipment.length > 0) {
+    return; // Equipment already initialized
+  }
+
+  // Get equipment type IDs
+  const types = await db.select().from(equipmentTypes);
+  const weaponType = types.find(t => t.name === "Weapon");
+  const armorType = types.find(t => t.name === "Armor");
+  const toolType = types.find(t => t.name === "Tool");
+  const consumableType = types.find(t => t.name === "Consumable");
+  const accessoryType = types.find(t => t.name === "Accessory");
+
+  const equipmentItems = [
+    // Weapons
+    { name: "Rusty Knife", description: "A dull blade that's seen better days.", typeId: weaponType?.id, rarity: "common", statModifiers: JSON.stringify({ attack: 1 }), marketValue: 5 },
+    { name: "Makeshift Club", description: "A heavy piece of wood wrapped with cloth.", typeId: weaponType?.id, rarity: "common", statModifiers: JSON.stringify({ attack: 2 }), marketValue: 8 },
+    { name: "Crowbar", description: "Useful for both breaking things and breaking into things.", typeId: weaponType?.id, rarity: "common", statModifiers: JSON.stringify({ attack: 1 }), marketValue: 12 },
+    
+    // Armor
+    { name: "Worn Jacket", description: "A sturdy jacket with multiple pockets.", typeId: armorType?.id, rarity: "common", statModifiers: JSON.stringify({ defense: 1 }), marketValue: 10 },
+    { name: "Work Boots", description: "Heavy boots that protect your feet.", typeId: armorType?.id, rarity: "common", statModifiers: JSON.stringify({ defense: 1 }), marketValue: 15 },
+    { name: "Hard Hat", description: "Industrial safety equipment.", typeId: armorType?.id, rarity: "common", statModifiers: JSON.stringify({ defense: 1 }), marketValue: 8 },
+    
+    // Tools
+    { name: "Flashlight", description: "Provides light in dark places.", typeId: toolType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 6 },
+    { name: "Rope", description: "50 feet of sturdy climbing rope.", typeId: toolType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 10 },
+    { name: "First Aid Kit", description: "Basic medical supplies.", typeId: toolType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 20 },
+    
+    // Consumables
+    { name: "Energy Bar", description: "Restores a small amount of energy.", typeId: consumableType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 3 },
+    { name: "Water Bottle", description: "Clean drinking water.", typeId: consumableType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 2 },
+    { name: "Painkiller", description: "Reduces pain and improves focus.", typeId: consumableType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 5 },
+    
+    // Accessories
+    { name: "Lucky Coin", description: "A shiny coin that might bring good fortune.", typeId: accessoryType?.id, rarity: "uncommon", statModifiers: JSON.stringify({ luck: 1 }), marketValue: 25 },
+    { name: "Digital Watch", description: "Keeps accurate time and has basic functions.", typeId: accessoryType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 15 },
+    { name: "Compass", description: "Always points toward magnetic north.", typeId: accessoryType?.id, rarity: "common", statModifiers: JSON.stringify({}), marketValue: 12 }
+  ];
+
+  for (const item of equipmentItems) {
+    if (item.typeId) {
+      await db.insert(equipment).values(item);
+    }
+  }
+}
+
+async function initializeEnemies() {
+  const { enemies, floors } = await import("@shared/schema");
+  
+  // Check if enemies already exist
+  const existingEnemies = await db.select().from(enemies).limit(1);
+  if (existingEnemies.length > 0) {
+    return; // Enemies already initialized
+  }
+
+  // Get floor 1
+  const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+  if (!floor1) return;
+
+  const enemyData = [
+    {
+      name: "Sewer Rat",
+      description: "A large, aggressive rodent with yellow teeth.",
+      floorId: floor1.id,
+      health: 8,
+      attack: 2,
+      defense: 0,
+      speed: 3,
+      lootTable: JSON.stringify([
+        { item: "Raw Meat", chance: 0.7, quantity: 1 },
+        { item: "Rat Tail", chance: 0.3, quantity: 1 }
+      ]),
+      experienceReward: 5,
+      abilities: JSON.stringify(["Quick Bite"])
+    },
+    {
+      name: "Skeleton Guard",
+      description: "The animated remains of a former castle guard.",
+      floorId: floor1.id,
+      health: 15,
+      attack: 4,
+      defense: 2,
+      speed: 1,
+      lootTable: JSON.stringify([
+        { item: "Bone Fragment", chance: 0.8, quantity: 1 },
+        { item: "Rusty Sword", chance: 0.2, quantity: 1 }
+      ]),
+      experienceReward: 12,
+      abilities: JSON.stringify(["Undead Resilience"])
+    },
+    {
+      name: "Giant Spider",
+      description: "A web-spinning predator the size of a small dog.",
+      floorId: floor1.id,
+      health: 12,
+      attack: 3,
+      defense: 1,
+      speed: 4,
+      lootTable: JSON.stringify([
+        { item: "Spider Silk", chance: 0.9, quantity: 2 },
+        { item: "Venom Sac", chance: 0.4, quantity: 1 }
+      ]),
+      experienceReward: 8,
+      abilities: JSON.stringify(["Web Trap", "Poison Bite"])
+    }
+  ];
+
+  for (const enemy of enemyData) {
+    await db.insert(enemies).values(enemy);
+  }
+}
+
+async function initializeSeasons() {
+  const { seasons } = await import("@shared/schema");
+  
+  // Check if seasons already exist
+  const existingSeason = await db.select().from(seasons).limit(1);
+  if (existingSeason.length > 0) {
+    return; // Season already initialized
+  }
+
+  // Create Season 1
+  await db.insert(seasons).values({
+    seasonNumber: 1,
+    name: "The Descent Begins",
+    description: "The first brave souls venture into the mysterious depths beneath the old castle.",
+    startDate: new Date(),
+    endDate: null, // Ongoing
+    isActive: true,
+    maxPrimarySponsorsips: 1000
+  });
 }
