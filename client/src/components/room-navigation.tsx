@@ -34,6 +34,8 @@ interface Room {
   type: string;
   isSafe: boolean;
   hasLoot: boolean;
+  x: number;
+  y: number;
 }
 
 interface RoomData {
@@ -236,7 +238,6 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
               <Switch
                 checked={showCoordinates}
                 onCheckedChange={setShowCoordinates}
-                size="sm"
               />
             </div>
           </div>
