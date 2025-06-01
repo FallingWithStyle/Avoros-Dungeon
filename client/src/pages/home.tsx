@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import { Plus, Users, Activity, TrendingUp, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -16,6 +16,7 @@ import Leaderboard from "@/components/leaderboard";
 import MiniMap from "@/components/mini-map-new";
 import ExplorationPanel from "@/components/exploration-panel";
 import CrawlerCard from "@/components/crawler-card";
+import DebugPanel from "@/components/debug-panel";
 import { useAuth } from "@/hooks/useAuth";
 import type { CrawlerWithDetails } from "@shared/schema";
 
@@ -84,75 +85,7 @@ export default function Home() {
     setActiveCrawler(crawler);
   };
 
-  // Debug reset functionality
-  const resetCrawlersMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/debug/reset-crawlers");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      toast({
-        title: "Reset Complete",
-        description: "All crawlers have been reset successfully.",
-      });
-    },
-    onError: (error) => {
-      showErrorToast("Reset Failed", error);
-    },
-  });
 
-  // Debug energy restoration
-  const restoreEnergyMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/restore-energy`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      toast({
-        title: "Energy Restored",
-        description: "Crawler energy has been restored to 100%.",
-      });
-    },
-    onError: (error) => {
-      showErrorToast("Energy Restore Failed", error);
-    },
-  });
-
-  // Debug dungeon regeneration
-  const regenerateDungeonMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/debug/regenerate-dungeon");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      toast({
-        title: "Dungeon Regenerated",
-        description: "New dungeon layout with updated room distribution applied.",
-      });
-    },
-    onError: (error) => {
-      showErrorToast("Regeneration Failed", error);
-    },
-  });
-
-  // Debug position reset
-  const resetPositionMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/reset-position`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      toast({
-        title: "Position Reset",
-        description: "Crawler has been moved to the entrance.",
-      });
-    },
-    onError: (error) => {
-      showErrorToast("Position Reset Failed", error);
-    },
-  });
 
   if (crawlersLoading) {
     return (
@@ -319,79 +252,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Debug Section (Development Only) */}
-        <div className="container mx-auto mt-8">
-          <Card className="bg-red-900/20 border-red-600/30">
-            <CardHeader>
-              <CardTitle className="text-red-400 flex items-center gap-2">
-                <RefreshCw className="w-5 h-5" />
-                Debug Controls
-              </CardTitle>
-              <CardDescription className="text-red-300">
-                Development tools - these will be removed in production
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => resetCrawlersMutation.mutate()}
-                  disabled={resetCrawlersMutation.isPending}
-                  variant="destructive"
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  {resetCrawlersMutation.isPending ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  Reset All Crawlers
-                </Button>
-                
-                <Button
-                  onClick={() => regenerateDungeonMutation.mutate()}
-                  disabled={regenerateDungeonMutation.isPending}
-                  variant="outline"
-                  className="border-purple-600/30 text-purple-400 hover:bg-purple-600/10"
-                >
-                  {regenerateDungeonMutation.isPending ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  Regenerate Dungeon
-                </Button>
-                
-                <Button
-                  onClick={() => restoreEnergyMutation.mutate()}
-                  disabled={restoreEnergyMutation.isPending || !activeCrawler}
-                  variant="outline"
-                  className="border-green-600/30 text-green-400 hover:bg-green-600/10"
-                >
-                  {restoreEnergyMutation.isPending ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Zap className="w-4 h-4 mr-2" />
-                  )}
-                  Restore Energy (100%)
-                </Button>
-                
-                <Button
-                  onClick={() => resetPositionMutation.mutate()}
-                  disabled={resetPositionMutation.isPending || !activeCrawler}
-                  variant="outline"
-                  className="border-blue-600/30 text-blue-400 hover:bg-blue-600/10"
-                >
-                  {resetPositionMutation.isPending ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                  )}
-                  Reset Position
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+
 
         {/* Crawler Selection Modal */}
         {showCrawlerSelection && (
@@ -406,6 +267,9 @@ export default function Home() {
         )}
 
       </div>
+      
+      {/* Global Debug Panel */}
+      <DebugPanel activeCrawler={activeCrawler} />
     </div>
   );
 }
