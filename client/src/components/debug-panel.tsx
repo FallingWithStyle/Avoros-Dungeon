@@ -243,7 +243,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               <div className="text-xs text-red-300 space-y-1">
                 <div>Hidden Luck: {activeCrawler.luck || 0}</div>
                 <div>
-                  Coordinates: Floor {activeCrawler.currentFloor || 1}, Room {roomData?.room?.x || 0},{roomData?.room?.y || 0}
+                  Coordinates: Floor {roomData?.room?.floorId || activeCrawler.currentFloor || 1}, Room {roomData?.room?.x || 0},{roomData?.room?.y || 0}
                 </div>
               </div>
             </div>
