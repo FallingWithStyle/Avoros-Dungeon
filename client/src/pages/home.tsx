@@ -99,7 +99,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="bg-slate-900 text-slate-100">
       <div className="container mx-auto px-4 py-6 space-y-6">
         
         {/* Season Status */}
