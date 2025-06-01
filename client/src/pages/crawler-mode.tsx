@@ -13,6 +13,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import MiniMap from "@/components/mini-map-new";
 import RoomNavigation from "@/components/room-navigation";
+import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CrawlerModeProps {
@@ -23,7 +24,6 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [showDebug, setShowDebug] = useState(false);
   const [energyDisabled, setEnergyDisabled] = useState(false);
 
   // Fetch crawler data with more frequent updates
@@ -37,70 +37,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
     setLocation("/");
   };
 
-  // Debug mutations
-  const healMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", `/api/crawlers/${crawlerId}/debug/heal`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawlerId}`] });
-      toast({
-        title: "Debug: Crawler Healed",
-        description: "Health and energy restored to maximum.",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Debug Error",
-        description: "Failed to heal crawler.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const resetMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", `/api/crawlers/${crawlerId}/debug/reset`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawlerId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawlerId}/current-room`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`] });
-      toast({
-        title: "Debug: Crawler Reset",
-        description: "Crawler returned to entrance room with full health/energy.",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Debug Error",
-        description: "Failed to reset crawler.",
-        variant: "destructive",
-      });
-    },
-  });
 
   if (isLoading || crawlerLoading) {
     return (
