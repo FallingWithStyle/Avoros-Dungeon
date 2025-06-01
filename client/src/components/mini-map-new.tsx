@@ -102,11 +102,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       return <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">?</div>;
     }
     
+    // Check for safe rooms first (including entrance which is also safe)
+    if (room.isSafe && room.type !== 'entrance') {
+      return <Shield className="w-3 h-3 text-green-400" />;
+    }
+    
     switch (room.type) {
       case 'entrance':
         return <Home className="w-3 h-3 text-green-400" />;
-      case 'safe':
-        return <Shield className="w-3 h-3 text-green-400" />;
       case 'treasure':
         return <Gem className="w-3 h-3 text-yellow-400" />;
       case 'boss':
@@ -128,10 +131,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       return "bg-slate-800/50 border-slate-600/50";
     }
     
+    // Check for safe rooms first (including entrance)
+    if (room.isSafe) {
+      return "bg-green-600/20 border-green-600/50";
+    }
+    
     switch (room.type) {
-      case 'entrance':
-      case 'safe':
-        return "bg-green-600/20 border-green-600/50";
       case 'treasure':
         return "bg-yellow-600/20 border-yellow-600/50";
       case 'boss':
