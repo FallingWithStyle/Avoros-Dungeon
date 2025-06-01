@@ -25,6 +25,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(false);
+  const [showFullMap, setShowFullMap] = useState(true);
 
   // Fetch crawler data with more frequent updates
   const { data: crawler, isLoading: crawlerLoading } = useQuery<CrawlerWithDetails>({
@@ -258,7 +259,10 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
       </div>
       
       {/* Global Debug Panel */}
-      <DebugPanel activeCrawler={crawler} />
+      <DebugPanel 
+        activeCrawler={crawler} 
+        onMapModeChange={(newShowFullMap) => setShowFullMap(newShowFullMap)}
+      />
     </div>
   );
 }
