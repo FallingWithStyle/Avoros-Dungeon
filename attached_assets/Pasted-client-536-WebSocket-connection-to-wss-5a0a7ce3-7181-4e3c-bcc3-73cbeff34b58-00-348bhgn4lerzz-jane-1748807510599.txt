@@ -1,0 +1,129 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=bXhHhlEqsouA' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=bXhHhlEqsouA' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=84144ba6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+@radix-ui_react-dialog.js?v=84144ba6:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=84144ba6:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=84144ba6:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=84144ba6:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=84144ba6:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=84144ba6:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=84144ba6:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=84144ba6:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=84144ba6:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=84144ba6:19416
+commitRoot @ chunk-RPCDYKBN.js?v=84144ba6:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+@radix-ui_react-dialog.js?v=84144ba6:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=84144ba6:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=84144ba6:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=84144ba6:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=84144ba6:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=84144ba6:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=84144ba6:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=84144ba6:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=84144ba6:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=84144ba6:19416
+commitRoot @ chunk-RPCDYKBN.js?v=84144ba6:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+@radix-ui_react-dialog.js?v=84144ba6:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=84144ba6:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=84144ba6:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=84144ba6:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=84144ba6:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=84144ba6:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=84144ba6:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=84144ba6:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=84144ba6:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=84144ba6:19416
+commitRoot @ chunk-RPCDYKBN.js?v=84144ba6:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+@radix-ui_react-dialog.js?v=84144ba6:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=84144ba6:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=84144ba6:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=84144ba6:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=84144ba6:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=84144ba6:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=84144ba6:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=84144ba6:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=84144ba6:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=84144ba6:19416
+commitRoot @ chunk-RPCDYKBN.js?v=84144ba6:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+room-navigation.tsx:70 Warning: Encountered two children with the same key, `south`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at _c9 (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at RoomNavigation (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/room-navigation.tsx:40:42)
+    at div
+    at div
+    at div
+    at div
+    at CrawlerMode (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/pages/crawler-mode.tsx:28:39)
+    at Route (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=84144ba6:323:16)
+    at Switch (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=84144ba6:379:17)
+    at div
+    at Router (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=eaIO1u62REOrjFvALhRJm:32:42)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=84144ba6:38:15)
+    at TooltipProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=84144ba6:64:5)
+    at QueryClientProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=84144ba6:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=84144ba6:521
+error @ chunk-RPCDYKBN.js?v=84144ba6:505
+warnOnInvalidKey @ chunk-RPCDYKBN.js?v=84144ba6:10219
+reconcileChildrenArray @ chunk-RPCDYKBN.js?v=84144ba6:10235
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=84144ba6:10559
+reconcileChildren @ chunk-RPCDYKBN.js?v=84144ba6:14292
+updateHostComponent @ chunk-RPCDYKBN.js?v=84144ba6:14807
+beginWork @ chunk-RPCDYKBN.js?v=84144ba6:15935
+beginWork$1 @ chunk-RPCDYKBN.js?v=84144ba6:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=84144ba6:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=84144ba6:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=84144ba6:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=84144ba6:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=84144ba6:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=84144ba6:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=84144ba6:555
+flush @ @tanstack_react-query.js?v=84144ba6:569
+batch @ @tanstack_react-query.js?v=84144ba6:587
+dispatch_fn @ @tanstack_react-query.js?v=84144ba6:996
+setData @ @tanstack_react-query.js?v=84144ba6:696
+onSuccess @ @tanstack_react-query.js?v=84144ba6:897
+resolve @ @tanstack_react-query.js?v=84144ba6:456
+Promise.then
+run @ @tanstack_react-query.js?v=84144ba6:498
+start @ @tanstack_react-query.js?v=84144ba6:536
+fetch @ @tanstack_react-query.js?v=84144ba6:926
+(anonymous) @ @tanstack_react-query.js?v=84144ba6:1726
+(anonymous) @ @tanstack_react-query.js?v=84144ba6:1725
+batch @ @tanstack_react-query.js?v=84144ba6:583
+refetchQueries @ @tanstack_react-query.js?v=84144ba6:1724
+(anonymous) @ @tanstack_react-query.js?v=84144ba6:1716
+batch @ @tanstack_react-query.js?v=84144ba6:583
+invalidateQueries @ @tanstack_react-query.js?v=84144ba6:1705
+onSuccess @ room-navigation.tsx:70
+execute @ @tanstack_react-query.js?v=84144ba6:1233
+await in execute
+mutate @ @tanstack_react-query.js?v=84144ba6:2630
+(anonymous) @ @tanstack_react-query.js?v=84144ba6:3295
+(anonymous) @ room-navigation.tsx:117
+handleKeyPress @ room-navigation.tsx:154

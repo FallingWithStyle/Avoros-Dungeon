@@ -198,15 +198,18 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     );
   }
 
-  // For full map mode, we need to find the current room from explored rooms
+  // For full map mode, we need to find the current room and mark it
   let currentRoom: ExploredRoom | undefined;
   if (showFullMap && allRooms && exploredRooms) {
-    currentRoom = exploredRooms.find(r => r.isCurrentRoom);
-    // Mark the current room in the full map data
-    if (currentRoom) {
-      const fullMapCurrentRoom = allRooms.find(r => r.id === currentRoom!.id);
+    // Find current room from explored rooms first
+    const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
+    if (exploredCurrentRoom) {
+      // Find and mark the corresponding room in the full map data
+      const fullMapCurrentRoom = allRooms.find(r => r.id === exploredCurrentRoom.id);
       if (fullMapCurrentRoom) {
         fullMapCurrentRoom.isCurrentRoom = true;
+        fullMapCurrentRoom.isExplored = true; // Mark as explored too
+        currentRoom = fullMapCurrentRoom;
       }
     }
   } else {
