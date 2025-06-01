@@ -65,22 +65,38 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
 
   // Reusable centering function
   const centerOnCrawler = useCallback(() => {
-    if (!roomsData || roomsData.length === 0) {
-      console.log("centerOnCrawler: No room data");
+    // Use the processed displayRooms instead of raw roomsData
+    let dataToUse = roomsData;
+    
+    // If we're in the main component rendering, use displayRooms
+    if (showFullMap && allRooms && exploredRooms) {
+      const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
+      const currentRoomId = exploredCurrentRoom?.id;
+      
+      dataToUse = allRooms.map(room => ({
+        ...room,
+        isCurrentRoom: room.id === currentRoomId,
+        isExplored: exploredRooms.some(er => er.id === room.id) ? true : false
+      }));
+    }
+    
+    if (!dataToUse || dataToUse.length === 0) {
+      console.log("centerOnCrawler: No room data available");
       return;
     }
     
-    const currentRoom = roomsData.find(room => room.isCurrentRoom);
+    const currentRoom = dataToUse.find(room => room.isCurrentRoom);
     if (!currentRoom) {
-      console.log("centerOnCrawler: No current room found");
+      console.log("centerOnCrawler: No current room found in", dataToUse.length, "rooms");
+      console.log("Available rooms:", dataToUse.map(r => ({ id: r.id, name: r.name, isCurrentRoom: r.isCurrentRoom })));
       return;
     }
 
     console.log("centerOnCrawler: Current room", currentRoom.name, "at", currentRoom.x, currentRoom.y);
 
-    // Calculate room grid bounds
-    const allX = roomsData.map(r => r.x);
-    const allY = roomsData.map(r => r.y);
+    // Calculate room grid bounds using the same data
+    const allX = dataToUse.map(r => r.x);
+    const allY = dataToUse.map(r => r.y);
     const minX = Math.min(...allX);
     const maxX = Math.max(...allX);
     const minY = Math.min(...allY);
@@ -122,7 +138,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     
     console.log("Setting pan offset:", { centerX, centerY });
     setPanOffset({ x: centerX, y: centerY });
-  }, [roomsData]);
+  }, [roomsData, showFullMap, allRooms, exploredRooms]);
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
