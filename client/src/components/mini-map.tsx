@@ -1,35 +1,28 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Maximize2, User, Gem, Shield, AlertTriangle, MapPin } from "lucide-react";
-
-interface CrawlerWithDetails {
-  id: number;
-  sponsorId: string;
-  name: string;
-  currentRoomId: number;
-  currentFloor: number;
-  energy: number;
-  maxEnergy: number;
-  health: number;
-  maxHealth: number;
-  experience: number;
-  level: number;
-  attack: number;
-  defense: number;
-  speed: number;
-  wit: number;
-  charisma: number;
-  memory: number;
-  credits: number;
-  corporationName: string;
-  background: string;
-}
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  MapPin, 
+  Shield, 
+  Gem, 
+  Skull, 
+  DoorOpen,
+  Home,
+  ArrowDown,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Navigation
+} from "lucide-react";
+import { CrawlerWithDetails } from "@shared/schema";
 
 interface MiniMapProps {
   crawler: CrawlerWithDetails;
+  showFullMap?: boolean;
 }
 
 interface ExploredRoom {
@@ -44,104 +37,243 @@ interface ExploredRoom {
   isExplored: boolean;
 }
 
-// Check if debug mode is enabled
-function isFullMapMode(): boolean {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('debug-full-map') === 'true';
-  }
-  return false;
-}
-
-export default function MiniMap({ crawler }: MiniMapProps) {
-  const [isPanning, setIsPanning] = useState(false);
+export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) {
+  const [isMoving, setIsMoving] = useState(false);
+  const [previousCurrentRoom, setPreviousCurrentRoom] = useState<ExploredRoom | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
-  const [debugMode, setDebugMode] = useState(isFullMapMode());
+
   const mapRef = useRef<HTMLDivElement>(null);
-  
-  // Check for debug mode changes
-  useEffect(() => {
-    const checkDebugMode = () => {
-      const newDebugMode = isFullMapMode();
-      if (newDebugMode !== debugMode) {
-        console.log("Debug mode changed:", newDebugMode);
-        setDebugMode(newDebugMode);
-      }
-    };
-    
-    // Check immediately and then every second
-    checkDebugMode();
-    const interval = setInterval(checkDebugMode, 1000);
-    return () => clearInterval(interval);
-  }, [debugMode]);
-  
-  // Fetch explored rooms for this crawler
-  const { data: exploredRooms, isLoading: isLoadingRooms } = useQuery<ExploredRoom[]>({
+
+  // Fetch explored rooms for this crawler (always enabled for current room detection)
+  const { data: exploredRooms, isLoading: exploredLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    retry: false,
-    refetchInterval: 2000,
-    enabled: !debugMode,
+    refetchInterval: 2000, // Refresh every 2 seconds
   });
 
-  // Fetch all floor rooms when in debug mode
-  const { data: allFloorRooms, isLoading: isLoadingAllRooms } = useQuery<any[]>({
+  // Fetch all rooms for full map mode
+  const { data: allRooms, isLoading: allRoomsLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
-    retry: false,
-    enabled: debugMode,
+    enabled: showFullMap,
   });
 
-  // Determine which rooms to display
-  const roomsToDisplay = debugMode && allFloorRooms ? 
-    allFloorRooms.map(room => ({
-      id: room.id,
-      name: room.name,
-      type: room.type,
-      isSafe: room.type === 'safe' || room.type === 'entrance',
-      hasLoot: room.type === 'treasure',
-      x: room.x || 0,
-      y: room.y || 0,
-      isCurrentRoom: crawler.currentRoomId === room.id,
-      isExplored: true,
-    })) : exploredRooms || [];
+  // Use appropriate data based on mode
+  const roomsData = showFullMap ? allRooms : exploredRooms;
+  const isLoading = showFullMap ? allRoomsLoading : exploredLoading;
+
+  // Reusable centering function
+  const centerOnCrawler = useCallback(() => {
+    // Use the processed displayRooms instead of raw roomsData
+    let dataToUse = roomsData;
+    
+    // If we're in the main component rendering, use displayRooms
+    if (showFullMap && allRooms && exploredRooms) {
+      const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
+      const currentRoomId = exploredCurrentRoom?.id;
+      
+      dataToUse = allRooms.map(room => ({
+        ...room,
+        isCurrentRoom: room.id === currentRoomId,
+        isExplored: exploredRooms.some(er => er.id === room.id) ? true : false
+      }));
+    }
+    
+    if (!dataToUse || dataToUse.length === 0) {
+      console.log("centerOnCrawler: No room data available");
+      return;
+    }
+    
+    const currentRoom = dataToUse.find(room => room.isCurrentRoom);
+    if (!currentRoom) {
+      console.log("centerOnCrawler: No current room found in", dataToUse.length, "rooms");
+      console.log("Available rooms:", dataToUse.map(r => ({ id: r.id, name: r.name, isCurrentRoom: r.isCurrentRoom })));
+      return;
+    }
+
+    console.log("centerOnCrawler: Current room", currentRoom.name, "at", currentRoom.x, currentRoom.y);
+
+    // For centering, always use the displayed rooms, not the full dataset
+    const displayedRooms = showFullMap ? 
+      (allRooms && exploredRooms ? 
+        allRooms.map(room => ({
+          ...room,
+          isCurrentRoom: room.id === exploredRooms.find(r => r.isCurrentRoom)?.id,
+          isExplored: exploredRooms.some(er => er.id === room.id)
+        })).filter(room => room.isExplored || room.isCurrentRoom) // Only show explored rooms in the grid calculation
+        : []
+      ) : exploredRooms || [];
+
+    // Calculate room grid bounds using displayed rooms only
+    const allX = displayedRooms.map(r => r.x);
+    const allY = displayedRooms.map(r => r.y);
+    const minX = Math.min(...allX);
+    const maxX = Math.max(...allX);
+    const minY = Math.min(...allY);
+    const maxY = Math.max(...allY);
+    
+    console.log("Grid bounds:", { minX, maxX, minY, maxY });
+    
+    // Room size in the grid (w-6 h-6 = 24px + gap-1 = 4px)
+    const roomSize = 28;
+    
+    // Calculate where the current room is in the grid (accounting for Y-flip)
+    const roomGridX = (currentRoom.x - minX) * 2;
+    const roomGridY = (maxY - currentRoom.y) * 2;
+    
+    console.log("Current room coords:", { x: currentRoom.x, y: currentRoom.y });
+    console.log("Grid calculation:", { 
+      roomX: currentRoom.x, 
+      minX, 
+      gridX: currentRoom.x - minX, 
+      finalGridX: roomGridX,
+      roomY: currentRoom.y,
+      maxY,
+      gridY: maxY - currentRoom.y,
+      finalGridY: roomGridY
+    });
+    
+    console.log("Room grid position:", { roomGridX, roomGridY });
+    
+    // Calculate the pixel position of the current room
+    const roomPixelX = roomGridX * roomSize;
+    const roomPixelY = roomGridY * roomSize;
+    
+    console.log("Room pixel position:", { roomPixelX, roomPixelY });
+    
+    // Get the container dimensions
+    const container = mapRef.current;
+    if (!container) {
+      console.log("centerOnCrawler: No container ref");
+      return;
+    }
+    
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    
+    console.log("Container dimensions:", { containerWidth, containerHeight });
+    
+    // Center the current room in the view
+    const centerX = containerWidth / 2 - roomPixelX - roomSize / 2;
+    const centerY = containerHeight / 2 - roomPixelY - roomSize / 2;
+    
+    // Ensure the calculated offset keeps the room within visible bounds
+    const maxOffset = Math.max(containerWidth, containerHeight) / 4; // Allow some panning but not too far
+    const clampedCenterX = Math.max(-maxOffset, Math.min(maxOffset, centerX));
+    const clampedCenterY = Math.max(-maxOffset, Math.min(maxOffset, centerY));
+    
+    console.log("Setting pan offset:", { centerX, centerY, clampedCenterX, clampedCenterY });
+    setPanOffset({ x: clampedCenterX, y: clampedCenterY });
+  }, [roomsData, showFullMap, allRooms, exploredRooms]);
+
+  // Track room changes for smooth transitions and reset pan
+  useEffect(() => {
+    if (roomsData) {
+      const currentRoom = roomsData.find(room => room.isCurrentRoom);
+      if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
+        setIsMoving(true);
+        
+        // Auto-center on player when they move
+        if (resetPanOnNextMove) {
+          centerOnCrawler();
+          setResetPanOnNextMove(false);
+        }
+        
+        setTimeout(() => setIsMoving(false), 800);
+      }
+      if (currentRoom) {
+        setPreviousCurrentRoom(currentRoom);
+      }
+    }
+  }, [roomsData, previousCurrentRoom, resetPanOnNextMove]);
+
+  // Auto-center on initial load or when switching between explored/full map modes
+  useEffect(() => {
+    centerOnCrawler();
+  }, [showFullMap, centerOnCrawler]);
+
+  // Handle mouse dragging for pan
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+      setResetPanOnNextMove(true);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) return <User className="w-3 h-3" />;
+    if (room.isExplored === false) {
+      return <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">?</div>;
+    }
+    
+    // Check for safe rooms first (including entrance which is also safe)
+    if (room.isSafe && room.type !== 'entrance') {
+      return <Shield className="w-3 h-3 text-green-400" />;
+    }
+    
     switch (room.type) {
+      case 'entrance':
+        return <Home className="w-3 h-3 text-green-400" />;
       case 'treasure':
-        return <Gem className="w-3 h-3" />;
-      case 'safe':
-        return <Shield className="w-3 h-3" />;
-      case 'trap':
-        return <AlertTriangle className="w-3 h-3" />;
+        return <Gem className="w-3 h-3 text-yellow-400" />;
+      case 'boss':
+      case 'exit':
+        return <Skull className="w-3 h-3 text-red-400" />;
+      case 'stairs':
+        return <ArrowDown className="w-3 h-3 text-purple-400" />;
       default:
-        return <MapPin className="w-3 h-3" />;
+        return <div className="w-3 h-3 bg-slate-600 rounded" />;
     }
   };
 
   const getRoomColor = (room: ExploredRoom) => {
     if (room.isCurrentRoom) {
-      return "bg-blue-600/30 border-blue-600";
+      return "bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-400/20";
     }
+    
+    if (room.isExplored === false) {
+      return "bg-slate-800/50 border-slate-600/50";
+    }
+    
+    // Check for safe rooms first (including entrance)
+    if (room.isSafe) {
+      return "bg-green-600/20 border-green-600/50";
+    }
+    
     switch (room.type) {
-      case 'entrance':
-        return "bg-green-600/20 border-green-600/50";
-      case 'safe':
-        return "bg-green-600/20 border-green-600/50";
       case 'treasure':
         return "bg-yellow-600/20 border-yellow-600/50";
       case 'boss':
-        return "bg-red-600/20 border-red-600/50";
       case 'exit':
+        return "bg-red-600/20 border-red-600/50";
+      case 'stairs':
         return "bg-purple-600/20 border-purple-600/50";
-      case 'trap':
-        return "bg-orange-600/20 border-orange-600/50";
       default:
         return "bg-slate-600/20 border-slate-600/50";
     }
   };
 
-  if (isLoadingRooms || (debugMode && isLoadingAllRooms)) {
+  // Only show loading for full map mode when it's specifically loading
+  if (showFullMap && allRoomsLoading) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -151,185 +283,466 @@ export default function MiniMap({ crawler }: MiniMapProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-48 flex items-center justify-center text-slate-400">
-            Loading map...
+          <div className="text-sm text-slate-400">Loading full floor map...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!roomsData || roomsData.length === 0) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Mini-Map
+            <Badge variant="outline" className="ml-auto text-xs">
+              {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-slate-400">
+            {showFullMap ? "Loading floor map..." : "No rooms explored yet"}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsPanning(true);
-    setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isPanning) return;
-    
-    setPanOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsPanning(false);
-  };
-
-  const currentRoom = roomsToDisplay.find(room => room.isCurrentRoom);
+  // Find current room correctly based on mode
+  let currentRoom: ExploredRoom | undefined;
+  let displayRooms: ExploredRoom[] = [];
   
-  // Auto-center on current room when it changes, unless user is manually panning
-  useEffect(() => {
-    if (currentRoom && !isPanning && resetPanOnNextMove) {
-      const mapElement = mapRef.current;
-      if (mapElement) {
-        const mapRect = mapElement.getBoundingClientRect();
-        const centerX = mapRect.width / 2;
-        const centerY = mapRect.height / 2;
-        
-        setPanOffset({
-          x: centerX - currentRoom.x - 12,
-          y: centerY - currentRoom.y - 12,
-        });
-        setResetPanOnNextMove(false);
-      }
-    }
-  }, [currentRoom, isPanning, resetPanOnNextMove]);
+  if (showFullMap && allRooms && exploredRooms) {
+    // In full map mode, get the current room ID from explored rooms
+    const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
+    const currentRoomId = exploredCurrentRoom?.id;
+    
+    // Create display rooms array with proper current room marking
+    displayRooms = allRooms.map(room => ({
+      ...room,
+      isCurrentRoom: room.id === currentRoomId,
+      isExplored: exploredRooms.some(er => er.id === room.id) ? true : false
+    }));
+    
+    currentRoom = displayRooms.find(r => r.isCurrentRoom);
+  } else {
+    // In explored mode, use explored rooms directly
+    displayRooms = roomsData || [];
+    currentRoom = displayRooms.find(r => r.isCurrentRoom);
+  }
+
+  if (!currentRoom) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Mini-Map
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-slate-400">No current room</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Calculate bounds to show all rooms
+  const allX = displayRooms.map(r => r.x);
+  const allY = displayRooms.map(r => r.y);
+  const minX = Math.min(...allX);
+  const maxX = Math.max(...allX);
+  const minY = Math.min(...allY);
+  const maxY = Math.max(...allY);
+  
+  const roomMap = new Map();
+  displayRooms.forEach(room => {
+    roomMap.set(`${room.x},${room.y}`, room);
+  });
 
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base text-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            Mini-Map
-            {debugMode && (
-              <Badge variant="outline" className="bg-cyan-500/20 text-cyan-400 border-cyan-500/50">
-                DEBUG
-              </Badge>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-slate-400 hover:text-slate-200 h-6 w-6 p-0"
-            onClick={() => setResetPanOnNextMove(true)}
+        <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+          <MapPin className="w-4 h-4" />
+          Mini-Map
+          <Badge variant="outline" className="ml-auto text-xs">
+            {showFullMap ? "Full Floor" : `${displayRooms?.length || 0} Explored`}
+          </Badge>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 w-6 p-0 ml-2"
+            onClick={centerOnCrawler}
+            title="Center on Crawler"
           >
-            <Maximize2 className="w-3 h-3" />
+            <Navigation className="w-3 h-3" />
           </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-2">
+                <Maximize2 className="w-3 h-3" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl h-[80vh] bg-game-panel border-game-border p-6">
+              <DialogHeader>
+                <DialogTitle className="text-slate-200 flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Dungeon Map - Floor {crawler.currentFloor}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="h-full w-full bg-slate-900/50 border border-slate-700 rounded p-4">
+                <div className="text-center text-slate-400">Expanded map view - Coming soon</div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div 
-          ref={mapRef}
-          className="relative h-48 bg-slate-900/50 border border-slate-700 overflow-hidden rounded cursor-move"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          <div 
-            className="absolute transition-transform duration-200"
-            style={{
-              transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-            }}
-          >
-            {roomsToDisplay.map((room) => (
-              <div
-                key={room.id}
-                className={`absolute w-6 h-6 rounded border-2 flex items-center justify-center text-xs transition-all duration-200 ${getRoomColor(room)}`}
+        <div className="space-y-2">
+          <div className="flex justify-center">
+            <div 
+              className="border border-slate-600 bg-slate-900/50 p-2 rounded relative overflow-hidden mx-auto"
+              style={{ height: '250px', width: '250px' }}
+            >
+              <div 
+                className="absolute inset-0 cursor-move select-none flex items-center justify-center"
+                ref={mapRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
                 style={{
-                  left: room.x,
-                  top: room.y,
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+                  transition: isDragging ? 'none' : 'transform 0.3s ease'
                 }}
-                title={room.name}
               >
-                {getRoomIcon(room)}
+                <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${(maxX - minX + 1) * 2 - 1}, 1fr)` }}>
+                  {Array.from({ length: ((maxY - minY + 1) * 2 - 1) * ((maxX - minX + 1) * 2 - 1) }, (_, index) => {
+                    const gridWidth = (maxX - minX + 1) * 2 - 1;
+                    const row = Math.floor(index / gridWidth);
+                    const col = index % gridWidth;
+                    
+                    const isRoomRow = row % 2 === 0;
+                    const isRoomCol = col % 2 === 0;
+                    
+                    if (isRoomRow && isRoomCol) {
+                      const roomRow = Math.floor(row / 2);
+                      const roomCol = Math.floor(col / 2);
+                      const x = minX + roomCol;
+                      const y = maxY - roomRow;
+                      const room = roomMap.get(`${x},${y}`);
+                      
+                      if (room) {
+                        return (
+                          <div
+                            key={`room-${room.id}`}
+                            className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all duration-300 relative ${getRoomColor(room)} ${
+                              isMoving && room.isCurrentRoom ? 'scale-110 animate-pulse' : ''
+                            }`}
+                            title={`${room.name} (${x}, ${y})`}
+                          >
+                            {getRoomIcon(room)}
+                          </div>
+                        );
+                      } else {
+                        return <div key={`empty-${col}-${row}`} className="w-6 h-6" />;
+                      }
+                    } else if (isRoomRow && !isRoomCol) {
+                      const roomRow = Math.floor(row / 2);
+                      const leftCol = Math.floor(col / 2);
+                      const rightCol = leftCol + 1;
+                      const y = maxY - roomRow;
+                      const leftX = minX + leftCol;
+                      const rightX = minX + rightCol;
+                      const leftRoom = roomMap.get(`${leftX},${y}`);
+                      const rightRoom = roomMap.get(`${rightX},${y}`);
+                      
+                      if (leftRoom && rightRoom) {
+                        return (
+                          <div key={`h-${leftX}-${rightX}-${y}`} className="w-6 h-6 flex items-center justify-center">
+                            <div className="w-4 h-0.5 bg-slate-500"></div>
+                          </div>
+                        );
+                      }
+                      return <div key={`h-empty-${col}-${row}`} className="w-6 h-6" />;
+                    } else if (!isRoomRow && isRoomCol) {
+                      const roomCol = Math.floor(col / 2);
+                      const topRow = Math.floor(row / 2);
+                      const bottomRow = topRow + 1;
+                      const x = minX + roomCol;
+                      const topY = maxY - topRow;
+                      const bottomY = maxY - bottomRow;
+                      const topRoom = roomMap.get(`${x},${topY}`);
+                      const bottomRoom = roomMap.get(`${x},${bottomY}`);
+                      
+                      if (topRoom && bottomRoom) {
+                        return (
+                          <div key={`v-${x}-${topY}-${bottomY}`} className="w-6 h-6 flex items-center justify-center">
+                            <div className="w-0.5 h-4 bg-slate-500"></div>
+                          </div>
+                        );
+                      }
+                      return <div key={`v-empty-${col}-${row}`} className="w-6 h-6" />;
+                    } else {
+                      return <div key={`intersection-${col}-${row}`} className="w-6 h-6" />;
+                    }
+                  })}
+                </div>
               </div>
-            ))}
-          </div>
-          
-          {roomsToDisplay.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
-              No rooms explored yet
             </div>
-          )}
-        </div>
-        
-        <div className="mt-3 text-xs text-slate-400 space-y-1">
-          <div className="flex justify-between">
-            <span>Rooms: {roomsToDisplay.length}</span>
-            <span>Floor {crawler.currentFloor}</span>
           </div>
-          {currentRoom && (
-            <div className="text-slate-300">
-              Current: {currentRoom.name}
+
+          {/* Legend */}
+          <div className="mt-4 space-y-1 text-xs">
+            <div className="font-medium text-slate-300 mb-2">Legend:</div>
+            <div className="grid grid-cols-2 gap-1 text-slate-400">
+              <div className="flex items-center gap-1">
+                <Shield className="w-3 h-3 text-green-400" />
+                <span>Safe</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Gem className="w-3 h-3 text-yellow-400" />
+                <span>Treasure</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Home className="w-3 h-3 text-green-400" />
+                <span>Entrance</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <ArrowDown className="w-3 h-3 text-purple-400" />
+                <span>Stairs</span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
+// Expanded map view component for the dialog
 interface ExpandedMapViewProps {
   exploredRooms: ExploredRoom[];
 }
 
 function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
+  const [scale, setScale] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const zoomIn = () => setScale(prev => Math.min(prev * 1.2, 3));
+  const zoomOut = () => setScale(prev => Math.max(prev / 1.2, 0.5));
+  const resetView = () => {
+    setScale(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) return <User className="w-4 h-4" />;
+    if (!room.isExplored) {
+      return <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">?</div>;
+    }
+    
+    // Check for safe rooms first (by isSafe property)
+    if (room.isSafe) {
+      return <Shield className="w-6 h-6 text-green-400" />;
+    }
+    
     switch (room.type) {
+      case 'entrance':
+        return <Home className="w-6 h-6 text-green-400" />;
       case 'treasure':
-        return <Gem className="w-4 h-4" />;
-      case 'safe':
-        return <Shield className="w-4 h-4" />;
-      case 'trap':
-        return <AlertTriangle className="w-4 h-4" />;
+        return <Gem className="w-6 h-6 text-yellow-400" />;
+      case 'boss':
+      case 'exit':
+        return <Skull className="w-6 h-6 text-red-400" />;
+      case 'stairs':
+        return <ArrowDown className="w-6 h-6 text-purple-400" />;
       default:
-        return <MapPin className="w-4 h-4" />;
+        return <div className="w-6 h-6 bg-slate-600 rounded" />;
     }
   };
 
   const getRoomColor = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return "bg-blue-600/40 border-blue-600 shadow-lg shadow-blue-600/20";
+    if (!room.isExplored) {
+      return "bg-slate-800/50 border-slate-600/50";
     }
+    
+    // Check for safe rooms first (by isSafe property)
+    if (room.isSafe) {
+      return "bg-green-600/20 border-green-600/50";
+    }
+    
     switch (room.type) {
       case 'entrance':
-        return "bg-green-600/30 border-green-600/60";
-      case 'safe':
-        return "bg-green-600/30 border-green-600/60";
+        return "bg-green-600/20 border-green-600/50";
       case 'treasure':
-        return "bg-yellow-600/30 border-yellow-600/60";
+        return "bg-yellow-600/20 border-yellow-600/50";
       case 'boss':
-        return "bg-red-600/30 border-red-600/60";
       case 'exit':
-        return "bg-purple-600/30 border-purple-600/60";
-      case 'trap':
-        return "bg-orange-600/30 border-orange-600/60";
+        return "bg-red-600/20 border-red-600/50";
+      case 'stairs':
+        return "bg-purple-600/20 border-purple-600/50";
       default:
-        return "bg-slate-600/30 border-slate-600/60";
+        return "bg-slate-600/20 border-slate-600/50";
     }
   };
 
+  if (!exploredRooms || exploredRooms.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center text-slate-400">
+        No rooms explored yet
+      </div>
+    );
+  }
+
+  // Calculate bounds
+  const minX = Math.min(...exploredRooms.map(r => r.x));
+  const maxX = Math.max(...exploredRooms.map(r => r.x));
+  const minY = Math.min(...exploredRooms.map(r => r.y));
+  const maxY = Math.max(...exploredRooms.map(r => r.y));
+
+  // Create room map
+  const roomMap = new Map();
+  exploredRooms.forEach(room => {
+    roomMap.set(`${room.x},${room.y}`, room);
+  });
+
   return (
-    <div className="relative w-full h-96 bg-slate-900/50 border border-slate-700 overflow-auto rounded">
-      <div className="relative min-w-[800px] min-h-[600px]">
-        {exploredRooms.map((room) => (
-          <div
-            key={room.id}
-            className={`absolute w-8 h-8 rounded border-2 flex items-center justify-center transition-all duration-200 ${getRoomColor(room)}`}
-            style={{
-              left: room.x * 2,
-              top: room.y * 2,
-            }}
-            title={room.name}
-          >
-            {getRoomIcon(room)}
+    <div className="flex flex-col h-full">
+      {/* Controls */}
+      <div className="flex items-center gap-2 mb-4">
+        <Button onClick={zoomIn} size="sm" variant="outline">
+          <ZoomIn className="w-4 h-4" />
+        </Button>
+        <Button onClick={zoomOut} size="sm" variant="outline">
+          <ZoomOut className="w-4 h-4" />
+        </Button>
+        <Button onClick={resetView} size="sm" variant="outline">
+          <RotateCcw className="w-4 h-4" />
+        </Button>
+        <span className="text-sm text-slate-400 ml-2">
+          Zoom: {Math.round(scale * 100)}%
+        </span>
+      </div>
+
+      {/* Map container */}
+      <div 
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto"
+        style={{ height: '600px', width: '600px' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <div 
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease'
+          }}
+        >
+          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${(maxX - minX + 1) * 2 - 1}, 1fr)` }}>
+            {Array.from({ length: ((maxY - minY + 1) * 2 - 1) * ((maxX - minX + 1) * 2 - 1) }, (_, index) => {
+              const gridWidth = (maxX - minX + 1) * 2 - 1;
+              const row = Math.floor(index / gridWidth);
+              const col = index % gridWidth;
+              
+              const isRoomRow = row % 2 === 0;
+              const isRoomCol = col % 2 === 0;
+              
+              if (isRoomRow && isRoomCol) {
+                // Room position
+                const roomRow = Math.floor(row / 2);
+                const roomCol = Math.floor(col / 2);
+                const x = minX + roomCol;
+                const y = maxY - roomRow;
+                const room = roomMap.get(`${x},${y}`);
+                
+                if (room) {
+                  return (
+                    <div
+                      key={`room-${room.id}`}
+                      className={`w-12 h-12 border-2 rounded flex items-center justify-center relative ${getRoomColor(room)}`}
+                      title={`${room.name} (${x}, ${y})`}
+                    >
+                      {getRoomIcon(room)}
+                      {room.isCurrentRoom && (
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+                      )}
+                    </div>
+                  );
+                } else {
+                  return <div key={`empty-${col}-${row}`} className="w-12 h-12" />;
+                }
+              } else if (isRoomRow && !isRoomCol) {
+                // Horizontal connection
+                const roomRow = Math.floor(row / 2);
+                const leftCol = Math.floor(col / 2);
+                const rightCol = leftCol + 1;
+                const y = maxY - roomRow;
+                const leftX = minX + leftCol;
+                const rightX = minX + rightCol;
+                const leftRoom = roomMap.get(`${leftX},${y}`);
+                const rightRoom = roomMap.get(`${rightX},${y}`);
+                
+                if (leftRoom && rightRoom) {
+                  return (
+                    <div key={`h-${leftX}-${rightX}-${y}`} className="w-12 h-12 flex items-center justify-center">
+                      <div className="w-8 h-1 bg-slate-500"></div>
+                    </div>
+                  );
+                }
+                return <div key={`h-empty-${col}-${row}`} className="w-12 h-12" />;
+              } else if (!isRoomRow && isRoomCol) {
+                // Vertical connection
+                const roomCol = Math.floor(col / 2);
+                const topRow = Math.floor(row / 2);
+                const bottomRow = topRow + 1;
+                const x = minX + roomCol;
+                const topY = maxY - topRow;
+                const bottomY = maxY - bottomRow;
+                const topRoom = roomMap.get(`${x},${topY}`);
+                const bottomRoom = roomMap.get(`${x},${bottomY}`);
+                
+                if (topRoom && bottomRoom) {
+                  return (
+                    <div key={`v-${x}-${topY}-${bottomY}`} className="w-12 h-12 flex items-center justify-center">
+                      <div className="w-1 h-8 bg-slate-500"></div>
+                    </div>
+                  );
+                }
+                return <div key={`v-empty-${col}-${row}`} className="w-12 h-12" />;
+              } else {
+                // Intersection
+                return <div key={`intersection-${col}-${row}`} className="w-12 h-12" />;
+              }
+            })}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
