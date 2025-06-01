@@ -498,6 +498,12 @@ export const insertCrawlerPositionSchema = createInsertSchema(crawlerPositions).
   enteredAt: true,
 });
 
+export const insertMapKnowledgeSchema = createInsertSchema(mapKnowledge).omit({
+  id: true,
+  firstSeenAt: true,
+  lastUpdatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -511,6 +517,7 @@ export type Floor = typeof floors.$inferSelect;
 export type Room = typeof rooms.$inferSelect;
 export type RoomConnection = typeof roomConnections.$inferSelect;
 export type CrawlerPosition = typeof crawlerPositions.$inferSelect;
+export type MapKnowledge = typeof mapKnowledge.$inferSelect;
 export type Enemy = typeof enemies.$inferSelect;
 export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;

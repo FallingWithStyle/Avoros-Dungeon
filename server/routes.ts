@@ -274,6 +274,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get crawler's map knowledge (enhanced map data)
+  app.get('/api/crawlers/:id/map-knowledge', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+      
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const mapKnowledge = await storage.getCrawlerMapKnowledge(crawlerId);
+      res.json(mapKnowledge);
+    } catch (error) {
+      console.error("Error fetching map knowledge:", error);
+      res.status(500).json({ message: "Failed to fetch map knowledge" });
+    }
+  });
+
   app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
