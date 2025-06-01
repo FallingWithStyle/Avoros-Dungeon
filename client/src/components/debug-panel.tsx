@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Zap, RotateCcw } from "lucide-react";
+import { RefreshCw, Zap, RotateCcw, Heart } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -88,6 +88,25 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
+  // Debug heal crawler
+  const healMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeCrawler) throw new Error("No active crawler");
+      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/debug/heal`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler?.id}`] });
+      toast({
+        title: "Crawler Healed",
+        description: "Health and energy restored to maximum.",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Heal Failed", error);
+    },
+  });
+
   // Don't render debug panel if not in debug mode
   if (!IS_DEBUG_MODE) {
     return null;
@@ -166,7 +185,32 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               )}
               Reset Position
             </Button>
+            
+            <Button
+              onClick={() => healMutation.mutate()}
+              disabled={healMutation.isPending || !activeCrawler}
+              variant="outline"
+              size="sm"
+              className="border-green-600/30 text-green-400 hover:bg-green-600/10"
+            >
+              {healMutation.isPending ? (
+                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+              ) : (
+                <Heart className="w-3 h-3 mr-2" />
+              )}
+              Heal Crawler
+            </Button>
           </div>
+          
+          {/* Debug Information */}
+          {activeCrawler && (
+            <div className="mt-3 pt-3 border-t border-red-600/30">
+              <div className="text-xs text-red-300 space-y-1">
+                <div>Hidden Luck: {activeCrawler.luck || 0}</div>
+                <div>Coordinates: Floor {activeCrawler.currentFloor || 1}</div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
