@@ -94,9 +94,20 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
 
     console.log("centerOnCrawler: Current room", currentRoom.name, "at", currentRoom.x, currentRoom.y);
 
-    // Calculate room grid bounds using the same data
-    const allX = dataToUse.map(r => r.x);
-    const allY = dataToUse.map(r => r.y);
+    // For centering, always use the displayed rooms, not the full dataset
+    const displayedRooms = showFullMap ? 
+      (allRooms && exploredRooms ? 
+        allRooms.map(room => ({
+          ...room,
+          isCurrentRoom: room.id === exploredRooms.find(r => r.isCurrentRoom)?.id,
+          isExplored: exploredRooms.some(er => er.id === room.id)
+        })).filter(room => room.isExplored || room.isCurrentRoom) // Only show explored rooms in the grid calculation
+        : []
+      ) : exploredRooms || [];
+
+    // Calculate room grid bounds using displayed rooms only
+    const allX = displayedRooms.map(r => r.x);
+    const allY = displayedRooms.map(r => r.y);
     const minX = Math.min(...allX);
     const maxX = Math.max(...allX);
     const minY = Math.min(...allY);
