@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +18,8 @@ import {
   Shield,
   Gem,
   Users,
-  Zap
+  Zap,
+  Map
 } from "lucide-react";
 
 interface RoomNavigationProps {
@@ -43,6 +45,7 @@ interface RoomData {
 export default function RoomNavigation({ crawler, energyDisabled = false }: RoomNavigationProps) {
   const { toast } = useToast();
   const [pendingDirection, setPendingDirection] = useState<string | null>(null);
+  const [showCoordinates, setShowCoordinates] = useState(false);
 
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery<RoomData>({
@@ -222,12 +225,29 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {getRoomTypeIcon(room)}
-          {room.name}
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {getRoomTypeIcon(room)}
+            {room.name}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Map className="h-4 w-4" />
+              <Switch
+                checked={showCoordinates}
+                onCheckedChange={setShowCoordinates}
+                size="sm"
+              />
+            </div>
+          </div>
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           {getRoomTypeBadge(room)}
+          {showCoordinates && (
+            <Badge variant="outline" className="font-mono text-xs">
+              ({room.x}, {room.y})
+            </Badge>
+          )}
           {playersInRoom.length > 1 && (
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />

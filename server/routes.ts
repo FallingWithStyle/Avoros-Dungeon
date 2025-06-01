@@ -527,7 +527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/debug/regenerate-dungeon', isAuthenticated, async (req: any, res) => {
     try {
       const { db } = await import('./db');
-      const { rooms, roomConnections, crawlerPositions } = await import('@shared/schema');
+      const { rooms, roomConnections, crawlerPositions, floors } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
       
       // Clear existing room data
       await db.delete(crawlerPositions);
@@ -537,6 +538,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Reinitialize with new layout
       const { initializeDatabase } = await import('./init-db');
       await initializeDatabase();
+      
+      // Reset all crawlers to entrance room
+      const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+      if (floor1) {
+        const [entranceRoom] = await db.select().from(rooms).where(eq(rooms.type, 'entrance'));
+        if (entranceRoom) {
+          // Get all active crawlers and reset their positions
+          const { crawlers } = await import('@shared/schema');
+          const activeCrawlers = await db.select().from(crawlers).where(eq(crawlers.status, 'active'));
+          
+          for (const crawler of activeCrawlers) {
+            await db.insert(crawlerPositions).values({
+              crawlerId: crawler.id,
+              roomId: entranceRoom.id,
+              enteredAt: new Date()
+            });
+          }
+        }
+      }
       
       res.json({ message: "Dungeon layout regenerated with new room distribution" });
     } catch (error) {
