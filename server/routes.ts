@@ -274,30 +274,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get crawler's explored rooms
-  app.get('/api/crawlers/:id/explored-rooms', isAuthenticated, async (req: any, res) => {
-    try {
-      console.log('Explored rooms endpoint called for crawler:', req.params.id);
-      console.log('User claims:', req.user?.claims);
-      
-      const crawlerId = parseInt(req.params.id);
-      const crawler = await storage.getCrawler(crawlerId);
-      
-      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
-        console.log('Access denied - crawler not found or wrong sponsor');
-        return res.status(404).json({ message: "Crawler not found" });
-      }
-
-      console.log('Fetching explored rooms for crawler:', crawlerId);
-      const exploredRooms = await storage.getExploredRooms(crawlerId);
-      console.log('Explored rooms returned:', exploredRooms?.length || 0, 'rooms');
-      res.json(exploredRooms);
-    } catch (error) {
-      console.error("Error fetching explored rooms:", error);
-      res.status(500).json({ message: "Failed to fetch explored rooms" });
-    }
-  });
-
   // Get crawler's map knowledge (enhanced map data)
   app.get('/api/crawlers/:id/map-knowledge', isAuthenticated, async (req: any, res) => {
     try {
