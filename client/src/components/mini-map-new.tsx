@@ -61,26 +61,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   const roomsData = showFullMap ? allRooms : exploredRooms;
   const isLoading = showFullMap ? allRoomsLoading : exploredLoading;
 
-  // Track room changes for smooth transitions and reset pan
-  useEffect(() => {
-    if (roomsData) {
-      const currentRoom = roomsData.find(room => room.isCurrentRoom);
-      if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
-        setIsMoving(true);
-        
-        // Reset pan offset when player moves
-        if (resetPanOnNextMove) {
-          setPanOffset({ x: 0, y: 0 });
-          setResetPanOnNextMove(false);
-        }
-        
-        setTimeout(() => setIsMoving(false), 800);
-      }
-      if (currentRoom) {
-        setPreviousCurrentRoom(currentRoom);
-      }
-    }
-  }, [roomsData, previousCurrentRoom, resetPanOnNextMove]);
+
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -249,6 +230,39 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   displayRooms.forEach(room => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
+
+  // Auto-center on current room when it changes
+  useEffect(() => {
+    if (currentRoom && displayRooms.length > 0) {
+      // Calculate the center position for the current room
+      const mapWidth = 250;
+      const mapHeight = 250;
+      const gridWidth = (maxX - minX + 1) * 2 - 1;
+      const gridHeight = (maxY - minY + 1) * 2 - 1;
+      const cellSize = Math.min(mapWidth / gridWidth, mapHeight / gridHeight);
+      
+      // Position of current room in the grid
+      const roomCol = (currentRoom.x - minX) * 2;
+      const roomRow = (currentRoom.y - minY) * 2;
+      
+      // Calculate the position to center this room
+      const roomPixelX = roomCol * cellSize;
+      const roomPixelY = roomRow * cellSize;
+      
+      // Center the room in the viewport
+      const centerX = mapWidth / 2 - roomPixelX - cellSize / 2;
+      const centerY = mapHeight / 2 - roomPixelY - cellSize / 2;
+      
+      setPanOffset({ x: centerX, y: centerY });
+      
+      // Track room changes for smooth transitions
+      if (previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
+        setIsMoving(true);
+        setTimeout(() => setIsMoving(false), 800);
+      }
+      setPreviousCurrentRoom(currentRoom);
+    }
+  }, [currentRoom?.id, displayRooms.length, minX, maxX, minY, maxY]);
 
   return (
     <Card className="bg-game-panel border-game-border">
