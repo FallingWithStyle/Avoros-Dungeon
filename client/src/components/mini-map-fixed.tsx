@@ -104,7 +104,7 @@ export function MiniMap({ crawler }: { crawler: any }) {
 
   // All query hooks at the top - always called
   const { data: exploredRooms, isLoading: exploredLoading, error: exploredError } = useQuery({
-    queryKey: ['/api/crawlers', crawler?.id, 'explored-rooms'],
+    queryKey: [`/api/crawlers/${crawler?.id}/explored-rooms`],
     enabled: !!crawler?.id,
   });
 
@@ -124,6 +124,7 @@ export function MiniMap({ crawler }: { crawler: any }) {
 
   if (exploredRooms && Array.isArray(exploredRooms)) {
     console.log('Explored rooms data:', exploredRooms);
+    console.log('First room structure:', exploredRooms[0]);
     const currentRoomInData = exploredRooms.find(r => r.isCurrentRoom);
     console.log('Current room found:', currentRoomInData);
   }
