@@ -365,7 +365,8 @@ export class DatabaseStorage implements IStorage {
     if (entranceRoom) {
       await db.insert(crawlerPositions).values({
         crawlerId: crawlerId,
-        roomId: entranceRoom.id
+        roomId: entranceRoom.id,
+        enteredAt: new Date()
       });
     }
   }
