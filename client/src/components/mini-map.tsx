@@ -232,10 +232,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   }
 
   // Calculate the bounds of explored rooms
-  const minX = Math.min(...exploredRooms.map(r => r.x));
-  const maxX = Math.max(...exploredRooms.map(r => r.x));
-  const minY = Math.min(...exploredRooms.map(r => r.y));
-  const maxY = Math.max(...exploredRooms.map(r => r.y));
+  const minX = Math.min(...roomsToDisplay.map(r => r.x));
+  const maxX = Math.max(...roomsToDisplay.map(r => r.x));
+  const minY = Math.min(...roomsToDisplay.map(r => r.y));
+  const maxY = Math.max(...roomsToDisplay.map(r => r.y));
 
   const gridWidth = maxX - minX + 1;
   const gridHeight = maxY - minY + 1;
@@ -243,7 +243,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   // Create a 2D grid to position rooms (flip Y axis to put north at top)
   const grid: (ExploredRoom | null)[][] = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill(null));
   
-  exploredRooms.forEach(room => {
+  roomsToDisplay.forEach(room => {
     const gridX = room.x - minX;
     const gridY = (maxY - room.y); // Flip Y coordinate so north is at top
     grid[gridY][gridX] = room;
@@ -271,7 +271,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                   Dungeon Map - Floor {crawler.currentFloor}
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={exploredRooms} />
+              <ExpandedMapView exploredRooms={roomsToDisplay || []} />
             </DialogContent>
           </Dialog>
         </CardTitle>
@@ -282,7 +282,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
           <div className="flex justify-center">
             {/* Calculate visible area around current room */}
             {(() => {
-              const currentRoom = exploredRooms.find(r => r.isCurrentRoom);
+              const currentRoom = roomsToDisplay.find(r => r.isCurrentRoom);
               if (!currentRoom) return <div className="text-slate-400">No current room</div>;
               
               const centerX = currentRoom.x;
@@ -296,7 +296,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
               
               // Create a map of coordinates to rooms
               const roomMap = new Map();
-              exploredRooms.forEach(room => {
+              roomsToDisplay.forEach(room => {
                 roomMap.set(`${room.x},${room.y}`, room);
               });
               
