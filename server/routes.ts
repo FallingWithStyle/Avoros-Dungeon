@@ -442,6 +442,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug route for full map data
+  app.get('/api/debug/rooms/:floorId', async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const rooms = await storage.getRoomsForFloor(floorId);
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching floor rooms:", error);
+      res.status(500).json({ message: "Failed to fetch floor rooms" });
+    }
+  });
+
   // Crawler generation
   app.get('/api/crawlers/candidates', isAuthenticated, async (req, res) => {
     try {

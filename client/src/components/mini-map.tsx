@@ -18,6 +18,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
+import { isFullMapMode } from "@/components/debug-panel";
 
 interface MiniMapProps {
   crawler: CrawlerWithDetails;
@@ -50,19 +51,55 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
+  // Check if we're in full map debug mode
+  const [showFullMap, setShowFullMap] = useState(isFullMapMode());
+  
   // Fetch explored rooms for this crawler
   const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     retry: false,
     refetchInterval: 2000, // Refresh every 2 seconds to ensure current room updates
+    enabled: !showFullMap,
   });
 
+  // Fetch all rooms for full map mode
+  const { data: allRooms, isLoading: isLoadingAllRooms } = useQuery<any[]>({
+    queryKey: [`/api/debug/rooms/${crawler.currentFloor}`],
+    retry: false,
+    enabled: showFullMap,
+  });
 
+  // Update show full map state when debug mode changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newShowFullMap = isFullMapMode();
+      if (newShowFullMap !== showFullMap) {
+        setShowFullMap(newShowFullMap);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [showFullMap]);
+
+  // Convert all rooms data to explored rooms format when in full map mode
+  const { data: currentRoomData } = useQuery<any>({
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    retry: false,
+    enabled: showFullMap,
+  });
+
+  // Combine data based on mode
+  const roomsToDisplay = showFullMap && allRooms ? 
+    allRooms.map(room => ({
+      ...room,
+      isCurrentRoom: currentRoomData?.room?.id === room.id,
+      isExplored: true, // Mark all rooms as explored in debug mode
+    })) : 
+    exploredRooms;
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
-    if (exploredRooms) {
-      const currentRoom = exploredRooms.find(room => room.isCurrentRoom);
+    if (roomsToDisplay) {
+      const currentRoom = roomsToDisplay.find(room => room.isCurrentRoom);
       if (currentRoom && previousCurrentRoom && currentRoom.id !== previousCurrentRoom.id) {
         setIsMoving(true);
         
@@ -78,7 +115,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         setPreviousCurrentRoom(currentRoom);
       }
     }
-  }, [exploredRooms, previousCurrentRoom, resetPanOnNextMove]);
+  }, [roomsToDisplay, previousCurrentRoom, resetPanOnNextMove]);
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -162,7 +199,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingAllRooms) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -178,17 +215,17 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     );
   }
 
-  if (!exploredRooms || exploredRooms.length === 0) {
+  if (!roomsToDisplay || roomsToDisplay.length === 0) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-200 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            Mini-Map
+            Mini-Map {showFullMap && <Badge variant="outline" className="text-cyan-400 border-cyan-400">DEBUG</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-slate-400">No rooms explored yet</div>
+          <div className="text-sm text-slate-400">No rooms {showFullMap ? 'available' : 'explored yet'}</div>
         </CardContent>
       </Card>
     );
