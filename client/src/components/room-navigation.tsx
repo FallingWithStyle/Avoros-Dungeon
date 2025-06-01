@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { IS_DEBUG_MODE } from "@/components/debug-panel";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
@@ -48,7 +49,6 @@ interface RoomData {
 export default function RoomNavigation({ crawler, energyDisabled = false }: RoomNavigationProps) {
   const { toast } = useToast();
   const [pendingDirection, setPendingDirection] = useState<string | null>(null);
-  const [showCoordinates, setShowCoordinates] = useState(false);
 
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery<RoomData>({
@@ -62,7 +62,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
     mutationFn: async (direction: string) => {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { 
         direction,
-        debugEnergyDisabled: energyDisabled 
+        debugEnergyDisabled: isEnergyDisabled() 
       });
     },
     onSuccess: () => {
@@ -233,23 +233,14 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
             {getRoomTypeIcon(room)}
             {room.name}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-sm">
-              <Map className="h-4 w-4" />
-              <Switch
-                checked={showCoordinates}
-                onCheckedChange={setShowCoordinates}
-              />
-            </div>
-          </div>
-        </CardTitle>
-        <CardDescription className="flex items-center gap-2">
-          {getRoomTypeBadge(room)}
-          {showCoordinates && (
+          {IS_DEBUG_MODE && (
             <Badge variant="outline" className="font-mono text-xs">
               ({room.x}, {room.y})
             </Badge>
           )}
+        </CardTitle>
+        <CardDescription className="flex items-center gap-2">
+          {getRoomTypeBadge(room)}
           {playersInRoom.length > 1 && (
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />
