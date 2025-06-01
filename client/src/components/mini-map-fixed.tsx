@@ -167,20 +167,20 @@ export function MiniMap({ crawler }: { crawler: any }) {
             <MapPin className="w-4 h-4" />
             Mini-Map
             <Badge variant="secondary" className="ml-auto">
-              {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
+              {showFullMap ? "Full Floor" : `${Array.isArray(roomsData) ? roomsData.length : 0} Explored`}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-sm text-slate-400">
-            {showFullMap ? "Loading floor map..." : "No rooms explored yet"}
+            {showFullMap ? "Loading floor map..." : "Loading explored rooms..."}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!roomsData || roomsData.length === 0) {
+  if (!roomsData || !Array.isArray(roomsData) || roomsData.length === 0) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -188,13 +188,13 @@ export function MiniMap({ crawler }: { crawler: any }) {
             <MapPin className="w-4 h-4" />
             Mini-Map
             <Badge variant="secondary" className="ml-auto">
-              {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
+              {showFullMap ? "Full Floor" : `${Array.isArray(roomsData) ? roomsData.length : 0} Explored`}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-sm text-slate-400">
-            {showFullMap ? "Loading floor map..." : "No rooms explored yet"}
+            {showFullMap ? "No rooms on floor" : "No rooms explored yet"}
           </div>
         </CardContent>
       </Card>
