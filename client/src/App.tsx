@@ -15,7 +15,7 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
-    <div className="min-h-screen">
+    <div>
       {!isLoading && isAuthenticated && <HeaderNavigation />}
       <Switch>
         {isLoading || !isAuthenticated ? (
