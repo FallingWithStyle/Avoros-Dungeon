@@ -302,6 +302,15 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           <Badge variant="outline" className="ml-auto text-xs">
             {showFullMap ? "Full Floor" : `${displayRooms?.length || 0} Explored`}
           </Badge>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 px-2 ml-2 text-xs"
+            onClick={centerOnCrawler}
+            title="Center on Crawler"
+          >
+            📍
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-2">
