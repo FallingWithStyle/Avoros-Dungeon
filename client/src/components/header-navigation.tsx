@@ -2,16 +2,24 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Building2, Bot, User, Settings } from "lucide-react";
 
 export default function HeaderNavigation() {
   const { user } = useAuth();
   const [location] = useLocation();
 
-  // Determine the crawler navigation URL based on user's active crawler
+  // Get the user's crawlers to determine active crawler
+  const { data: crawlers } = useQuery({
+    queryKey: ["/api/crawlers"],
+    retry: false,
+  });
+
+  // Determine the crawler navigation URL based on user's crawlers
   const getCrawlerHref = () => {
-    if (user?.activeCrawlerId) {
-      return `/crawler/${user.activeCrawlerId}`;
+    const activeCrawlers = crawlers?.filter((c: any) => c.isAlive) || [];
+    if (activeCrawlers.length > 0) {
+      return `/crawler/${activeCrawlers[0].id}`;
     }
     return "/"; // Fallback to sponsor page if no active crawler
   };
@@ -28,7 +36,7 @@ export default function HeaderNavigation() {
       label: "Crawler",
       icon: Bot,
       description: "Active Crawler Control",
-      disabled: !user?.activeCrawlerId
+      disabled: !crawlers?.some((c: any) => c.isAlive)
     },
     {
       href: "/account",
