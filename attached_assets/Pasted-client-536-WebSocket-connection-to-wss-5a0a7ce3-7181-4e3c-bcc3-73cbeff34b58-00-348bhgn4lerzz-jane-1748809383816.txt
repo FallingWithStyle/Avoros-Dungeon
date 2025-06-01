@@ -1,0 +1,39 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=YE048s-2fnjD' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=YE048s-2fnjD' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=84144ba6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: undefined, exploredLoading: true, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
+mini-map-fixed.tsx:117 MiniMap Debug: {crawlerId: 51, exploredRooms: Array(1), exploredLoading: false, exploredError: null, queryEnabled: true}
+mini-map-fixed.tsx:126 Explored rooms data: [{…}]
+mini-map-fixed.tsx:128 Current room found: undefined
