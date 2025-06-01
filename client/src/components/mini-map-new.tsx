@@ -198,22 +198,27 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     );
   }
 
-  // For full map mode, we need to find the current room and mark it
+  // Find current room correctly based on mode
   let currentRoom: ExploredRoom | undefined;
+  let displayRooms: ExploredRoom[] = [];
+  
   if (showFullMap && allRooms && exploredRooms) {
-    // Find current room from explored rooms first
+    // In full map mode, get the current room ID from explored rooms
     const exploredCurrentRoom = exploredRooms.find(r => r.isCurrentRoom);
-    if (exploredCurrentRoom) {
-      // Find and mark the corresponding room in the full map data
-      const fullMapCurrentRoom = allRooms.find(r => r.id === exploredCurrentRoom.id);
-      if (fullMapCurrentRoom) {
-        fullMapCurrentRoom.isCurrentRoom = true;
-        fullMapCurrentRoom.isExplored = true; // Mark as explored too
-        currentRoom = fullMapCurrentRoom;
-      }
-    }
+    const currentRoomId = exploredCurrentRoom?.id;
+    
+    // Create display rooms array with proper current room marking
+    displayRooms = allRooms.map(room => ({
+      ...room,
+      isCurrentRoom: room.id === currentRoomId,
+      isExplored: exploredRooms.some(er => er.id === room.id) ? true : false
+    }));
+    
+    currentRoom = displayRooms.find(r => r.isCurrentRoom);
   } else {
-    currentRoom = roomsData.find(r => r.isCurrentRoom);
+    // In explored mode, use explored rooms directly
+    displayRooms = roomsData || [];
+    currentRoom = displayRooms.find(r => r.isCurrentRoom);
   }
 
   if (!currentRoom) {
