@@ -2206,7 +2206,15 @@ export class DatabaseStorage implements IStorage {
     const crawler = await this.getCrawler(crawlerId);
     if (crawler && crawler.energy >= 15) {
       await db.update(crawlers)
-        .set({ energy: crawler.energy - 15 })
+        .set({ 
+          energy: crawler.energy - 15,
+          currentFloor: nextFloor.floorNumber 
+        })
+        .where(eq(crawlers.id, crawlerId));
+    } else {
+      // Update floor even if no energy cost (for debug mode)
+      await db.update(crawlers)
+        .set({ currentFloor: nextFloor.floorNumber })
         .where(eq(crawlers.id, crawlerId));
     }
 
