@@ -162,6 +162,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
       case 'south': return <ArrowDown className="h-4 w-4" />;
       case 'east': return <ArrowRight className="h-4 w-4" />;
       case 'west': return <ArrowLeft className="h-4 w-4" />;
+      case 'staircase': return <ArrowDown className="h-4 w-4 text-purple-400" />;
       default: return null;
     }
   };
@@ -172,6 +173,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
       case 'south': return 'S';
       case 'east': return 'D';
       case 'west': return 'A';
+      case 'staircase': return 'Q';
       default: return '';
     }
   };

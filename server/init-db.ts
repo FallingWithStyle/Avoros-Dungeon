@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { crawlerClasses, equipment, equipmentTypes, floors, enemies, crawlers } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, lte } from "drizzle-orm";
 
 export async function initializeDatabase() {
   try {
@@ -275,6 +275,9 @@ async function initializeRooms() {
     { x: -2, y: 0, name: "Western Gatehouse", description: "A fortified checkpoint protecting the artisan quarter.", type: "normal" },
     { x: 0, y: 6, name: "North Tower Base", description: "The foundation of a great tower. Structural supports reach skyward.", type: "normal" },
     { x: 2, y: -1, name: "Memorial Garden", description: "A peaceful courtyard with withered plants and memorial stones.", type: "normal", isSafe: true },
+    
+    // Single staircase - extremely rare (1/1000 rooms)
+    { x: 0, y: -4, name: "Deep Sanctuary Steps", description: "The deepest staircase, leading downward into mysteries unknown.", type: "stairs" },
   ];
 
   // Insert all rooms
