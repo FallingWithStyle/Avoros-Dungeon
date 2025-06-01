@@ -82,14 +82,14 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           const minY = Math.min(...allY);
           const maxY = Math.max(...allY);
           
-          // Room size in the grid (including spacing)
-          const roomSize = 16; // 12px room + 4px gap
+          // Room size in the grid (w-6 h-6 = 24px + gap-1 = 4px)
+          const roomSize = 28; // 24px room + 4px gap
           const totalGridWidth = ((maxX - minX + 1) * 2 - 1) * roomSize;
           const totalGridHeight = ((maxY - minY + 1) * 2 - 1) * roomSize;
           
-          // Calculate where the current room is in the grid
+          // Calculate where the current room is in the grid (accounting for Y-flip)
           const roomGridX = (currentRoom.x - minX) * 2;
-          const roomGridY = (currentRoom.y - minY) * 2;
+          const roomGridY = (maxY - currentRoom.y) * 2;
           
           // Calculate the pixel position of the current room
           const roomPixelX = roomGridX * roomSize;
@@ -128,12 +128,12 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
         const minY = Math.min(...allY);
         const maxY = Math.max(...allY);
         
-        // Room size in the grid (including spacing)
-        const roomSize = 16;
+        // Room size in the grid (w-6 h-6 = 24px + gap-1 = 4px)
+        const roomSize = 28;
         
-        // Calculate where the current room is in the grid
+        // Calculate where the current room is in the grid (accounting for Y-flip)
         const roomGridX = (currentRoom.x - minX) * 2;
-        const roomGridY = (currentRoom.y - minY) * 2;
+        const roomGridY = (maxY - currentRoom.y) * 2;
         
         // Calculate the pixel position of the current room
         const roomPixelX = roomGridX * roomSize;
