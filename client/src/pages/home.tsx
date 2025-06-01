@@ -136,6 +136,24 @@ export default function Home() {
     },
   });
 
+  // Debug position reset
+  const resetPositionMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeCrawler) throw new Error("No active crawler");
+      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/reset-position`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      toast({
+        title: "Position Reset",
+        description: "Crawler has been moved to the entrance.",
+      });
+    },
+    onError: (error) => {
+      showErrorToast("Position Reset Failed", error);
+    },
+  });
+
   if (crawlersLoading) {
     return (
       <div className="min-h-screen bg-slate-900 p-6">
@@ -355,6 +373,20 @@ export default function Home() {
                     <Zap className="w-4 h-4 mr-2" />
                   )}
                   Restore Energy (100%)
+                </Button>
+                
+                <Button
+                  onClick={() => resetPositionMutation.mutate()}
+                  disabled={resetPositionMutation.isPending || !activeCrawler}
+                  variant="outline"
+                  className="border-blue-600/30 text-blue-400 hover:bg-blue-600/10"
+                >
+                  {resetPositionMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                  )}
+                  Reset Position
                 </Button>
               </div>
             </CardContent>

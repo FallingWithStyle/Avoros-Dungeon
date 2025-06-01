@@ -523,6 +523,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DEBUG: Reset crawler to entrance
+  app.post('/api/crawlers/:id/reset-position', isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { db } = await import('./db');
+      const { rooms, crawlerPositions } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      // Find entrance room
+      const [entranceRoom] = await db.select().from(rooms).where(eq(rooms.type, 'entrance'));
+      if (!entranceRoom) {
+        return res.status(404).json({ message: "Entrance room not found" });
+      }
+
+      // Clear existing position
+      await db.delete(crawlerPositions).where(eq(crawlerPositions.crawlerId, crawlerId));
+      
+      // Set new position at entrance
+      await db.insert(crawlerPositions).values({
+        crawlerId: crawlerId,
+        roomId: entranceRoom.id,
+        enteredAt: new Date()
+      });
+      
+      res.json({ message: "Crawler position reset to entrance" });
+    } catch (error) {
+      console.error("Reset position error:", error);
+      res.status(500).json({ message: "Failed to reset position" });
+    }
+  });
+
   // DEBUG: Regenerate dungeon layout
   app.post('/api/debug/regenerate-dungeon', isAuthenticated, async (req: any, res) => {
     try {
@@ -553,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               crawlerId: crawler.id,
               roomId: entranceRoom.id,
               enteredAt: new Date()
-            });
+            }).onConflictDoNothing();
           }
         }
       }
