@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Zap, RotateCcw, Heart } from "lucide-react";
+import { RefreshCw, Zap, RotateCcw, Heart, Shield } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -15,8 +15,29 @@ interface DebugPanelProps {
 // Global debug mode flag - set to true for development, false for production
 const IS_DEBUG_MODE = true;
 
+// Global energy disabled state - disabled by default for debug mode
+let globalEnergyDisabled = true;
+
 export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const { toast } = useToast();
+  const [energyDisabled, setEnergyDisabled] = useState(globalEnergyDisabled);
+
+  // Get current room data to show coordinates
+  const { data: roomData } = useQuery({
+    queryKey: [`/api/crawlers/${activeCrawler?.id}/current-room`],
+    enabled: !!activeCrawler,
+    retry: false,
+  });
+
+  const toggleEnergyUsage = () => {
+    const newState = !energyDisabled;
+    setEnergyDisabled(newState);
+    globalEnergyDisabled = newState;
+    toast({
+      title: newState ? "Energy Usage Disabled" : "Energy Usage Enabled",
+      description: newState ? "Movement will not consume energy" : "Movement will consume energy normally",
+    });
+  };
 
   // Debug crawler reset
   const resetCrawlersMutation = useMutation({
@@ -157,6 +178,20 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             </Button>
             
             <Button
+              onClick={toggleEnergyUsage}
+              variant="outline"
+              size="sm"
+              className={`${
+                energyDisabled 
+                  ? "border-orange-600/30 text-orange-400 hover:bg-orange-600/10" 
+                  : "border-gray-600/30 text-gray-400 hover:bg-gray-600/10"
+              }`}
+            >
+              <Shield className="w-3 h-3 mr-2" />
+              {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
+            </Button>
+            
+            <Button
               onClick={() => restoreEnergyMutation.mutate()}
               disabled={restoreEnergyMutation.isPending || !activeCrawler}
               variant="outline"
@@ -207,7 +242,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             <div className="mt-3 pt-3 border-t border-red-600/30">
               <div className="text-xs text-red-300 space-y-1">
                 <div>Hidden Luck: {activeCrawler.luck || 0}</div>
-                <div>Coordinates: Floor {activeCrawler.currentFloor || 1}</div>
+                <div>
+                  Coordinates: Floor {activeCrawler.currentFloor || 1}, Room {roomData?.room?.x || 0},{roomData?.room?.y || 0}
+                </div>
               </div>
             </div>
           )}
@@ -216,5 +253,8 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     </div>
   );
 }
+
+// Function to get current energy disabled state
+export const isEnergyDisabled = () => globalEnergyDisabled;
 
 export { IS_DEBUG_MODE };

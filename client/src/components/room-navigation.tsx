@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
+import { isEnergyDisabled } from "@/components/debug-panel";
 import { CrawlerWithDetails } from "@shared/schema";
 import { 
   MapPin, 
