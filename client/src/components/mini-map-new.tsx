@@ -98,10 +98,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return <MapPin className="w-3 h-3 text-blue-400" />;
-    }
-    
     if (room.isExplored === false) {
       return <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">?</div>;
     }
