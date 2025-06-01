@@ -250,7 +250,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <MiniMap crawler={crawler} />
+                <MiniMap crawler={crawler} showFullMap={showFullMap} />
               </CardContent>
             </Card>
           </div>
