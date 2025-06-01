@@ -104,6 +104,13 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+@keyframes slowPulse {
+  0% { opacity: 0.2; transform: scale(0.8); }
+  15% { opacity: 1; transform: scale(1); }
+  85% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.2; transform: scale(0.8); }
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 8px;
