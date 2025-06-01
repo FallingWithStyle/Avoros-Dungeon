@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { MiniMap } from "@/components/mini-map-fixed";
+import MiniMap from "@/components/mini-map-new";
 import RoomNavigation from "@/components/room-navigation";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -250,7 +250,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <MiniMap crawler={crawler} />
+                <MiniMap crawler={crawler} showFullMap={showFullMap} />
               </CardContent>
             </Card>
           </div>
