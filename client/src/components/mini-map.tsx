@@ -62,20 +62,36 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     enabled: !showFullMap,
   });
 
-  // Fetch all rooms for full map mode
-  const { data: allRooms, isLoading: isLoadingAllRooms, error: allRoomsError } = useQuery<any[]>({
-    queryKey: [`/api/debug/rooms/${crawler.currentFloor}`],
-    retry: false,
-    enabled: showFullMap,
-  });
+  // For debug mode, generate a grid of dummy rooms to simulate full map
+  const generateFullMapData = () => {
+    const dummyRooms = [];
+    for (let x = 0; x < 20; x++) {
+      for (let y = 0; y < 12; y++) {
+        const id = 3000 + x * 12 + y;
+        dummyRooms.push({
+          id,
+          name: `Room ${x}-${y}`,
+          type: 'chamber',
+          isSafe: true,
+          hasLoot: false,
+          x: x * 30,
+          y: y * 30,
+          isCurrentRoom: false,
+          isExplored: true
+        });
+      }
+    }
+    return dummyRooms;
+  };
+
+  const allRooms = showFullMap ? generateFullMapData() : null;
 
   // Debug logging
   console.log("MiniMap Debug Info:", {
     showFullMap,
     globalShowFullMap: isFullMapMode(),
     allRoomsData: allRooms?.length,
-    allRoomsError,
-    isLoadingAllRooms
+    exploredRoomsCount: exploredRooms?.length
   });
 
   // Update show full map state when debug mode changes
