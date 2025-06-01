@@ -1921,7 +1921,16 @@ export class DatabaseStorage implements IStorage {
     const connections = await db.select()
       .from(roomConnections)
       .where(eq(roomConnections.fromRoomId, roomId));
-    return connections.map(conn => conn.direction);
+    
+    const directions = connections.map(conn => conn.direction);
+    
+    // Check if this room has a staircase
+    const room = await this.getRoom(roomId);
+    if (room && room.type === 'stairs') {
+      directions.push('staircase');
+    }
+    
+    return directions;
   }
 
   async moveToRoom(crawlerId: number, direction: string, debugEnergyDisabled?: boolean): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
@@ -1934,6 +1943,20 @@ export class DatabaseStorage implements IStorage {
 
     if (!currentPosition) {
       return { success: false, error: "Crawler position not found" };
+    }
+
+    // Get current room to check if it's a staircase
+    const currentRoom = await this.getRoom(currentPosition.roomId);
+    if (!currentRoom) {
+      return { success: false, error: "Current room not found" };
+    }
+
+    // Special handling for staircase movement
+    if (direction === 'staircase') {
+      if (currentRoom.type !== 'stairs') {
+        return { success: false, error: "No staircase in this room" };
+      }
+      return await this.handleStaircaseMovement(crawlerId, currentRoom);
     }
 
     // Find connection in the given direction
@@ -2145,6 +2168,55 @@ export class DatabaseStorage implements IStorage {
         enteredAt: new Date()
       });
     }
+  }
+
+  async handleStaircaseMovement(crawlerId: number, currentRoom: any): Promise<{ success: boolean; newRoom?: any; error?: string }> {
+    // Get current floor
+    const [currentFloor] = await db.select()
+      .from(floors)
+      .where(eq(floors.id, currentRoom.floorId));
+
+    if (!currentFloor) {
+      return { success: false, error: "Current floor not found" };
+    }
+
+    // Find next floor
+    const [nextFloor] = await db.select()
+      .from(floors)
+      .where(eq(floors.floorNumber, currentFloor.floorNumber + 1));
+
+    if (!nextFloor) {
+      return { success: false, error: "No deeper floor available" };
+    }
+
+    // Find entrance room on next floor
+    const [entranceRoom] = await db.select()
+      .from(rooms)
+      .where(and(
+        eq(rooms.floorId, nextFloor.id),
+        eq(rooms.type, 'entrance')
+      ));
+
+    if (!entranceRoom) {
+      return { success: false, error: "No entrance found on next floor" };
+    }
+
+    // Deduct energy for floor transition (higher cost)
+    const crawler = await this.getCrawler(crawlerId);
+    if (crawler && crawler.energy >= 15) {
+      await db.update(crawlers)
+        .set({ energy: crawler.energy - 15 })
+        .where(eq(crawlers.id, crawlerId));
+    }
+
+    // Move crawler to entrance of next floor
+    await db.insert(crawlerPositions).values({
+      crawlerId,
+      roomId: entranceRoom.id,
+      enteredAt: new Date()
+    });
+
+    return { success: true, newRoom: entranceRoom };
   }
 }
 
