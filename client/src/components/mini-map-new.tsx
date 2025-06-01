@@ -277,12 +277,17 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                         return (
                           <div
                             key={`room-${room.id}`}
-                            className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all duration-300 ${getRoomColor(room)} ${
+                            className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all duration-300 relative ${getRoomColor(room)} ${
                               isMoving && room.isCurrentRoom ? 'scale-110 animate-pulse' : ''
                             }`}
                             title={`${room.name} (${x}, ${y})`}
                           >
                             {getRoomIcon(room)}
+                            {room.isCurrentRoom && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-400/50" />
+                              </div>
+                            )}
                           </div>
                         );
                       } else {
