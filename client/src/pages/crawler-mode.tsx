@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import MiniMap from "@/components/mini-map";
+import MiniMap from "@/components/mini-map-new";
 import RoomNavigation from "@/components/room-navigation";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -25,7 +25,6 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(false);
-  const [showFullMap, setShowFullMap] = useState(true);
 
   // Fetch crawler data with more frequent updates
   const { data: crawler, isLoading: crawlerLoading } = useQuery<CrawlerWithDetails>({
@@ -250,7 +249,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <MiniMap crawler={crawler} showFullMap={showFullMap} />
+                <MiniMap crawler={crawler} />
               </CardContent>
             </Card>
           </div>
@@ -259,10 +258,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
       </div>
       
       {/* Global Debug Panel */}
-      <DebugPanel 
-        activeCrawler={crawler} 
-        onMapModeChange={(newShowFullMap) => setShowFullMap(newShowFullMap)}
-      />
+      <DebugPanel activeCrawler={crawler} />
     </div>
   );
 }

@@ -274,50 +274,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get crawler's map knowledge (enhanced map data)
-  app.get('/api/crawlers/:id/map-knowledge', isAuthenticated, async (req: any, res) => {
-    try {
-      const crawlerId = parseInt(req.params.id);
-      const crawler = await storage.getCrawler(crawlerId);
-      
-      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
-        return res.status(404).json({ message: "Crawler not found" });
-      }
-
-      const mapKnowledge = await storage.getCrawlerMapKnowledge(crawlerId);
-      res.json(mapKnowledge);
-    } catch (error) {
-      console.error("Error fetching map knowledge:", error);
-      res.status(500).json({ message: "Failed to fetch map knowledge" });
-    }
-  });
-
-  // Get all rooms on a floor (for debug full map mode)
-  app.get('/api/floors/:floorNumber/rooms', isAuthenticated, async (req: any, res) => {
-    try {
-      const floorNumber = parseInt(req.params.floorNumber);
-      const allRooms = await storage.getRoomsForFloor(floorNumber);
-      
-      // Convert to the same format as explored rooms for compatibility
-      const roomsWithMetadata = allRooms.map(room => ({
-        id: room.id,
-        name: room.name,
-        type: room.type,
-        x: room.x,
-        y: room.y,
-        isSafe: room.type === 'entrance' || room.type === 'safe',
-        hasLoot: room.type === 'treasure',
-        isCurrentRoom: false,
-        isExplored: false, // Mark as unexplored for visual distinction
-      }));
-      
-      res.json(roomsWithMetadata);
-    } catch (error) {
-      console.error("Error fetching floor rooms:", error);
-      res.status(500).json({ message: "Failed to fetch floor rooms" });
-    }
-  });
-
   app.post('/api/crawlers/:id/move', isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
@@ -486,8 +442,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-
   // Crawler generation
   app.get('/api/crawlers/candidates', isAuthenticated, async (req, res) => {
     try {
@@ -574,36 +528,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Reset position error:", error);
       res.status(500).json({ message: "Failed to reset position" });
-    }
-  });
-
-  // Get all rooms for a floor (debug endpoint)
-  app.get('/api/debug/rooms/:floorId', async (req, res) => {
-    try {
-      const floorId = parseInt(req.params.floorId);
-      console.log("Debug endpoint called for floor:", floorId);
-      
-      const rooms = await storage.getRoomsForFloor(floorId);
-      console.log("Retrieved rooms count:", rooms.length);
-      
-      // Transform rooms to match the ExploredRoom interface for consistency
-      const transformedRooms = rooms.map(room => ({
-        id: room.id,
-        name: room.name,
-        type: room.type,
-        isSafe: true, // Assume safe for debug view
-        hasLoot: false, // Don't show loot markers in debug view
-        x: room.x,
-        y: room.y,
-        isCurrentRoom: false, // Will be set by client
-        isExplored: true // Mark all as explored in debug mode
-      }));
-      
-      console.log("Sending transformed rooms:", transformedRooms.length);
-      res.json(transformedRooms);
-    } catch (error) {
-      console.error("Error fetching floor rooms:", error);
-      res.status(500).json({ message: "Failed to fetch floor rooms" });
     }
   });
 

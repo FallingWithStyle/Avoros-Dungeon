@@ -281,9 +281,7 @@ async function generateConnections() {
       roomMap.set(`${room.x},${room.y}`, room);
     }
     
-    // Connect adjacent rooms (process each pair only once to avoid duplicates)
-    const processedPairs = new Set<string>();
-    
+    // Connect adjacent rooms
     for (const room of floorRooms) {
       const directions = [
         { dx: 0, dy: 1, dir: 'north', opposite: 'south' },
@@ -297,25 +295,16 @@ async function generateConnections() {
         const adjacentRoom = roomMap.get(adjacentKey);
         
         if (adjacentRoom) {
-          // Create a unique pair key to avoid processing the same connection twice
-          const pairKey1 = `${room.id}-${adjacentRoom.id}`;
-          const pairKey2 = `${adjacentRoom.id}-${room.id}`;
-          
-          if (!processedPairs.has(pairKey1) && !processedPairs.has(pairKey2)) {
-            connections.push({
-              fromRoomId: room.id,
-              toRoomId: adjacentRoom.id,
-              direction: dir
-            });
-            connections.push({
-              fromRoomId: adjacentRoom.id,
-              toRoomId: room.id,
-              direction: opposite
-            });
-            
-            processedPairs.add(pairKey1);
-            processedPairs.add(pairKey2);
-          }
+          connections.push({
+            fromRoomId: room.id,
+            toRoomId: adjacentRoom.id,
+            direction: dir
+          });
+          connections.push({
+            fromRoomId: adjacentRoom.id,
+            toRoomId: room.id,
+            direction: opposite
+          });
         }
       }
     }

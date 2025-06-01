@@ -181,23 +181,6 @@ export const crawlerPositions = pgTable("crawler_positions", {
   enteredAt: timestamp("entered_at").defaultNow(),
 });
 
-// Map knowledge tracking - what each crawler knows about rooms
-export const mapKnowledge = pgTable("map_knowledge", {
-  id: serial("id").primaryKey(),
-  crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
-  roomId: integer("room_id").notNull().references(() => rooms.id),
-  visibilityLevel: varchar("visibility_level", { length: 20 }).default("unknown").notNull(), 
-  // unknown, glimpsed, explored, surveyed, scanned
-  firstSeenAt: timestamp("first_seen_at").defaultNow(),
-  lastUpdatedAt: timestamp("last_updated_at").defaultNow(),
-  revealedBy: varchar("revealed_by", { length: 50 }), // exploration, skill, equipment, ability
-  details: jsonb("details"), // stores additional knowledge like hazards, loot, connections
-}, (table) => [
-  index("idx_map_knowledge_crawler").on(table.crawlerId),
-  index("idx_map_knowledge_room").on(table.roomId),
-  index("idx_map_knowledge_unique").on(table.crawlerId, table.roomId),
-]);
-
 // Enemies
 export const enemies = pgTable("enemies", {
   id: serial("id").primaryKey(),
@@ -361,17 +344,6 @@ export const crawlerPositionsRelations = relations(crawlerPositions, ({ one }) =
   }),
 }));
 
-export const mapKnowledgeRelations = relations(mapKnowledge, ({ one }) => ({
-  crawler: one(crawlers, {
-    fields: [mapKnowledge.crawlerId],
-    references: [crawlers.id],
-  }),
-  room: one(rooms, {
-    fields: [mapKnowledge.roomId],
-    references: [rooms.id],
-  }),
-}));
-
 export const enemiesRelations = relations(enemies, ({ many }) => ({
   encounters: many(encounters),
 }));
@@ -498,12 +470,6 @@ export const insertCrawlerPositionSchema = createInsertSchema(crawlerPositions).
   enteredAt: true,
 });
 
-export const insertMapKnowledgeSchema = createInsertSchema(mapKnowledge).omit({
-  id: true,
-  firstSeenAt: true,
-  lastUpdatedAt: true,
-});
-
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -517,7 +483,6 @@ export type Floor = typeof floors.$inferSelect;
 export type Room = typeof rooms.$inferSelect;
 export type RoomConnection = typeof roomConnections.$inferSelect;
 export type CrawlerPosition = typeof crawlerPositions.$inferSelect;
-export type MapKnowledge = typeof mapKnowledge.$inferSelect;
 export type Enemy = typeof enemies.$inferSelect;
 export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
