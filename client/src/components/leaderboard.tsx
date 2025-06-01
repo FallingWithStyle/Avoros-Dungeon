@@ -29,7 +29,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="p-4 border-b border-game-border">
         <h3 className="text-lg font-semibold text-white flex items-center">
           <i className="fas fa-trophy mr-2"></i>
@@ -37,7 +37,7 @@ export default function Leaderboard() {
         </h3>
       </div>
       
-      <div className="flex-1 p-4 space-y-3 overflow-y-auto">
+      <div className="p-4 space-y-3">
         {isLoading ? (
           // Loading skeletons
           Array.from({ length: 5 }).map((_, i) => (
