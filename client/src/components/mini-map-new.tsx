@@ -204,13 +204,29 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     currentRoom = exploredRooms.find(r => r.isCurrentRoom);
     // Mark the current room in the full map data
     if (currentRoom) {
-      const fullMapCurrentRoom = allRooms.find(r => r.id === currentRoom.id);
+      const fullMapCurrentRoom = allRooms.find(r => r.id === currentRoom!.id);
       if (fullMapCurrentRoom) {
         fullMapCurrentRoom.isCurrentRoom = true;
       }
     }
   } else {
     currentRoom = roomsData.find(r => r.isCurrentRoom);
+  }
+
+  if (!currentRoom) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Mini-Map
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-slate-400">No current room</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   // Calculate bounds to show all rooms
@@ -222,7 +238,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
   const maxY = Math.max(...allY);
   
   const roomMap = new Map();
-  exploredRooms.forEach(room => {
+  roomsData.forEach(room => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
 
@@ -233,7 +249,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           <MapPin className="w-4 h-4" />
           Mini-Map
           <Badge variant="outline" className="ml-auto text-xs">
-            Floor {crawler.currentFloor}
+            {showFullMap ? "Full Floor" : `${roomsData?.length || 0} Explored`}
           </Badge>
           <Dialog>
             <DialogTrigger asChild>
@@ -248,7 +264,7 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
                   Dungeon Map - Floor {crawler.currentFloor}
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={exploredRooms} />
+              <ExpandedMapView exploredRooms={roomsData || []} />
             </DialogContent>
           </Dialog>
         </CardTitle>
