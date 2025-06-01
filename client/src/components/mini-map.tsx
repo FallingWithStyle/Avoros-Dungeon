@@ -255,6 +255,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           Mini-Map
+          {showFullMap && <Badge variant="outline" className="text-cyan-400 border-cyan-400 text-xs">DEBUG</Badge>}
           <Badge variant="outline" className="ml-auto text-xs">
             Floor {crawler.currentFloor}
           </Badge>
