@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Users, Activity, TrendingUp, Zap, MessageSquare, RefreshCw, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
