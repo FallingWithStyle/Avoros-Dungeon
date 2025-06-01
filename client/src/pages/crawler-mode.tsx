@@ -33,9 +33,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
     refetchInterval: 3000, // Refresh every 3 seconds
   });
 
-  const handleReturnToSponsor = () => {
-    setLocation("/");
-  };
+
 
 
 
@@ -61,9 +59,9 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
               <p className="text-slate-400 mb-4">
                 The requested crawler could not be found or you don't have access to it.
               </p>
-              <Button onClick={handleReturnToSponsor} className="bg-blue-600 hover:bg-blue-700">
-                Return to Command Center
-              </Button>
+              <div className="text-amber-300/70 text-sm">
+                Use the navigation above to return to your corporation overview.
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -172,17 +170,11 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className={`grid ${import.meta.env.DEV ? 'grid-cols-2' : 'grid-cols-1'} gap-4 pt-4 border-t border-game-border`}>
-                  <Button
-                    variant="outline"
-                    onClick={handleReturnToSponsor}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  >
-                    <i className="fas fa-arrow-left mr-2"></i>
-                    Return
-                  </Button>
-
+                {/* Action Buttons - Removed Return button as header navigation handles this */}
+                <div className="pt-4 border-t border-game-border">
+                  <div className="text-center text-amber-300/50 text-sm">
+                    Use the header navigation to switch between pages
+                  </div>
                 </div>
               </CardContent>
             </Card>
