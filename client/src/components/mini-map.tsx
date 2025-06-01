@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Maximize2, User, Treasure, Shield, AlertTriangle, MapPin } from "lucide-react";
+import { Maximize2, User, Gem, Shield, AlertTriangle, MapPin } from "lucide-react";
 
 interface CrawlerWithDetails {
   id: number;
@@ -109,7 +109,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     if (room.isCurrentRoom) return <User className="w-3 h-3" />;
     switch (room.type) {
       case 'treasure':
-        return <Treasure className="w-3 h-3" />;
+        return <Gem className="w-3 h-3" />;
       case 'safe':
         return <Shield className="w-3 h-3" />;
       case 'trap':
@@ -282,7 +282,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
     if (room.isCurrentRoom) return <User className="w-4 h-4" />;
     switch (room.type) {
       case 'treasure':
-        return <Treasure className="w-4 h-4" />;
+        return <Gem className="w-4 h-4" />;
       case 'safe':
         return <Shield className="w-4 h-4" />;
       case 'trap':
