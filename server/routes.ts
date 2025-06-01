@@ -442,17 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Debug route for full map data
-  app.get('/api/debug/rooms/:floorId', async (req, res) => {
-    try {
-      const floorId = parseInt(req.params.floorId);
-      const rooms = await storage.getRoomsForFloor(floorId);
-      res.json(rooms);
-    } catch (error) {
-      console.error("Error fetching floor rooms:", error);
-      res.status(500).json({ message: "Failed to fetch floor rooms" });
-    }
-  });
+
 
   // Crawler generation
   app.get('/api/crawlers/candidates', isAuthenticated, async (req, res) => {
@@ -547,7 +537,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/debug/rooms/:floorId', async (req, res) => {
     try {
       const floorId = parseInt(req.params.floorId);
+      console.log("Debug endpoint called for floor:", floorId);
+      
       const rooms = await storage.getRoomsForFloor(floorId);
+      console.log("Retrieved rooms count:", rooms.length);
       
       // Transform rooms to match the ExploredRoom interface for consistency
       const transformedRooms = rooms.map(room => ({
@@ -562,6 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isExplored: true // Mark all as explored in debug mode
       }));
       
+      console.log("Sending transformed rooms:", transformedRooms.length);
       res.json(transformedRooms);
     } catch (error) {
       console.error("Error fetching floor rooms:", error);
