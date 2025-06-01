@@ -15,7 +15,8 @@ import {
   Maximize2,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  Navigation
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
 
@@ -64,15 +65,19 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
 
   // Reusable centering function
   const centerOnCrawler = useCallback(() => {
-    if (!roomsData || roomsData.length === 0) return;
+    if (!roomsData || roomsData.length === 0) {
+      console.log("centerOnCrawler: No room data");
+      return;
+    }
     
     const currentRoom = roomsData.find(room => room.isCurrentRoom);
-    if (!currentRoom) return;
+    if (!currentRoom) {
+      console.log("centerOnCrawler: No current room found");
+      return;
+    }
 
-    // Calculate the center position for the current room
-    const mapWidth = 250;
-    const mapHeight = 250;
-    
+    console.log("centerOnCrawler: Current room", currentRoom.name, "at", currentRoom.x, currentRoom.y);
+
     // Calculate room grid bounds
     const allX = roomsData.map(r => r.x);
     const allY = roomsData.map(r => r.y);
@@ -81,6 +86,8 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     const minY = Math.min(...allY);
     const maxY = Math.max(...allY);
     
+    console.log("Grid bounds:", { minX, maxX, minY, maxY });
+    
     // Room size in the grid (w-6 h-6 = 24px + gap-1 = 4px)
     const roomSize = 28;
     
@@ -88,14 +95,32 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
     const roomGridX = (currentRoom.x - minX) * 2;
     const roomGridY = (maxY - currentRoom.y) * 2;
     
+    console.log("Room grid position:", { roomGridX, roomGridY });
+    
     // Calculate the pixel position of the current room
     const roomPixelX = roomGridX * roomSize;
     const roomPixelY = roomGridY * roomSize;
     
-    // Center the current room in the view
-    const centerX = mapWidth / 2 - roomPixelX - roomSize / 2;
-    const centerY = mapHeight / 2 - roomPixelY - roomSize / 2;
+    console.log("Room pixel position:", { roomPixelX, roomPixelY });
     
+    // Get the container dimensions
+    const container = mapRef.current;
+    if (!container) {
+      console.log("centerOnCrawler: No container ref");
+      return;
+    }
+    
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    
+    console.log("Container dimensions:", { containerWidth, containerHeight });
+    
+    // Center the current room in the view
+    const centerX = containerWidth / 2 - roomPixelX - roomSize / 2;
+    const centerY = containerHeight / 2 - roomPixelY - roomSize / 2;
+    
+    console.log("Setting pan offset:", { centerX, centerY });
     setPanOffset({ x: centerX, y: centerY });
   }, [roomsData]);
 
@@ -305,11 +330,11 @@ export default function MiniMap({ crawler, showFullMap = false }: MiniMapProps) 
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-6 px-2 ml-2 text-xs"
+            className="h-6 w-6 p-0 ml-2"
             onClick={centerOnCrawler}
             title="Center on Crawler"
           >
-            📍
+            <Navigation className="w-3 h-3" />
           </Button>
           <Dialog>
             <DialogTrigger asChild>
