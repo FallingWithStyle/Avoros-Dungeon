@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Zap, RotateCcw, Heart, Shield } from "lucide-react";
+import { RefreshCw, Zap, RotateCcw, Heart, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -21,6 +21,7 @@ let globalEnergyDisabled = true;
 export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(globalEnergyDisabled);
+  const [minimized, setMinimized] = useState(false);
 
   // Get current room data to show coordinates
   const { data: roomData } = useQuery({
@@ -133,122 +134,140 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     return null;
   }
 
+  // Button and text styles for "mini" buttons
+  const miniButtonClasses =
+    "h-7 px-2 py-1 text-[0.65rem] rounded border border-opacity-30 flex items-center gap-1";
+  const miniIconClasses = "w-3 h-3 mr-1";
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
-      <Card className="bg-red-900/20 border-red-600/30 rounded-none border-x-0 border-b-0">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-red-400 flex items-center gap-2 text-sm">
-            <RefreshCw className="w-4 h-4" />
-            Debug Controls
-          </CardTitle>
-          <CardDescription className="text-red-300 text-xs">
-            Development tools - these will be removed in production
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              onClick={() => resetCrawlersMutation.mutate()}
-              disabled={resetCrawlersMutation.isPending}
-              variant="destructive"
-              size="sm"
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {resetCrawlersMutation.isPending ? (
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="w-3 h-3 mr-2" />
-              )}
-              Reset All Crawlers
-            </Button>
-            
-            <Button
-              onClick={() => regenerateDungeonMutation.mutate()}
-              disabled={regenerateDungeonMutation.isPending}
-              variant="outline"
-              size="sm"
-              className="border-purple-600/30 text-purple-400 hover:bg-purple-600/10"
-            >
-              {regenerateDungeonMutation.isPending ? (
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="w-3 h-3 mr-2" />
-              )}
-              Regenerate Dungeon
-            </Button>
-            
-            <Button
-              onClick={toggleEnergyUsage}
-              variant="outline"
-              size="sm"
-              className={`${
-                energyDisabled 
-                  ? "border-orange-600/30 text-orange-400 hover:bg-orange-600/10" 
-                  : "border-gray-600/30 text-gray-400 hover:bg-gray-600/10"
-              }`}
-            >
-              <Shield className="w-3 h-3 mr-2" />
-              {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
-            </Button>
-            
-            <Button
-              onClick={() => restoreEnergyMutation.mutate()}
-              disabled={restoreEnergyMutation.isPending || !activeCrawler}
-              variant="outline"
-              size="sm"
-              className="border-green-600/30 text-green-400 hover:bg-green-600/10"
-            >
-              {restoreEnergyMutation.isPending ? (
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              ) : (
-                <Zap className="w-3 h-3 mr-2" />
-              )}
-              Restore Energy
-            </Button>
-            
-            <Button
-              onClick={() => resetPositionMutation.mutate()}
-              disabled={resetPositionMutation.isPending || !activeCrawler}
-              variant="outline"
-              size="sm"
-              className="border-blue-600/30 text-blue-400 hover:bg-blue-600/10"
-            >
-              {resetPositionMutation.isPending ? (
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              ) : (
-                <RotateCcw className="w-3 h-3 mr-2" />
-              )}
-              Reset Position
-            </Button>
-            
-            <Button
-              onClick={() => healMutation.mutate()}
-              disabled={healMutation.isPending || !activeCrawler}
-              variant="outline"
-              size="sm"
-              className="border-green-600/30 text-green-400 hover:bg-green-600/10"
-            >
-              {healMutation.isPending ? (
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              ) : (
-                <Heart className="w-3 h-3 mr-2" />
-              )}
-              Heal Crawler
-            </Button>
+      <Card className="bg-red-900/20 border-red-600/30 rounded-none border-x-0 border-b-0 shadow-md">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center gap-2">
+            <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
+              <RefreshCw className="w-3 h-3" />
+              Debug Controls
+            </CardTitle>
+            <CardDescription className="text-red-300 text-[0.60rem] ml-2">
+              Development tools - these will be removed in production
+            </CardDescription>
           </div>
-          
-          {/* Debug Information */}
-          {activeCrawler && (
-            <div className="mt-3 pt-3 border-t border-red-600/30">
-              <div className="text-xs text-red-300 space-y-1">
-                <div>Hidden Luck: {activeCrawler.luck || 0}</div>
-                <div>
-                  Coordinates: Floor {roomData?.room?.floorId || activeCrawler.currentFloor || 1}, Room {roomData?.room?.x || 0},{roomData?.room?.y || 0}
-                </div>
-              </div>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setMinimized((m) => !m)}
+            aria-label={minimized ? "Expand Debug Panel" : "Minimize Debug Panel"}
+            className="ml-2 text-red-200 hover:bg-red-900/30 p-1 h-7 w-7"
+          >
+            {minimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+        </CardHeader>
+        {!minimized && (
+          <CardContent className="pt-0">
+            {/* Button Row */}
+            <div className="flex gap-1 flex-wrap mb-1">
+              <Button
+                onClick={() => resetCrawlersMutation.mutate()}
+                disabled={resetCrawlersMutation.isPending}
+                variant="destructive"
+                className={miniButtonClasses + " bg-red-600 hover:bg-red-700 border-red-600"}
+              >
+                {resetCrawlersMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <RefreshCw className={miniIconClasses} />
+                )}
+                Reset All Crawlers
+              </Button>
+
+              <Button
+                onClick={() => regenerateDungeonMutation.mutate()}
+                disabled={regenerateDungeonMutation.isPending}
+                variant="outline"
+                className={miniButtonClasses + " border-purple-600 text-purple-400 hover:bg-purple-600/10"}
+              >
+                {regenerateDungeonMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <RefreshCw className={miniIconClasses} />
+                )}
+                Regenerate Dungeon
+              </Button>
+
+              <Button
+                onClick={toggleEnergyUsage}
+                variant="outline"
+                className={
+                  miniButtonClasses +
+                  " " +
+                  (energyDisabled
+                    ? "border-orange-600 text-orange-400 hover:bg-orange-600/10"
+                    : "border-gray-600 text-gray-400 hover:bg-gray-600/10")
+                }
+              >
+                <Shield className={miniIconClasses} />
+                {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
+              </Button>
+
+              {/* Move Reset Position here, next to Energy */}
+              <Button
+                onClick={() => resetPositionMutation.mutate()}
+                disabled={resetPositionMutation.isPending || !activeCrawler}
+                variant="outline"
+                className={miniButtonClasses + " border-blue-600 text-blue-400 hover:bg-blue-600/10"}
+              >
+                {resetPositionMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <RotateCcw className={miniIconClasses} />
+                )}
+                Reset Position
+              </Button>
+
+              {/* Now Heal and Restore are together */}
+              <Button
+                onClick={() => healMutation.mutate()}
+                disabled={healMutation.isPending || !activeCrawler}
+                variant="outline"
+                className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
+              >
+                {healMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <Heart className={miniIconClasses} />
+                )}
+                Heal Crawler
+              </Button>
+              <Button
+                onClick={() => restoreEnergyMutation.mutate()}
+                disabled={restoreEnergyMutation.isPending || !activeCrawler}
+                variant="outline"
+                className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
+              >
+                {restoreEnergyMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <Zap className={miniIconClasses} />
+                )}
+                Restore Energy
+              </Button>
             </div>
-          )}
-        </CardContent>
+            {/* Debug Info - all on one line, pipe-separated */}
+            <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-2 mt-1">
+              <span>
+                Coordinates: Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
+              </span>
+              <span className="mx-1 text-red-400">|</span>
+              <span>
+                Crawler ID: {activeCrawler?.id ?? "N/A"}
+              </span>
+              <span className="mx-1 text-red-400">|</span>
+              <span>
+                Luck: {activeCrawler?.luck ?? 0}
+              </span>
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );
