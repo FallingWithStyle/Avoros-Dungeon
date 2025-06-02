@@ -47,8 +47,8 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
 
   const getAvatarUrl = () => {
     // Generate a deterministic avatar based on crawler name and class
-    const seed = crawler.name + crawler.class.name;
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=1e293b`;
+    const seed = crawler.name + crawler.id; 
+    return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=1e293b`;
   };
 
   return (
