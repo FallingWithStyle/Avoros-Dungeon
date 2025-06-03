@@ -207,6 +207,8 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     </span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
             {/* Equipment */}
             <Card className="bg-game-surface border-game-border">
