@@ -9,6 +9,7 @@ import {
   integer,
   boolean,
   decimal,
+  PgArray
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations, sql } from "drizzle-orm";
@@ -179,6 +180,17 @@ export const crawlerPositions = pgTable("crawler_positions", {
   crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
   roomId: integer("room_id").notNull().references(() => rooms.id),
   enteredAt: timestamp("entered_at").defaultNow(),
+});
+
+// Factions for NPCs, level theming, etc
+export const factions = pgTable("factions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  mobTypes: pgArray(text("mob_type")).notNull(),
+  influence: integer("influence").notNull().default(1),
+  color: varchar("color", { length: 16 }),
+  icon: text("icon"),
 });
 
 // Enemies
