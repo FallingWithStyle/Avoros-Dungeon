@@ -1,23 +1,26 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Client } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool } from '@neondatabase/serverless';
 import { factions } from '../../../../shared/schema';
 import { factionsData } from './factionsData';
 
 async function main() {
-  const client = new Client({ connectionString: process.env.DATABASE_URL! });
-  const db = drizzle(client);
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const db = drizzle({ client: pool });
 
   try {
-    await client.connect();
     // Optional: clear existing data before seeding
     await db.delete(factions);
 
     await db.insert(factions).values(factionsData);
-    console.log('Faction data seeded!');
+    console.log('Faction data seeded successfully!');
   } catch (err) {
     console.error('Error seeding factions:', err);
   } finally {
-    await client.end();
+    await pool.end();
   }
 }
 
