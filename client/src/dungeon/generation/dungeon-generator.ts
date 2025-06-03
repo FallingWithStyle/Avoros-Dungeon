@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "server/db.ts";
 import { floors, rooms, roomConnections } from "@shared/schema";
 
 interface FloorTheme {
