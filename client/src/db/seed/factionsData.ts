@@ -242,7 +242,7 @@ export const factionsData = [
   {
     name: "Ivory Talon",
     description: "Aerial warriors and strategists. Their leadership works to organize and secure control of the skies above the kingdom.",
-    mobTypes: ["griffin rider", "archer", "sky captain", "wind scout", "falconer"],
+    mobTypes: ["griffin","griffin rider", "archer", "sky captain", "wind sprite"],
     influence: 6,
     color: "#FFF8DC",
     icon: "🦅",

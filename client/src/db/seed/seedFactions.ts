@@ -1,7 +1,11 @@
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import { Pool } from '@neondatabase/serverless';
+import ws from "ws";
 import { factions } from '../../../../shared/schema';
 import { factionsData } from './factionsData';
+
+// Configure WebSocket for Node.js environment
+neonConfig.webSocketConstructor = ws;
 
 async function main() {
   if (!process.env.DATABASE_URL) {
