@@ -15,6 +15,7 @@ import MiniMap from "@/components/mini-map-new";
 import RoomNavigation from "@/components/room-navigation";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 import { expRequired } from "@/lib/progressionUtils";
 
 interface CrawlerModeProps {
@@ -75,6 +76,7 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
   const baseExp = 100; // or use crawler.baseExp if you add it to your data model
   const expReq = expRequired(crawler.level, baseExp);
   const expPercent = Math.min((crawler.experience / expReq) * 100, 100);
+  const avatarUrl = getAvatarUrl(crawler.name, crawler.id);
 
   return (
     <div className="min-h-screen bg-game-bg text-slate-100">
@@ -83,11 +85,14 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <i className="fas fa-user-ninja text-3xl text-crawler"></i>
+              {/* Avatar image */}
+              <img
+                src={getAvatarUrl(crawler.name, crawler.id)}
+                alt={`${crawler.name} avatar`}
+                className="w-12 h-12 rounded-full border-2 border-game-border bg-gray-800"
+              />
               <div>
-                <h1 className="text-2xl font-bold text-white">
-                  {crawler.name}
-                </h1>
+                <h1 className="text-2xl font-bold text-white">{crawler.name}</h1>
                 <p className="text-slate-400">
                   Level {crawler.level} {crawler.class?.name || "Crawler"} •
                   Floor {crawler.currentFloor}
@@ -202,15 +207,6 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     </span>
                   </div>
                 </div>
-
-                {/* Action Buttons - Removed Return button as header navigation handles this */}
-                <div className="pt-4 border-t border-game-border">
-                  <div className="text-center text-amber-300/50 text-sm">
-                    Use the header navigation to switch between pages
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Equipment */}
             <Card className="bg-game-surface border-game-border">
