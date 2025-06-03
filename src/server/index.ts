@@ -3,7 +3,7 @@ import express from 'express';
 import { initializeDatabase } from './init-db';
 import { setupVite } from './vite';
 import { setupRoutes } from './routes';
-import { setupReplitAuth } from './replitAuth';
+import { setupAuth } from './replitAuth';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,7 +14,7 @@ async function startServer() {
     await initializeDatabase();
     
     // Setup authentication
-    await setupReplitAuth(app);
+    await setupAuth(app);
     
     // Setup API routes
     setupRoutes(app);
