@@ -93,7 +93,7 @@ export const factionsData = [
     mobTypes: ["warlock", "cultist", "shadow priest", "obsidian adept", "void speaker"],
     influence: 6,
     color: "#181818",
-    icon: "🗡️",
+    icon: "🌀",
   },
   {
     name: "Celestial Choir",
@@ -117,7 +117,7 @@ export const factionsData = [
     mobTypes: ["monk", "scholar", "oracle", "twilight scribe", "gloam mystic"],
     influence: 4,
     color: "#8A2BE2",
-    icon: "🌆",
+    icon: "🦉",
   },
   {
     name: "Silver Spire",
