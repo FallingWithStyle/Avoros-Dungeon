@@ -1,3 +1,6 @@
+
+import express, { type Express } from 'express';
+import { db } from './db';
 import {
   users,
   crawlers,
@@ -32,3 +35,15 @@ import {
   type CrawlerPosition,
   type Season,
 } from "../../db/schema";
+
+export function setupRoutes(app: Express) {
+  app.use(express.json());
+  
+  // Basic health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+  
+  // Add your API routes here
+  // Example: app.get('/api/users', async (req, res) => { ... });
+}
