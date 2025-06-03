@@ -1,18 +1,8 @@
-import express from "express";
-import { db } from "./db";
-```const app = express();
-const port = process.env.PORT || 5000;
+// src/server/index.ts
+import { initializeDatabase } from './init-db';
+import { setupVite } from './vite';
+import { setupRoutes } from './routes';
+import { setupReplitAuth } from './replitAuth';
 
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.json({ message: "Server is running!" });
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running on port ${port}`);
-});
+// Placeholder server logic
+console.log("Server started");
