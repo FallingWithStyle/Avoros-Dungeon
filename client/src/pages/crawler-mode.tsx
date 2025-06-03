@@ -92,7 +92,9 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 className="w-12 h-12 rounded-full border-2 border-game-border bg-gray-800"
               />
               <div>
-                <h1 className="text-2xl font-bold text-white">{crawler.name}</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  {crawler.name}
+                </h1>
                 <p className="text-slate-400">
                   Level {crawler.level} {crawler.class?.name || "Crawler"} •
                   Floor {crawler.currentFloor}
@@ -133,7 +135,12 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                       {crawler.health}/{crawler.maxHealth}
                     </span>
                   </div>
-                  <Progress value={healthPercent} className="h-2" />
+                  <Progress
+                    value={healthPercent}
+                    className="h-2"
+                    barColor="#ef4444"
+                  />{" "}
+                  {/* Red for Health */}
                 </div>
 
                 {/* Energy Bar */}
@@ -144,7 +151,12 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                       {crawler.energy}/{crawler.maxEnergy}
                     </span>
                   </div>
-                  <Progress value={energyPercent} className="h-2" />
+                  <Progress
+                    value={energyPercent}
+                    className="h-2"
+                    barColor="#38bdf8"
+                  />{" "}
+                  {/* Cyan for Energy */}
                 </div>
 
                 {/* Experience Bar */}
@@ -155,7 +167,12 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                       {crawler.experience}/{expReq}
                     </span>
                   </div>
-                  <Progress value={expPercent} className="h-2" />
+                  <Progress
+                    value={expPercent}
+                    className="h-2"
+                    barColor="#facc15"
+                  />{" "}
+                  {/* Yellow for Exp */}
                 </div>
 
                 {/* Stats */}
@@ -207,6 +224,8 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                     </span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
             {/* Equipment */}
             <Card className="bg-game-surface border-game-border">
