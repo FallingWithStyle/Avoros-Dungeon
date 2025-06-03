@@ -170,7 +170,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-200 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            {room?.name || "Mini-Map"}
+            Mini-Map
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -232,7 +232,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
-          Mini-Map
+          {currentRoom?.name || "Mini-Map"}
           <Badge variant="outline" className="ml-auto text-xs">
             Floor {crawler.currentFloor}
           </Badge>
