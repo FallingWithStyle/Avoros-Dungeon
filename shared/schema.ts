@@ -9,7 +9,6 @@ import {
   integer,
   boolean,
   decimal,
-  PgArray
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations, sql } from "drizzle-orm";
@@ -46,12 +45,18 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   corporationName: varchar("corporation_name").notNull(),
-  corporationType: varchar("corporation_type").default("Mining Consortium").notNull(), // Mining Consortium, Tech Corp, Military Contractor, etc.
+  corporationType: varchar("corporation_type")
+    .default("Mining Consortium")
+    .notNull(), // Mining Consortium, Tech Corp, Military Contractor, etc.
   credits: integer("credits").default(50000).notNull(),
   sponsorReputation: integer("sponsor_reputation").default(0).notNull(),
   activeCrawlerId: integer("active_crawler_id"),
-  primarySponsorshipUsed: boolean("primary_sponsorship_used").default(false).notNull(),
-  lastPrimarySponsorshipSeason: integer("last_primary_sponsorship_season").default(1).notNull(),
+  primarySponsorshipUsed: boolean("primary_sponsorship_used")
+    .default(false)
+    .notNull(),
+  lastPrimarySponsorshipSeason: integer("last_primary_sponsorship_season")
+    .default(1)
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -74,7 +79,9 @@ export const crawlerClasses = pgTable("crawler_classes", {
 // Crawlers
 export const crawlers = pgTable("crawlers", {
   id: serial("id").primaryKey(),
-  sponsorId: varchar("sponsor_id").notNull().references(() => users.id),
+  sponsorId: varchar("sponsor_id")
+    .notNull()
+    .references(() => users.id),
   name: varchar("name", { length: 50 }).notNull(),
   background: text("background").notNull(), // Brief story/background
   classId: integer("class_id").references(() => crawlerClasses.id), // Null until they choose a class
@@ -114,7 +121,9 @@ export const equipmentTypes = pgTable("equipment_types", {
 // Equipment items
 export const equipment = pgTable("equipment", {
   id: serial("id").primaryKey(),
-  typeId: integer("type_id").notNull().references(() => equipmentTypes.id),
+  typeId: integer("type_id")
+    .notNull()
+    .references(() => equipmentTypes.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   attackBonus: integer("attack_bonus").default(0),
@@ -132,8 +141,12 @@ export const equipment = pgTable("equipment", {
 // Crawler equipment (what equipment each crawler has)
 export const crawlerEquipment = pgTable("crawler_equipment", {
   id: serial("id").primaryKey(),
-  crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
-  equipmentId: integer("equipment_id").notNull().references(() => equipment.id),
+  crawlerId: integer("crawler_id")
+    .notNull()
+    .references(() => crawlers.id),
+  equipmentId: integer("equipment_id")
+    .notNull()
+    .references(() => equipment.id),
   equipped: boolean("equipped").default(false),
   acquiredAt: timestamp("acquired_at").defaultNow(),
 });
@@ -151,7 +164,9 @@ export const floors = pgTable("floors", {
 // Rooms within each floor
 export const rooms = pgTable("rooms", {
   id: serial("id").primaryKey(),
-  floorId: integer("floor_id").notNull().references(() => floors.id),
+  floorId: integer("floor_id")
+    .notNull()
+    .references(() => floors.id),
   x: integer("x").notNull(), // Grid position X
   y: integer("y").notNull(), // Grid position Y
   name: varchar("name", { length: 100 }).notNull(),
@@ -166,8 +181,12 @@ export const rooms = pgTable("rooms", {
 // Room connections (which rooms connect to which)
 export const roomConnections = pgTable("room_connections", {
   id: serial("id").primaryKey(),
-  fromRoomId: integer("from_room_id").notNull().references(() => rooms.id),
-  toRoomId: integer("to_room_id").notNull().references(() => rooms.id),
+  fromRoomId: integer("from_room_id")
+    .notNull()
+    .references(() => rooms.id),
+  toRoomId: integer("to_room_id")
+    .notNull()
+    .references(() => rooms.id),
   direction: varchar("direction", { length: 10 }).notNull(), // north, south, east, west
   isLocked: boolean("is_locked").default(false).notNull(),
   keyRequired: varchar("key_required", { length: 50 }), // Optional key requirement
@@ -177,8 +196,12 @@ export const roomConnections = pgTable("room_connections", {
 // Player positions in rooms
 export const crawlerPositions = pgTable("crawler_positions", {
   id: serial("id").primaryKey(),
-  crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
-  roomId: integer("room_id").notNull().references(() => rooms.id),
+  crawlerId: integer("crawler_id")
+    .notNull()
+    .references(() => crawlers.id),
+  roomId: integer("room_id")
+    .notNull()
+    .references(() => rooms.id),
   enteredAt: timestamp("entered_at").defaultNow(),
 });
 
@@ -187,7 +210,7 @@ export const factions = pgTable("factions", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  mobTypes: pgArray(text("mob_type")).notNull(),
+  mobTypes: text("mob_type").array().notNull(),
   influence: integer("influence").notNull().default(1),
   color: varchar("color", { length: 16 }),
   icon: text("icon"),
@@ -224,8 +247,12 @@ export const npcs = pgTable("npcs", {
 // Combat encounters and exploration events
 export const encounters = pgTable("encounters", {
   id: serial("id").primaryKey(),
-  crawlerId: integer("crawler_id").notNull().references(() => crawlers.id),
-  floorId: integer("floor_id").notNull().references(() => floors.id),
+  crawlerId: integer("crawler_id")
+    .notNull()
+    .references(() => crawlers.id),
+  floorId: integer("floor_id")
+    .notNull()
+    .references(() => floors.id),
   type: varchar("type", { length: 20 }).default("combat").notNull(), // combat, npc, treasure, trap, event
   enemyId: integer("enemy_id").references(() => enemies.id),
   npcId: integer("npc_id").references(() => npcs.id),
@@ -240,7 +267,9 @@ export const encounters = pgTable("encounters", {
 // Activity feed
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
   crawlerId: integer("crawler_id").references(() => crawlers.id),
   type: varchar("type", { length: 30 }).notNull(), // combat_victory, floor_advance, death, level_up, equipment_found
   message: text("message").notNull(),
@@ -251,7 +280,9 @@ export const activities = pgTable("activities", {
 // Chat messages
 export const chatMessages = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -259,8 +290,12 @@ export const chatMessages = pgTable("chat_messages", {
 // Marketplace listings
 export const marketplaceListings = pgTable("marketplace_listings", {
   id: serial("id").primaryKey(),
-  sellerId: varchar("seller_id").notNull().references(() => users.id),
-  equipmentId: integer("equipment_id").notNull().references(() => equipment.id),
+  sellerId: varchar("seller_id")
+    .notNull()
+    .references(() => users.id),
+  equipmentId: integer("equipment_id")
+    .notNull()
+    .references(() => equipment.id),
   price: integer("price").notNull(),
   quantity: integer("quantity").default(1),
   active: boolean("active").default(true),
@@ -289,9 +324,12 @@ export const crawlersRelations = relations(crawlers, ({ one, many }) => ({
   activities: many(activities),
 }));
 
-export const crawlerClassesRelations = relations(crawlerClasses, ({ many }) => ({
-  crawlers: many(crawlers),
-}));
+export const crawlerClassesRelations = relations(
+  crawlerClasses,
+  ({ many }) => ({
+    crawlers: many(crawlers),
+  }),
+);
 
 export const equipmentRelations = relations(equipment, ({ one, many }) => ({
   type: one(equipmentTypes, {
@@ -302,20 +340,26 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
   marketplaceListings: many(marketplaceListings),
 }));
 
-export const equipmentTypesRelations = relations(equipmentTypes, ({ many }) => ({
-  equipment: many(equipment),
-}));
+export const equipmentTypesRelations = relations(
+  equipmentTypes,
+  ({ many }) => ({
+    equipment: many(equipment),
+  }),
+);
 
-export const crawlerEquipmentRelations = relations(crawlerEquipment, ({ one }) => ({
-  crawler: one(crawlers, {
-    fields: [crawlerEquipment.crawlerId],
-    references: [crawlers.id],
+export const crawlerEquipmentRelations = relations(
+  crawlerEquipment,
+  ({ one }) => ({
+    crawler: one(crawlers, {
+      fields: [crawlerEquipment.crawlerId],
+      references: [crawlers.id],
+    }),
+    equipment: one(equipment, {
+      fields: [crawlerEquipment.equipmentId],
+      references: [equipment.id],
+    }),
   }),
-  equipment: one(equipment, {
-    fields: [crawlerEquipment.equipmentId],
-    references: [equipment.id],
-  }),
-}));
+);
 
 export const floorsRelations = relations(floors, ({ many }) => ({
   encounters: many(encounters),
@@ -332,29 +376,35 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
   connectionsTo: many(roomConnections, { relationName: "toRoom" }),
 }));
 
-export const roomConnectionsRelations = relations(roomConnections, ({ one }) => ({
-  fromRoom: one(rooms, {
-    fields: [roomConnections.fromRoomId],
-    references: [rooms.id],
-    relationName: "fromRoom",
+export const roomConnectionsRelations = relations(
+  roomConnections,
+  ({ one }) => ({
+    fromRoom: one(rooms, {
+      fields: [roomConnections.fromRoomId],
+      references: [rooms.id],
+      relationName: "fromRoom",
+    }),
+    toRoom: one(rooms, {
+      fields: [roomConnections.toRoomId],
+      references: [rooms.id],
+      relationName: "toRoom",
+    }),
   }),
-  toRoom: one(rooms, {
-    fields: [roomConnections.toRoomId],
-    references: [rooms.id],
-    relationName: "toRoom",
-  }),
-}));
+);
 
-export const crawlerPositionsRelations = relations(crawlerPositions, ({ one }) => ({
-  crawler: one(crawlers, {
-    fields: [crawlerPositions.crawlerId],
-    references: [crawlers.id],
+export const crawlerPositionsRelations = relations(
+  crawlerPositions,
+  ({ one }) => ({
+    crawler: one(crawlers, {
+      fields: [crawlerPositions.crawlerId],
+      references: [crawlers.id],
+    }),
+    room: one(rooms, {
+      fields: [crawlerPositions.roomId],
+      references: [rooms.id],
+    }),
   }),
-  room: one(rooms, {
-    fields: [crawlerPositions.roomId],
-    references: [rooms.id],
-  }),
-}));
+);
 
 export const enemiesRelations = relations(enemies, ({ many }) => ({
   encounters: many(encounters),
@@ -393,16 +443,19 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   }),
 }));
 
-export const marketplaceListingsRelations = relations(marketplaceListings, ({ one }) => ({
-  seller: one(users, {
-    fields: [marketplaceListings.sellerId],
-    references: [users.id],
+export const marketplaceListingsRelations = relations(
+  marketplaceListings,
+  ({ one }) => ({
+    seller: one(users, {
+      fields: [marketplaceListings.sellerId],
+      references: [users.id],
+    }),
+    equipment: one(equipment, {
+      fields: [marketplaceListings.equipmentId],
+      references: [equipment.id],
+    }),
   }),
-  equipment: one(equipment, {
-    fields: [marketplaceListings.equipmentId],
-    references: [equipment.id],
-  }),
-}));
+);
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -416,19 +469,25 @@ export const insertCrawlerSchema = createInsertSchema(crawlers).omit({
   lastAction: true,
 });
 
-export const insertCrawlerClassSchema = createInsertSchema(crawlerClasses).omit({
-  id: true,
-});
+export const insertCrawlerClassSchema = createInsertSchema(crawlerClasses).omit(
+  {
+    id: true,
+  },
+);
 
 export const insertEquipmentSchema = createInsertSchema(equipment).omit({
   id: true,
 });
 
-export const insertEquipmentTypeSchema = createInsertSchema(equipmentTypes).omit({
+export const insertEquipmentTypeSchema = createInsertSchema(
+  equipmentTypes,
+).omit({
   id: true,
 });
 
-export const insertCrawlerEquipmentSchema = createInsertSchema(crawlerEquipment).omit({
+export const insertCrawlerEquipmentSchema = createInsertSchema(
+  crawlerEquipment,
+).omit({
   id: true,
   acquiredAt: true,
 });
@@ -457,7 +516,9 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
-export const insertMarketplaceListingSchema = createInsertSchema(marketplaceListings).omit({
+export const insertMarketplaceListingSchema = createInsertSchema(
+  marketplaceListings,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -472,12 +533,16 @@ export const insertRoomSchema = createInsertSchema(rooms).omit({
   createdAt: true,
 });
 
-export const insertRoomConnectionSchema = createInsertSchema(roomConnections).omit({
+export const insertRoomConnectionSchema = createInsertSchema(
+  roomConnections,
+).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertCrawlerPositionSchema = createInsertSchema(crawlerPositions).omit({
+export const insertCrawlerPositionSchema = createInsertSchema(
+  crawlerPositions,
+).omit({
   id: true,
   enteredAt: true,
 });
