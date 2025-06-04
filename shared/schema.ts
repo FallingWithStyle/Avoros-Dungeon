@@ -175,6 +175,8 @@ export const rooms = pgTable("rooms", {
   isExplored: boolean("is_explored").default(false).notNull(),
   hasLoot: boolean("has_loot").default(false).notNull(),
   isSafe: boolean("is_safe").default(false).notNull(), // Safe rooms for leveling/resting
+  factionId: integer("faction_id"),
+  placementId: integer("placement_id").default(-1).notNull(), // id to help with the arrangement of rooms on the map, default -1 means "not yet placed"
   createdAt: timestamp("created_at").defaultNow(),
 });
 

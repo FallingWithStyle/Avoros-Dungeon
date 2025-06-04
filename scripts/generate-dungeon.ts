@@ -1,7 +1,7 @@
 
-import { generateFullDungeon } from "../client/src/dungeon/generation/dungeon-generator.ts";
-import { db } from "../server/db.ts";
-import { factions as factionsTable } from "../shared/schema.ts";
+import { generateFullDungeon } from "../client/src/dungeon/generation/dungeon-generator.js";
+import { db } from "../server/db.js";
+import { factions as factionsTable } from "../shared/schema.js";
 
 // Define the Faction type directly to avoid import issues
 interface Faction {

@@ -1,4 +1,4 @@
-// Faction and Room object types, adjust as needed for your schema
+// Faction and Room object types, adjust as needed for schema
 export type Faction = {
   id: number;
   name: string;
@@ -10,7 +10,7 @@ export type Faction = {
 };
 
 export type Room = {
-  id: number;
+  placementId: number;
   x: number;
   y: number;
   floorId: number;
@@ -23,20 +23,23 @@ export type Room = {
   factionId: number | null;
 };
 
-// Result type: maps factionId (or null for unclaimed) to array of room IDs
-export type FactionRoomAssignment = Record<number | "unclaimed", number[]>;
+// Result type: maps factionId (or "unclaimed" for unclaimed) to array of placementIds
+export type FactionRoomAssignment = Partial<
+  Record<number | "unclaimed", number[]>
+>;
 
 interface AssignFactionsOptions {
   rooms: Room[];
   factions: Faction[];
   unclaimedPercent?: number; // Default: 0.2 (20%)
-  minFactions?: number;      // Default: 2
-  roomsPerFaction?: number;  // Default: 10
+  minFactions?: number; // Default: 2
+  roomsPerFaction?: number; // Default: 10
 }
 
 /**
  * Assigns rooms to factions based on influence, leaving a percent unclaimed.
  * Returns a mapping: { [factionId]: number[], unclaimed: number[] }
+ * All arrays contain placementId values.
  */
 export function assignRoomsByFactionInfluence({
   rooms,
@@ -47,7 +50,7 @@ export function assignRoomsByFactionInfluence({
 }: AssignFactionsOptions): FactionRoomAssignment {
   // 1. Filter rooms that can be claimed (not entrance, stairs, or safe)
   const claimableRooms = rooms.filter(
-    (room) => !["entrance", "stairs", "safe"].includes(room.type)
+    (room) => !["entrance", "stairs", "safe"].includes(room.type),
   );
 
   // 2. Shuffle the claimable rooms for randomness
@@ -61,13 +64,16 @@ export function assignRoomsByFactionInfluence({
   // 4. Select factions for this floor
   const numFactions = Math.max(
     minFactions,
-    Math.min(factions.length, Math.ceil(toAssign.length / roomsPerFaction))
+    Math.min(factions.length, Math.ceil(toAssign.length / roomsPerFaction)),
   );
   // Randomly pick unique factions
   const pickedFactions = pickRandomFactions(factions, numFactions);
 
   // 5. Calculate total influence and room shares
-  const totalInfluence = pickedFactions.reduce((sum, f) => sum + f.influence, 0);
+  const totalInfluence = pickedFactions.reduce(
+    (sum, f) => sum + f.influence,
+    0,
+  );
 
   // 6. Assign rooms to factions proportionally to their influence
   const assignments: FactionRoomAssignment = {};
@@ -79,17 +85,19 @@ export function assignRoomsByFactionInfluence({
         ? remainingRooms.length
         : Math.round((faction.influence / totalInfluence) * toAssign.length);
 
-    assignments[faction.id] = remainingRooms.splice(0, roomCount).map((r) => r.id);
+    assignments[faction.id] = remainingRooms
+      .splice(0, roomCount)
+      .map((r) => r.placementId);
   });
 
   // 7. Add unclaimed rooms to the result under "unclaimed"
-  assignments.unclaimed = unclaimedRooms.map((r) => r.id);
+  assignments.unclaimed = unclaimedRooms.map((r) => r.placementId);
 
-  // 8. Optionally, add all non-claimable room IDs to "unclaimed" as well
-  const nonClaimable = rooms.filter(
-    (room) => ["entrance", "stairs", "safe"].includes(room.type)
+  // 8. Optionally, add all non-claimable room placementIds to "unclaimed" as well
+  const nonClaimable = rooms.filter((room) =>
+    ["entrance", "stairs", "safe"].includes(room.type),
   );
-  assignments.unclaimed.push(...nonClaimable.map((r) => r.id));
+  assignments.unclaimed.push(...nonClaimable.map((r) => r.placementId));
 
   return assignments;
 }
