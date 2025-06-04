@@ -24,6 +24,111 @@ function getRandomRoomType(theme: FloorTheme) {
   return theme.roomTypes[0];
 }
 
+/**
+ * Ensures all rooms are connected to the entrance by finding disconnected rooms
+ * and adding connections to the nearest connected room.
+ *
+ * @param rooms Array of Room objects (with .id, .x, .y)
+ * @param connections Array of connection objects ({ fromRoomId, toRoomId, direction })
+ * @param entranceRoomId The ID of the entrance room (usually at 0,0)
+ */
+function connectStrandedRooms(
+  rooms: Room[],
+  connections: Array<{
+    fromRoomId: number;
+    toRoomId: number;
+    direction: string;
+  }>,
+  entranceRoomId: number,
+) {
+  // Build a map from roomId to neighbors
+  const neighborMap = new Map<number, number[]>(); // roomId -> [neighborRoomId, ...]
+  for (const room of rooms) {
+    neighborMap.set(room.id, []);
+  }
+  for (const conn of connections) {
+    if (!neighborMap.has(conn.fromRoomId)) neighborMap.set(conn.fromRoomId, []);
+    neighborMap.get(conn.fromRoomId)!.push(conn.toRoomId);
+  }
+
+  // Find all reachable rooms from the entrance using BFS
+  const visited = new Set<number>();
+  const queue = [entranceRoomId];
+  visited.add(entranceRoomId);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const neighbor of neighborMap.get(current)!) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  // Find all stranded rooms (not reachable from entrance)
+  const strandedRooms = rooms.filter((r) => !visited.has(r.id));
+
+  if (strandedRooms.length === 0) return; // all connected
+
+  // For each stranded room, connect it to the nearest connected room
+  for (const stranded of strandedRooms) {
+    // Find connected rooms
+    const connectedRooms = rooms.filter((r) => visited.has(r.id));
+    // Find nearest connected room (using Manhattan distance)
+    let minDist = Infinity;
+    let nearest = connectedRooms[0];
+    for (const connRoom of connectedRooms) {
+      const dist =
+        Math.abs(connRoom.x - stranded.x) + Math.abs(connRoom.y - stranded.y);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = connRoom;
+      }
+    }
+
+    // Determine direction from stranded -> nearest
+    let direction = "";
+    if (nearest.x === stranded.x && nearest.y === stranded.y + 1)
+      direction = "north";
+    else if (nearest.x === stranded.x && nearest.y === stranded.y - 1)
+      direction = "south";
+    else if (nearest.x === stranded.x + 1 && nearest.y === stranded.y)
+      direction = "east";
+    else if (nearest.x === stranded.x - 1 && nearest.y === stranded.y)
+      direction = "west";
+    else {
+      // Not adjacent, just connect as "secret"
+      direction = "secret";
+    }
+
+    // Add connection (both ways)
+    connections.push({
+      fromRoomId: stranded.id,
+      toRoomId: nearest.id,
+      direction,
+    });
+    // Optionally add reverse connection
+    connections.push({
+      fromRoomId: nearest.id,
+      toRoomId: stranded.id,
+      direction:
+        direction === "north"
+          ? "south"
+          : direction === "south"
+            ? "north"
+            : direction === "east"
+              ? "west"
+              : direction === "west"
+                ? "east"
+                : "secret",
+    });
+
+    // Mark the stranded room as now connected
+    visited.add(stranded.id);
+  }
+}
+
 function generateFactionalRoomDetails(
   base: { name: string; description: string },
   faction?: Faction,
