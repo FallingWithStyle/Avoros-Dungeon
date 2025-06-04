@@ -8,7 +8,211 @@ import {
 } from "./faction-assignment.ts";
 import { logErrorToFile } from "../../../../shared/logger.ts";
 
-// ... (floorThemes, getRandomRoomType, connectStrandedRooms, generateFactionalRoomDetails unchanged)
+// Floor theme definitions
+interface RoomType {
+  name: string;
+  description: string;
+}
+
+interface FloorTheme {
+  name: string;
+  description: string;
+  roomTypes: RoomType[];
+}
+
+const floorThemes: FloorTheme[] = [
+  {
+    name: "Ruined Castle Grounds",
+    description: "Crumbling battlements and overgrown courtyards",
+    roomTypes: [
+      { name: "Collapsed Watchtower", description: "Stone debris blocks most passages" },
+      { name: "Overgrown Courtyard", description: "Weeds grow through cracked flagstones" },
+      { name: "Ruined Barracks", description: "Rotting wooden bunks and rusted weapons" },
+      { name: "Old Armory", description: "Empty weapon racks and broken shields" },
+    ],
+  },
+  {
+    name: "Ancient Crypts",
+    description: "Stone tombs and burial chambers",
+    roomTypes: [
+      { name: "Burial Chamber", description: "Ancient sarcophagi line the walls" },
+      { name: "Ossuary", description: "Bones arranged in intricate patterns" },
+      { name: "Tomb Antechamber", description: "Carved reliefs tell forgotten stories" },
+      { name: "Catacombs", description: "Narrow passages between burial niches" },
+    ],
+  },
+  {
+    name: "Alchemical Laboratories",
+    description: "Chambers filled with strange apparatus and bubbling concoctions",
+    roomTypes: [
+      { name: "Distillation Chamber", description: "Complex glassware covers every surface" },
+      { name: "Reagent Storage", description: "Shelves of mysterious bottles and powders" },
+      { name: "Experimentation Lab", description: "Tables scarred by acid and fire" },
+      { name: "Transmutation Circle", description: "Arcane symbols etched into the floor" },
+    ],
+  },
+  {
+    name: "Prison Complex",
+    description: "Cells and interrogation chambers",
+    roomTypes: [
+      { name: "Prison Cell", description: "Iron bars and moldy straw" },
+      { name: "Guard Station", description: "Keys hang from hooks on the wall" },
+      { name: "Interrogation Room", description: "Ominous stains mark the floor" },
+      { name: "Solitary Confinement", description: "A small, windowless chamber" },
+    ],
+  },
+  {
+    name: "Flooded Caverns",
+    description: "Water-filled chambers with slippery surfaces",
+    roomTypes: [
+      { name: "Underground Pool", description: "Dark water reflects the ceiling" },
+      { name: "Dripping Grotto", description: "Constant water droplets echo endlessly" },
+      { name: "Flooded Passage", description: "Ankle-deep water covers the floor" },
+      { name: "Underground River", description: "Fast-moving water blocks the way" },
+    ],
+  },
+  {
+    name: "Mechanical Workshop",
+    description: "Halls filled with gears, pistons, and steam",
+    roomTypes: [
+      { name: "Gear Chamber", description: "Massive clockwork mechanisms fill the space" },
+      { name: "Steam Engine Room", description: "Pipes release jets of hot vapor" },
+      { name: "Assembly Line", description: "Conveyor belts and robotic arms" },
+      { name: "Control Room", description: "Dozens of levers and gauges" },
+    ],
+  },
+  {
+    name: "Crystal Mines",
+    description: "Sparkling chambers carved from living rock",
+    roomTypes: [
+      { name: "Crystal Cavern", description: "Brilliant gems illuminate the walls" },
+      { name: "Mining Shaft", description: "Pick marks score the tunnel walls" },
+      { name: "Gem Processing", description: "Cutting tools and polishing stations" },
+      { name: "Crystal Formation", description: "Natural crystals grow in impossible shapes" },
+    ],
+  },
+  {
+    name: "Ancient Temple",
+    description: "Sacred halls dedicated to forgotten gods",
+    roomTypes: [
+      { name: "Prayer Hall", description: "Rows of stone pews face an altar" },
+      { name: "Shrine Room", description: "Offerings lie before weathered statues" },
+      { name: "Ceremonial Chamber", description: "Ritual circles mark the floor" },
+      { name: "Sanctum", description: "The most sacred space, radiating power" },
+    ],
+  },
+  {
+    name: "Dragon's Lair",
+    description: "Scorched chambers reeking of sulfur",
+    roomTypes: [
+      { name: "Treasure Hoard", description: "Piles of gold and precious objects" },
+      { name: "Sleeping Chamber", description: "Massive indentations in the stone floor" },
+      { name: "Scorched Hall", description: "Walls blackened by dragonfire" },
+      { name: "Bone Yard", description: "Remains of unfortunate adventurers" },
+    ],
+  },
+  {
+    name: "Cosmic Observatory",
+    description: "Chambers focused on celestial observation",
+    roomTypes: [
+      { name: "Star Chart Room", description: "Constellation maps cover the ceiling" },
+      { name: "Telescope Chamber", description: "Massive brass instruments point skyward" },
+      { name: "Astrolabe Workshop", description: "Precise instruments for celestial navigation" },
+      { name: "Portal Nexus", description: "Swirling energies connect to distant realms" },
+    ],
+  },
+];
+
+function getRandomRoomType(theme: FloorTheme): RoomType {
+  return theme.roomTypes[Math.floor(Math.random() * theme.roomTypes.length)];
+}
+
+function connectStrandedRooms(
+  allRooms: Room[],
+  connections: Array<{ fromRoomId: number; toRoomId: number; direction: string }>,
+  entranceRoomId: number
+) {
+  // Build adjacency list
+  const adjacencyMap = new Map<number, Set<number>>();
+  allRooms.forEach(room => adjacencyMap.set(room.id, new Set()));
+  
+  connections.forEach(conn => {
+    adjacencyMap.get(conn.fromRoomId)?.add(conn.toRoomId);
+    adjacencyMap.get(conn.toRoomId)?.add(conn.fromRoomId);
+  });
+
+  // Find connected component containing entrance
+  const visited = new Set<number>();
+  const queue = [entranceRoomId];
+  visited.add(entranceRoomId);
+  
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+    const neighbors = adjacencyMap.get(currentId) || new Set();
+    for (const neighborId of neighbors) {
+      if (!visited.has(neighborId)) {
+        visited.add(neighborId);
+        queue.push(neighborId);
+      }
+    }
+  }
+
+  // Connect stranded rooms
+  const strandedRooms = allRooms.filter(room => !visited.has(room.id));
+  for (const strandedRoom of strandedRooms) {
+    // Find closest connected room
+    let closestRoom = null;
+    let minDistance = Infinity;
+    
+    for (const connectedRoom of allRooms.filter(r => visited.has(r.id))) {
+      const distance = Math.abs(strandedRoom.x - connectedRoom.x) + Math.abs(strandedRoom.y - connectedRoom.y);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestRoom = connectedRoom;
+      }
+    }
+    
+    if (closestRoom) {
+      // Add connection
+      const dx = strandedRoom.x - closestRoom.x;
+      const dy = strandedRoom.y - closestRoom.y;
+      const direction = dx > 0 ? "east" : dx < 0 ? "west" : dy > 0 ? "north" : "south";
+      
+      connections.push({
+        fromRoomId: closestRoom.id,
+        toRoomId: strandedRoom.id,
+        direction
+      });
+      
+      visited.add(strandedRoom.id);
+      adjacencyMap.get(closestRoom.id)?.add(strandedRoom.id);
+      adjacencyMap.get(strandedRoom.id)?.add(closestRoom.id);
+    }
+  }
+}
+
+function generateFactionalRoomDetails(
+  baseRoom: { name: string; description: string },
+  faction?: Faction
+): { name: string; description: string } {
+  if (!faction) {
+    return baseRoom;
+  }
+
+  const factionalPrefixes = [
+    `${faction.name}-controlled`,
+    `${faction.name}-occupied`,
+    `${faction.name}-claimed`,
+    `${faction.name}-dominated`,
+  ];
+  
+  const prefix = factionalPrefixes[Math.floor(Math.random() * factionalPrefixes.length)];
+  
+  return {
+    name: `${prefix} ${baseRoom.name}`,
+    description: `${baseRoom.description} This area shows clear signs of ${faction.name} influence.`,
+  };
+}
 
 export async function generateFullDungeon(factions: Faction[]) {
   try {
