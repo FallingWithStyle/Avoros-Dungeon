@@ -1,7 +1,7 @@
 import { generateFullDungeon } from "../client/src/dungeon/generation/dungeon-generator.ts";
-import { db } from "../server/db";
-import { factions as factionsTable } from "../shared/schema";
-import type { Faction } from "../client/src/dungeon/generation/faction-assignment"; // Import Faction type to avoid typescript errors
+import { db } from "../server/db.ts";
+import { factions as factionsTable } from "../shared/schema.ts";
+import type { Faction } from "../client/src/dungeon/generation/faction-assignment.ts"; // Import Faction type to avoid typescript errors
 
 // Utility: Fetch all factions from the DB with correct typing
 async function getAllFactions(): Promise<Faction[]> {
