@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,12 +38,47 @@ interface Room {
   hasLoot: boolean;
   x: number;
   y: number;
+  factionId?: number | null;
 }
 
 interface RoomData {
   room: Room;
   availableDirections: string[];
   playersInRoom: CrawlerWithDetails[];
+}
+
+interface Faction {
+  id: number;
+  name: string;
+  color: string;
+}
+
+function FactionBadge({ factionId, factions }: { factionId?: number | null, factions: Faction[] }) {
+  const faction = factions.find(f => f.id === factionId);
+  if (!factionId || !faction) {
+    return (
+      <Badge
+        style={{
+          backgroundColor: "#6B7280", // neutral gray
+          color: "white",
+        }}
+        variant="secondary"
+      >
+        Neutral
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      style={{
+        backgroundColor: faction.color,
+        color: "white",
+      }}
+      variant="secondary"
+    >
+      {faction.name}
+    </Badge>
+  );
 }
 
 export default function RoomNavigation({ crawler, energyDisabled = false }: RoomNavigationProps) {
@@ -53,8 +88,17 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery<RoomData>({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000, // Refresh every 5 seconds to see other players
+    refetchInterval: 5000,
     retry: false,
+  });
+
+  // Fetch factions list from backend
+  const { data: factions = [], isLoading: isFactionsLoading } = useQuery<Faction[]>({
+    queryKey: ["/api/factions"],
+    queryFn: async () => {
+      return await apiRequest("GET", "/api/factions");
+    },
+    staleTime: 5 * 60 * 1000, // 5 min
   });
 
   // Movement mutation
@@ -66,7 +110,6 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
       });
     },
     onSuccess: () => {
-      // Refresh room data and mini-map
       queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/current-room`] });
       queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`] });
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
@@ -97,13 +140,10 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
     },
   });
 
-  // Handle movement
   const handleMove = useCallback((direction: string) => {
     if (moveMutation.isPending || !roomData?.availableDirections.includes(direction)) {
       return;
     }
-    
-    // Check energy (unless disabled for debug)
     if (!energyDisabled && crawler.energy < 10) {
       toast({
         title: "Not enough energy",
@@ -112,49 +152,31 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
       });
       return;
     }
-
     setPendingDirection(direction);
     moveMutation.mutate(direction);
   }, [moveMutation, roomData, crawler.energy, toast]);
 
-  // Keyboard controls (WASD)
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Only handle if no input is focused
       if (document.activeElement?.tagName === 'INPUT' || 
           document.activeElement?.tagName === 'TEXTAREA') {
         return;
       }
-
       const key = event.key.toLowerCase();
       let direction: string | null = null;
-
       switch (key) {
-        case 'w':
-          direction = 'north';
-          break;
-        case 's':
-          direction = 'south';
-          break;
-        case 'a':
-          direction = 'west';
-          break;
-        case 'd':
-          direction = 'east';
-          break;
-        case 'q':
-          direction = 'staircase';
-          break;
-        default:
-          return;
+        case 'w': direction = 'north'; break;
+        case 's': direction = 'south'; break;
+        case 'a': direction = 'west'; break;
+        case 'd': direction = 'east'; break;
+        case 'q': direction = 'staircase'; break;
+        default: return;
       }
-
       event.preventDefault();
       if (direction) {
         handleMove(direction);
       }
     };
-
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleMove]);
@@ -194,7 +216,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
     return <Badge variant="outline">Normal Room</Badge>;
   };
 
-  if (isLoading) {
+  if (isLoading || isFactionsLoading) {
     return (
       <Card>
         <CardHeader>
@@ -246,6 +268,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           {getRoomTypeBadge(room)}
+          <FactionBadge factionId={room.factionId} factions={factions} />
           {playersInRoom.length > 1 && (
             <Badge variant="secondary" className="flex items-center gap-1">
               <Users className="h-3 w-3" />
@@ -274,7 +297,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
             Available Exits
             <Badge variant="outline" className="text-xs">Use WASD keys</Badge>
           </h4>
-          
+
           {availableDirections.length === 0 ? (
             <p className="text-sm text-muted-foreground">No available exits from this room.</p>
           ) : (
@@ -300,7 +323,7 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
               ))}
             </div>
           )}
-          
+
           {crawler.energy < 10 && (
             <p className="text-xs text-red-600">Need at least 10 energy to move</p>
           )}

@@ -304,30 +304,6 @@ function connectStrandedRooms(
   }
 }
 
-function generateFactionalRoomDetails(
-  baseRoom: { name: string; description: string },
-  faction?: Faction,
-): { name: string; description: string } {
-  if (!faction) {
-    return baseRoom;
-  }
-
-  const factionalPrefixes = [
-    `${faction.name}-controlled`,
-    `${faction.name}-occupied`,
-    `${faction.name}-claimed`,
-    `${faction.name}-dominated`,
-  ];
-
-  const prefix =
-    factionalPrefixes[Math.floor(Math.random() * factionalPrefixes.length)];
-
-  return {
-    name: `${prefix} ${baseRoom.name}`,
-    description: `${baseRoom.description} This area shows clear signs of ${faction.name} influence.`,
-  };
-}
-
 export async function generateFullDungeon(factions: Faction[]) {
   try {
     await logErrorToFile("Generating full 10-floor dungeon...", "info");
@@ -514,7 +490,7 @@ export async function generateFullDungeon(factions: Faction[]) {
           throw e;
         }
 
-        // Theme room names/descriptions & set factionId before insert
+        // assign factionId
         Object.entries(factionAssignments).forEach(([factionKey, roomIds]) => {
           const faction =
             factionKey === "unclaimed"
@@ -524,13 +500,6 @@ export async function generateFullDungeon(factions: Faction[]) {
             const room = roomsToInsert[fakeId];
             if (!room) continue;
             if (["entrance", "stairs", "safe"].includes(room.type)) continue;
-            // Theme and assign factionId
-            const themed = generateFactionalRoomDetails(
-              { name: room.name, description: room.description },
-              faction,
-            );
-            room.name = themed.name;
-            room.description = themed.description;
             room.factionId = faction ? faction.id : null;
           }
         });
