@@ -6,7 +6,121 @@ import {
   Room,
 } from "./faction-assignment";
 
-// ... FloorTheme
+// Floor theme definitions
+interface RoomType {
+  name: string;
+  description: string;
+  weight: number;
+}
+
+interface FloorTheme {
+  name: string;
+  description: string;
+  roomTypes: RoomType[];
+}
+
+const floorThemes: FloorTheme[] = [
+  {
+    name: "Abandoned Outpost",
+    description: "Once a thriving settlement, now eerily quiet",
+    roomTypes: [
+      { name: "Guard Post", description: "A military checkpoint with rusted weapons", weight: 3 },
+      { name: "Storage Room", description: "Supplies and equipment left behind", weight: 4 },
+      { name: "Living Quarters", description: "Personal belongings scattered about", weight: 3 },
+      { name: "Common Hall", description: "Where settlers once gathered", weight: 2 },
+    ]
+  },
+  {
+    name: "Underground Tunnels",
+    description: "A maze of carved stone passages",
+    roomTypes: [
+      { name: "Mining Shaft", description: "Deep excavation into the earth", weight: 4 },
+      { name: "Tool Cache", description: "Abandoned mining equipment", weight: 3 },
+      { name: "Collapsed Tunnel", description: "Dangerous unstable passage", weight: 2 },
+      { name: "Worker's Rest", description: "Small chamber for breaks", weight: 3 },
+    ]
+  },
+  {
+    name: "Ancient Catacombs",
+    description: "Sacred burial grounds from a lost civilization",
+    roomTypes: [
+      { name: "Burial Chamber", description: "Stone sarcophagi line the walls", weight: 4 },
+      { name: "Ritual Circle", description: "Mysterious symbols carved in stone", weight: 2 },
+      { name: "Ossuary", description: "Bones arranged in intricate patterns", weight: 3 },
+      { name: "Memorial Hall", description: "Faded murals tell ancient stories", weight: 3 },
+    ]
+  },
+  {
+    name: "Fungal Caverns",
+    description: "Bioluminescent fungi illuminate twisted passages",
+    roomTypes: [
+      { name: "Spore Grove", description: "Glowing mushrooms cluster together", weight: 4 },
+      { name: "Mycelium Web", description: "Fungal networks span the ceiling", weight: 3 },
+      { name: "Toxic Pool", description: "Bubbling fungal secretions", weight: 2 },
+      { name: "Growth Chamber", description: "Massive fungal specimens", weight: 3 },
+    ]
+  },
+  {
+    name: "Crystalline Depths",
+    description: "Glittering crystal formations create a maze of light",
+    roomTypes: [
+      { name: "Crystal Garden", description: "Beautiful formations of living crystal", weight: 3 },
+      { name: "Resonance Chamber", description: "Crystals hum with mystical energy", weight: 2 },
+      { name: "Prism Hall", description: "Light refracts in dazzling patterns", weight: 3 },
+      { name: "Mineral Vein", description: "Rich deposits embedded in rock", weight: 4 },
+    ]
+  },
+  {
+    name: "Flooded Ruins",
+    description: "Ancient structures partially submerged in dark water",
+    roomTypes: [
+      { name: "Sunken Plaza", description: "Water-filled courtyard with debris", weight: 3 },
+      { name: "Drowned Library", description: "Waterlogged books and scrolls", weight: 2 },
+      { name: "Tidal Pool", description: "Strange creatures in shallow water", weight: 4 },
+      { name: "Drainage Channel", description: "Fast-flowing underground river", weight: 3 },
+    ]
+  },
+  {
+    name: "Mechanical Fortress",
+    description: "Ancient automated defenses still patrol these halls",
+    roomTypes: [
+      { name: "Gear Chamber", description: "Massive clockwork mechanisms", weight: 3 },
+      { name: "Control Room", description: "Inactive panels and switches", weight: 2 },
+      { name: "Assembly Line", description: "Conveyor belts and mechanical arms", weight: 4 },
+      { name: "Power Core", description: "Humming energy source", weight: 3 },
+    ]
+  },
+  {
+    name: "Twisted Laboratory",
+    description: "Mad experiments left unfinished and unstable",
+    roomTypes: [
+      { name: "Specimen Chamber", description: "Preserved creatures in glass tanks", weight: 3 },
+      { name: "Chemical Storage", description: "Volatile substances in containers", weight: 2 },
+      { name: "Operating Theater", description: "Surgical equipment stained with age", weight: 3 },
+      { name: "Research Archive", description: "Notebooks filled with mad theories", weight: 4 },
+    ]
+  },
+  {
+    name: "Nightmare Realm",
+    description: "Reality bends and warps in these cursed depths",
+    roomTypes: [
+      { name: "Void Chamber", description: "Empty space that seems to absorb light", weight: 2 },
+      { name: "Mirror Maze", description: "Reflections that don't match reality", weight: 3 },
+      { name: "Temporal Rift", description: "Time flows strangely here", weight: 2 },
+      { name: "Madness Pool", description: "Swirling energy that affects the mind", weight: 3 },
+    ]
+  },
+  {
+    name: "The Abyss",
+    description: "The deepest reaches where few dare to venture",
+    roomTypes: [
+      { name: "Abyssal Pit", description: "Bottomless chasm into darkness", weight: 2 },
+      { name: "Ancient Throne", description: "Seat of some forgotten ruler", weight: 1 },
+      { name: "Primordial Cave", description: "Where the world itself was born", weight: 3 },
+      { name: "Final Chamber", description: "The end of all journeys", weight: 2 },
+    ]
+  }
+];
 
 function getRandomRoomType(theme: FloorTheme) {
   const totalWeight = theme.roomTypes.reduce(
