@@ -4,6 +4,24 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCrawlerSchema } from "@shared/schema";
+import {
+  users,
+  crawlers,
+  crawlerClasses,
+  floors,
+  rooms,
+  roomConnections,
+  crawlerPositions,
+  activities,
+  chatMessages,
+  seasons,
+  enemies,
+  encounters,
+  equipment,
+  equipmentTypes,
+  crawlerEquipment,
+  factions,
+} from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware

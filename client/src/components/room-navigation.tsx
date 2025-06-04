@@ -54,6 +54,11 @@ interface Faction {
 }
 
 function FactionBadge({ factionId, factions }: { factionId?: number | null, factions: Faction[] }) {
+  // Debug logging
+  if (IS_DEBUG_MODE) {
+    console.log("FactionBadge - factionId:", factionId, "factions count:", factions.length);
+  }
+  
   const faction = factions.find(f => f.id === factionId);
   if (!factionId || !faction) {
     return (
@@ -71,7 +76,7 @@ function FactionBadge({ factionId, factions }: { factionId?: number | null, fact
   return (
     <Badge
       style={{
-        backgroundColor: faction.color,
+        backgroundColor: faction.color || "#6B7280",
         color: "white",
       }}
       variant="secondary"
@@ -96,7 +101,11 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   const { data: factions = [], isLoading: isFactionsLoading } = useQuery<Faction[]>({
     queryKey: ["/api/factions"],
     queryFn: async () => {
-      return await apiRequest("GET", "/api/factions");
+      const result = await apiRequest("GET", "/api/factions");
+      if (IS_DEBUG_MODE) {
+        console.log("Fetched factions:", result);
+      }
+      return result;
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });
