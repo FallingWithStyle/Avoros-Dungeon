@@ -556,6 +556,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Factions
+  app.get("/api/factions", async (req, res) => {
+    try {
+      const allFactions = await db.select().from(factions);
+      res.json(allFactions);
+    } catch (error) {
+      console.error("Error fetching factions:", error);
+      res.status(500).json({ message: "Failed to fetch factions" });
+    }
+  });
+
   // DEBUG: Reset crawlers (temporary for development)
   app.post(
     "/api/debug/reset-crawlers",
