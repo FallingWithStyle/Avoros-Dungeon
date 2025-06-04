@@ -148,15 +148,19 @@ function generateFactionalRoomDetails(
 
 export async function generateFullDungeon(factions: Faction[]) {
   console.log("Generating full 10-floor dungeon...");
-  
-  // Import floors table and clear existing rooms
+
+  // Import required modules
   const { floors } = await import("@shared/schema");
   const { eq } = await import("drizzle-orm");
-  
+
   // Clear existing rooms and connections first
   console.log("Clearing existing dungeon data...");
   await db.delete(roomConnections);
   await db.delete(rooms);
+
+  // Get all floors to verify they exist
+  const allFloors = await db.select().from(floors).orderBy(floors.floorNumber);
+  console.log(`Found ${allFloors.length} floors in database`);
 
   const GRID_SIZE = 20;
   const MIN_ROOMS_PER_FLOOR = 200;
@@ -165,9 +169,12 @@ export async function generateFullDungeon(factions: Faction[]) {
   for (let floorNum = 1; floorNum <= 10; floorNum++) {
     console.log(`Generating Floor ${floorNum}...`);
     const theme = floorThemes[floorNum - 1];
-    
+
     // Get the actual floor from database
-    const [floor] = await db.select().from(floors).where(eq(floors.floorNumber, floorNum));
+    const [floor] = await db
+      .select()
+      .from(floors)
+      .where(eq(floors.floorNumber, floorNum));
     if (!floor) {
       console.error(`Floor ${floorNum} not found in database! Skipping...`);
       continue;
