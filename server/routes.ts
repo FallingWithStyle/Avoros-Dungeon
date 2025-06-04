@@ -559,6 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Factions
   app.get("/api/factions", async (req, res) => {
     try {
+      const { db } = await import("./db");
       const allFactions = await db.select().from(factions);
       res.json(allFactions);
     } catch (error) {
