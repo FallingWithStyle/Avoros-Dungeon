@@ -82,7 +82,7 @@ function getFloorDescription(floor: number): string {
 }
 
 async function initializeRooms() {
-  const { rooms, roomConnections, crawlerPositions } = await import("@shared/schema");
+  const { rooms, roomConnections, crawlerPositions, floors } = await import("@shared/schema");
   
   // Check if rooms already exist
   const existingRooms = await db.select().from(rooms).limit(1);
