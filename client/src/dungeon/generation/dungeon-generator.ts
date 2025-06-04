@@ -1,5 +1,6 @@
 import { db } from "server/db.ts";
-import { rooms, roomConnections } from "@shared/schema";
+import { rooms, roomConnections, floors } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import {
   assignRoomsByFactionInfluence,
   Faction,
@@ -262,10 +263,6 @@ function generateFactionalRoomDetails(
 
 export async function generateFullDungeon(factions: Faction[]) {
   console.log("Generating full 10-floor dungeon...");
-
-  // Import required modules
-  const { floors } = await import("@shared/schema");
-  const { eq } = await import("drizzle-orm");
 
   // Clear existing rooms and connections first
   console.log("Clearing existing dungeon data...");
