@@ -4,6 +4,24 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCrawlerSchema } from "@shared/schema";
+import {
+  users,
+  crawlers,
+  crawlerClasses,
+  floors,
+  rooms,
+  roomConnections,
+  crawlerPositions,
+  activities,
+  chatMessages,
+  seasons,
+  enemies,
+  encounters,
+  equipment,
+  equipmentTypes,
+  crawlerEquipment,
+  factions,
+} from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -535,6 +553,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching equipment:", error);
       res.status(500).json({ message: "Failed to fetch equipment" });
+    }
+  });
+
+  // Factions
+  app.get("/api/factions", async (req, res) => {
+    try {
+      const { db } = await import("./db");
+      const allFactions = await db.select().from(factions);
+      res.json(allFactions);
+    } catch (error) {
+      console.error("Error fetching factions:", error);
+      res.status(500).json({ message: "Failed to fetch factions" });
     }
   });
 
