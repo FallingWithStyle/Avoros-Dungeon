@@ -20,6 +20,7 @@ export type Room = {
   isSafe: boolean;
   isExplored: boolean;
   hasLoot: boolean;
+  factionId: number | null;
 };
 
 // Result type: maps factionId (or null for unclaimed) to array of room IDs

@@ -15,12 +15,24 @@ async function getAllFactions(): Promise<Faction[]> {
 
 async function run() {
   try {
+    console.log("Starting dungeon generation...");
+    
+    // Test database connection first
+    console.log("Testing database connection...");
+    const testQuery = await db.select().from(factionsTable).limit(1);
+    console.log("Database connection successful, found", testQuery.length, "factions");
+    
     const factions = await getAllFactions();
-    await generateFullDungeon(factions); // No type error!
+    console.log("Retrieved", factions.length, "factions from database");
+    
+    await generateFullDungeon(factions);
     console.log("All 10 dungeon floors generated!");
     process.exit(0);
   } catch (err) {
-    console.error("Dungeon generation failed:", err);
+    console.error("Dungeon generation failed:");
+    console.error("Error name:", err?.constructor?.name);
+    console.error("Error message:", err?.message);
+    console.error("Full error:", err);
     process.exit(1);
   }
 }
