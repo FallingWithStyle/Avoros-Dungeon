@@ -1,11 +1,11 @@
-import { db } from "server/db.ts";
-import { rooms, roomConnections, floors } from "@shared/schema";
+import { db } from "../../server/db.js";
+import { rooms, roomConnections, floors } from "../../shared/schema.js";
 import { eq } from "drizzle-orm";
 import {
   assignRoomsByFactionInfluence,
   Faction,
   Room,
-} from "./faction-assignment";
+} from "./faction-assignment.js";
 
 // Floor theme definitions
 interface RoomType {
