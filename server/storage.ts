@@ -36,6 +36,7 @@ import {
   type Enemy,
   type Encounter,
   type Season,
+  factions,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, asc, like, inArray } from "drizzle-orm";
@@ -44,65 +45,65 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+
   // Crawler operations
   createCrawler(crawlerData: InsertCrawler): Promise<Crawler>;
   getCrawlersBySponssor(sponsorId: string): Promise<CrawlerWithDetails[]>;
   getCrawler(id: number): Promise<CrawlerWithDetails | undefined>;
   updateCrawler(id: number, updates: Partial<Crawler>): Promise<Crawler>;
-  
+
   // Season operations
   getCurrentSeason(): Promise<Season | undefined>;
   canCreatePrimaryCrawler(userId: string): Promise<boolean>;
   getAvailableSecondarySponsorships(): Promise<CrawlerWithDetails[]>;
   resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number): Promise<User>;
-  
+
   // Crawler generation
   generateCrawlerCandidates(count?: number): Promise<any[]>;
-  
+
   // Crawler classes
   getCrawlerClasses(): Promise<CrawlerClass[]>;
-  
+
   // Equipment operations
   getEquipment(): Promise<Equipment[]>;
   getEquipmentById(id: number): Promise<Equipment | undefined>;
   getCrawlerEquipment(crawlerId: number): Promise<Equipment[]>;
-  
+
   // Combat and encounters
   createEncounter(crawlerId: number, floorId: number, enemyId?: number): Promise<Encounter>;
   getActiveEncounter(crawlerId: number): Promise<Encounter | undefined>;
   updateEncounter(id: number, updates: Partial<Encounter>): Promise<Encounter>;
-  
+
   // Exploration
   exploreFloor(crawlerId: number): Promise<any>;
   regenerateEnergy(crawlerId: number): Promise<Crawler>;
   applyCompetencyBonus(crawler: any, encounterType: string): number;
-  
+
   // Floors and enemies
   getFloor(floorNumber: number): Promise<Floor | undefined>;
   getEnemiesForFloor(floorNumber: number): Promise<Enemy[]>;
-  
+
   // Activities and notifications
   createActivity(activityData: Omit<Activity, 'id' | 'createdAt'>): Promise<Activity>;
   getRecentActivities(userId: string, limit?: number): Promise<ActivityWithDetails[]>;
-  
+
   // Chat
   createChatMessage(userId: string, message: string): Promise<ChatMessage>;
   getRecentChatMessages(limit?: number): Promise<ChatMessageWithUser[]>;
-  
+
   // Leaderboards
   getTopCrawlers(limit?: number): Promise<CrawlerWithDetails[]>;
-  
+
   // Marketplace
   getMarketplaceListings(limit?: number): Promise<MarketplaceListingWithDetails[]>;
-  
+
   // Credits and transactions
   updateUserCredits(userId: string, amount: number): Promise<User>;
   updateUserActiveCrawler(userId: string, crawlerId: number): Promise<User>;
-  
+
   // Encounter choice processing
   processEncounterChoice(crawlerId: number, choiceId: string, encounterData: any): Promise<any>;
-  
+
   // Room and mapping operations
   createRoom(floorId: number, x: number, y: number, type: string, name: string, description: string): Promise<Room>;
   getRoomsForFloor(floorId: number): Promise<Room[]>;
@@ -113,9 +114,12 @@ export interface IStorage {
   getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined>;
   getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]>;
   getExploredRooms(crawlerId: number): Promise<any[]>;
-  
+
   // Debug functions
   resetUserCrawlers(userId: string): Promise<void>;
+
+  // Factions operations
+  getFactions(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -128,7 +132,7 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     // Generate corporation name if not provided
     const corporationName = userData.corporationName || this.generateCorporationName();
-    
+
     const [user] = await db
       .insert(users)
       .values({
@@ -153,16 +157,16 @@ export class DatabaseStorage implements IStorage {
       "Prime", "Omega", "Alpha", "Beta", "Gamma", "Delta", "Nexus", "Core",
       "Apex", "Matrix", "Vector", "Phoenix", "Titan", "Nova", "Orbital", "Galactic"
     ];
-    
+
     const suffixes = [
       "Industries", "Corporation", "Enterprises", "Dynamics", "Systems", "Technologies",
       "Solutions", "Consortium", "Holdings", "Syndicate", "Alliance", "Collective",
       "Federation", "Empire", "Conglomerate", "Group", "Labs", "Works"
     ];
-    
+
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    
+
     return `${prefix} ${suffix}`;
   }
 
@@ -177,16 +181,16 @@ export class DatabaseStorage implements IStorage {
       Math.floor(Math.random() * 6), // 0-5
       Math.floor(Math.random() * 6), // 0-5
     ];
-    
+
     // Give one stat a chance to be higher
     const highlightStat = Math.floor(Math.random() * 6);
     if (Math.random() < 0.3) { // 30% chance for a higher stat
       stats[highlightStat] = 6 + Math.floor(Math.random() * 3); // 6-8
     }
-    
+
     const health = 60 + Math.floor(Math.random() * 20); // 60-80
     const luck = Math.floor(Math.random() * 6); // 0-5 luck (hidden from players)
-    
+
     return {
       health,
       maxHealth: health,
@@ -207,7 +211,7 @@ export class DatabaseStorage implements IStorage {
       "Demolitions", "Survival", "Leadership", "Marksmanship", "Athletics",
       "Engineering", "Chemistry", "Psychology", "Linguistics", "Navigation"
     ];
-    
+
     // Give each crawler 2-4 random competencies
     const numCompetencies = 2 + Math.floor(Math.random() * 3);
     const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
@@ -222,13 +226,13 @@ export class DatabaseStorage implements IStorage {
       "security guard", "janitor", "mail carrier", "bus driver", "parking attendant",
       "inventory manager", "call center operator", "copy machine technician", "payroll clerk",
       "administrative assistant", "quality control inspector", "warehouse worker", "delivery driver",
-      
+
       // Professional jobs
       "accountant", "lawyer", "teacher", "nurse", "engineer", "architect", "dentist",
       "pharmacist", "veterinarian", "therapist", "consultant", "project manager",
       "marketing specialist", "sales representative", "human resources coordinator",
       "graphic designer", "web developer", "database administrator", "financial advisor",
-      
+
       // Weird/unusual jobs
       "professional line waiter", "cheese sculptor", "pet psychic", "fortune cookie writer",
       "professional apologizer", "social media influencer for plants", "elevator music composer",
@@ -236,7 +240,7 @@ export class DatabaseStorage implements IStorage {
       "professional sleeper", "fortune teller for pets", "bubble wrap quality tester",
       "professional Netflix watcher", "chicken sexer", "paint drying observer", "food stylist",
       "professional cuddler", "grass growing supervisor", "professional queue holder",
-      
+
       // Sci-fi/fantastic jobs  
       "space traffic controller", "alien interpreter", "robot therapist", "time travel agent",
       "interdimensional courier", "gravity adjuster", "memory editor", "dream architect",
@@ -244,14 +248,14 @@ export class DatabaseStorage implements IStorage {
       "artificial intelligence trainer", "parallel universe monitor", "cosmic weather forecaster",
       "quantum entanglement specialist", "nano-technology farmer", "digital ghost hunter",
       "synthetic emotion designer", "planetary atmosphere engineer", "galactic tour guide",
-      
+
       // Blue collar with a twist
       "underwater welder", "professional food critic", "wine tester", "mattress tester",
       "theme park ride tester", "video game tester", "chocolate taster", "perfume evaluator",
       "fireworks technician", "special effects coordinator", "stunt double", "voice actor",
       "professional wrestler", "circus performer", "street performer", "wedding planner"
     ];
-    
+
     return jobs[Math.floor(Math.random() * jobs.length)];
   }
 
@@ -333,7 +337,7 @@ export class DatabaseStorage implements IStorage {
     } else {
       reason = tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
     }
-    
+
     return `Former ${job}. ${reason}`;
   }
 
@@ -373,11 +377,11 @@ export class DatabaseStorage implements IStorage {
 
   private async assignRandomStartingEquipment(crawlerId: number): Promise<void> {
     const availableEquipment = await db.select().from(equipment);
-    
+
     // Give 1-3 random pieces of basic equipment
     const numItems = 1 + Math.floor(Math.random() * 3);
     const basicEquipment = availableEquipment.filter(eq => eq.rarity === 'common');
-    
+
     for (let i = 0; i < numItems; i++) {
       const randomEquipment = basicEquipment[Math.floor(Math.random() * basicEquipment.length)];
       if (randomEquipment) {
@@ -718,7 +722,7 @@ export class DatabaseStorage implements IStorage {
 
     // Generate encounter based on floor and crawler capabilities
     const encounter = await this.generateEncounter(crawler);
-    
+
     // Return the encounter for the frontend to display choices
     // Don't process it automatically anymore
     return encounter;
@@ -727,13 +731,13 @@ export class DatabaseStorage implements IStorage {
   private async generateEncounter(crawler: any): Promise<any> {
     const encounterTypes = ['combat', 'treasure', 'npc', 'trap', 'event'];
     const weights = this.getEncounterWeights(crawler);
-    
+
     const encounterType = this.weightedRandom(encounterTypes, weights);
     const floor = await this.getFloor(crawler.currentFloor);
-    
+
     // Generate choice-based encounter with multiple options
     const encounterData = this.generateChoiceEncounter(encounterType, crawler);
-    
+
     return {
       type: encounterType,
       crawlerId: crawler.id,
@@ -1017,7 +1021,7 @@ export class DatabaseStorage implements IStorage {
 
     const typeEncounters = (encounters as any)[type] || encounters.event;
     const selectedEncounter = typeEncounters[Math.floor(Math.random() * typeEncounters.length)];
-    
+
     return {
       title: selectedEncounter.title,
       description: selectedEncounter.description,
@@ -1029,24 +1033,24 @@ export class DatabaseStorage implements IStorage {
   private getEncounterWeights(crawler: any): number[] {
     // Base weights [combat, treasure, npc, trap, event]
     let weights = [40, 20, 15, 15, 10];
-    
+
     // Modify based on competencies
     if (crawler.competencies?.includes('Scavenging')) weights[1] += 10; // More treasure
     if (crawler.competencies?.includes('Stealth')) weights[3] -= 5; // Fewer traps
     if (crawler.competencies?.includes('Negotiation')) weights[2] += 10; // More NPCs
     if (crawler.competencies?.includes('Combat Reflexes')) weights[0] += 5; // More combat
-    
+
     // Modify based on stats
     if (crawler.tech > 12) weights[4] += 5; // More events for high-tech crawlers
     if (crawler.speed > 12) weights[3] -= 3; // Avoid traps with high speed
-    
+
     return weights;
   }
 
   private weightedRandom(items: string[], weights: number[]): string {
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     const random = Math.random() * totalWeight;
-    
+
     let currentWeight = 0;
     for (let i = 0; i < items.length; i++) {
       currentWeight += weights[i];
@@ -1090,14 +1094,14 @@ export class DatabaseStorage implements IStorage {
         `${crawler.name} finds evidence of the dungeon's mysterious past!`
       ]
     };
-    
+
     const typeStories = (stories as any)[type] || stories.event;
     return typeStories[Math.floor(Math.random() * typeStories.length)];
   }
 
   private async processEncounter(crawler: any, encounter: any): Promise<any> {
     let rewards = { credits: 0, experience: 0, equipment: [], damage: 0 };
-    
+
     switch (encounter.type) {
       case 'combat':
         rewards = await this.processCombatEncounter(crawler);
@@ -1115,10 +1119,10 @@ export class DatabaseStorage implements IStorage {
         rewards = await this.processEventEncounter(crawler);
         break;
     }
-    
+
     // Apply rewards and damage
     await this.applyCrawlerUpdates(crawler.id, rewards);
-    
+
     return {
       ...encounter,
       result: rewards,
@@ -1129,11 +1133,11 @@ export class DatabaseStorage implements IStorage {
   private async processCombatEncounter(crawler: any): Promise<any> {
     const baseReward = Math.floor(crawler.currentFloor * 10);
     const attackBonus = this.applyCompetencyBonus(crawler, 'combat');
-    
+
     // Simple combat resolution
     const combatPower = crawler.attack + attackBonus;
     const enemyPower = 15 + (crawler.currentFloor * 2);
-    
+
     if (combatPower >= enemyPower) {
       return {
         credits: baseReward + Math.floor(Math.random() * 50),
@@ -1154,7 +1158,7 @@ export class DatabaseStorage implements IStorage {
   private async processTreasureEncounter(crawler: any): Promise<any> {
     const scavengingBonus = this.applyCompetencyBonus(crawler, 'treasure');
     const baseCredits = Math.floor(crawler.currentFloor * 15);
-    
+
     return {
       credits: baseCredits + scavengingBonus + Math.floor(Math.random() * 100),
       experience: 15 + Math.floor(Math.random() * 15),
@@ -1165,7 +1169,7 @@ export class DatabaseStorage implements IStorage {
 
   private async processNpcEncounter(crawler: any): Promise<any> {
     const negotiationBonus = this.applyCompetencyBonus(crawler, 'npc');
-    
+
     return {
       credits: Math.floor(Math.random() * 50) + negotiationBonus,
       experience: 20 + Math.floor(Math.random() * 20),
@@ -1177,9 +1181,9 @@ export class DatabaseStorage implements IStorage {
   private async processTrapEncounter(crawler: any): Promise<any> {
     const avoidanceBonus = this.applyCompetencyBonus(crawler, 'trap');
     const techBonus = Math.floor(crawler.tech / 2);
-    
+
     const avoidChance = (crawler.speed + avoidanceBonus + techBonus) / 100;
-    
+
     if (Math.random() < avoidChance) {
       return {
         credits: 0,
@@ -1199,7 +1203,7 @@ export class DatabaseStorage implements IStorage {
 
   private async processEventEncounter(crawler: any): Promise<any> {
     const techBonus = this.applyCompetencyBonus(crawler, 'event');
-    
+
     return {
       credits: Math.floor(Math.random() * 30),
       experience: 30 + techBonus,
@@ -1210,7 +1214,7 @@ export class DatabaseStorage implements IStorage {
 
   applyCompetencyBonus(crawler: any, encounterType: string): number {
     if (!crawler.competencies) return 0;
-    
+
     const competencyBonuses = {
       combat: ['Combat Reflexes', 'Marksmanship', 'Athletics'],
       treasure: ['Scavenging', 'Lock Picking', 'Electronics'],
@@ -1218,30 +1222,30 @@ export class DatabaseStorage implements IStorage {
       trap: ['Stealth', 'Electronics', 'Engineering'],
       event: ['Engineering', 'Chemistry', 'Hacking']
     };
-    
+
     const relevantCompetencies = (competencyBonuses as any)[encounterType] || [];
     const bonusCount = crawler.competencies.filter((comp: any) => 
       relevantCompetencies.includes(comp)
     ).length;
-    
+
     return bonusCount * 5; // 5 point bonus per relevant competency
   }
 
   private async applyCrawlerUpdates(crawlerId: number, rewards: any): Promise<void> {
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) return;
-    
+
     // Apply energy cost for exploration (always costs 10 energy)
     const newEnergy = Math.max(0, crawler.energy - 10);
-    
+
     // Apply damage from encounters
     const newHealth = Math.max(0, crawler.health - rewards.damage);
-    
+
     // Apply rewards
     const newCredits = crawler.credits + rewards.credits;
     const newExperience = crawler.experience + rewards.experience;
     const isAlive = newHealth > 0;
-    
+
     // Remove items that were lost in trading
     if (rewards.itemsLost && rewards.itemsLost.length > 0) {
       for (const lostItemName of rewards.itemsLost) {
@@ -1252,7 +1256,7 @@ export class DatabaseStorage implements IStorage {
           .innerJoin(equipment, eq(crawlerEquipment.equipmentId, equipment.id))
           .where(eq(crawlerEquipment.crawlerId, crawlerId))
           .limit(1);
-          
+
         if (equipmentToRemove.length > 0) {
           await db
             .delete(crawlerEquipment)
@@ -1260,7 +1264,7 @@ export class DatabaseStorage implements IStorage {
         }
       }
     }
-    
+
     // Update crawler with all changes
     await this.updateCrawler(crawlerId, {
       energy: newEnergy,
@@ -1270,14 +1274,14 @@ export class DatabaseStorage implements IStorage {
       isAlive: isAlive,
       status: "active"
     });
-    
+
     // Create detailed activity log
     let logMessage = `${crawler.name} explored and`;
     if (rewards.damage > 0) {
       logMessage += ` took ${rewards.damage} damage,`;
     }
     logMessage += ` gained ${rewards.experience} XP and ${rewards.credits} credits`;
-    
+
     await this.createActivity({
       userId: crawler.sponsorId,
       crawlerId: crawler.id,
@@ -1290,15 +1294,15 @@ export class DatabaseStorage implements IStorage {
   async regenerateEnergy(crawlerId: number): Promise<Crawler> {
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) throw new Error("Crawler not found");
-    
+
     const now = new Date();
     const lastRegen = new Date((crawler.lastEnergyRegen || crawler.createdAt) as string | Date);
     const timeDiff = now.getTime() - lastRegen.getTime();
     const minutesPassed = Math.floor(timeDiff / 60000);
-    
+
     // Regenerate 1 energy per minute, max energy cap
     const energyToRestore = Math.min(minutesPassed, crawler.maxEnergy - crawler.energy);
-    
+
     if (energyToRestore > 0) {
       const [updatedCrawler] = await db
         .update(crawlers)
@@ -1310,7 +1314,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updatedCrawler;
     }
-    
+
     return crawler;
   }
 
@@ -1324,7 +1328,7 @@ export class DatabaseStorage implements IStorage {
       "Lawrence", "Mark", "Matthew", "Michael", "Nicholas", "Patrick", "Paul", "Peter", "Philip", "Raymond",
       "Richard", "Robert", "Roger", "Ronald", "Russell", "Samuel", "Scott", "Stephen", "Steven", "Thomas",
       "Timothy", "Walter", "Wayne", "William", "Eugene", "Leonard", "Stanley", "Ralph", "Frank", "Louis",
-      
+
       // Female names
       "Alice", "Amanda", "Amy", "Andrea", "Angela", "Anna", "Anne", "Barbara", "Betty", "Beverly",
       "Brenda", "Carol", "Catherine", "Christine", "Cynthia", "Deborah", "Diana", "Donna", "Dorothy", "Elizabeth",
@@ -1334,7 +1338,7 @@ export class DatabaseStorage implements IStorage {
       "Patricia", "Rachel", "Rebecca", "Ruth", "Sandra", "Sarah", "Sharon", "Stephanie", "Susan", "Teresa",
       "Virginia", "Wanda", "Gloria", "Rose", "Evelyn", "Mildred", "Florence", "Irene", "Grace", "Carolyn"
     ];
-    
+
     const lastNames = [
       "Adams", "Allen", "Anderson", "Baker", "Barnes", "Bell", "Bennett", "Brooks", "Brown", "Butler",
       "Campbell", "Carter", "Clark", "Collins", "Cooper", "Cox", "Davis", "Edwards", "Evans", "Fisher",
@@ -1349,7 +1353,7 @@ export class DatabaseStorage implements IStorage {
       "Blackwood", "Fairfax", "Goodwin", "Harrington", "Lancaster", "Mansfield", "Montgomery", "Pemberton",
       "Sinclair", "Whitmore", "Worthington", "Ashford", "Bradford", "Donovan", "Grayson", "Hartwell"
     ];
-    
+
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     return `${firstName} ${lastName}`;
@@ -1453,26 +1457,26 @@ export class DatabaseStorage implements IStorage {
         { name: "Report Card", description: "All A's, fat lot of good it did" }
       );
     }
-    
+
     // Build equipment list with more variety
     const equipment = [];
-    
+
     // 2-3 survival items
     equipment.push(...this.shuffleArray(survivalGear).slice(0, 2 + Math.floor(Math.random() * 2)));
-    
+
     // Always include one personal item for emotional depth
     equipment.push(...this.shuffleArray(personalItems).slice(0, 1));
-    
+
     // 60% chance of weird item for personality
     if (Math.random() < 0.6) {
       equipment.push(...this.shuffleArray(weirdItems).slice(0, 1));
     }
-    
+
     // Include contextual gear if available
     if (contextualGear.length > 0 && Math.random() < 0.7) {
       equipment.push(...this.shuffleArray(contextualGear).slice(0, 1));
     }
-    
+
     return equipment;
   }
 
@@ -1536,14 +1540,14 @@ export class DatabaseStorage implements IStorage {
 
     // Check if crawler meets requirements
     const meetsRequirements = this.checkChoiceRequirements(crawler, choice.requirements);
-    
+
     // Calculate success based on stats and competencies
     const successChance = this.calculateChoiceSuccess(crawler, choice, meetsRequirements);
     const isSuccess = Math.random() < successChance;
 
     // Generate results based on choice outcome
     const results = this.generateChoiceResults(crawler, choice, encounterData.type, isSuccess);
-    
+
     // Apply results to crawler
     await this.applyCrawlerUpdates(crawlerId, results);
 
@@ -1579,7 +1583,7 @@ export class DatabaseStorage implements IStorage {
 
     // Calculate challenge level based on requirements
     const challengeLevel = this.getChoiceChallengeLevel(choice);
-    
+
     // Apply luck mechanics
     const luckBonus = this.calculateLuckBonus(crawler, choice, challengeLevel);
     baseChance += luckBonus;
@@ -1595,7 +1599,7 @@ export class DatabaseStorage implements IStorage {
     if (choice.primaryStat !== 'none') {
       const primaryStatValue = crawler[choice.primaryStat] || 0;
       baseChance += Math.min(primaryStatValue * 0.02, 0.2); // Up to +20% bonus from primary stat
-      
+
       // Small bonus from other relevant stats
       const secondaryBonus = this.calculateSecondaryStatBonus(crawler, choice);
       baseChance += secondaryBonus;
@@ -1617,6 +1621,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   private getChoiceChallengeLevel(choice: any): number {
+    // Calculate total challenge based on This code adds the `getFactions` method to the `DatabaseStorage` class, allowing retrieval of factions data.
+```typescript
     // Calculate total challenge based on requirements
     const requirements = choice.requirements || {};
     return Object.values(requirements).reduce((sum: number, value: any) => sum + (value || 0), 0);
@@ -1625,14 +1631,14 @@ export class DatabaseStorage implements IStorage {
   private calculateLuckBonus(crawler: any, choice: any, challengeLevel: number): number {
     const luck = crawler.luck || 0;
     const primaryStat = crawler[choice.primaryStat] || 0;
-    
+
     // Luck mechanics: +1 if luck > challenge, -1 if skill + luck < challenge
     if (luck > challengeLevel) {
       return 0.1; // +10% success chance
     } else if ((primaryStat + luck) < challengeLevel) {
       return -0.1; // -10% success chance
     }
-    
+
     return 0; // No luck bonus/penalty
   }
 
@@ -1640,7 +1646,7 @@ export class DatabaseStorage implements IStorage {
     const allStats = ['attack', 'defense', 'speed', 'wit', 'charisma', 'memory'];
     const primaryStat = choice.primaryStat;
     let bonus = 0;
-    
+
     // Small bonus from non-primary stats (max 5% total)
     allStats.forEach(stat => {
       if (stat !== primaryStat) {
@@ -1648,13 +1654,13 @@ export class DatabaseStorage implements IStorage {
         bonus += Math.min(statValue * 0.005, 0.01); // Up to 1% per stat
       }
     });
-    
+
     return Math.min(bonus, 0.05); // Cap at 5% total secondary bonus
   }
 
   private generateChoiceResults(crawler: any, choice: any, encounterType: string, isSuccess: boolean): any {
     const baseFloorMultiplier = 1 + (crawler.currentFloor * 0.1);
-    
+
     let results = {
       credits: 0,
       experience: 0,
@@ -1664,19 +1670,19 @@ export class DatabaseStorage implements IStorage {
       itemsGained: [],
       summary: ""
     };
-    
+
     if (!isSuccess) {
       // Failed attempts usually result in damage and minimal rewards
       results.credits = Math.floor(Math.random() * 10);
       results.experience = this.getFailureXP(choice, encounterType);
       results.damage = Math.floor((10 + Math.random() * 15) * baseFloorMultiplier);
-      
+
       // Trading failures might still lose items
       if (choice.text.toLowerCase().includes('trade') && crawler.equipment?.length > 0) {
         const randomItem = crawler.equipment[Math.floor(Math.random() * crawler.equipment.length)];
         results.itemsLost.push(randomItem.equipment?.name || 'Unknown item');
       }
-      
+
       results.summary = `Lost ${results.damage} health${results.itemsLost.length > 0 ? `, lost ${results.itemsLost.join(', ')}` : ''}`;
       return results;
     }
@@ -1684,7 +1690,7 @@ export class DatabaseStorage implements IStorage {
     // Base successful rewards based on action difficulty
     const baseXP = this.getSuccessXP(choice, encounterType);
     results.experience = Math.floor(baseXP * baseFloorMultiplier);
-    
+
     // Only certain actions should give credits
     const actionText = choice.text.toLowerCase();
     const givesCredits = actionText.includes('trade') || 
@@ -1693,7 +1699,7 @@ export class DatabaseStorage implements IStorage {
                         actionText.includes('search') ||
                         actionText.includes('ambush') ||
                         encounterType === 'treasure';
-                        
+
     if (givesCredits) {
       results.credits = Math.floor((10 + Math.random() * 15) * baseFloorMultiplier);
     }
@@ -1703,7 +1709,7 @@ export class DatabaseStorage implements IStorage {
       if (crawler.equipment?.length > 0) {
         const randomItem = crawler.equipment[Math.floor(Math.random() * crawler.equipment.length)];
         results.itemsLost.push(randomItem.equipment?.name || 'Unknown item');
-        
+
         // Trading success gives better credit rewards
         results.credits = Math.floor((results.credits || 10) * 1.8);
       }
@@ -1734,7 +1740,7 @@ export class DatabaseStorage implements IStorage {
     if (results.itemsLost.length > 0) summaryParts.push(`lost ${results.itemsLost.join(', ')}`);
     if (results.itemsGained.length > 0) summaryParts.push(`gained ${results.itemsGained.join(', ')}`);
     if (results.damage > 0) summaryParts.push(`-${results.damage} health`);
-    
+
     results.summary = summaryParts.join(', ') || 'No significant changes';
 
     return results;
@@ -1743,7 +1749,7 @@ export class DatabaseStorage implements IStorage {
   // Helper method to calculate XP for failed actions
   private getFailureXP(choice: any, encounterType: string): number {
     const baseFailureXP = 5;
-    
+
     // Higher risk actions give more XP even when failed
     let multiplier = 1;
     switch (choice.riskLevel) {
@@ -1751,14 +1757,14 @@ export class DatabaseStorage implements IStorage {
       case 'medium': multiplier = 1.2; break;
       case 'low': multiplier = 1.0; break;
     }
-    
+
     return Math.floor(baseFailureXP * multiplier);
   }
 
   // Helper method to calculate XP for successful actions based on difficulty
   private getSuccessXP(choice: any, encounterType: string): number {
     let baseXP = 15;
-    
+
     // Different encounter types give different base XP
     switch (encounterType) {
       case 'combat': 
@@ -1769,33 +1775,33 @@ export class DatabaseStorage implements IStorage {
       case 'trap': baseXP = 22; break;
       case 'event': baseXP = 30; break;
     }
-    
+
     // Risk level affects XP rewards
     switch (choice.riskLevel) {
       case 'high': baseXP *= 1.4; break;
       case 'medium': baseXP *= 1.2; break;
       case 'low': baseXP *= 0.8; break;
     }
-    
+
     // Action type affects XP (combat actions > trade > escape)
     if (choice.text.toLowerCase().includes('run') || choice.text.toLowerCase().includes('flee')) {
       baseXP *= 0.6; // Running gives less XP
     } else if (choice.text.toLowerCase().includes('trade') || choice.text.toLowerCase().includes('offer')) {
       baseXP *= 0.8; // Trading gives moderate XP
     }
-    
+
     return Math.floor(baseXP);
   }
 
   private generateOutcomeMessage(crawler: any, choice: any, isSuccess: boolean, results: any): string {
     const action = choice.text.toLowerCase();
-    
+
     if (!isSuccess) {
       return `${crawler.name} attempted to ${action} but failed! Took ${results.damage} damage but gained some experience from the attempt.`;
     }
 
     let message = `${crawler.name} successfully chose to ${action}!`;
-    
+
     if (results.credits > 0) {
       message += ` Gained ${results.credits} credits`;
     }
@@ -1805,7 +1811,7 @@ export class DatabaseStorage implements IStorage {
     if (results.damage > 0) {
       message += ` but took ${results.damage} damage in the process`;
     }
-    
+
     return message + '.';
   }
 
@@ -1813,7 +1819,7 @@ export class DatabaseStorage implements IStorage {
   private async isRoomSafe(roomId: number): Promise<boolean> {
     // For now, consider all previously visited rooms as safe for reduced energy cost
     // This is a simplified approach since we don't have detailed encounter tracking
-    
+
     // Get room details to check room type
     const room = await this.getRoom(roomId);
     if (!room) {
@@ -1846,36 +1852,40 @@ export class DatabaseStorage implements IStorage {
     return true;
   }
 
+  async getFactions() {
+    return await db.select().from(factions);
+  }
+
   async resetUserCrawlers(userId: string): Promise<void> {
     // Get all crawler IDs for this user
     const userCrawlers = await db.select({ id: crawlers.id }).from(crawlers).where(eq(crawlers.sponsorId, userId));
     const crawlerIds = userCrawlers.map(c => c.id);
-    
+
     if (crawlerIds.length > 0) {
       // Delete activities first (foreign key constraint)
       for (const crawlerId of crawlerIds) {
         await db.delete(activities).where(eq(activities.crawlerId, crawlerId));
       }
-      
+
       // Delete encounters
       for (const crawlerId of crawlerIds) {
         await db.delete(encounters).where(eq(encounters.crawlerId, crawlerId));
       }
-      
+
       // Delete crawler equipment
       for (const crawlerId of crawlerIds) {
         await db.delete(crawlerEquipment).where(eq(crawlerEquipment.crawlerId, crawlerId));
       }
-      
+
       // Delete crawler positions
       for (const crawlerId of crawlerIds) {
         await db.delete(crawlerPositions).where(eq(crawlerPositions.crawlerId, crawlerId));
       }
-      
+
       // Finally delete the crawlers
       await db.delete(crawlers).where(eq(crawlers.sponsorId, userId));
     }
-    
+
     // Reset user's primary sponsorship status
     await db.update(users)
       .set({ 
@@ -1922,15 +1932,15 @@ export class DatabaseStorage implements IStorage {
     const connections = await db.select()
       .from(roomConnections)
       .where(eq(roomConnections.fromRoomId, roomId));
-    
+
     const directions = connections.map(conn => conn.direction);
-    
+
     // Check if this room has a staircase
     const room = await this.getRoom(roomId);
     if (room && room.type === 'stairs') {
       directions.push('staircase');
     }
-    
+
     return directions;
   }
 
@@ -1994,7 +2004,7 @@ export class DatabaseStorage implements IStorage {
 
     // Calculate energy cost - reduced for previously explored rooms
     let energyCost = 10; // Default movement cost for new rooms
-    
+
     console.log(`Energy calculation: crawlerId=${crawlerId}, roomId=${connection.toRoomId}, previousVisits=${previousVisit.length}`);
     if (previousVisit.length > 0) {
       // Reduced energy cost for rooms you've already explored
@@ -2003,7 +2013,7 @@ export class DatabaseStorage implements IStorage {
     } else {
       console.log(`First visit to room ${connection.toRoomId}, energy cost: ${energyCost}`);
     }
-    
+
     // Get current crawler to check/update energy
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) {
@@ -2104,7 +2114,7 @@ export class DatabaseStorage implements IStorage {
     // Create a map of unique visited rooms
     const visitedRoomsMap = new Map();
     const visitedRoomIds = new Set<number>();
-    
+
     for (const position of visitedPositions) {
       if (!visitedRoomsMap.has(position.roomId)) {
         console.log(`Adding room ${position.roomId} (${position.room.name}) to visited rooms`);
@@ -2112,10 +2122,10 @@ export class DatabaseStorage implements IStorage {
         visitedRoomIds.add(position.roomId);
       }
     }
-    
+
     console.log(`Total unique rooms visited: ${visitedRoomsMap.size}`);
     console.log(`Room IDs: ${Array.from(visitedRoomIds).join(', ')}`);
-    
+
     // If we have multiple rooms but map shows only one, there's an issue
     if (visitedPositions.length > 1 && visitedRoomsMap.size <= 1) {
       console.error('WARNING: Multiple position records but only 1 unique room found!');
@@ -2129,7 +2139,7 @@ export class DatabaseStorage implements IStorage {
 
     const discoveredUnexploredRooms: any[] = [];
     const discoveredRoomIds = new Set<number>();
-    
+
     for (const connection of allConnections) {
       if (!visitedRoomIds.has(connection.toRoomId) && !discoveredRoomIds.has(connection.toRoomId)) {
         const adjacentRoom = await this.getRoom(connection.toRoomId);
