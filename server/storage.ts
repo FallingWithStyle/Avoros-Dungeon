@@ -996,9 +996,7 @@ export class DatabaseStorage implements IStorage {
     const floor = await this.getFloor(crawler.currentFloor);
 
     // Generate choice-based encounter with multiple options
-    const encounterData = this.generateChoiceEncounterThis code maintains a running counter for crawler IDs in memory to avoid database calls for each new crawler.
-```
-(encounterType, crawler);
+    const encounterData = this.generateChoiceEncounter(encounterType, crawler);
 
     return {
       type: encounterType,
@@ -1606,7 +1604,7 @@ export class DatabaseStorage implements IStorage {
       "Andrew",
       "Anthony",
       "Arthur",
-      "Benjamin",",
+      "Benjamin",
       "Brian",
       "Bruce",
       "Carl",
