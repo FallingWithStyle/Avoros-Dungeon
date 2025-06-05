@@ -1,5 +1,4 @@
-
-import { generateFullDungeon } from "../client/src/dungeon/generation/dungeon-generator.js";
+import { generateFullDungeon } from "../client/src/features/dungeon/generation/dungeon-generator.js";
 import { db } from "../server/db.js";
 import { factions as factionsTable } from "../shared/schema.js";
 
@@ -27,15 +26,15 @@ async function getAllFactions(): Promise<Faction[]> {
 async function run() {
   try {
     console.log("Starting dungeon generation...");
-    
+
     // Test database connection first
     console.log("Testing database connection...");
     const testQuery = await db.select().from(factionsTable).limit(1);
     console.log("Database connection successful, found", testQuery.length, "factions");
-    
+
     const factions = await getAllFactions();
     console.log("Retrieved", factions.length, "factions from database");
-    
+
     await generateFullDungeon(factions);
     console.log("All 10 dungeon floors generated!");
     process.exit(0);
