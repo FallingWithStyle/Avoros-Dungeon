@@ -3107,6 +3107,30 @@ export class DatabaseStorage implements IStorage {
     return { success: true, effect };
   }
 
+  async getFloorBounds(floorId: number): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
+    const floorRooms = await db
+      .select({
+        x: rooms.x,
+        y: rooms.y,
+      })
+      .from(rooms)
+      .where(eq(rooms.floorId, floorId));
+
+    if (floorRooms.length === 0) {
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    }
+
+    const xs = floorRooms.map(r => r.x);
+    const ys = floorRooms.map(r => r.y);
+
+    return {
+      minX: Math.min(...xs),
+      maxX: Math.max(...xs),
+      minY: Math.min(...ys),
+      maxY: Math.max(...ys),
+    };
+  }
+
   async handleStaircaseMovement(
     crawlerId: number,
     currentRoom: any,
