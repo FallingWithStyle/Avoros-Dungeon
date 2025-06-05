@@ -597,8 +597,21 @@ export class DatabaseStorage implements IStorage {
 
     if (!result) return undefined;
 
+    // Clean expired effects and calculate effective stats
+    const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
+    const activeEffects = cleanExpiredEffects(result.crawler.activeEffects || []);
+    
+    // Update crawler with cleaned effects if any were removed
+    if (activeEffects.length !== (result.crawler.activeEffects || []).length) {
+      await this.updateCrawler(id, { activeEffects });
+    }
+
+    const effectiveStats = calculateEffectiveStats(result.crawler, activeEffects);
+
     return {
       ...result.crawler,
+      ...effectiveStats, // Apply stat bonuses from effects
+      activeEffects,
       class: result.class!,
       equipment: [], // Will be populated separately if needed
     };
@@ -2988,6 +3001,77 @@ export class DatabaseStorage implements IStorage {
         enteredAt: new Date(),
       });
     }
+  }
+
+  async applyEffect(crawlerId: number, effectId: string): Promise<{ success: boolean; effect?: any; error?: string }> {
+    const { EFFECT_DEFINITIONS, addEffect, cleanExpiredEffects } = await import("@shared/effects");
+    
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) {
+      return { success: false, error: "Crawler not found" };
+    }
+
+    const definition = EFFECT_DEFINITIONS[effectId];
+    if (!definition) {
+      return { success: false, error: "Effect not found" };
+    }
+
+    // Check requirements
+    if (definition.requirements) {
+      const req = definition.requirements;
+      if (req.level && crawler.level < req.level) {
+        return { success: false, error: `Requires level ${req.level}` };
+      }
+      if (req.stats) {
+        for (const [stat, required] of Object.entries(req.stats)) {
+          if ((crawler as any)[stat] < required) {
+            return { success: false, error: `Requires ${stat} ${required}` };
+          }
+        }
+      }
+      if (req.competencies) {
+        const hasAll = req.competencies.every(comp => crawler.competencies.includes(comp));
+        if (!hasAll) {
+          return { success: false, error: `Missing required competencies: ${req.competencies.join(', ')}` };
+        }
+      }
+    }
+
+    // Check costs
+    if (definition.cost) {
+      if (definition.cost.energy && crawler.energy < definition.cost.energy) {
+        return { success: false, error: `Not enough energy (need ${definition.cost.energy})` };
+      }
+      if (definition.cost.credits && crawler.credits < definition.cost.credits) {
+        return { success: false, error: `Not enough credits (need ${definition.cost.credits})` };
+      }
+    }
+
+    // Create the effect
+    const effect = addEffect(crawler, effectId);
+    if (!effect) {
+      return { success: false, error: "Failed to create effect" };
+    }
+
+    // Clean and add the new effect
+    const currentEffects = cleanExpiredEffects(crawler.activeEffects || []);
+    
+    // Remove existing effect of the same type if it exists (for spells that don't stack)
+    const filteredEffects = currentEffects.filter(e => e.id !== effectId);
+    const newEffects = [...filteredEffects, effect];
+
+    // Apply costs
+    const updates: any = { activeEffects: newEffects };
+    if (definition.cost?.energy) {
+      updates.energy = crawler.energy - definition.cost.energy;
+    }
+    if (definition.cost?.credits) {
+      updates.credits = crawler.credits - definition.cost.credits;
+    }
+
+    await this.updateCrawler(crawlerId, updates);
+
+    return { success: true, effect };
   }
 
   async handleStaircaseMovement(

@@ -101,6 +101,7 @@ export const crawlers = pgTable("crawlers", {
   energy: integer("energy").default(100).notNull(),
   maxEnergy: integer("max_energy").default(100).notNull(),
   scanRange: integer("scan_range").default(2).notNull(), // Manhattan distance for scanning unvisited rooms
+  activeEffects: jsonb("active_effects").default('[]').notNull(), // Array of active spell/skill effects
   competencies: text("competencies").array().notNull(), // Array of starting competencies
   abilities: text("abilities").array().notNull(), // Unlocked special abilities
   status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead, exploring

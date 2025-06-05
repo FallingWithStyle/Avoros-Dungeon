@@ -806,3 +806,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+// Debug heal crawler
+  server.post("/api/crawlers/:id/debug/heal", async (req, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler) {
+        return res.status(404).json({ error: "Crawler not found" });
+      }
+
+      // Restore to full health and energy
+      const updated = await storage.updateCrawler(crawlerId, {
+        health: crawler.maxHealth,
+        energy: crawler.maxEnergy,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Failed to heal crawler:", error);
+      res.status(500).json({ error: "Failed to heal crawler" });
+    }
+  });
+
+  // Apply effect to crawler
+  server.post("/api/crawlers/:id/apply-effect/:effectId", async (req, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const effectId = req.params.effectId;
+
+      const result = await storage.applyEffect(crawlerId, effectId);
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to apply effect:", error);
+      res.status(500).json({ error: "Failed to apply effect" });
+    }
+  });
