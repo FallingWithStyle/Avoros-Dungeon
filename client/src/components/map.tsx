@@ -44,6 +44,10 @@ interface ExploredRoom {
   isScanned?: boolean;
   floorId: number;
   factionId?: number | null;
+  hasEnemies?: boolean;
+  enemyCount?: number;
+  playerCount?: number;
+  playersHere?: string[]; // player names
 }
 
 interface Faction {
@@ -227,6 +231,28 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       default:
         return <div className="w-3 h-3 bg-slate-600 rounded" />;
     }
+  };
+
+  const getRoomIndicators = (room: ExploredRoom) => {
+    const indicators = [];
+    
+    // Enemy indicators (example: if room has hasEnemies property)
+    if (room.hasEnemies) {
+      indicators.push(
+        <div key="enemy" className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-red-300 animate-pulse" 
+             title="Enemies present" />
+      );
+    }
+    
+    // Other players indicator (example: if room has playerCount > 1)
+    if (room.playerCount && room.playerCount > 1) {
+      indicators.push(
+        <div key="players" className="absolute -bottom-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200" 
+             title={`${room.playerCount} players here`} />
+      );
+    }
+    
+    return indicators;
   };
 
   const getRoomColor = (room: ExploredRoom) => {
@@ -446,6 +472,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                               title={`${room.name} (${x}, ${y})`}
                             >
                               {getRoomIcon(room)}
+                              {getRoomIndicators(room)}
                             </div>
                           );
                         } else {
@@ -554,6 +581,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                   ?
                 </div>
                 <span>Unknown</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <span>Enemies</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full" />
+                <span>Players</span>
               </div>
             </div>
           </div>
@@ -796,6 +831,32 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
     }
   };
 
+  const getExpandedRoomIndicators = (room: ExploredRoom) => {
+    const indicators = [];
+    
+    // Enemy indicators for expanded view
+    if (room.hasEnemies) {
+      indicators.push(
+        <div key="enemy" className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-red-300 animate-pulse flex items-center justify-center" 
+             title="Enemies present">
+          <Skull className="w-2 h-2 text-white" />
+        </div>
+      );
+    }
+    
+    // Other players indicator for expanded view
+    if (room.playerCount && room.playerCount > 1) {
+      indicators.push(
+        <div key="players" className="absolute -bottom-1 -right-1 w-4 h-3 bg-cyan-400 rounded-full border border-cyan-200 flex items-center justify-center text-xs font-bold text-white" 
+             title={`${room.playerCount} players here`}>
+          {room.playerCount}
+        </div>
+      );
+    }
+    
+    return indicators;
+  };
+
   const getRoomColor = (room: ExploredRoom) => {
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
@@ -932,6 +993,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
                         title={`${room.name} (${x}, ${y})`}
                       >
                         {getRoomIcon(room)}
+                        {getExpandedRoomIndicators(room)}
                         {room.isCurrentRoom && (
                           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
                         )}
