@@ -100,8 +100,6 @@ export const crawlers = pgTable("crawlers", {
   experience: integer("experience").default(0).notNull(),
   energy: integer("energy").default(100).notNull(),
   maxEnergy: integer("max_energy").default(100).notNull(),
-  detectRange: integer("detect_range").default(0).notNull(), // How far crawler can detect room types
-  analyzeRange: integer("analyze_range").default(0).notNull(), // How far crawler can analyze room details
   competencies: text("competencies").array().notNull(), // Array of starting competencies
   abilities: text("abilities").array().notNull(), // Unlocked special abilities
   status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead, exploring
@@ -179,9 +177,6 @@ export const rooms = pgTable("rooms", {
   isSafe: boolean("is_safe").default(false).notNull(), // Safe rooms for leveling/resting
   factionId: integer("faction_id"),
   placementId: integer("placement_id").default(-1).notNull(), // id to help with the arrangement of rooms on the map, default -1 means "not yet placed"
-  environment: varchar("environment", { length: 20 }).default("indoors").notNull(), // indoors, outdoors, underground
-  hasCreatures: boolean("has_creatures").default(false).notNull(), // Whether creatures are present
-  territoryStatus: varchar("territory_status", { length: 10 }).default("neutral").notNull(), // friendly, neutral, unfriendly
   createdAt: timestamp("created_at").defaultNow(),
 });
 

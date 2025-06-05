@@ -2828,64 +2828,6 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getScannedRooms(crawlerId: number): Promise<any[]> {
-    const crawler = await this.getCrawler(crawlerId);
-    if (!crawler) return [];
-
-    const currentRoom = await this.getCrawlerCurrentRoom(crawlerId);
-    if (!currentRoom) return [];
-
-    const detectRange = crawler.detectRange || 0;
-    const analyzeRange = crawler.analyzeRange || 0;
-
-    // Get all rooms within detect range using coordinate distance
-    const nearbyRooms = await db
-      .select()
-      .from(rooms)
-      .where(eq(rooms.floorId, currentRoom.floorId));
-
-    const scannedRooms: any[] = [];
-
-    for (const room of nearbyRooms) {
-      const distance = Math.abs(room.x - currentRoom.x) + Math.abs(room.y - currentRoom.y);
-      
-      if (distance <= detectRange && distance > 0) {
-        // Check if this room has been visited
-        const hasVisited = await db
-          .select()
-          .from(crawlerPositions)
-          .where(
-            and(
-              eq(crawlerPositions.crawlerId, crawlerId),
-              eq(crawlerPositions.roomId, room.id)
-            )
-          )
-          .limit(1);
-
-        const isVisited = hasVisited.length > 0;
-        const canAnalyze = distance <= analyzeRange;
-
-        scannedRooms.push({
-          id: room.id,
-          name: isVisited ? room.name : "???",
-          x: room.x,
-          y: room.y,
-          floorId: room.floorId,
-          type: isVisited ? room.type : "scanned",
-          environment: room.environment, // Always visible when detected
-          hasCreatures: canAnalyze ? room.hasCreatures : undefined,
-          territoryStatus: canAnalyze ? room.territoryStatus : undefined,
-          isVisited,
-          isDetected: true,
-          isAnalyzed: canAnalyze,
-          distance
-        });
-      }
-    }
-
-    return scannedRooms;
-  }
-
   async getExploredRooms(crawlerId: number): Promise<any[]> {
     // Get all rooms this crawler has visited
     const visitedRooms = await db
@@ -2977,37 +2919,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`Total unique rooms visited: ${exploredRooms.length}`);
     console.log(`Room IDs: ${exploredRooms.map(r => r.id).join(', ')}`);
 
-    // Get scanned rooms (from scanning abilities)
-    const scannedRooms = await this.getScannedRooms(crawlerId);
-    
-    // Filter out any scanned rooms that are already in explored/discovered rooms
-    const existingRoomIds = new Set([
-      ...exploredRooms.map(r => r.id),
-      ...discoveredUnexploredRooms.map(r => r.id)
-    ]);
-    
-    const uniqueScannedRooms = scannedRooms.filter(r => !existingRoomIds.has(r.id));
-
-    return [...exploredRooms, ...discoveredUnexploredRooms, ...uniqueScannedRooms];
-  }
-
-  async applyScanningSpell(crawlerId: number, detectBonus: number, analyzeBonus: number): Promise<Crawler> {
-    const crawler = await this.getCrawler(crawlerId);
-    if (!crawler) throw new Error("Crawler not found");
-
-    const newDetectRange = Math.max(0, crawler.detectRange + detectBonus);
-    const newAnalyzeRange = Math.max(0, crawler.analyzeRange + analyzeBonus);
-
-    const [updatedCrawler] = await db
-      .update(crawlers)
-      .set({
-        detectRange: newDetectRange,
-        analyzeRange: newAnalyzeRange
-      })
-      .where(eq(crawlers.id, crawlerId))
-      .returning();
-
-    return updatedCrawler;
+    return [...exploredRooms, ...discoveredUnexploredRooms];
   }
 
   async resetCrawlerToEntrance(crawlerId: number): Promise<void> {
