@@ -116,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/crawlers", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { name, stats, competencies, background } = req.body;
+      const { name, serial, stats, competencies, background } = req.body;
 
       // Check if user can create primary crawler
       const canCreate = await storage.canCreatePrimaryCrawler(userId);
@@ -139,6 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create crawler with the generated stats and info
       const newCrawler = await storage.createCrawler({
         name,
+        serial,
         classId: defaultClass.id,
         sponsorId: userId,
         health: stats.health,

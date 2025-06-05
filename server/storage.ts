@@ -507,16 +507,25 @@ export class DatabaseStorage implements IStorage {
     return `Former ${job}. ${reason}`;
   }
 
-  async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
-    const [crawler] = await db.insert(crawlers).values(crawlerData).returning();
+  async createCrawler(crawlerData: any): Promise<Crawler> {
+    const [newCrawler] = await db
+      .insert(crawlers)
+      .values({
+        sponsorId: crawlerData.sponsorId,
+        name: crawlerData.name,
+        serial: crawlerData.serial,
+        classId: crawlerData.classId,
+        background: crawlerData.background,
+      })
+      .returning();
 
     // Give them some random starting equipment
-    await this.assignRandomStartingEquipment(crawler.id);
+    await this.assignRandomStartingEquipment(newCrawler.id);
 
     // Place crawler in the entrance room (floor 1)
-    await this.placeCrawlerInEntranceRoom(crawler.id);
+    await this.placeCrawlerInEntranceRoom(newCrawler.id);
 
-    return crawler;
+    return newCrawler;
   }
 
   private async placeCrawlerInEntranceRoom(crawlerId: number): Promise<void> {
@@ -2061,6 +2070,10 @@ export class DatabaseStorage implements IStorage {
   async generateCrawlerCandidates(count = 30): Promise<any[]> {
     const candidates = [];
 
+    // Generate a single serial number that all candidates will share
+    // This ensures consistent avatar generation on the selection screen
+    const sharedSerial = Math.floor(Math.random() * 1000000);
+
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
       const competencies = this.generateRandomCompetencies();
@@ -2110,6 +2123,7 @@ export class DatabaseStorage implements IStorage {
         species,
         planetType,
         level: 1,
+        serial: sharedSerial,
       });
     }
 

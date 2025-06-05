@@ -55,7 +55,10 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         <div className="flex items-start justify-between mb-4 h-16">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
-              <AvatarImage src={avatarUrl} alt={crawler.name} />
+              <AvatarImage
+                src={getAvatarUrl(crawler.name, crawler.serial)}
+                alt={crawler.name}
+              />
               <AvatarFallback className="bg-crawler text-white">
                 {crawler.name.charAt(0).toUpperCase()}
               </AvatarFallback>

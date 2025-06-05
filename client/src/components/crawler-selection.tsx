@@ -12,6 +12,7 @@ import { getAvatarUrl } from "@/lib/avatarUtils";
 interface CrawlerCandidate {
   id: string;
   name: string;
+  serial: number;
   stats: {
     health: number;
     maxHealth: number;
@@ -89,7 +90,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
             <CardHeader className="pb-3 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={getAvatarUrl(candidate.name, candidate.id)} alt={candidate.name} />
+                  <AvatarImage src={getAvatarUrl(candidate.name, candidate.serial)} alt={candidate.name} />
                   <AvatarFallback className="bg-crawler text-white">
                     {candidate.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -217,7 +218,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={getAvatarUrl(selectedCandidate.name, selectedCandidate.id)} alt={selectedCandidate.name} />
+                  <AvatarImage src={getAvatarUrl(selectedCandidate.name, selectedCandidate.serial)} alt={selectedCandidate.name} />
                   <AvatarFallback className="bg-crawler text-white">
                     {selectedCandidate.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
