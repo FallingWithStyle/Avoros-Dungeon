@@ -41,9 +41,6 @@ import {
 import { db } from "./db";
 import { eq, desc, and, sql, asc, like, inArray, not } from "drizzle-orm";
 
-// In-memory counter for next crawler ID
-let nextCrawlerIdCounter: number | null = null;
-
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
@@ -245,30 +242,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Crawler operations
-  async initializeNextCrawlerId(): Promise<void> {
-    if (nextCrawlerIdCounter === null) {
-      const { max } = await import("drizzle-orm");
-      const [result] = await db
-        .select({ maxId: max(crawlers.id) })
-        .from(crawlers);
-
-      nextCrawlerIdCounter = (result.maxId || 0) + 1;
-    }
-  }
-
-  async getNextCrawlerId(): Promise<number> {
-    if (nextCrawlerIdCounter === null) {
-      await this.initializeNextCrawlerId();
-    }
-    return nextCrawlerIdCounter!;
-  }
-
-  private incrementCrawlerId(): void {
-    if (nextCrawlerIdCounter !== null) {
-      nextCrawlerIdCounter++;
-    }
-  }
-
   private generateRandomStats() {
     // Most stats 0-5, with one potentially higher (max 8)
     const stats = [
@@ -535,13 +508,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCrawler(crawlerData: InsertCrawler): Promise<Crawler> {
-    const [crawler] = await db
-      .insert(crawlers)
-      .values(crawlerData)
-      .returning();
-
-    // Increment the counter after successful creation
-    this.incrementCrawlerId();
+    const [crawler] = await db.insert(crawlers).values(crawlerData).returning();
 
     // Give them some random starting equipment
     await this.assignRandomStartingEquipment(crawler.id);
