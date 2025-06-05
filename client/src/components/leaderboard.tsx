@@ -32,7 +32,7 @@ export default function Leaderboard() {
           Top Crawlers
         </h3>
       </div>
-      
+
       <div className="p-4 space-y-3">
         {isLoading ? (
           // Loading skeletons
@@ -79,7 +79,7 @@ export default function Leaderboard() {
             <p className="text-sm">No crawlers on the leaderboard yet.</p>
           </div>
         )}
-        
+
         {topCrawlers && topCrawlers.length > 0 && (
           <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white mt-4">
             View Full Rankings

@@ -1,8 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { getAvatarUrl } from "@/lib/avatarUtils";
+import { Heart, Zap, Shield, Sword, Clock, Gauge } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { expRequired } from "@/lib/progressionUtils";
 
 interface CrawlerStatusPanelProps {
   crawler: CrawlerWithDetails;
@@ -26,6 +27,12 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <img
+          src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
+          alt={crawler.name}
+          className="w-16 h-16 rounded-full border-2 border-blue-500/30"
+        />
+
           {/* Health Bar */}
           <div>
             <div className="flex justify-between text-sm mb-1">

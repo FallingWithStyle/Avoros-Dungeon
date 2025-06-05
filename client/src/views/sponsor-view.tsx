@@ -31,6 +31,7 @@ export default function SponsorView() {
     mutationFn: async (candidateData: any) => {
       return await apiRequest("POST", "/api/crawlers", {
         name: candidateData.name,
+        serial: candidateData.serial,
         stats: candidateData.stats,
         competencies: candidateData.competencies,
         background: candidateData.background,
