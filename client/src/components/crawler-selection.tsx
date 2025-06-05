@@ -185,7 +185,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               </div>
 
               {/* Starting Equipment */}
-              <div className="mt-auto">
+              <div>
                 <h4 className="font-semibold text-slate-200 mb-2 flex items-center gap-2">
                   <Package className="w-4 h-4" />
                   Starting Equipment
