@@ -289,6 +289,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       }
     }
 
+    // Handle unexplored rooms (including scanned rooms that show as ?)
     if (room.isExplored === false) {
       return "bg-slate-800/50 border-slate-600/50";
     }
@@ -317,6 +318,17 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     const faction = factions.find(f => f.id === room.factionId);
     if (!faction) return {};
     
+    // For scanned rooms, use a fainter border
+    if (room.isScanned) {
+      return {
+        borderColor: faction.color,
+        borderWidth: '2px',
+        borderStyle: 'dashed',
+        opacity: 0.6,
+      };
+    }
+    
+    // For fully explored rooms, use solid borders
     return {
       borderColor: faction.color,
       borderWidth: '3px',
@@ -931,6 +943,17 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
     const faction = factions.find(f => f.id === room.factionId);
     if (!faction) return {};
     
+    // For scanned rooms, use a fainter border
+    if (room.isScanned) {
+      return {
+        borderColor: faction.color,
+        borderWidth: '3px',
+        borderStyle: 'dashed',
+        opacity: 0.6,
+      };
+    }
+    
+    // For fully explored rooms, use solid borders
     return {
       borderColor: faction.color,
       borderWidth: '4px',
