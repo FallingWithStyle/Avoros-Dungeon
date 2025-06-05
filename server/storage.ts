@@ -2910,12 +2910,13 @@ export class DatabaseStorage implements IStorage {
             y: adjacentRoom.y,
             isCurrentRoom: false,
             isExplored: false,
+            floorId: adjacentRoom.floorId, // <-- Add this for unexplored rooms as well!
           });
         }
       }
     }
 
-    // Convert visited rooms to the expected format
+    // Convert visited rooms to the expected format, including floorId
     const exploredRoomData = Array.from(visitedRoomsMap.values()).map(
       (room) => ({
         id: room.id,
@@ -2927,6 +2928,7 @@ export class DatabaseStorage implements IStorage {
         y: room.y,
         isCurrentRoom: room.id === currentRoomId,
         isExplored: true,
+        floorId: room.floorId, // <-- Add this to explored rooms
       }),
     );
 
