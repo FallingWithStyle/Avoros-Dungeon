@@ -122,8 +122,7 @@ export default function SponsorView() {
             onCancel={() => setShowCrawlerSelection(false)}
           />
         </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       {/* Debug Panel */}
       <DebugPanel activeCrawler={selectedCrawler} />
