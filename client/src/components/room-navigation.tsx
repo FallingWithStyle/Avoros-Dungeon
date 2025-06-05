@@ -66,8 +66,9 @@ function FactionBadge({
   factionId?: number | null;
   factions: Faction[];
 }) {
-  // Debug logging
-  if (IS_DEBUG_MODE) {
+  // Debug logging. currently disabled. To enable, change to:
+  // if (IS_DEBUG_MODE) {
+  if (false) {
     console.log(
       "FactionBadge - factionId:",
       factionId,

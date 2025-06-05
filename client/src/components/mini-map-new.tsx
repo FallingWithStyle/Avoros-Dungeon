@@ -39,6 +39,7 @@ interface ExploredRoom {
   y: number;
   isCurrentRoom: boolean;
   isExplored: boolean;
+  floorId: number;
 }
 
 export default function MiniMap({ crawler }: MiniMapProps) {
@@ -57,10 +58,31 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
+  // Debug log
+  console.log(
+    "Current floor:",
+    crawler.currentFloor,
+    typeof crawler.currentFloor,
+  );
+  console.log(
+    "Room:",
+    exploredRooms?.map((r) => r),
+  );
+
+  // Filter rooms for current floor (strict number comparison first, then string fallback)
+  const floorRooms =
+    exploredRooms?.filter(
+      (room) =>
+        room.floorId === crawler.currentFloor ||
+        String(room.floorId) === String(crawler.currentFloor),
+    ) ?? [];
+
+  console.log("Filtered floorRooms:", floorRooms);
+
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
-    if (exploredRooms) {
-      const currentRoom = exploredRooms.find((room) => room.isCurrentRoom);
+    if (floorRooms) {
+      const currentRoom = floorRooms.find((room) => room.isCurrentRoom);
       if (
         currentRoom &&
         previousCurrentRoom &&
@@ -80,7 +102,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         setPreviousCurrentRoom(currentRoom);
       }
     }
-  }, [exploredRooms, previousCurrentRoom, resetPanOnNextMove]);
+  }, [floorRooms, previousCurrentRoom, resetPanOnNextMove]);
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -180,7 +202,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     );
   }
 
-  if (!exploredRooms || exploredRooms.length === 0) {
+  if (!floorRooms || floorRooms.length === 0) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -190,13 +212,15 @@ export default function MiniMap({ crawler }: MiniMapProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-slate-400">No rooms explored yet</div>
+          <div className="text-sm text-slate-400">
+            No rooms explored yet on this floor
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  const currentRoom = exploredRooms.find((r) => r.isCurrentRoom);
+  const currentRoom = floorRooms.find((r) => r.isCurrentRoom);
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -223,7 +247,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const maxY = centerY + radius;
 
   const roomMap = new Map();
-  exploredRooms.forEach((room) => {
+  floorRooms.forEach((room) => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
 
@@ -249,7 +273,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                   Dungeon Map - Floor {crawler.currentFloor}
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={exploredRooms} />
+              <ExpandedMapView exploredRooms={floorRooms} />
             </DialogContent>
           </Dialog>
         </CardTitle>
@@ -512,7 +536,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   if (!exploredRooms || exploredRooms.length === 0) {
     return (
       <div className="h-96 flex items-center justify-center text-slate-400">
-        No rooms explored yet
+        No rooms explored yet on this floor
       </div>
     );
   }
