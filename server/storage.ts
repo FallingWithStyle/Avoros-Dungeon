@@ -2828,73 +2828,113 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getScannedRooms(crawlerId: number): Promise<any[]> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) return [];
+
+    const currentRoom = await this.getCrawlerCurrentRoom(crawlerId);
+    if (!currentRoom) return [];
+
+    const detectRange = crawler.detectRange || 0;
+    const analyzeRange = crawler.analyzeRange || 0;
+
+    // Get all rooms within detect range using coordinate distance
+    const nearbyRooms = await db
+      .select()
+      .from(rooms)
+      .where(eq(rooms.floorId, currentRoom.floorId));
+
+    const scannedRooms: any[] = [];
+
+    for (const room of nearbyRooms) {
+      const distance = Math.abs(room.x - currentRoom.x) + Math.abs(room.y - currentRoom.y);
+      
+      if (distance <= detectRange && distance > 0) {
+        // Check if this room has been visited
+        const hasVisited = await db
+          .select()
+          .from(crawlerPositions)
+          .where(
+            and(
+              eq(crawlerPositions.crawlerId, crawlerId),
+              eq(crawlerPositions.roomId, room.id)
+            )
+          )
+          .limit(1);
+
+        const isVisited = hasVisited.length > 0;
+        const canAnalyze = distance <= analyzeRange;
+
+        scannedRooms.push({
+          id: room.id,
+          name: isVisited ? room.name : "???",
+          x: room.x,
+          y: room.y,
+          floorId: room.floorId,
+          type: isVisited ? room.type : "scanned",
+          environment: room.environment, // Always visible when detected
+          hasCreatures: canAnalyze ? room.hasCreatures : undefined,
+          territoryStatus: canAnalyze ? room.territoryStatus : undefined,
+          isVisited,
+          isDetected: true,
+          isAnalyzed: canAnalyze,
+          distance
+        });
+      }
+    }
+
+    return scannedRooms;
+  }
+
   async getExploredRooms(crawlerId: number): Promise<any[]> {
-    // Get current position (most recent entry)
-    const currentPosition = await db
+    // Get all rooms this crawler has visited
+    const visitedRooms = await db
+      .select({
+        roomId: crawlerPositions.roomId,
+        enteredAt: crawlerPositions.enteredAt,
+      })
+      .from(crawlerPositions)
+      .where(eq(crawlerPositions.crawlerId, crawlerId))
+      .orderBy(desc(crawlerPositions.enteredAt));
+
+    console.log(`Found ${visitedRooms.length} position records for crawler ${crawlerId}`);
+
+    // Get unique room IDs and their details
+    const uniqueRoomIds = Array.from(new Set(visitedRooms.map(vr => vr.roomId)));
+
+    if (uniqueRoomIds.length === 0) {
+      return [];
+    }
+
+    const roomDetails = await db
+      .select()
+      .from(rooms)
+      .where(inArray(rooms.id, uniqueRoomIds));
+
+    console.log("Room details found:", roomDetails.length);
+
+    // Get current crawler position to mark current room
+    const [currentPosition] = await db
       .select()
       .from(crawlerPositions)
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt))
       .limit(1);
 
-    if (currentPosition.length === 0) {
-      return [];
-    }
-
-    const currentRoomId = currentPosition[0].roomId;
-
-    // Get ALL rooms this crawler has visited by checking position history
-    // We need to track unique room visits
-    const visitedPositions = await db
-      .select({
-        roomId: crawlerPositions.roomId,
-        room: rooms,
-      })
-      .from(crawlerPositions)
-      .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
-      .where(eq(crawlerPositions.crawlerId, crawlerId));
-
-    console.log(
-      `Found ${visitedPositions.length} position records for crawler ${crawlerId}`,
-    );
-
-    // Create a map of unique visited rooms
-    const visitedRoomsMap = new Map();
-    const visitedRoomIds = new Set<number>();
-
-    for (const position of visitedPositions) {
-      if (!visitedRoomsMap.has(position.roomId)) {
-        console.log(
-          `Adding room ${position.roomId} (${position.room.name}) to visited rooms`,
-        );
-        visitedRoomsMap.set(position.roomId, position.room);
-        visitedRoomIds.add(position.roomId);
-      }
-    }
-
-    console.log(`Total unique rooms visited: ${visitedRoomsMap.size}`);
-    console.log(`Room IDs: ${Array.from(visitedRoomIds).join(", ")}`);
-
-    // If we have multiple rooms but map shows only one, there's an issue
-    if (visitedPositions.length > 1 && visitedRoomsMap.size <= 1) {
-      console.error(
-        "WARNING: Multiple position records but only 1 unique room found!",
-      );
-      console.error("Sample position:", visitedPositions[0]);
-    }
+    const currentRoomId = currentPosition?.roomId;
 
     // Find ALL adjacent rooms from ALL visited rooms (persistent fog of war)
     const allConnections = await db
       .select()
       .from(roomConnections)
-      .where(inArray(roomConnections.fromRoomId, Array.from(visitedRoomIds)));
+      .where(inArray(roomConnections.fromRoomId, uniqueRoomIds));
 
     const discoveredUnexploredRooms: any[] = [];
     const discoveredRoomIds = new Set<number>();
 
     for (const connection of allConnections) {
       if (
-        !visitedRoomIds.has(connection.toRoomId) &&
+        !uniqueRoomIds.includes(connection.toRoomId) &&
         !discoveredRoomIds.has(connection.toRoomId)
       ) {
         const adjacentRoom = await this.getRoom(connection.toRoomId);
@@ -2908,31 +2948,66 @@ export class DatabaseStorage implements IStorage {
             hasLoot: false,
             x: adjacentRoom.x,
             y: adjacentRoom.y,
+            floorId: adjacentRoom.floorId, // Include floorId for adjacent rooms
             isCurrentRoom: false,
             isExplored: false,
-            floorId: adjacentRoom.floorId, // <-- Add this for unexplored rooms as well!
           });
         }
       }
     }
 
-    // Convert visited rooms to the expected format, including floorId
-    const exploredRoomData = Array.from(visitedRoomsMap.values()).map(
-      (room) => ({
+    const exploredRooms: any[] = roomDetails.map(room => {
+      console.log(`Adding room ${room.id} (${room.name}) to visited rooms`);
+      return {
         id: room.id,
         name: room.name,
+        description: room.description,
         type: room.type,
         isSafe: room.isSafe,
         hasLoot: room.hasLoot,
         x: room.x,
         y: room.y,
+        floorId: room.floorId, // Include floorId for explored rooms
         isCurrentRoom: room.id === currentRoomId,
         isExplored: true,
-        floorId: room.floorId, // <-- Add this to explored rooms
-      }),
-    );
+        factionId: room.factionId,
+      };
+    });
 
-    return [...exploredRoomData, ...discoveredUnexploredRooms];
+    console.log(`Total unique rooms visited: ${exploredRooms.length}`);
+    console.log(`Room IDs: ${exploredRooms.map(r => r.id).join(', ')}`);
+
+    // Get scanned rooms (from scanning abilities)
+    const scannedRooms = await this.getScannedRooms(crawlerId);
+    
+    // Filter out any scanned rooms that are already in explored/discovered rooms
+    const existingRoomIds = new Set([
+      ...exploredRooms.map(r => r.id),
+      ...discoveredUnexploredRooms.map(r => r.id)
+    ]);
+    
+    const uniqueScannedRooms = scannedRooms.filter(r => !existingRoomIds.has(r.id));
+
+    return [...exploredRooms, ...discoveredUnexploredRooms, ...uniqueScannedRooms];
+  }
+
+  async applyScanningSpell(crawlerId: number, detectBonus: number, analyzeBonus: number): Promise<Crawler> {
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) throw new Error("Crawler not found");
+
+    const newDetectRange = Math.max(0, crawler.detectRange + detectBonus);
+    const newAnalyzeRange = Math.max(0, crawler.analyzeRange + analyzeBonus);
+
+    const [updatedCrawler] = await db
+      .update(crawlers)
+      .set({
+        detectRange: newDetectRange,
+        analyzeRange: newAnalyzeRange
+      })
+      .where(eq(crawlers.id, crawlerId))
+      .returning();
+
+    return updatedCrawler;
   }
 
   async resetCrawlerToEntrance(crawlerId: number): Promise<void> {

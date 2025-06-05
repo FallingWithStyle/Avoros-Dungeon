@@ -58,17 +58,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
-  // Debug log
-  console.log(
-    "Current floor:",
-    crawler.currentFloor,
-    typeof crawler.currentFloor,
-  );
-  console.log(
-    "Room:",
-    exploredRooms?.map((r) => r),
-  );
-
   // Filter rooms for current floor (strict number comparison first, then string fallback)
   const floorRooms =
     exploredRooms?.filter(
@@ -77,7 +66,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
 
-  console.log("Filtered floorRooms:", floorRooms);
+  // Room Debug logging
+  while (false) {
+    console.log(
+      "Current floor:",
+      crawler.currentFloor,
+      typeof crawler.currentFloor,
+    );
+    console.log(
+      "Room:",
+      exploredRooms?.map((r) => r),
+    );
+    console.log("Filtered floorRooms:", floorRooms);
+  }
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
@@ -618,7 +619,16 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
                     return (
                       <div
                         key={`room-${room.id}`}
-                        className={`w-12 h-12 border-2 rounded flex items-center justify-center relative ${getRoomColor(room)}`}
+                        className={`
+                w-8 h-8 border border-gray-600 cursor-pointer transition-all duration-200 flex items-center justify-center text-xs font-bold
+                ${room.isCurrentRoom ? 'ring-2 ring-yellow-400 bg-yellow-500' : 
+                  room.isExplored ? 
+                    getRoomColor(room.type, room.factionId) : 
+                    room.isDetected ? 
+                      'bg-blue-900 text-blue-300 border-blue-500' :
+                      'bg-gray-700 text-gray-500'}
+                ${room.isExplored || room.isDetected ? 'hover:brightness-110' : ''}
+              `}
                         title={`${room.name} (${x}, ${y})`}
                       >
                         {getRoomIcon(room)}
