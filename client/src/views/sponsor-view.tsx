@@ -26,6 +26,9 @@ export default function SponsorView() {
     enabled: !!user,
   });
 
+  // Auto-select the first crawler for debug panel if none selected
+  const activeCrawler = selectedCrawler || (crawlers && crawlers.length > 0 ? crawlers[0] : null);
+
   // Mutation for creating a new crawler
   const createCrawlerMutation = useMutation({
     mutationFn: async (candidateData: any) => {
@@ -78,7 +81,21 @@ export default function SponsorView() {
                 {crawlers && crawlers.length > 0 ? (
                   <div className="space-y-4">
                     {crawlers.map((crawler) => (
-                      <CrawlerCard key={crawler.id} crawler={crawler} />
+                      <div key={crawler.id} className="relative">
+                        <CrawlerCard crawler={crawler} />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedCrawler(crawler)}
+                          className={`absolute top-2 right-2 text-xs ${
+                            activeCrawler?.id === crawler.id 
+                              ? 'bg-blue-600 text-white border-blue-600' 
+                              : 'bg-gray-700 text-gray-300 border-gray-600'
+                          }`}
+                        >
+                          {activeCrawler?.id === crawler.id ? 'Selected' : 'Select'}
+                        </Button>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -123,7 +140,7 @@ export default function SponsorView() {
       </Dialog>
 
       {/* Debug Panel */}
-      <DebugPanel activeCrawler={selectedCrawler} />
+      <DebugPanel activeCrawler={activeCrawler} />
     </div>
   );
 }
