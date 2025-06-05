@@ -596,6 +596,11 @@ function ExpandedMapControls() {
     expandedMapSetters?.setPanOffset(expandedMapPanOffset);
   };
 
+  const centerOnPlayer = () => {
+    expandedMapPanOffset = { x: 0, y: 0 };
+    expandedMapSetters?.setPanOffset(expandedMapPanOffset);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button onClick={zoomIn} size="sm" variant="outline">
@@ -604,12 +609,12 @@ function ExpandedMapControls() {
       <Button onClick={zoomOut} size="sm" variant="outline">
         <ZoomOut className="w-4 h-4" />
       </Button>
+      <Button onClick={centerOnPlayer} size="sm" variant="outline">
+        <MapPin className="w-4 h-4" />
+      </Button>
       <Button onClick={resetView} size="sm" variant="outline">
         <RotateCcw className="w-4 h-4" />
       </Button>
-      <span className="text-sm text-slate-400 ml-2">
-        Zoom: {Math.round(expandedMapScale * 100)}%
-      </span>
     </div>
   );
 }
@@ -619,6 +624,8 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const [panOffset, setPanOffset] = useState(expandedMapPanOffset);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [keys, setKeys] = useState<Set<string>>(new Set());
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Register setters for global control
   React.useEffect(() => {
@@ -627,6 +634,88 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
       expandedMapSetters = null;
     };
   }, [setScale, setPanOffset]);
+
+  // Keyboard event handlers
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
+        e.preventDefault();
+        setKeys(prev => new Set(prev).add(e.key.toLowerCase()));
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (['w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
+        setKeys(prev => {
+          const newKeys = new Set(prev);
+          newKeys.delete(e.key.toLowerCase());
+          return newKeys;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // Handle WASD movement
+  React.useEffect(() => {
+    if (keys.size === 0) return;
+
+    const moveSpeed = 10;
+    const interval = setInterval(() => {
+      const deltaX = (keys.has('d') ? moveSpeed : 0) + (keys.has('a') ? -moveSpeed : 0);
+      const deltaY = (keys.has('s') ? moveSpeed : 0) + (keys.has('w') ? -moveSpeed : 0);
+
+      if (deltaX !== 0 || deltaY !== 0) {
+        setPanOffset(current => {
+          // Calculate bounds for keyboard movement (same logic as mouse dragging)
+          const minX = Math.min(...exploredRooms.map((r) => r.x));
+          const maxX = Math.max(...exploredRooms.map((r) => r.x));
+          const minY = Math.min(...exploredRooms.map((r) => r.y));
+          const maxY = Math.max(...exploredRooms.map((r) => r.y));
+
+          const mapWidthCells = maxX - minX + 1;
+          const mapHeightCells = maxY - minY + 1;
+          const paddingX = Math.ceil(mapWidthCells * 0.1);
+          const paddingY = Math.ceil(mapHeightCells * 0.1);
+
+          const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+          const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
+          const containerWidth = 880;
+          const containerHeight = 600;
+
+          const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+          const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
+
+          const newOffset = {
+            x: Math.max(-maxPanX, Math.min(maxPanX, current.x + deltaX)),
+            y: Math.max(-maxPanY, Math.min(maxPanY, current.y + deltaY)),
+          };
+
+          expandedMapPanOffset = newOffset;
+          return newOffset;
+        });
+      }
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, [keys, scale, exploredRooms]);
+
+  // Mouse wheel zoom handler
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.max(0.3, Math.min(3, scale * zoomFactor));
+    
+    expandedMapScale = newScale;
+    setScale(newScale);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -799,12 +888,15 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
     <div className="h-full">
       {/* Map container - uses full available height */}
       <div
-        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto h-full"
+        ref={mapContainerRef}
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto h-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         style={{ width: "100%", maxWidth: "900px" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+        tabIndex={0}
       >
         <div
           className="absolute inset-0 flex items-center justify-center"
