@@ -83,6 +83,7 @@ export const crawlers = pgTable("crawlers", {
     .notNull()
     .references(() => users.id),
   name: varchar("name", { length: 50 }).notNull(),
+  serial: integer("serial").notNull(), // Serial number for avatar generation and flavor
   background: text("background").notNull(), // Brief story/background
   classId: integer("class_id").references(() => crawlerClasses.id), // Null until they choose a class
   level: integer("level").default(0).notNull(), // Start at Level 0
