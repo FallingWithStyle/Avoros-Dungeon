@@ -2580,6 +2580,7 @@ export class DatabaseStorage implements IStorage {
     type: string,
     name: string,
     description: string,
+    environment: string = "indoor",
   ): Promise<Room> {
     const [room] = await db
       .insert(rooms)
@@ -2590,6 +2591,7 @@ export class DatabaseStorage implements IStorage {
         type,
         name,
         description,
+        environment,
         isSafe: type === "safe",
         hasLoot: type === "treasure",
       })

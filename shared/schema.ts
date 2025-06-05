@@ -172,6 +172,7 @@ export const rooms = pgTable("rooms", {
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description").notNull(),
   type: varchar("type", { length: 30 }).default("normal").notNull(), // normal, safe, boss, treasure, trap, entrance, exit
+  environment: varchar("environment", { length: 20 }).default("indoor").notNull(), // indoor, outdoor, underground
   isExplored: boolean("is_explored").default(false).notNull(),
   hasLoot: boolean("has_loot").default(false).notNull(),
   isSafe: boolean("is_safe").default(false).notNull(), // Safe rooms for leveling/resting
