@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -11,17 +17,17 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { isEnergyDisabled } from "@/components/debug-panel";
 import { CrawlerWithDetails } from "@shared/schema";
-import { 
-  MapPin, 
-  ArrowUp, 
-  ArrowDown, 
-  ArrowLeft, 
+import {
+  MapPin,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
   ArrowRight,
   Shield,
   Gem,
   Users,
   Zap,
-  Map
+  Map,
 } from "lucide-react";
 
 interface RoomNavigationProps {
@@ -53,40 +59,34 @@ interface Faction {
   color: string;
 }
 
-function FactionBadge({ factionId, factions }: { factionId?: number | null, factions: Faction[] }) {
+function FactionBadge({
+  factionId,
+  factions,
+}: {
+  factionId?: number | null;
+  factions: Faction[];
+}) {
   // Debug logging
   if (IS_DEBUG_MODE) {
-    console.log("FactionBadge - factionId:", factionId, "factions count:", factions.length);
-  }
-  
-  const faction = factions.find(f => f.id === factionId);
-  if (!factionId || !faction) {
-    return (
-      <Badge
-        style={{
-          backgroundColor: "#6B7280", // neutral gray
-          color: "white",
-        }}
-        variant="secondary"
-      >
-        Neutral
-      </Badge>
+    console.log(
+      "FactionBadge - factionId:",
+      factionId,
+      "factions count:",
+      factions.length,
     );
   }
-  return (
-    <Badge
-      style={{
-        backgroundColor: faction.color || "#6B7280",
-        color: "white",
-      }}
-      variant="secondary"
-    >
-      {faction.name}
-    </Badge>
-  );
+
+  const faction = factions.find((f) => f.id === factionId);
+  if (!factionId || !faction) {
+    return <Badge color="#6B7280">Neutral</Badge>;
+  }
+  return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
 }
 
-export default function RoomNavigation({ crawler, energyDisabled = false }: RoomNavigationProps) {
+export default function RoomNavigation({
+  crawler,
+  energyDisabled = false,
+}: RoomNavigationProps) {
   const { toast } = useToast();
   const [pendingDirection, setPendingDirection] = useState<string | null>(null);
 
@@ -98,7 +98,9 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   });
 
   // Fetch factions list from backend
-  const { data: factions = [], isLoading: isFactionsLoading } = useQuery<Faction[]>({
+  const { data: factions = [], isLoading: isFactionsLoading } = useQuery<
+    Faction[]
+  >({
     queryKey: ["/api/factions"],
     queryFn: async () => {
       const result = await apiRequest("GET", "/api/factions");
@@ -113,14 +115,18 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   // Movement mutation
   const moveMutation = useMutation({
     mutationFn: async (direction: string) => {
-      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, { 
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
         direction,
-        debugEnergyDisabled: isEnergyDisabled() 
+        debugEnergyDisabled: isEnergyDisabled(),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/current-room`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       setPendingDirection(null);
       toast({
@@ -149,66 +155,97 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
     },
   });
 
-  const handleMove = useCallback((direction: string) => {
-    if (moveMutation.isPending || !roomData?.availableDirections.includes(direction)) {
-      return;
-    }
-    if (!energyDisabled && crawler.energy < 10) {
-      toast({
-        title: "Not enough energy",
-        description: "You need at least 10 energy to move between rooms.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setPendingDirection(direction);
-    moveMutation.mutate(direction);
-  }, [moveMutation, roomData, crawler.energy, toast]);
+  const handleMove = useCallback(
+    (direction: string) => {
+      if (
+        moveMutation.isPending ||
+        !roomData?.availableDirections.includes(direction)
+      ) {
+        return;
+      }
+      if (!energyDisabled && crawler.energy < 10) {
+        toast({
+          title: "Not enough energy",
+          description: "You need at least 10 energy to move between rooms.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setPendingDirection(direction);
+      moveMutation.mutate(direction);
+    },
+    [moveMutation, roomData, crawler.energy, toast],
+  );
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (document.activeElement?.tagName === 'INPUT' || 
-          document.activeElement?.tagName === 'TEXTAREA') {
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
         return;
       }
       const key = event.key.toLowerCase();
       let direction: string | null = null;
       switch (key) {
-        case 'w': direction = 'north'; break;
-        case 's': direction = 'south'; break;
-        case 'a': direction = 'west'; break;
-        case 'd': direction = 'east'; break;
-        case 'q': direction = 'staircase'; break;
-        default: return;
+        case "w":
+          direction = "north";
+          break;
+        case "s":
+          direction = "south";
+          break;
+        case "a":
+          direction = "west";
+          break;
+        case "d":
+          direction = "east";
+          break;
+        case "q":
+          direction = "staircase";
+          break;
+        default:
+          return;
       }
       event.preventDefault();
       if (direction) {
         handleMove(direction);
       }
     };
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [handleMove]);
 
   const getDirectionIcon = (direction: string) => {
     switch (direction) {
-      case 'north': return <ArrowUp className="h-4 w-4" />;
-      case 'south': return <ArrowDown className="h-4 w-4" />;
-      case 'east': return <ArrowRight className="h-4 w-4" />;
-      case 'west': return <ArrowLeft className="h-4 w-4" />;
-      case 'staircase': return <ArrowDown className="h-4 w-4 text-purple-400" />;
-      default: return null;
+      case "north":
+        return <ArrowUp className="h-4 w-4" />;
+      case "south":
+        return <ArrowDown className="h-4 w-4" />;
+      case "east":
+        return <ArrowRight className="h-4 w-4" />;
+      case "west":
+        return <ArrowLeft className="h-4 w-4" />;
+      case "staircase":
+        return <ArrowDown className="h-4 w-4 text-purple-400" />;
+      default:
+        return null;
     }
   };
 
   const getDirectionKey = (direction: string) => {
     switch (direction) {
-      case 'north': return 'W';
-      case 'south': return 'S';
-      case 'east': return 'D';
-      case 'west': return 'A';
-      case 'staircase': return 'Q';
-      default: return '';
+      case "north":
+        return "W";
+      case "south":
+        return "S";
+      case "east":
+        return "D";
+      case "west":
+        return "A";
+      case "staircase":
+        return "Q";
+      default:
+        return "";
     }
   };
 
@@ -219,9 +256,24 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
   };
 
   const getRoomTypeBadge = (room: Room) => {
-    if (room.isSafe) return <Badge variant="secondary" className="bg-green-100 text-green-800">Safe Room</Badge>;
-    if (room.hasLoot) return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Treasure Room</Badge>;
-    if (room.type === 'entrance') return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Entrance</Badge>;
+    if (room.isSafe)
+      return (
+        <Badge variant="secondary" className="bg-green-100 text-green-800">
+          Safe Room
+        </Badge>
+      );
+    if (room.hasLoot)
+      return (
+        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+          Treasure Room
+        </Badge>
+      );
+    if (room.type === "entrance")
+      return (
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+          Entrance
+        </Badge>
+      );
     return <Badge variant="outline">Normal Room</Badge>;
   };
 
@@ -235,7 +287,9 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-muted-foreground">Loading room data...</div>
+          <div className="text-center text-muted-foreground">
+            Loading room data...
+          </div>
         </CardContent>
       </Card>
     );
@@ -252,7 +306,8 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
         </CardHeader>
         <CardContent>
           <div className="text-center text-muted-foreground">
-            Room data not available. Your crawler may need to be positioned in a room.
+            Room data not available. Your crawler may need to be positioned in a
+            room.
           </div>
         </CardContent>
       </Card>
@@ -304,11 +359,15 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
           <h4 className="text-sm font-medium flex items-center gap-2">
             <Zap className="h-4 w-4" />
             Available Exits
-            <Badge variant="outline" className="text-xs">Use WASD keys</Badge>
+            <Badge variant="outline" className="text-xs">
+              Use WASD keys
+            </Badge>
           </h4>
 
           {availableDirections.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No available exits from this room.</p>
+            <p className="text-sm text-muted-foreground">
+              No available exits from this room.
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {availableDirections.map((direction) => (
@@ -334,7 +393,9 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
           )}
 
           {crawler.energy < 10 && (
-            <p className="text-xs text-red-600">Need at least 10 energy to move</p>
+            <p className="text-xs text-red-600">
+              Need at least 10 energy to move
+            </p>
           )}
         </div>
 
@@ -348,9 +409,12 @@ export default function RoomNavigation({ crawler, energyDisabled = false }: Room
               </h4>
               <div className="space-y-1">
                 {playersInRoom
-                  .filter(p => p.id !== crawler.id)
+                  .filter((p) => p.id !== crawler.id)
                   .map((player) => (
-                    <div key={player.id} className="flex items-center justify-between text-xs p-2 bg-muted rounded">
+                    <div
+                      key={player.id}
+                      className="flex items-center justify-between text-xs p-2 bg-muted rounded"
+                    >
                       <span className="font-medium">{player.name}</span>
                       <Badge variant="outline">Level {player.level}</Badge>
                     </div>
