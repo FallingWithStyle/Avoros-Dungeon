@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getAvatarUrl } from "@/lib/avatarUtils";
+import { expRequired } from "@/lib/progressionUtils";
 import { Heart, Zap, Shield, Sword, Clock, Gauge } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 
