@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Zap, Shield, Gauge, Brain, Users, Archive, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getAvatarUrl } from "@/lib/avatarUtils";
 
 interface CrawlerCandidate {
   id: string;
@@ -68,9 +70,9 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
 
   return (
     <div className="relative space-y-6 px-8 py-6">
-      <div className="text-center">
-        <h3 className="text-xl font-bold text-white">Select Your Crawler</h3>
-        <p className="text-slate-400">Choose from these 30 Level 0 crawler candidates. Each has unique stats, competencies, and equipment.</p>
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-white mb-4">Choose Your Crawler</h2>
+        <p className="text-slate-400">Choose from available crawler candidates. Each candidate starts at level 1 with unique stats and competencies.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -81,32 +83,37 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               selectedCandidate?.id === candidate.id 
                 ? 'border-blue-500 bg-blue-500/10' 
                 : 'border-game-border hover:border-slate-600'
-            } bg-game-surface`}
+            } bg-game-surface flex flex-col h-full`}
             onClick={() => setSelectedCandidate(candidate)}
           >
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-400" />
+            <CardHeader className="pb-3 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={getAvatarUrl(candidate.name, candidate.id)} alt={candidate.name} />
+                  <AvatarFallback className="bg-crawler text-white">
+                    {candidate.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <CardTitle className="text-lg">{candidate.name}</CardTitle>
               </div>
               <CardDescription className="text-sm text-slate-400">
                 Level {candidate.level} • {candidate.topAbility.description}
               </CardDescription>
             </CardHeader>
-            
-            <CardContent className="space-y-4">
+
+            <CardContent className="flex-1 flex flex-col">
               {/* Background */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-2">Background</h4>
                 <p className="text-sm text-slate-400 leading-relaxed">
                   {candidate.background}
                 </p>
               </div>
 
-              <Separator className="bg-game-border" />
+              <Separator className="bg-game-border mb-4" />
 
               {/* Stats */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-3">Statistics</h4>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -158,7 +165,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                     </div>
                     <span className="text-sm font-mono">{candidate.stats.health}</span>
                   </div>
-                  
+
                   {/* Debug: Show hidden luck stat */}
                   <div className="flex items-center justify-between p-2 bg-red-900/20 border border-red-600/30 rounded">
                     <div className="flex items-center gap-2">
@@ -170,10 +177,10 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                 </div>
               </div>
 
-              <Separator className="bg-game-border" />
+              <Separator className="bg-game-border mb-4" />
 
               {/* Competencies */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-2">Competencies</h4>
                 <div className="flex flex-wrap gap-1">
                   {candidate.competencies.map((comp, index) => (
@@ -208,15 +215,20 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setSelectedCandidate(null)}>
           <Card className="bg-game-surface border-blue-500 border-2 w-96 mx-4" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="w-6 h-6 text-blue-400" />
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={getAvatarUrl(selectedCandidate.name, selectedCandidate.id)} alt={selectedCandidate.name} />
+                  <AvatarFallback className="bg-crawler text-white">
+                    {selectedCandidate.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
                 Level {selectedCandidate.level} • {selectedCandidate.topAbility.description}
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               {/* Background */}
               <div>

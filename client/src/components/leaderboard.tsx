@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAvatarUrl } from "@/lib/avatarUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 export default function Leaderboard() {
@@ -21,11 +22,6 @@ export default function Leaderboard() {
       default:
         return 'bg-gray-600';
     }
-  };
-
-  const getAvatarUrl = (crawler: CrawlerWithDetails) => {
-    const seed = crawler.name + crawler.class.name;
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=1e293b`;
   };
 
   return (
@@ -60,7 +56,7 @@ export default function Leaderboard() {
                   {index + 1}
                 </div>
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={getAvatarUrl(crawler)} alt={crawler.name} />
+                  <AvatarImage src={getAvatarUrl(crawler.name, crawler.id)} alt={crawler.name} />
                   <AvatarFallback className="bg-crawler text-white text-xs">
                     {crawler.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
