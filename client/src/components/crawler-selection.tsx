@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Zap, Shield, Gauge, Brain, Users, Archive, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getAvatarUrl } from "@/lib/avatarUtils";
 
 interface CrawlerCandidate {
   id: string;
@@ -85,8 +87,13 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
             onClick={() => setSelectedCandidate(candidate)}
           >
             <CardHeader className="pb-3 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center gap-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={getAvatarUrl(candidate.name, candidate.id)} alt={candidate.name} />
+                  <AvatarFallback className="bg-crawler text-white">
+                    {candidate.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <CardTitle className="text-lg">{candidate.name}</CardTitle>
               </div>
               <CardDescription className="text-sm text-slate-400">
@@ -208,8 +215,13 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setSelectedCandidate(null)}>
           <Card className="bg-game-surface border-blue-500 border-2 w-96 mx-4" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="w-6 h-6 text-blue-400" />
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={getAvatarUrl(selectedCandidate.name, selectedCandidate.id)} alt={selectedCandidate.name} />
+                  <AvatarFallback className="bg-crawler text-white">
+                    {selectedCandidate.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
