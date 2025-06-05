@@ -10,7 +10,8 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "seed:factions": "tsx client/src/db/seed/seedFactions.ts",
-    "generate-dungeon": "tsx scripts/generate-dungeon.ts"
+    "generate-dungeon": "tsx scripts/generate-dungeon.ts",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
