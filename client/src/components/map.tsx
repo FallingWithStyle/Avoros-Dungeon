@@ -701,7 +701,6 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
 
   // Mouse wheel zoom handler
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.max(0.3, Math.min(3, scale * zoomFactor));
     
@@ -887,7 +886,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheelCapture={handleWheel}
+        onWheel={handleWheel}
         tabIndex={0}
       >
         <div
