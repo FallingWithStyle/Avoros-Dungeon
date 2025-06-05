@@ -596,21 +596,13 @@ function ExpandedMapControls() {
     expandedMapSetters?.setPanOffset(expandedMapPanOffset);
   };
 
-  const centerOnPlayer = () => {
-    expandedMapPanOffset = { x: 0, y: 0 };
-    expandedMapSetters?.setPanOffset(expandedMapPanOffset);
-  };
-
   return (
     <div className="flex items-center gap-2">
-      <Button onClick={zoomIn} size="sm" variant="outline">
-        <ZoomIn className="w-4 h-4" />
-      </Button>
       <Button onClick={zoomOut} size="sm" variant="outline">
         <ZoomOut className="w-4 h-4" />
       </Button>
-      <Button onClick={centerOnPlayer} size="sm" variant="outline">
-        <MapPin className="w-4 h-4" />
+      <Button onClick={zoomIn} size="sm" variant="outline">
+        <ZoomIn className="w-4 h-4" />
       </Button>
       <Button onClick={resetView} size="sm" variant="outline">
         <RotateCcw className="w-4 h-4" />
@@ -895,7 +887,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
+        onWheelCapture={handleWheel}
         tabIndex={0}
       >
         <div
