@@ -39,7 +39,7 @@ import {
   type Season,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, asc, like, inArray } from "drizzle-orm";
+import { eq, desc, and, sql, asc, like, inArray, not } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -600,7 +600,7 @@ export class DatabaseStorage implements IStorage {
     // Clean expired effects and calculate effective stats
     const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
     const activeEffects = cleanExpiredEffects(result.crawler.activeEffects || []);
-    
+
     // Update crawler with cleaned effects if any were removed
     if (activeEffects.length !== (result.crawler.activeEffects || []).length) {
       await this.updateCrawler(id, { activeEffects });
@@ -2883,7 +2883,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
 
     const currentRoomId = currentPosition?.roomId;
-    
+
     // Get current room position for scan range calculation
     const currentRoom = currentRoomId ? await this.getRoom(currentRoomId) : null;
 
@@ -2921,42 +2921,43 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Add scanned rooms within scan range of current position
+    // Optimized scan range calculation with single query
     const scannedRooms: any[] = [];
     if (currentRoom && crawler.scanRange > 0) {
-      // Get all rooms on the current floor within scan range
-      const allRoomsOnFloor = await db
+      const visitedRoomDetails = await db
         .select()
         .from(rooms)
-        .where(eq(rooms.floorId, currentRoom.floorId));
+        .where(inArray(rooms.id, uniqueRoomIds));
+      const visitedRoomIds = visitedRoomDetails.map(r => r.id);
 
-      for (const room of allRoomsOnFloor) {
-        // Skip if already visited or already discovered as adjacent
-        if (uniqueRoomIds.includes(room.id) || discoveredRoomIds.has(room.id)) {
-          continue;
-        }
+      // Single query to get rooms within scan range that haven't been visited
+      const nearbyRooms = await db
+        .select()
+        .from(rooms)
+        .where(
+          and(
+            eq(rooms.floorId, currentRoom.floorId),
+            not(inArray(rooms.id, visitedRoomIds)),
+            // Use SQL to calculate Manhattan distance in the query
+            sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${crawler.scanRange}`
+          )
+        );
 
-        // Calculate Manhattan distance
-        const distance = Math.abs(room.x - currentRoom.x) + Math.abs(room.y - currentRoom.y);
-        
-        if (distance <= crawler.scanRange) {
-          scannedRooms.push({
-            id: room.id,
-            name: "???",
-            type: "scanned",
-            actualType: room.type, // Store the actual type for color coding
-            environment: room.environment,
-            isSafe: room.isSafe,
-            hasLoot: room.hasLoot,
-            x: room.x,
-            y: room.y,
-            floorId: room.floorId,
-            isCurrentRoom: false,
-            isExplored: false,
-            isScanned: true,
-          });
-        }
-      }
+      scannedRooms.push(...nearbyRooms.map(room => ({
+        id: room.id,
+        name: "???",
+        type: "scanned",
+        actualType: room.type,
+        environment: room.environment,
+        isSafe: room.isSafe,
+        hasLoot: room.hasLoot,
+        x: room.x,
+        y: room.y,
+        floorId: room.floorId,
+        isCurrentRoom: false,
+        isExplored: false,
+        isScanned: true,
+      })));
     }
 
     const exploredRooms: any[] = roomDetails.map(room => {
@@ -3005,7 +3006,7 @@ export class DatabaseStorage implements IStorage {
 
   async applyEffect(crawlerId: number, effectId: string): Promise<{ success: boolean; effect?: any; error?: string }> {
     const { EFFECT_DEFINITIONS, addEffect, cleanExpiredEffects } = await import("@shared/effects");
-    
+
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) {
       return { success: false, error: "Crawler not found" };
@@ -3055,7 +3056,7 @@ export class DatabaseStorage implements IStorage {
 
     // Clean and add the new effect
     const currentEffects = cleanExpiredEffects(crawler.activeEffects || []);
-    
+
     // Remove existing effect of the same type if it exists (for spells that don't stack)
     const filteredEffects = currentEffects.filter(e => e.id !== effectId);
     const newEffects = [...filteredEffects, effect];

@@ -55,10 +55,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms for this crawler
-  const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
+  // Fetch explored rooms with optimized refresh
+  const { data: exploredRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    refetchInterval: 2000, // Refresh every 2 seconds
+    refetchInterval: 15000, // Reduced frequency from 5s to 15s
+    staleTime: 60000, // Cache for 1 minute
+    retry: false,
   });
 
   // Fetch full map bounds for proper boundary calculations
@@ -256,7 +258,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingRooms) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
