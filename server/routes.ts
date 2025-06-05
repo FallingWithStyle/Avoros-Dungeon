@@ -776,6 +776,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get full map bounds for a floor
+  app.get("/api/floors/:floorId/bounds", async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const bounds = await storage.getFloorBounds(floorId);
+      res.json(bounds);
+    } catch (error) {
+      console.error("Error fetching floor bounds:", error);
+      res.status(500).json({ error: "Failed to fetch floor bounds" });
+    }
+  });
+
+  // Get factions
+  app.get("/api/factions", async (req, res) => {
+    try {
+      const factions = await storage.getFactions();
+      res.json(factions);
+    } catch (error) {
+      console.error("Error fetching factions:", error);
+      res.status(500).json({ error: "Failed to fetch factions" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time features

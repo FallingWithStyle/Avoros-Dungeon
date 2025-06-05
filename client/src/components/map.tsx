@@ -43,6 +43,13 @@ interface ExploredRoom {
   isExplored: boolean;
   isScanned?: boolean;
   floorId: number;
+  factionId?: number | null;
+}
+
+interface Faction {
+  id: number;
+  name: string;
+  color: string;
 }
 
 export default function MiniMap({ crawler }: MiniMapProps) {
@@ -71,6 +78,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     maxY: number;
   }>({
     queryKey: [`/api/floors/${crawler.currentFloor}/bounds`],
+    retry: false,
+  });
+
+  // Fetch faction data for room border colors
+  const { data: factions = [] } = useQuery<Faction[]>({
+    queryKey: ["/api/factions"],
     retry: false,
   });
 
@@ -264,6 +277,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
   };
 
+  const getFactionBorderStyle = (room: ExploredRoom) => {
+    if (!room.factionId) return {};
+    
+    const faction = factions.find(f => f.id === room.factionId);
+    if (!faction) return {};
+    
+    return {
+      borderColor: faction.color,
+      borderWidth: '3px',
+      borderStyle: 'solid',
+    };
+  };
+
   if (isLoadingRooms) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -416,6 +442,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                                   ? "scale-110 animate-pulse"
                                   : ""
                               }`}
+                              style={getFactionBorderStyle(room)}
                               title={`${room.name} (${x}, ${y})`}
                             >
                               {getRoomIcon(room)}
@@ -734,6 +761,19 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
     }
   };
 
+  const getExpandedFactionBorderStyle = (room: ExploredRoom) => {
+    if (!room.factionId) return {};
+    
+    const faction = factions.find(f => f.id === room.factionId);
+    if (!faction) return {};
+    
+    return {
+      borderColor: faction.color,
+      borderWidth: '4px',
+      borderStyle: 'solid',
+    };
+  };
+
   if (!exploredRooms || exploredRooms.length === 0) {
     return (
       <div className="h-96 flex items-center justify-center text-slate-400">
@@ -804,6 +844,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
                       <div
                         key={`room-${room.id}`}
                         className={`w-12 h-12 border-2 rounded flex items-center justify-center relative ${getRoomColor(room)}`}
+                        style={getExpandedFactionBorderStyle(room)}
                         title={`${room.name} (${x}, ${y})`}
                       >
                         {getRoomIcon(room)}
