@@ -218,7 +218,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 className={miniButtonClasses + " border-purple-600 text-purple-400 hover:bg-purple-600/10"}
               >
                 <Zap className={miniIconClasses} />
-                Eyes of D'Bug
+                Enhanced Scan
               </Button>
 
               {/* Move Reset Position here, next to Energy */}
