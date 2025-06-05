@@ -264,51 +264,50 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
-    //if (room.isCurrentRoom) {
-    //  return ""; // No extra color/border/shadow for the player's room for now
-    //}
-
+    // If room has faction, don't apply border classes - let faction borders take precedence
+    const hasFactionBorder = room.factionId && factions.find(f => f.id === room.factionId);
+    
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
       const opacity = "50"; // Medium opacity for scanned rooms
       if (room.isSafe) {
-        return `bg-green-600/${opacity} border-green-600/40`;
+        return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
       }
       switch (room.actualType) {
         case "entrance":
-          return `bg-green-600/${opacity} border-green-600/40`;
+          return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
         case "treasure":
-          return `bg-yellow-600/${opacity} border-yellow-600/40`;
+          return hasFactionBorder ? `bg-yellow-600/${opacity}` : `bg-yellow-600/${opacity} border-yellow-600/40`;
         case "boss":
         case "exit":
-          return `bg-red-600/${opacity} border-red-600/40`;
+          return hasFactionBorder ? `bg-red-600/${opacity}` : `bg-red-600/${opacity} border-red-600/40`;
         case "stairs":
-          return `bg-purple-600/${opacity} border-purple-600/40`;
+          return hasFactionBorder ? `bg-purple-600/${opacity}` : `bg-purple-600/${opacity} border-purple-600/40`;
         default:
-          return `bg-slate-600/${opacity} border-slate-600/40`;
+          return hasFactionBorder ? `bg-slate-600/${opacity}` : `bg-slate-600/${opacity} border-slate-600/40`;
       }
     }
 
     // Handle unexplored rooms (including adjacent rooms that show as ?)
     if (room.isExplored === false && !room.isScanned) {
-      return "bg-slate-800/50 border-slate-600/50";
+      return hasFactionBorder ? "bg-slate-800/50" : "bg-slate-800/50 border-slate-600/50";
     }
 
     // Check for safe rooms first (including entrance)
     if (room.isSafe) {
-      return "bg-green-600/20 border-green-600/50";
+      return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
     }
 
     switch (room.type) {
       case "treasure":
-        return "bg-yellow-600/20 border-yellow-600/50";
+        return hasFactionBorder ? "bg-yellow-600/20" : "bg-yellow-600/20 border-yellow-600/50";
       case "boss":
       case "exit":
-        return "bg-red-600/20 border-red-600/50";
+        return hasFactionBorder ? "bg-red-600/20" : "bg-red-600/20 border-red-600/50";
       case "stairs":
-        return "bg-purple-600/20 border-purple-600/50";
+        return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
       default:
-        return "bg-slate-600/20 border-slate-600/50";
+        return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
     }
   };
 
@@ -892,48 +891,51 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
+    // If room has faction, don't apply border classes - let faction borders take precedence
+    const hasFactionBorder = room.factionId && factions.find(f => f.id === room.factionId);
+    
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
       const opacity = "30"; // Medium opacity for scanned rooms in expanded view
       if (room.isSafe) {
-        return `bg-green-600/${opacity} border-green-600/40`;
+        return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
       }
       switch (room.actualType) {
         case "entrance":
-          return `bg-green-600/${opacity} border-green-600/40`;
+          return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
         case "treasure":
-          return `bg-yellow-600/${opacity} border-yellow-600/40`;
+          return hasFactionBorder ? `bg-yellow-600/${opacity}` : `bg-yellow-600/${opacity} border-yellow-600/40`;
         case "boss":
         case "exit":
-          return `bg-red-600/${opacity} border-red-600/40`;
+          return hasFactionBorder ? `bg-red-600/${opacity}` : `bg-red-600/${opacity} border-red-600/40`;
         case "stairs":
-          return `bg-purple-600/${opacity} border-purple-600/40`;
+          return hasFactionBorder ? `bg-purple-600/${opacity}` : `bg-purple-600/${opacity} border-purple-600/40`;
         default:
-          return `bg-slate-600/${opacity} border-slate-600/40`;
+          return hasFactionBorder ? `bg-slate-600/${opacity}` : `bg-slate-600/${opacity} border-slate-600/40`;
       }
     }
 
     if (!room.isExplored && !room.isScanned) {
-      return "bg-slate-800/50 border-slate-600/50";
+      return hasFactionBorder ? "bg-slate-800/50" : "bg-slate-800/50 border-slate-600/50";
     }
 
     // Check for safe rooms first (by isSafe property)
     if (room.isSafe) {
-      return "bg-green-600/20 border-green-600/50";
+      return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
     }
 
     switch (room.type) {
       case "entrance":
-        return "bg-green-600/20 border-green-600/50";
+        return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
       case "treasure":
-        return "bg-yellow-600/20 border-yellow-600/50";
+        return hasFactionBorder ? "bg-yellow-600/20" : "bg-yellow-600/20 border-yellow-600/50";
       case "boss":
       case "exit":
-        return "bg-red-600/20 border-red-600/50";
+        return hasFactionBorder ? "bg-red-600/20" : "bg-red-600/20 border-red-600/50";
       case "stairs":
-        return "bg-purple-600/20 border-purple-600/50";
+        return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
       default:
-        return "bg-slate-600/20 border-slate-600/50";
+        return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
     }
   };
 
