@@ -244,6 +244,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       );
     }
     
+    // Neutral mobs indicator (example: if room has neutralCount property)
+    if (room.neutralCount && room.neutralCount > 0) {
+      indicators.push(
+        <div key="neutral" className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full border border-orange-200" 
+             title={`${room.neutralCount} neutral creatures`} />
+      );
+    }
+    
     // Other players indicator (example: if room has playerCount > 1)
     if (room.playerCount && room.playerCount > 1) {
       indicators.push(
@@ -587,6 +595,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <span>Enemies</span>
               </div>
               <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-orange-400 rounded-full" />
+                <span>Neutral Mobs</span>
+              </div>
+              <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full" />
                 <span>Players</span>
               </div>
@@ -840,6 +852,16 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         <div key="enemy" className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-red-300 animate-pulse flex items-center justify-center" 
              title="Enemies present">
           <Skull className="w-2 h-2 text-white" />
+        </div>
+      );
+    }
+    
+    // Neutral mobs indicator for expanded view
+    if (room.neutralCount && room.neutralCount > 0) {
+      indicators.push(
+        <div key="neutral" className="absolute -top-1 -left-1 w-4 h-3 bg-orange-400 rounded-full border border-orange-200 flex items-center justify-center text-xs font-bold text-white" 
+             title={`${room.neutralCount} neutral creatures`}>
+          {room.neutralCount}
         </div>
       );
     }
