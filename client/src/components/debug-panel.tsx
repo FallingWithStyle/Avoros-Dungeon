@@ -277,6 +277,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               <span>
                 Luck: {activeCrawler?.luck ?? 0}
               </span>
+              <span className="mx-1 text-red-400">|</span>
+              <span>
+                Scan: {activeCrawler?.scanRange ?? 0}
+              </span>
             </div>
           </CardContent>
         )}
