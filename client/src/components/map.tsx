@@ -381,7 +381,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 </DialogTitle>
               </DialogHeader>
               <div className="flex-1 w-full h-full min-h-0">
-                <ExpandedMapView exploredRooms={floorRooms} />
+                <ExpandedMapView exploredRooms={floorRooms} factions={factions} />
               </div>
             </DialogContent>
           </Dialog>
@@ -566,6 +566,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 // Expanded map view component for the dialog
 interface ExpandedMapViewProps {
   exploredRooms: ExploredRoom[];
+  factions: Faction[];
 }
 
 // Global state for expanded map controls
@@ -613,7 +614,7 @@ function ExpandedMapControls() {
   );
 }
 
-function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
+function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const [scale, setScale] = useState(expandedMapScale);
   const [panOffset, setPanOffset] = useState(expandedMapPanOffset);
   const [isDragging, setIsDragging] = useState(false);
