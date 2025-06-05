@@ -619,16 +619,7 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
                     return (
                       <div
                         key={`room-${room.id}`}
-                        className={`
-                w-8 h-8 border border-gray-600 cursor-pointer transition-all duration-200 flex items-center justify-center text-xs font-bold
-                ${room.isCurrentRoom ? 'ring-2 ring-yellow-400 bg-yellow-500' : 
-                  room.isExplored ? 
-                    getRoomColor(room.type, room.factionId) : 
-                    room.isDetected ? 
-                      'bg-blue-900 text-blue-300 border-blue-500' :
-                      'bg-gray-700 text-gray-500'}
-                ${room.isExplored || room.isDetected ? 'hover:brightness-110' : ''}
-              `}
+                        className={`w-12 h-12 border-2 rounded flex items-center justify-center relative ${getRoomColor(room)}`}
                         title={`${room.name} (${x}, ${y})`}
                       >
                         {getRoomIcon(room)}
