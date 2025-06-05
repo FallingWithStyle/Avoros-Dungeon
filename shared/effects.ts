@@ -87,6 +87,22 @@ export const EFFECT_DEFINITIONS: { [key: string]: EffectDefinition } = {
       witBonus: 1,
     },
   },
+  eyes_of_debug: {
+    id: 'eyes_of_debug',
+    name: 'Eyes of D\'Bug',
+    description: 'A powerful debug spell that grants omniscient vision of the dungeon layout.',
+    type: 'spell',
+    duration: 600000, // 10 minutes in milliseconds
+    properties: {
+      scanRangeBonus: 100, // Massive scan range boost
+    },
+    requirements: {
+      // No stat requirements - debug only
+    },
+    cost: {
+      energy: 0, // Free for debug mode
+    },
+  },
 };
 
 // Utility functions for effects

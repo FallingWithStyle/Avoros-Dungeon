@@ -114,12 +114,12 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
-  // Apply Enhanced Scan spell
-  const applyEnhancedScan = async () => {
+  // Apply Eyes of D'Bug spell
+  const applyEyesOfDebug = async () => {
     if (!activeCrawler) return;
     
     try {
-      const result = await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/apply-effect/enhanced_scan`);
+      const result = await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/apply-effect/eyes_of_debug`);
       
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
@@ -127,18 +127,18 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
         queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler.id}/explored-rooms`] });
         
         toast({
-          title: "Enhanced Scan Active",
-          description: "Scan range increased by 3 for 5 minutes! Energy cost: 15",
+          title: "Eyes of D'Bug Active",
+          description: "Scan range increased by 100 for 10 minutes! Debug power unleashed!",
         });
       } else {
         toast({
-          title: "Cannot Cast Enhanced Scan",
+          title: "Cannot Cast Eyes of D'Bug",
           description: result.error || "Unknown error",
           variant: "destructive",
         });
       }
     } catch (error) {
-      showErrorToast("Spell Failed", error);
+      showErrorToast("Debug Spell Failed", error);
     }
   };
 
@@ -210,15 +210,15 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
               </Button>
 
-              {/* Enhanced Scan Spell */}
+              {/* Eyes of D'Bug Spell */}
               <Button
-                onClick={() => applyEnhancedScan()}
+                onClick={() => applyEyesOfDebug()}
                 disabled={!activeCrawler}
                 variant="outline"
                 className={miniButtonClasses + " border-purple-600 text-purple-400 hover:bg-purple-600/10"}
               >
                 <Zap className={miniIconClasses} />
-                Enhanced Scan
+                Eyes of D'Bug
               </Button>
 
               {/* Move Reset Position here, next to Energy */}
