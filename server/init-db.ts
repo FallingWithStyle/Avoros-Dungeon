@@ -389,4 +389,3 @@ async function initializeSeasons() {
     maxPrimarySponsorsips: 1000,
   });
 }
-```
