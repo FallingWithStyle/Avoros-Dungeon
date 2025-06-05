@@ -223,7 +223,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
-      const opacity = "50"; // Lower opacity for scanned rooms
+      const opacity = "75"; // Lower opacity for scanned rooms
       if (room.isSafe) {
         return `bg-green-600/${opacity} border-green-600/30`;
       }
