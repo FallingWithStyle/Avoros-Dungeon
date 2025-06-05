@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CrawlerSelection from "@/components/crawler-selection";
+import CrawlerCard from "@/components/crawler-card";
 import ActivityFeed from "@/components/activity-feed";
 import Leaderboard from "@/components/leaderboard";
 import SeasonStatus from "@/components/season-status";
@@ -43,11 +43,18 @@ export default function SponsorView() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CrawlerSelection 
-                  crawlers={crawlers || []}
-                  selectedCrawler={selectedCrawler}
-                  onCrawlerSelect={setSelectedCrawler}
-                />
+                {crawlers && crawlers.length > 0 ? (
+                  <div className="space-y-4">
+                    {crawlers.map((crawler) => (
+                      <CrawlerCard key={crawler.id} crawler={crawler} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400 mb-4">No active crawlers found.</p>
+                    <p className="text-sm text-slate-500">Create a new crawler to begin dungeon exploration.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
