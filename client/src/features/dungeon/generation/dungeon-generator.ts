@@ -555,11 +555,11 @@ export async function generateFullDungeon(factions: Faction[]) {
           ) {
             continue;
           }
-          
+
           // Determine room type and properties
           let roomType, name, description, type, hasLoot, environment;
           const rand = Math.random();
-          
+
           if (rand < 0.08) { // 8% chance for treasure room
             type = "treasure";
             name = "Treasure Cache";
@@ -581,7 +581,7 @@ export async function generateFullDungeon(factions: Faction[]) {
             hasLoot = Math.random() < 0.15; // 15% chance for loot in normal rooms
             environment = "indoor";
           }
-          
+
           roomsToInsert.push({
             floorId,
             x: pos.x,
@@ -624,25 +624,29 @@ export async function generateFullDungeon(factions: Faction[]) {
           id: r.placementId,
         }));
 
-        let factionAssignments;
-        try {
-          factionAssignments = assignFactionTerritories({
-            rooms: fakeRoomsForAssignment,
-            factions: factionsForFloor,
-            unclaimedPercent: 0.15, // Reduced from 0.2 to 0.15 for more faction claims
-          });
-        } catch (e) {
-          await logErrorToFile(
-            e,
-            `Error assigning factions on floor ${floorNum}`,
-          );
-          throw e;
-        }
-        // Log faction claims for this floor
+        const factionAssignments = assignFactionTerritories({
+          rooms: fakeRoomsForAssignment,
+          factions: factionsForFloor,
+          unclaimedPercent: 0.15, // Reduced from 0.2 to 0.15 for more faction claims
+        });
+
+        // Log faction claims for this floor with starting positions
         const factionStats = factionsForFloor
           .map((faction) => {
-            const claimed = (factionAssignments[faction.id] || []).length;
-            return `Faction ${faction.name} (#${faction.id}) claimed  ${claimed} rooms.`;
+            const claimedRoomIds = factionAssignments[faction.id] || [];
+            const claimed = claimedRoomIds.length;
+
+            // Find the starting room (first room assigned to this faction)
+            let startingPos = "unknown";
+            if (claimedRoomIds.length > 0) {
+              const firstRoomId = claimedRoomIds[0];
+              const firstRoom = fakeRoomsForAssignment.find(r => r.id === firstRoomId);
+              if (firstRoom) {
+                startingPos = `${firstRoom.x},${firstRoom.y}`;
+              }
+            }
+
+            return `Faction ${faction.name} (#${faction.id}) claimed  ${claimed} rooms starting at ${startingPos}.`;
           })
           .join("\n");
         await logErrorToFile(
