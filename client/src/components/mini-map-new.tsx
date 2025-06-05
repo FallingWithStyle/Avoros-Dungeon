@@ -331,17 +331,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl h-[90vh] bg-game-panel border-game-border p-6">
-              <DialogHeader>
-                <DialogTitle className="text-slate-200 flex items-center justify-between w-full">
+            <DialogContent className="max-w-6xl h-[90vh] bg-game-panel border-game-border p-4">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-slate-200 flex items-center justify-between w-full text-lg">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
+                    <MapPin className="w-4 h-4" />
                     Dungeon Map - Floor {crawler.currentFloor}
                   </div>
                   <ExpandedMapControls />
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={floorRooms} />
+              <div className="flex-1 min-h-0">
+                <ExpandedMapView exploredRooms={floorRooms} />
+              </div>
             </DialogContent>
           </Dialog>
         </CardTitle>
@@ -606,8 +608,8 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       // Calculate padded map dimensions for expanded view with larger container
       const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
       const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
-      const containerWidth = 900; // Increased from 600
-      const containerHeight = 700; // Increased from 600
+      const containerWidth = 880; // Account for padding and borders
+      const containerHeight = 600; // Will be dynamically sized by CSS
 
       // Calculate maximum allowed pan offset to keep map within padded bounds
       const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
@@ -732,11 +734,11 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   });
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Map container - now takes up most of the dialog space */}
+    <div className="h-full">
+      {/* Map container - uses full available height */}
       <div
-        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto flex-1"
-        style={{ height: "700px", width: "900px", maxHeight: "calc(90vh - 120px)" }}
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto h-full"
+        style={{ width: "100%", maxWidth: "900px" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
