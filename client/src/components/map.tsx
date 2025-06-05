@@ -644,7 +644,7 @@ function ExpandedMapControls() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 mr-8">
       <Button onClick={zoomOut} size="sm" variant="outline">
         <ZoomOut className="w-4 h-4" />
       </Button>
