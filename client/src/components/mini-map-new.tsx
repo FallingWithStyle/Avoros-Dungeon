@@ -58,17 +58,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
-  // Debug log
-  console.log(
-    "Current floor:",
-    crawler.currentFloor,
-    typeof crawler.currentFloor,
-  );
-  console.log(
-    "Room:",
-    exploredRooms?.map((r) => r),
-  );
-
   // Filter rooms for current floor (strict number comparison first, then string fallback)
   const floorRooms =
     exploredRooms?.filter(
@@ -77,7 +66,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
 
-  console.log("Filtered floorRooms:", floorRooms);
+  // Room Debug logging
+  while (false) {
+    console.log(
+      "Current floor:",
+      crawler.currentFloor,
+      typeof crawler.currentFloor,
+    );
+    console.log(
+      "Room:",
+      exploredRooms?.map((r) => r),
+    );
+    console.log("Filtered floorRooms:", floorRooms);
+  }
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
