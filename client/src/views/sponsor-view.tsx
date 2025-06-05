@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -96,7 +95,7 @@ export default function SponsorView() {
                 )}
               </CardContent>
             </Card>
-            
+
             <SeasonStatus />
           </div>
 
@@ -123,10 +122,11 @@ export default function SponsorView() {
             onCancel={() => setShowCrawlerSelection(false)}
           />
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      </div>
 
-      {/* Global Debug Panel */}
-      <DebugPanel />
+      {/* Debug Panel */}
+      <DebugPanel activeCrawler={selectedCrawler} />
     </div>
   );
 }
