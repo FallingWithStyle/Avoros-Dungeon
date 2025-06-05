@@ -270,27 +270,27 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
-      const opacity = "75"; // Lower opacity for scanned rooms
+      const opacity = "50"; // Medium opacity for scanned rooms
       if (room.isSafe) {
-        return `bg-green-600/${opacity} border-green-600/30`;
+        return `bg-green-600/${opacity} border-green-600/40`;
       }
       switch (room.actualType) {
         case "entrance":
-          return `bg-green-600/${opacity} border-green-600/30`;
+          return `bg-green-600/${opacity} border-green-600/40`;
         case "treasure":
-          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+          return `bg-yellow-600/${opacity} border-yellow-600/40`;
         case "boss":
         case "exit":
-          return `bg-red-600/${opacity} border-red-600/30`;
+          return `bg-red-600/${opacity} border-red-600/40`;
         case "stairs":
-          return `bg-purple-600/${opacity} border-purple-600/30`;
+          return `bg-purple-600/${opacity} border-purple-600/40`;
         default:
-          return `bg-slate-600/${opacity} border-slate-600/30`;
+          return `bg-slate-600/${opacity} border-slate-600/40`;
       }
     }
 
-    // Handle unexplored rooms (including scanned rooms that show as ?)
-    if (room.isExplored === false) {
+    // Handle unexplored rooms (including adjacent rooms that show as ?)
+    if (room.isExplored === false && !room.isScanned) {
       return "bg-slate-800/50 border-slate-600/50";
     }
 
@@ -894,26 +894,26 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const getRoomColor = (room: ExploredRoom) => {
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
-      const opacity = "15"; // Lower opacity for scanned rooms
+      const opacity = "30"; // Medium opacity for scanned rooms in expanded view
       if (room.isSafe) {
-        return `bg-green-600/${opacity} border-green-600/30`;
+        return `bg-green-600/${opacity} border-green-600/40`;
       }
       switch (room.actualType) {
         case "entrance":
-          return `bg-green-600/${opacity} border-green-600/30`;
+          return `bg-green-600/${opacity} border-green-600/40`;
         case "treasure":
-          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+          return `bg-yellow-600/${opacity} border-yellow-600/40`;
         case "boss":
         case "exit":
-          return `bg-red-600/${opacity} border-red-600/30`;
+          return `bg-red-600/${opacity} border-red-600/40`;
         case "stairs":
-          return `bg-purple-600/${opacity} border-purple-600/30`;
+          return `bg-purple-600/${opacity} border-purple-600/40`;
         default:
-          return `bg-slate-600/${opacity} border-slate-600/30`;
+          return `bg-slate-600/${opacity} border-slate-600/40`;
       }
     }
 
-    if (!room.isExplored) {
+    if (!room.isExplored && !room.isScanned) {
       return "bg-slate-800/50 border-slate-600/50";
     }
 
