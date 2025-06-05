@@ -160,10 +160,6 @@ export default function RoomNavigation({
       }, 100); // Small delay to batch updates
       
       setPendingDirection(null);
-      toast({
-        title: "Moved successfully",
-        description: "You have entered a new room.",
-      });
     },
     onError: (error) => {
       setPendingDirection(null);
