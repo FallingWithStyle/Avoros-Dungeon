@@ -1,14 +1,30 @@
 import { appendFile } from "fs/promises";
 
+/**
+ * Logs a message or error to dungeon-error.log, always writing actual newlines.
+ * If error is a string with \n, replaces \n with real line breaks.
+ * If error is an Error, logs stack and message.
+ * Falls back to console.error on file write failure.
+ */
 export async function logErrorToFile(error: unknown, context = "") {
   const now = new Date().toISOString();
   let errMsg = `[${now}]`;
   if (context) errMsg += ` [${context}]`;
-  if (error instanceof Error) {
+
+  if (typeof error === "string") {
+    // Replace any \n with actual line breaks
+    errMsg += ` ${error.replace(/\\n/g, "\n")}\n\n`;
+  } else if (error instanceof Error) {
     errMsg += ` ${error.name}: ${error.message}\n${error.stack}\n\n`;
   } else {
-    errMsg += ` ${JSON.stringify(error)}\n\n`;
+    // For objects, don't stringify with escaped \n, show as-is
+    let stringified =
+      typeof error === "object" && error !== null
+        ? (JSON.stringify(error, null, 2) ?? String(error))
+        : String(error);
+    errMsg += ` ${stringified}\n\n`;
   }
+
   try {
     await appendFile("dungeon-error.log", errMsg);
   } catch (e) {

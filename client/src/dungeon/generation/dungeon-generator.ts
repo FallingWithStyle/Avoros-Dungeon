@@ -6,11 +6,7 @@ import {
   crawlerPositions,
 } from "../../../../shared/schema.js";
 import { eq } from "drizzle-orm";
-import {
-  assignRoomsByFactionInfluence,
-  Faction,
-  Room,
-} from "./faction-assignment.js";
+import { Faction, Room } from "./faction-assignment.js";
 type RoomInsert = Omit<Room, "id">;
 import { logErrorToFile } from "../../../../shared/logger.js";
 
@@ -233,82 +229,197 @@ function getRandomRoomType(theme: FloorTheme): RoomType {
   return theme.roomTypes[Math.floor(Math.random() * theme.roomTypes.length)];
 }
 
-function connectStrandedRooms(
-  allRooms: Room[],
-  connections: Array<{
-    fromRoomId: number;
-    toRoomId: number;
-    direction: string;
-  }>,
-  entranceRoomId: number,
-) {
-  // Build adjacency list
-  const adjacencyMap = new Map<number, Set<number>>();
-  allRooms.forEach((room) => adjacencyMap.set(room.id, new Set()));
+// Ensure all rooms are fully connected by joining all disconnected components.
+function connectAllDisconnectedComponents(allRooms: RoomInsert[]) {
+  let maxPlacementId = Math.max(
+    ...allRooms.map((r) =>
+      typeof r.placementId === "number" ? r.placementId : 0,
+    ),
+    0,
+  );
+  function nextPlacementId() {
+    return ++maxPlacementId;
+  }
+  const posToRoom = new Map<string, RoomInsert>();
+  allRooms.forEach((r) => posToRoom.set(`${r.x},${r.y}`, r));
+  function findComponents(): RoomInsert[][] {
+    const visited = new Set<string>();
+    const components: RoomInsert[][] = [];
+    for (const room of allRooms) {
+      const key = `${room.x},${room.y}`;
+      if (visited.has(key)) continue;
+      const queue = [room];
+      const component: RoomInsert[] = [];
+      visited.add(key);
+      while (queue.length) {
+        const current = queue.shift()!;
+        component.push(current);
+        const neighbors = [
+          { x: current.x, y: current.y + 1 },
+          { x: current.x, y: current.y - 1 },
+          { x: current.x + 1, y: current.y },
+          { x: current.x - 1, y: current.y },
+        ];
+        for (const n of neighbors) {
+          const nKey = `${n.x},${n.y}`;
+          if (!visited.has(nKey) && posToRoom.has(nKey)) {
+            visited.add(nKey);
+            queue.push(posToRoom.get(nKey)!);
+          }
+        }
+      }
+      components.push(component);
+    }
+    return components;
+  }
+  let components = findComponents();
+  while (components.length > 1) {
+    const [main, ...others] = components;
+    let minDistance = Infinity;
+    let bestPair: { a: RoomInsert; b: RoomInsert } | null = null;
+    for (const a of main) {
+      for (const comp of others) {
+        for (const b of comp) {
+          const dist = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestPair = { a, b };
+          }
+        }
+      }
+    }
+    if (bestPair) {
+      let { a: roomA, b: roomB } = bestPair;
+      let x = roomA.x,
+        y = roomA.y;
+      const path: { x: number; y: number }[] = [];
+      while (x !== roomB.x) {
+        x += Math.sign(roomB.x - x);
+        path.push({ x, y });
+      }
+      while (y !== roomB.y) {
+        y += Math.sign(roomB.y - y);
+        path.push({ x, y });
+      }
+      for (const pos of path) {
+        const key = `${pos.x},${pos.y}`;
+        if (!posToRoom.has(key)) {
+          const corridor: RoomInsert = {
+            floorId: roomA.floorId,
+            x: pos.x,
+            y: pos.y,
+            name: "Corridor",
+            description: "A narrow connecting passage.",
+            type: "corridor",
+            isSafe: false,
+            isExplored: false,
+            hasLoot: false,
+            factionId: null,
+            placementId: nextPlacementId(),
+          };
+          allRooms.push(corridor);
+          posToRoom.set(key, corridor);
+        }
+      }
+    }
+    components = findComponents();
+  }
+}
 
-  connections.forEach((conn) => {
-    adjacencyMap.get(conn.fromRoomId)?.add(conn.toRoomId);
-    adjacencyMap.get(conn.toRoomId)?.add(conn.fromRoomId);
+// Assign faction territories (contiguous region expansion) by influence.
+function assignFactionTerritories({
+  rooms,
+  factions,
+  unclaimedPercent = 0.2,
+}: {
+  rooms: { x: number; y: number; id: number }[];
+  factions: Array<Faction & { influence: number }>;
+  unclaimedPercent?: number;
+}) {
+  const totalRooms = rooms.length;
+  const unclaimedCount = Math.floor(totalRooms * unclaimedPercent);
+  const toAssign = totalRooms - unclaimedCount;
+
+  const eligibleFactions = factions.filter((f) => f.influence > 0);
+  const totalInfluence = eligibleFactions.reduce(
+    (sum, f) => sum + f.influence,
+    0,
+  );
+
+  // Assign number of rooms per faction, proportional to influence
+  const factionRoomTargets = eligibleFactions.map((f) => ({
+    id: f.id,
+    count: Math.round((f.influence / totalInfluence) * toAssign),
+  }));
+
+  let leftToAssign =
+    toAssign - factionRoomTargets.reduce((acc, fr) => acc + fr.count, 0);
+  for (let i = 0; i < factionRoomTargets.length && leftToAssign !== 0; i++) {
+    factionRoomTargets[i].count += leftToAssign > 0 ? 1 : -1;
+    leftToAssign += leftToAssign > 0 ? -1 : 1;
+  }
+
+  const roomMap = new Map<string, { x: number; y: number; id: number }>();
+  rooms.forEach((room) => roomMap.set(`${room.x},${room.y}`, room));
+
+  const assigned = new Set<number>();
+  const assignments: Record<number, number[]> = {};
+  const remainingRooms = rooms.filter((r) => !assigned.has(r.id));
+  const seeds = factionRoomTargets.map((ft, i) => {
+    const idx = Math.floor(Math.random() * remainingRooms.length);
+    const room = remainingRooms.splice(idx, 1)[0];
+    assignments[ft.id] = [room.id];
+    assigned.add(room.id);
+    return { ...room, factionId: ft.id };
   });
 
-  // Find connected component containing entrance
-  const visited = new Set<number>();
-  const queue = [entranceRoomId];
-  visited.add(entranceRoomId);
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    const neighbors = adjacencyMap.get(currentId) || new Set();
-    for (const neighborId of neighbors) {
-      if (!visited.has(neighborId)) {
-        visited.add(neighborId);
-        queue.push(neighborId);
+  let expanding = seeds;
+  const factionTargetMap = Object.fromEntries(
+    factionRoomTargets.map((f) => [f.id, f.count]),
+  );
+  while (
+    Object.values(assignments).reduce((a, b) => a + b.length, 0) < toAssign &&
+    expanding.length
+  ) {
+    const nextExpanding: typeof expanding = [];
+    for (const exp of expanding) {
+      const factionId = exp.factionId;
+      if (assignments[factionId].length >= factionTargetMap[factionId])
+        continue;
+      for (const [dx, dy] of [
+        [1, 0],
+        [0, 1],
+        [-1, 0],
+        [0, -1],
+      ]) {
+        const nx = exp.x + dx,
+          ny = exp.y + dy;
+        const key = `${nx},${ny}`;
+        const nextRoom = roomMap.get(key);
+        if (nextRoom && !assigned.has(nextRoom.id)) {
+          assignments[factionId].push(nextRoom.id);
+          assigned.add(nextRoom.id);
+          nextExpanding.push({ ...nextRoom, factionId });
+          if (assignments[factionId].length >= factionTargetMap[factionId])
+            break;
+        }
       }
     }
+    expanding = nextExpanding;
   }
 
-  // Connect stranded rooms
-  const strandedRooms = allRooms.filter((room) => !visited.has(room.id));
-  for (const strandedRoom of strandedRooms) {
-    // Find closest connected room
-    let closestRoom = null;
-    let minDistance = Infinity;
-
-    for (const connectedRoom of allRooms.filter((r) => visited.has(r.id))) {
-      const distance =
-        Math.abs(strandedRoom.x - connectedRoom.x) +
-        Math.abs(strandedRoom.y - connectedRoom.y);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestRoom = connectedRoom;
-      }
-    }
-
-    if (closestRoom) {
-      // Add connection
-      const dx = strandedRoom.x - closestRoom.x;
-      const dy = strandedRoom.y - closestRoom.y;
-      const direction =
-        dx > 0 ? "east" : dx < 0 ? "west" : dy > 0 ? "north" : "south";
-
-      connections.push({
-        fromRoomId: closestRoom.id,
-        toRoomId: strandedRoom.id,
-        direction,
-      });
-
-      visited.add(strandedRoom.id);
-      adjacencyMap.get(closestRoom.id)?.add(strandedRoom.id);
-      adjacencyMap.get(strandedRoom.id)?.add(closestRoom.id);
-    }
-  }
+  const unclaimed: number[] = rooms
+    .filter((r) => !assigned.has(r.id))
+    .map((r) => r.id);
+  const result: Record<string, number[]> = {};
+  eligibleFactions.forEach((f) => (result[f.id] = assignments[f.id] || []));
+  result["unclaimed"] = unclaimed;
+  return result;
 }
 
 export async function generateFullDungeon(factions: Faction[]) {
   try {
     await logErrorToFile("Generating full 10-floor dungeon...", "info");
-
-    // Clear existing rooms and connections first
     await logErrorToFile("Clearing existing dungeon data...", "info");
     try {
       await db.delete(crawlerPositions);
@@ -319,7 +430,6 @@ export async function generateFullDungeon(factions: Faction[]) {
       throw e;
     }
 
-    // Get all floors to verify they exist
     let allFloors = [];
     try {
       allFloors = await db.select().from(floors).orderBy(floors.floorNumber);
@@ -341,7 +451,6 @@ export async function generateFullDungeon(factions: Faction[]) {
         await logErrorToFile(`Generating Floor ${floorNum}...`, "info");
         const theme = floorThemes[floorNum - 1];
 
-        // Get the actual floor from database
         let floor, floorId;
         try {
           [floor] = await db
@@ -361,7 +470,6 @@ export async function generateFullDungeon(factions: Faction[]) {
           continue;
         }
 
-        // Generate grid of potential room positions
         const roomPositions: Array<{ x: number; y: number }> = [];
         for (let x = -GRID_SIZE / 2; x < GRID_SIZE / 2; x++) {
           for (let y = -GRID_SIZE / 2; y < GRID_SIZE / 2; y++) {
@@ -381,7 +489,6 @@ export async function generateFullDungeon(factions: Faction[]) {
           "info",
         );
 
-        // Special rooms
         const entranceRoom: RoomInsert = {
           floorId,
           x: 0,
@@ -393,7 +500,7 @@ export async function generateFullDungeon(factions: Faction[]) {
           isExplored: false,
           hasLoot: false,
           factionId: null,
-          placementId: 0, // always 0 for entrance
+          placementId: 0,
         };
         const roomsToInsert: RoomInsert[] = [entranceRoom];
 
@@ -401,7 +508,6 @@ export async function generateFullDungeon(factions: Faction[]) {
           roomPositions.push({ x: 0, y: 0 });
         }
 
-        // Staircases
         const staircasePositions: Array<{ x: number; y: number }> = [];
         for (let i = 0; i < STAIRCASES_PER_FLOOR && floorNum < 10; i++) {
           let staircasePos: { x: number; y: number };
@@ -433,11 +539,10 @@ export async function generateFullDungeon(factions: Faction[]) {
             isExplored: false,
             hasLoot: false,
             factionId: null,
-            placementId: roomsToInsert.length, // Set placementId to the index being pushed
+            placementId: roomsToInsert.length,
           });
         }
 
-        // Normal rooms (to be themed by faction after assignment)
         for (const pos of roomPositions) {
           if (
             (pos.x === 0 && pos.y === 0) ||
@@ -459,7 +564,7 @@ export async function generateFullDungeon(factions: Faction[]) {
             isExplored: false,
             hasLoot: false,
             factionId: null,
-            placementId: roomsToInsert.length, // Set placementId to the index being pushed
+            placementId: roomsToInsert.length,
           });
         }
         await logErrorToFile(
@@ -467,20 +572,34 @@ export async function generateFullDungeon(factions: Faction[]) {
           "info",
         );
 
-        // Assign factions BEFORE insert (using placementId as the mapping key)
+        // Number of factions scales with floor size (min 2, max 10, 1 per 120 rooms)
+        const MIN_FACTIONS = 2;
+        const MAX_FACTIONS = 10;
+        const normalRoomCount = roomsToInsert.filter(
+          (r) => r.type === "normal",
+        ).length;
+        const numFactions = Math.max(
+          MIN_FACTIONS,
+          Math.min(MAX_FACTIONS, Math.floor(normalRoomCount / 120)),
+        );
+        const factionsWithInfluence = factions.filter(
+          (f) => typeof f.influence === "number" && f.influence > 0,
+        );
+        const factionsForFloor = [...factionsWithInfluence]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, Math.min(numFactions, factionsWithInfluence.length));
+
         const fakeRoomsForAssignment = roomsToInsert.map((r, idx) => ({
           ...r,
-          id: r.placementId, // for assignment logic
+          id: r.placementId,
         }));
 
         let factionAssignments;
         try {
-          factionAssignments = assignRoomsByFactionInfluence({
+          factionAssignments = assignFactionTerritories({
             rooms: fakeRoomsForAssignment,
-            factions,
+            factions: factionsForFloor,
             unclaimedPercent: 0.2,
-            roomsPerFaction: 10,
-            minFactions: 2,
           });
         } catch (e) {
           await logErrorToFile(
@@ -489,13 +608,24 @@ export async function generateFullDungeon(factions: Faction[]) {
           );
           throw e;
         }
+        // Log faction claims for this floor
+        const factionStats = factionsForFloor
+          .map((faction) => {
+            const claimed = (factionAssignments[faction.id] || []).length;
+            return `Faction ${faction.name} (#${faction.id}) claimed  ${claimed} rooms.`;
+          })
+          .join("\n");
+        await logErrorToFile(
+          `Floor ${floorNum} faction claims:
+        ${factionStats}`,
+          "info",
+        );
 
-        // assign factionId
         Object.entries(factionAssignments).forEach(([factionKey, roomIds]) => {
           const faction =
             factionKey === "unclaimed"
               ? undefined
-              : factions.find((f) => f.id === Number(factionKey));
+              : factionsForFloor.find((f) => f.id === Number(factionKey));
           for (const fakeId of roomIds) {
             const room = roomsToInsert[fakeId];
             if (!room) continue;
@@ -504,7 +634,8 @@ export async function generateFullDungeon(factions: Faction[]) {
           }
         });
 
-        // Insert rooms and get their DB IDs
+        connectAllDisconnectedComponents(roomsToInsert);
+
         const insertedRooms: Room[] = [];
         const BATCH_SIZE = 50;
         for (let i = 0; i < roomsToInsert.length; i += BATCH_SIZE) {
@@ -534,12 +665,10 @@ export async function generateFullDungeon(factions: Faction[]) {
           "info",
         );
 
-        // Build room map by x,y for quick lookup
         const roomMap = new Map<string, Room>();
         insertedRooms.forEach((r) => roomMap.set(`${r.x},${r.y}`, r));
         const entranceRoomId = roomMap.get("0,0")!.id;
 
-        // Generate connections (adjacency)
         const connections: Array<{
           fromRoomId: number;
           toRoomId: number;
@@ -564,18 +693,6 @@ export async function generateFullDungeon(factions: Faction[]) {
           }
         }
 
-        // Ensure all rooms are connected to entrance
-        try {
-          connectStrandedRooms(insertedRooms, connections, entranceRoomId);
-        } catch (e) {
-          await logErrorToFile(
-            e,
-            `Error connecting stranded rooms (floor ${floorNum})`,
-          );
-          throw e;
-        }
-
-        // Batch-insert connections (dedupe)
         const seen = new Set<string>();
         const uniqueConnections = connections.filter((conn) => {
           const key = `${conn.fromRoomId}-${conn.toRoomId}-${conn.direction}`;
