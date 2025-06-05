@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -174,6 +173,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
+    if (room.isCurrentRoom) {
+      // Always show the blue dot for the player crawler location
+      return (
+        <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+      );
+    }
     if (room.isExplored === false && !room.isScanned) {
       return (
         <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
@@ -212,13 +217,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return "bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-400/20";
-    }
+    //if (room.isCurrentRoom) {
+    //  return ""; // No extra color/border/shadow for the player's room for now
+    //}
 
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
-      const opacity = "15"; // Lower opacity for scanned rooms
+      const opacity = "50"; // Lower opacity for scanned rooms
       if (room.isSafe) {
         return `bg-green-600/${opacity} border-green-600/30`;
       }
@@ -640,6 +645,12 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
+    if (room.isCurrentRoom) {
+      // Always show the blue dot for the player crawler location
+      return (
+        <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+      );
+    }
     if (!room.isExplored && !room.isScanned) {
       return (
         <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">
