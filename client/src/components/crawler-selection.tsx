@@ -81,10 +81,10 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               selectedCandidate?.id === candidate.id 
                 ? 'border-blue-500 bg-blue-500/10' 
                 : 'border-game-border hover:border-slate-600'
-            } bg-game-surface`}
+            } bg-game-surface flex flex-col h-full`}
             onClick={() => setSelectedCandidate(candidate)}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-400" />
                 <CardTitle className="text-lg">{candidate.name}</CardTitle>
@@ -94,19 +94,19 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="flex-1 flex flex-col">
               {/* Background */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-2">Background</h4>
                 <p className="text-sm text-slate-400 leading-relaxed">
                   {candidate.background}
                 </p>
               </div>
 
-              <Separator className="bg-game-border" />
+              <Separator className="bg-game-border mb-4" />
 
               {/* Stats */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-3">Statistics</h4>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -170,10 +170,10 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                 </div>
               </div>
 
-              <Separator className="bg-game-border" />
+              <Separator className="bg-game-border mb-4" />
 
               {/* Competencies */}
-              <div>
+              <div className="mb-4">
                 <h4 className="font-semibold text-slate-200 mb-2">Competencies</h4>
                 <div className="flex flex-wrap gap-1">
                   {candidate.competencies.map((comp, index) => (
@@ -185,7 +185,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               </div>
 
               {/* Starting Equipment */}
-              <div>
+              <div className="mt-auto">
                 <h4 className="font-semibold text-slate-200 mb-2 flex items-center gap-2">
                   <Package className="w-4 h-4" />
                   Starting Equipment
