@@ -40,6 +40,7 @@ interface Room {
   name: string;
   description: string;
   type: string;
+  environment: string;
   isSafe: boolean;
   hasLoot: boolean;
   x: number;
@@ -82,6 +83,38 @@ function FactionBadge({
     return <Badge color="#6B7280">Neutral</Badge>;
   }
   return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
+}
+
+function EnvironmentBadge({ environment }: { environment: string }) {
+  const getEnvironmentColor = (env: string) => {
+    switch (env) {
+      case "outdoor":
+        return "#10B981"; // Green
+      case "underground":
+        return "#8B5CF6"; // Purple
+      case "indoor":
+      default:
+        return "#6B7280"; // Gray
+    }
+  };
+
+  const getEnvironmentIcon = (env: string) => {
+    switch (env) {
+      case "outdoor":
+        return "🌿";
+      case "underground":
+        return "⛏️";
+      case "indoor":
+      default:
+        return "🏠";
+    }
+  };
+
+  return (
+    <Badge color={getEnvironmentColor(environment)} className="capitalize">
+      {getEnvironmentIcon(environment)} {environment}
+    </Badge>
+  );
 }
 
 export default function RoomNavigation({
@@ -333,6 +366,7 @@ export default function RoomNavigation({
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           {getRoomTypeBadge(room)}
+          <EnvironmentBadge environment={room.environment} />
           <FactionBadge factionId={room.factionId} factions={factions} />
           {playersInRoom.length > 1 && (
             <Badge variant="secondary" className="flex items-center gap-1">
