@@ -62,7 +62,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   });
 
   // Fetch full map bounds for proper boundary calculations
-  const { data: mapBounds } = useQuery<{minX: number, maxX: number, minY: number, maxY: number}>({
+  const { data: mapBounds } = useQuery<{
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  }>({
     queryKey: [`/api/floors/${crawler.currentFloor}/bounds`],
     retry: false,
   });
@@ -331,8 +336,8 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl h-[90vh] bg-game-panel border-game-border p-4">
-              <DialogHeader className="pb-2">
+            <DialogContent className="max-w-6xl w-full h-[90vh] bg-game-panel border-game-border p-4 flex flex-col">
+              <DialogHeader className="shrink-0 pb-2">
                 <DialogTitle className="text-slate-200 flex items-center justify-between w-full text-lg">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
@@ -341,7 +346,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                   <ExpandedMapControls />
                 </DialogTitle>
               </DialogHeader>
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 w-full h-full min-h-0">
                 <ExpandedMapView exploredRooms={floorRooms} />
               </div>
             </DialogContent>
@@ -542,12 +547,12 @@ function ExpandedMapControls() {
     expandedMapScale = Math.min(expandedMapScale * 1.2, 3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
-  
+
   const zoomOut = () => {
     expandedMapScale = Math.max(expandedMapScale / 1.2, 0.3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
-  
+
   const resetView = () => {
     expandedMapScale = 0.7;
     expandedMapPanOffset = { x: 0, y: 0 };
@@ -606,8 +611,10 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       const paddingY = Math.ceil(mapHeightCells * 0.1);
 
       // Calculate padded map dimensions for expanded view with larger container
-      const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
-      const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedWidth =
+        ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedHeight =
+        ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
       const containerWidth = 880; // Account for padding and borders
       const containerHeight = 600; // Will be dynamically sized by CSS
 
