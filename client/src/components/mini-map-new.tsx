@@ -119,9 +119,22 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Calculate map dimensions and container size
+      const mapWidth = ((maxX - minX + 1) * 2 - 1) * 24 + 8; // grid width * cell size + gap
+      const mapHeight = ((maxY - minY + 1) * 2 - 1) * 24 + 8; // grid height * cell size + gap
+      const containerWidth = 250;
+      const containerHeight = 250;
+
+      // Calculate maximum allowed pan offset to keep map within bounds
+      const maxPanX = Math.max(0, (mapWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (mapHeight - containerHeight) / 2);
+
       setPanOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newY)),
       });
     }
   };
@@ -507,9 +520,22 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Calculate map dimensions and container size for expanded view
+      const mapWidth = ((maxX - minX + 1) * 2 - 1) * 48 * scale + 16; // grid width * cell size * scale + gap
+      const mapHeight = ((maxY - minY + 1) * 2 - 1) * 48 * scale + 16; // grid height * cell size * scale + gap
+      const containerWidth = 600;
+      const containerHeight = 600;
+
+      // Calculate maximum allowed pan offset to keep map within bounds
+      const maxPanX = Math.max(0, (mapWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (mapHeight - containerHeight) / 2);
+
       setPanOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newY)),
       });
     }
   };
