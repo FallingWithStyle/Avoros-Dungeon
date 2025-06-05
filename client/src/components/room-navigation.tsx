@@ -98,21 +98,9 @@ function EnvironmentBadge({ environment }: { environment: string }) {
     }
   };
 
-  const getEnvironmentIcon = (env: string) => {
-    switch (env) {
-      case "outdoor":
-        return "🌿";
-      case "underground":
-        return "⛏️";
-      case "indoor":
-      default:
-        return "🏠";
-    }
-  };
-
   return (
     <Badge color={getEnvironmentColor(environment)} className="capitalize">
-      {getEnvironmentIcon(environment)} {environment}
+      {environment}
     </Badge>
   );
 }
