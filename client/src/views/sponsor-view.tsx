@@ -10,6 +10,7 @@ import CrawlerSelection from "@/components/crawler-selection";
 import ActivityFeed from "@/components/activity-feed";
 import Leaderboard from "@/components/leaderboard";
 import SeasonStatus from "@/components/season-status";
+import DebugPanel from "@/components/debug-panel";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -89,7 +90,7 @@ export default function SponsorView() {
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
                       <i className="fas fa-plus mr-2"></i>
-                      Create New Crawler
+                      Choose Your Crawler
                     </Button>
                   </div>
                 )}
@@ -123,6 +124,9 @@ export default function SponsorView() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Global Debug Panel */}
+      <DebugPanel />
     </div>
   );
 }
