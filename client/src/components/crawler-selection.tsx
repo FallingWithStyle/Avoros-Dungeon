@@ -68,6 +68,12 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
     }
   };
 
+  // Fetch the next available crawler ID
+  const { data: nextIdData } = useQuery({
+    queryKey: ["/api/crawlers/next-id"],
+    queryFn: () => fetch("/api/crawlers/next-id").then(res => res.json()),
+  });
+
   // Calculate the next available crawler ID
   const nextCrawlerId = Array.isArray(candidates) ? candidates.length : 0;
 
