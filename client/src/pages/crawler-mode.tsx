@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import MiniMap from "@/components/map";
-import MapPreview from "@/components/map-preview";
 import RoomNavigation from "@/components/room-navigation";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -308,9 +307,6 @@ export default function CrawlerMode({ crawlerId }: CrawlerModeProps) {
                 <MiniMap crawler={crawler} />
               </CardContent>
             </Card>
-
-            {/* Map Preview */}
-            <MapPreview />
           </div>
         </div>
       </div>
