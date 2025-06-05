@@ -33,12 +33,15 @@ interface ExploredRoom {
   id: number;
   name: string;
   type: string;
+  actualType?: string; // For scanned rooms, this contains the real room type
+  environment: string;
   isSafe: boolean;
   hasLoot: boolean;
   x: number;
   y: number;
   isCurrentRoom: boolean;
   isExplored: boolean;
+  isScanned?: boolean;
   floorId: number;
 }
 
@@ -132,10 +135,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isExplored === false) {
+    if (room.isExplored === false && !room.isScanned) {
       return (
         <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
           ?
+        </div>
+      );
+    }
+
+    // For scanned rooms, use a different icon to indicate they're scanned but not explored
+    if (room.isScanned) {
+      return (
+        <div className="w-3 h-3 text-slate-400 text-xs flex items-center justify-center font-bold border border-slate-400 rounded">
+          S
         </div>
       );
     }
@@ -163,6 +175,27 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const getRoomColor = (room: ExploredRoom) => {
     if (room.isCurrentRoom) {
       return "bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-400/20";
+    }
+
+    // Handle scanned rooms with color coding based on actual room type
+    if (room.isScanned && room.actualType) {
+      const opacity = "15"; // Lower opacity for scanned rooms
+      if (room.isSafe) {
+        return `bg-green-600/${opacity} border-green-600/30`;
+      }
+      switch (room.actualType) {
+        case "entrance":
+          return `bg-green-600/${opacity} border-green-600/30`;
+        case "treasure":
+          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+        case "boss":
+        case "exit":
+          return `bg-red-600/${opacity} border-red-600/30`;
+        case "stairs":
+          return `bg-purple-600/${opacity} border-purple-600/30`;
+        default:
+          return `bg-slate-600/${opacity} border-slate-600/30`;
+      }
     }
 
     if (room.isExplored === false) {
@@ -434,6 +467,18 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <ArrowDown className="w-3 h-3 text-purple-400" />
                 <span>Stairs</span>
               </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 text-slate-400 text-xs flex items-center justify-center font-bold border border-slate-400 rounded">
+                  S
+                </div>
+                <span>Scanned</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
+                  ?
+                </div>
+                <span>Unknown</span>
+              </div>
             </div>
           </div>
         </div>
@@ -481,10 +526,19 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (!room.isExplored) {
+    if (!room.isExplored && !room.isScanned) {
       return (
         <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">
           ?
+        </div>
+      );
+    }
+
+    // For scanned rooms, use a different icon to indicate they're scanned but not explored
+    if (room.isScanned) {
+      return (
+        <div className="w-6 h-6 text-slate-400 text-sm flex items-center justify-center font-bold border border-slate-400 rounded">
+          S
         </div>
       );
     }
@@ -510,6 +564,27 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
+    // Handle scanned rooms with color coding based on actual room type
+    if (room.isScanned && room.actualType) {
+      const opacity = "15"; // Lower opacity for scanned rooms
+      if (room.isSafe) {
+        return `bg-green-600/${opacity} border-green-600/30`;
+      }
+      switch (room.actualType) {
+        case "entrance":
+          return `bg-green-600/${opacity} border-green-600/30`;
+        case "treasure":
+          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+        case "boss":
+        case "exit":
+          return `bg-red-600/${opacity} border-red-600/30`;
+        case "stairs":
+          return `bg-purple-600/${opacity} border-purple-600/30`;
+        default:
+          return `bg-slate-600/${opacity} border-slate-600/30`;
+      }
+    }
+
     if (!room.isExplored) {
       return "bg-slate-800/50 border-slate-600/50";
     }

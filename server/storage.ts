@@ -2831,6 +2831,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExploredRooms(crawlerId: number): Promise<any[]> {
+    // Get crawler info including scan range
+    const crawler = await this.getCrawler(crawlerId);
+    if (!crawler) return [];
+
     // Get all rooms this crawler has visited
     const visitedRooms = await db
       .select({
@@ -2866,6 +2870,9 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
 
     const currentRoomId = currentPosition?.roomId;
+    
+    // Get current room position for scan range calculation
+    const currentRoom = currentRoomId ? await this.getRoom(currentRoomId) : null;
 
     // Find ALL adjacent rooms from ALL visited rooms (persistent fog of war)
     const allConnections = await db
@@ -2888,6 +2895,7 @@ export class DatabaseStorage implements IStorage {
             id: adjacentRoom.id,
             name: "???",
             type: "unexplored",
+            environment: adjacentRoom.environment,
             isSafe: false,
             hasLoot: false,
             x: adjacentRoom.x,
@@ -2900,6 +2908,44 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    // Add scanned rooms within scan range of current position
+    const scannedRooms: any[] = [];
+    if (currentRoom && crawler.scanRange > 0) {
+      // Get all rooms on the current floor within scan range
+      const allRoomsOnFloor = await db
+        .select()
+        .from(rooms)
+        .where(eq(rooms.floorId, currentRoom.floorId));
+
+      for (const room of allRoomsOnFloor) {
+        // Skip if already visited or already discovered as adjacent
+        if (uniqueRoomIds.includes(room.id) || discoveredRoomIds.has(room.id)) {
+          continue;
+        }
+
+        // Calculate Manhattan distance
+        const distance = Math.abs(room.x - currentRoom.x) + Math.abs(room.y - currentRoom.y);
+        
+        if (distance <= crawler.scanRange) {
+          scannedRooms.push({
+            id: room.id,
+            name: "???",
+            type: "scanned",
+            actualType: room.type, // Store the actual type for color coding
+            environment: room.environment,
+            isSafe: room.isSafe,
+            hasLoot: room.hasLoot,
+            x: room.x,
+            y: room.y,
+            floorId: room.floorId,
+            isCurrentRoom: false,
+            isExplored: false,
+            isScanned: true,
+          });
+        }
+      }
+    }
+
     const exploredRooms: any[] = roomDetails.map(room => {
       console.log(`Adding room ${room.id} (${room.name}) to visited rooms`);
       return {
@@ -2907,6 +2953,7 @@ export class DatabaseStorage implements IStorage {
         name: room.name,
         description: room.description,
         type: room.type,
+        environment: room.environment,
         isSafe: room.isSafe,
         hasLoot: room.hasLoot,
         x: room.x,
@@ -2919,9 +2966,10 @@ export class DatabaseStorage implements IStorage {
     });
 
     console.log(`Total unique rooms visited: ${exploredRooms.length}`);
+    console.log(`Scanned rooms found: ${scannedRooms.length}`);
     console.log(`Room IDs: ${exploredRooms.map(r => r.id).join(', ')}`);
 
-    return [...exploredRooms, ...discoveredUnexploredRooms];
+    return [...exploredRooms, ...discoveredUnexploredRooms, ...scannedRooms];
   }
 
   async resetCrawlerToEntrance(crawlerId: number): Promise<void> {
