@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -331,11 +331,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[80vh] bg-game-panel border-game-border p-6">
+            <DialogContent className="max-w-6xl h-[90vh] bg-game-panel border-game-border p-6">
               <DialogHeader>
-                <DialogTitle className="text-slate-200 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Dungeon Map - Floor {crawler.currentFloor}
+                <DialogTitle className="text-slate-200 flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Dungeon Map - Floor {crawler.currentFloor}
+                  </div>
+                  <ExpandedMapControls />
                 </DialogTitle>
               </DialogHeader>
               <ExpandedMapView exploredRooms={floorRooms} />
@@ -523,11 +526,64 @@ interface ExpandedMapViewProps {
   exploredRooms: ExploredRoom[];
 }
 
+// Global state for expanded map controls
+let expandedMapScale = 0.7; // Start more zoomed out
+let expandedMapPanOffset = { x: 0, y: 0 };
+let expandedMapSetters: {
+  setScale: (scale: number) => void;
+  setPanOffset: (offset: { x: number; y: number }) => void;
+} | null = null;
+
+// Expanded map controls component
+function ExpandedMapControls() {
+  const zoomIn = () => {
+    expandedMapScale = Math.min(expandedMapScale * 1.2, 3);
+    expandedMapSetters?.setScale(expandedMapScale);
+  };
+  
+  const zoomOut = () => {
+    expandedMapScale = Math.max(expandedMapScale / 1.2, 0.3);
+    expandedMapSetters?.setScale(expandedMapScale);
+  };
+  
+  const resetView = () => {
+    expandedMapScale = 0.7;
+    expandedMapPanOffset = { x: 0, y: 0 };
+    expandedMapSetters?.setScale(expandedMapScale);
+    expandedMapSetters?.setPanOffset(expandedMapPanOffset);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button onClick={zoomIn} size="sm" variant="outline">
+        <ZoomIn className="w-4 h-4" />
+      </Button>
+      <Button onClick={zoomOut} size="sm" variant="outline">
+        <ZoomOut className="w-4 h-4" />
+      </Button>
+      <Button onClick={resetView} size="sm" variant="outline">
+        <RotateCcw className="w-4 h-4" />
+      </Button>
+      <span className="text-sm text-slate-400 ml-2">
+        Zoom: {Math.round(expandedMapScale * 100)}%
+      </span>
+    </div>
+  );
+}
+
 function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
-  const [scale, setScale] = useState(1);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(expandedMapScale);
+  const [panOffset, setPanOffset] = useState(expandedMapPanOffset);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Register setters for global control
+  React.useEffect(() => {
+    expandedMapSetters = { setScale, setPanOffset };
+    return () => {
+      expandedMapSetters = null;
+    };
+  }, [setScale, setPanOffset]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -547,32 +603,28 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       const paddingX = Math.ceil(mapWidthCells * 0.1);
       const paddingY = Math.ceil(mapHeightCells * 0.1);
 
-      // Calculate padded map dimensions for expanded view
+      // Calculate padded map dimensions for expanded view with larger container
       const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
       const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
-      const containerWidth = 600;
-      const containerHeight = 600;
+      const containerWidth = 900; // Increased from 600
+      const containerHeight = 700; // Increased from 600
 
       // Calculate maximum allowed pan offset to keep map within padded bounds
       const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
       const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
 
-      setPanOffset({
+      const newOffset = {
         x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
         y: Math.max(-maxPanY, Math.min(maxPanY, newY)),
-      });
+      };
+
+      setPanOffset(newOffset);
+      expandedMapPanOffset = newOffset;
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-  };
-
-  const zoomIn = () => setScale((prev) => Math.min(prev * 1.2, 3));
-  const zoomOut = () => setScale((prev) => Math.max(prev / 1.2, 0.5));
-  const resetView = () => {
-    setScale(1);
-    setPanOffset({ x: 0, y: 0 });
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
@@ -681,26 +733,10 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Controls */}
-      <div className="flex items-center gap-2 mb-4">
-        <Button onClick={zoomIn} size="sm" variant="outline">
-          <ZoomIn className="w-4 h-4" />
-        </Button>
-        <Button onClick={zoomOut} size="sm" variant="outline">
-          <ZoomOut className="w-4 h-4" />
-        </Button>
-        <Button onClick={resetView} size="sm" variant="outline">
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-        <span className="text-sm text-slate-400 ml-2">
-          Zoom: {Math.round(scale * 100)}%
-        </span>
-      </div>
-
-      {/* Map container */}
+      {/* Map container - now takes up most of the dialog space */}
       <div
-        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto"
-        style={{ height: "600px", width: "600px" }}
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto flex-1"
+        style={{ height: "700px", width: "900px", maxHeight: "calc(90vh - 120px)" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
