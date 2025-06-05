@@ -68,7 +68,8 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
 
   return (
     <div className="relative space-y-6 px-8 py-6">
-      <div className="mb-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-white mb-4">Choose Your Crawler</h2>
         <p className="text-slate-400">Choose from available crawler candidates. Each candidate starts at level 1 with unique stats and competencies.</p>
       </div>
 

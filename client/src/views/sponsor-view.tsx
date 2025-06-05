@@ -114,9 +114,6 @@ export default function SponsorView() {
       {/* Crawler Selection Dialog */}
       <Dialog open={showCrawlerSelection} onOpenChange={setShowCrawlerSelection}>
         <DialogContent className="max-w-7xl w-[95vw] h-[90vh] bg-game-surface border-game-border">
-          <DialogHeader>
-            <DialogTitle className="text-white">Create New Crawler</DialogTitle>
-          </DialogHeader>
           <CrawlerSelection
             onSelect={(candidate) => createCrawlerMutation.mutate(candidate)}
             onCancel={() => setShowCrawlerSelection(false)}
