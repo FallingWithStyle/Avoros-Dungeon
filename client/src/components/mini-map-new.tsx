@@ -61,6 +61,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     refetchInterval: 2000, // Refresh every 2 seconds
   });
 
+  // Fetch full map bounds for proper boundary calculations
+  const { data: mapBounds } = useQuery<{minX: number, maxX: number, minY: number, maxY: number}>({
+    queryKey: [`/api/floors/${crawler.currentFloor}/bounds`],
+    retry: false,
+  });
+
   // Filter rooms for current floor (strict number comparison first, then string fallback)
   const floorRooms =
     exploredRooms?.filter(
@@ -122,15 +128,27 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
 
-      // Calculate map dimensions and container size
-      const mapWidth = ((maxX - minX + 1) * 2 - 1) * 24 + 8; // grid width * cell size + gap
-      const mapHeight = ((maxY - minY + 1) * 2 - 1) * 24 + 8; // grid height * cell size + gap
+      // Use full map bounds if available, otherwise fall back to visible area
+      const boundsMinX = mapBounds?.minX ?? minX;
+      const boundsMaxX = mapBounds?.maxX ?? maxX;
+      const boundsMinY = mapBounds?.minY ?? minY;
+      const boundsMaxY = mapBounds?.maxY ?? maxY;
+
+      // Calculate 10% padding
+      const mapWidthCells = boundsMaxX - boundsMinX + 1;
+      const mapHeightCells = boundsMaxY - boundsMinY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+
+      // Calculate padded map dimensions
+      const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 24 + 8;
+      const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 24 + 8;
       const containerWidth = 250;
       const containerHeight = 250;
 
-      // Calculate maximum allowed pan offset to keep map within bounds
-      const maxPanX = Math.max(0, (mapWidth - containerWidth) / 2);
-      const maxPanY = Math.max(0, (mapHeight - containerHeight) / 2);
+      // Calculate maximum allowed pan offset to keep map within padded bounds
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
 
       setPanOffset({
         x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
@@ -523,15 +541,21 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
 
-      // Calculate map dimensions and container size for expanded view
-      const mapWidth = ((maxX - minX + 1) * 2 - 1) * 48 * scale + 16; // grid width * cell size * scale + gap
-      const mapHeight = ((maxY - minY + 1) * 2 - 1) * 48 * scale + 16; // grid height * cell size * scale + gap
+      // Calculate 10% padding for expanded view
+      const mapWidthCells = maxX - minX + 1;
+      const mapHeightCells = maxY - minY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+
+      // Calculate padded map dimensions for expanded view
+      const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
       const containerWidth = 600;
       const containerHeight = 600;
 
-      // Calculate maximum allowed pan offset to keep map within bounds
-      const maxPanX = Math.max(0, (mapWidth - containerWidth) / 2);
-      const maxPanY = Math.max(0, (mapHeight - containerHeight) / 2);
+      // Calculate maximum allowed pan offset to keep map within padded bounds
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
 
       setPanOffset({
         x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
