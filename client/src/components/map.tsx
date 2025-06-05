@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,12 +33,15 @@ interface ExploredRoom {
   id: number;
   name: string;
   type: string;
+  actualType?: string; // For scanned rooms, this contains the real room type
+  environment: string;
   isSafe: boolean;
   hasLoot: boolean;
   x: number;
   y: number;
   isCurrentRoom: boolean;
   isExplored: boolean;
+  isScanned?: boolean;
   floorId: number;
 }
 
@@ -52,10 +55,23 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms for this crawler
-  const { data: exploredRooms, isLoading } = useQuery<ExploredRoom[]>({
+  // Fetch explored rooms with optimized refresh
+  const { data: exploredRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    refetchInterval: 2000, // Refresh every 2 seconds
+    refetchInterval: 15000, // Reduced frequency from 5s to 15s
+    staleTime: 60000, // Cache for 1 minute
+    retry: false,
+  });
+
+  // Fetch full map bounds for proper boundary calculations
+  const { data: mapBounds } = useQuery<{
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  }>({
+    queryKey: [`/api/floors/${crawler.currentFloor}/bounds`],
+    retry: false,
   });
 
   // Filter rooms for current floor (strict number comparison first, then string fallback)
@@ -116,9 +132,34 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Use full map bounds if available, otherwise fall back to visible area
+      const boundsMinX = mapBounds?.minX ?? minX;
+      const boundsMaxX = mapBounds?.maxX ?? maxX;
+      const boundsMinY = mapBounds?.minY ?? minY;
+      const boundsMaxY = mapBounds?.maxY ?? maxY;
+
+      // Calculate 10% padding
+      const mapWidthCells = boundsMaxX - boundsMinX + 1;
+      const mapHeightCells = boundsMaxY - boundsMinY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+
+      // Calculate padded map dimensions
+      const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 24 + 8;
+      const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 24 + 8;
+      const containerWidth = 250;
+      const containerHeight = 250;
+
+      // Calculate maximum allowed pan offset to keep map within padded bounds
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
+
       setPanOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newY)),
       });
     }
   };
@@ -132,10 +173,25 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isExplored === false) {
+    if (room.isCurrentRoom) {
+      // Always show the blue dot for the player crawler location
+      return (
+        <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+      );
+    }
+    if (room.isExplored === false && !room.isScanned) {
       return (
         <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
           ?
+        </div>
+      );
+    }
+
+    // For scanned rooms, use a different icon to indicate they're scanned but not explored
+    if (room.isScanned) {
+      return (
+        <div className="w-3 h-3 text-slate-400 text-xs flex items-center justify-center font-bold border border-slate-400 rounded">
+          S
         </div>
       );
     }
@@ -161,8 +217,29 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
-      return "bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-400/20";
+    //if (room.isCurrentRoom) {
+    //  return ""; // No extra color/border/shadow for the player's room for now
+    //}
+
+    // Handle scanned rooms with color coding based on actual room type
+    if (room.isScanned && room.actualType) {
+      const opacity = "75"; // Lower opacity for scanned rooms
+      if (room.isSafe) {
+        return `bg-green-600/${opacity} border-green-600/30`;
+      }
+      switch (room.actualType) {
+        case "entrance":
+          return `bg-green-600/${opacity} border-green-600/30`;
+        case "treasure":
+          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+        case "boss":
+        case "exit":
+          return `bg-red-600/${opacity} border-red-600/30`;
+        case "stairs":
+          return `bg-purple-600/${opacity} border-purple-600/30`;
+        default:
+          return `bg-slate-600/${opacity} border-slate-600/30`;
+      }
     }
 
     if (room.isExplored === false) {
@@ -187,7 +264,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingRooms) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -267,14 +344,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <Maximize2 className="w-3 h-3" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[80vh] bg-game-panel border-game-border p-6">
-              <DialogHeader>
-                <DialogTitle className="text-slate-200 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Dungeon Map - Floor {crawler.currentFloor}
+            <DialogContent className="max-w-6xl w-full h-[90vh] bg-game-panel border-game-border p-4 flex flex-col">
+              <DialogHeader className="shrink-0 pb-2">
+                <DialogTitle className="text-slate-200 flex items-center justify-between w-full text-lg">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Dungeon Map - Floor {crawler.currentFloor}
+                  </div>
+                  <ExpandedMapControls />
                 </DialogTitle>
               </DialogHeader>
-              <ExpandedMapView exploredRooms={floorRooms} />
+              <div className="flex-1 w-full h-full min-h-0">
+                <ExpandedMapView exploredRooms={floorRooms} />
+              </div>
             </DialogContent>
           </Dialog>
         </CardTitle>
@@ -434,6 +516,18 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                 <ArrowDown className="w-3 h-3 text-purple-400" />
                 <span>Stairs</span>
               </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 text-slate-400 text-xs flex items-center justify-center font-bold border border-slate-400 rounded">
+                  S
+                </div>
+                <span>Scanned</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
+                  ?
+                </div>
+                <span>Unknown</span>
+              </div>
             </div>
           </div>
         </div>
@@ -447,11 +541,64 @@ interface ExpandedMapViewProps {
   exploredRooms: ExploredRoom[];
 }
 
+// Global state for expanded map controls
+let expandedMapScale = 0.7; // Start more zoomed out
+let expandedMapPanOffset = { x: 0, y: 0 };
+let expandedMapSetters: {
+  setScale: (scale: number) => void;
+  setPanOffset: (offset: { x: number; y: number }) => void;
+} | null = null;
+
+// Expanded map controls component
+function ExpandedMapControls() {
+  const zoomIn = () => {
+    expandedMapScale = Math.min(expandedMapScale * 1.2, 3);
+    expandedMapSetters?.setScale(expandedMapScale);
+  };
+
+  const zoomOut = () => {
+    expandedMapScale = Math.max(expandedMapScale / 1.2, 0.3);
+    expandedMapSetters?.setScale(expandedMapScale);
+  };
+
+  const resetView = () => {
+    expandedMapScale = 0.7;
+    expandedMapPanOffset = { x: 0, y: 0 };
+    expandedMapSetters?.setScale(expandedMapScale);
+    expandedMapSetters?.setPanOffset(expandedMapPanOffset);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button onClick={zoomIn} size="sm" variant="outline">
+        <ZoomIn className="w-4 h-4" />
+      </Button>
+      <Button onClick={zoomOut} size="sm" variant="outline">
+        <ZoomOut className="w-4 h-4" />
+      </Button>
+      <Button onClick={resetView} size="sm" variant="outline">
+        <RotateCcw className="w-4 h-4" />
+      </Button>
+      <span className="text-sm text-slate-400 ml-2">
+        Zoom: {Math.round(expandedMapScale * 100)}%
+      </span>
+    </div>
+  );
+}
+
 function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
-  const [scale, setScale] = useState(1);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(expandedMapScale);
+  const [panOffset, setPanOffset] = useState(expandedMapPanOffset);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Register setters for global control
+  React.useEffect(() => {
+    expandedMapSetters = { setScale, setPanOffset };
+    return () => {
+      expandedMapSetters = null;
+    };
+  }, [setScale, setPanOffset]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -462,10 +609,34 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging) {
-      setPanOffset({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Calculate 10% padding for expanded view
+      const mapWidthCells = maxX - minX + 1;
+      const mapHeightCells = maxY - minY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+
+      // Calculate padded map dimensions for expanded view with larger container
+      const paddedWidth =
+        ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedHeight =
+        ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
+      const containerWidth = 880; // Account for padding and borders
+      const containerHeight = 600; // Will be dynamically sized by CSS
+
+      // Calculate maximum allowed pan offset to keep map within padded bounds
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
+
+      const newOffset = {
+        x: Math.max(-maxPanX, Math.min(maxPanX, newX)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newY)),
+      };
+
+      setPanOffset(newOffset);
+      expandedMapPanOffset = newOffset;
     }
   };
 
@@ -473,18 +644,26 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
     setIsDragging(false);
   };
 
-  const zoomIn = () => setScale((prev) => Math.min(prev * 1.2, 3));
-  const zoomOut = () => setScale((prev) => Math.max(prev / 1.2, 0.5));
-  const resetView = () => {
-    setScale(1);
-    setPanOffset({ x: 0, y: 0 });
-  };
-
   const getRoomIcon = (room: ExploredRoom) => {
-    if (!room.isExplored) {
+    if (room.isCurrentRoom) {
+      // Always show the blue dot for the player crawler location
+      return (
+        <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+      );
+    }
+    if (!room.isExplored && !room.isScanned) {
       return (
         <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">
           ?
+        </div>
+      );
+    }
+
+    // For scanned rooms, use a different icon to indicate they're scanned but not explored
+    if (room.isScanned) {
+      return (
+        <div className="w-6 h-6 text-slate-400 text-sm flex items-center justify-center font-bold border border-slate-400 rounded">
+          S
         </div>
       );
     }
@@ -510,6 +689,27 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   };
 
   const getRoomColor = (room: ExploredRoom) => {
+    // Handle scanned rooms with color coding based on actual room type
+    if (room.isScanned && room.actualType) {
+      const opacity = "15"; // Lower opacity for scanned rooms
+      if (room.isSafe) {
+        return `bg-green-600/${opacity} border-green-600/30`;
+      }
+      switch (room.actualType) {
+        case "entrance":
+          return `bg-green-600/${opacity} border-green-600/30`;
+        case "treasure":
+          return `bg-yellow-600/${opacity} border-yellow-600/30`;
+        case "boss":
+        case "exit":
+          return `bg-red-600/${opacity} border-red-600/30`;
+        case "stairs":
+          return `bg-purple-600/${opacity} border-purple-600/30`;
+        default:
+          return `bg-slate-600/${opacity} border-slate-600/30`;
+      }
+    }
+
     if (!room.isExplored) {
       return "bg-slate-800/50 border-slate-600/50";
     }
@@ -555,27 +755,11 @@ function ExpandedMapView({ exploredRooms }: ExpandedMapViewProps) {
   });
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Controls */}
-      <div className="flex items-center gap-2 mb-4">
-        <Button onClick={zoomIn} size="sm" variant="outline">
-          <ZoomIn className="w-4 h-4" />
-        </Button>
-        <Button onClick={zoomOut} size="sm" variant="outline">
-          <ZoomOut className="w-4 h-4" />
-        </Button>
-        <Button onClick={resetView} size="sm" variant="outline">
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-        <span className="text-sm text-slate-400 ml-2">
-          Zoom: {Math.round(scale * 100)}%
-        </span>
-      </div>
-
-      {/* Map container */}
+    <div className="h-full">
+      {/* Map container - uses full available height */}
       <div
-        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto"
-        style={{ height: "600px", width: "600px" }}
+        className="overflow-hidden border border-slate-600 bg-slate-900/50 rounded cursor-move select-none relative mx-auto h-full"
+        style={{ width: "100%", maxWidth: "900px" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

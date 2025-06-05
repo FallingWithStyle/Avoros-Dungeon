@@ -100,6 +100,8 @@ export const crawlers = pgTable("crawlers", {
   experience: integer("experience").default(0).notNull(),
   energy: integer("energy").default(100).notNull(),
   maxEnergy: integer("max_energy").default(100).notNull(),
+  scanRange: integer("scan_range").default(2).notNull(), // Manhattan distance for scanning unvisited rooms
+  activeEffects: jsonb("active_effects").default('[]').notNull(), // Array of active spell/skill effects
   competencies: text("competencies").array().notNull(), // Array of starting competencies
   abilities: text("abilities").array().notNull(), // Unlocked special abilities
   status: varchar("status", { length: 20 }).default("active").notNull(), // active, resting, dead, exploring
@@ -172,6 +174,7 @@ export const rooms = pgTable("rooms", {
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description").notNull(),
   type: varchar("type", { length: 30 }).default("normal").notNull(), // normal, safe, boss, treasure, trap, entrance, exit
+  environment: varchar("environment", { length: 20 }).default("indoor").notNull(), // indoor, outdoor, underground
   isExplored: boolean("is_explored").default(false).notNull(),
   hasLoot: boolean("has_loot").default(false).notNull(),
   isSafe: boolean("is_safe").default(false).notNull(), // Safe rooms for leveling/resting

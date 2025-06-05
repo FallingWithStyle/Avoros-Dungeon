@@ -804,5 +804,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Apply effect to crawler
+  app.post("/api/crawlers/:id/apply-effect/:effectId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const effectId = req.params.effectId;
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const result = await storage.applyEffect(crawlerId, effectId);
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to apply effect:", error);
+      res.status(500).json({ message: "Failed to apply effect" });
+    }
+  });
+
   return httpServer;
 }

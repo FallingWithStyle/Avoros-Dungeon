@@ -40,6 +40,7 @@ interface Room {
   name: string;
   description: string;
   type: string;
+  environment: string;
   isSafe: boolean;
   hasLoot: boolean;
   x: number;
@@ -84,6 +85,26 @@ function FactionBadge({
   return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
 }
 
+function EnvironmentBadge({ environment }: { environment: string }) {
+  const getEnvironmentColor = (env: string) => {
+    switch (env) {
+      case "outdoor":
+        return "#10B981"; // Green
+      case "underground":
+        return "#8B5CF6"; // Purple
+      case "indoor":
+      default:
+        return "#6B7280"; // Gray
+    }
+  };
+
+  return (
+    <Badge color={getEnvironmentColor(environment)} className="capitalize">
+      {environment}
+    </Badge>
+  );
+}
+
 export default function RoomNavigation({
   crawler,
   energyDisabled = false,
@@ -91,10 +112,11 @@ export default function RoomNavigation({
   const { toast } = useToast();
   const [pendingDirection, setPendingDirection] = useState<string | null>(null);
 
-  // Fetch current room data
+  // Fetch current room data with reduced polling
   const { data: roomData, isLoading } = useQuery<RoomData>({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000,
+    refetchInterval: 10000, // Reduced from 5s to 10s
+    staleTime: 30000, // Cache for 30 seconds
     retry: false,
   });
 
@@ -113,7 +135,7 @@ export default function RoomNavigation({
     staleTime: 5 * 60 * 1000, // 5 min
   });
 
-  // Movement mutation
+  // Movement mutation with optimistic updates
   const moveMutation = useMutation({
     mutationFn: async (direction: string) => {
       return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
@@ -121,19 +143,23 @@ export default function RoomNavigation({
         debugEnergyDisabled: isEnergyDisabled(),
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+    onMutate: async (direction) => {
+      // Optimistic update - immediately show movement is happening
+      setPendingDirection(direction);
+    },
+    onSuccess: (data) => {
+      // Batch invalidations with shorter delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      }, 100); // Small delay to batch updates
+      
       setPendingDirection(null);
-      toast({
-        title: "Moved successfully",
-        description: "You have entered a new room.",
-      });
     },
     onError: (error) => {
       setPendingDirection(null);
@@ -333,6 +359,7 @@ export default function RoomNavigation({
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           {getRoomTypeBadge(room)}
+          <EnvironmentBadge environment={room.environment} />
           <FactionBadge factionId={room.factionId} factions={factions} />
           {playersInRoom.length > 1 && (
             <Badge variant="secondary" className="flex items-center gap-1">
