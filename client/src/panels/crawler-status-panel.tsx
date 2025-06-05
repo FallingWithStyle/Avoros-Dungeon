@@ -28,12 +28,6 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <img
-          src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
-          alt={crawler.name}
-          className="w-16 h-16 rounded-full border-2 border-blue-500/30"
-        />
-
           {/* Health Bar */}
           <div>
             <div className="flex justify-between text-sm mb-1">

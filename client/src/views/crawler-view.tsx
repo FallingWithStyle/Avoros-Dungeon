@@ -73,7 +73,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             <div className="flex items-center space-x-4">
               {/* Avatar image */}
               <img
-                src={getAvatarUrl(crawler.name, crawler.id)}
+                src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
                 alt={`${crawler.name} avatar`}
                 className="w-12 h-12 rounded-full border-2 border-game-border bg-gray-800"
               />
