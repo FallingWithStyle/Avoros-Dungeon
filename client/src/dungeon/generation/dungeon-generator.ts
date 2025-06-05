@@ -316,6 +316,7 @@ function connectAllDisconnectedComponents(allRooms: RoomInsert[]) {
             hasLoot: false,
             factionId: null,
             placementId: nextPlacementId(),
+            environment: "indoor",
           };
           allRooms.push(corridor);
           posToRoom.set(key, corridor);
@@ -501,6 +502,7 @@ export async function generateFullDungeon(factions: Faction[]) {
           hasLoot: false,
           factionId: null,
           placementId: 0,
+          environment: "indoor",
         };
         const roomsToInsert: RoomInsert[] = [entranceRoom];
 
@@ -540,6 +542,7 @@ export async function generateFullDungeon(factions: Faction[]) {
             hasLoot: false,
             factionId: null,
             placementId: roomsToInsert.length,
+            environment: "indoor",
           });
         }
 
@@ -552,19 +555,46 @@ export async function generateFullDungeon(factions: Faction[]) {
           ) {
             continue;
           }
-          const roomType = getRandomRoomType(theme);
+          
+          // Determine room type and properties
+          let roomType, name, description, type, hasLoot, environment;
+          const rand = Math.random();
+          
+          if (rand < 0.08) { // 8% chance for treasure room
+            type = "treasure";
+            name = "Treasure Cache";
+            description = "A hidden chamber containing valuable loot";
+            hasLoot = true;
+            environment = "indoor";
+          } else if (rand < 0.12) { // 4% chance for outdoor room
+            const themeRoomType = getRandomRoomType(theme);
+            type = "normal";
+            name = themeRoomType.name;
+            description = themeRoomType.description;
+            hasLoot = Math.random() < 0.15; // 15% chance for loot in normal rooms
+            environment = "outdoor";
+          } else { // 88% normal indoor rooms
+            const themeRoomType = getRandomRoomType(theme);
+            type = "normal";
+            name = themeRoomType.name;
+            description = themeRoomType.description;
+            hasLoot = Math.random() < 0.15; // 15% chance for loot in normal rooms
+            environment = "indoor";
+          }
+          
           roomsToInsert.push({
             floorId,
             x: pos.x,
             y: pos.y,
-            name: roomType.name,
-            description: roomType.description,
-            type: "normal",
+            name,
+            description,
+            type,
             isSafe: false,
             isExplored: false,
-            hasLoot: false,
+            hasLoot,
             factionId: null,
             placementId: roomsToInsert.length,
+            environment,
           });
         }
         await logErrorToFile(
@@ -572,15 +602,15 @@ export async function generateFullDungeon(factions: Faction[]) {
           "info",
         );
 
-        // Number of factions scales with floor size (min 2, max 10, 1 per 120 rooms)
-        const MIN_FACTIONS = 2;
-        const MAX_FACTIONS = 10;
-        const normalRoomCount = roomsToInsert.filter(
-          (r) => r.type === "normal",
+        // Number of factions scales with floor size (min 3, max 8, better scaling)
+        const MIN_FACTIONS = 3;
+        const MAX_FACTIONS = 8;
+        const claimableRoomCount = roomsToInsert.filter(
+          (r) => r.type === "normal" || r.type === "treasure",
         ).length;
         const numFactions = Math.max(
           MIN_FACTIONS,
-          Math.min(MAX_FACTIONS, Math.floor(normalRoomCount / 120)),
+          Math.min(MAX_FACTIONS, Math.floor(claimableRoomCount / 80)),
         );
         const factionsWithInfluence = factions.filter(
           (f) => typeof f.influence === "number" && f.influence > 0,
@@ -599,7 +629,7 @@ export async function generateFullDungeon(factions: Faction[]) {
           factionAssignments = assignFactionTerritories({
             rooms: fakeRoomsForAssignment,
             factions: factionsForFloor,
-            unclaimedPercent: 0.2,
+            unclaimedPercent: 0.15, // Reduced from 0.2 to 0.15 for more faction claims
           });
         } catch (e) {
           await logErrorToFile(

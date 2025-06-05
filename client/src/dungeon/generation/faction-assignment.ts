@@ -75,19 +75,32 @@ export function assignRoomsByFactionInfluence({
     0,
   );
 
-  // 6. Assign rooms to factions proportionally to their influence
+  // 6. Assign rooms to factions proportionally to their influence with minimum guarantees
   const assignments: FactionRoomAssignment = {};
   let remainingRooms = [...toAssign];
-  pickedFactions.forEach((faction, i) => {
-    // Last faction gets the remainder to ensure all rooms are assigned
-    const roomCount =
-      i === pickedFactions.length - 1
-        ? remainingRooms.length
-        : Math.round((faction.influence / totalInfluence) * toAssign.length);
-
+  const minRoomsPerFaction = Math.max(5, Math.floor(toAssign.length / (pickedFactions.length * 3)));
+  
+  // First pass: ensure minimum rooms per faction
+  pickedFactions.forEach((faction) => {
+    const minRooms = Math.min(minRoomsPerFaction, remainingRooms.length);
     assignments[faction.id] = remainingRooms
-      .splice(0, roomCount)
+      .splice(0, minRooms)
       .map((r) => r.placementId);
+  });
+  
+  // Second pass: distribute remaining rooms by influence
+  pickedFactions.forEach((faction, i) => {
+    if (remainingRooms.length === 0) return;
+    
+    const additionalRooms = i === pickedFactions.length - 1
+      ? remainingRooms.length // Last faction gets remainder
+      : Math.floor((faction.influence / totalInfluence) * remainingRooms.length);
+    
+    const additionalAssignment = remainingRooms
+      .splice(0, additionalRooms)
+      .map((r) => r.placementId);
+    
+    assignments[faction.id] = [...(assignments[faction.id] || []), ...additionalAssignment];
   });
 
   // 7. Add unclaimed rooms to the result under "unclaimed"
