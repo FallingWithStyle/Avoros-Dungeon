@@ -7,12 +7,17 @@ export interface CombatEntity {
   type: "player" | "hostile" | "neutral";
   health: number;
   maxHealth: number;
+  hp?: number; // Alias for health for compatibility
+  maxHp?: number; // Alias for maxHealth for compatibility
   attack: number;
   defense: number;
   speed: number;
   position: { x: number; y: number };
-  status: "alive" | "dead" | "stunned";
+  status?: "alive" | "dead" | "stunned";
   lastAction?: string;
+  isSelected?: boolean;
+  entryDirection?: "north" | "south" | "east" | "west" | null;
+  cooldowns?: Record<string, number>;
 }
 
 export interface CombatAction {
@@ -31,6 +36,7 @@ export interface CombatState {
   selectedEntityId: string | null;
   turn: number;
   phase: "planning" | "executing" | "complete";
+  isInCombat: boolean;
   actionQueue: Array<{
     entityId: string;
     action: CombatAction;
@@ -48,6 +54,7 @@ class CombatSystem {
     selectedEntityId: null,
     turn: 0,
     phase: "planning",
+    isInCombat: false,
     actionQueue: [],
     cooldowns: {},
   };
@@ -83,6 +90,11 @@ class CombatSystem {
   }
 
   selectEntity(entityId: string | null) {
+    // Update isSelected state for all entities
+    this.state.entities.forEach(entity => {
+      entity.isSelected = entity.id === entityId;
+    });
+    
     this.state.selectedEntityId = entityId;
     this.notifyListeners();
   }
@@ -99,7 +111,31 @@ class CombatSystem {
   addEntity(entity: CombatEntity) {
     // Remove existing entity with same ID if exists
     this.state.entities = this.state.entities.filter(e => e.id !== entity.id);
+    
+    // Sync hp/health properties
+    if (entity.hp !== undefined && entity.health === undefined) {
+      entity.health = entity.hp;
+    }
+    if (entity.maxHp !== undefined && entity.maxHealth === undefined) {
+      entity.maxHealth = entity.maxHp;
+    }
+    if (entity.health !== undefined && entity.hp === undefined) {
+      entity.hp = entity.health;
+    }
+    if (entity.maxHealth !== undefined && entity.maxHp === undefined) {
+      entity.maxHp = entity.maxHealth;
+    }
+    
+    // Set default status
+    if (!entity.status) {
+      entity.status = "alive";
+    }
+    
+    // Check if this entity is currently selected
+    entity.isSelected = this.state.selectedEntityId === entity.id;
+    
     this.state.entities.push(entity);
+    this.updateCombatState();
     this.notifyListeners();
   }
 
@@ -119,7 +155,21 @@ class CombatSystem {
     this.notifyListeners();
   }
 
-  queueAction(entityId: string, action: CombatAction, targetId?: string, targetPosition?: { x: number; y: number }) {
+  queueAction(entityId: string, actionIdOrAction: string | CombatAction, targetId?: string, targetPosition?: { x: number; y: number }) {
+    let action: CombatAction;
+    
+    if (typeof actionIdOrAction === 'string') {
+      // Get action from definitions
+      const actionDef = this.actionDefinitions?.get(actionIdOrAction);
+      if (!actionDef) {
+        console.warn(`Action ${actionIdOrAction} not found in definitions`);
+        return false;
+      }
+      action = actionDef;
+    } else {
+      action = actionIdOrAction;
+    }
+
     // Check if action is on cooldown
     const cooldowns = this.state.cooldowns[entityId] || {};
     if (cooldowns[action.id] && cooldowns[action.id] > 0) {
@@ -352,6 +402,66 @@ class CombatSystem {
     });
   }
 
+  // Get hostile entities
+  getHostileEntities(): CombatEntity[] {
+    return this.state.entities.filter(entity => entity.type === "hostile" && entity.status === "alive");
+  }
+
+  // Get friendly entities (player and allies)
+  getFriendlyEntities(): CombatEntity[] {
+    return this.state.entities.filter(entity => 
+      (entity.type === "player" || entity.type === "neutral") && entity.status === "alive"
+    );
+  }
+
+  // Get all entities by type
+  getEntitiesByType(type: "player" | "hostile" | "neutral"): CombatEntity[] {
+    return this.state.entities.filter(entity => entity.type === type && entity.status === "alive");
+  }
+
+  // Calculate distance between two positions
+  calculateDistance(pos1: { x: number; y: number }, pos2: { x: number; y: number }): number {
+    const dx = pos1.x - pos2.x;
+    const dy = pos1.y - pos2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Queue a move action (simplified version)
+  queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
+    const moveAction: CombatAction = {
+      id: "move",
+      name: "Move",
+      type: "move",
+      energyCost: 1,
+      description: "Move to a new position"
+    };
+
+    return this.queueAction(entityId, moveAction, undefined, targetPosition);
+  }
+
+  // Action definitions map for cooldowns and properties
+  actionDefinitions?: Map<string, any> = new Map([
+    ["move", { id: "move", name: "Move", type: "move", cooldown: 1000, executionTime: 800 }],
+    ["basic_attack", { id: "basic_attack", name: "Basic Attack", type: "attack", cooldown: 2000, damage: 20, range: 15, executionTime: 1000 }],
+    ["heavy_attack", { id: "heavy_attack", name: "Heavy Attack", type: "attack", cooldown: 3000, damage: 30, range: 15, executionTime: 1200 }],
+    ["ranged_attack", { id: "ranged_attack", name: "Ranged Attack", type: "attack", cooldown: 2500, damage: 18, range: 25, executionTime: 1000 }],
+    ["defend", { id: "defend", name: "Defend", type: "ability", cooldown: 1500, executionTime: 500 }],
+    ["ability1", { id: "ability1", name: "Ability 1", type: "ability", cooldown: 4000, executionTime: 1500 }],
+    ["ability2", { id: "ability2", name: "Ability 2", type: "ability", cooldown: 5000, executionTime: 2000 }],
+    ["ability3", { id: "ability3", name: "Ability 3", type: "ability", cooldown: 6000, executionTime: 2500 }],
+    ["wait", { id: "wait", name: "Wait", type: "ability", cooldown: 500, executionTime: 1000 }]
+  ]);
+
+  // Update combat state based on current entities
+  private updateCombatState() {
+    this.state.isInCombat = this.getHostileEntities().length > 0;
+  }
+
+  // Check if combat is active
+  get isInCombat(): boolean {
+    return this.state.isInCombat;
+  }
+
   // Clear all state
   reset() {
     this.state = {
@@ -359,6 +469,7 @@ class CombatSystem {
       selectedEntityId: null,
       turn: 0,
       phase: "planning",
+      isInCombat: false,
       actionQueue: [],
       cooldowns: {},
     };
