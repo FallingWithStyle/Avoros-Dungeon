@@ -386,7 +386,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         handleActionClick({ id: activeActionMode.actionId, name: activeActionMode.actionName, type: activeActionMode.type }, entityId);
         setActiveActionMode(null); // Clear active action mode
       } else {
-        combatSystem.selectEntity(entityId);
+        // If clicking on already selected entity, deselect it
+        const currentlySelected = combatSystem.getSelectedEntity();
+        if (currentlySelected && currentlySelected.id === entityId) {
+          combatSystem.selectEntity(null);
+        } else {
+          combatSystem.selectEntity(entityId);
+        }
       }
     }
   };

@@ -377,7 +377,7 @@ export class CombatSystem {
   private combatInterval: NodeJS.Timeout | null = null;
 
   private executeAction(queuedAction: QueuedAction): void {
-    const { entityId, action, targetId } = queuedAction;
+    const { entityId, action, targetId, targetPosition } = queuedAction;
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
 
@@ -396,8 +396,8 @@ export class CombatSystem {
         this.executeAbility(entity, action, targetId);
         break;
       case 'move':
-        if (queuedAction.targetPosition) {
-          this.moveEntityToPosition(entityId, queuedAction.targetPosition);
+        if (targetPosition) {
+          this.moveEntityToPosition(entityId, targetPosition);
         }
         break;
     }
@@ -634,9 +634,8 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    if (!this.combatInterval) {
-      this.startCombatProcessing();
-    }
+    // Always start combat processing to ensure actions execute
+    this.startCombatProcessing();
 
     this.notifyListeners();
     eventsSystem.onCombatAction(moveAction, entityId);
