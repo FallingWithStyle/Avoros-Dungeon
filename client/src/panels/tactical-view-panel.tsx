@@ -33,6 +33,7 @@ interface RoomData {
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
+  const [lastRoomId, setLastRoomId] = useState<number | null>(null);
 
   // Subscribe to combat system updates
   useEffect(() => {
@@ -49,12 +50,30 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Update combat system when room data changes
   useEffect(() => {
     if (roomData) {
+      // Detect room change and calculate entry direction
+      let entryDirection: 'north' | 'south' | 'east' | 'west' | null = null;
+      
+      if (lastRoomId !== null && lastRoomId !== roomData.room.id) {
+        // Room has changed, get the movement direction from storage
+        const storedDirection = sessionStorage.getItem('lastMovementDirection');
+        if (storedDirection && ['north', 'south', 'east', 'west'].includes(storedDirection)) {
+          entryDirection = storedDirection as 'north' | 'south' | 'east' | 'west';
+          // Clear the stored direction after using it
+          sessionStorage.removeItem('lastMovementDirection');
+        }
+      }
+      
+      setLastRoomId(roomData.room.id);
+
       // Clear existing entities
       combatState.entities.forEach(entity => {
         if (entity.id !== 'player') {
           combatSystem.removeEntity(entity.id);
         }
       });
+
+      // Calculate player position based on entry direction
+      const playerPosition = entryDirection ? combatSystem.getEntryPosition(entryDirection) : { x: 50, y: 50 };
 
       // Add player entity
       const playerEntity: CombatEntity = {
@@ -66,13 +85,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         attack: crawler.attack,
         defense: crawler.defense,
         speed: crawler.speed,
-        position: { x: 50, y: 50 }, // Center position
+        position: playerPosition,
+        entryDirection,
       };
       
       if (!combatState.entities.find(e => e.id === 'player')) {
         combatSystem.addEntity(playerEntity);
       } else {
         combatSystem.updateEntity('player', playerEntity);
+      }
+      
+      // Set entry direction in combat system
+      if (entryDirection) {
+        combatSystem.setPlayerEntryDirection(entryDirection);
       }
 
       // Add room entities based on tactical data

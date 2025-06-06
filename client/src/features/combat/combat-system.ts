@@ -12,6 +12,7 @@ export interface CombatEntity {
   isSelected?: boolean;
   cooldowns?: Record<string, number>;
   effects?: string[];
+  entryDirection?: 'north' | 'south' | 'east' | 'west' | null;
 }
 
 export interface CombatAction {
@@ -304,6 +305,31 @@ export class CombatSystem {
 
   getFriendlyEntities(): CombatEntity[] {
     return this.state.entities.filter(e => e.type === 'player' || e.type === 'neutral');
+  }
+
+  // Calculate entry position based on direction
+  getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
+    switch (direction) {
+      case 'north':
+        return { x: 50, y: 85 }; // Enter from south side (bottom)
+      case 'south':
+        return { x: 50, y: 15 }; // Enter from north side (top)
+      case 'east':
+        return { x: 15, y: 50 }; // Enter from west side (left)
+      case 'west':
+        return { x: 85, y: 50 }; // Enter from east side (right)
+      default:
+        return { x: 50, y: 50 }; // Center if no direction (starting position)
+    }
+  }
+
+  setPlayerEntryDirection(direction: 'north' | 'south' | 'east' | 'west' | null): void {
+    const player = this.state.entities.find(e => e.id === 'player');
+    if (player) {
+      player.entryDirection = direction;
+      player.position = this.getEntryPosition(direction);
+      this.notifyListeners();
+    }
   }
 }
 

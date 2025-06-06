@@ -158,7 +158,7 @@ export default function RoomNavigation({
         });
         queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       }, 100); // Small delay to batch updates
-      
+
       setPendingDirection(null);
     },
     onError: (error) => {
@@ -342,6 +342,41 @@ export default function RoomNavigation({
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
+
+  const [isMoving, setIsMoving] = useState(false);
+  const handleMove = async (direction: string) => {
+    try {
+      setIsMoving(true);
+      const response = await fetch(`/api/crawlers/${crawler.id}/move`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          direction, 
+          debugEnergyDisabled: crawler.energy < 5 
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to move");
+      }
+
+      // Store the movement direction in sessionStorage for the tactical view to pick up
+      sessionStorage.setItem('lastMovementDirection', direction);
+
+      // Refetch all relevant data
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/current-room`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`] });
+
+      toast.success(`Moved ${direction} successfully!`);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsMoving(false);
+    }
+  };
+
 
   return (
     <Card>
