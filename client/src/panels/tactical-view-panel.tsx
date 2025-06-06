@@ -41,6 +41,7 @@ interface ContextMenu {
   entityId: string;
   entity: CombatEntity;
   actions: CombatAction[];
+  clickPosition?: { x: number; y: number };
 }
 
 interface ExploredRoom extends Room {
@@ -56,7 +57,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    entityId: string;
+    entity: CombatEntity;
+    actions: CombatAction[];
+    clickPosition?: { x: number; y: number };
+  } | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
@@ -115,14 +124,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       setLastRoomId(roomData.room.id);
 
-      // Clear existing entities
+      // Clear existing entities except player and party members
       combatState.entities.forEach(entity => {
-        if (entity.id !== 'player') {
+        if (!entity.id.startsWith('player') && !entity.id.startsWith('party-') && !entity.id.startsWith('companion-')) {
           combatSystem.removeEntity(entity.id);
         }
       });
 
-      // Add player entity with correct position
+      // Calculate entry position for the party
+      const partyEntryPositions = getPartyEntryPositions(entryDirection, roomData.playersInRoom.length + 1); // +1 for main player
+
+      // Add/update main player entity
       const playerEntity: CombatEntity = {
         id: 'player',
         name: crawler.name,
@@ -132,7 +144,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         attack: crawler.attack,
         defense: crawler.defense,
         speed: crawler.speed,
-        position: { x: 50, y: 50 }, // Default center, will be updated below
+        position: partyEntryPositions[0], // Main player gets first position
         entryDirection,
       };
 
@@ -142,28 +154,60 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.updateEntity('player', playerEntity);
       }
 
-      // Set entry direction and position in combat system AFTER adding/updating the entity
-      if (entryDirection) {
-        combatSystem.setPlayerEntryDirection(entryDirection);
-      } else {
-        // If no entry direction, place player in center
-        const existingPlayer = combatState.entities.find(e => e.id === 'player');
-        if (existingPlayer) {
-          combatSystem.updateEntity('player', { position: { x: 50, y: 50 } });
-        }
-      }
+      // TODO: Add party members when party system is implemented
+      // Example placeholder for party members:
+      /*
+      const partyMembers = getPartyMembers(); // Future function to get party data
+      partyMembers.forEach((member, index) => {
+        const memberEntity: CombatEntity = {
+          id: `party-${member.id}`,
+          name: member.name,
+          type: 'player',
+          hp: member.hp,
+          maxHp: member.maxHp,
+          attack: member.attack,
+          defense: member.defense,
+          speed: member.speed,
+          position: partyEntryPositions[index + 1] || partyEntryPositions[0], // Fallback to main position
+          entryDirection,
+        };
+        combatSystem.addEntity(memberEntity);
+      });
+      */
+
+      // TODO: Add companions/pets when companion system is implemented
+      // Example placeholder for companions:
+      /*
+      const companions = getActiveCompanions(); // Future function to get companion data
+      companions.forEach((companion, index) => {
+        const companionEntity: CombatEntity = {
+          id: `companion-${companion.id}`,
+          name: companion.name,
+          type: 'neutral',
+          hp: companion.hp,
+          maxHp: companion.maxHp,
+          attack: companion.attack,
+          defense: companion.defense,
+          speed: companion.speed,
+          position: getCompanionPosition(partyEntryPositions[0], index), // Position near main player
+          entryDirection,
+        };
+        combatSystem.addEntity(companionEntity);
+      });
+      */
 
       // Add room entities based on tactical data
       const tacticalData = generateTacticalData(roomData);
 
       // Add mobs as combat entities
       tacticalData.mobs.forEach((mob, index) => {
+        const maxHp = 100;
         const mobEntity: CombatEntity = {
           id: `mob-${index}`,
           name: mob.name,
           type: 'hostile',
-          hp: mob.hp,
-          maxHp: 100,
+          hp: maxHp, // Always spawn with full health
+          maxHp: maxHp,
           attack: 15,
           defense: 5,
           speed: 10,
@@ -190,14 +234,130 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData, crawler]);
 
+  // Helper function to convert grid coordinates to percentage
+  const gridToPercentage = (gridX: number, gridY: number): { x: number; y: number } => {
+    // Convert 0-14 grid coordinates to percentage (with padding)
+    const cellWidth = 100 / 15;
+    const cellHeight = 100 / 15;
+    return {
+      x: (gridX + 0.5) * cellWidth, // Center of the cell
+      y: (gridY + 0.5) * cellHeight
+    };
+  };
+
+  // Helper function to get party entry positions based on direction
+  const getPartyEntryPositions = (direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] => {
+    const positions: { x: number; y: number }[] = [];
+
+    // Get base entry position
+    let baseGridX = 7; // Center
+    let baseGridY = 7; // Center
+    let spreadDirection: 'horizontal' | 'vertical' = 'horizontal';
+
+    switch (direction) {
+      case 'north':
+        baseGridX = 7;
+        baseGridY = 13; // Enter from south side (bottom)
+        spreadDirection = 'horizontal';
+        break;
+      case 'south':
+        baseGridX = 7;
+        baseGridY = 1; // Enter from north side (top)
+        spreadDirection = 'horizontal';
+        break;
+      case 'east':
+        baseGridX = 1;
+        baseGridY = 7; // Enter from west side (left)
+        spreadDirection = 'vertical';
+        break;
+      case 'west':
+        baseGridX = 13;
+        baseGridY = 7; // Enter from east side (right)
+        spreadDirection = 'vertical';
+        break;
+      default:
+        // No direction or center spawn
+        baseGridX = 7;
+        baseGridY = 7;
+        spreadDirection = 'horizontal';
+    }
+
+    // Calculate positions for party members
+    const halfParty = Math.floor(partySize / 2);
+
+    for (let i = 0; i < partySize; i++) {
+      let gridX = baseGridX;
+      let gridY = baseGridY;
+
+      if (partySize > 1) {
+        const offset = i - halfParty;
+
+        if (spreadDirection === 'horizontal') {
+          gridX = Math.max(0, Math.min(14, baseGridX + offset));
+        } else {
+          gridY = Math.max(0, Math.min(14, baseGridY + offset));
+        }
+      }
+
+      positions.push(gridToPercentage(gridX, gridY));
+    }
+
+    return positions;
+  };
+
+  // Helper function to position companions near their owner
+  const getCompanionPosition = (ownerPosition: { x: number; y: number }, companionIndex: number): { x: number; y: number } => {
+    // Convert owner position back to grid coordinates
+    const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
+    const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
+
+    // Position companions in adjacent cells
+    const companionOffsets = [
+      { x: 1, y: 0 },   // Right
+      { x: -1, y: 0 },  // Left
+      { x: 0, y: 1 },   // Down
+      { x: 0, y: -1 },  // Up
+      { x: 1, y: 1 },   // Diagonal down-right
+      { x: -1, y: -1 }, // Diagonal up-left
+      { x: 1, y: -1 },  // Diagonal up-right
+      { x: -1, y: 1 },  // Diagonal down-left
+    ];
+
+    const offset = companionOffsets[companionIndex % companionOffsets.length];
+    const companionGridX = Math.max(0, Math.min(14, ownerGridX + offset.x));
+    const companionGridY = Math.max(0, Math.min(14, ownerGridY + offset.y));
+
+    return gridToPercentage(companionGridX, companionGridY);
+  };
+
+  // Helper function to get a random empty grid cell
+  const getRandomEmptyCell = (excludeCells: Set<string> = new Set()): { gridX: number; gridY: number } => {
+    let attempts = 0;
+    while (attempts < 100) { // Prevent infinite loops
+      const gridX = Math.floor(Math.random() * 15);
+      const gridY = Math.floor(Math.random() * 15);
+      const cellKey = `${gridX},${gridY}`;
+
+      if (!excludeCells.has(cellKey)) {
+        excludeCells.add(cellKey);
+        return { gridX, gridY };
+      }
+      attempts++;
+    }
+    // Fallback if no empty cell found
+    return { gridX: 7, gridY: 7 };
+  };
+
   // Helper function to generate tactical data
   const generateTacticalData = (data: RoomData) => {
     const { room, availableDirections, playersInRoom } = data;
+    const occupiedCells = new Set<string>();
+
     return {
       background: getRoomBackgroundType(room.environment, room.type),
-      loot: generateLootPositions(room.hasLoot, room.type),
-      mobs: generateMobPositions(room.type, room.factionId),
-      npcs: generateNpcPositions(room.type, room.isSafe),
+      loot: generateLootPositions(room.hasLoot, room.type, occupiedCells),
+      mobs: generateMobPositions(room.type, room.factionId, occupiedCells),
+      npcs: generateNpcPositions(room.type, room.isSafe, occupiedCells),
       exits: {
         north: availableDirections.includes("north"),
         south: availableDirections.includes("south"),
@@ -226,20 +386,30 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const entity = combatState.entities.find(e => e.id === entityId);
     if (!entity) return;
 
-    // Select the entity
-    combatSystem.selectEntity(entityId);
+    const selectedEntity = combatSystem.getSelectedEntity();
+    let availableActions: CombatAction[] = [];
 
-    // Get available actions for the player towards this entity
-    const availableActions = combatSystem.getAvailableActions('player');
+    if (selectedEntity && entity.type === 'hostile') {
+      availableActions = combatSystem.getAvailableActions(selectedEntity.id);
+    }
 
-    // Show context menu
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      entityId,
-      entity,
-      actions: availableActions
-    });
+    // Calculate click position relative to the grid
+    const gridElement = event.currentTarget.closest('.relative');
+    if (gridElement) {
+      const rect = gridElement.getBoundingClientRect();
+      const clickX = ((event.clientX - rect.left) / rect.width) * 100;
+      const clickY = ((event.clientY - rect.top) / rect.height) * 100;
+
+      setContextMenu({
+        visible: true,
+        x: event.clientX,
+        y: event.clientY,
+        entityId,
+        entity,
+        actions: availableActions,
+        clickPosition: { x: clickX, y: clickY },
+      });
+    }
   };
 
   const handleLootClick = (lootIndex: number, lootItem: any, event: React.MouseEvent) => {
@@ -272,14 +442,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  const handleActionClick = (action: CombatAction, targetEntityId: string) => {
-    const success = combatSystem.queueAction('player', action.id, targetEntityId);
-    if (success) {
-      console.log(`Queued action: ${action.name} on ${contextMenu?.entity.name}`);
-    } else {
-      console.log(`Cannot perform ${action.name} - on cooldown or already queued`);
+  const handleActionClick = (action: CombatAction, targetId: string) => {
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity) {
+      const success = combatSystem.queueAction(selectedEntity.id, action.id, targetId);
+      if (success) {
+        console.log(`${selectedEntity.name} queued ${action.name} on ${targetId}`);
+      } else {
+        console.log(`Failed to queue ${action.name} - check cooldown, range, or existing action`);
+      }
     }
     setContextMenu(null);
+  };
+
+  const handleMoveToPosition = (targetPosition?: { x: number; y: number }) => {
+    if (!targetPosition) return;
+
+    const playerEntity = combatState.entities.find(e => e.type === 'player');
+    if (playerEntity) {
+      combatSystem.updateEntity(playerEntity.id, { position: targetPosition });
+      console.log(`Player moved to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`);
+    }
+    setContextMenu(null);
+  };
+
+  const handleGridClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    // If player is selected and no entity was clicked, move player to clicked position
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity?.type === 'player') {
+      handleMoveToPosition({ x, y });
+    }
   };
 
   const handleBackgroundClick = (event: React.MouseEvent) => {
@@ -323,65 +519,86 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }
 
-  function generateLootPositions(hasLoot: boolean, roomType: string) {
+  function generateLootPositions(hasLoot: boolean, roomType: string, occupiedCells: Set<string>) {
     if (!hasLoot) return [];
 
     const lootItems = [];
     if (roomType === "treasure") {
+      const chest = getRandomEmptyCell(occupiedCells);
+      const chestPos = gridToPercentage(chest.gridX, chest.gridY);
+
+      const coins = getRandomEmptyCell(occupiedCells);
+      const coinsPos = gridToPercentage(coins.gridX, coins.gridY);
+
+      const gems = getRandomEmptyCell(occupiedCells);
+      const gemsPos = gridToPercentage(gems.gridX, gems.gridY);
+
       lootItems.push(
-        { type: "treasure", name: "Treasure Chest", x: 50, y: 70 },
-        { type: "treasure", name: "Golden Coins", x: 30, y: 60 },
-        { type: "treasure", name: "Precious Gems", x: 70, y: 50 }
+        { type: "treasure", name: "Treasure Chest", x: chestPos.x, y: chestPos.y },
+        { type: "treasure", name: "Golden Coins", x: coinsPos.x, y: coinsPos.y },
+        { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y }
       );
     } else {
       // Random loot positioning for normal rooms
       const lootCount = Math.floor(Math.random() * 2) + 1;
       for (let i = 0; i < lootCount; i++) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+
         lootItems.push({
           type: Math.random() > 0.5 ? "treasure" : "weapon",
           name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60
+          x: pos.x,
+          y: pos.y
         });
       }
     }
     return lootItems;
   }
 
-  function generateMobPositions(roomType: string, factionId: number | null | undefined) {
+  function generateMobPositions(roomType: string, factionId: number | null | undefined, occupiedCells: Set<string>) {
     const mobs = [];
 
     if (roomType === "safe" || roomType === "entrance") return mobs;
 
     if (roomType === "boss") {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
       mobs.push({
         type: "hostile",
         name: "Boss Monster",
-        x: 50,
-        y: 30,
-        hp: 90
+        x: pos.x,
+        y: pos.y,
+        hp: 100
       });
     } else if (factionId) {
       // Add faction-based enemies
       const enemyCount = Math.floor(Math.random() * 3) + 1;
       for (let i = 0; i < enemyCount; i++) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+
         mobs.push({
           type: "hostile",
           name: "Faction Warrior",
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60,
-          hp: 60 + Math.random() * 40
+          x: pos.x,
+          y: pos.y,
+          hp: 100
         });
       }
     } else {
       // Random enemies for unclaimed rooms
       if (Math.random() > 0.6) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+
         mobs.push({
           type: "hostile",
           name: "Wild Monster",
-          x: 30 + Math.random() * 40,
-          y: 25 + Math.random() * 50,
-          hp: 50 + Math.random() * 50
+          x: pos.x,
+          y: pos.y,
+          hp: 100
         });
       }
     }
@@ -389,21 +606,27 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return mobs;
   }
 
-  function generateNpcPositions(roomType: string, isSafe: boolean) {
+  function generateNpcPositions(roomType: string, isSafe: boolean, occupiedCells: Set<string>) {
     const npcs = [];
 
     if (isSafe || roomType === "safe") {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
       npcs.push({
         name: "Sanctuary Keeper",
-        x: 60,
-        y: 40,
+        x: pos.x,
+        y: pos.y,
         dialogue: true
       });
     } else if (Math.random() > 0.8) {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
       npcs.push({
         name: "Wandering Merchant",
-        x: 40 + Math.random() * 20,
-        y: 30 + Math.random() * 40,
+        x: pos.x,
+        y: pos.y,
         dialogue: true
       });
     }
@@ -471,13 +694,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20">
-              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <svg width="100%" height="100%" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <defs>
-                  <pattern id="grid" width="6.67%" height="6.67%" patternUnits="userSpaceOnUse">
-                    <path d="M 6.67% 0 L 0 0 0 6.67%" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                  <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
+                    <path d="M 1 0 L 0 0 0 1" fill="none" stroke="currentColor" strokeWidth="0.02"/>
                   </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
+                <rect width="15" height="15" fill="url(#grid)" />
               </svg>
             </div>
           </div>
@@ -526,8 +749,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
               </div>
 
-              {/* HP bar for non-player entities */}
-              {entity.type !== 'player' && (
+              {/* HP bar for non-player entities (only show if damaged) */}
+              {entity.type !== 'player' && entity.hp !== undefined && entity.maxHp !== undefined && entity.hp < entity.maxHp && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
                   <div 
                     className={`h-full rounded transition-all duration-300 ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
@@ -590,24 +813,31 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
 
           {/* Other Players */}
-          {tacticalData.otherPlayers.map((player, index) => (
-            <div
-              key={`player-${index}`}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
-              style={{ 
-                left: `${25 + (index * 15)}%`, 
-                top: `${75 - (index * 10)}%` 
-              }}
-              title={`${player.name} (Level ${player.level})`}
-            >
-              <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-purple-300 flex items-center justify-center">
-                <Users className="w-3 h-3 text-white" />
+          {tacticalData.otherPlayers.map((player, index) => {
+            // Generate a specific grid position for each other player
+            const gridX = 2 + (index % 3) * 2; // Spread horizontally: 2, 4, 6, then wrap
+            const gridY = 12 + Math.floor(index / 3); // Stack vertically if more than 3 players
+            const pos = gridToPercentage(gridX, gridY);
+
+            return (
+              <div
+                key={`player-${index}`}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
+                style={{ 
+                  left: `${pos.x}%`, 
+                  top: `${pos.y}%` 
+                }}
+                title={`${player.name} (Level ${player.level})`}
+              >
+                <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-purple-300 flex items-center justify-center">
+                  <Users className="w-3 h-3 text-white" />
+                </div>
+                <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 font-medium whitespace-nowrap">
+                  {player.name}
+                </div>
               </div>
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 font-medium whitespace-nowrap">
-                {player.name}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Context Menu */}

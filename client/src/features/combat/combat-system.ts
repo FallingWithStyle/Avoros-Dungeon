@@ -63,7 +63,7 @@ export class CombatSystem {
         type: 'attack',
         cooldown: 2000,
         damage: 20,
-        range: 1,
+        range: 15, // Grid units - close combat range
         targetType: 'single',
         executionTime: 1000,
       }],
@@ -81,9 +81,19 @@ export class CombatSystem {
         type: 'attack',
         cooldown: 5000,
         damage: 40,
-        range: 1,
+        range: 15, // Grid units - close combat range
         targetType: 'single',
         executionTime: 2000,
+      }],
+      ['ranged_attack', {
+        id: 'ranged_attack',
+        name: 'Ranged Attack',
+        type: 'attack',
+        cooldown: 3000,
+        damage: 15,
+        range: 40, // Grid units - longer range
+        targetType: 'single',
+        executionTime: 1500,
       }],
     ]);
   }
@@ -171,6 +181,18 @@ export class CombatSystem {
     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
     if (existingAction) return false;
 
+    // Check range for attack actions
+    if (action.type === 'attack' && targetId && action.range) {
+      const target = this.state.entities.find(e => e.id === targetId);
+      if (target) {
+        const distance = this.calculateDistance(entity.position, target.position);
+        if (distance > action.range) {
+          console.log(`${entity.name} is too far from ${target.name} to attack (distance: ${distance.toFixed(1)}, range: ${action.range})`);
+          return false;
+        }
+      }
+    }
+
     const queuedAction: QueuedAction = {
       entityId,
       action,
@@ -183,6 +205,61 @@ export class CombatSystem {
     this.state.actionQueue.push(queuedAction);
     this.notifyListeners();
     return true;
+  }
+
+  // Process AI for enemy entities
+  private processEnemyAI(): void {
+    const hostileEntities = this.state.entities.filter(e => e.type === 'hostile');
+    const playerEntity = this.state.entities.find(e => e.type === 'player');
+    
+    if (!playerEntity) return;
+
+    hostileEntities.forEach(enemy => {
+      // Skip if enemy already has an action queued
+      const hasQueuedAction = this.state.actionQueue.some(qa => qa.entityId === enemy.id);
+      if (hasQueuedAction) return;
+
+      // Check if enemy can attack player
+      const distance = this.calculateDistance(enemy.position, playerEntity.position);
+      const attackAction = this.actionDefinitions.get('basic_attack');
+      
+      if (attackAction && distance <= attackAction.range!) {
+        // Enemy is in range, attack
+        this.queueAction(enemy.id, 'basic_attack', playerEntity.id);
+      } else {
+        // Enemy is too far, move closer
+        this.moveEntityTowards(enemy.id, playerEntity.position);
+      }
+    });
+  }
+
+  // Calculate distance between two positions
+  private calculateDistance(pos1: { x: number; y: number }, pos2: { x: number; y: number }): number {
+    const dx = pos1.x - pos2.x;
+    const dy = pos1.y - pos2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Move entity towards a target position
+  private moveEntityTowards(entityId: string, targetPosition: { x: number; y: number }): void {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return;
+
+    const dx = targetPosition.x - entity.position.x;
+    const dy = targetPosition.y - entity.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return;
+
+    // Move a small step towards the target (adjust speed as needed)
+    const moveSpeed = 2; // Percentage points per movement
+    const normalizedDx = (dx / distance) * moveSpeed;
+    const normalizedDy = (dy / distance) * moveSpeed;
+
+    entity.position.x = Math.max(5, Math.min(95, entity.position.x + normalizedDx));
+    entity.position.y = Math.max(5, Math.min(95, entity.position.y + normalizedDy));
+
+    this.notifyListeners();
   }
 
   cancelAction(entityId: string): boolean {
@@ -198,6 +275,7 @@ export class CombatSystem {
   startCombat(): void {
     this.state.isInCombat = true;
     this.state.combatStartTime = Date.now();
+    this.startCombatProcessing();
     this.notifyListeners();
   }
 
@@ -205,6 +283,7 @@ export class CombatSystem {
     this.state.isInCombat = false;
     this.state.actionQueue = [];
     this.state.combatStartTime = undefined;
+    this.stopCombatProcessing();
     this.notifyListeners();
   }
 
@@ -220,10 +299,32 @@ export class CombatSystem {
     // Remove executed actions
     this.state.actionQueue = this.state.actionQueue.filter(qa => now < qa.executesAt);
     
+    // Process AI for hostile entities that don't have queued actions
+    this.processEnemyAI();
+    
     if (readyActions.length > 0) {
       this.notifyListeners();
     }
   }
+
+  // Start automatic combat processing
+  startCombatProcessing(): void {
+    if (this.combatInterval) return; // Already running
+    
+    this.combatInterval = setInterval(() => {
+      this.processCombatTick();
+    }, 100); // Process every 100ms
+  }
+
+  // Stop automatic combat processing
+  stopCombatProcessing(): void {
+    if (this.combatInterval) {
+      clearInterval(this.combatInterval);
+      this.combatInterval = null;
+    }
+  }
+
+  private combatInterval: NodeJS.Timeout | null = null;
 
   private executeAction(queuedAction: QueuedAction): void {
     const { entityId, action, targetId } = queuedAction;
@@ -307,20 +408,80 @@ export class CombatSystem {
     return this.state.entities.filter(e => e.type === 'player' || e.type === 'neutral');
   }
 
-  // Calculate entry position based on direction
+  // Helper function to convert grid coordinates to percentage
+  private gridToPercentage(gridX: number, gridY: number): { x: number; y: number } {
+    const cellWidth = 100 / 15;
+    const cellHeight = 100 / 15;
+    return {
+      x: (gridX + 0.5) * cellWidth, // Center of the cell
+      y: (gridY + 0.5) * cellHeight
+    };
+  }
+
+  // Calculate entry position based on direction using grid coordinates
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
     switch (direction) {
       case 'north':
-        return { x: 50, y: 85 }; // Enter from south side (bottom)
+        // Coming from north means entering from south side (bottom edge)
+        return this.gridToPercentage(7, 13);
       case 'south':
-        return { x: 50, y: 15 }; // Enter from north side (top)
+        // Coming from south means entering from north side (top edge)
+        return this.gridToPercentage(7, 1);
       case 'east':
-        return { x: 15, y: 50 }; // Enter from west side (left)
+        // Coming from east means entering from west side (left edge)
+        return this.gridToPercentage(1, 7);
       case 'west':
-        return { x: 85, y: 50 }; // Enter from east side (right)
+        // Coming from west means entering from east side (right edge)
+        return this.gridToPercentage(13, 7);
       default:
-        return { x: 50, y: 50 }; // Center if no direction (starting position)
+        // No direction specified - spawn in center
+        return this.gridToPercentage(7, 7);
     }
+  }
+
+  // Enhanced method to position multiple entities (for future party system)
+  getPartyEntryPositions(direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] {
+    const positions: { x: number; y: number }[] = [];
+    const basePosition = this.getEntryPosition(direction);
+    
+    if (partySize <= 1) {
+      return [basePosition];
+    }
+
+    // Convert base position back to grid coordinates
+    const baseGridX = Math.round((basePosition.x / 100) * 15 - 0.5);
+    const baseGridY = Math.round((basePosition.y / 100) * 15 - 0.5);
+    
+    // Spread party members around the entry point
+    const halfParty = Math.floor(partySize / 2);
+    
+    for (let i = 0; i < partySize; i++) {
+      let gridX = baseGridX;
+      let gridY = baseGridY;
+      
+      const offset = i - halfParty;
+      
+      // Spread horizontally for north/south entries, vertically for east/west
+      if (direction === 'north' || direction === 'south') {
+        gridX = Math.max(0, Math.min(14, baseGridX + offset));
+      } else if (direction === 'east' || direction === 'west') {
+        gridY = Math.max(0, Math.min(14, baseGridY + offset));
+      } else {
+        // For center spawns, use a small cluster pattern
+        const clusterOffsets = [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 0 },
+          { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 1 },
+          { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }
+        ];
+        const clusterOffset = clusterOffsets[i % clusterOffsets.length];
+        gridX = Math.max(0, Math.min(14, baseGridX + clusterOffset.x));
+        gridY = Math.max(0, Math.min(14, baseGridY + clusterOffset.y));
+      }
+      
+      positions.push(this.gridToPercentage(gridX, gridY));
+    }
+
+    return positions;
   }
 
   setPlayerEntryDirection(direction: 'north' | 'south' | 'east' | 'west' | null): void {

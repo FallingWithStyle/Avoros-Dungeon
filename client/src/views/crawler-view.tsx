@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +8,7 @@ import FloorInfoPanel from "@/panels/floor-info-panel";
 import NavigationPanel from "@/panels/navigation-panel";
 import MapPanel from "@/panels/map-panel";
 import TacticalViewPanel from "@/panels/tactical-view-panel";
+import RoomEventsPanel from "@/panels/room-events-panel";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
@@ -112,6 +112,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           <div className="space-y-6">
             <NavigationPanel crawler={crawler} energyDisabled={energyDisabled} />
             <TacticalViewPanel crawler={crawler} />
+            <RoomEventsPanel crawler={crawler} />
           </div>
 
           {/* Right Column - Floor Info & Mini-map */}

@@ -198,6 +198,12 @@ export default function RoomNavigation({
         });
         return;
       }
+      
+      // Store the movement direction for tactical view positioning
+      if (['north', 'south', 'east', 'west'].includes(direction)) {
+        sessionStorage.setItem('lastMovementDirection', direction);
+      }
+      
       setPendingDirection(direction);
       moveMutation.mutate(direction);
     },
@@ -342,7 +348,6 @@ export default function RoomNavigation({
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-
 
   return (
     <Card>
