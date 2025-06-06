@@ -307,19 +307,29 @@ export class CombatSystem {
     return this.state.entities.filter(e => e.type === 'player' || e.type === 'neutral');
   }
 
-  // Calculate entry position based on direction
+  // Helper function to convert grid coordinates to percentage
+  private gridToPercentage(gridX: number, gridY: number): { x: number; y: number } {
+    const cellWidth = 100 / 15;
+    const cellHeight = 100 / 15;
+    return {
+      x: (gridX + 0.5) * cellWidth, // Center of the cell
+      y: (gridY + 0.5) * cellHeight
+    };
+  }
+
+  // Calculate entry position based on direction using grid coordinates
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
     switch (direction) {
       case 'north':
-        return { x: 50, y: 85 }; // Enter from south side (bottom)
+        return this.gridToPercentage(7, 13); // Enter from south side (bottom row, center)
       case 'south':
-        return { x: 50, y: 15 }; // Enter from north side (top)
+        return this.gridToPercentage(7, 1); // Enter from north side (top row, center)
       case 'east':
-        return { x: 15, y: 50 }; // Enter from west side (left)
+        return this.gridToPercentage(1, 7); // Enter from west side (left column, center)
       case 'west':
-        return { x: 85, y: 50 }; // Enter from east side (right)
+        return this.gridToPercentage(13, 7); // Enter from east side (right column, center)
       default:
-        return { x: 50, y: 50 }; // Center if no direction (starting position)
+        return this.gridToPercentage(7, 7); // Center if no direction (middle of grid)
     }
   }
 

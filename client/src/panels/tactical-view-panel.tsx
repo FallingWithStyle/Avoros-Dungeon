@@ -190,14 +190,45 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData, crawler]);
 
+  // Helper function to convert grid coordinates to percentage
+  const gridToPercentage = (gridX: number, gridY: number): { x: number; y: number } => {
+    // Convert 0-14 grid coordinates to percentage (with padding)
+    const cellWidth = 100 / 15;
+    const cellHeight = 100 / 15;
+    return {
+      x: (gridX + 0.5) * cellWidth, // Center of the cell
+      y: (gridY + 0.5) * cellHeight
+    };
+  };
+
+  // Helper function to get a random empty grid cell
+  const getRandomEmptyCell = (excludeCells: Set<string> = new Set()): { gridX: number; gridY: number } => {
+    let attempts = 0;
+    while (attempts < 100) { // Prevent infinite loops
+      const gridX = Math.floor(Math.random() * 15);
+      const gridY = Math.floor(Math.random() * 15);
+      const cellKey = `${gridX},${gridY}`;
+      
+      if (!excludeCells.has(cellKey)) {
+        excludeCells.add(cellKey);
+        return { gridX, gridY };
+      }
+      attempts++;
+    }
+    // Fallback if no empty cell found
+    return { gridX: 7, gridY: 7 };
+  };
+
   // Helper function to generate tactical data
   const generateTacticalData = (data: RoomData) => {
     const { room, availableDirections, playersInRoom } = data;
+    const occupiedCells = new Set<string>();
+    
     return {
       background: getRoomBackgroundType(room.environment, room.type),
-      loot: generateLootPositions(room.hasLoot, room.type),
-      mobs: generateMobPositions(room.type, room.factionId),
-      npcs: generateNpcPositions(room.type, room.isSafe),
+      loot: generateLootPositions(room.hasLoot, room.type, occupiedCells),
+      mobs: generateMobPositions(room.type, room.factionId, occupiedCells),
+      npcs: generateNpcPositions(room.type, room.isSafe, occupiedCells),
       exits: {
         north: availableDirections.includes("north"),
         south: availableDirections.includes("south"),
@@ -323,64 +354,85 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }
 
-  function generateLootPositions(hasLoot: boolean, roomType: string) {
+  function generateLootPositions(hasLoot: boolean, roomType: string, occupiedCells: Set<string>) {
     if (!hasLoot) return [];
 
     const lootItems = [];
     if (roomType === "treasure") {
+      const chest = getRandomEmptyCell(occupiedCells);
+      const chestPos = gridToPercentage(chest.gridX, chest.gridY);
+      
+      const coins = getRandomEmptyCell(occupiedCells);
+      const coinsPos = gridToPercentage(coins.gridX, coins.gridY);
+      
+      const gems = getRandomEmptyCell(occupiedCells);
+      const gemsPos = gridToPercentage(gems.gridX, gems.gridY);
+      
       lootItems.push(
-        { type: "treasure", name: "Treasure Chest", x: 50, y: 70 },
-        { type: "treasure", name: "Golden Coins", x: 30, y: 60 },
-        { type: "treasure", name: "Precious Gems", x: 70, y: 50 }
+        { type: "treasure", name: "Treasure Chest", x: chestPos.x, y: chestPos.y },
+        { type: "treasure", name: "Golden Coins", x: coinsPos.x, y: coinsPos.y },
+        { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y }
       );
     } else {
       // Random loot positioning for normal rooms
       const lootCount = Math.floor(Math.random() * 2) + 1;
       for (let i = 0; i < lootCount; i++) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+        
         lootItems.push({
           type: Math.random() > 0.5 ? "treasure" : "weapon",
           name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60
+          x: pos.x,
+          y: pos.y
         });
       }
     }
     return lootItems;
   }
 
-  function generateMobPositions(roomType: string, factionId: number | null | undefined) {
+  function generateMobPositions(roomType: string, factionId: number | null | undefined, occupiedCells: Set<string>) {
     const mobs = [];
 
     if (roomType === "safe" || roomType === "entrance") return mobs;
 
     if (roomType === "boss") {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+      
       mobs.push({
         type: "hostile",
         name: "Boss Monster",
-        x: 50,
-        y: 30,
+        x: pos.x,
+        y: pos.y,
         hp: 90
       });
     } else if (factionId) {
       // Add faction-based enemies
       const enemyCount = Math.floor(Math.random() * 3) + 1;
       for (let i = 0; i < enemyCount; i++) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+        
         mobs.push({
           type: "hostile",
           name: "Faction Warrior",
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60,
+          x: pos.x,
+          y: pos.y,
           hp: 60 + Math.random() * 40
         });
       }
     } else {
       // Random enemies for unclaimed rooms
       if (Math.random() > 0.6) {
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
+        
         mobs.push({
           type: "hostile",
           name: "Wild Monster",
-          x: 30 + Math.random() * 40,
-          y: 25 + Math.random() * 50,
+          x: pos.x,
+          y: pos.y,
           hp: 50 + Math.random() * 50
         });
       }
@@ -389,21 +441,27 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return mobs;
   }
 
-  function generateNpcPositions(roomType: string, isSafe: boolean) {
+  function generateNpcPositions(roomType: string, isSafe: boolean, occupiedCells: Set<string>) {
     const npcs = [];
 
     if (isSafe || roomType === "safe") {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+      
       npcs.push({
         name: "Sanctuary Keeper",
-        x: 60,
-        y: 40,
+        x: pos.x,
+        y: pos.y,
         dialogue: true
       });
     } else if (Math.random() > 0.8) {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+      
       npcs.push({
         name: "Wandering Merchant",
-        x: 40 + Math.random() * 20,
-        y: 30 + Math.random() * 40,
+        x: pos.x,
+        y: pos.y,
         dialogue: true
       });
     }
@@ -590,24 +648,31 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
 
           {/* Other Players */}
-          {tacticalData.otherPlayers.map((player, index) => (
-            <div
-              key={`player-${index}`}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
-              style={{ 
-                left: `${25 + (index * 15)}%`, 
-                top: `${75 - (index * 10)}%` 
-              }}
-              title={`${player.name} (Level ${player.level})`}
-            >
-              <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-purple-300 flex items-center justify-center">
-                <Users className="w-3 h-3 text-white" />
+          {tacticalData.otherPlayers.map((player, index) => {
+            // Generate a specific grid position for each other player
+            const gridX = 2 + (index % 3) * 2; // Spread horizontally: 2, 4, 6, then wrap
+            const gridY = 12 + Math.floor(index / 3); // Stack vertically if more than 3 players
+            const pos = gridToPercentage(gridX, gridY);
+            
+            return (
+              <div
+                key={`player-${index}`}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
+                style={{ 
+                  left: `${pos.x}%`, 
+                  top: `${pos.y}%` 
+                }}
+                title={`${player.name} (Level ${player.level})`}
+              >
+                <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-purple-300 flex items-center justify-center">
+                  <Users className="w-3 h-3 text-white" />
+                </div>
+                <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 font-medium whitespace-nowrap">
+                  {player.name}
+                </div>
               </div>
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 font-medium whitespace-nowrap">
-                {player.name}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Context Menu */}
