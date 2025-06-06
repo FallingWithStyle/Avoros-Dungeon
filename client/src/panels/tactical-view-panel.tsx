@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -357,7 +356,7 @@ const generateNpcPositions = (
 };
 
 // Helper function to generate tactical data
-const generateTacticalData = (data: RoomData) => {
+const generateTacticalData = (data: RoomData, crawler: CrawlerWithDetails) => {
   const { room, availableDirections, playersInRoom } = data;
   const occupiedCells = new Set<string>();
 
@@ -372,7 +371,7 @@ const generateTacticalData = (data: RoomData) => {
       east: availableDirections.includes("east"),
       west: availableDirections.includes("west"),
     },
-    otherPlayers: playersInRoom.filter((p) => p.id !== data.room.id),
+    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
 };
 
@@ -505,7 +504,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionId: string;
     actionName: string;
   } | null>(null);
-  
+
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Fetch current room data
@@ -576,8 +575,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         event.preventDefault();
         const action = hotbarActions[actionIndex];
         const cooldownPercentage = getCooldownPercentage(action.id);
-        
-        if (cooldownPercentage === 0) { // Only trigger if not on cooldown
+
+        if (cooldownPercentage === 0) {
+          // Only trigger if not on cooldown
           handleHotbarClick(action.id, action.type, action.name);
         }
       }
@@ -650,7 +650,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
 
       // Add room entities based on tactical data
-      const tacticalData = generateTacticalData(roomData);
+      const tacticalData = generateTacticalData(roomData, crawler);
 
       // Add mobs as combat entities
       tacticalData.mobs.forEach((mob, index) => {
@@ -698,9 +698,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const lastUsed = playerEntity.cooldowns[actionId] || 0;
     const now = Date.now();
     const timeSinceLastUse = now - lastUsed;
-    
+
     if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
-    
+
     return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
   };
 
@@ -715,8 +715,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     let closestTarget: CombatEntity | null = null;
     let closestDistance = Infinity;
 
-    hostileEntities.forEach(entity => {
-      const distance = combatSystem.calculateDistance(playerEntity.position, entity.position);
+    hostileEntities.forEach((entity) => {
+      const distance = combatSystem.calculateDistance(
+        playerEntity.position,
+        entity.position,
+      );
       if (distance < closestDistance) {
         closestDistance = distance;
         closestTarget = entity;
@@ -752,7 +755,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Auto-select and attack viable target
         const target = findViableTarget();
         if (target && playerEntity) {
-          const attackAction = combatSystem.actionDefinitions?.get(actionId) || {
+          const attackAction = combatSystem.actionDefinitions?.get(
+            actionId,
+          ) || {
             id: actionId,
             name: actionName,
             type: "attack",
@@ -764,34 +769,55 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           };
 
           // Check if target is in range
-          const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
+          const distance = combatSystem.calculateDistance(
+            playerEntity.position,
+            target.position,
+          );
           if (distance <= (attackAction.range || 15)) {
             // Target is in range, attack directly
-            const success = combatSystem.queueAction(playerEntity.id, actionId, target.id);
+            const success = combatSystem.queueAction(
+              playerEntity.id,
+              actionId,
+              target.id,
+            );
             if (success) {
               console.log(`Auto-attacking ${target.name}`);
             } else {
-              console.log(`Failed to attack ${target.name} - check cooldown or existing action`);
+              console.log(
+                `Failed to attack ${target.name} - check cooldown or existing action`,
+              );
             }
           } else {
             // Target is out of range, queue move then attack
             console.log(`Target out of range, moving closer to ${target.name}`);
-            
+
             // Calculate position to move to (just within attack range)
             const dx = target.position.x - playerEntity.position.x;
             const dy = target.position.y - playerEntity.position.y;
             const targetDistance = Math.sqrt(dx * dx + dy * dy);
-            const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
-            
-            const moveX = playerEntity.position.x + (dx / targetDistance) * moveDistance;
-            const moveY = playerEntity.position.y + (dy / targetDistance) * moveDistance;
-            
+            const moveDistance = Math.max(
+              0,
+              targetDistance - (attackAction.range || 15) + 2,
+            ); // Leave small buffer
+
+            const moveX =
+              playerEntity.position.x + (dx / targetDistance) * moveDistance;
+            const moveY =
+              playerEntity.position.y + (dy / targetDistance) * moveDistance;
+
             // Queue move action first
-            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, { x: moveX, y: moveY });
+            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, {
+              x: moveX,
+              y: moveY,
+            });
             if (moveSuccess) {
               // Schedule the attack to be queued after move completes
               setTimeout(() => {
-                const attackSuccess = combatSystem.queueAction(playerEntity.id, actionId, target.id);
+                const attackSuccess = combatSystem.queueAction(
+                  playerEntity.id,
+                  actionId,
+                  target.id,
+                );
                 if (attackSuccess) {
                   console.log(`Queued attack on ${target.name} after movement`);
                 }
@@ -1026,7 +1052,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
 
     // Check if clicked on an entity
-    const clickedEntity = combatState.entities.find(entity => {
+    const clickedEntity = combatState.entities.find((entity) => {
       const dx = Math.abs(entity.position.x - x);
       const dy = Math.abs(entity.position.y - y);
       return dx < 3 && dy < 3; // 3% tolerance for clicking on entities
@@ -1042,11 +1068,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const selectedEntity = combatSystem.getSelectedEntity();
     const playerEntity = combatState.entities.find((e) => e.id === "player");
 
-    if (selectedEntity?.type !== 'player' && playerEntity) {
-      combatSystem.selectEntity('player');
+    if (selectedEntity?.type !== "player" && playerEntity) {
+      combatSystem.selectEntity("player");
     }
 
-    const activePlayer = selectedEntity?.type === "player" ? selectedEntity : playerEntity;
+    const activePlayer =
+      selectedEntity?.type === "player" ? selectedEntity : playerEntity;
 
     if (!activePlayer) {
       console.log("No player entity found");
@@ -1081,7 +1108,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
     } else if (activeActionMode?.type === "attack") {
       // Attack mode - check if clicking on an entity or empty space
-      const clickedEntity = combatState.entities.find(entity => {
+      const clickedEntity = combatState.entities.find((entity) => {
         const dx = Math.abs(entity.position.x - x);
         const dy = Math.abs(entity.position.y - y);
         return dx < 3 && dy < 3 && entity.type === "hostile";
@@ -1089,7 +1116,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (clickedEntity) {
         // Clicked on a hostile entity - attack it
-        const attackAction = combatSystem.actionDefinitions?.get(activeActionMode.actionId) || {
+        const attackAction = combatSystem.actionDefinitions?.get(
+          activeActionMode.actionId,
+        ) || {
           id: activeActionMode.actionId,
           name: activeActionMode.actionName,
           type: "attack",
@@ -1101,40 +1130,65 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         };
 
         // Check if target is in range
-        const distance = combatSystem.calculateDistance(activePlayer.position, clickedEntity.position);
+        const distance = combatSystem.calculateDistance(
+          activePlayer.position,
+          clickedEntity.position,
+        );
         if (distance <= (attackAction.range || 15)) {
           // Target is in range, attack directly
-          const success = combatSystem.queueAction(activePlayer.id, activeActionMode.actionId, clickedEntity.id);
+          const success = combatSystem.queueAction(
+            activePlayer.id,
+            activeActionMode.actionId,
+            clickedEntity.id,
+          );
           if (success) {
             console.log(`Attacking ${clickedEntity.name}`);
             setActiveActionMode(null); // Clear attack mode after successful attack
           } else {
-            console.log(`Failed to attack ${clickedEntity.name} - check cooldown or existing action`);
+            console.log(
+              `Failed to attack ${clickedEntity.name} - check cooldown or existing action`,
+            );
           }
         } else {
           // Target is out of range, queue move then attack
-          console.log(`Target out of range, moving closer to ${clickedEntity.name}`);
-          
+          console.log(
+            `Target out of range, moving closer to ${clickedEntity.name}`,
+          );
+
           // Calculate position to move to (just within attack range)
           const dx = clickedEntity.position.x - activePlayer.position.x;
           const dy = clickedEntity.position.y - activePlayer.position.y;
           const targetDistance = Math.sqrt(dx * dx + dy * dy);
-          const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
-          
-          const moveX = activePlayer.position.x + (dx / targetDistance) * moveDistance;
-          const moveY = activePlayer.position.y + (dy / targetDistance) * moveDistance;
-          
+          const moveDistance = Math.max(
+            0,
+            targetDistance - (attackAction.range || 15) + 2,
+          ); // Leave small buffer
+
+          const moveX =
+            activePlayer.position.x + (dx / targetDistance) * moveDistance;
+          const moveY =
+            activePlayer.position.y + (dy / targetDistance) * moveDistance;
+
           // Queue move action first
-          const moveSuccess = combatSystem.queueMoveAction(activePlayer.id, { x: moveX, y: moveY });
+          const moveSuccess = combatSystem.queueMoveAction(activePlayer.id, {
+            x: moveX,
+            y: moveY,
+          });
           if (moveSuccess) {
             // Schedule the attack to be queued after move completes
             setTimeout(() => {
-              const attackSuccess = combatSystem.queueAction(activePlayer.id, activeActionMode.actionId, clickedEntity.id);
+              const attackSuccess = combatSystem.queueAction(
+                activePlayer.id,
+                activeActionMode.actionId,
+                clickedEntity.id,
+              );
               if (attackSuccess) {
-                console.log(`Queued attack on ${clickedEntity.name} after movement`);
+                console.log(
+                  `Queued attack on ${clickedEntity.name} after movement`,
+                );
               }
             }, 900); // Slightly before move action completes (800ms execution time)
-            
+
             setActiveActionMode(null); // Clear attack mode after queuing actions
           }
         }
@@ -1174,7 +1228,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-  const tacticalData = generateTacticalData(roomData);
+  const tacticalData = generateTacticalData(roomData, crawler);
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -1386,7 +1440,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {hotbarActions.map((action, index) => {
             const cooldownPercentage = getCooldownPercentage(action.id);
             const isOnCooldown = cooldownPercentage > 0;
-            
+
             return (
               <button
                 key={action.id}
@@ -1402,7 +1456,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {/* Cooldown overlay */}
                 {isOnCooldown && (
                   <div className="absolute inset-0 rounded-full overflow-hidden">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
+                    <svg
+                      className="w-full h-full transform -rotate-90"
+                      viewBox="0 0 32 32"
+                    >
                       <circle
                         cx="16"
                         cy="16"
@@ -1416,12 +1473,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     </svg>
                   </div>
                 )}
-                
+
                 {/* Icon */}
-                <div className={`${isOnCooldown ? "opacity-50" : ""} transition-opacity duration-150`}>
+                <div
+                  className={`${isOnCooldown ? "opacity-50" : ""} transition-opacity duration-150`}
+                >
                   {action.icon}
                 </div>
-                
+
                 {/* Number indicator */}
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-slate-600 text-xs rounded-full flex items-center justify-center text-slate-200">
                   {index === 9 ? "0" : (index + 1).toString()}
