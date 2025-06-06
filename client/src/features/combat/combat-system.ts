@@ -97,6 +97,14 @@ export class CombatSystem {
         targetType: 'single',
         executionTime: 1500,
       }],
+      ['move', {
+        id: 'move',
+        name: 'Move',
+        type: 'move',
+        cooldown: 1000,
+        targetType: 'area',
+        executionTime: 800,
+      }],
     ]);
   }
 
@@ -117,6 +125,7 @@ export class CombatSystem {
   // Entity management
   addEntity(entity: CombatEntity): void {
     this.state.entities.push({ ...entity, cooldowns: {} });
+    this.checkAndStartCombat();
     this.notifyListeners();
   }
 
@@ -125,6 +134,7 @@ export class CombatSystem {
     if (this.state.selectedEntityId === entityId) {
       this.state.selectedEntityId = null;
     }
+    this.checkAndStartCombat(); // This will end combat if no enemies remain
     this.notifyListeners();
   }
 
@@ -168,20 +178,23 @@ export class CombatSystem {
     });
   }
 
-  queueAction(entityId: string, actionId: string, targetId?: string, targetPosition?: { x: number; y: number }): boolean {
+  queueAction(entityId: string, actionId: string, targetId?: string, targetPosition?: { x: number; y: number }): { success: boolean; reason?: string } {
     const entity = this.state.entities.find(e => e.id === entityId);
     const action = this.actionDefinitions.get(actionId);
 
-    if (!entity || !action) return false;
+    if (!entity || !action) return { success: false, reason: "Entity or action not found" };
 
     // Check if action is on cooldown
     const now = Date.now();
     const lastUsed = entity.cooldowns?.[actionId] || 0;
-    if (now < lastUsed + action.cooldown) return false;
+    if (now < lastUsed + action.cooldown) {
+      const remainingCooldown = Math.ceil((lastUsed + action.cooldown - now) / 1000);
+      return { success: false, reason: `${action.name} is on cooldown for ${remainingCooldown}s` };
+    }
 
     // Check if entity already has an action queued
     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
-    if (existingAction) return false;
+    if (existingAction) return { success: false, reason: "Already performing an action" };
 
     // Check range for attack actions
     if (action.type === 'attack' && targetId && action.range) {
@@ -189,9 +202,23 @@ export class CombatSystem {
       if (target) {
         const distance = this.calculateDistance(entity.position, target.position);
         if (distance > action.range) {
-          console.log(`${entity.name} is too far from ${target.name} to attack (distance: ${distance.toFixed(1)}, range: ${action.range})`);
-          return false;
+          return { 
+            success: false, 
+            reason: `Too far to attack (distance: ${distance.toFixed(1)}, range: ${action.range}). Move closer first.` 
+          };
         }
+      }
+    }
+
+    // Validate move action
+    if (action.type === 'move' && targetPosition) {
+      const distance = this.calculateDistance(entity.position, targetPosition);
+      const maxMoveDistance = 20; // Maximum move distance per action
+      if (distance > maxMoveDistance) {
+        return { 
+          success: false, 
+          reason: `Cannot move that far in one action (max: ${maxMoveDistance})` 
+        };
       }
     }
 
@@ -210,7 +237,7 @@ export class CombatSystem {
     // Generate event for the action
     eventsSystem.onCombatAction(action, entityId, targetId, action.damage);
 
-    return true;
+    return { success: true };
   }
 
   // Process AI for enemy entities
@@ -283,6 +310,17 @@ export class CombatSystem {
     this.state.combatStartTime = Date.now();
     this.startCombatProcessing();
     this.notifyListeners();
+    console.log("Combat started with", this.getHostileEntities().length, "enemies");
+  }
+
+  // Auto-start combat when hostile entities are present
+  checkAndStartCombat(): void {
+    const hostileEntities = this.getHostileEntities();
+    if (hostileEntities.length > 0 && !this.state.isInCombat) {
+      this.startCombat();
+    } else if (hostileEntities.length === 0 && this.state.isInCombat) {
+      this.endCombat();
+    }
   }
 
   endCombat(): void {
@@ -333,7 +371,7 @@ export class CombatSystem {
   private combatInterval: NodeJS.Timeout | null = null;
 
   private executeAction(queuedAction: QueuedAction): void {
-    const { entityId, action, targetId } = queuedAction;
+    const { entityId, action, targetId, targetPosition } = queuedAction;
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
 
@@ -351,7 +389,20 @@ export class CombatSystem {
       case 'ability':
         this.executeAbility(entity, action, targetId);
         break;
+      case 'move':
+        if (targetPosition) {
+          this.executeMove(entity, targetPosition);
+        }
+        break;
     }
+  }
+
+  private executeMove(entity: CombatEntity, targetPosition: { x: number; y: number }): void {
+    // Smooth movement towards target position
+    entity.position.x = Math.max(5, Math.min(95, targetPosition.x));
+    entity.position.y = Math.max(5, Math.min(95, targetPosition.y));
+    
+    console.log(`${entity.name} moved to position (${entity.position.x.toFixed(1)}, ${entity.position.y.toFixed(1)})`);
   }
 
   private dealDamage(targetId: string, baseDamage: number, attackStat: number): void {
