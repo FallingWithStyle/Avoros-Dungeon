@@ -524,6 +524,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Only handle left clicks
     if (event.button !== 0) return;
 
+    // Check if we actually clicked on the grid background, not on an entity
+    const target = event.target as HTMLElement;
+    const clickedOnGrid = target === event.currentTarget || target.closest('.grid-background');
+
+    if (!clickedOnGrid) {
+      // Clicked on an entity or other element, let their handlers deal with it
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -554,16 +563,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const playerEntity = combatState.entities.find(e => e.id === 'player');
       if (playerEntity) {
         combatSystem.selectEntity('player');
-        // Small delay to ensure selection is processed, then queue move
-        setTimeout(() => {
-          const success = combatSystem.queueMoveAction('player', { x, y });
-          if (success) {
-            console.log(`${playerEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-            if (activeActionMode) {
-              setActiveActionMode(null);
-            }
+        // Queue move action immediately
+        const success = combatSystem.queueMoveAction('player', { x, y });
+        if (success) {
+          console.log(`${playerEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+          if (activeActionMode) {
+            setActiveActionMode(null);
           }
-        }, 50);
+        }
       } else {
         console.log('No player entity found');
       }
@@ -821,16 +828,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           title="Click to move your character"
         >
           {/* Room Background */}
-          <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
+          <div className={`absolute inset-0 grid-background ${getRoomBackground(tacticalData.background)}`}>
             {/* Grid overlay for tactical feel */}
-            <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 opacity-20 grid-background">
               <svg width="100%" height="100%" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <defs>
                   <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
                     <path d="M 1 0 L 0 0 0 1" fill="none" stroke="currentColor" strokeWidth="0.02"/>
                   </pattern>
                 </defs>
-                <rect width="15" height="15" fill="url(#grid)" />
+                <rect width="15" height="15" fill="url(#grid)" className="grid-background" />
               </svg>
             </div>
           </div>
