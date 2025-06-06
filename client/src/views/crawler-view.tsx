@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +14,30 @@ import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 
 interface CrawlerViewProps {
   crawlerId: string;
+}
+
+// Dummy RoomEventsPanel component
+function RoomEventsPanel({ crawler }: { crawler: CrawlerWithDetails }) {
+  return (
+    <Card className="bg-game-surface border-game-border">
+      <CardContent>
+        <h3 className="text-lg font-semibold mb-2">Room Events</h3>
+        <div>
+          {/* Example events - replace with actual game logic */}
+          <p className="text-sm text-slate-400">
+            Crawler {crawler.name} entered from the north.
+          </p>
+          <p className="text-sm text-slate-400">
+            Crawler {crawler.name} used Heavy Attack on Dungeon Slug, dealing 5
+            damage.
+          </p>
+          <p className="text-sm text-slate-400">
+            Dungeon Slug noticed Crawler {crawler.name}.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
@@ -112,6 +135,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           <div className="space-y-6">
             <NavigationPanel crawler={crawler} energyDisabled={energyDisabled} />
             <TacticalViewPanel crawler={crawler} />
+            <RoomEventsPanel crawler={crawler} />
           </div>
 
           {/* Right Column - Floor Info & Mini-map */}
