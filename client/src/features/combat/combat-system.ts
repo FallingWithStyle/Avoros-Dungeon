@@ -242,8 +242,7 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Ensure combat processing is running
-    this.ensureCombatProcessing();
+    // Combat processing is always running
 
     this.notifyListeners();
 
@@ -362,8 +361,7 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Ensure combat processing is running
-    this.ensureCombatProcessing();
+    // Combat processing is always running
 
     this.notifyListeners();
     eventsSystem.onCombatAction(moveAction, entityId);
@@ -400,11 +398,9 @@ export class CombatSystem {
   processCombatTick(): void {
     const now = Date.now();
     const readyActions = this.state.actionQueue.filter(qa => now >= qa.executesAt);
-    let stateChanged = false;
 
     // Execute ready actions and remove them from queue
     readyActions.forEach(queuedAction => {
-      console.log(`Executing ${queuedAction.action.name} for ${queuedAction.entityId}`);
       this.executeAction(queuedAction);
 
       // Remove this specific action from the queue
@@ -413,49 +409,33 @@ export class CombatSystem {
       );
       if (actionIndex !== -1) {
         this.state.actionQueue.splice(actionIndex, 1);
-        stateChanged = true;
       }
     });
 
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Always notify listeners if the state changed
-    if (stateChanged || readyActions.length > 0) {
-      this.notifyListeners();
-    }
-  }
+    // Keep combat processing running constantly for AI and grace period management
+    // No longer auto-stop combat processing
 
-  // Ensure combat processing is running (safe to call multiple times)
-  ensureCombatProcessing(): void {
-    if (!this.combatInterval) {
-      this.startCombatProcessing();
+    // Always notify listeners if we processed any actions or if the queue changed
+    if (readyActions.length > 0) {
+      this.notifyListeners();
     }
   }
 
   // Start automatic combat processing
   startCombatProcessing(): void {
-    if (this.combatInterval) return;
-
-    // Only start processing if there are entities or queued actions
-    if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
-      return;
-    }
+    if (this.combatInterval) return; // Already running
 
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
-
-      // Stop processing if no entities and no queued actions for efficiency
-      if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
-        this.stopCombatProcessing();
-      }
     }, 100); // Process every 100ms
   }
 
   // Stop automatic combat processing
   stopCombatProcessing(): void {
     if (this.combatInterval) {
-      console.log('Stopping combat processing...');
       clearInterval(this.combatInterval);
       this.combatInterval = null;
     }
@@ -494,7 +474,7 @@ export class CombatSystem {
     const target = this.state.entities.find(e => e.id === targetId);
     if (!target) return;
 
-    // Calculate actual damage (base damage + attackStat - target defense)
+    // Calculate actual damage (base damage + attack stat - target defense)
     const actualDamage = Math.max(1, baseDamage + attackStat - target.defense);
     target.hp = Math.max(0, target.hp - actualDamage);
 
@@ -694,7 +674,7 @@ export class CombatSystem {
     return baseActions;
   }
 
-
+  
 }
 
 // Singleton instance
