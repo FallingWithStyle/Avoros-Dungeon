@@ -68,6 +68,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     clickPosition?: { x: number; y: number };
   } | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
+  const [activeActionMode, setActiveActionMode] = useState<{
+    type: 'move' | 'attack' | 'ability';
+    actionId: string;
+    actionName: string;
+  } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to combat system updates
@@ -376,7 +381,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     setContextMenu(null); // Close any open context menu
 
     if (event.button === 0) { // Left click
-      combatSystem.selectEntity(entityId);
+      if (activeActionMode?.type === 'attack') {
+        // Queue the attack action on the selected entity
+        handleActionClick({ id: activeActionMode.actionId, name: activeActionMode.actionName, type: activeActionMode.type }, entityId);
+        setActiveActionMode(null); // Clear active action mode
+      } else {
+        combatSystem.selectEntity(entityId);
+      }
     }
   };
 
@@ -504,21 +515,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   };
 
   const handleGridClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    // Only handle left clicks for movement
+    // Only handle left clicks
     if (event.button !== 0) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    // If player is selected and no entity was clicked, queue a move action
-    const selectedEntity = combatSystem.getSelectedEntity();
-    if (selectedEntity?.type === 'player') {
-      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
-      if (success) {
-        console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-      } else {
-        console.log(`Failed to queue move action - check cooldown or existing action`);
+    // If in move mode, queue a move action
+    if (activeActionMode?.type === 'move') {
+      const selectedEntity = combatSystem.getSelectedEntity();
+      if (selectedEntity?.type === 'player') {
+        const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+        if (success) {
+          console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        } else {
+          console.log(`Failed to queue move action - check cooldown or existing action`);
+        }
+        setActiveActionMode(null); // Clear active move mode
       }
     }
   };
@@ -573,10 +587,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const chestPos = gridToPercentage(chest.gridX, chest.gridY);
 
       const coins = getRandomEmptyCell(occupiedCells);
-      const coinsPos = gridToPercentage(coins.gridX, coins.gridY);
+      const coinsPos = gridToPercentage(coins.gridX, chest.gridY);
 
       const gems = getRandomEmptyCell(occupiedCells);
-      const gemsPos = gridToPercentage(gems.gridX, gems.gridY);
+      const gemsPos = gridToPercentage(gems.gridX, chest.gridY);
 
       lootItems.push(
         { type: "treasure", name: "Treasure Chest", x: chestPos.x, y: chestPos.y },
@@ -724,21 +738,32 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Add hotbar for actions
   const hotbarActions = [
-    { id: 'move', name: 'Move', icon: <Footprints className="w-4 h-4" /> },
-    { id: 'attack', name: 'Attack', icon: <Sword className="w-4 h-4" /> },
-    { id: 'defend', name: 'Defend', icon: <Shield className="w-4 h-4" /> },
-    { id: 'ability1', name: 'Ability 1', icon: <Target className="w-4 h-4" /> },
-    { id: 'ability2', name: 'Ability 2', icon: <Target className="w-4 h-4" /> },
-    { id: 'ability3', name: 'Ability 3', icon: <Target className="w-4 h-4" /> },
-    { id: 'ability4', name: 'Ability 4', icon: <Target className="w-4 h-4" /> },
-    { id: 'ability5', name: 'Ability 5', icon: <Target className="w-4 h-4" /> },
-    { id: 'ability6', name: 'Ability 6', icon: <Target className="w-4 h-4" /> },
-    { id: 'wait', name: 'Wait', icon: <Clock className="w-4 h-4" /> },
+    { id: 'move', name: 'Move', icon: <Footprints className="w-4 h-4" />, type: 'move' },
+    { id: 'attack', name: 'Attack', icon: <Sword className="w-4 h-4" />, type: 'attack' },
+    { id: 'defend', name: 'Defend', icon: <Shield className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability1', name: 'Ability 1', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability2', name: 'Ability 2', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability3', name: 'Ability 3', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability4', name: 'Ability 4', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability5', name: 'Ability 5', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'ability6', name: 'Ability 6', icon: <Target className="w-4 h-4" />, type: 'ability' },
+    { id: 'wait', name: 'Wait', icon: <Clock className="w-4 h-4" />, type: 'ability' },
   ];
 
-  const handleHotbarClick = (actionId: string) => {
+  const handleHotbarClick = (actionId: string, actionType: string, actionName: string) => {
     console.log(`Hotbar action clicked: ${actionId}`);
-    // TODO: Implement action handling logic
+
+    if (actionType === 'move') {
+      // Activate move mode
+      setActiveActionMode({ type: 'move', actionId: actionId, actionName: actionName });
+    } else if (actionType === 'attack') {
+      // Activate attack mode
+      setActiveActionMode({ type: 'attack', actionId: actionId, actionName: actionName });
+    } else {
+      // Handle other abilities/actions
+      console.log(`Casting ability: ${actionId}`);
+      setActiveActionMode({ type: 'ability', actionId: actionId, actionName: actionName });
+    }
   };
 
   return (
@@ -784,7 +809,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
-          {/* Combat Entities */}
+          {/*```text
+          Combat Entities */}
           {combatState.entities.map((entity) => (
             <div
               key={entity.id}
@@ -910,8 +936,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {hotbarActions.map((action, index) => (
             <button
               key={action.id}
-              className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center"
-              onClick={() => handleHotbarClick(action.id)}
+              className={`w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? 'bg-yellow-500' : 'bg-gray-800 hover:bg-gray-700'} text-white flex items-center justify-center`}
+              onClick={() => handleHotbarClick(action.id, action.type, action.name)}
               title={`${index + 1}: ${action.name}`}
             >
               {action.icon}
