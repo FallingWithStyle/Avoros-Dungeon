@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
 import { useEffect, useState, useRef } from "react";
+import ActionQueuePanel from "./action-queue-panel";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -1054,6 +1055,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               </span>
             )}
           </div>
+        </div>
+
+        {/* Action Queue Panel */}
+        <div className="mt-4">
+          <ActionQueuePanel />
         </div>
       </CardContent>
     </Card>
