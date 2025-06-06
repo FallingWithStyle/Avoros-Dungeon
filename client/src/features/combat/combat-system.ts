@@ -121,11 +121,18 @@ export class CombatSystem {
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener(this.state));
+    console.log("notifyListeners called", { entities: this.state.entities.map(e => ({ id: e.id, position: e.position })) });
+    const stateCopy = this.getState();
+    this.listeners.forEach(listener => listener(stateCopy));
   }
 
   getState(): CombatState {
-    return { ...this.state };
+    // Return a copy to help with React reactivity
+    return {
+      ...this.state,
+      entities: [...this.state.entities],
+      actionQueue: [...this.state.actionQueue],
+    };
   }
 
   // Entity management
@@ -139,10 +146,12 @@ export class CombatSystem {
       hasDetectedPlayer: false
     };
     this.state.entities.push(entityWithDefaults);
+    console.log("addEntity:", entityWithDefaults);
     this.notifyListeners();
   }
 
   removeEntity(entityId: string): void {
+    console.log("removeEntity:", entityId);
     this.state.entities = this.state.entities.filter(e => e.id !== entityId);
     if (this.state.selectedEntityId === entityId) {
       this.state.selectedEntityId = null;
@@ -154,6 +163,7 @@ export class CombatSystem {
     const entity = this.state.entities.find(e => e.id === entityId);
     if (entity) {
       Object.assign(entity, updates);
+      console.log("updateEntity:", entityId, updates);
       this.notifyListeners();
     }
   }
@@ -171,6 +181,7 @@ export class CombatSystem {
     }
 
     this.state.selectedEntityId = entityId;
+    console.log("selectEntity:", entityId);
     this.notifyListeners();
   }
 
@@ -244,6 +255,8 @@ export class CombatSystem {
 
     // Combat processing is always running
 
+    console.log("queueAction:", queuedAction);
+
     this.notifyListeners();
 
     // Generate event for the action
@@ -255,7 +268,7 @@ export class CombatSystem {
   // Process AI for enemy entities
   private processEnemyAI(): void {
     const hostileEntities = this.state.entities.filter(e => e.type === 'hostile');
-    const playerEntity = this.state.entities.find(e => e.type === 'player');
+    const playerEntity = this.state.entities.find(e => e.id === 'player');
 
     if (!playerEntity) return;
 
@@ -318,6 +331,8 @@ export class CombatSystem {
     entity.position.x = Math.max(5, Math.min(95, entity.position.x + normalizedDx));
     entity.position.y = Math.max(5, Math.min(95, entity.position.y + normalizedDy));
 
+    console.log("moveEntityTowards:", entityId, "->", entity.position);
+
     this.notifyListeners();
   }
 
@@ -329,6 +344,8 @@ export class CombatSystem {
     // Clamp position to grid bounds
     entity.position.x = Math.max(5, Math.min(95, targetPosition.x));
     entity.position.y = Math.max(5, Math.min(95, targetPosition.y));
+
+    console.log("moveEntityToPosition:", entityId, "->", entity.position);
 
     this.notifyListeners();
   }
@@ -361,6 +378,8 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
+    console.log("queueMoveAction:", queuedAction);
+
     // Combat processing is always running
 
     this.notifyListeners();
@@ -380,18 +399,34 @@ export class CombatSystem {
 
   // Combat flow
   startCombat(): void {
-    this.state.isInCombat = true;
-    this.state.combatStartTime = Date.now();
-    this.startCombatProcessing();
-    this.notifyListeners();
+    if (!this.state.isInCombat) {
+      this.state.isInCombat = true;
+      this.state.combatStartTime = Date.now();
+      console.log('Combat started!');
+      this.notifyListeners();
+    }
   }
 
   endCombat(): void {
-    this.state.isInCombat = false;
-    this.state.actionQueue = [];
-    this.state.combatStartTime = undefined;
-    this.stopCombatProcessing();
-    this.notifyListeners();
+    if (this.state.isInCombat) {
+      this.state.isInCombat = false;
+      this.state.combatStartTime = undefined;
+      console.log('Combat ended!');
+      this.notifyListeners();
+    }
+  }
+
+  // Check if combat should be active based on hostile entities
+  private checkCombatState(): void {
+    const hostileEntities = this.getHostileEntities();
+    const hasHostiles = hostileEntities.length > 0;
+    const hasDetectedHostiles = hostileEntities.some(e => e.hasDetectedPlayer);
+
+    if (hasDetectedHostiles && !this.state.isInCombat) {
+      this.startCombat();
+    } else if (!hasHostiles && this.state.isInCombat) {
+      this.endCombat();
+    }
   }
 
   // Process queued actions (should be called regularly, e.g., via setInterval)
@@ -412,14 +447,15 @@ export class CombatSystem {
       }
     });
 
+    // Check and update combat state based on hostile entities
+    this.checkCombatState();
+
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Keep combat processing running constantly for AI and grace period management
-    // No longer auto-stop combat processing
-
-    // Always notify listeners if we processed any actions or if the queue changed
+    // Always notify listeners if we processed any actions or combat state changed
     if (readyActions.length > 0) {
+      console.log("processCombatTick: processed actions", readyActions.map(a => ({ entityId: a.entityId, action: a.action.id })));
       this.notifyListeners();
     }
   }
@@ -431,6 +467,7 @@ export class CombatSystem {
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
     }, 100); // Process every 100ms
+    console.log("Combat processing started (setInterval)");
   }
 
   // Stop automatic combat processing
@@ -438,6 +475,7 @@ export class CombatSystem {
     if (this.combatInterval) {
       clearInterval(this.combatInterval);
       this.combatInterval = null;
+      console.log("Combat processing stopped (clearInterval)");
     }
   }
 
@@ -451,6 +489,8 @@ export class CombatSystem {
     // Set cooldown
     if (!entity.cooldowns) entity.cooldowns = {};
     entity.cooldowns[action.id] = Date.now();
+
+    console.log("executeAction:", queuedAction);
 
     // Execute action effects
     switch (action.type) {
@@ -477,6 +517,8 @@ export class CombatSystem {
     // Calculate actual damage (base damage + attack stat - target defense)
     const actualDamage = Math.max(1, baseDamage + attackStat - target.defense);
     target.hp = Math.max(0, target.hp - actualDamage);
+
+    console.log("dealDamage:", { targetId, actualDamage, hp: target.hp });
 
     // Check if target is defeated
     if (target.hp <= 0) {
@@ -674,7 +716,7 @@ export class CombatSystem {
     return baseActions;
   }
 
-  
+
 }
 
 // Singleton instance
