@@ -3241,22 +3241,36 @@ export class DatabaseStorage implements IStorage {
 
   async createOrUpdateRoomState(roomId: number, stateData: any): Promise<any> {
     const { roomStates } = await import("@shared/schema");
-    const [roomState] = await db
-      .insert(roomStates)
-      .values({
-        roomId,
-        ...stateData,
-        lastUpdated: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: roomStates.roomId,
-        set: {
+    
+    // First try to get existing room state
+    const [existing] = await db
+      .select()
+      .from(roomStates)
+      .where(eq(roomStates.roomId, roomId));
+    
+    if (existing) {
+      // Update existing record
+      const [roomState] = await db
+        .update(roomStates)
+        .set({
           ...stateData,
           lastUpdated: new Date(),
-        },
-      })
-      .returning();
-    return roomState;
+        })
+        .where(eq(roomStates.roomId, roomId))
+        .returning();
+      return roomState;
+    } else {
+      // Insert new record
+      const [roomState] = await db
+        .insert(roomStates)
+        .values({
+          roomId,
+          ...stateData,
+          lastUpdated: new Date(),
+        })
+        .returning();
+      return roomState;
+    }
   }
 
   async spawnMobsInRoom(roomId: number): Promise<any[]> {
