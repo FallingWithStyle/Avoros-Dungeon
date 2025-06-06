@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown, Footprints } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown, Footprints, Clock } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
@@ -722,6 +722,25 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
+  // Add hotbar for actions
+  const hotbarActions = [
+    { id: 'move', name: 'Move', icon: <Footprints className="w-4 h-4" /> },
+    { id: 'attack', name: 'Attack', icon: <Sword className="w-4 h-4" /> },
+    { id: 'defend', name: 'Defend', icon: <Shield className="w-4 h-4" /> },
+    { id: 'ability1', name: 'Ability 1', icon: <Target className="w-4 h-4" /> },
+    { id: 'ability2', name: 'Ability 2', icon: <Target className="w-4 h-4" /> },
+    { id: 'ability3', name: 'Ability 3', icon: <Target className="w-4 h-4" /> },
+    { id: 'ability4', name: 'Ability 4', icon: <Target className="w-4 h-4" /> },
+    { id: 'ability5', name: 'Ability 5', icon: <Target className="w-4 h-4" /> },
+    { id: 'ability6', name: 'Ability 6', icon: <Target className="w-4 h-4" /> },
+    { id: 'wait', name: 'Wait', icon: <Clock className="w-4 h-4" /> },
+  ];
+
+  const handleHotbarClick = (actionId: string) => {
+    console.log(`Hotbar action clicked: ${actionId}`);
+    // TODO: Implement action handling logic
+  };
+
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
@@ -782,7 +801,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
                 entity.type === 'player' 
                   ? 'bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50' 
-                  : entity.type === 'hostile'
+                  : entity.type
+This commit adds a hotbar to the tactical view panel, allowing players to quickly access actions.
                   ? 'bg-red-600 border-red-400 shadow-red-400/30'
                   : entity.type === 'neutral'
                   ? 'bg-orange-500 border-orange-300 shadow-orange-400/30'
@@ -884,6 +904,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               </div>
             );
           })}
+        </div>
+
+        {/* Hotbar */}
+        <div className="flex justify-center gap-2 mt-2">
+          {hotbarActions.map((action, index) => (
+            <button
+              key={action.id}
+              className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center"
+              onClick={() => handleHotbarClick(action.id)}
+              title={`${index + 1}: ${action.name}`}
+            >
+              {action.icon}
+            </button>
+          ))}
         </div>
 
         {/* Context Menu */}
