@@ -213,6 +213,12 @@ export class CombatSystem {
     };
 
     this.state.actionQueue.push(queuedAction);
+    
+    // Auto-start combat processing if not already running
+    if (!this.combatInterval) {
+      this.startCombatProcessing();
+    }
+    
     this.notifyListeners();
 
     // Generate event for the action
@@ -338,6 +344,11 @@ export class CombatSystem {
 
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
+
+    // Stop combat processing if no actions are queued and not in active combat
+    if (this.state.actionQueue.length === 0 && !this.state.isInCombat) {
+      this.stopCombatProcessing();
+    }
 
     // Always notify listeners if we processed any actions or if the queue changed
     if (readyActions.length > 0) {
