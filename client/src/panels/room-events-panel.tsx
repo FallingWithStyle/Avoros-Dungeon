@@ -203,7 +203,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
       case 'combat':
         return 'text-red-400';
       case 'discovery':
-        return event.priority === 'high' ? 'text-red-400' : 'text-green-400';
+        return event.priority === 'high' ? 'text-orange-400' : 'text-green-400';
       case 'movement':
         return 'text-blue-400';
       case 'interaction':
@@ -245,9 +245,14 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-          <Clock className="w-4 h-4" />
-          Room Events
+        <CardTitle className="text-base text-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Room Events
+          </div>
+          <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+            {events.length} events
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -276,12 +281,12 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                           </span>
                         )}
                       </p>
-                      <span className="text-[10px] text-slate-500 flex-shrink-0">
+                      <span className="text-xs text-slate-500 flex-shrink-0">
                         {new Date(event.timestamp).toLocaleTimeString([], { 
                           hour: '2-digit', 
                           minute: '2-digit',
                           second: '2-digit'
-                        })}.{String(event.timestamp % 1000).padStart(3, '0')}
+                        })}
                       </span>
                     </div>
                   </div>
