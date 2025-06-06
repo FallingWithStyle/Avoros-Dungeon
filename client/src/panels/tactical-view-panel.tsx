@@ -801,8 +801,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
                 entity.type === 'player' 
                   ? 'bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50' 
-                  : entity.type
-This commit adds a hotbar to the tactical view panel, allowing players to quickly access actions.
+                  : entity.type === 'hostile'
                   ? 'bg-red-600 border-red-400 shadow-red-400/30'
                   : entity.type === 'neutral'
                   ? 'bg-orange-500 border-orange-300 shadow-orange-400/30'
