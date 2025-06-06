@@ -977,7 +977,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  // Add hotbar for actions (10 total)
+  
+
+  // Define hotbar actions here to ensure it's available for the keyboard handler
   const hotbarActions = [
     {
       id: "move",
@@ -1075,7 +1077,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [hotbarActions]);
+  }, []);
 
   // Helper function to get cooldown percentage for an action
   const getCooldownPercentage = (actionId: string): number => {
