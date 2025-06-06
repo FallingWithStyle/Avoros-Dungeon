@@ -1,3 +1,5 @@
+import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "@shared/schema";
+import { eventsSystem } from "../events/events-system";
 
 export interface CombatEntity {
   id: string;
@@ -137,7 +139,7 @@ export class CombatSystem {
   selectEntity(entityId: string | null): void {
     // Deselect previous entity
     this.state.entities.forEach(e => e.isSelected = false);
-    
+
     // Select new entity
     if (entityId) {
       const entity = this.state.entities.find(e => e.id === entityId);
@@ -145,7 +147,7 @@ export class CombatSystem {
         entity.isSelected = true;
       }
     }
-    
+
     this.state.selectedEntityId = entityId;
     this.notifyListeners();
   }
@@ -169,7 +171,7 @@ export class CombatSystem {
   queueAction(entityId: string, actionId: string, targetId?: string, targetPosition?: { x: number; y: number }): boolean {
     const entity = this.state.entities.find(e => e.id === entityId);
     const action = this.actionDefinitions.get(actionId);
-    
+
     if (!entity || !action) return false;
 
     // Check if action is on cooldown
@@ -204,6 +206,10 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
     this.notifyListeners();
+
+    // Generate event for the action
+    eventsSystem.onCombatAction(action, entityId, targetId, action.damage);
+
     return true;
   }
 
@@ -211,7 +217,7 @@ export class CombatSystem {
   private processEnemyAI(): void {
     const hostileEntities = this.state.entities.filter(e => e.type === 'hostile');
     const playerEntity = this.state.entities.find(e => e.type === 'player');
-    
+
     if (!playerEntity) return;
 
     hostileEntities.forEach(enemy => {
@@ -222,7 +228,7 @@ export class CombatSystem {
       // Check if enemy can attack player
       const distance = this.calculateDistance(enemy.position, playerEntity.position);
       const attackAction = this.actionDefinitions.get('basic_attack');
-      
+
       if (attackAction && distance <= attackAction.range!) {
         // Enemy is in range, attack
         this.queueAction(enemy.id, 'basic_attack', playerEntity.id);
@@ -298,10 +304,10 @@ export class CombatSystem {
 
     // Remove executed actions
     this.state.actionQueue = this.state.actionQueue.filter(qa => now < qa.executesAt);
-    
+
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
-    
+
     if (readyActions.length > 0) {
       this.notifyListeners();
     }
@@ -310,7 +316,7 @@ export class CombatSystem {
   // Start automatic combat processing
   startCombatProcessing(): void {
     if (this.combatInterval) return; // Already running
-    
+
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
     }, 100); // Process every 100ms
@@ -369,7 +375,7 @@ export class CombatSystem {
         // Add dodge effect
         if (!entity.effects) entity.effects = [];
         entity.effects.push('dodging');
-        
+
         // Remove dodge effect after a short time
         setTimeout(() => {
           if (entity.effects) {
@@ -384,7 +390,7 @@ export class CombatSystem {
   private onEntityDefeated(entity: CombatEntity): void {
     // Handle entity defeat (could trigger loot, experience, etc.)
     console.log(`${entity.name} has been defeated!`);
-    
+
     // For now, just remove the entity
     this.removeEntity(entity.id);
   }
@@ -443,7 +449,7 @@ export class CombatSystem {
   getPartyEntryPositions(direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] {
     const positions: { x: number; y: number }[] = [];
     const basePosition = this.getEntryPosition(direction);
-    
+
     if (partySize <= 1) {
       return [basePosition];
     }
@@ -451,16 +457,16 @@ export class CombatSystem {
     // Convert base position back to grid coordinates
     const baseGridX = Math.round((basePosition.x / 100) * 15 - 0.5);
     const baseGridY = Math.round((basePosition.y / 100) * 15 - 0.5);
-    
+
     // Spread party members around the entry point
     const halfParty = Math.floor(partySize / 2);
-    
+
     for (let i = 0; i < partySize; i++) {
       let gridX = baseGridX;
       let gridY = baseGridY;
-      
+
       const offset = i - halfParty;
-      
+
       // Spread horizontally for north/south entries, vertically for east/west
       if (direction === 'north' || direction === 'south') {
         gridX = Math.max(0, Math.min(14, baseGridX + offset));
@@ -477,7 +483,7 @@ export class CombatSystem {
         gridX = Math.max(0, Math.min(14, baseGridX + clusterOffset.x));
         gridY = Math.max(0, Math.min(14, baseGridY + clusterOffset.y));
       }
-      
+
       positions.push(this.gridToPercentage(gridX, gridY));
     }
 

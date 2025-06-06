@@ -1,43 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
   Sword,
-  Shield,
   Eye,
   ArrowDown,
   ArrowUp,
   ArrowLeft,
   ArrowRight,
   Users,
-  Skull,
-  Heart,
   Footprints,
-  Zap,
+  Heart,
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import type { CrawlerWithDetails } from "@shared/schema";
-import { combatSystem } from "@/features/combat/combat-system";
 import { useEffect, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { CrawlerWithDetails } from "@shared/schema";
+import { eventsSystem, type RoomEvent } from "@/features/events/events-system";
 
 interface RoomEventsPanelProps {
   crawler: CrawlerWithDetails;
-}
-
-interface RoomEvent {
-  id: string;
-  timestamp: number;
-  type: "movement" | "combat" | "discovery" | "interaction" | "status";
-  message: string;
-  entityId?: string;
-  entityName?: string;
-  targetId?: string;
-  targetName?: string;
-  damage?: number;
-  direction?: string;
-  priority: "low" | "medium" | "high";
 }
 
 interface RoomData {
@@ -50,15 +32,29 @@ interface RoomData {
 
 export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   const [events, setEvents] = useState<RoomEvent[]>([]);
-  const [lastRoomId, setLastRoomId] = useState<number | null>(null);
-  const [roomEntryTime, setRoomEntryTime] = useState<number>(Date.now());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch current room data
+  // Fetch current room data to detect room changes
   const { data: roomData } = useQuery<RoomData>({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
     refetchInterval: 5000,
   });
+
+  // Subscribe to events system
+  useEffect(() => {
+    const unsubscribe = eventsSystem.subscribe((newEvents) => {
+      setEvents(newEvents);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Handle room changes
+  useEffect(() => {
+    if (roomData) {
+      eventsSystem.onRoomChange(roomData.room.id, crawler.name, crawler.id);
+    }
+  }, [roomData?.room.id, crawler.name, crawler.id]);
 
   // Auto-scroll to bottom when new events are added
   useEffect(() => {
@@ -67,136 +63,13 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
     }
   }, [events]);
 
-  // Subscribe to combat system events for real-time updates
-  useEffect(() => {
-    const unsubscribe = combatSystem.subscribe((state) => {
-      const now = Date.now();
-
-      // Track new combat actions
-      state.actionQueue.forEach((queuedAction) => {
-        const existingEvent = events.find(
-          (e) =>
-            e.id === `action-${queuedAction.entityId}-${queuedAction.queuedAt}`,
-        );
-
-        if (!existingEvent && queuedAction.queuedAt >= roomEntryTime) {
-          const entity = state.entities.find(
-            (e) => e.id === queuedAction.entityId,
-          );
-          const target = queuedAction.targetId
-            ? state.entities.find((e) => e.id === queuedAction.targetId)
-            : null;
-
-          if (entity) {
-            const newEvent: RoomEvent = {
-              id: `action-${queuedAction.entityId}-${queuedAction.queuedAt}`,
-              timestamp: queuedAction.queuedAt,
-              type: "combat",
-              message: target
-                ? `${entity.id === "player" ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name} on ${target.name}`
-                : `${entity.id === "player" ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name}`,
-              entityId: entity.id,
-              entityName: entity.name,
-              targetId: target?.id,
-              targetName: target?.name,
-              damage: queuedAction.action.damage,
-              priority:
-                queuedAction.action.type === "attack" ? "high" : "medium",
-            };
-
-            setEvents((prev) => {
-              // Avoid duplicates
-              if (prev.find((e) => e.id === newEvent.id)) return prev;
-              return [...prev, newEvent];
-            });
-          }
-        }
-      });
-    });
-
-    return unsubscribe;
-  }, [roomEntryTime]);
-
-  // Handle room changes and generate entry events
-  useEffect(() => {
-    if (roomData && roomData.room.id !== lastRoomId) {
-      const now = Date.now();
-      setRoomEntryTime(now);
-
-      // Clear events when entering a new room
-      setEvents([]);
-
-      // Determine entry direction from stored movement direction
-      const storedDirection = sessionStorage.getItem("lastMovementDirection");
-      let entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered the room`;
-
-      if (
-        storedDirection &&
-        ["north", "south", "east", "west"].includes(storedDirection)
-      ) {
-        const oppositeDirection = {
-          north: "south",
-          south: "north",
-          east: "west",
-          west: "east",
-        }[storedDirection];
-        entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered from the ${oppositeDirection}`;
-      }
-
-      // Add entry event
-      const entryEvent: RoomEvent = {
-        id: `entry-${now}`,
-        timestamp: now,
-        type: "movement",
-        message: entryMessage,
-        entityId: "player",
-        entityName: crawler.name,
-        direction: storedDirection || undefined,
-        priority: "medium",
-      };
-
-      setEvents([entryEvent]);
-      setLastRoomId(roomData.room.id);
-
-      // Add events for discovering entities in the room after a brief delay
-      setTimeout(() => {
-        const combatState = combatSystem.getState();
-        const discoveryEvents: RoomEvent[] = [];
-
-        combatState.entities.forEach((entity) => {
-          if (entity.id !== "player") {
-            discoveryEvents.push({
-              id: `discovery-${entity.id}-${now}`,
-              timestamp: now + 1500, // Slight delay after entry
-              type: "discovery",
-              message:
-                entity.type === "hostile"
-                  ? `Crawler ${crawler.name} (#${crawler.id}) notices a dangerous ${entity.name}`
-                  : `Crawler ${crawler.name} (#${crawler.id}) spots ${entity.name} in the room`,
-              entityId: entity.id,
-              entityName: entity.name,
-              priority: entity.type === "hostile" ? "high" : "low",
-            });
-          }
-        });
-
-        if (discoveryEvents.length > 0) {
-          setEvents((prev) => [...prev, ...discoveryEvents]);
-        }
-      }, 1500);
-    }
-  }, [roomData, lastRoomId, crawler.name]);
-
   const getEventIcon = (event: RoomEvent) => {
     switch (event.type) {
       case "movement":
         if (event.direction === "north") return <ArrowUp className="w-3 h-3" />;
-        if (event.direction === "south")
-          return <ArrowDown className="w-3 h-3" />;
-        if (event.direction === "east")
-          return <ArrowRight className="w-3 h-3" />;
-        if (event.direction === "west")
-          return <ArrowLeft className="w-3 h-3" />;
+        if (event.direction === "south") return <ArrowDown className="w-3 h-3" />;
+        if (event.direction === "east") return <ArrowRight className="w-3 h-3" />;
+        if (event.direction === "west") return <ArrowLeft className="w-3 h-3" />;
         return <Footprints className="w-3 h-3" />;
       case "combat":
         return <Sword className="w-3 h-3" />;
@@ -316,7 +189,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         {/* Legend */}
         <div className="mt-3 pt-3 border-t border-slate-700">
           <div className="text-xs text-slate-400 mb-2">
-            Room entered: {formatTimestamp(roomEntryTime)}
+            Room entered: {formatTimestamp(eventsSystem.getRoomEntryTime())}
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
             <span className="flex items-center gap-1">
