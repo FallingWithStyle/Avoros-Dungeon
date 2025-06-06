@@ -1,11 +1,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { combatSystem, type CombatEntity } from "@/features/combat/combat-system";
-import { useEffect, useState } from "react";
+import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
+import { useEffect, useState, useRef } from "react";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -30,16 +30,52 @@ interface RoomData {
   playersInRoom: CrawlerWithDetails[];
 }
 
+interface ContextMenu {
+  x: number;
+  y: number;
+  entityId: string;
+  entity: CombatEntity;
+  actions: CombatAction[];
+}
+
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe(setCombatState);
     return unsubscribe;
   }, []);
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContextMenu(null);
+      }
+    };
+
+    if (contextMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [contextMenu]);
 
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery({
@@ -158,6 +194,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Click handlers
   const handleEntityClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
+    setContextMenu(null); // Close any open context menu
+    
     if (event.button === 0) { // Left click
       combatSystem.selectEntity(entityId);
     }
@@ -165,20 +204,71 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleEntityRightClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
+    
     const entity = combatState.entities.find(e => e.id === entityId);
     if (!entity) return;
 
-    // For now, just select and show available actions in console
+    // Select the entity
     combatSystem.selectEntity(entityId);
-    const availableActions = combatSystem.getAvailableActions('player');
-    console.log(`Available actions for ${entity.name}:`, availableActions);
     
-    // TODO: Show context menu with actions
+    // Get available actions for the player towards this entity
+    const availableActions = combatSystem.getAvailableActions('player');
+    
+    // Show context menu
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      entityId,
+      entity,
+      actions: availableActions
+    });
+  };
+
+  const handleLootClick = (lootIndex: number, lootItem: any, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setContextMenu(null);
+    
+    if (event.button === 2) { // Right click
+      // Show loot context menu
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        entityId: `loot-${lootIndex}`,
+        entity: {
+          id: `loot-${lootIndex}`,
+          name: lootItem.name,
+          type: 'neutral',
+          hp: 1,
+          maxHp: 1,
+          attack: 0,
+          defense: 0,
+          speed: 0,
+          position: { x: lootItem.x, y: lootItem.y }
+        } as CombatEntity,
+        actions: []
+      });
+    } else if (event.button === 0) { // Left click
+      console.log(`Examining ${lootItem.name}`);
+      // TODO: Implement loot examination/pickup
+    }
+  };
+
+  const handleActionClick = (action: CombatAction, targetEntityId: string) => {
+    const success = combatSystem.queueAction('player', action.id, targetEntityId);
+    if (success) {
+      console.log(`Queued action: ${action.name} on ${contextMenu?.entity.name}`);
+    } else {
+      console.log(`Cannot perform ${action.name} - on cooldown or already queued`);
+    }
+    setContextMenu(null);
   };
 
   const handleBackgroundClick = (event: React.MouseEvent) => {
     if (event.target === event.currentTarget) {
       combatSystem.selectEntity(null);
+      setContextMenu(null);
     }
   };
 
@@ -394,24 +484,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div
               key={entity.id}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
-                entity.isSelected ? 'ring-2 ring-yellow-400' : ''
-              } ${hoveredEntity === entity.id ? 'scale-110' : ''} transition-transform`}
+                entity.isSelected ? 'ring-2 ring-yellow-400 ring-offset-1' : ''
+              } ${hoveredEntity === entity.id ? 'scale-110 z-30' : ''} transition-all duration-200`}
               style={{ left: `${entity.position.x}%`, top: `${entity.position.y}%` }}
               onClick={(e) => handleEntityClick(entity.id, e)}
               onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
               onMouseEnter={() => setHoveredEntity(entity.id)}
               onMouseLeave={() => setHoveredEntity(null)}
-              title={`${entity.name} (${entity.hp}/${entity.maxHp} HP)`}
+              title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
             >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
                 entity.type === 'player' 
-                  ? 'bg-blue-500 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50' 
+                  ? 'bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50' 
                   : entity.type === 'hostile'
-                  ? 'bg-red-600 border-red-400'
+                  ? 'bg-red-600 border-red-400 shadow-red-400/30'
                   : entity.type === 'neutral'
-                  ? 'bg-orange-500 border-orange-300'
-                  : 'bg-cyan-500 border-cyan-300'
-              }`}>
+                  ? 'bg-orange-500 border-orange-300 shadow-orange-400/30'
+                  : 'bg-cyan-500 border-cyan-300 shadow-cyan-400/30'
+              } ${hoveredEntity === entity.id ? 'shadow-xl' : ''}`}>
                 {entity.type === 'player' && (
                   <div className="absolute inset-1 bg-blue-300 rounded-full"></div>
                 )}
@@ -421,9 +511,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               
               {/* HP bar for non-player entities */}
               {entity.type !== 'player' && (
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded">
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
                   <div 
-                    className={`h-full rounded ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
+                    className={`h-full rounded transition-all duration-300 ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
                     style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
                   ></div>
                 </div>
@@ -433,6 +523,21 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               {entity.isSelected && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
               )}
+
+              {/* Hover name display */}
+              {hoveredEntity === entity.id && (
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                  {entity.name}
+                  {entity.type !== 'player' && ` (${entity.hp}/${entity.maxHp})`}
+                </div>
+              )}
+
+              {/* Action queue indicator */}
+              {combatState.actionQueue.some(qa => qa.entityId === entity.id) && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-spin">
+                  <div className="w-full h-full bg-purple-300 rounded-full animate-ping"></div>
+                </div>
+              )}
             </div>
           ))}
 
@@ -440,13 +545,28 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {tacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
+                hoveredLoot === index ? 'scale-110 z-20' : ''
+              } transition-all duration-200`}
               style={{ left: `${item.x}%`, top: `${item.y}%` }}
-              title={item.name}
+              title={`${item.name} - Right-click to interact`}
+              onClick={(e) => handleLootClick(index, item, e)}
+              onContextMenu={(e) => handleLootClick(index, item, e)}
+              onMouseEnter={() => setHoveredLoot(index)}
+              onMouseLeave={() => setHoveredLoot(null)}
             >
-              <div className="w-6 h-6 bg-yellow-500 rounded border-2 border-yellow-300 flex items-center justify-center animate-bounce">
+              <div className={`w-6 h-6 bg-yellow-500 rounded border-2 border-yellow-300 flex items-center justify-center shadow-lg ${
+                hoveredLoot === index ? 'animate-pulse shadow-yellow-400/50' : 'animate-bounce'
+              }`}>
                 {getLootIcon(item.type)}
               </div>
+              
+              {/* Hover name display */}
+              {hoveredLoot === index && (
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                  {item.name}
+                </div>
+              )}
             </div>
           ))}
 
@@ -472,6 +592,106 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           ))}
         </div>
+
+        {/* Context Menu */}
+        {contextMenu && (
+          <div
+            ref={contextMenuRef}
+            className="fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 py-2 min-w-48"
+            style={{ 
+              left: `${Math.min(contextMenu.x, window.innerWidth - 200)}px`, 
+              top: `${Math.min(contextMenu.y, window.innerHeight - 200)}px` 
+            }}
+          >
+            {/* Entity Info Header */}
+            <div className="px-3 py-2 border-b border-gray-700">
+              <div className="flex items-center gap-2">
+                {contextMenu.entity.type === 'hostile' && <Skull className="w-4 h-4 text-red-400" />}
+                {(contextMenu.entity.type === 'neutral' || contextMenu.entity.type === 'npc') && <Users className="w-4 h-4 text-orange-400" />}
+                {contextMenu.entityId.startsWith('loot-') && <Package className="w-4 h-4 text-yellow-400" />}
+                <div>
+                  <div className="text-white font-medium">{contextMenu.entity.name}</div>
+                  {!contextMenu.entityId.startsWith('loot-') && (
+                    <div className="text-xs text-gray-400">
+                      {contextMenu.entity.hp}/{contextMenu.entity.maxHp} HP
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Info Actions */}
+            <div className="px-3 py-2 border-b border-gray-700">
+              <button
+                className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                onClick={() => {
+                  console.log(`Examining ${contextMenu.entity.name}`);
+                  setContextMenu(null);
+                }}
+              >
+                <Eye className="w-4 h-4" />
+                Examine
+              </button>
+              
+              {contextMenu.entity.type === 'npc' && (
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                  onClick={() => {
+                    console.log(`Talking to ${contextMenu.entity.name}`);
+                    setContextMenu(null);
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Talk
+                </button>
+              )}
+
+              {contextMenu.entityId.startsWith('loot-') && (
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                  onClick={() => {
+                    console.log(`Picking up ${contextMenu.entity.name}`);
+                    setContextMenu(null);
+                  }}
+                >
+                  <Package className="w-4 h-4" />
+                  Pick Up
+                </button>
+              )}
+            </div>
+
+            {/* Combat Actions */}
+            {contextMenu.actions.length > 0 && contextMenu.entity.type === 'hostile' && (
+              <div className="px-3 py-2">
+                <div className="text-xs text-gray-500 mb-2">Combat Actions</div>
+                {contextMenu.actions.map((action) => (
+                  <button
+                    key={action.id}
+                    className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                    onClick={() => handleActionClick(action, contextMenu.entityId)}
+                  >
+                    {action.type === 'attack' && <Sword className="w-4 h-4 text-red-400" />}
+                    {action.type === 'ability' && <Target className="w-4 h-4 text-blue-400" />}
+                    <div>
+                      <div>{action.name}</div>
+                      {action.damage && (
+                        <div className="text-xs text-gray-500">Damage: {action.damage}</div>
+                      )}
+                      <div className="text-xs text-gray-500">Cooldown: {action.cooldown/1000}s</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* No actions available */}
+            {contextMenu.actions.length === 0 && contextMenu.entity.type === 'hostile' && (
+              <div className="px-3 py-2 text-xs text-gray-500">
+                No actions available (on cooldown)
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Room info */}
         <div className="mt-3 text-xs text-slate-400">
