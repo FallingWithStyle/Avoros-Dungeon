@@ -31,8 +31,7 @@ interface RoomData {
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery({
-    queryKey: ["currentRoom", crawler.id],
-    queryFn: () => apiRequest(`/api/crawlers/${crawler.id}/current-room`),
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
@@ -224,7 +223,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full h-48 border-2 border-game-border rounded-lg overflow-hidden">
+        <div className="relative w-full aspect-square border-2 border-game-border rounded-lg overflow-hidden">
           {/* Room Background */}
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
             {/* Grid overlay for tactical feel */}
