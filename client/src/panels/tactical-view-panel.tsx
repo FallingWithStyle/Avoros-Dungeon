@@ -156,8 +156,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (!combatState.entities.find(e => e.id === 'player')) {
         combatSystem.addEntity(playerEntity);
+        combatSystem.selectEntity('player'); // Auto-select the player
       } else {
         combatSystem.updateEntity('player', playerEntity);
+        if (!combatSystem.getSelectedEntity()) {
+          combatSystem.selectEntity('player'); // Ensure player is selected if no entity is selected
+        }
       }
 
       // TODO: Add party members when party system is implemented
@@ -518,22 +522,35 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Only handle left clicks
     if (event.button !== 0) return;
 
+    event.preventDefault();
+    event.stopPropagation();
+
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
+    console.log(`Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`, activeActionMode);
+
     // If in move mode, queue a move action
     if (activeActionMode?.actionId === 'move') {
       const selectedEntity = combatSystem.getSelectedEntity();
+      console.log('Selected entity:', selectedEntity);
+      
       if (selectedEntity?.type === 'player') {
         const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+        console.log('Move action queued:', success);
+        
         if (success) {
           console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
         } else {
           console.log(`Failed to queue move action - check cooldown or existing action`);
         }
         setActiveActionMode(null); // Clear active move mode
+      } else {
+        console.log('No player entity selected or entity is not a player');
       }
+    } else {
+      console.log('Not in move mode');
     }
   };
 
@@ -776,9 +793,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </CardHeader>
       <CardContent>
         <div 
-          className={`relative w-full aspect-square border-2 ${activeActionMode?.actionId === 'move' ? 'border-green-400 border-4' : 'border-game-border'} rounded-lg overflow-hidden ${activeActionMode?.actionId === 'move' ? 'cursor-crosshair' : 'cursor-pointer'}`}
+          className={`relative w-full aspect-square border-2 ${activeActionMode?.actionId === 'move' ? 'border-green-400 border-4' : 'border-game-border'} rounded-lg overflow-hidden ${activeActionMode?.actionId === 'move' ? 'cursor-move-custom' : 'cursor-pointer'}`}
           onClick={activeActionMode?.actionId === 'move' ? handleGridClick : handleBackgroundClick}
           onContextMenu={handleGridRightClick}
+          style={activeActionMode?.actionId === 'move' ? { cursor: 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEuNWMtNS4xOSAwLTkuNSA0LjMxLTkuNSA5LjUgMCA1Ljc5IDkuNSAxMS41IDkuNSAxMS41czktNS43MSA5LTExLjVjMC01LjE5LTQuMzEtOS41LTkuNS05LjV6IiBmaWxsPSIjMzc4M2ZmIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMSIvPgo8cGF0aCBkPSJNMTIgNmMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCIgZmlsbD0iIzAwNzVmZiIvPgo8L3N2Zz4=") 12 12, crosshair' } : {}}
         >
           {/* Room Background */}
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
