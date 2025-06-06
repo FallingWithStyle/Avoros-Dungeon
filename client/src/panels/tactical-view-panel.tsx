@@ -523,7 +523,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
     // If in move mode, queue a move action
-    if (activeActionMode?.type === 'move') {
+    if (activeActionMode?.actionId === 'move') {
       const selectedEntity = combatSystem.getSelectedEntity();
       if (selectedEntity?.type === 'player') {
         const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
@@ -753,9 +753,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleHotbarClick = (actionId: string, actionType: string, actionName: string) => {
     console.log(`Hotbar action clicked: ${actionId}`);
 
-    if (actionType === 'move') {
+    if (actionId === 'move') {
       // Activate move mode
-      setActiveActionMode({ type: 'move', actionId: actionId, actionName: actionName });
+      setActiveActionMode({ type: 'move', actionId: 'move', actionName: 'Move' });
     } else if (actionType === 'attack') {
       // Activate attack mode
       setActiveActionMode({ type: 'attack', actionId: actionId, actionName: actionName });
@@ -776,8 +776,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </CardHeader>
       <CardContent>
         <div 
-          className="relative w-full aspect-square border-2 border-game-border rounded-lg overflow-hidden cursor-pointer"
-          onClick={handleBackgroundClick}
+          className={`relative w-full aspect-square border-2 ${activeActionMode?.actionId === 'move' ? 'border-green-400 border-4' : 'border-game-border'} rounded-lg overflow-hidden ${activeActionMode?.actionId === 'move' ? 'cursor-crosshair' : 'cursor-pointer'}`}
+          onClick={activeActionMode?.actionId === 'move' ? handleGridClick : handleBackgroundClick}
           onContextMenu={handleGridRightClick}
         >
           {/* Room Background */}
