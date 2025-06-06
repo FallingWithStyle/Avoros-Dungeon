@@ -52,6 +52,7 @@ export class CombatSystem {
   public actionDefinitions: Map<string, CombatAction>;
   private listeners: Set<(state: CombatState) => void> = new Set();
   private actionCooldowns: Map<string, number> = new Map();
+  private onPlayerDamageCallback: ((damage: number) => void) | null = null;
 
   constructor() {
     this.state = {
@@ -520,6 +521,11 @@ export class CombatSystem {
 
     console.log("dealDamage:", { targetId, actualDamage, hp: target.hp });
 
+    // If this is the player, we need to sync the damage back to the main crawler data
+    if (targetId === "player" && this.onPlayerDamageCallback) {
+      this.onPlayerDamageCallback(actualDamage);
+    }
+
     // Check if target is defeated
     if (target.hp <= 0) {
       this.onEntityDefeated(target);
@@ -657,6 +663,11 @@ export class CombatSystem {
       console.log(`Player positioned at ${newPosition.x}, ${newPosition.y} after entering from ${direction}`);
       this.notifyListeners();
     }
+  }
+
+  // Set callback for when player takes damage
+  setPlayerDamageCallback(callback: (damage: number) => void): void {
+    this.onPlayerDamageCallback = callback;
   }
 
   // Define available actions for each entity type

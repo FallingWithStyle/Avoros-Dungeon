@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Eye,
   Gem,
@@ -74,6 +75,21 @@ interface ExploredRoom extends Room {
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
+  const queryClient = useQueryClient();
+
+  // Mutation to update crawler health when taking damage
+  const damageMutation = useMutation({
+    mutationFn: async (damage: number) => {
+      return await apiRequest("POST", `/api/crawlers/${crawler.id}/take-damage`, {
+        damage: damage
+      });
+    },
+    onSuccess: () => {
+      // Refresh crawler data
+      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+    },
+  });
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -93,14 +109,21 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Subscribe to combat system updates
+  // Subscribe to combat system updates and set up damage callback
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       console.log("Combat state changed", state);
       setCombatState(state);
     });
+
+    // Set up callback for when player takes damage
+    combatSystem.setPlayerDamageCallback((damage: number) => {
+      console.log(`Player took ${damage} damage, updating server...`);
+      damageMutation.mutate(damage);
+    });
+
     return unsubscribe;
-  }, []);
+  }, [damageMutation]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -219,11 +242,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         id: "player",
         name: crawler.name,
         type: "player",
-        hp: crawler.health,
-        maxHp: crawler.maxHealth,
-        attack: crawler.attack,
-        defense: crawler.defense,
-        speed: crawler.speed,
+        hp: crawler.health || 0,
+        maxHp: crawler.maxHealth || 100,
+        attack: crawler.attack || 10,
+        defense: crawler.defense || 5,
+        speed: crawler.speed || 10,
         position: partyEntryPositions[0], // Main player gets first position
         entryDirection,
       };
@@ -316,13 +339,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Update player entity HP when crawler health changes
   useEffect(() => {
-    if (crawler) {
+    if (crawler && crawler.health !== undefined && crawler.maxHealth !== undefined) {
       combatSystem.updateEntity("player", {
         hp: crawler.health,
         maxHp: crawler.maxHealth,
+        attack: crawler.attack,
+        defense: crawler.defense,
+        speed: crawler.speed,
       });
     }
-  }, [crawler?.health, crawler?.maxHealth]);
+  }, [crawler?.health, crawler?.maxHealth, crawler?.attack, crawler?.defense, crawler?.speed]);
 
   // Helper function to convert grid coordinates to percentage
   const gridToPercentage = (
@@ -1300,7 +1326,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
               onMouseEnter={() => setHoveredEntity(entity.id)}
               onMouseLeave={() => setHoveredEntity(null)}
-              title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
+              title={`${entity.name} (${entity.hp || 0}/${entity.maxHp || 100} HP) - Right-click for actions`}
             >
               <div
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
@@ -1347,7 +1373,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                   {entity.name}
                   {entity.type !== "player" &&
-                    ` (${entity.hp}/${entity.maxHp})`}
+                    ` (${entity.hp || 0}/${entity.maxHp || 100})`}
                 </div>
               )}
 
@@ -1502,7 +1528,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   </div>
                   {!contextMenu.entityId.startsWith("loot-") && (
                     <div className="text-xs text-gray-400">
-                      {contextMenu.entity.hp}/{contextMenu.entity.maxHp} HP
+                      {contextMenu.entity.hp || 0}/{contextMenu.entity.maxHp || 100} HP
                     </div>
                   )}
                 </div>
