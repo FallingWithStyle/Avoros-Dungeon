@@ -49,6 +49,7 @@ export class CombatSystem {
   private state: CombatState;
   private actionDefinitions: Map<string, CombatAction>;
   private listeners: Set<(state: CombatState) => void> = new Set();
+  private actionCooldowns: Map<string, number> = new Map();
 
   constructor() {
     this.state = {
@@ -213,12 +214,12 @@ export class CombatSystem {
     };
 
     this.state.actionQueue.push(queuedAction);
-    
+
     // Auto-start combat processing if not already running
     if (!this.combatInterval) {
       this.startCombatProcessing();
     }
-    
+
     this.notifyListeners();
 
     // Generate event for the action
@@ -332,7 +333,7 @@ export class CombatSystem {
     // Execute ready actions and remove them from queue
     readyActions.forEach(queuedAction => {
       this.executeAction(queuedAction);
-      
+
       // Remove this specific action from the queue
       const actionIndex = this.state.actionQueue.findIndex(qa => 
         qa.entityId === queuedAction.entityId && qa.queuedAt === queuedAction.queuedAt
@@ -546,6 +547,126 @@ export class CombatSystem {
       player.position = newPosition;
       console.log(`Player positioned at ${newPosition.x}, ${newPosition.y} after entering from ${direction}`);
       this.notifyListeners();
+    }
+  }
+
+  // Define available actions for each entity type
+  private getEntityActions(entityId: string): CombatAction[] {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return [];
+
+    const baseActions: CombatAction[] = [
+      {
+        id: 'move',
+        name: 'Move',
+        type: 'move',
+        cooldown: 1000,
+        targetType: 'area',
+        executionTime: 800,
+      },
+      {
+        id: 'basic_attack',
+        name: 'Attack',
+        type: 'attack',
+        cooldown: 2000,
+        damage: 20,
+        range: 15, // Grid units - close combat range
+        targetType: 'single',
+        executionTime: 1000,
+      },
+      {
+        id: 'dodge',
+        name: 'Dodge',
+        type: 'ability',
+        cooldown: 3000,
+        targetType: 'self',
+        executionTime: 500,
+      },
+      {
+        id: 'heavy_attack',
+        name: 'Heavy Attack',
+        type: 'attack',
+        cooldown: 5000,
+        damage: 40,
+        range: 15, // Grid units - close combat range
+        targetType: 'single',
+        executionTime: 2000,
+      },
+      {
+        id: 'ranged_attack',
+        name: 'Ranged Attack',
+        type: 'attack',
+        cooldown: 3000,
+        damage: 15,
+        range: 40, // Grid units - longer range
+        targetType: 'single',
+        executionTime: 1500,
+      }
+    ];
+
+    return baseActions;
+  }
+
+  queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return false;
+
+    const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
+    if (existingAction) return false;
+
+    const moveAction = this.getEntityActions(entityId).find(a => a.id === 'move');
+    if (!moveAction) return false;
+
+    if (!entity.cooldowns) entity.cooldowns = {};
+    const now = Date.now();
+    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveAction.cooldown) {
+        return false;
+    }
+
+    const queuedAction: QueuedAction = {
+      entityId,
+      action: moveAction,
+      targetId: undefined,
+      targetPosition,
+      queuedAt: now,
+      executesAt: now + moveAction.executionTime,
+    };
+
+    this.state.actionQueue.push(queuedAction);
+
+    if (!this.combatInterval) {
+      this.startCombatProcessing();
+    }
+
+    this.notifyListeners();
+    eventsSystem.onCombatAction(moveAction, entityId);
+
+    return true;
+  }
+
+  private executeAction(queuedAction: QueuedAction): void {
+    const { entityId, action, targetId, targetPosition } = queuedAction;
+    const entity = this.state.entities.find(e => e.id === entityId);
+
+    if (!entity) return;
+
+    if (!entity.cooldowns) entity.cooldowns = {};
+    entity.cooldowns[action.id] = Date.now();
+
+    switch (action.type) {
+      case 'attack':
+        if (targetId && action.damage) {
+          this.dealDamage(targetId, action.damage, entity.attack);
+        }
+        break;
+      case 'ability':
+        this.executeAbility(entity, action, targetId);
+        break;
+      case 'move':
+        if (targetPosition) {
+          this.moveEntityToPosition(entityId, targetPosition);
+        }
+        break;
     }
   }
 }
