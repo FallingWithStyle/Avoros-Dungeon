@@ -2,19 +2,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Clock, 
-  Sword, 
-  Shield, 
-  Eye, 
-  ArrowDown, 
-  ArrowUp, 
-  ArrowLeft, 
-  ArrowRight, 
+import {
+  Clock,
+  Sword,
+  Shield,
+  Eye,
+  ArrowDown,
+  ArrowUp,
+  ArrowLeft,
+  ArrowRight,
   Users,
   Skull,
   Heart,
-  Zap
+  Footprints,
+  Zap,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -28,7 +29,7 @@ interface RoomEventsPanelProps {
 interface RoomEvent {
   id: string;
   timestamp: number;
-  type: 'movement' | 'combat' | 'discovery' | 'interaction' | 'status';
+  type: "movement" | "combat" | "discovery" | "interaction" | "status";
   message: string;
   entityId?: string;
   entityName?: string;
@@ -36,7 +37,7 @@ interface RoomEvent {
   targetName?: string;
   damage?: number;
   direction?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
 }
 
 interface RoomData {
@@ -72,35 +73,40 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
       const now = Date.now();
 
       // Track new combat actions
-      state.actionQueue.forEach(queuedAction => {
-        const existingEvent = events.find(e => 
-          e.id === `action-${queuedAction.entityId}-${queuedAction.queuedAt}`
+      state.actionQueue.forEach((queuedAction) => {
+        const existingEvent = events.find(
+          (e) =>
+            e.id === `action-${queuedAction.entityId}-${queuedAction.queuedAt}`,
         );
 
         if (!existingEvent && queuedAction.queuedAt >= roomEntryTime) {
-          const entity = state.entities.find(e => e.id === queuedAction.entityId);
-          const target = queuedAction.targetId ? 
-            state.entities.find(e => e.id === queuedAction.targetId) : null;
+          const entity = state.entities.find(
+            (e) => e.id === queuedAction.entityId,
+          );
+          const target = queuedAction.targetId
+            ? state.entities.find((e) => e.id === queuedAction.targetId)
+            : null;
 
           if (entity) {
             const newEvent: RoomEvent = {
               id: `action-${queuedAction.entityId}-${queuedAction.queuedAt}`,
               timestamp: queuedAction.queuedAt,
-              type: 'combat',
-              message: target ? 
-                `${entity.id === 'player' ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name} on ${target.name}` :
-                `${entity.id === 'player' ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name}`,
+              type: "combat",
+              message: target
+                ? `${entity.id === "player" ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name} on ${target.name}`
+                : `${entity.id === "player" ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name}`,
               entityId: entity.id,
               entityName: entity.name,
               targetId: target?.id,
               targetName: target?.name,
               damage: queuedAction.action.damage,
-              priority: queuedAction.action.type === 'attack' ? 'high' : 'medium'
+              priority:
+                queuedAction.action.type === "attack" ? "high" : "medium",
             };
 
-            setEvents(prev => {
+            setEvents((prev) => {
               // Avoid duplicates
-              if (prev.find(e => e.id === newEvent.id)) return prev;
+              if (prev.find((e) => e.id === newEvent.id)) return prev;
               return [...prev, newEvent];
             });
           }
@@ -121,15 +127,18 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
       setEvents([]);
 
       // Determine entry direction from stored movement direction
-      const storedDirection = sessionStorage.getItem('lastMovementDirection');
+      const storedDirection = sessionStorage.getItem("lastMovementDirection");
       let entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered the room`;
 
-      if (storedDirection && ['north', 'south', 'east', 'west'].includes(storedDirection)) {
+      if (
+        storedDirection &&
+        ["north", "south", "east", "west"].includes(storedDirection)
+      ) {
         const oppositeDirection = {
-          'north': 'south',
-          'south': 'north',
-          'east': 'west',
-          'west': 'east'
+          north: "south",
+          south: "north",
+          east: "west",
+          west: "east",
         }[storedDirection];
         entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered from the ${oppositeDirection}`;
       }
@@ -138,12 +147,12 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
       const entryEvent: RoomEvent = {
         id: `entry-${now}`,
         timestamp: now,
-        type: 'movement',
+        type: "movement",
         message: entryMessage,
-        entityId: 'player',
+        entityId: "player",
         entityName: crawler.name,
         direction: storedDirection || undefined,
-        priority: 'medium'
+        priority: "medium",
       };
 
       setEvents([entryEvent]);
@@ -154,24 +163,25 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         const combatState = combatSystem.getState();
         const discoveryEvents: RoomEvent[] = [];
 
-        combatState.entities.forEach(entity => {
-          if (entity.id !== 'player') {
+        combatState.entities.forEach((entity) => {
+          if (entity.id !== "player") {
             discoveryEvents.push({
               id: `discovery-${entity.id}-${now}`,
               timestamp: now + 1500, // Slight delay after entry
-              type: 'discovery',
-              message: entity.type === 'hostile' ? 
-                `Crawler ${crawler.name} (#${crawler.id}) notices a dangerous ${entity.name}` :
-                `Crawler ${crawler.name} (#${crawler.id}) spots ${entity.name} in the room`,
+              type: "discovery",
+              message:
+                entity.type === "hostile"
+                  ? `Crawler ${crawler.name} (#${crawler.id}) notices a dangerous ${entity.name}`
+                  : `Crawler ${crawler.name} (#${crawler.id}) spots ${entity.name} in the room`,
               entityId: entity.id,
               entityName: entity.name,
-              priority: entity.type === 'hostile' ? 'high' : 'low'
+              priority: entity.type === "hostile" ? "high" : "low",
             });
           }
         });
 
         if (discoveryEvents.length > 0) {
-          setEvents(prev => [...prev, ...discoveryEvents]);
+          setEvents((prev) => [...prev, ...discoveryEvents]);
         }
       }, 1500);
     }
@@ -179,19 +189,22 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
 
   const getEventIcon = (event: RoomEvent) => {
     switch (event.type) {
-      case 'movement':
-        if (event.direction === 'north') return <ArrowUp className="w-3 h-3" />;
-        if (event.direction === 'south') return <ArrowDown className="w-3 h-3" />;
-        if (event.direction === 'east') return <ArrowRight className="w-3 h-3" />;
-        if (event.direction === 'west') return <ArrowLeft className="w-3 h-3" />;
-        return <Zap className="w-3 h-3" />;
-      case 'combat':
+      case "movement":
+        if (event.direction === "north") return <ArrowUp className="w-3 h-3" />;
+        if (event.direction === "south")
+          return <ArrowDown className="w-3 h-3" />;
+        if (event.direction === "east")
+          return <ArrowRight className="w-3 h-3" />;
+        if (event.direction === "west")
+          return <ArrowLeft className="w-3 h-3" />;
+        return <Footprints className="w-3 h-3" />;
+      case "combat":
         return <Sword className="w-3 h-3" />;
-      case 'discovery':
+      case "discovery":
         return <Eye className="w-3 h-3" />;
-      case 'interaction':
+      case "interaction":
         return <Users className="w-3 h-3" />;
-      case 'status':
+      case "status":
         return <Heart className="w-3 h-3" />;
       default:
         return <Clock className="w-3 h-3" />;
@@ -200,46 +213,49 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
 
   const getEventColor = (event: RoomEvent) => {
     switch (event.type) {
-      case 'combat':
-        return 'text-red-400';
-      case 'discovery':
-        return event.priority === 'high' ? 'text-red-400' : 'text-green-400';
-      case 'movement':
-        return 'text-blue-400';
-      case 'interaction':
-        return 'text-purple-400';
-      case 'status':
-        return 'text-yellow-400';
+      case "combat":
+        return "text-red-400";
+      case "discovery":
+        return event.priority === "high" ? "text-red-400" : "text-green-400";
+      case "movement":
+        return "text-blue-400";
+      case "interaction":
+        return "text-purple-400";
+      case "status":
+        return "text-yellow-400";
       default:
-        return 'text-slate-300';
+        return "text-slate-300";
     }
   };
 
   const getEventBadgeStyle = (event: RoomEvent) => {
     switch (event.type) {
-      case 'movement':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'combat':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
-      case 'discovery':
-        return event.priority === 'high' 
-          ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
-          : 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'interaction':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-      case 'status':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+      case "movement":
+        return "bg-blue-500/20 text-blue-300 border-blue-500/30";
+      case "combat":
+        return "bg-red-500/20 text-red-300 border-red-500/30";
+      case "discovery":
+        return event.priority === "high"
+          ? "bg-orange-500/20 text-orange-300 border-orange-500/30"
+          : "bg-green-500/20 text-green-300 border-green-500/30";
+      case "interaction":
+        return "bg-purple-500/20 text-purple-300 border-purple-500/30";
+      case "status":
+        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
       default:
-        return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
   };
 
   const formatTimestamp = (timestamp: number) => {
     const diff = Date.now() - timestamp;
-    if (diff < 1000) return 'Just now';
+    if (diff < 1000) return "Just now";
     if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -282,9 +298,9 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {event.type === 'combat' && (
-                      <Badge 
-                        variant="outline" 
+                    {event.type === "combat" && (
+                      <Badge
+                        variant="outline"
                         className={`text-xs ${getEventBadgeStyle(event)}`}
                       >
                         combat
@@ -304,7 +320,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
             <span className="flex items-center gap-1">
-              <Zap className="w-3 h-3 text-blue-400" />
+              <Footprints className="w-3 h-3 text-blue-400" />
               Movement
             </span>
             <span className="flex items-center gap-1">
