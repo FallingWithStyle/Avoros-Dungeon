@@ -41,6 +41,7 @@ interface ContextMenu {
   entityId: string;
   entity: CombatEntity;
   actions: CombatAction[];
+  clickPosition?: { x: number; y: number };
 }
 
 interface ExploredRoom extends Room {
@@ -56,9 +57,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    entityId: string;
+    entity: CombatEntity;
+    actions: CombatAction[];
+    clickPosition?: { x: number; y: number };
+  } | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
-  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const [contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to combat system updates
   useEffect(() => {
@@ -377,20 +386,30 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const entity = combatState.entities.find(e => e.id === entityId);
     if (!entity) return;
 
-    // Select the entity
-    combatSystem.selectEntity(entityId);
+    const selectedEntity = combatSystem.getSelectedEntity();
+    let availableActions: CombatAction[] = [];
 
-    // Get available actions for the player towards this entity
-    const availableActions = combatSystem.getAvailableActions('player');
+    if (selectedEntity && entity.type === 'hostile') {
+      availableActions = combatSystem.getAvailableActions(selectedEntity.id);
+    }
 
-    // Show context menu
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      entityId,
-      entity,
-      actions: availableActions
-    });
+    // Calculate click position relative to the grid
+    const gridElement = event.currentTarget.closest('.relative');
+    if (gridElement) {
+      const rect = gridElement.getBoundingClientRect();
+      const clickX = ((event.clientX - rect.left) / rect.width) * 100;
+      const clickY = ((event.clientY - rect.top) / rect.height) * 100;
+
+      setContextMenu({
+        visible: true,
+        x: event.clientX,
+        y: event.clientY,
+        entityId,
+        entity,
+        actions: availableActions,
+        clickPosition: { x: clickX, y: clickY },
+      });
+    }
   };
 
   const handleLootClick = (lootIndex: number, lootItem: any, event: React.MouseEvent) => {
@@ -423,14 +442,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  const handleActionClick = (action: CombatAction, targetEntityId: string) => {
-    const success = combatSystem.queueAction('player', action.id, targetEntityId);
-    if (success) {
-      console.log(`Queued action: ${action.name} on ${contextMenu?.entity.name}`);
-    } else {
-      console.log(`Cannot perform ${action.name} - on cooldown or already queued`);
+  const handleActionClick = (action: CombatAction, targetId: string) => {
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity) {
+      const success = combatSystem.queueAction(selectedEntity.id, action.id, targetId);
+      if (success) {
+        console.log(`${selectedEntity.name} queued ${action.name} on ${targetId}`);
+      } else {
+        console.log(`Failed to queue ${action.name} - check cooldown, range, or existing action`);
+      }
     }
     setContextMenu(null);
+  };
+
+  const handleMoveToPosition = (targetPosition?: { x: number; y: number }) => {
+    if (!targetPosition) return;
+
+    const playerEntity = combatState.entities.find(e => e.type === 'player');
+    if (playerEntity) {
+      combatSystem.updateEntity(playerEntity.id, { position: targetPosition });
+      console.log(`Player moved to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`);
+    }
+    setContextMenu(null);
+  };
+
+  const handleGridClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    // If player is selected and no entity was clicked, move player to clicked position
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity?.type === 'player') {
+      handleMoveToPosition({ x, y });
+    }
   };
 
   const handleBackgroundClick = (event: React.MouseEvent) => {
