@@ -3228,6 +3228,111 @@ export class DatabaseStorage implements IStorage {
 
     return { success: true, newRoom: entranceRoom };
   }
+
+  // Room state management methods
+  async getRoomState(roomId: number): Promise<any> {
+    const { roomStates } = await import("@shared/schema");
+    const [roomState] = await db
+      .select()
+      .from(roomStates)
+      .where(eq(roomStates.roomId, roomId));
+    return roomState;
+  }
+
+  async createOrUpdateRoomState(roomId: number, stateData: any): Promise<any> {
+    const { roomStates } = await import("@shared/schema");
+    const [roomState] = await db
+      .insert(roomStates)
+      .values({
+        roomId,
+        ...stateData,
+        lastUpdated: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: roomStates.roomId,
+        set: {
+          ...stateData,
+          lastUpdated: new Date(),
+        },
+      })
+      .returning();
+    return roomState;
+  }
+
+  async spawnMobsInRoom(roomId: number): Promise<any[]> {
+    // Get room info to determine appropriate mobs
+    const room = await this.getRoom(roomId);
+    if (!room) return [];
+
+    // Simple mob generation based on room type and environment
+    const mobCount = Math.floor(Math.random() * 3) + 1; // 1-3 mobs
+    const mobs = [];
+
+    for (let i = 0; i < mobCount; i++) {
+      const mob = {
+        id: `mob-${roomId}-${i}`,
+        name: this.generateMobName(room.environment),
+        mobType: this.getMobType(room.environment),
+        health: 50 + Math.floor(Math.random() * 30),
+        maxHealth: 50 + Math.floor(Math.random() * 30),
+        attack: 10 + Math.floor(Math.random() * 10),
+        defense: 5 + Math.floor(Math.random() * 5),
+        positionX: (20 + Math.random() * 60).toString(),
+        positionY: (20 + Math.random() * 60).toString(),
+        status: 'alive',
+      };
+      mobs.push(mob);
+    }
+
+    return mobs;
+  }
+
+  async getActiveMobsInRoom(roomId: number): Promise<any[]> {
+    const roomState = await this.getRoomState(roomId);
+    if (!roomState || !roomState.mobData) return [];
+    
+    // Filter for alive mobs
+    return roomState.mobData.filter((mob: any) => mob.status === 'alive');
+  }
+
+  async killMob(mobId: number): Promise<void> {
+    // This would update the mob status in the room state
+    // For now, this is a placeholder since we're using JSON data
+    console.log(`Mob ${mobId} killed`);
+  }
+
+  async incrementRoomActivity(roomId: number, amount: number): Promise<void> {
+    const { roomStates } = await import("@shared/schema");
+    await db
+      .update(roomStates)
+      .set({
+        playerActivity: sql`${roomStates.playerActivity} + ${amount}`,
+        lastPlayerVisit: new Date(),
+      })
+      .where(eq(roomStates.roomId, roomId));
+  }
+
+  private generateMobName(environment: string): string {
+    const names = {
+      outdoor: ['Wild Wolf', 'Forest Bear', 'Mountain Bandit', 'Wild Boar'],
+      underground: ['Cave Goblin', 'Giant Rat', 'Skeleton Warrior', 'Cave Spider'],
+      indoor: ['Security Guard', 'Cultist', 'Ancient Construct', 'Wraith'],
+    };
+    
+    const environmentNames = names[environment as keyof typeof names] || names.indoor;
+    return environmentNames[Math.floor(Math.random() * environmentNames.length)];
+  }
+
+  private getMobType(environment: string): string {
+    const types = {
+      outdoor: ['beast', 'humanoid', 'animal'],
+      underground: ['undead', 'vermin', 'construct'],
+      indoor: ['humanoid', 'construct', 'undead'],
+    };
+    
+    const environmentTypes = types[environment as keyof typeof types] || types.indoor;
+    return environmentTypes[Math.floor(Math.random() * environmentTypes.length)];
+  }
 }
 
 export const storage = new DatabaseStorage();
