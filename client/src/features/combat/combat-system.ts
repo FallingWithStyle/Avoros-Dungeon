@@ -435,11 +435,20 @@ export class CombatSystem {
 
   // Start automatic combat processing
   startCombatProcessing(): void {
-    if (this.combatInterval) return; // Already running
+    if (this.combatInterval) return;
 
-    console.log('Starting combat processing...');
+    // Only start processing if there are entities or queued actions
+    if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
+      return;
+    }
+
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
+
+      // Stop processing if no entities and no queued actions for efficiency
+      if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
+        this.stopCombatProcessing();
+      }
     }, 100); // Process every 100ms
   }
 
@@ -485,7 +494,7 @@ export class CombatSystem {
     const target = this.state.entities.find(e => e.id === targetId);
     if (!target) return;
 
-    // Calculate actual damage (base damage + attack stat - target defense)
+    // Calculate actual damage (base damage + attackStat - target defense)
     const actualDamage = Math.max(1, baseDamage + attackStat - target.defense);
     target.hp = Math.max(0, target.hp - actualDamage);
 
@@ -685,7 +694,7 @@ export class CombatSystem {
     return baseActions;
   }
 
-  
+
 }
 
 // Singleton instance
