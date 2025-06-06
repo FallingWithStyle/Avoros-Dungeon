@@ -67,7 +67,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     clickPosition?: { x: number; y: number };
   } | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
-  const [contextMenuRef = useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to combat system updates
   useEffect(() => {
