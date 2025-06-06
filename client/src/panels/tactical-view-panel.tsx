@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package } from "lucide-react";
@@ -6,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
 import { useEffect, useState, useRef } from "react";
+import { generatePersistentTacticalData, saveTacticalDataChanges } from "../features/combat/persistent-tactical-data";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -88,7 +88,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (roomData) {
       // Detect room change and calculate entry direction
       let entryDirection: 'north' | 'south' | 'east' | 'west' | null = null;
-      
+
       if (lastRoomId !== null && lastRoomId !== roomData.room.id) {
         // Room has changed, get the movement direction from storage
         const storedDirection = sessionStorage.getItem('lastMovementDirection');
@@ -98,7 +98,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           sessionStorage.removeItem('lastMovementDirection');
         }
       }
-      
+
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities
@@ -121,13 +121,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         position: { x: 50, y: 50 }, // Default center, will be updated below
         entryDirection,
       };
-      
+
       if (!combatState.entities.find(e => e.id === 'player')) {
         combatSystem.addEntity(playerEntity);
       } else {
         combatSystem.updateEntity('player', playerEntity);
       }
-      
+
       // Set entry direction and position in combat system AFTER adding/updating the entity
       if (entryDirection) {
         combatSystem.setPlayerEntryDirection(entryDirection);
@@ -140,44 +140,44 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
 
       // Add room entities based on tactical data
-      const tacticalData = generateTacticalData(roomData);
-      
-      // Add mobs as combat entities
-      tacticalData.mobs.forEach((mob, index) => {
-        const mobEntity: CombatEntity = {
-          id: `mob-${index}`,
-          name: mob.name,
-          type: 'hostile',
-          hp: mob.hp,
-          maxHp: 100,
-          attack: 15,
-          defense: 5,
-          speed: 10,
-          position: { x: mob.x, y: mob.y },
-        };
-        combatSystem.addEntity(mobEntity);
-      });
+      generatePersistentTacticalData(roomData.room.id).then(tacticalData => {
+        // Add mobs as combat entities
+        tacticalData.mobs.forEach((mob, index) => {
+          const mobEntity: CombatEntity = {
+            id: `mob-${index}`,
+            name: mob.name,
+            type: 'hostile',
+            hp: mob.hp,
+            maxHp: 100,
+            attack: 15,
+            defense: 5,
+            speed: 10,
+            position: { x: mob.x, y: mob.y },
+          };
+          combatSystem.addEntity(mobEntity);
+        });
 
-      // Add NPCs as neutral entities
-      tacticalData.npcs.forEach((npc, index) => {
-        const npcEntity: CombatEntity = {
-          id: `npc-${index}`,
-          name: npc.name,
-          type: 'neutral',
-          hp: 100,
-          maxHp: 100,
-          attack: 0,
-          defense: 10,
-          speed: 5,
-          position: { x: npc.x, y: npc.y },
-        };
-        combatSystem.addEntity(npcEntity);
+        // Add NPCs as neutral entities
+        tacticalData.npcs.forEach((npc, index) => {
+          const npcEntity: CombatEntity = {
+            id: `npc-${index}`,
+            name: npc.name,
+            type: 'neutral',
+            hp: 100,
+            maxHp: 100,
+            attack: 0,
+            defense: 10,
+            speed: 5,
+            position: { x: npc.x, y: npc.y },
+          };
+          combatSystem.addEntity(npcEntity);
+        });
       });
     }
   }, [roomData, crawler]);
 
   // Helper function to generate tactical data
-  const generateTacticalData = (data: RoomData) => {
+  /*const generateTacticalData = (data: RoomData) => {
     const { room, availableDirections, playersInRoom } = data;
     return {
       background: getRoomBackgroundType(room.environment, room.type),
@@ -192,14 +192,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       },
       otherPlayers: playersInRoom.filter(p => p.id !== crawler.id)
     };
-  };
+  };*/
 
   // Click handlers
   const handleEntityClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null); // Close any open context menu
-    
+
     if (event.button === 0) { // Left click
       combatSystem.selectEntity(entityId);
     }
@@ -208,16 +208,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleEntityRightClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const entity = combatState.entities.find(e => e.id === entityId);
     if (!entity) return;
 
     // Select the entity
     combatSystem.selectEntity(entityId);
-    
+
     // Get available actions for the player towards this entity
     const availableActions = combatSystem.getAvailableActions('player');
-    
+
     // Show context menu
     setContextMenu({
       x: event.clientX,
@@ -232,7 +232,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null);
-    
+
     if (event.button === 2) { // Right click
       // Show loot context menu
       setContextMenu({
@@ -294,14 +294,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-  const tacticalData = generateTacticalData(roomData);
+  //const tacticalData = generateTacticalData(roomData);
 
   function getRoomBackgroundType(environment: string, type: string): string {
     if (type === "entrance" || type === "exit") return "stone_chamber";
     if (type === "treasure") return "golden_chamber";
     if (type === "safe") return "peaceful_chamber";
     if (type === "boss") return "dark_chamber";
-    
+
     switch (environment) {
       case "outdoor": return "forest_clearing";
       case "underground": return "dungeon_corridor";
@@ -311,7 +311,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   function generateLootPositions(hasLoot: boolean, roomType: string) {
     if (!hasLoot) return [];
-    
+
     const lootItems = [];
     if (roomType === "treasure") {
       lootItems.push(
@@ -336,9 +336,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   function generateMobPositions(roomType: string, factionId: number | null | undefined) {
     const mobs = [];
-    
+
     if (roomType === "safe" || roomType === "entrance") return mobs;
-    
+
     if (roomType === "boss") {
       mobs.push({
         type: "hostile",
@@ -371,13 +371,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         });
       }
     }
-    
+
     return mobs;
   }
 
   function generateNpcPositions(roomType: string, isSafe: boolean) {
     const npcs = [];
-    
+
     if (isSafe || roomType === "safe") {
       npcs.push({
         name: "Sanctuary Keeper",
@@ -393,7 +393,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         dialogue: true
       });
     }
-    
+
     return npcs;
   }
 
@@ -454,7 +454,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           onClick={handleBackgroundClick}
         >
           {/* Room Background */}
-          <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
+          {/*<div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>*/}
+          <div className={`absolute inset-0 ${getRoomBackgroundType(room.environment, room.type)}`}>
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20">
               <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -469,16 +470,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           </div>
 
           {/* Exit indicators */}
-          {tacticalData.exits.north && (
+          {availableDirections.includes("north") && (
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-b"></div>
           )}
-          {tacticalData.exits.south && (
+          {availableDirections.includes("south") && (
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-t"></div>
           )}
-          {tacticalData.exits.east && (
+          {availableDirections.includes("east") && (
             <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-l"></div>
           )}
-          {tacticalData.exits.west && (
+          {availableDirections.includes("west") && (
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
@@ -511,7 +512,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {entity.type === 'hostile' && <Skull className="w-3 h-3 text-white" />}
                 {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
               </div>
-              
+
               {/* HP bar for non-player entities */}
               {entity.type !== 'player' && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
@@ -521,7 +522,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   ></div>
                 </div>
               )}
-              
+
               {/* Selection indicator */}
               {entity.isSelected && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
@@ -545,7 +546,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           ))}
 
           {/* Loot items */}
-          {tacticalData.loot.map((item, index) => (
+          {/*tacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
@@ -563,20 +564,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               }`}>
                 {getLootIcon(item.type)}
               </div>
-              
-              {/* Hover name display */}
+
+              {/* Hover name display *}
               {hoveredLoot === index && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                   {item.name}
                 </div>
               )}
             </div>
-          ))}
+          ))*/}
 
-          
+
 
           {/* Other Players */}
-          {tacticalData.otherPlayers.map((player, index) => (
+          {playersInRoom.filter(p => p.id !== crawler.id).map((player, index) => (
             <div
               key={`player-${index}`}
               className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
@@ -635,7 +636,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <Eye className="w-4 h-4" />
                 Examine
               </button>
-              
+
               {contextMenu.entity.type === 'npc' && (
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
@@ -703,7 +704,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div className="flex items-center gap-4 mt-1">
             <span className="flex items-center gap-1">
               <Gem className="w-3 h-3 text-yellow-400" />
-              {tacticalData.loot.length} items
+              {/*tacticalData.loot.length*/} 0 items
             </span>
             <span className="flex items-center gap-1">
               <Skull className="w-3 h-3 text-red-500" />
@@ -711,7 +712,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </span>
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3 text-cyan-400" />
-              {combatSystem.getFriendlyEntities().length - 1 + tacticalData.otherPlayers.length} friendlies
+              {combatSystem.getFriendlyEntities().length - 1 + playersInRoom.filter(p => p.id !== crawler.id).length} friendlies
             </span>
             {combatState.selectedEntityId && (
               <span className="flex items-center gap-1 text-yellow-400">

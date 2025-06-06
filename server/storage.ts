@@ -3049,6 +3049,205 @@ export class DatabaseStorage implements IStorage {
       return { success: false, error: "Effect not found" };
     }
 
+    // Implementation continues...
+    return { success: true };
+  }
+
+  // Room state persistence methods
+  async getRoomState(roomId: number): Promise<any> {
+    const { roomStates } = await import("@shared/schema");
+    const [roomState] = await db
+      .select()
+      .from(roomStates)
+      .where(eq(roomStates.roomId, roomId))
+      .limit(1);
+
+    return roomState;
+  }
+
+  async createOrUpdateRoomState(roomId: number, stateData: {
+    mobData?: any[];
+    npcData?: any[];
+    lootData?: any[];
+    environmentData?: any;
+    playerActivity?: number;
+    isDepleted?: boolean;
+  }): Promise<any> {
+    const { roomStates } = await import("@shared/schema");
+    
+    const existingState = await this.getRoomState(roomId);
+    
+    if (existingState) {
+      // Update existing state
+      const [updated] = await db
+        .update(roomStates)
+        .set({
+          ...stateData,
+          lastUpdated: new Date(),
+          lastPlayerVisit: new Date(),
+        })
+        .where(eq(roomStates.roomId, roomId))
+        .returning();
+      return updated;
+    } else {
+      // Create new state
+      const [created] = await db
+        .insert(roomStates)
+        .values({
+          roomId,
+          ...stateData,
+          lastPlayerVisit: new Date(),
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async incrementRoomActivity(roomId: number, activityAmount: number = 10): Promise<void> {
+    const { roomStates } = await import("@shared/schema");
+    
+    const existingState = await this.getRoomState(roomId);
+    
+    if (existingState) {
+      await db
+        .update(roomStates)
+        .set({
+          playerActivity: existingState.playerActivity + activityAmount,
+          lastPlayerVisit: new Date(),
+        })
+        .where(eq(roomStates.roomId, roomId));
+    } else {
+      await this.createOrUpdateRoomState(roomId, {
+        playerActivity: activityAmount,
+      });
+    }
+  }
+
+  async spawnMobsInRoom(roomId: number): Promise<any[]> {
+    const { mobInstances, mobSpawnConfigs, rooms } = await import("@shared/schema");
+    
+    // Get room info
+    const room = await db
+      .select()
+      .from(rooms)
+      .where(eq(rooms.id, roomId))
+      .limit(1);
+      
+    if (!room.length) return [];
+    
+    // Get spawn configuration for this room type
+    const [spawnConfig] = await db
+      .select()
+      .from(mobSpawnConfigs)
+      .where(eq(mobSpawnConfigs.roomType, room[0].type))
+      .limit(1);
+      
+    if (!spawnConfig) return [];
+    
+    // Check existing mobs in room
+    const existingMobs = await db
+      .select()
+      .from(mobInstances)
+      .where(and(
+        eq(mobInstances.roomId, roomId),
+        eq(mobInstances.status, "alive")
+      ));
+      
+    if (existingMobs.length >= spawnConfig.maxMobs) {
+      return existingMobs;
+    }
+    
+    // Spawn new mobs
+    const mobsToSpawn = spawnConfig.maxMobs - existingMobs.length;
+    const newMobs = [];
+    
+    for (let i = 0; i < mobsToSpawn; i++) {
+      const mobType = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+      
+      const [newMob] = await db
+        .insert(mobInstances)
+        .values({
+          roomId,
+          mobType,
+          name: `${mobType} ${Math.floor(Math.random() * 1000)}`,
+          health: 50 + Math.floor(Math.random() * 50), // 50-100 HP
+          maxHealth: 100,
+          attack: 10 + Math.floor(Math.random() * 10), // 10-20 attack
+          defense: 5 + Math.floor(Math.random() * 5), // 5-10 defense
+          positionX: 15 + Math.random() * 70, // Random position in room
+          positionY: 15 + Math.random() * 70,
+        })
+        .returning();
+        
+      newMobs.push(newMob);
+    }
+    
+    return [...existingMobs, ...newMobs];
+  }
+
+  async getActiveMobsInRoom(roomId: number): Promise<any[]> {
+    const { mobInstances } = await import("@shared/schema");
+    
+    const mobs = await db
+      .select()
+      .from(mobInstances)
+      .where(and(
+        eq(mobInstances.roomId, roomId),
+        eq(mobInstances.status, "alive")
+      ));
+      
+    return mobs;
+  }
+
+  async killMob(mobId: number): Promise<void> {
+    const { mobInstances } = await import("@shared/schema");
+    
+    await db
+      .update(mobInstances)
+      .set({
+        status: "dead",
+        deathTime: new Date(),
+      })
+      .where(eq(mobInstances.id, mobId));
+  }
+
+  async processRoomRespawns(): Promise<void> {
+    const { roomStates, mobSpawnConfigs, rooms } = await import("@shared/schema");
+    
+    // Find rooms that need respawning based on time and activity
+    const roomsToRespawn = await db
+      .select({
+        roomId: roomStates.roomId,
+        roomType: rooms.type,
+        playerActivity: roomStates.playerActivity,
+        lastPlayerVisit: roomStates.lastPlayerVisit,
+        mobLastSpawn: roomStates.mobLastSpawn,
+      })
+      .from(roomStates)
+      .leftJoin(rooms, eq(roomStates.roomId, rooms.id))
+      .where(
+        and(
+          eq(roomStates.isDepleted, true),
+          // Room hasn't been visited recently but has enough activity
+          sql`${roomStates.playerActivity} >= 50`,
+          sql`${roomStates.lastPlayerVisit} < NOW() - INTERVAL '30 minutes'`,
+          sql`${roomStates.mobLastSpawn} < NOW() - INTERVAL '1 hour'`
+        )
+      );
+      
+    for (const room of roomsToRespawn) {
+      await this.spawnMobsInRoom(room.roomId);
+      await db
+        .update(roomStates)
+        .set({
+          isDepleted: false,
+          mobLastSpawn: new Date(),
+          playerActivity: Math.max(0, room.playerActivity - 30), // Reduce activity after respawn
+        })
+        .where(eq(roomStates.roomId, room.roomId));
+    }
+  }
+
     // Check requirements
     if (definition.requirements) {
       const req = definition.requirements;
