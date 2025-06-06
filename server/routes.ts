@@ -669,7 +669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Generate full 10-floor dungeon
         const { generateFullDungeon } = await import(
-          "../client/src/dungeon/generation/dungeon-generator"
+          "../client/src/features/dungeon/generation/dungeon-generator"
         );
         await generateFullDungeon();
 

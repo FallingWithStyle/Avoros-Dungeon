@@ -56,7 +56,7 @@ export default function Leaderboard() {
                   {index + 1}
                 </div>
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={getAvatarUrl(crawler.name || 'Unknown', crawler.id)} alt={crawler.name || 'Unknown'} />
+                  <AvatarImage src={getAvatarUrl(crawler.name || 'Unknown', crawler.serial || crawler.id)} alt={crawler.name || 'Unknown'} />
                   <AvatarFallback className="bg-crawler text-white text-xs">
                     {(crawler.name || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
