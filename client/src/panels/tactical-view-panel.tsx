@@ -542,38 +542,46 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     console.log(`Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`, activeActionMode);
 
-    // Always try to queue a move action when clicking on the map, regardless of action mode
+    // Ensure we have a player selected
     const selectedEntity = combatSystem.getSelectedEntity();
+    const playerEntity = combatState.entities.find(e => e.id === 'player');
     
-    if (selectedEntity?.type === 'player') {
-      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+    if (!selectedEntity?.type === 'player' && playerEntity) {
+      combatSystem.selectEntity('player');
+    }
+
+    const activePlayer = selectedEntity?.type === 'player' ? selectedEntity : playerEntity;
+    
+    if (!activePlayer) {
+      console.log('No player entity found');
+      return;
+    }
+
+    // If no action mode is active, automatically activate move mode
+    if (!activeActionMode) {
+      setActiveActionMode({ type: 'move', actionId: 'move', actionName: 'Move' });
+      console.log('Auto-activated move mode');
+    }
+
+    // Handle different action modes
+    if (activeActionMode?.type === 'move' || !activeActionMode) {
+      // Move action
+      const success = combatSystem.queueMoveAction(activePlayer.id, { x, y });
       console.log('Move action queued:', success);
       
       if (success) {
-        console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-        // Clear active action mode after successful move
-        if (activeActionMode) {
-          setActiveActionMode(null);
-        }
+        console.log(`${activePlayer.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        // Keep move mode active for subsequent clicks
       } else {
         console.log(`Failed to queue move action - check cooldown or existing action`);
       }
-    } else {
-      // If no player selected, automatically select the player and then try to move
-      const playerEntity = combatState.entities.find(e => e.id === 'player');
-      if (playerEntity) {
-        combatSystem.selectEntity('player');
-        // Queue move action immediately
-        const success = combatSystem.queueMoveAction('player', { x, y });
-        if (success) {
-          console.log(`${playerEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-          if (activeActionMode) {
-            setActiveActionMode(null);
-          }
-        }
-      } else {
-        console.log('No player entity found');
-      }
+    } else if (activeActionMode?.type === 'attack') {
+      // Attack mode - need to click on an entity, not empty grid
+      console.log('Attack mode active - click on an enemy to attack');
+    } else if (activeActionMode?.type === 'ability') {
+      // Ability mode - handle based on specific ability
+      console.log(`Ability mode active: ${activeActionMode.actionName}`);
+      // TODO: Handle different abilities
     }
   };
 
