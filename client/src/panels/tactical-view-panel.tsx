@@ -537,11 +537,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (activeActionMode?.actionId === 'move') {
       const selectedEntity = combatSystem.getSelectedEntity();
       console.log('Selected entity:', selectedEntity);
-      
+
       if (selectedEntity?.type === 'player') {
         const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
         console.log('Move action queued:', success);
-        
+
         if (success) {
           console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
         } else {
@@ -561,6 +561,47 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       combatSystem.selectEntity(null);
       setContextMenu(null);
     }
+  };
+
+  const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (contextMenu) {
+      setContextMenu(null);
+      return;
+    }
+
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (!selectedEntity || selectedEntity.id !== 'player') {
+      console.log('No valid entity selected for movement');
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    console.log(`Map clicked at: ${x.toFixed(1)}%, ${y.toFixed(1)}% for entity: ${selectedEntity.name}`);
+
+    // Check if move action is available
+    const availableActions = combatSystem.getAvailableActions(selectedEntity.id);
+    const moveAction = availableActions.find(action => action.id === 'move');
+
+    if (moveAction) {
+      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+      if (success) {
+        console.log(`Successfully queued move action to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        // Force a state update to ensure UI reflects the queued action
+        setTimeout(() => {
+          const currentState = combatSystem.getState();
+          console.log(`Current action queue: ${currentState.actionQueue.length} actions`);
+        }, 50);
+      } else {
+        console.log('Failed to queue move action - entity may be on cooldown or already have an action queued');
+      }
+    } else {
+      console.log('Move action not available - entity may be on cooldown');
+    }
+
+    event.stopPropagation();
   };
 
   if (isLoading || !roomData) {
@@ -805,6 +846,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           onClick={activeActionMode?.actionId === 'move' ? handleGridClick : handleBackgroundClick}
           onContextMenu={handleGridRightClick}
           style={activeActionMode?.actionId === 'move' ? { cursor: 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEuNWMtNS4xOSAwLTkuNSA0LjMxLTkuNSA5LjUgMCA1Ljc5IDkuNSAxMS41IDkuNSAxMS41czktNS43MSA5LTExLjVjMC01LjE5LTQuMzEtOS41LTkuNS05LjV6IiBmaWxsPSIjMzc4M2ZmIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMSIvPgo8cGF0aCBkPSJNMTIgNmMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCIgZmlsbD0iIzAwNzVmZiIvPgo8L3N2Zz4=") 12 12, crosshair' } : {}}
+          onClick={handleMapClick}
         >
           {/* Room Background */}
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
@@ -835,318 +877,4 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
-          {/*```text
-          Combat Entities */}
-          {combatState.entities.map((entity) => (
-            <div
-              key={entity.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
-                entity.isSelected ? 'ring-2 ring-yellow-400 ring-offset-1' : ''
-              } ${hoveredEntity === entity.id ? 'scale-110 z-30' : ''} transition-all duration-200`}
-              style={{ left: `${entity.position.x}%`, top: `${entity.position.y}%` }}
-              onClick={(e) => handleEntityClick(entity.id, e)}
-              onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
-              onMouseEnter={() => setHoveredEntity(entity.id)}
-              onMouseLeave={() => setHoveredEntity(null)}
-              title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
-            >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
-                entity.type === 'player' 
-                  ? 'bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50' 
-                  : entity.type === 'hostile'
-                  ? 'bg-red-600 border-red-400 shadow-red-400/30'
-                  : entity.type === 'neutral'
-                  ? 'bg-orange-500 border-orange-300 shadow-orange-400/30'
-                  : 'bg-cyan-500 border-cyan-300 shadow-cyan-400/30'
-              } ${hoveredEntity === entity.id ? 'shadow-xl' : ''}`}>
-                {entity.type === 'player' && (
-                  <div className="absolute inset-1 bg-blue-300 rounded-full"></div>
-                )}
-                {entity.type === 'hostile' && <Skull className="w-3 h-3 text-white" />}
-                {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
-              </div>
-
-              {/* HP bar for non-player entities (only show if damaged) */}
-              {entity.type !== 'player' && entity.hp !== undefined && entity.maxHp !== undefined && entity.hp < entity.maxHp && (
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
-                  <div 
-                    className={`h-full rounded transition-all duration-300 ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
-                    style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
-                  ></div>
-                </div>
-              )}
-
-              {/* Selection indicator - always show when selected */}
-              {entity.isSelected && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
-              )}
-
-              {/* Hover name display */}
-              {hoveredEntity === entity.id && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
-                  {entity.name}
-                  {entity.type !== 'player' && ` (${entity.hp}/${entity.maxHp})`}
-                </div>
-              )}
-
-              {/* Action queue indicator */}
-              {combatState.actionQueue.some(qa => qa.entityId === entity.id) && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-spin">
-                  <div className="w-full h-full bg-purple-300 rounded-full animate-ping"></div>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Loot items */}
-          {tacticalData.loot.map((item, index) => (
-            <div
-              key={`loot-${index}`}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
-                hoveredLoot === index ? 'scale-110 z-20' : ''
-              } transition-all duration-200`}
-              style={{ left: `${item.x}%`, top: `${item.y}%` }}
-              title={`${item.name} - Right-click to interact`}
-              onClick={(e) => handleLootClick(index, item, e)}
-              onContextMenu={(e) => handleLootClick(index, item, e)}
-              onMouseEnter={() => setHoveredLoot(index)}
-              onMouseLeave={() => setHoveredLoot(null)}
-            >
-              <div className={`w-6 h-6 bg-yellow-500 rounded border-2 border-yellow-300 flex items-center justify-center shadow-lg ${
-                hoveredLoot === index ? 'animate-pulse shadow-yellow-400/50' : 'animate-bounce'
-              }`}>
-                {getLootIcon(item.type)}
-              </div>
-
-              {/* Hover name display */}
-              {hoveredLoot === index && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
-                  {item.name}
-                </div>
-              )}
-            </div>
-          ))}
-
-
-
-          {/* Other Players */}
-          {tacticalData.otherPlayers.map((player, index) => {
-            // Generate a specific grid position for each other player
-            const gridX = 2 + (index % 3) * 2; // Spread horizontally: 2, 4, 6, then wrap
-            const gridY = 12 + Math.floor(index / 3); // Stack vertically if more than 3 players
-            const pos = gridToPercentage(gridX, gridY);
-
-            return (
-              <div
-                key={`player-${index}`}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
-                style={{ 
-                  left: `${pos.x}%`, 
-                  top: `${pos.y}%` 
-                }}
-                title={`${player.name} (Level ${player.level})`}
-              >
-                <div className="w-6 h-6 bg-purple-500 rounded-full border-2 border-purple-300 flex items-center justify-center">
-                  <Users className="w-3 h-3 text-white" />
-                </div>
-                <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 font-medium whitespace-nowrap">
-                  {player.name}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Hotbar */}
-        <div className="flex justify-center gap-2 mt-2">
-          {hotbarActions.map((action, index) => (
-            <button
-              key={action.id}
-              className={`w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? 'bg-yellow-500' : 'bg-gray-800 hover:bg-gray-700'} text-white flex items-center justify-center`}
-              onClick={() => handleHotbarClick(action.id, action.type, action.name)}
-              title={`${index + 1}: ${action.name}`}
-            >
-              {action.icon}
-            </button>
-          ))}
-        </div>
-
-        {/* Context Menu */}
-        {contextMenu && (
-          <div
-            ref={contextMenuRef}
-            className="fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 py-2 min-w-48"
-            style={{ 
-              left: `${Math.min(contextMenu.x, window.innerWidth - 200)}px`, 
-              top: `${Math.min(contextMenu.y, window.innerHeight - 200)}px` 
-            }}
-          >
-            {/* Entity Info Header */}
-            <div className="px-3 py-2 border-b border-gray-700">
-              <div className="flex items-center gap-2">
-                {contextMenu.entity.type === 'hostile' && <Skull className="w-4 h-4 text-red-400" />}
-                {(contextMenu.entity.type === 'neutral' || contextMenu.entity.type === 'npc') && <Users className="w-4 h-4 text-orange-400" />}
-                {contextMenu.entityId.startsWith('loot-') && <Package className="w-4 h-4 text-yellow-400" />}
-                <div>
-                  <div className="text-white font-medium">{contextMenu.entity.name}</div>
-                  {!contextMenu.entityId.startsWith('loot-') && (
-                    <div className="text-xs text-gray-400">
-                      {contextMenu.entity.hp}/{contextMenu.entity.maxHp} HP
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Info Actions */}
-            <div className="px-3 py-2 border-b border-gray-700">
-              <button
-                className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                onClick={() => {
-                  console.log(`Examining ${contextMenu.entity.name}`);
-                  setContextMenu(null);
-                }}
-              >
-                <Eye className="w-4 h-4" />
-                Examine
-              </button>
-
-              {contextMenu.entity.type === 'npc' && (
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => {
-                    console.log(`Talking to ${contextMenu.entity.name}`);
-                    setContextMenu(null);
-                  }}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Talk
-                </button>
-              )}
-
-              {contextMenu.entityId.startsWith('loot-') && (
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => {
-                    console.log(`Picking up ${contextMenu.entity.name}`);
-                    setContextMenu(null);
-                  }}
-                >
-                  <Package className="w-4 h-4" />
-                  Pick Up
-                </button>
-              )}
-            </div>
-
-            {/* Movement Actions */}
-            {contextMenu.clickPosition && combatSystem.getSelectedEntity()?.type === 'player' && (
-              <div className="px-3 py-2 border-b border-gray-700">
-                <div className="text-xs text-gray-500 mb-2">Movement</div>
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => handleMoveToPosition(contextMenu.clickPosition)}
-                >
-                  <Footprints className="w-4 h-4 text-green-400" />
-                  <div>
-                    <div>Move Here</div>
-                    <div className="text-xs text-gray-500">Position: {contextMenu.clickPosition.x.toFixed(0)}, {contextMenu.clickPosition.y.toFixed(0)}</div>
-                  </div>
-                </button>
-              </div>
-            )}
-
-            {/* Grid-specific actions */}
-            {contextMenu.entityId === 'grid' && combatSystem.getSelectedEntity()?.type === 'player' && (
-              <div className="px-3 py-2">
-                <div className="text-xs text-gray-500 mb-2">Grid Actions</div>
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => {
-                    const selectedEntity = combatSystem.getSelectedEntity();
-                    if (selectedEntity && contextMenu.clickPosition) {
-                      const success = combatSystem.queueMoveAction(selectedEntity.id, contextMenu.clickPosition);
-                      if (success) {
-                        console.log(`${selectedEntity.name} moving to ${contextMenu.clickPosition.x.toFixed(1)}, ${contextMenu.clickPosition.y.toFixed(1)}`);
-                      } else {
-                        console.log(`Failed to queue move action - check cooldown or existing action`);
-                      }
-                    }
-                    setContextMenu(null);
-                  }}
-                >
-                  <Footprints className="w-4 h-4 text-green-400" />
-                  <div>
-                    <div>Move to Position</div>
-                    <div className="text-xs text-gray-500">Grid: {contextMenu.clickPosition?.x.toFixed(0)}, {contextMenu.clickPosition?.y.toFixed(0)}</div>
-                  </div>
-                </button>
-              </div>
-            )}
-
-            {/* Combat Actions */}
-            {contextMenu.actions.length > 0 && contextMenu.entity.type === 'hostile' && (
-              <div className="px-3 py-2">
-                <div className="text-xs text-gray-500 mb-2">Combat Actions</div>
-                {contextMenu.actions.map((action) => (
-                  <button
-                    key={action.id}
-                    className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                    onClick={() => handleActionClick(action, contextMenu.entityId)}
-                  >
-                    {action.type === 'attack' && <Sword className="w-4 h-4 text-red-400" />}
-                    {action.type === 'ability' && <Target className="w-4 h-4 text-blue-400" />}
-                    <div>
-                      <div>{action.name}</div>
-                      {action.damage && (
-                        <div className="text-xs text-gray-500">Damage: {action.damage}</div>
-                      )}
-                      <div className="text-xs text-gray-500">Cooldown: {action.cooldown/1000}s</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* No actions available */}
-            {contextMenu.actions.length === 0 && contextMenu.entity.type === 'hostile' && (
-              <div className="px-3 py-2 text-xs text-gray-500">
-                No actions available (on cooldown)
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Room info */}
-        <div className="mt-3 text-xs text-slate-400">
-          <p className="font-medium text-slate-300">Current Room: {room.name}</p>
-          <p>Environment: {room.environment} • Type: {room.type}</p>
-          <div className="flex items-center gap-4 mt-1">
-            <span className="flex items-center gap-1">
-              <Gem className="w-3 h-3 text-yellow-400" />
-              {tacticalData.loot.length} items
-            </span>
-            <span className="flex items-center gap-1">
-              <Skull className="w-3 h-3 text-red-500" />
-              {combatSystem.getHostileEntities().length} enemies
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-cyan-400" />
-              {combatSystem.getFriendlyEntities().length - 1 + tacticalData.otherPlayers.length} friendlies
-            </span>
-            {combatState.selectedEntityId && (
-              <span className="flex items-center gap-1 text-yellow-400">
-                <Eye className="w-3 h-3" />
-                {combatState.entities.find(e => e.id === combatState.selectedEntityId)?.name} selected
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Action Queue Panel */}
-        <div className="mt-4">
-          <ActionQueuePanel />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+          {/*

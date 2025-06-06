@@ -242,7 +242,8 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Combat processing is always running
+    // Ensure combat processing is running
+    this.ensureCombatProcessing();
 
     this.notifyListeners();
 
@@ -361,7 +362,8 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Combat processing is always running
+    // Ensure combat processing is running
+    this.ensureCombatProcessing();
 
     this.notifyListeners();
     eventsSystem.onCombatAction(moveAction, entityId);
@@ -398,9 +400,11 @@ export class CombatSystem {
   processCombatTick(): void {
     const now = Date.now();
     const readyActions = this.state.actionQueue.filter(qa => now >= qa.executesAt);
+    let stateChanged = false;
 
     // Execute ready actions and remove them from queue
     readyActions.forEach(queuedAction => {
+      console.log(`Executing ${queuedAction.action.name} for ${queuedAction.entityId}`);
       this.executeAction(queuedAction);
 
       // Remove this specific action from the queue
@@ -409,18 +413,23 @@ export class CombatSystem {
       );
       if (actionIndex !== -1) {
         this.state.actionQueue.splice(actionIndex, 1);
+        stateChanged = true;
       }
     });
 
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Keep combat processing running constantly for AI and grace period management
-    // No longer auto-stop combat processing
-
-    // Always notify listeners if we processed any actions or if the queue changed
-    if (readyActions.length > 0) {
+    // Always notify listeners if the state changed
+    if (stateChanged || readyActions.length > 0) {
       this.notifyListeners();
+    }
+  }
+
+  // Ensure combat processing is running (safe to call multiple times)
+  ensureCombatProcessing(): void {
+    if (!this.combatInterval) {
+      this.startCombatProcessing();
     }
   }
 
@@ -428,6 +437,7 @@ export class CombatSystem {
   startCombatProcessing(): void {
     if (this.combatInterval) return; // Already running
 
+    console.log('Starting combat processing...');
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
     }, 100); // Process every 100ms
@@ -436,6 +446,7 @@ export class CombatSystem {
   // Stop automatic combat processing
   stopCombatProcessing(): void {
     if (this.combatInterval) {
+      console.log('Stopping combat processing...');
       clearInterval(this.combatInterval);
       this.combatInterval = null;
     }
