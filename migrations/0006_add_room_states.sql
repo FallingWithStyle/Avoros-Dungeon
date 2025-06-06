@@ -2,7 +2,7 @@
 -- Add room states table for persistent tactical data
 CREATE TABLE IF NOT EXISTS "room_states" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"room_id" integer NOT NULL,
+	"room_id" integer NOT NULL UNIQUE,
 	"last_updated" timestamp DEFAULT now(),
 	"mob_data" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"npc_data" jsonb DEFAULT '[]'::jsonb NOT NULL,
