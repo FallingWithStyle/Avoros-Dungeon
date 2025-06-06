@@ -1032,6 +1032,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       type: "ability",
     },
     {
+      id: "basic_attack",
+      name: "Normal Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "heavy_attack",
+      name: "Heavy Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "ranged_attack",
+      name: "Ranged Attack",
+      icon: <Target className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
       id: "wait",
       name: "Wait",
       icon: <Clock className="w-4 h-4" />,
