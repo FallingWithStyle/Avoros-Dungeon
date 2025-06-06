@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown, Footprints } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
@@ -379,6 +379,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
+  const handleGridRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (!selectedEntity || selectedEntity.type !== 'player') return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = ((event.clientX - rect.left) / rect.width) * 100;
+    const clickY = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      entityId: 'grid',
+      entity: {
+        id: 'grid',
+        name: 'Empty Space',
+        type: 'neutral',
+        hp: 1,
+        maxHp: 1,
+        attack: 0,
+        defense: 0,
+        speed: 0,
+        position: { x: clickX, y: clickY }
+      } as CombatEntity,
+      actions: [],
+      clickPosition: { x: clickX, y: clickY },
+    });
+  };
+
   const handleEntityRightClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -471,6 +503,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   };
 
   const handleGridClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    // Only handle left clicks for movement
+    if (event.button !== 0) return;
+
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -698,6 +733,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         <div 
           className="relative w-full aspect-square border-2 border-game-border rounded-lg overflow-hidden cursor-pointer"
           onClick={handleBackgroundClick}
+          onContextMenu={handleGridRightClick}
         >
           {/* Room Background */}
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
@@ -924,10 +960,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                   onClick={() => handleMoveToPosition(contextMenu.clickPosition)}
                 >
-                  <ArrowDown className="w-4 h-4 text-green-400" />
+                  <Footprints className="w-4 h-4 text-green-400" />
                   <div>
                     <div>Move Here</div>
                     <div className="text-xs text-gray-500">Position: {contextMenu.clickPosition.x.toFixed(0)}, {contextMenu.clickPosition.y.toFixed(0)}</div>
+                  </div>
+                </button>
+              </div>
+            )}
+
+            {/* Grid-specific actions */}
+            {contextMenu.entityId === 'grid' && combatSystem.getSelectedEntity()?.type === 'player' && (
+              <div className="px-3 py-2">
+                <div className="text-xs text-gray-500 mb-2">Grid Actions</div>
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                  onClick={() => {
+                    const selectedEntity = combatSystem.getSelectedEntity();
+                    if (selectedEntity && contextMenu.clickPosition) {
+                      const success = combatSystem.queueMoveAction(selectedEntity.id, contextMenu.clickPosition);
+                      if (success) {
+                        console.log(`${selectedEntity.name} moving to ${contextMenu.clickPosition.x.toFixed(1)}, ${contextMenu.clickPosition.y.toFixed(1)}`);
+                      } else {
+                        console.log(`Failed to queue move action - check cooldown or existing action`);
+                      }
+                    }
+                    setContextMenu(null);
+                  }}
+                >
+                  <Footprints className="w-4 h-4 text-green-400" />
+                  <div>
+                    <div>Move to Position</div>
+                    <div className="text-xs text-gray-500">Grid: {contextMenu.clickPosition?.x.toFixed(0)}, {contextMenu.clickPosition?.y.toFixed(0)}</div>
                   </div>
                 </button>
               </div>
