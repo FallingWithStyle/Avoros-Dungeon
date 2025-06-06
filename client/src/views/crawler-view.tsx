@@ -8,36 +8,13 @@ import FloorInfoPanel from "@/panels/floor-info-panel";
 import NavigationPanel from "@/panels/navigation-panel";
 import MapPanel from "@/panels/map-panel";
 import TacticalViewPanel from "@/panels/tactical-view-panel";
+import RoomEventsPanel from "@/panels/room-events-panel";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 
 interface CrawlerViewProps {
   crawlerId: string;
-}
-
-// Dummy RoomEventsPanel component
-function RoomEventsPanel({ crawler }: { crawler: CrawlerWithDetails }) {
-  return (
-    <Card className="bg-game-surface border-game-border">
-      <CardContent>
-        <h3 className="text-lg font-semibold mb-2">Room Events</h3>
-        <div>
-          {/* Example events - replace with actual game logic */}
-          <p className="text-sm text-slate-400">
-            Crawler {crawler.name} entered from the north.
-          </p>
-          <p className="text-sm text-slate-400">
-            Crawler {crawler.name} used Heavy Attack on Dungeon Slug, dealing 5
-            damage.
-          </p>
-          <p className="text-sm text-slate-400">
-            Dungeon Slug noticed Crawler {crawler.name}.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
 
 export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
