@@ -130,6 +130,42 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     };
   }, [contextMenu]);
 
+  // Handle hotbar keyboard shortcuts (1-0)
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input field
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      const key = event.key;
+      let actionIndex = -1;
+
+      // Handle keys 1-9 and 0 (which maps to index 9)
+      if (key >= "1" && key <= "9") {
+        actionIndex = parseInt(key) - 1; // Convert 1-9 to 0-8
+      } else if (key === "0") {
+        actionIndex = 9; // 0 key maps to the 10th action (index 9)
+      }
+
+      if (actionIndex >= 0 && actionIndex < hotbarActions.length) {
+        event.preventDefault();
+        const action = hotbarActions[actionIndex];
+        const cooldownPercentage = getCooldownPercentage(action.id);
+        
+        if (cooldownPercentage === 0) { // Only trigger if not on cooldown
+          handleHotbarClick(action.id, action.type, action.name);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [hotbarActions]);
+
   // Fetch current room data
   const { data: roomData, isLoading } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
