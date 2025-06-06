@@ -876,7 +876,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 </div>
               )}
 
-              {/* Selection indicator */}
+              {/* Selection indicator - always show when selected */}
               {entity.isSelected && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
               )}

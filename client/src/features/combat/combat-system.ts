@@ -215,10 +215,8 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Auto-start combat processing if not already running
-    if (!this.combatInterval) {
-      this.startCombatProcessing();
-    }
+    // Always ensure combat processing is running when actions are queued
+    this.startCombatProcessing();
 
     this.notifyListeners();
 
@@ -297,7 +295,39 @@ export class CombatSystem {
 
   // Queue a move action to a specific position
   queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
-    return this.queueAction(entityId, 'move', undefined, targetPosition);
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return false;
+
+    const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
+    if (existingAction) return false;
+
+    const moveAction = this.actionDefinitions.get('move');
+    if (!moveAction) return false;
+
+    if (!entity.cooldowns) entity.cooldowns = {};
+    const now = Date.now();
+    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveAction.cooldown) {
+        return false;
+    }
+
+    const queuedAction: QueuedAction = {
+      entityId,
+      action: moveAction,
+      targetId: undefined,
+      targetPosition,
+      queuedAt: now,
+      executesAt: now + moveAction.executionTime,
+    };
+
+    this.state.actionQueue.push(queuedAction);
+
+    // Always ensure combat processing is running
+    this.startCombatProcessing();
+
+    this.notifyListeners();
+    eventsSystem.onCombatAction(moveAction, entityId);
+
+    return true;
   }
 
   cancelAction(entityId: string): boolean {
@@ -607,67 +637,7 @@ export class CombatSystem {
     return baseActions;
   }
 
-  queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
-    const entity = this.state.entities.find(e => e.id === entityId);
-    if (!entity) return false;
-
-    const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
-    if (existingAction) return false;
-
-    const moveAction = this.getEntityActions(entityId).find(a => a.id === 'move');
-    if (!moveAction) return false;
-
-    if (!entity.cooldowns) entity.cooldowns = {};
-    const now = Date.now();
-    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveAction.cooldown) {
-        return false;
-    }
-
-    const queuedAction: QueuedAction = {
-      entityId,
-      action: moveAction,
-      targetId: undefined,
-      targetPosition,
-      queuedAt: now,
-      executesAt: now + moveAction.executionTime,
-    };
-
-    this.state.actionQueue.push(queuedAction);
-
-    // Always start combat processing to ensure actions execute
-    this.startCombatProcessing();
-
-    this.notifyListeners();
-    eventsSystem.onCombatAction(moveAction, entityId);
-
-    return true;
-  }
-
-  private executeAction(queuedAction: QueuedAction): void {
-    const { entityId, action, targetId, targetPosition } = queuedAction;
-    const entity = this.state.entities.find(e => e.id === entityId);
-
-    if (!entity) return;
-
-    if (!entity.cooldowns) entity.cooldowns = {};
-    entity.cooldowns[action.id] = Date.now();
-
-    switch (action.type) {
-      case 'attack':
-        if (targetId && action.damage) {
-          this.dealDamage(targetId, action.damage, entity.attack);
-        }
-        break;
-      case 'ability':
-        this.executeAbility(entity, action, targetId);
-        break;
-      case 'move':
-        if (targetPosition) {
-          this.moveEntityToPosition(entityId, targetPosition);
-        }
-        break;
-    }
-  }
+  
 }
 
 // Singleton instance
