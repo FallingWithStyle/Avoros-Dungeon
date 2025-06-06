@@ -975,7 +975,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  // Add hotbar for actions
+  // Add hotbar for actions (10 total)
   const hotbarActions = [
     {
       id: "move",
@@ -1014,24 +1014,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       type: "ability",
     },
     {
-      id: "ability4",
-      name: "Ability 4",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "ability5",
-      name: "Ability 5",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "ability6",
-      name: "Ability 6",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
       id: "basic_attack",
       name: "Normal Attack",
       icon: <Sword className="w-4 h-4" />,
@@ -1056,6 +1038,23 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       type: "ability",
     },
   ];
+
+  // Helper function to get cooldown percentage for an action
+  const getCooldownPercentage = (actionId: string): number => {
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+    if (!playerEntity || !playerEntity.cooldowns) return 0;
+
+    const action = combatSystem.actionDefinitions?.get(actionId);
+    if (!action) return 0;
+
+    const lastUsed = playerEntity.cooldowns[actionId] || 0;
+    const now = Date.now();
+    const timeSinceLastUse = now - lastUsed;
+    
+    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
+    
+    return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
+  };
 
   const findViableTarget = (): CombatEntity | null => {
     const hostileEntities = combatSystem.getHostileEntities();
@@ -1381,18 +1380,52 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
         {/* Hotbar */}
         <div className="flex justify-center gap-2 mt-2">
-          {hotbarActions.map((action, index) => (
-            <button
-              key={action.id}
-              className={`w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? "bg-yellow-500" : "bg-gray-800 hover:bg-gray-700"} text-white flex items-center justify-center`}
-              onClick={() =>
-                handleHotbarClick(action.id, action.type, action.name)
-              }
-              title={`${index + 1}: ${action.name}`}
-            >
-              {action.icon}
-            </button>
-          ))}
+          {hotbarActions.map((action, index) => {
+            const cooldownPercentage = getCooldownPercentage(action.id);
+            const isOnCooldown = cooldownPercentage > 0;
+            
+            return (
+              <button
+                key={action.id}
+                className={`relative w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? "bg-yellow-500" : isOnCooldown ? "bg-gray-900 cursor-not-allowed" : "bg-gray-800 hover:bg-gray-700"} text-white flex items-center justify-center transition-all duration-150`}
+                onClick={() => {
+                  if (!isOnCooldown) {
+                    handleHotbarClick(action.id, action.type, action.name);
+                  }
+                }}
+                disabled={isOnCooldown}
+                title={`${index + 1}: ${action.name}${isOnCooldown ? " (on cooldown)" : ""}`}
+              >
+                {/* Cooldown overlay */}
+                {isOnCooldown && (
+                  <div className="absolute inset-0 rounded-full overflow-hidden">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="14"
+                        fill="none"
+                        stroke="rgba(239, 68, 68, 0.8)"
+                        strokeWidth="2"
+                        strokeDasharray={`${(cooldownPercentage / 100) * 87.96} 87.96`}
+                        className="transition-all duration-100"
+                      />
+                    </svg>
+                  </div>
+                )}
+                
+                {/* Icon */}
+                <div className={`${isOnCooldown ? "opacity-50" : ""} transition-opacity duration-150`}>
+                  {action.icon}
+                </div>
+                
+                {/* Number indicator */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-slate-600 text-xs rounded-full flex items-center justify-center text-slate-200">
+                  {index === 9 ? "0" : (index + 1).toString()}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Context Menu */}
