@@ -115,14 +115,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       setLastRoomId(roomData.room.id);
 
-      // Clear existing entities
+      // Clear existing entities except player and party members
       combatState.entities.forEach(entity => {
-        if (entity.id !== 'player') {
+        if (!entity.id.startsWith('player') && !entity.id.startsWith('party-') && !entity.id.startsWith('companion-')) {
           combatSystem.removeEntity(entity.id);
         }
       });
 
-      // Add player entity with correct position
+      // Calculate entry position for the party
+      const partyEntryPositions = getPartyEntryPositions(entryDirection, roomData.playersInRoom.length + 1); // +1 for main player
+
+      // Add/update main player entity
       const playerEntity: CombatEntity = {
         id: 'player',
         name: crawler.name,
@@ -132,7 +135,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         attack: crawler.attack,
         defense: crawler.defense,
         speed: crawler.speed,
-        position: { x: 50, y: 50 }, // Default center, will be updated below
+        position: partyEntryPositions[0], // Main player gets first position
         entryDirection,
       };
 
@@ -142,16 +145,47 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.updateEntity('player', playerEntity);
       }
 
-      // Set entry direction and position in combat system AFTER adding/updating the entity
-      if (entryDirection) {
-        combatSystem.setPlayerEntryDirection(entryDirection);
-      } else {
-        // If no entry direction, place player in center
-        const existingPlayer = combatState.entities.find(e => e.id === 'player');
-        if (existingPlayer) {
-          combatSystem.updateEntity('player', { position: { x: 50, y: 50 } });
-        }
-      }
+      // TODO: Add party members when party system is implemented
+      // Example placeholder for party members:
+      /*
+      const partyMembers = getPartyMembers(); // Future function to get party data
+      partyMembers.forEach((member, index) => {
+        const memberEntity: CombatEntity = {
+          id: `party-${member.id}`,
+          name: member.name,
+          type: 'player',
+          hp: member.hp,
+          maxHp: member.maxHp,
+          attack: member.attack,
+          defense: member.defense,
+          speed: member.speed,
+          position: partyEntryPositions[index + 1] || partyEntryPositions[0], // Fallback to main position
+          entryDirection,
+        };
+        combatSystem.addEntity(memberEntity);
+      });
+      */
+
+      // TODO: Add companions/pets when companion system is implemented
+      // Example placeholder for companions:
+      /*
+      const companions = getActiveCompanions(); // Future function to get companion data
+      companions.forEach((companion, index) => {
+        const companionEntity: CombatEntity = {
+          id: `companion-${companion.id}`,
+          name: companion.name,
+          type: 'neutral',
+          hp: companion.hp,
+          maxHp: companion.maxHp,
+          attack: companion.attack,
+          defense: companion.defense,
+          speed: companion.speed,
+          position: getCompanionPosition(partyEntryPositions[0], index), // Position near main player
+          entryDirection,
+        };
+        combatSystem.addEntity(companionEntity);
+      });
+      */
 
       // Add room entities based on tactical data
       const tacticalData = generateTacticalData(roomData);
@@ -199,6 +233,91 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       x: (gridX + 0.5) * cellWidth, // Center of the cell
       y: (gridY + 0.5) * cellHeight
     };
+  };
+
+  // Helper function to get party entry positions based on direction
+  const getPartyEntryPositions = (direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] => {
+    const positions: { x: number; y: number }[] = [];
+    
+    // Get base entry position
+    let baseGridX = 7; // Center
+    let baseGridY = 7; // Center
+    let spreadDirection: 'horizontal' | 'vertical' = 'horizontal';
+
+    switch (direction) {
+      case 'north':
+        baseGridX = 7;
+        baseGridY = 13; // Enter from south side (bottom)
+        spreadDirection = 'horizontal';
+        break;
+      case 'south':
+        baseGridX = 7;
+        baseGridY = 1; // Enter from north side (top)
+        spreadDirection = 'horizontal';
+        break;
+      case 'east':
+        baseGridX = 1;
+        baseGridY = 7; // Enter from west side (left)
+        spreadDirection = 'vertical';
+        break;
+      case 'west':
+        baseGridX = 13;
+        baseGridY = 7; // Enter from east side (right)
+        spreadDirection = 'vertical';
+        break;
+      default:
+        // No direction or center spawn
+        baseGridX = 7;
+        baseGridY = 7;
+        spreadDirection = 'horizontal';
+    }
+
+    // Calculate positions for party members
+    const halfParty = Math.floor(partySize / 2);
+    
+    for (let i = 0; i < partySize; i++) {
+      let gridX = baseGridX;
+      let gridY = baseGridY;
+      
+      if (partySize > 1) {
+        const offset = i - halfParty;
+        
+        if (spreadDirection === 'horizontal') {
+          gridX = Math.max(0, Math.min(14, baseGridX + offset));
+        } else {
+          gridY = Math.max(0, Math.min(14, baseGridY + offset));
+        }
+      }
+      
+      positions.push(gridToPercentage(gridX, gridY));
+    }
+
+    return positions;
+  };
+
+  // Helper function to position companions near their owner
+  const getCompanionPosition = (ownerPosition: { x: number; y: number }, companionIndex: number): { x: number; y: number } => {
+    // Convert owner position back to grid coordinates
+    const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
+    const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
+    
+    // Position companions in adjacent cells
+    const companionOffsets = [
+      { x: 1, y: 0 },   // Right
+      { x: -1, y: 0 },  // Left
+      { x: 0, y: 1 },   // Down
+      { x: 0, y: -1 },  // Up
+      { x: 1, y: 1 },   // Diagonal down-right
+      { x: -1, y: -1 }, // Diagonal up-left
+      { x: 1, y: -1 },  // Diagonal up-right
+      { x: -1, y: 1 },  // Diagonal down-left
+    ];
+    
+    const offset = companionOffsets[companionIndex % companionOffsets.length];
+    const companionGridX = Math.max(0, Math.min(14, ownerGridX + offset.x));
+    const companionGridY = Math.max(0, Math.min(14, ownerGridY + offset.y));
+    
+    return gridToPercentage(companionGridX, companionGridY);
   };
 
   // Helper function to get a random empty grid cell

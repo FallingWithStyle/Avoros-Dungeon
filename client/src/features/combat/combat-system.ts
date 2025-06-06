@@ -321,16 +321,66 @@ export class CombatSystem {
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
     switch (direction) {
       case 'north':
-        return this.gridToPercentage(7, 13); // Enter from south side (bottom row, center)
+        // Coming from north means entering from south side (bottom edge)
+        return this.gridToPercentage(7, 13);
       case 'south':
-        return this.gridToPercentage(7, 1); // Enter from north side (top row, center)
+        // Coming from south means entering from north side (top edge)
+        return this.gridToPercentage(7, 1);
       case 'east':
-        return this.gridToPercentage(1, 7); // Enter from west side (left column, center)
+        // Coming from east means entering from west side (left edge)
+        return this.gridToPercentage(1, 7);
       case 'west':
-        return this.gridToPercentage(13, 7); // Enter from east side (right column, center)
+        // Coming from west means entering from east side (right edge)
+        return this.gridToPercentage(13, 7);
       default:
-        return this.gridToPercentage(7, 7); // Center if no direction (middle of grid)
+        // No direction specified - spawn in center
+        return this.gridToPercentage(7, 7);
     }
+  }
+
+  // Enhanced method to position multiple entities (for future party system)
+  getPartyEntryPositions(direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] {
+    const positions: { x: number; y: number }[] = [];
+    const basePosition = this.getEntryPosition(direction);
+    
+    if (partySize <= 1) {
+      return [basePosition];
+    }
+
+    // Convert base position back to grid coordinates
+    const baseGridX = Math.round((basePosition.x / 100) * 15 - 0.5);
+    const baseGridY = Math.round((basePosition.y / 100) * 15 - 0.5);
+    
+    // Spread party members around the entry point
+    const halfParty = Math.floor(partySize / 2);
+    
+    for (let i = 0; i < partySize; i++) {
+      let gridX = baseGridX;
+      let gridY = baseGridY;
+      
+      const offset = i - halfParty;
+      
+      // Spread horizontally for north/south entries, vertically for east/west
+      if (direction === 'north' || direction === 'south') {
+        gridX = Math.max(0, Math.min(14, baseGridX + offset));
+      } else if (direction === 'east' || direction === 'west') {
+        gridY = Math.max(0, Math.min(14, baseGridY + offset));
+      } else {
+        // For center spawns, use a small cluster pattern
+        const clusterOffsets = [
+          { x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 0 },
+          { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 1 },
+          { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }
+        ];
+        const clusterOffset = clusterOffsets[i % clusterOffsets.length];
+        gridX = Math.max(0, Math.min(14, baseGridX + clusterOffset.x));
+        gridY = Math.max(0, Math.min(14, baseGridY + clusterOffset.y));
+      }
+      
+      positions.push(this.gridToPercentage(gridX, gridY));
+    }
+
+    return positions;
   }
 
   setPlayerEntryDirection(direction: 'north' | 'south' | 'east' | 'west' | null): void {
