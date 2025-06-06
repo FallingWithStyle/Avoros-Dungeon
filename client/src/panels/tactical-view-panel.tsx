@@ -951,7 +951,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     {
       id: "ability3",
       name: "Ability 3",
-      icon: <TargetclassName="w-4 h-4" />,
+      icon: <Target className="w-4 h-4" />,
       type: "ability",
     },
     {
