@@ -156,12 +156,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (!combatState.entities.find(e => e.id === 'player')) {
         combatSystem.addEntity(playerEntity);
-        combatSystem.selectEntity('player'); // Auto-select the player
       } else {
         combatSystem.updateEntity('player', playerEntity);
-        if (!combatSystem.getSelectedEntity()) {
-          combatSystem.selectEntity('player'); // Ensure player is selected if no entity is selected
-        }
       }
 
       // TODO: Add party members when party system is implemented
@@ -769,6 +765,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleHotbarClick = (actionId: string, actionType: string, actionName: string) => {
     console.log(`Hotbar action clicked: ${actionId}`);
+
+    // Auto-select player when any hotbar action is clicked
+    const playerEntity = combatState.entities.find(e => e.id === 'player');
+    if (playerEntity && !combatSystem.getSelectedEntity()) {
+      combatSystem.selectEntity('player');
+    }
 
     if (actionId === 'move') {
       // Activate move mode
