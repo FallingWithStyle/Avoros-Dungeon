@@ -158,7 +158,7 @@ export default function RoomNavigation({
         });
         queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       }, 100); // Small delay to batch updates
-      
+
       setPendingDirection(null);
     },
     onError: (error) => {
@@ -342,6 +342,7 @@ export default function RoomNavigation({
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
+
 
   return (
     <Card>

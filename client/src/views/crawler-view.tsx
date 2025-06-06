@@ -8,6 +8,7 @@ import CrawlerStatusPanel from "@/panels/crawler-status-panel";
 import FloorInfoPanel from "@/panels/floor-info-panel";
 import NavigationPanel from "@/panels/navigation-panel";
 import MapPanel from "@/panels/map-panel";
+import TacticalViewPanel from "@/panels/tactical-view-panel";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
@@ -107,9 +108,10 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             <CrawlerStatusPanel crawler={crawler} />
           </div>
 
-          {/* Middle Column - Room Navigation */}
+          {/* Middle Column - Room Navigation & Tactical View */}
           <div className="space-y-6">
             <NavigationPanel crawler={crawler} energyDisabled={energyDisabled} />
+            <TacticalViewPanel crawler={crawler} />
           </div>
 
           {/* Right Column - Floor Info & Mini-map */}
