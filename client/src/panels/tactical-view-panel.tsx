@@ -1,6 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiRequest } from "@/lib/queryClient";
 import {
   Eye,
   Gem,
@@ -75,21 +74,6 @@ interface ExploredRoom extends Room {
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
-  const queryClient = useQueryClient();
-
-  // Mutation to update crawler health when taking damage
-  const damageMutation = useMutation({
-    mutationFn: async (damage: number) => {
-      return await apiRequest("POST", `/api/crawlers/${crawler.id}/take-damage`, {
-        damage: damage
-      });
-    },
-    onSuccess: () => {
-      // Refresh crawler data
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${crawler.id}`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-    },
-  });
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -109,21 +93,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Subscribe to combat system updates and set up damage callback
+  // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       console.log("Combat state changed", state);
       setCombatState(state);
     });
-
-    // Set up callback for when player takes damage
-    combatSystem.setPlayerDamageCallback((damage: number) => {
-      console.log(`Player took ${damage} damage, updating server...`);
-      damageMutation.mutate(damage);
-    });
-
     return unsubscribe;
-  }, [damageMutation]);
+  }, []);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -178,7 +155,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         event.preventDefault();
         const action = hotbarActions[actionIndex];
         const cooldownPercentage = getCooldownPercentage(action.id);
-
+        
         if (cooldownPercentage === 0) { // Only trigger if not on cooldown
           handleHotbarClick(action.id, action.type, action.name);
         }
@@ -242,11 +219,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         id: "player",
         name: crawler.name,
         type: "player",
-        hp: crawler.health || 0,
-        maxHp: crawler.maxHealth || 100,
-        attack: crawler.attack || 10,
-        defense: crawler.defense || 5,
-        speed: crawler.speed || 10,
+        hp: crawler.hp,
+        maxHp: crawler.maxHp,
+        attack: crawler.attack,
+        defense: crawler.defense,
+        speed: crawler.speed,
         position: partyEntryPositions[0], // Main player gets first position
         entryDirection,
       };
@@ -335,20 +312,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.addEntity(npcEntity);
       });
     }
-  }, [crawler, roomData]);
-
-  // Update player entity HP when crawler health changes
-  useEffect(() => {
-    if (crawler && crawler.health !== undefined && crawler.maxHealth !== undefined) {
-      combatSystem.updateEntity("player", {
-        hp: crawler.health,
-        maxHp: crawler.maxHealth,
-        attack: crawler.attack,
-        defense: crawler.defense,
-        speed: crawler.speed,
-      });
-    }
-  }, [crawler?.health, crawler?.maxHealth, crawler?.attack, crawler?.defense, crawler?.speed]);
+  }, [roomData, crawler]);
 
   // Helper function to convert grid coordinates to percentage
   const gridToPercentage = (
@@ -789,16 +753,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         } else {
           // Target is out of range, queue move then attack
           console.log(`Target out of range, moving closer to ${clickedEntity.name}`);
-
+          
           // Calculate position to move to (just within attack range)
           const dx = clickedEntity.position.x - activePlayer.position.x;
           const dy = clickedEntity.position.y - activePlayer.position.y;
           const targetDistance = Math.sqrt(dx * dx + dy * dy);
           const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
-
+          
           const moveX = activePlayer.position.x + (dx / targetDistance) * moveDistance;
           const moveY = activePlayer.position.y + (dy / targetDistance) * moveDistance;
-
+          
           // Queue move action first
           const moveSuccess = combatSystem.queueMoveAction(activePlayer.id, { x: moveX, y: moveY });
           if (moveSuccess) {
@@ -809,7 +773,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 console.log(`Queued attack on ${clickedEntity.name} after movement`);
               }
             }, 900); // Slightly before move action completes (800ms execution time)
-
+            
             setActiveActionMode(null); // Clear attack mode after queuing actions
           }
         }
@@ -956,7 +920,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     } else {
       // Random enemies for unclaimed rooms
       if (Math.random() > 0.6) {
-        const cell = getRandomEmptyCell(occupiedCells);const pos = gridToPercentage(cell.gridX, cell.gridY);
+        const cell = getRandomEmptyCell(occupiedCells);
+        const pos = gridToPercentage(cell.gridX, cell.gridY);
 
         mobs.push({
           type: "hostile",
@@ -1121,9 +1086,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const lastUsed = playerEntity.cooldowns[actionId] || 0;
     const now = Date.now();
     const timeSinceLastUse = now - lastUsed;
-
+    
     if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
-
+    
     return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
   };
 
@@ -1199,16 +1164,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           } else {
             // Target is out of range, queue move then attack
             console.log(`Target out of range, moving closer to ${target.name}`);
-
+            
             // Calculate position to move to (just within attack range)
             const dx = target.position.x - playerEntity.position.x;
             const dy = target.position.y - playerEntity.position.y;
             const targetDistance = Math.sqrt(dx * dx + dy * dy);
             const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
-
+            
             const moveX = playerEntity.position.x + (dx / targetDistance) * moveDistance;
             const moveY = playerEntity.position.y + (dy / targetDistance) * moveDistance;
-
+            
             // Queue move action first
             const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, { x: moveX, y: moveY });
             if (moveSuccess) {
@@ -1326,7 +1291,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
               onMouseEnter={() => setHoveredEntity(entity.id)}
               onMouseLeave={() => setHoveredEntity(null)}
-              title={`${entity.name} (${entity.hp || 0}/${entity.maxHp || 100} HP) - Right-click for actions`}
+              title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
             >
               <div
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
@@ -1373,7 +1338,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                   {entity.name}
                   {entity.type !== "player" &&
-                    ` (${entity.hp || 0}/${entity.maxHp || 100})`}
+                    ` (${entity.hp}/${entity.maxHp})`}
                 </div>
               )}
 
@@ -1454,7 +1419,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {hotbarActions.map((action, index) => {
             const cooldownPercentage = getCooldownPercentage(action.id);
             const isOnCooldown = cooldownPercentage > 0;
-
+            
             return (
               <button
                 key={action.id}
@@ -1484,12 +1449,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     </svg>
                   </div>
                 )}
-
+                
                 {/* Icon */}
                 <div className={`${isOnCooldown ? "opacity-50" : ""} transition-opacity duration-150`}>
                   {action.icon}
                 </div>
-
+                
                 {/* Number indicator */}
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-slate-600 text-xs rounded-full flex items-center justify-center text-slate-200">
                   {index === 9 ? "0" : (index + 1).toString()}
@@ -1528,7 +1493,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   </div>
                   {!contextMenu.entityId.startsWith("loot-") && (
                     <div className="text-xs text-gray-400">
-                      {contextMenu.entity.hp || 0}/{contextMenu.entity.maxHp || 100} HP
+                      {contextMenu.entity.hp}/{contextMenu.entity.maxHp} HP
                     </div>
                   )}
                 </div>
