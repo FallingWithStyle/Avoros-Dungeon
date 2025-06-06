@@ -15,6 +15,8 @@ export interface CombatEntity {
   cooldowns?: Record<string, number>;
   effects?: string[];
   entryDirection?: 'north' | 'south' | 'east' | 'west' | null;
+  detectionGraceEnd?: number; // Timestamp when grace period ends
+  hasDetectedPlayer?: boolean; // Whether this entity has detected the player
 }
 
 export interface CombatAction {
@@ -49,6 +51,7 @@ export class CombatSystem {
   private state: CombatState;
   private actionDefinitions: Map<string, CombatAction>;
   private listeners: Set<(state: CombatState) => void> = new Set();
+  private actionCooldowns: Map<string, number> = new Map();
 
   constructor() {
     this.state = {
@@ -57,6 +60,9 @@ export class CombatSystem {
       actionQueue: [],
       isInCombat: false,
     };
+
+    // Start constant combat processing
+    this.startCombatProcessing();
 
     this.actionDefinitions = new Map([
       ['basic_attack', {
@@ -97,6 +103,14 @@ export class CombatSystem {
         targetType: 'single',
         executionTime: 1500,
       }],
+      ['move', {
+        id: 'move',
+        name: 'Move',
+        type: 'move',
+        cooldown: 1000,
+        targetType: 'area',
+        executionTime: 800,
+      }],
     ]);
   }
 
@@ -116,7 +130,15 @@ export class CombatSystem {
 
   // Entity management
   addEntity(entity: CombatEntity): void {
-    this.state.entities.push({ ...entity, cooldowns: {} });
+    const now = Date.now();
+    const entityWithDefaults = { 
+      ...entity, 
+      cooldowns: {},
+      // Add 5-second grace period for hostile entities
+      detectionGraceEnd: entity.type === 'hostile' ? now + 5000 : undefined,
+      hasDetectedPlayer: false
+    };
+    this.state.entities.push(entityWithDefaults);
     this.notifyListeners();
   }
 
@@ -183,6 +205,20 @@ export class CombatSystem {
     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
     if (existingAction) return false;
 
+    // If player is attacking a hostile entity, trigger immediate detection for all hostiles
+    if (entity.type === 'player' && action.type === 'attack' && targetId) {
+      const target = this.state.entities.find(e => e.id === targetId);
+      if (target && target.type === 'hostile') {
+        this.state.entities.forEach(e => {
+          if (e.type === 'hostile') {
+            e.hasDetectedPlayer = true;
+            e.detectionGraceEnd = now; // End grace period immediately
+          }
+        });
+        console.log('Player attacked hostile - all enemies are now alerted!');
+      }
+    }
+
     // Check range for attack actions
     if (action.type === 'attack' && targetId && action.range) {
       const target = this.state.entities.find(e => e.id === targetId);
@@ -205,6 +241,10 @@ export class CombatSystem {
     };
 
     this.state.actionQueue.push(queuedAction);
+
+    // Ensure combat processing is running
+    this.ensureCombatProcessing();
+
     this.notifyListeners();
 
     // Generate event for the action
@@ -220,10 +260,24 @@ export class CombatSystem {
 
     if (!playerEntity) return;
 
+    const now = Date.now();
+
     hostileEntities.forEach(enemy => {
       // Skip if enemy already has an action queued
       const hasQueuedAction = this.state.actionQueue.some(qa => qa.entityId === enemy.id);
       if (hasQueuedAction) return;
+
+      // Check if grace period is still active
+      if (enemy.detectionGraceEnd && now < enemy.detectionGraceEnd && !enemy.hasDetectedPlayer) {
+        return; // Still in grace period, don't act
+      }
+
+      // Grace period is over or player has been detected
+      if (!enemy.hasDetectedPlayer) {
+        enemy.hasDetectedPlayer = true;
+        console.log(`${enemy.name} has detected the player!`);
+        this.notifyListeners();
+      }
 
       // Check if enemy can attack player
       const distance = this.calculateDistance(enemy.position, playerEntity.position);
@@ -246,7 +300,7 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // Move entity towards a target position
+  // Move entity towards a target position (used by AI)
   private moveEntityTowards(entityId: string, targetPosition: { x: number; y: number }): void {
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
@@ -266,6 +320,55 @@ export class CombatSystem {
     entity.position.y = Math.max(5, Math.min(95, entity.position.y + normalizedDy));
 
     this.notifyListeners();
+  }
+
+  // Move entity to exact position (used by player actions)
+  moveEntityToPosition(entityId: string, targetPosition: { x: number; y: number }): void {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return;
+
+    // Clamp position to grid bounds
+    entity.position.x = Math.max(5, Math.min(95, targetPosition.x));
+    entity.position.y = Math.max(5, Math.min(95, targetPosition.y));
+
+    this.notifyListeners();
+  }
+
+  // Queue a move action to a specific position
+  queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return false;
+
+    const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
+    if (existingAction) return false;
+
+    const moveAction = this.actionDefinitions.get('move');
+    if (!moveAction) return false;
+
+    if (!entity.cooldowns) entity.cooldowns = {};
+    const now = Date.now();
+    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveAction.cooldown) {
+        return false;
+    }
+
+    const queuedAction: QueuedAction = {
+      entityId,
+      action: moveAction,
+      targetId: undefined,
+      targetPosition,
+      queuedAt: now,
+      executesAt: now + moveAction.executionTime,
+    };
+
+    this.state.actionQueue.push(queuedAction);
+
+    // Ensure combat processing is running
+    this.ensureCombatProcessing();
+
+    this.notifyListeners();
+    eventsSystem.onCombatAction(moveAction, entityId);
+
+    return true;
   }
 
   cancelAction(entityId: string): boolean {
@@ -297,34 +400,62 @@ export class CombatSystem {
   processCombatTick(): void {
     const now = Date.now();
     const readyActions = this.state.actionQueue.filter(qa => now >= qa.executesAt);
+    let stateChanged = false;
 
+    // Execute ready actions and remove them from queue
     readyActions.forEach(queuedAction => {
+      console.log(`Executing ${queuedAction.action.name} for ${queuedAction.entityId}`);
       this.executeAction(queuedAction);
-    });
 
-    // Remove executed actions
-    this.state.actionQueue = this.state.actionQueue.filter(qa => now < qa.executesAt);
+      // Remove this specific action from the queue
+      const actionIndex = this.state.actionQueue.findIndex(qa => 
+        qa.entityId === queuedAction.entityId && qa.queuedAt === queuedAction.queuedAt
+      );
+      if (actionIndex !== -1) {
+        this.state.actionQueue.splice(actionIndex, 1);
+        stateChanged = true;
+      }
+    });
 
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    if (readyActions.length > 0) {
+    // Always notify listeners if the state changed
+    if (stateChanged || readyActions.length > 0) {
       this.notifyListeners();
+    }
+  }
+
+  // Ensure combat processing is running (safe to call multiple times)
+  ensureCombatProcessing(): void {
+    if (!this.combatInterval) {
+      this.startCombatProcessing();
     }
   }
 
   // Start automatic combat processing
   startCombatProcessing(): void {
-    if (this.combatInterval) return; // Already running
+    if (this.combatInterval) return;
+
+    // Only start processing if there are entities or queued actions
+    if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
+      return;
+    }
 
     this.combatInterval = setInterval(() => {
       this.processCombatTick();
+
+      // Stop processing if no entities and no queued actions for efficiency
+      if (this.state.entities.length === 0 && this.state.actionQueue.length === 0) {
+        this.stopCombatProcessing();
+      }
     }, 100); // Process every 100ms
   }
 
   // Stop automatic combat processing
   stopCombatProcessing(): void {
     if (this.combatInterval) {
+      console.log('Stopping combat processing...');
       clearInterval(this.combatInterval);
       this.combatInterval = null;
     }
@@ -333,7 +464,7 @@ export class CombatSystem {
   private combatInterval: NodeJS.Timeout | null = null;
 
   private executeAction(queuedAction: QueuedAction): void {
-    const { entityId, action, targetId } = queuedAction;
+    const { entityId, action, targetId, targetPosition } = queuedAction;
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
 
@@ -351,6 +482,11 @@ export class CombatSystem {
       case 'ability':
         this.executeAbility(entity, action, targetId);
         break;
+      case 'move':
+        if (targetPosition) {
+          this.moveEntityToPosition(entityId, targetPosition);
+        }
+        break;
     }
   }
 
@@ -358,7 +494,7 @@ export class CombatSystem {
     const target = this.state.entities.find(e => e.id === targetId);
     if (!target) return;
 
-    // Calculate actual damage (base damage + attack stat - target defense)
+    // Calculate actual damage (base damage + attackStat - target defense)
     const actualDamage = Math.max(1, baseDamage + attackStat - target.defense);
     target.hp = Math.max(0, target.hp - actualDamage);
 
@@ -500,6 +636,65 @@ export class CombatSystem {
       this.notifyListeners();
     }
   }
+
+  // Define available actions for each entity type
+  private getEntityActions(entityId: string): CombatAction[] {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return [];
+
+    const baseActions: CombatAction[] = [
+      {
+        id: 'move',
+        name: 'Move',
+        type: 'move',
+        cooldown: 1000,
+        targetType: 'area',
+        executionTime: 800,
+      },
+      {
+        id: 'basic_attack',
+        name: 'Attack',
+        type: 'attack',
+        cooldown: 2000,
+        damage: 20,
+        range: 15, // Grid units - close combat range
+        targetType: 'single',
+        executionTime: 1000,
+      },
+      {
+        id: 'dodge',
+        name: 'Dodge',
+        type: 'ability',
+        cooldown: 3000,
+        targetType: 'self',
+        executionTime: 500,
+      },
+      {
+        id: 'heavy_attack',
+        name: 'Heavy Attack',
+        type: 'attack',
+        cooldown: 5000,
+        damage: 40,
+        range: 15, // Grid units - close combat range
+        targetType: 'single',
+        executionTime: 2000,
+      },
+      {
+        id: 'ranged_attack',
+        name: 'Ranged Attack',
+        type: 'attack',
+        cooldown: 3000,
+        damage: 15,
+        range: 40, // Grid units - longer range
+        targetType: 'single',
+        executionTime: 1500,
+      }
+    ];
+
+    return baseActions;
+  }
+
+
 }
 
 // Singleton instance
