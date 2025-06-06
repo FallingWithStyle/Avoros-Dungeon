@@ -36,8 +36,17 @@ export async function generatePersistentTacticalData(roomId: number): Promise<Pe
     console.warn("Failed to fetch persistent room state, generating fresh data:", error);
   }
 
-  // Fallback to generating fresh data
-  return generateFreshTacticalData(roomData);
+  // Generate fallback data - minimal empty state
+  return generateFallbackTacticalData();
+}
+
+function generateFallbackTacticalData(): PersistentTacticalData {
+  return {
+    mobs: [],
+    npcs: [],
+    loot: [],
+    environmental: []
+  };
 }
 
 function convertRoomStateToTacticalData(roomState: any): PersistentTacticalData {
