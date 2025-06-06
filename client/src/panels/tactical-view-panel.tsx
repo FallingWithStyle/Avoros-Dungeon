@@ -73,6 +73,70 @@ interface ExploredRoom extends Room {
 }
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
+  // Define hotbar actions first to ensure stable reference
+  const hotbarActions = [
+    {
+      id: "move",
+      name: "Move",
+      icon: <Footprints className="w-4 h-4" />,
+      type: "move",
+    },
+    {
+      id: "attack",
+      name: "Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "defend",
+      name: "Defend",
+      icon: <Shield className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability1",
+      name: "Ability 1",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability2",
+      name: "Ability 2",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability3",
+      name: "Ability 3",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "basic_attack",
+      name: "Normal Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "heavy_attack",
+      name: "Heavy Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "ranged_attack",
+      name: "Ranged Attack",
+      icon: <Target className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "wait",
+      name: "Wait",
+      icon: <Clock className="w-4 h-4" />,
+      type: "ability",
+    },
+  ];
+
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [lastRoomId, setLastRoomId] = useState<number | null>(null);
@@ -979,69 +1043,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   
 
-  // Define hotbar actions here to ensure it's available for the keyboard handler
-  const hotbarActions = [
-    {
-      id: "move",
-      name: "Move",
-      icon: <Footprints className="w-4 h-4" />,
-      type: "move",
-    },
-    {
-      id: "attack",
-      name: "Attack",
-      icon: <Sword className="w-4 h-4" />,
-      type: "attack",
-    },
-    {
-      id: "defend",
-      name: "Defend",
-      icon: <Shield className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "ability1",
-      name: "Ability 1",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "ability2",
-      name: "Ability 2",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "ability3",
-      name: "Ability 3",
-      icon: <Target className="w-4 h-4" />,
-      type: "ability",
-    },
-    {
-      id: "basic_attack",
-      name: "Normal Attack",
-      icon: <Sword className="w-4 h-4" />,
-      type: "attack",
-    },
-    {
-      id: "heavy_attack",
-      name: "Heavy Attack",
-      icon: <Sword className="w-4 h-4" />,
-      type: "attack",
-    },
-    {
-      id: "ranged_attack",
-      name: "Ranged Attack",
-      icon: <Target className="w-4 h-4" />,
-      type: "attack",
-    },
-    {
-      id: "wait",
-      name: "Wait",
-      icon: <Clock className="w-4 h-4" />,
-      type: "ability",
-    },
-  ];
+  // Helper function to get cooldown percentage for an action
+  const getCooldownPercentage = (actionId: string): number => {
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+    if (!playerEntity || !playerEntity.cooldowns) return 0;
+
+    const action = combatSystem.actionDefinitions?.get(actionId);
+    if (!action) return 0;
+
+    const lastUsed = playerEntity.cooldowns[actionId] || 0;
+    const now = Date.now();
+    const timeSinceLastUse = now - lastUsed;
+    
+    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
+    
+    return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
+  };
 
   // Handle hotbar keyboard shortcuts (1-0)
   useEffect(() => {
@@ -1078,23 +1095,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
-
-  // Helper function to get cooldown percentage for an action
-  const getCooldownPercentage = (actionId: string): number => {
-    const playerEntity = combatState.entities.find((e) => e.id === "player");
-    if (!playerEntity || !playerEntity.cooldowns) return 0;
-
-    const action = combatSystem.actionDefinitions?.get(actionId);
-    if (!action) return 0;
-
-    const lastUsed = playerEntity.cooldowns[actionId] || 0;
-    const now = Date.now();
-    const timeSinceLastUse = now - lastUsed;
-    
-    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
-    
-    return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
-  };
 
   const findViableTarget = (): CombatEntity | null => {
     const hostileEntities = combatSystem.getHostileEntities();
