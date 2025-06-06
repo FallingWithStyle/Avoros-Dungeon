@@ -632,7 +632,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const selectedEntity = combatSystem.getSelectedEntity();
     const playerEntity = combatState.entities.find((e) => e.id === "player");
 
-    if (!selectedEntity?.type === "player" && playerEntity) {
+    if (selectedEntity?.type !== "player" && playerEntity) {
       combatSystem.selectEntity("player");
     }
 
