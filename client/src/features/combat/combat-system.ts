@@ -15,6 +15,8 @@ export interface CombatEntity {
   cooldowns?: Record<string, number>;
   effects?: string[];
   entryDirection?: 'north' | 'south' | 'east' | 'west' | null;
+  detectionGraceEnd?: number; // Timestamp when grace period ends
+  hasDetectedPlayer?: boolean; // Whether this entity has detected the player
 }
 
 export interface CombatAction {
@@ -58,6 +60,9 @@ export class CombatSystem {
       actionQueue: [],
       isInCombat: false,
     };
+
+    // Start constant combat processing
+    this.startCombatProcessing();
 
     this.actionDefinitions = new Map([
       ['basic_attack', {
@@ -125,7 +130,15 @@ export class CombatSystem {
 
   // Entity management
   addEntity(entity: CombatEntity): void {
-    this.state.entities.push({ ...entity, cooldowns: {} });
+    const now = Date.now();
+    const entityWithDefaults = { 
+      ...entity, 
+      cooldowns: {},
+      // Add 5-second grace period for hostile entities
+      detectionGraceEnd: entity.type === 'hostile' ? now + 5000 : undefined,
+      hasDetectedPlayer: false
+    };
+    this.state.entities.push(entityWithDefaults);
     this.notifyListeners();
   }
 
@@ -192,6 +205,20 @@ export class CombatSystem {
     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
     if (existingAction) return false;
 
+    // If player is attacking a hostile entity, trigger immediate detection for all hostiles
+    if (entity.type === 'player' && action.type === 'attack' && targetId) {
+      const target = this.state.entities.find(e => e.id === targetId);
+      if (target && target.type === 'hostile') {
+        this.state.entities.forEach(e => {
+          if (e.type === 'hostile') {
+            e.hasDetectedPlayer = true;
+            e.detectionGraceEnd = now; // End grace period immediately
+          }
+        });
+        console.log('Player attacked hostile - all enemies are now alerted!');
+      }
+    }
+
     // Check range for attack actions
     if (action.type === 'attack' && targetId && action.range) {
       const target = this.state.entities.find(e => e.id === targetId);
@@ -215,8 +242,7 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Always ensure combat processing is running when actions are queued
-    this.startCombatProcessing();
+    // Combat processing is always running
 
     this.notifyListeners();
 
@@ -233,10 +259,24 @@ export class CombatSystem {
 
     if (!playerEntity) return;
 
+    const now = Date.now();
+
     hostileEntities.forEach(enemy => {
       // Skip if enemy already has an action queued
       const hasQueuedAction = this.state.actionQueue.some(qa => qa.entityId === enemy.id);
       if (hasQueuedAction) return;
+
+      // Check if grace period is still active
+      if (enemy.detectionGraceEnd && now < enemy.detectionGraceEnd && !enemy.hasDetectedPlayer) {
+        return; // Still in grace period, don't act
+      }
+
+      // Grace period is over or player has been detected
+      if (!enemy.hasDetectedPlayer) {
+        enemy.hasDetectedPlayer = true;
+        console.log(`${enemy.name} has detected the player!`);
+        this.notifyListeners();
+      }
 
       // Check if enemy can attack player
       const distance = this.calculateDistance(enemy.position, playerEntity.position);
@@ -321,8 +361,7 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Always ensure combat processing is running
-    this.startCombatProcessing();
+    // Combat processing is always running
 
     this.notifyListeners();
     eventsSystem.onCombatAction(moveAction, entityId);
@@ -376,10 +415,8 @@ export class CombatSystem {
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Stop combat processing if no actions are queued and not in active combat
-    if (this.state.actionQueue.length === 0 && !this.state.isInCombat) {
-      this.stopCombatProcessing();
-    }
+    // Keep combat processing running constantly for AI and grace period management
+    // No longer auto-stop combat processing
 
     // Always notify listeners if we processed any actions or if the queue changed
     if (readyActions.length > 0) {

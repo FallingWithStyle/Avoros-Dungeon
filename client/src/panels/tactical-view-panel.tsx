@@ -772,9 +772,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleHotbarClick = (actionId: string, actionType: string, actionName: string) => {
     console.log(`Hotbar action clicked: ${actionId}`);
 
-    // Auto-select player when any hotbar action is clicked
+    // Always select the player when any hotbar action is clicked, deselecting any other entity
     const playerEntity = combatState.entities.find(e => e.id === 'player');
-    if (playerEntity && !combatSystem.getSelectedEntity()) {
+    if (playerEntity) {
       combatSystem.selectEntity('player');
     }
 
