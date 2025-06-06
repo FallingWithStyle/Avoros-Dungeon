@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -72,8 +73,357 @@ interface ExploredRoom extends Room {
   isCurrentRoom: boolean;
 }
 
+// Helper function to convert grid coordinates to percentage
+const gridToPercentage = (
+  gridX: number,
+  gridY: number,
+): { x: number; y: number } => {
+  // Convert 0-14 grid coordinates to percentage (with padding)
+  const cellWidth = 100 / 15;
+  const cellHeight = 100 / 15;
+  return {
+    x: (gridX + 0.5) * cellWidth, // Center of the cell
+    y: (gridY + 0.5) * cellHeight,
+  };
+};
+
+// Helper function to get party entry positions based on direction
+const getPartyEntryPositions = (
+  direction: "north" | "south" | "east" | "west" | null,
+  partySize: number,
+): { x: number; y: number }[] => {
+  const positions: { x: number; y: number }[] = [];
+
+  // Get base entry position
+  let baseGridX = 7; // Center
+  let baseGridY = 7; // Center
+  let spreadDirection: "horizontal" | "vertical" = "horizontal";
+
+  switch (direction) {
+    case "north":
+      baseGridX = 7;
+      baseGridY = 13; // Enter from south side (bottom)
+      spreadDirection = "horizontal";
+      break;
+    case "south":
+      baseGridX = 7;
+      baseGridY = 1; // Enter from north side (top)
+      spreadDirection = "horizontal";
+      break;
+    case "east":
+      baseGridX = 1;
+      baseGridY = 7; // Enter from west side (left)
+      spreadDirection = "vertical";
+      break;
+    case "west":
+      baseGridX = 13;
+      baseGridY = 7; // Enter from east side (right)
+      spreadDirection = "vertical";
+      break;
+    default:
+      // No direction or center spawn
+      baseGridX = 7;
+      baseGridY = 7;
+      spreadDirection = "horizontal";
+  }
+
+  // Calculate positions for party members
+  const halfParty = Math.floor(partySize / 2);
+
+  for (let i = 0; i < partySize; i++) {
+    let gridX = baseGridX;
+    let gridY = baseGridY;
+
+    if (partySize > 1) {
+      const offset = i - halfParty;
+
+      if (spreadDirection === "horizontal") {
+        gridX = Math.max(0, Math.min(14, baseGridX + offset));
+      } else {
+        gridY = Math.max(0, Math.min(14, baseGridY + offset));
+      }
+    }
+
+    positions.push(gridToPercentage(gridX, gridY));
+  }
+
+  return positions;
+};
+
+// Helper function to position companions near their owner
+const getCompanionPosition = (
+  ownerPosition: { x: number; y: number },
+  companionIndex: number,
+): { x: number; y: number } => {
+  // Convert owner position back to grid coordinates
+  const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
+  const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
+
+  // Position companions in adjacent cells
+  const companionOffsets = [
+    { x: 1, y: 0 }, // Right
+    { x: -1, y: 0 }, // Left
+    { x: 0, y: 1 }, // Down
+    { x: 0, y: -1 }, // Up
+    { x: 1, y: 1 }, // Diagonal down-right
+    { x: -1, y: -1 }, // Diagonal up-left
+    { x: 1, y: -1 }, // Diagonal up-right
+    { x: -1, y: 1 }, // Diagonal down-left
+  ];
+
+  const offset = companionOffsets[companionIndex % companionOffsets.length];
+  const companionGridX = Math.max(0, Math.min(14, ownerGridX + offset.x));
+  const companionGridY = Math.max(0, Math.min(14, ownerGridY + offset.y));
+
+  return gridToPercentage(companionGridX, companionGridY);
+};
+
+// Helper function to get a random empty grid cell
+const getRandomEmptyCell = (
+  excludeCells: Set<string> = new Set(),
+): { gridX: number; gridY: number } => {
+  let attempts = 0;
+  while (attempts < 100) {
+    // Prevent infinite loops
+    const gridX = Math.floor(Math.random() * 15);
+    const gridY = Math.floor(Math.random() * 15);
+    const cellKey = `${gridX},${gridY}`;
+
+    if (!excludeCells.has(cellKey)) {
+      excludeCells.add(cellKey);
+      return { gridX, gridY };
+    }
+    attempts++;
+  }
+  // Fallback if no empty cell found
+  return { gridX: 7, gridY: 7 };
+};
+
+// Helper function to get room background type
+const getRoomBackgroundType = (environment: string, type: string): string => {
+  if (type === "entrance" || type === "exit") return "stone_chamber";
+  if (type === "treasure") return "golden_chamber";
+  if (type === "safe") return "peaceful_chamber";
+  if (type === "boss") return "dark_chamber";
+
+  switch (environment) {
+    case "outdoor":
+      return "forest_clearing";
+    case "underground":
+      return "dungeon_corridor";
+    default:
+      return "stone_chamber";
+  }
+};
+
+// Helper function to generate loot positions
+const generateLootPositions = (
+  hasLoot: boolean,
+  roomType: string,
+  occupiedCells: Set<string>,
+) => {
+  if (!hasLoot) return [];
+
+  const lootItems = [];
+  if (roomType === "treasure") {
+    const chest = getRandomEmptyCell(occupiedCells);
+    const chestPos = gridToPercentage(chest.gridX, chest.gridY);
+
+    const coins = getRandomEmptyCell(occupiedCells);
+    const coinsPos = gridToPercentage(coins.gridX, chest.gridY);
+
+    const gems = getRandomEmptyCell(occupiedCells);
+    const gemsPos = gridToPercentage(gems.gridX, chest.gridY);
+
+    lootItems.push(
+      {
+        type: "treasure",
+        name: "Treasure Chest",
+        x: chestPos.x,
+        y: chestPos.y,
+      },
+      {
+        type: "treasure",
+        name: "Golden Coins",
+        x: coinsPos.x,
+        y: coinsPos.y,
+      },
+      { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y },
+    );
+  } else {
+    // Random loot positioning for normal rooms
+    const lootCount = Math.floor(Math.random() * 2) + 1;
+    for (let i = 0; i < lootCount; i++) {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+      lootItems.push({
+        type: Math.random() > 0.5 ? "treasure" : "weapon",
+        name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+  }
+  return lootItems;
+};
+
+// Helper function to generate mob positions
+const generateMobPositions = (
+  roomType: string,
+  factionId: number | null | undefined,
+  occupiedCells: Set<string>,
+) => {
+  const mobs = [];
+
+  if (roomType === "safe" || roomType === "entrance") return mobs;
+
+  if (roomType === "boss") {
+    const cell = getRandomEmptyCell(occupiedCells);
+    const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+    mobs.push({
+      type: "hostile",
+      name: "Boss Monster",
+      x: pos.x,
+      y: pos.y,
+      hp: 100,
+    });
+  } else if (factionId) {
+    // Add faction-based enemies
+    const enemyCount = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < enemyCount; i++) {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+      mobs.push({
+        type: "hostile",
+        name: "Faction Warrior",
+        x: pos.x,
+        y: pos.y,
+        hp: 100,
+      });
+    }
+  } else {
+    // Random enemies for unclaimed rooms
+    if (Math.random() > 0.6) {
+      const cell = getRandomEmptyCell(occupiedCells);
+      const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+      mobs.push({
+        type: "hostile",
+        name: "Wild Monster",
+        x: pos.x,
+        y: pos.y,
+        hp: 100,
+      });
+    }
+  }
+
+  return mobs;
+};
+
+// Helper function to generate NPC positions
+const generateNpcPositions = (
+  roomType: string,
+  isSafe: boolean,
+  occupiedCells: Set<string>,
+) => {
+  const npcs = [];
+
+  if (isSafe || roomType === "safe") {
+    const cell = getRandomEmptyCell(occupiedCells);
+    const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+    npcs.push({
+      name: "Sanctuary Keeper",
+      x: pos.x,
+      y: pos.y,
+      dialogue: true,
+    });
+  } else if (Math.random() > 0.8) {
+    const cell = getRandomEmptyCell(occupiedCells);
+    const pos = gridToPercentage(cell.gridX, cell.gridY);
+
+    npcs.push({
+      name: "Wandering Merchant",
+      x: pos.x,
+      y: pos.y,
+      dialogue: true,
+    });
+  }
+
+  return npcs;
+};
+
+// Helper function to generate tactical data
+const generateTacticalData = (data: RoomData) => {
+  const { room, availableDirections, playersInRoom } = data;
+  const occupiedCells = new Set<string>();
+
+  return {
+    background: getRoomBackgroundType(room.environment, room.type),
+    loot: generateLootPositions(room.hasLoot, room.type, occupiedCells),
+    mobs: generateMobPositions(room.type, room.factionId, occupiedCells),
+    npcs: generateNpcPositions(room.type, room.isSafe, occupiedCells),
+    exits: {
+      north: availableDirections.includes("north"),
+      south: availableDirections.includes("south"),
+      east: availableDirections.includes("east"),
+      west: availableDirections.includes("west"),
+    },
+    otherPlayers: playersInRoom.filter((p) => p.id !== data.room.id),
+  };
+};
+
+// Helper function to get room background CSS class
+const getRoomBackground = (bgType: string) => {
+  switch (bgType) {
+    case "stone_chamber":
+      return "bg-gradient-to-br from-stone-600 to-stone-800";
+    case "forest_clearing":
+      return "bg-gradient-to-br from-green-600 to-green-800";
+    case "dungeon_corridor":
+      return "bg-gradient-to-br from-gray-700 to-gray-900";
+    case "golden_chamber":
+      return "bg-gradient-to-br from-yellow-600 to-amber-800";
+    case "peaceful_chamber":
+      return "bg-gradient-to-br from-blue-600 to-cyan-800";
+    case "dark_chamber":
+      return "bg-gradient-to-br from-purple-900 to-black";
+    default:
+      return "bg-gradient-to-br from-slate-600 to-slate-800";
+  }
+};
+
+// Helper function to get loot icon
+const getLootIcon = (type: string) => {
+  switch (type) {
+    case "treasure":
+      return <Gem className="w-3 h-3 text-yellow-400" />;
+    case "weapon":
+      return <Sword className="w-3 h-3 text-red-400" />;
+    case "armor":
+      return <Shield className="w-3 h-3 text-blue-400" />;
+    default:
+      return <div className="w-3 h-3 bg-yellow-400 rounded" />;
+  }
+};
+
+// Helper function to get mob icon
+const getMobIcon = (type: string) => {
+  switch (type) {
+    case "hostile":
+      return <Skull className="w-4 h-4 text-red-500" />;
+    case "neutral":
+      return <Users className="w-4 h-4 text-orange-400" />;
+    default:
+      return <div className="w-4 h-4 bg-gray-400 rounded-full" />;
+  }
+};
+
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
-  // Define hotbar actions first to ensure stable reference
+  // ALL HOOKS AT TOP LEVEL - NEVER MOVE THESE OR ADD HOOKS ELSEWHERE
   const hotbarActions = [
     {
       id: "move",
@@ -155,7 +505,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionId: string;
     actionName: string;
   } | null>(null);
+  
   const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // Fetch current room data
+  const { data: roomData, isLoading } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
 
   // Subscribe to combat system updates
   useEffect(() => {
@@ -194,13 +551,41 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     };
   }, [contextMenu]);
 
-  
+  // Handle hotbar keyboard shortcuts (1-0)
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input field
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
 
-  // Fetch current room data
-  const { data: roomData, isLoading } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000, // Refresh every 5 seconds
-  });
+      const key = event.key;
+      let actionIndex = -1;
+
+      // Handle keys 1-9 and 0 (which maps to index 9)
+      if (key >= "1" && key <= "9") {
+        actionIndex = parseInt(key) - 1; // Convert 1-9 to 0-8
+      } else if (key === "0") {
+        actionIndex = 9; // 0 key maps to the 10th action (index 9)
+      }
+
+      if (actionIndex >= 0 && actionIndex < hotbarActions.length) {
+        event.preventDefault();
+        const action = hotbarActions[actionIndex];
+        const cooldownPercentage = getCooldownPercentage(action.id);
+        
+        if (cooldownPercentage === 0) { // Only trigger if not on cooldown
+          handleHotbarClick(action.id, action.type, action.name);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [hotbarActions]);
 
   // Update combat system when room data changes
   useEffect(() => {
@@ -264,48 +649,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.updateEntity("player", playerEntity);
       }
 
-      // TODO: Add party members when party system is implemented
-      // Example placeholder for party members:
-      /*
-      const partyMembers = getPartyMembers(); // Future function to get party data
-      partyMembers.forEach((member, index) => {
-        const memberEntity: CombatEntity = {
-          id: `party-${member.id}`,
-          name: member.name,
-          type: 'player',
-          hp: member.hp,
-          maxHp: member.maxHp,
-          attack: member.attack,
-          defense: member.defense,
-          speed: member.speed,
-          position: partyEntryPositions[index + 1] || partyEntryPositions[0], // Fallback to main position
-          entryDirection,
-        };
-        combatSystem.addEntity(memberEntity);
-      });
-      */
-
-      // TODO: Add companions/pets when companion system is implemented
-      // Example placeholder for companions:
-      /*
-      const companions = getActiveCompanions(); // Future function to get companion data
-      companions.forEach((companion, index) => {
-        const companionEntity: CombatEntity = {
-          id: `companion-${companion.id}`,
-          name: companion.name,
-          type: 'neutral',
-          hp: companion.hp,
-          maxHp: companion.maxHp,
-          attack: companion.attack,
-          defense: companion.defense,
-          speed: companion.speed,
-          position: getCompanionPosition(partyEntryPositions[0], index), // Position near main player
-          entryDirection,
-        };
-        combatSystem.addEntity(companionEntity);
-      });
-      */
-
       // Add room entities based on tactical data
       const tacticalData = generateTacticalData(roomData);
 
@@ -342,152 +685,139 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.addEntity(npcEntity);
       });
     }
-  }, [roomData, crawler]);
+  }, [roomData, crawler, combatState.entities, lastRoomId]);
 
-  // Helper function to convert grid coordinates to percentage
-  const gridToPercentage = (
-    gridX: number,
-    gridY: number,
-  ): { x: number; y: number } => {
-    // Convert 0-14 grid coordinates to percentage (with padding)
-    const cellWidth = 100 / 15;
-    const cellHeight = 100 / 15;
-    return {
-      x: (gridX + 0.5) * cellWidth, // Center of the cell
-      y: (gridY + 0.5) * cellHeight,
-    };
+  // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
+  const getCooldownPercentage = (actionId: string): number => {
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+    if (!playerEntity || !playerEntity.cooldowns) return 0;
+
+    const action = combatSystem.actionDefinitions?.get(actionId);
+    if (!action) return 0;
+
+    const lastUsed = playerEntity.cooldowns[actionId] || 0;
+    const now = Date.now();
+    const timeSinceLastUse = now - lastUsed;
+    
+    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
+    
+    return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
   };
 
-  // Helper function to get party entry positions based on direction
-  const getPartyEntryPositions = (
-    direction: "north" | "south" | "east" | "west" | null,
-    partySize: number,
-  ): { x: number; y: number }[] => {
-    const positions: { x: number; y: number }[] = [];
+  const findViableTarget = (): CombatEntity | null => {
+    const hostileEntities = combatSystem.getHostileEntities();
+    if (hostileEntities.length === 0) return null;
 
-    // Get base entry position
-    let baseGridX = 7; // Center
-    let baseGridY = 7; // Center
-    let spreadDirection: "horizontal" | "vertical" = "horizontal";
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+    if (!playerEntity) return null;
 
-    switch (direction) {
-      case "north":
-        baseGridX = 7;
-        baseGridY = 13; // Enter from south side (bottom)
-        spreadDirection = "horizontal";
-        break;
-      case "south":
-        baseGridX = 7;
-        baseGridY = 1; // Enter from north side (top)
-        spreadDirection = "horizontal";
-        break;
-      case "east":
-        baseGridX = 1;
-        baseGridY = 7; // Enter from west side (left)
-        spreadDirection = "vertical";
-        break;
-      case "west":
-        baseGridX = 13;
-        baseGridY = 7; // Enter from east side (right)
-        spreadDirection = "vertical";
-        break;
-      default:
-        // No direction or center spawn
-        baseGridX = 7;
-        baseGridY = 7;
-        spreadDirection = "horizontal";
+    // Find the closest hostile entity
+    let closestTarget: CombatEntity | null = null;
+    let closestDistance = Infinity;
+
+    hostileEntities.forEach(entity => {
+      const distance = combatSystem.calculateDistance(playerEntity.position, entity.position);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTarget = entity;
+      }
+    });
+
+    return closestTarget;
+  };
+
+  const handleHotbarClick = (
+    actionId: string,
+    actionType: string,
+    actionName: string,
+  ) => {
+    console.log(`Hotbar action clicked: ${actionId}`);
+
+    // Always select the player when any hotbar action is clicked, deselecting any other entity
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+    if (playerEntity) {
+      combatSystem.selectEntity("player");
     }
 
-    // Calculate positions for party members
-    const halfParty = Math.floor(partySize / 2);
+    if (actionId === "move") {
+      // Activate move mode
+      setActiveActionMode({
+        type: "move",
+        actionId: "move",
+        actionName: "Move",
+      });
+    } else if (actionType === "attack") {
+      // Check if we're in combat
+      if (combatState.isInCombat) {
+        // Auto-select and attack viable target
+        const target = findViableTarget();
+        if (target && playerEntity) {
+          const attackAction = combatSystem.actionDefinitions?.get(actionId) || {
+            id: actionId,
+            name: actionName,
+            type: "attack",
+            cooldown: 2000,
+            damage: 20,
+            range: 15,
+            targetType: "single",
+            executionTime: 1000,
+          };
 
-    for (let i = 0; i < partySize; i++) {
-      let gridX = baseGridX;
-      let gridY = baseGridY;
-
-      if (partySize > 1) {
-        const offset = i - halfParty;
-
-        if (spreadDirection === "horizontal") {
-          gridX = Math.max(0, Math.min(14, baseGridX + offset));
+          // Check if target is in range
+          const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
+          if (distance <= (attackAction.range || 15)) {
+            // Target is in range, attack directly
+            const success = combatSystem.queueAction(playerEntity.id, actionId, target.id);
+            if (success) {
+              console.log(`Auto-attacking ${target.name}`);
+            } else {
+              console.log(`Failed to attack ${target.name} - check cooldown or existing action`);
+            }
+          } else {
+            // Target is out of range, queue move then attack
+            console.log(`Target out of range, moving closer to ${target.name}`);
+            
+            // Calculate position to move to (just within attack range)
+            const dx = target.position.x - playerEntity.position.x;
+            const dy = target.position.y - playerEntity.position.y;
+            const targetDistance = Math.sqrt(dx * dx + dy * dy);
+            const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
+            
+            const moveX = playerEntity.position.x + (dx / targetDistance) * moveDistance;
+            const moveY = playerEntity.position.y + (dy / targetDistance) * moveDistance;
+            
+            // Queue move action first
+            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, { x: moveX, y: moveY });
+            if (moveSuccess) {
+              // Schedule the attack to be queued after move completes
+              setTimeout(() => {
+                const attackSuccess = combatSystem.queueAction(playerEntity.id, actionId, target.id);
+                if (attackSuccess) {
+                  console.log(`Queued attack on ${target.name} after movement`);
+                }
+              }, 900); // Slightly before move action completes (800ms execution time)
+            }
+          }
         } else {
-          gridY = Math.max(0, Math.min(14, baseGridY + offset));
+          console.log("No viable targets found for auto-attack");
         }
+      } else {
+        // Not in combat, activate attack mode for manual target selection
+        setActiveActionMode({
+          type: "attack",
+          actionId: actionId,
+          actionName: actionName,
+        });
       }
-
-      positions.push(gridToPercentage(gridX, gridY));
+    } else {
+      // Handle other abilities/actions
+      console.log(`Casting ability: ${actionId}`);
+      setActiveActionMode({
+        type: "ability",
+        actionId: actionId,
+        actionName: actionName,
+      });
     }
-
-    return positions;
-  };
-
-  // Helper function to position companions near their owner
-  const getCompanionPosition = (
-    ownerPosition: { x: number; y: number },
-    companionIndex: number,
-  ): { x: number; y: number } => {
-    // Convert owner position back to grid coordinates
-    const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
-    const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
-
-    // Position companions in adjacent cells
-    const companionOffsets = [
-      { x: 1, y: 0 }, // Right
-      { x: -1, y: 0 }, // Left
-      { x: 0, y: 1 }, // Down
-      { x: 0, y: -1 }, // Up
-      { x: 1, y: 1 }, // Diagonal down-right
-      { x: -1, y: -1 }, // Diagonal up-left
-      { x: 1, y: -1 }, // Diagonal up-right
-      { x: -1, y: 1 }, // Diagonal down-left
-    ];
-
-    const offset = companionOffsets[companionIndex % companionOffsets.length];
-    const companionGridX = Math.max(0, Math.min(14, ownerGridX + offset.x));
-    const companionGridY = Math.max(0, Math.min(14, ownerGridY + offset.y));
-
-    return gridToPercentage(companionGridX, companionGridY);
-  };
-
-  // Helper function to get a random empty grid cell
-  const getRandomEmptyCell = (
-    excludeCells: Set<string> = new Set(),
-  ): { gridX: number; gridY: number } => {
-    let attempts = 0;
-    while (attempts < 100) {
-      // Prevent infinite loops
-      const gridX = Math.floor(Math.random() * 15);
-      const gridY = Math.floor(Math.random() * 15);
-      const cellKey = `${gridX},${gridY}`;
-
-      if (!excludeCells.has(cellKey)) {
-        excludeCells.add(cellKey);
-        return { gridX, gridY };
-      }
-      attempts++;
-    }
-    // Fallback if no empty cell found
-    return { gridX: 7, gridY: 7 };
-  };
-
-  // Helper function to generate tactical data
-  const generateTacticalData = (data: RoomData) => {
-    const { room, availableDirections, playersInRoom } = data;
-    const occupiedCells = new Set<string>();
-
-    return {
-      background: getRoomBackgroundType(room.environment, room.type),
-      loot: generateLootPositions(room.hasLoot, room.type, occupiedCells),
-      mobs: generateMobPositions(room.type, room.factionId, occupiedCells),
-      npcs: generateNpcPositions(room.type, room.isSafe, occupiedCells),
-      exits: {
-        north: availableDirections.includes("north"),
-        south: availableDirections.includes("south"),
-        east: availableDirections.includes("east"),
-        west: availableDirections.includes("west"),
-      },
-      otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
-    };
   };
 
   // Click handlers
@@ -602,6 +932,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       // Right click
       // Show loot context menu
       setContextMenu({
+        visible: true,
         x: event.clientX,
         y: event.clientY,
         entityId: `loot-${lootIndex}`,
@@ -845,373 +1176,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { room, availableDirections, playersInRoom } = roomData;
   const tacticalData = generateTacticalData(roomData);
 
-  function getRoomBackgroundType(environment: string, type: string): string {
-    if (type === "entrance" || type === "exit") return "stone_chamber";
-    if (type === "treasure") return "golden_chamber";
-    if (type === "safe") return "peaceful_chamber";
-    if (type === "boss") return "dark_chamber";
-
-    switch (environment) {
-      case "outdoor":
-        return "forest_clearing";
-      case "underground":
-        return "dungeon_corridor";
-      default:
-        return "stone_chamber";
-    }
-  }
-
-  function generateLootPositions(
-    hasLoot: boolean,
-    roomType: string,
-    occupiedCells: Set<string>,
-  ) {
-    if (!hasLoot) return [];
-
-    const lootItems = [];
-    if (roomType === "treasure") {
-      const chest = getRandomEmptyCell(occupiedCells);
-      const chestPos = gridToPercentage(chest.gridX, chest.gridY);
-
-      const coins = getRandomEmptyCell(occupiedCells);
-      const coinsPos = gridToPercentage(coins.gridX, chest.gridY);
-
-      const gems = getRandomEmptyCell(occupiedCells);
-      const gemsPos = gridToPercentage(gems.gridX, chest.gridY);
-
-      lootItems.push(
-        {
-          type: "treasure",
-          name: "Treasure Chest",
-          x: chestPos.x,
-          y: chestPos.y,
-        },
-        {
-          type: "treasure",
-          name: "Golden Coins",
-          x: coinsPos.x,
-          y: coinsPos.y,
-        },
-        { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y },
-      );
-    } else {
-      // Random loot positioning for normal rooms
-      const lootCount = Math.floor(Math.random() * 2) + 1;
-      for (let i = 0; i < lootCount; i++) {
-        const cell = getRandomEmptyCell(occupiedCells);
-        const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-        lootItems.push({
-          type: Math.random() > 0.5 ? "treasure" : "weapon",
-          name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
-          x: pos.x,
-          y: pos.y,
-        });
-      }
-    }
-    return lootItems;
-  }
-
-  function generateMobPositions(
-    roomType: string,
-    factionId: number | null | undefined,
-    occupiedCells: Set<string>,
-  ) {
-    const mobs = [];
-
-    if (roomType === "safe" || roomType === "entrance") return mobs;
-
-    if (roomType === "boss") {
-      const cell = getRandomEmptyCell(occupiedCells);
-      const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-      mobs.push({
-        type: "hostile",
-        name: "Boss Monster",
-        x: pos.x,
-        y: pos.y,
-        hp: 100,
-      });
-    } else if (factionId) {
-      // Add faction-based enemies
-      const enemyCount = Math.floor(Math.random() * 3) + 1;
-      for (let i = 0; i < enemyCount; i++) {
-        const cell = getRandomEmptyCell(occupiedCells);
-        const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-        mobs.push({
-          type: "hostile",
-          name: "Faction Warrior",
-          x: pos.x,
-          y: pos.y,
-          hp: 100,
-        });
-      }
-    } else {
-      // Random enemies for unclaimed rooms
-      if (Math.random() > 0.6) {
-        const cell = getRandomEmptyCell(occupiedCells);
-        const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-        mobs.push({
-          type: "hostile",
-          name: "Wild Monster",
-          x: pos.x,
-          y: pos.y,
-          hp: 100,
-        });
-      }
-    }
-
-    return mobs;
-  }
-
-  function generateNpcPositions(
-    roomType: string,
-    isSafe: boolean,
-    occupiedCells: Set<string>,
-  ) {
-    const npcs = [];
-
-    if (isSafe || roomType === "safe") {
-      const cell = getRandomEmptyCell(occupiedCells);
-      const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-      npcs.push({
-        name: "Sanctuary Keeper",
-        x: pos.x,
-        y: pos.y,
-        dialogue: true,
-      });
-    } else if (Math.random() > 0.8) {
-      const cell = getRandomEmptyCell(occupiedCells);
-      const pos = gridToPercentage(cell.gridX, cell.gridY);
-
-      npcs.push({
-        name: "Wandering Merchant",
-        x: pos.x,
-        y: pos.y,
-        dialogue: true,
-      });
-    }
-
-    return npcs;
-  }
-
-  const getRoomBackground = (bgType: string) => {
-    switch (bgType) {
-      case "stone_chamber":
-        return "bg-gradient-to-br from-stone-600 to-stone-800";
-      case "forest_clearing":
-        return "bg-gradient-to-br from-green-600 to-green-800";
-      case "dungeon_corridor":
-        return "bg-gradient-to-br from-gray-700 to-gray-900";
-      case "golden_chamber":
-        return "bg-gradient-to-br from-yellow-600 to-amber-800";
-      case "peaceful_chamber":
-        return "bg-gradient-to-br from-blue-600 to-cyan-800";
-      case "dark_chamber":
-        return "bg-gradient-to-br from-purple-900 to-black";
-      default:
-        return "bg-gradient-to-br from-slate-600 to-slate-800";
-    }
-  };
-
-  const getLootIcon = (type: string) => {
-    switch (type) {
-      case "treasure":
-        return <Gem className="w-3 h-3 text-yellow-400" />;
-      case "weapon":
-        return <Sword className="w-3 h-3 text-red-400" />;
-      case "armor":
-        return <Shield className="w-3 h-3 text-blue-400" />;
-      default:
-        return <div className="w-3 h-3 bg-yellow-400 rounded" />;
-    }
-  };
-
-  const getMobIcon = (type: string) => {
-    switch (type) {
-      case "hostile":
-        return <Skull className="w-4 h-4 text-red-500" />;
-      case "neutral":
-        return <Users className="w-4 h-4 text-orange-400" />;
-      default:
-        return <div className="w-4 h-4 bg-gray-400 rounded-full" />;
-    }
-  };
-
-  
-
-  // Helper function to get cooldown percentage for an action
-  const getCooldownPercentage = (actionId: string): number => {
-    const playerEntity = combatState.entities.find((e) => e.id === "player");
-    if (!playerEntity || !playerEntity.cooldowns) return 0;
-
-    const action = combatSystem.actionDefinitions?.get(actionId);
-    if (!action) return 0;
-
-    const lastUsed = playerEntity.cooldowns[actionId] || 0;
-    const now = Date.now();
-    const timeSinceLastUse = now - lastUsed;
-    
-    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
-    
-    return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
-  };
-
-  // Handle hotbar keyboard shortcuts (1-0)
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input field
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return;
-      }
-
-      const key = event.key;
-      let actionIndex = -1;
-
-      // Handle keys 1-9 and 0 (which maps to index 9)
-      if (key >= "1" && key <= "9") {
-        actionIndex = parseInt(key) - 1; // Convert 1-9 to 0-8
-      } else if (key === "0") {
-        actionIndex = 9; // 0 key maps to the 10th action (index 9)
-      }
-
-      if (actionIndex >= 0 && actionIndex < hotbarActions.length) {
-        event.preventDefault();
-        const action = hotbarActions[actionIndex];
-        const cooldownPercentage = getCooldownPercentage(action.id);
-        
-        if (cooldownPercentage === 0) { // Only trigger if not on cooldown
-          handleHotbarClick(action.id, action.type, action.name);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
-
-  const findViableTarget = (): CombatEntity | null => {
-    const hostileEntities = combatSystem.getHostileEntities();
-    if (hostileEntities.length === 0) return null;
-
-    const playerEntity = combatState.entities.find((e) => e.id === "player");
-    if (!playerEntity) return null;
-
-    // Find the closest hostile entity
-    let closestTarget: CombatEntity | null = null;
-    let closestDistance = Infinity;
-
-    hostileEntities.forEach(entity => {
-      const distance = combatSystem.calculateDistance(playerEntity.position, entity.position);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestTarget = entity;
-      }
-    });
-
-    return closestTarget;
-  };
-
-  const handleHotbarClick = (
-    actionId: string,
-    actionType: string,
-    actionName: string,
-  ) => {
-    console.log(`Hotbar action clicked: ${actionId}`);
-
-    // Always select the player when any hotbar action is clicked, deselecting any other entity
-    const playerEntity = combatState.entities.find((e) => e.id === "player");
-    if (playerEntity) {
-      combatSystem.selectEntity("player");
-    }
-
-    if (actionId === "move") {
-      // Activate move mode
-      setActiveActionMode({
-        type: "move",
-        actionId: "move",
-        actionName: "Move",
-      });
-    } else if (actionType === "attack") {
-      // Check if we're in combat
-      if (combatState.isInCombat) {
-        // Auto-select and attack viable target
-        const target = findViableTarget();
-        if (target && playerEntity) {
-          const attackAction = combatSystem.actionDefinitions?.get(actionId) || {
-            id: actionId,
-            name: actionName,
-            type: "attack",
-            cooldown: 2000,
-            damage: 20,
-            range: 15,
-            targetType: "single",
-            executionTime: 1000,
-          };
-
-          // Check if target is in range
-          const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
-          if (distance <= (attackAction.range || 15)) {
-            // Target is in range, attack directly
-            const success = combatSystem.queueAction(playerEntity.id, actionId, target.id);
-            if (success) {
-              console.log(`Auto-attacking ${target.name}`);
-            } else {
-              console.log(`Failed to attack ${target.name} - check cooldown or existing action`);
-            }
-          } else {
-            // Target is out of range, queue move then attack
-            console.log(`Target out of range, moving closer to ${target.name}`);
-            
-            // Calculate position to move to (just within attack range)
-            const dx = target.position.x - playerEntity.position.x;
-            const dy = target.position.y - playerEntity.position.y;
-            const targetDistance = Math.sqrt(dx * dx + dy * dy);
-            const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
-            
-            const moveX = playerEntity.position.x + (dx / targetDistance) * moveDistance;
-            const moveY = playerEntity.position.y + (dy / targetDistance) * moveDistance;
-            
-            // Queue move action first
-            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, { x: moveX, y: moveY });
-            if (moveSuccess) {
-              // Schedule the attack to be queued after move completes
-              setTimeout(() => {
-                const attackSuccess = combatSystem.queueAction(playerEntity.id, actionId, target.id);
-                if (attackSuccess) {
-                  console.log(`Queued attack on ${target.name} after movement`);
-                }
-              }, 900); // Slightly before move action completes (800ms execution time)
-            }
-          }
-        } else {
-          console.log("No viable targets found for auto-attack");
-        }
-      } else {
-        // Not in combat, activate attack mode for manual target selection
-        setActiveActionMode({
-          type: "attack",
-          actionId: actionId,
-          actionName: actionName,
-        });
-      }
-    } else {
-      // Handle other abilities/actions
-      console.log(`Casting ability: ${actionId}`);
-      setActiveActionMode({
-        type: "ability",
-        actionId: actionId,
-        actionName: actionName,
-      });
-    }
-  };
-
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
@@ -1279,8 +1243,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
-          {/*```text
-          Combat Entities */}
+          {/* Combat Entities */}
           {combatState.entities.map((entity) => (
             <div
               key={entity.id}
