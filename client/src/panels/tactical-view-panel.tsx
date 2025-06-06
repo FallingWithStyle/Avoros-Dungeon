@@ -1,7 +1,6 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
@@ -22,6 +21,12 @@ interface Room {
   x: number;
   y: number;
   factionId?: number | null;
+  isExplored?: boolean;
+  isScanned?: boolean;
+  hasEnemies?: boolean;
+  neutralCount?: number;
+  playerCount?: number;
+  isCurrentRoom?: boolean;
 }
 
 interface RoomData {
@@ -36,6 +41,15 @@ interface ContextMenu {
   entityId: string;
   entity: CombatEntity;
   actions: CombatAction[];
+}
+
+interface ExploredRoom extends Room {
+  isExplored: boolean;
+  isScanned: boolean;
+  hasEnemies: boolean;
+  neutralCount: number;
+  playerCount: number;
+  isCurrentRoom: boolean;
 }
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
@@ -88,7 +102,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (roomData) {
       // Detect room change and calculate entry direction
       let entryDirection: 'north' | 'south' | 'east' | 'west' | null = null;
-      
+
       if (lastRoomId !== null && lastRoomId !== roomData.room.id) {
         // Room has changed, get the movement direction from storage
         const storedDirection = sessionStorage.getItem('lastMovementDirection');
@@ -98,7 +112,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           sessionStorage.removeItem('lastMovementDirection');
         }
       }
-      
+
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities
@@ -121,13 +135,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         position: { x: 50, y: 50 }, // Default center, will be updated below
         entryDirection,
       };
-      
+
       if (!combatState.entities.find(e => e.id === 'player')) {
         combatSystem.addEntity(playerEntity);
       } else {
         combatSystem.updateEntity('player', playerEntity);
       }
-      
+
       // Set entry direction and position in combat system AFTER adding/updating the entity
       if (entryDirection) {
         combatSystem.setPlayerEntryDirection(entryDirection);
@@ -141,7 +155,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Add room entities based on tactical data
       const tacticalData = generateTacticalData(roomData);
-      
+
       // Add mobs as combat entities
       tacticalData.mobs.forEach((mob, index) => {
         const mobEntity: CombatEntity = {
@@ -199,7 +213,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null); // Close any open context menu
-    
+
     if (event.button === 0) { // Left click
       combatSystem.selectEntity(entityId);
     }
@@ -208,16 +222,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleEntityRightClick = (entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const entity = combatState.entities.find(e => e.id === entityId);
     if (!entity) return;
 
     // Select the entity
     combatSystem.selectEntity(entityId);
-    
+
     // Get available actions for the player towards this entity
     const availableActions = combatSystem.getAvailableActions('player');
-    
+
     // Show context menu
     setContextMenu({
       x: event.clientX,
@@ -232,7 +246,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null);
-    
+
     if (event.button === 2) { // Right click
       // Show loot context menu
       setContextMenu({
@@ -301,7 +315,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (type === "treasure") return "golden_chamber";
     if (type === "safe") return "peaceful_chamber";
     if (type === "boss") return "dark_chamber";
-    
+
     switch (environment) {
       case "outdoor": return "forest_clearing";
       case "underground": return "dungeon_corridor";
@@ -311,7 +325,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   function generateLootPositions(hasLoot: boolean, roomType: string) {
     if (!hasLoot) return [];
-    
+
     const lootItems = [];
     if (roomType === "treasure") {
       lootItems.push(
@@ -336,9 +350,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   function generateMobPositions(roomType: string, factionId: number | null | undefined) {
     const mobs = [];
-    
+
     if (roomType === "safe" || roomType === "entrance") return mobs;
-    
+
     if (roomType === "boss") {
       mobs.push({
         type: "hostile",
@@ -371,13 +385,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         });
       }
     }
-    
+
     return mobs;
   }
 
   function generateNpcPositions(roomType: string, isSafe: boolean) {
     const npcs = [];
-    
+
     if (isSafe || roomType === "safe") {
       npcs.push({
         name: "Sanctuary Keeper",
@@ -393,7 +407,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         dialogue: true
       });
     }
-    
+
     return npcs;
   }
 
@@ -511,7 +525,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {entity.type === 'hostile' && <Skull className="w-3 h-3 text-white" />}
                 {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
               </div>
-              
+
               {/* HP bar for non-player entities */}
               {entity.type !== 'player' && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
@@ -521,7 +535,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   ></div>
                 </div>
               )}
-              
+
               {/* Selection indicator */}
               {entity.isSelected && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
@@ -563,7 +577,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               }`}>
                 {getLootIcon(item.type)}
               </div>
-              
+
               {/* Hover name display */}
               {hoveredLoot === index && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
@@ -573,7 +587,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           ))}
 
-          
+
 
           {/* Other Players */}
           {tacticalData.otherPlayers.map((player, index) => (
@@ -635,7 +649,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <Eye className="w-4 h-4" />
                 Examine
               </button>
-              
+
               {contextMenu.entity.type === 'npc' && (
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
