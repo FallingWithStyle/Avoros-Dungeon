@@ -326,8 +326,10 @@ export class CombatSystem {
   setPlayerEntryDirection(direction: 'north' | 'south' | 'east' | 'west' | null): void {
     const player = this.state.entities.find(e => e.id === 'player');
     if (player) {
+      const newPosition = this.getEntryPosition(direction);
       player.entryDirection = direction;
-      player.position = this.getEntryPosition(direction);
+      player.position = newPosition;
+      console.log(`Player positioned at ${newPosition.x}, ${newPosition.y} after entering from ${direction}`);
       this.notifyListeners();
     }
   }

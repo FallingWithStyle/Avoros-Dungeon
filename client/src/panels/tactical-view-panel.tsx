@@ -108,10 +108,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
 
-      // Calculate player position based on entry direction
-      const playerPosition = entryDirection ? combatSystem.getEntryPosition(entryDirection) : { x: 50, y: 50 };
-
-      // Add player entity
+      // Add player entity with correct position
       const playerEntity: CombatEntity = {
         id: 'player',
         name: crawler.name,
@@ -121,7 +118,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         attack: crawler.attack,
         defense: crawler.defense,
         speed: crawler.speed,
-        position: playerPosition,
+        position: { x: 50, y: 50 }, // Default center, will be updated below
         entryDirection,
       };
       
@@ -131,9 +128,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.updateEntity('player', playerEntity);
       }
       
-      // Set entry direction in combat system
+      // Set entry direction and position in combat system AFTER adding/updating the entity
       if (entryDirection) {
         combatSystem.setPlayerEntryDirection(entryDirection);
+      } else {
+        // If no entry direction, place player in center
+        const existingPlayer = combatState.entities.find(e => e.id === 'player');
+        if (existingPlayer) {
+          combatSystem.updateEntity('player', { position: { x: 50, y: 50 } });
+        }
       }
 
       // Add room entities based on tactical data
