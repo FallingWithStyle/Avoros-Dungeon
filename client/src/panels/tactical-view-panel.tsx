@@ -533,26 +533,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     console.log(`Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`, activeActionMode);
 
-    // If in move mode, queue a move action
-    if (activeActionMode?.actionId === 'move') {
-      const selectedEntity = combatSystem.getSelectedEntity();
-      console.log('Selected entity:', selectedEntity);
+    // Always try to queue a move action when clicking on the map, regardless of action mode
+    const selectedEntity = combatSystem.getSelectedEntity();
+    
+    if (selectedEntity?.type === 'player') {
+      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+      console.log('Move action queued:', success);
       
-      if (selectedEntity?.type === 'player') {
-        const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
-        console.log('Move action queued:', success);
-        
-        if (success) {
-          console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-        } else {
-          console.log(`Failed to queue move action - check cooldown or existing action`);
+      if (success) {
+        console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        // Clear active action mode after successful move
+        if (activeActionMode) {
+          setActiveActionMode(null);
         }
-        setActiveActionMode(null); // Clear active move mode
       } else {
-        console.log('No player entity selected or entity is not a player');
+        console.log(`Failed to queue move action - check cooldown or existing action`);
       }
     } else {
-      console.log('Not in move mode');
+      // If no player selected, automatically select the player and then try to move
+      const playerEntity = combatState.entities.find(e => e.id === 'player');
+      if (playerEntity) {
+        combatSystem.selectEntity('player');
+        // Small delay to ensure selection is processed, then queue move
+        setTimeout(() => {
+          const success = combatSystem.queueMoveAction('player', { x, y });
+          if (success) {
+            console.log(`${playerEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+            if (activeActionMode) {
+              setActiveActionMode(null);
+            }
+          }
+        }, 50);
+      } else {
+        console.log('No player entity found');
+      }
     }
   };
 
@@ -801,10 +815,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </CardHeader>
       <CardContent>
         <div 
-          className={`relative w-full aspect-square border-2 ${activeActionMode?.actionId === 'move' ? 'border-green-400 border-4' : 'border-game-border'} rounded-lg overflow-hidden ${activeActionMode?.actionId === 'move' ? 'cursor-move-custom' : 'cursor-pointer'}`}
-          onClick={activeActionMode?.actionId === 'move' ? handleGridClick : handleBackgroundClick}
+          className={`relative w-full aspect-square border-2 ${combatState.isInCombat ? 'border-red-400' : activeActionMode?.actionId === 'move' ? 'border-green-400' : 'border-game-border'} rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 transition-colors`}
+          onClick={handleGridClick}
           onContextMenu={handleGridRightClick}
-          style={activeActionMode?.actionId === 'move' ? { cursor: 'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEuNWMtNS4xOSAwLTkuNSA0LjMxLTkuNSA5LjUgMCA1Ljc5IDkuNSAxMS41IDkuNSAxMS41czktNS43MSA5LTExLjVjMC01LjE5LTQuMzEtOS41LTkuNS05LjV6IiBmaWxsPSIjMzc4M2ZmIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMSIvPgo8cGF0aCBkPSJNMTIgNmMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCIgZmlsbD0iIzAwNzVmZiIvPgo8L3N2Zz4=") 12 12, crosshair' } : {}}
+          title="Click to move your character"
         >
           {/* Room Background */}
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
@@ -1133,6 +1147,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <Users className="w-3 h-3 text-cyan-400" />
               {combatSystem.getFriendlyEntities().length - 1 + tacticalData.otherPlayers.length} friendlies
             </span>
+            {combatState.isInCombat && (
+              <span className="flex items-center gap-1 text-red-400 animate-pulse">
+                <Sword className="w-3 h-3" />
+                IN COMBAT
+              </span>
+            )}
             {combatState.selectedEntityId && (
               <span className="flex items-center gap-1 text-yellow-400">
                 <Eye className="w-3 h-3" />

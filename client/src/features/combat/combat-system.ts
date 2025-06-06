@@ -380,18 +380,34 @@ export class CombatSystem {
 
   // Combat flow
   startCombat(): void {
-    this.state.isInCombat = true;
-    this.state.combatStartTime = Date.now();
-    this.startCombatProcessing();
-    this.notifyListeners();
+    if (!this.state.isInCombat) {
+      this.state.isInCombat = true;
+      this.state.combatStartTime = Date.now();
+      console.log('Combat started!');
+      this.notifyListeners();
+    }
   }
 
   endCombat(): void {
-    this.state.isInCombat = false;
-    this.state.actionQueue = [];
-    this.state.combatStartTime = undefined;
-    this.stopCombatProcessing();
-    this.notifyListeners();
+    if (this.state.isInCombat) {
+      this.state.isInCombat = false;
+      this.state.combatStartTime = undefined;
+      console.log('Combat ended!');
+      this.notifyListeners();
+    }
+  }
+
+  // Check if combat should be active based on hostile entities
+  private checkCombatState(): void {
+    const hostileEntities = this.getHostileEntities();
+    const hasHostiles = hostileEntities.length > 0;
+    const hasDetectedHostiles = hostileEntities.some(e => e.hasDetectedPlayer);
+
+    if (hasDetectedHostiles && !this.state.isInCombat) {
+      this.startCombat();
+    } else if (!hasHostiles && this.state.isInCombat) {
+      this.endCombat();
+    }
   }
 
   // Process queued actions (should be called regularly, e.g., via setInterval)
@@ -412,13 +428,13 @@ export class CombatSystem {
       }
     });
 
+    // Check and update combat state based on hostile entities
+    this.checkCombatState();
+
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Keep combat processing running constantly for AI and grace period management
-    // No longer auto-stop combat processing
-
-    // Always notify listeners if we processed any actions or if the queue changed
+    // Always notify listeners if we processed any actions or combat state changed
     if (readyActions.length > 0) {
       this.notifyListeners();
     }
