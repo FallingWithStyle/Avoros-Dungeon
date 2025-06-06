@@ -1,4 +1,3 @@
-
 export interface TacticalEntity {
   id: string;
   name: string;
@@ -21,8 +20,8 @@ export interface PersistentTacticalData {
 export async function generatePersistentTacticalData(roomData: any): Promise<PersistentTacticalData> {
   try {
     // First, try to get persistent room state from the server
-    const response = await fetch(`/api/rooms/${roomData.room.id}/state`);
-    
+    const response = await fetch(`/api/rooms/${roomData?.room?.id}/state`);
+
     if (response.ok) {
       const roomState = await response.json();
       return convertRoomStateToTacticalData(roomState);
@@ -30,7 +29,7 @@ export async function generatePersistentTacticalData(roomData: any): Promise<Per
   } catch (error) {
     console.warn("Failed to fetch persistent room state, generating fresh data:", error);
   }
-  
+
   // Fallback to generating fresh data
   return generateFreshTacticalData(roomData);
 }
@@ -80,15 +79,15 @@ function convertRoomStateToTacticalData(roomState: any): PersistentTacticalData 
 }
 
 function generateFreshTacticalData(roomData: any): PersistentTacticalData {
-  const room = roomData.room;
+  const room = roomData?.room;
   const mobs: TacticalEntity[] = [];
   const npcs: TacticalEntity[] = [];
   const loot: TacticalEntity[] = [];
   const environmental: TacticalEntity[] = [];
 
   // Generate mobs based on room type and floor
-  const mobCount = room.type === 'boss' ? 1 : 
-                   room.type === 'treasure' ? 0 : 
+  const mobCount = room?.type === 'boss' ? 1 : 
+                   room?.type === 'treasure' ? 0 : 
                    Math.floor(Math.random() * 3) + 1;
 
   for (let i = 0; i < mobCount; i++) {
@@ -125,16 +124,16 @@ function generateFreshTacticalData(roomData: any): PersistentTacticalData {
   }
 
   // Generate loot in treasure rooms or randomly
-  if (room.type === 'treasure' || Math.random() < 0.3) {
+  if (room?.type === 'treasure' || Math.random() < 0.3) {
     loot.push({
       id: 'loot-0',
-      name: room.type === 'treasure' ? 'Treasure Chest' : 'Supply Cache',
+      name: room?.type === 'treasure' ? 'Treasure Chest' : 'Supply Cache',
       type: 'loot',
       x: 40 + Math.random() * 20,
       y: 40 + Math.random() * 20,
       properties: {
-        lootType: room.type === 'treasure' ? 'treasure' : 'supplies',
-        value: room.type === 'treasure' ? 'high' : 'medium'
+        lootType: room?.type === 'treasure' ? 'treasure' : 'supplies',
+        value: room?.type === 'treasure' ? 'high' : 'medium'
       }
     });
   }
@@ -143,7 +142,7 @@ function generateFreshTacticalData(roomData: any): PersistentTacticalData {
 }
 
 function generateMobName(room: any): string {
-  const mobTypes = getMobTypesForEnvironment(room.environment);
+  const mobTypes = getMobTypesForEnvironment(room?.environment);
   const mobType = mobTypes[Math.floor(Math.random() * mobTypes.length)];
   const adjectives = ['Fierce', 'Ancient', 'Corrupted', 'Feral', 'Wandering'];
   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
@@ -156,7 +155,7 @@ function generateNpcName(room: any): string {
 }
 
 function getMobTypeForRoom(room: any): string {
-  const mobTypes = getMobTypesForEnvironment(room.environment);
+  const mobTypes = getMobTypesForEnvironment(room?.environment);
   return mobTypes[Math.floor(Math.random() * mobTypes.length)];
 }
 
