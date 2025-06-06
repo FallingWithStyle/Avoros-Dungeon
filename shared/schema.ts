@@ -308,59 +308,6 @@ export const marketplaceListings = pgTable("marketplace_listings", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Room states for persistent tactical data
-export const roomStates = pgTable("room_states", {
-  id: serial("id").primaryKey(),
-  roomId: integer("room_id")
-    .notNull()
-    .references(() => rooms.id),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  mobData: jsonb("mob_data").default('[]').notNull(), // Array of mob entities with positions
-  npcData: jsonb("npc_data").default('[]').notNull(), // Array of NPC entities with positions
-  lootData: jsonb("loot_data").default('[]').notNull(), // Array of loot entities with positions
-  environmentData: jsonb("environment_data").default('{}').notNull(), // Doors, traps, etc.
-  mobLastSpawn: timestamp("mob_last_spawn").defaultNow(),
-  playerActivity: integer("player_activity").default(0).notNull(), // Activity score for spawn algorithms
-  lastPlayerVisit: timestamp("last_player_visit"),
-  isDepleted: boolean("is_depleted").default(false).notNull(), // True if mobs cleared recently
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Mob spawn configurations for dynamic spawning
-export const mobSpawnConfigs = pgTable("mob_spawn_configs", {
-  id: serial("id").primaryKey(),
-  roomType: varchar("room_type", { length: 30 }).notNull(), // normal, treasure, boss, etc.
-  floorRange: varchar("floor_range", { length: 20 }).notNull(), // "1-3", "5-10", etc.
-  factionId: integer("faction_id").references(() => factions.id),
-  mobTypes: text("mob_types").array().notNull(), // Types of mobs that can spawn
-  spawnRate: decimal("spawn_rate", { precision: 3, scale: 2 }).default('1.0').notNull(), // Multiplier for spawn chance
-  maxMobs: integer("max_mobs").default(3).notNull(),
-  respawnTime: integer("respawn_time").default(3600).notNull(), // Seconds before mobs can respawn
-  activityThreshold: integer("activity_threshold").default(100).notNull(), // Player activity needed to trigger respawn
-  isActive: boolean("is_active").default(true).notNull(),
-});
-
-// Individual mob instances for tracking
-export const mobInstances = pgTable("mob_instances", {
-  id: serial("id").primaryKey(),
-  roomId: integer("room_id")
-    .notNull()
-    .references(() => rooms.id),
-  mobType: varchar("mob_type", { length: 50 }).notNull(),
-  name: varchar("name", { length: 100 }).notNull(),
-  health: integer("health").notNull(),
-  maxHealth: integer("max_health").notNull(),
-  attack: integer("attack").notNull(),
-  defense: integer("defense").notNull(),
-  positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
-  positionY: decimal("position_y", { precision: 5, scale: 2 }).notNull(),
-  status: varchar("status", { length: 20 }).default("alive").notNull(), // alive, dead, fled
-  lastAction: timestamp("last_action").defaultNow(),
-  spawnedAt: timestamp("spawned_at").defaultNow(),
-  deathTime: timestamp("death_time"),
-  lootDropped: boolean("loot_dropped").default(false).notNull(),
-});
-
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   crawlers: many(crawlers),
@@ -516,32 +463,6 @@ export const marketplaceListingsRelations = relations(
   }),
 );
 
-export const roomStatesRelations = relations(roomStates, ({ one, many }) => ({
-  room: one(rooms, {
-    fields: [roomStates.roomId],
-    references: [rooms.id],
-  }),
-  mobInstances: many(mobInstances),
-}));
-
-export const mobSpawnConfigsRelations = relations(mobSpawnConfigs, ({ one }) => ({
-  faction: one(factions, {
-    fields: [mobSpawnConfigs.factionId],
-    references: [factions.id],
-  }),
-}));
-
-export const mobInstancesRelations = relations(mobInstances, ({ one }) => ({
-  room: one(rooms, {
-    fields: [mobInstances.roomId],
-    references: [rooms.id],
-  }),
-  roomState: one(roomStates, {
-    fields: [mobInstances.roomId],
-    references: [roomStates.roomId],
-  }),
-}));
-
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -613,22 +534,6 @@ export const insertSeasonSchema = createInsertSchema(seasons).omit({
   createdAt: true,
 });
 
-export const insertRoomStateSchema = createInsertSchema(roomStates).omit({
-  id: true,
-  createdAt: true,
-  lastUpdated: true,
-});
-
-export const insertMobSpawnConfigSchema = createInsertSchema(mobSpawnConfigs).omit({
-  id: true,
-});
-
-export const insertMobInstanceSchema = createInsertSchema(mobInstances).omit({
-  id: true,
-  spawnedAt: true,
-  lastAction: true,
-});
-
 export const insertRoomSchema = createInsertSchema(rooms).omit({
   id: true,
   createdAt: true,
@@ -667,9 +572,6 @@ export type Activity = typeof activities.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
 export type Season = typeof seasons.$inferSelect;
-export type RoomState = typeof roomStates.$inferSelect;
-export type MobSpawnConfig = typeof mobSpawnConfigs.$inferSelect;
-export type MobInstance = typeof mobInstances.$inferSelect;
 
 // Extended types with relations
 export type CrawlerWithDetails = Crawler & {

@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
 import { useEffect, useState, useRef } from "react";
-import { generatePersistentTacticalData, saveTacticalDataChanges } from "../features/combat/persistent-tactical-data";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -22,6 +21,12 @@ interface Room {
   x: number;
   y: number;
   factionId?: number | null;
+  isExplored?: boolean;
+  isScanned?: boolean;
+  hasEnemies?: boolean;
+  neutralCount?: number;
+  playerCount?: number;
+  isCurrentRoom?: boolean;
 }
 
 interface RoomData {
@@ -36,6 +41,15 @@ interface ContextMenu {
   entityId: string;
   entity: CombatEntity;
   actions: CombatAction[];
+}
+
+interface ExploredRoom extends Room {
+  isExplored: boolean;
+  isScanned: boolean;
+  hasEnemies: boolean;
+  neutralCount: number;
+  playerCount: number;
+  isCurrentRoom: boolean;
 }
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
@@ -140,44 +154,44 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
 
       // Add room entities based on tactical data
-      generatePersistentTacticalData(roomData.room.id).then(tacticalData => {
-        // Add mobs as combat entities
-        tacticalData.mobs.forEach((mob, index) => {
-          const mobEntity: CombatEntity = {
-            id: `mob-${index}`,
-            name: mob.name,
-            type: 'hostile',
-            hp: mob.hp,
-            maxHp: 100,
-            attack: 15,
-            defense: 5,
-            speed: 10,
-            position: { x: mob.x, y: mob.y },
-          };
-          combatSystem.addEntity(mobEntity);
-        });
+      const tacticalData = generateTacticalData(roomData);
 
-        // Add NPCs as neutral entities
-        tacticalData.npcs.forEach((npc, index) => {
-          const npcEntity: CombatEntity = {
-            id: `npc-${index}`,
-            name: npc.name,
-            type: 'neutral',
-            hp: 100,
-            maxHp: 100,
-            attack: 0,
-            defense: 10,
-            speed: 5,
-            position: { x: npc.x, y: npc.y },
-          };
-          combatSystem.addEntity(npcEntity);
-        });
+      // Add mobs as combat entities
+      tacticalData.mobs.forEach((mob, index) => {
+        const mobEntity: CombatEntity = {
+          id: `mob-${index}`,
+          name: mob.name,
+          type: 'hostile',
+          hp: mob.hp,
+          maxHp: 100,
+          attack: 15,
+          defense: 5,
+          speed: 10,
+          position: { x: mob.x, y: mob.y },
+        };
+        combatSystem.addEntity(mobEntity);
+      });
+
+      // Add NPCs as neutral entities
+      tacticalData.npcs.forEach((npc, index) => {
+        const npcEntity: CombatEntity = {
+          id: `npc-${index}`,
+          name: npc.name,
+          type: 'neutral',
+          hp: 100,
+          maxHp: 100,
+          attack: 0,
+          defense: 10,
+          speed: 5,
+          position: { x: npc.x, y: npc.y },
+        };
+        combatSystem.addEntity(npcEntity);
       });
     }
   }, [roomData, crawler]);
 
   // Helper function to generate tactical data
-  /*const generateTacticalData = (data: RoomData) => {
+  const generateTacticalData = (data: RoomData) => {
     const { room, availableDirections, playersInRoom } = data;
     return {
       background: getRoomBackgroundType(room.environment, room.type),
@@ -192,7 +206,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       },
       otherPlayers: playersInRoom.filter(p => p.id !== crawler.id)
     };
-  };*/
+  };
 
   // Click handlers
   const handleEntityClick = (entityId: string, event: React.MouseEvent) => {
@@ -294,7 +308,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-  //const tacticalData = generateTacticalData(roomData);
+  const tacticalData = generateTacticalData(roomData);
 
   function getRoomBackgroundType(environment: string, type: string): string {
     if (type === "entrance" || type === "exit") return "stone_chamber";
@@ -454,14 +468,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           onClick={handleBackgroundClick}
         >
           {/* Room Background */}
-          {/*<div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>*/}
-          <div className={`absolute inset-0 ${getRoomBackgroundType(room.environment, room.type)}`}>
+          <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20">
               <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                  <pattern id="grid" width="6.67%" height="6.67%" patternUnits="userSpaceOnUse">
+                    <path d="M 6.67% 0 L 0 0 0 6.67%" fill="none" stroke="currentColor" strokeWidth="0.5"/>
                   </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
@@ -470,16 +483,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           </div>
 
           {/* Exit indicators */}
-          {availableDirections.includes("north") && (
+          {tacticalData.exits.north && (
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-b"></div>
           )}
-          {availableDirections.includes("south") && (
+          {tacticalData.exits.south && (
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-t"></div>
           )}
-          {availableDirections.includes("east") && (
+          {tacticalData.exits.east && (
             <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-l"></div>
           )}
-          {availableDirections.includes("west") && (
+          {tacticalData.exits.west && (
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
@@ -546,7 +559,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           ))}
 
           {/* Loot items */}
-          {/*tacticalData.loot.map((item, index) => (
+          {tacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
@@ -565,19 +578,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {getLootIcon(item.type)}
               </div>
 
-              {/* Hover name display *}
+              {/* Hover name display */}
               {hoveredLoot === index && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                   {item.name}
                 </div>
               )}
             </div>
-          ))*/}
+          ))}
 
 
 
           {/* Other Players */}
-          {playersInRoom.filter(p => p.id !== crawler.id).map((player, index) => (
+          {tacticalData.otherPlayers.map((player, index) => (
             <div
               key={`player-${index}`}
               className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
@@ -704,7 +717,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div className="flex items-center gap-4 mt-1">
             <span className="flex items-center gap-1">
               <Gem className="w-3 h-3 text-yellow-400" />
-              {/*tacticalData.loot.length*/} 0 items
+              {tacticalData.loot.length} items
             </span>
             <span className="flex items-center gap-1">
               <Skull className="w-3 h-3 text-red-500" />
@@ -712,7 +725,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </span>
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3 text-cyan-400" />
-              {combatSystem.getFriendlyEntities().length - 1 + playersInRoom.filter(p => p.id !== crawler.id).length} friendlies
+              {combatSystem.getFriendlyEntities().length - 1 + tacticalData.otherPlayers.length} friendlies
             </span>
             {combatState.selectedEntityId && (
               <span className="flex items-center gap-1 text-yellow-400">

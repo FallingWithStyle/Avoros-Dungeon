@@ -625,22 +625,15 @@ export class DatabaseStorage implements IStorage {
     if (!result) return undefined;
 
     // Clean expired effects and calculate effective stats
-    const { cleanExpiredEffects, calculateEffectiveStats } = await import(
-      "@shared/effects"
-    );
-    const activeEffects = cleanExpiredEffects(
-      result.crawler.activeEffects || [],
-    );
+    const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
+    const activeEffects = cleanExpiredEffects(result.crawler.activeEffects || []);
 
     // Update crawler with cleaned effects if any were removed
     if (activeEffects.length !== (result.crawler.activeEffects || []).length) {
       await this.updateCrawler(id, { activeEffects });
     }
 
-    const effectiveStats = calculateEffectiveStats(
-      result.crawler,
-      activeEffects,
-    );
+    const effectiveStats = calculateEffectiveStats(result.crawler, activeEffects);
 
     return {
       ...result.crawler,
@@ -2897,14 +2890,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt));
 
-    console.log(
-      `Found ${visitedRooms.length} position records for crawler ${crawlerId}`,
-    );
+    console.log(`Found ${visitedRooms.length} position records for crawler ${crawlerId}`);
 
     // Get unique room IDs and their details
-    const uniqueRoomIds = Array.from(
-      new Set(visitedRooms.map((vr) => vr.roomId)),
-    );
+    const uniqueRoomIds = Array.from(new Set(visitedRooms.map(vr => vr.roomId)));
 
     if (uniqueRoomIds.length === 0) {
       return [];
@@ -2928,9 +2917,7 @@ export class DatabaseStorage implements IStorage {
     const currentRoomId = currentPosition?.roomId;
 
     // Get current room position for scan range calculation
-    const currentRoom = currentRoomId
-      ? await this.getRoom(currentRoomId)
-      : null;
+    const currentRoom = currentRoomId ? await this.getRoom(currentRoomId) : null;
 
     // Find ALL adjacent rooms from ALL visited rooms (persistent fog of war)
     const allConnections = await db
@@ -2973,7 +2960,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(rooms)
         .where(inArray(rooms.id, uniqueRoomIds));
-      const visitedRoomIds = visitedRoomDetails.map((r) => r.id);
+      const visitedRoomIds = visitedRoomDetails.map(r => r.id);
 
       // Single query to get rooms within scan range that haven't been visited
       const nearbyRooms = await db
@@ -2984,30 +2971,28 @@ export class DatabaseStorage implements IStorage {
             eq(rooms.floorId, currentRoom.floorId),
             not(inArray(rooms.id, visitedRoomIds)),
             // Use SQL to calculate Manhattan distance in the query
-            sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${crawler.scanRange}`,
-          ),
+            sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${crawler.scanRange}`
+          )
         );
 
-      scannedRooms.push(
-        ...nearbyRooms.map((room) => ({
-          id: room.id,
-          name: "???",
-          type: "scanned",
-          actualType: room.type,
-          environment: room.environment,
-          isSafe: room.isSafe,
-          hasLoot: room.hasLoot,
-          x: room.x,
-          y: room.y,
-          floorId: room.floorId,
-          isCurrentRoom: false,
-          isExplored: false,
-          isScanned: true,
-        })),
-      );
+      scannedRooms.push(...nearbyRooms.map(room => ({
+        id: room.id,
+        name: "???",
+        type: "scanned",
+        actualType: room.type,
+        environment: room.environment,
+        isSafe: room.isSafe,
+        hasLoot: room.hasLoot,
+        x: room.x,
+        y: room.y,
+        floorId: room.floorId,
+        isCurrentRoom: false,
+        isExplored: false,
+        isScanned: true,
+      })));
     }
 
-    const exploredRooms: any[] = roomDetails.map((room) => {
+    const exploredRooms: any[] = roomDetails.map(room => {
       console.log(`Adding room ${room.id} (${room.name}) to visited rooms`);
       return {
         id: room.id,
@@ -3028,7 +3013,7 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`Total unique rooms visited: ${exploredRooms.length}`);
     console.log(`Scanned rooms found: ${scannedRooms.length}`);
-    console.log(`Room IDs: ${exploredRooms.map((r) => r.id).join(", ")}`);
+    console.log(`Room IDs: ${exploredRooms.map(r => r.id).join(', ')}`);
 
     return [...exploredRooms, ...discoveredUnexploredRooms, ...scannedRooms];
   }
@@ -3051,13 +3036,8 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async applyEffect(
-    crawlerId: number,
-    effectId: string,
-  ): Promise<{ success: boolean; effect?: any; error?: string }> {
-    const { EFFECT_DEFINITIONS, addEffect, cleanExpiredEffects } = await import(
-      "@shared/effects"
-    );
+  async applyEffect(crawlerId: number, effectId: string): Promise<{ success: boolean; effect?: any; error?: string }> {
+    const { EFFECT_DEFINITIONS, addEffect, cleanExpiredEffects } = await import("@shared/effects");
 
     const crawler = await this.getCrawler(crawlerId);
     if (!crawler) {
@@ -3083,14 +3063,9 @@ export class DatabaseStorage implements IStorage {
         }
       }
       if (req.competencies) {
-        const hasAll = req.competencies.every((comp) =>
-          crawler.competencies.includes(comp),
-        );
+        const hasAll = req.competencies.every(comp => crawler.competencies.includes(comp));
         if (!hasAll) {
-          return {
-            success: false,
-            error: `Missing required competencies: ${req.competencies.join(", ")}`,
-          };
+          return { success: false, error: `Missing required competencies: ${req.competencies.join(', ')}` };
         }
       }
     }
@@ -3098,19 +3073,10 @@ export class DatabaseStorage implements IStorage {
     // Check costs
     if (definition.cost) {
       if (definition.cost.energy && crawler.energy < definition.cost.energy) {
-        return {
-          success: false,
-          error: `Not enough energy (need ${definition.cost.energy})`,
-        };
+        return { success: false, error: `Not enough energy (need ${definition.cost.energy})` };
       }
-      if (
-        definition.cost.credits &&
-        crawler.credits < definition.cost.credits
-      ) {
-        return {
-          success: false,
-          error: `Not enough credits (need ${definition.cost.credits})`,
-        };
+      if (definition.cost.credits && crawler.credits < definition.cost.credits) {
+        return { success: false, error: `Not enough credits (need ${definition.cost.credits})` };
       }
     }
 
@@ -3124,7 +3090,7 @@ export class DatabaseStorage implements IStorage {
     const currentEffects = cleanExpiredEffects(crawler.activeEffects || []);
 
     // Remove existing effect of the same type if it exists (for spells that don't stack)
-    const filteredEffects = currentEffects.filter((e) => e.id !== effectId);
+    const filteredEffects = currentEffects.filter(e => e.id !== effectId);
     const newEffects = [...filteredEffects, effect];
 
     // Apply costs
@@ -3141,9 +3107,7 @@ export class DatabaseStorage implements IStorage {
     return { success: true, effect };
   }
 
-  async getFloorBounds(
-    floorId: number,
-  ): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
+  async getFloorBounds(floorId: number): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
     const floorRooms = await db
       .select({
         x: rooms.x,
@@ -3156,8 +3120,8 @@ export class DatabaseStorage implements IStorage {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
     }
 
-    const xs = floorRooms.map((r) => r.x);
-    const ys = floorRooms.map((r) => r.y);
+    const xs = floorRooms.map(r => r.x);
+    const ys = floorRooms.map(r => r.y);
 
     return {
       minX: Math.min(...xs),
@@ -3227,111 +3191,6 @@ export class DatabaseStorage implements IStorage {
     });
 
     return { success: true, newRoom: entranceRoom };
-  }
-
-  // Room state management methods
-  async getRoomState(roomId: number): Promise<any> {
-    const { roomStates } = await import("@shared/schema");
-    const [roomState] = await db
-      .select()
-      .from(roomStates)
-      .where(eq(roomStates.roomId, roomId));
-    return roomState;
-  }
-
-  async createOrUpdateRoomState(roomId: number, stateData: any): Promise<any> {
-    const { roomStates } = await import("@shared/schema");
-    const [roomState] = await db
-      .insert(roomStates)
-      .values({
-        roomId,
-        ...stateData,
-        lastUpdated: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: roomStates.roomId,
-        set: {
-          ...stateData,
-          lastUpdated: new Date(),
-        },
-      })
-      .returning();
-    return roomState;
-  }
-
-  async spawnMobsInRoom(roomId: number): Promise<any[]> {
-    // Get room info to determine appropriate mobs
-    const room = await this.getRoom(roomId);
-    if (!room) return [];
-
-    // Simple mob generation based on room type and environment
-    const mobCount = Math.floor(Math.random() * 3) + 1; // 1-3 mobs
-    const mobs = [];
-
-    for (let i = 0; i < mobCount; i++) {
-      const mob = {
-        id: `mob-${roomId}-${i}`,
-        name: this.generateMobName(room.environment),
-        mobType: this.getMobType(room.environment),
-        health: 50 + Math.floor(Math.random() * 30),
-        maxHealth: 50 + Math.floor(Math.random() * 30),
-        attack: 10 + Math.floor(Math.random() * 10),
-        defense: 5 + Math.floor(Math.random() * 5),
-        positionX: (20 + Math.random() * 60).toString(),
-        positionY: (20 + Math.random() * 60).toString(),
-        status: 'alive',
-      };
-      mobs.push(mob);
-    }
-
-    return mobs;
-  }
-
-  async getActiveMobsInRoom(roomId: number): Promise<any[]> {
-    const roomState = await this.getRoomState(roomId);
-    if (!roomState || !roomState.mobData) return [];
-    
-    // Filter for alive mobs
-    return roomState.mobData.filter((mob: any) => mob.status === 'alive');
-  }
-
-  async killMob(mobId: number): Promise<void> {
-    // This would update the mob status in the room state
-    // For now, this is a placeholder since we're using JSON data
-    console.log(`Mob ${mobId} killed`);
-  }
-
-  async incrementRoomActivity(roomId: number, amount: number): Promise<void> {
-    const { roomStates } = await import("@shared/schema");
-    await db
-      .update(roomStates)
-      .set({
-        playerActivity: sql`${roomStates.playerActivity} + ${amount}`,
-        lastPlayerVisit: new Date(),
-      })
-      .where(eq(roomStates.roomId, roomId));
-  }
-
-  private generateMobName(environment: string): string {
-    const names = {
-      outdoor: ['Wild Wolf', 'Forest Bear', 'Mountain Bandit', 'Wild Boar'],
-      underground: ['Cave Goblin', 'Giant Rat', 'Skeleton Warrior', 'Cave Spider'],
-      indoor: ['Security Guard', 'Cultist', 'Ancient Construct', 'Wraith'],
-    };
-    
-    const environmentNames = names[environment as keyof typeof names] || names.indoor;
-    return environmentNames[Math.floor(Math.random() * environmentNames.length)];
-  }
-
-  private getMobType(environment: string): string {
-    const types = {
-      outdoor: ['beast', 'humanoid', 'animal'],
-      underground: ['undead', 'vermin', 'construct'],
-      indoor: ['humanoid', 'construct', 'undead'],
-    };
-    
-    const environmentTypes = types[environment as keyof typeof types] || types.indoor;
-    return environmentTypes[Math.floor(Math.random() * environmentTypes.length)];
   }
 }
 
