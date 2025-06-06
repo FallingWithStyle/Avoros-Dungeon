@@ -88,8 +88,8 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
               timestamp: queuedAction.queuedAt,
               type: 'combat',
               message: target ? 
-                `${entity.name} used ${queuedAction.action.name} on ${target.name}` :
-                `${entity.name} used ${queuedAction.action.name}`,
+                `${entity.id === 'player' ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name} on ${target.name}` :
+                `${entity.id === 'player' ? `Crawler ${entity.name} (#${crawler.id})` : entity.name} used ${queuedAction.action.name}`,
               entityId: entity.id,
               entityName: entity.name,
               targetId: target?.id,
@@ -122,10 +122,16 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
 
       // Determine entry direction from stored movement direction
       const storedDirection = sessionStorage.getItem('lastMovementDirection');
-      let entryMessage = `${crawler.name} entered the room`;
+      let entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered the room`;
 
       if (storedDirection && ['north', 'south', 'east', 'west'].includes(storedDirection)) {
-        entryMessage = `${crawler.name} entered from the ${storedDirection}`;
+        const oppositeDirection = {
+          'north': 'south',
+          'south': 'north',
+          'east': 'west',
+          'west': 'east'
+        }[storedDirection];
+        entryMessage = `Crawler ${crawler.name} (#${crawler.id}) entered from the ${oppositeDirection}`;
       }
 
       // Add entry event
@@ -155,8 +161,8 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
               timestamp: now + 1500, // Slight delay after entry
               type: 'discovery',
               message: entity.type === 'hostile' ? 
-                `${crawler.name} notices a dangerous ${entity.name}` :
-                `${crawler.name} spots ${entity.name} in the room`,
+                `Crawler ${crawler.name} (#${crawler.id}) notices a dangerous ${entity.name}` :
+                `Crawler ${crawler.name} (#${crawler.id}) spots ${entity.name} in the room`,
               entityId: entity.id,
               entityName: entity.name,
               priority: entity.type === 'hostile' ? 'high' : 'low'
@@ -266,14 +272,23 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                     {getEventIcon(event)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-200 leading-snug">
-                      {event.message}
-                      {event.damage && (
-                        <span className="text-red-400 font-medium ml-1">
-                          (dealing {event.damage} damage)
-                        </span>
-                      )}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm text-slate-200 leading-snug flex-1">
+                        {event.message}
+                        {event.damage && (
+                          <span className="text-red-400 font-medium ml-1">
+                            (dealing {event.damage} damage)
+                          </span>
+                        )}
+                      </p>
+                      <span className="text-xs text-slate-500 flex-shrink-0">
+                        {new Date(event.timestamp).toLocaleTimeString([], { 
+                          hour: '2-digit', 
+                          minute: '2-digit',
+                          second: '2-digit'
+                        })}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {event.type === 'combat' && (
@@ -284,9 +299,6 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                         combat
                       </Badge>
                     )}
-                    <span className="text-xs text-slate-500">
-                      {formatTimestamp(event.timestamp)}
-                    </span>
                   </div>
                 </div>
               ))
