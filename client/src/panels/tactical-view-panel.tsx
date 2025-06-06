@@ -192,12 +192,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Add mobs as combat entities
       tacticalData.mobs.forEach((mob, index) => {
+        const maxHp = 100;
         const mobEntity: CombatEntity = {
           id: `mob-${index}`,
           name: mob.name,
           type: 'hostile',
-          hp: mob.hp,
-          maxHp: 100,
+          hp: maxHp, // Always spawn with full health
+          maxHp: maxHp,
           attack: 15,
           defense: 5,
           speed: 10,
@@ -524,7 +525,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         name: "Boss Monster",
         x: pos.x,
         y: pos.y,
-        hp: 90
+        hp: 100
       });
     } else if (factionId) {
       // Add faction-based enemies
@@ -538,7 +539,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           name: "Faction Warrior",
           x: pos.x,
           y: pos.y,
-          hp: 60 + Math.random() * 40
+          hp: 100
         });
       }
     } else {
@@ -552,7 +553,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           name: "Wild Monster",
           x: pos.x,
           y: pos.y,
-          hp: 50 + Math.random() * 50
+          hp: 100
         });
       }
     }
