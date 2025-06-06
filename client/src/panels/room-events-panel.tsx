@@ -178,7 +178,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         if (event.direction === 'south') return <ArrowDown className="w-3 h-3" />;
         if (event.direction === 'east') return <ArrowRight className="w-3 h-3" />;
         if (event.direction === 'west') return <ArrowLeft className="w-3 h-3" />;
-        return <Users className="w-3 h-3" />;
+        return <Zap className="w-3 h-3" />;
       case 'combat':
         return <Sword className="w-3 h-3" />;
       case 'discovery':
@@ -301,7 +301,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
             <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-blue-400" />
+              <Zap className="w-3 h-3 text-blue-400" />
               Movement
             </span>
             <span className="flex items-center gap-1">
