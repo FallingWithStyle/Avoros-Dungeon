@@ -49,7 +49,7 @@ export interface QueuedAction {
 
 export class CombatSystem {
   private state: CombatState;
-  private actionDefinitions: Map<string, CombatAction>;
+  public actionDefinitions: Map<string, CombatAction>;
   private listeners: Set<(state: CombatState) => void> = new Set();
   private actionCooldowns: Map<string, number> = new Map();
 
@@ -306,7 +306,7 @@ export class CombatSystem {
   }
 
   // Calculate distance between two positions
-  private calculateDistance(pos1: { x: number; y: number }, pos2: { x: number; y: number }): number {
+  calculateDistance(pos1: { x: number; y: number }, pos2: { x: number; y: number }): number {
     const dx = pos1.x - pos2.x;
     const dy = pos1.y - pos2.y;
     return Math.sqrt(dx * dx + dy * dy);
