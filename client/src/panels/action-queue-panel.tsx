@@ -12,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { combatSystem, type QueuedAction } from "@/features/combat/combat-system";
+import { combatSystem, type QueuedAction } from "@shared/combat-system";
 
 interface ActionQueuePanelProps {
   className?: string;

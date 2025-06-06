@@ -21,7 +21,7 @@ import {
   combatSystem,
   type CombatEntity,
   type CombatAction,
-} from "@/features/combat/combat-system";
+} from "@shared/combat-system";
 import { useEffect, useState, useRef } from "react";
 import ActionQueuePanel from "./action-queue-panel";
 
