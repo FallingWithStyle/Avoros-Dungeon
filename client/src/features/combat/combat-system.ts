@@ -97,6 +97,14 @@ export class CombatSystem {
         targetType: 'single',
         executionTime: 1500,
       }],
+      ['move', {
+        id: 'move',
+        name: 'Move',
+        type: 'move',
+        cooldown: 1000,
+        targetType: 'area',
+        executionTime: 800,
+      }],
     ]);
   }
 
@@ -246,7 +254,7 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // Move entity towards a target position
+  // Move entity towards a target position (used by AI)
   private moveEntityTowards(entityId: string, targetPosition: { x: number; y: number }): void {
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
@@ -266,6 +274,23 @@ export class CombatSystem {
     entity.position.y = Math.max(5, Math.min(95, entity.position.y + normalizedDy));
 
     this.notifyListeners();
+  }
+
+  // Move entity to exact position (used by player actions)
+  moveEntityToPosition(entityId: string, targetPosition: { x: number; y: number }): void {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return;
+
+    // Clamp position to grid bounds
+    entity.position.x = Math.max(5, Math.min(95, targetPosition.x));
+    entity.position.y = Math.max(5, Math.min(95, targetPosition.y));
+
+    this.notifyListeners();
+  }
+
+  // Queue a move action to a specific position
+  queueMoveAction(entityId: string, targetPosition: { x: number; y: number }): boolean {
+    return this.queueAction(entityId, 'move', undefined, targetPosition);
   }
 
   cancelAction(entityId: string): boolean {
@@ -350,6 +375,11 @@ export class CombatSystem {
         break;
       case 'ability':
         this.executeAbility(entity, action, targetId);
+        break;
+      case 'move':
+        if (queuedAction.targetPosition) {
+          this.moveEntityToPosition(entityId, queuedAction.targetPosition);
+        }
         break;
     }
   }

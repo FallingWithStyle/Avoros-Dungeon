@@ -458,10 +458,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleMoveToPosition = (targetPosition?: { x: number; y: number }) => {
     if (!targetPosition) return;
 
-    const playerEntity = combatState.entities.find(e => e.type === 'player');
-    if (playerEntity) {
-      combatSystem.updateEntity(playerEntity.id, { position: targetPosition });
-      console.log(`Player moved to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`);
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity) {
+      const success = combatSystem.queueMoveAction(selectedEntity.id, targetPosition);
+      if (success) {
+        console.log(`${selectedEntity.name} moving to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`);
+      } else {
+        console.log(`Failed to queue move action - check cooldown or existing action`);
+      }
     }
     setContextMenu(null);
   };
@@ -471,10 +475,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    // If player is selected and no entity was clicked, move player to clicked position
+    // If player is selected and no entity was clicked, queue a move action
     const selectedEntity = combatSystem.getSelectedEntity();
     if (selectedEntity?.type === 'player') {
-      handleMoveToPosition({ x, y });
+      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+      if (success) {
+        console.log(`${selectedEntity.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+      } else {
+        console.log(`Failed to queue move action - check cooldown or existing action`);
+      }
     }
   };
 
@@ -906,6 +915,23 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 </button>
               )}
             </div>
+
+            {/* Movement Actions */}
+            {contextMenu.clickPosition && combatSystem.getSelectedEntity()?.type === 'player' && (
+              <div className="px-3 py-2 border-b border-gray-700">
+                <div className="text-xs text-gray-500 mb-2">Movement</div>
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                  onClick={() => handleMoveToPosition(contextMenu.clickPosition)}
+                >
+                  <ArrowDown className="w-4 h-4 text-green-400" />
+                  <div>
+                    <div>Move Here</div>
+                    <div className="text-xs text-gray-500">Position: {contextMenu.clickPosition.x.toFixed(0)}, {contextMenu.clickPosition.y.toFixed(0)}</div>
+                  </div>
+                </button>
+              </div>
+            )}
 
             {/* Combat Actions */}
             {contextMenu.actions.length > 0 && contextMenu.entity.type === 'hostile' && (

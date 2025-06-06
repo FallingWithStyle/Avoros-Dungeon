@@ -121,21 +121,34 @@ class EventsSystem {
     if (!entity) return;
 
     const eventId = `action-${entityId}-${Date.now()}`;
-    const message = target
-      ? `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name} on ${target.name}`
-      : `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name}`;
+    
+    let message: string;
+    let eventType: "movement" | "combat" | "discovery" | "interaction" | "status";
+    let priority: "low" | "medium" | "high";
+
+    if (action.type === "move") {
+      message = `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} moved to a new position`;
+      eventType = "movement";
+      priority = "low";
+    } else {
+      message = target
+        ? `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name} on ${target.name}`
+        : `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name}`;
+      eventType = "combat";
+      priority = action.type === "attack" ? "high" : "medium";
+    }
 
     this.addEvent({
       id: eventId,
       timestamp: Date.now(),
-      type: "combat",
+      type: eventType,
       message,
       entityId: entity.id,
       entityName: entity.name,
       targetId: target?.id,
       targetName: target?.name,
       damage,
-      priority: action.type === "attack" ? "high" : "medium",
+      priority,
     });
   }
 
