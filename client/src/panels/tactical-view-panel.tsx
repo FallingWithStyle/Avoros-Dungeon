@@ -471,13 +471,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div className={`absolute inset-0 ${getRoomBackground(tacticalData.background)}`}>
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20">
-              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <svg width="100%" height="100%" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <defs>
-                  <pattern id="grid" width="6.67%" height="6.67%" patternUnits="userSpaceOnUse">
-                    <path d="M 6.67% 0 L 0 0 0 6.67%" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                  <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
+                    <path d="M 1 0 L 0 0 0 1" fill="none" stroke="currentColor" strokeWidth="0.02"/>
                   </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
+                <rect width="15" height="15" fill="url(#grid)" />
               </svg>
             </div>
           </div>
