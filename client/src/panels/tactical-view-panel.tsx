@@ -239,7 +239,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Helper function to get party entry positions based on direction
   const getPartyEntryPositions = (direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] => {
     const positions: { x: number; y: number }[] = [];
-    
+
     // Get base entry position
     let baseGridX = 7; // Center
     let baseGridY = 7; // Center
@@ -275,21 +275,21 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     // Calculate positions for party members
     const halfParty = Math.floor(partySize / 2);
-    
+
     for (let i = 0; i < partySize; i++) {
       let gridX = baseGridX;
       let gridY = baseGridY;
-      
+
       if (partySize > 1) {
         const offset = i - halfParty;
-        
+
         if (spreadDirection === 'horizontal') {
           gridX = Math.max(0, Math.min(14, baseGridX + offset));
         } else {
           gridY = Math.max(0, Math.min(14, baseGridY + offset));
         }
       }
-      
+
       positions.push(gridToPercentage(gridX, gridY));
     }
 
@@ -301,7 +301,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Convert owner position back to grid coordinates
     const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
     const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
-    
+
     // Position companions in adjacent cells
     const companionOffsets = [
       { x: 1, y: 0 },   // Right
@@ -313,11 +313,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       { x: 1, y: -1 },  // Diagonal up-right
       { x: -1, y: 1 },  // Diagonal down-left
     ];
-    
+
     const offset = companionOffsets[companionIndex % companionOffsets.length];
     const companionGridX = Math.max(0, Math.min(14, ownerGridX + offset.x));
     const companionGridY = Math.max(0, Math.min(14, ownerGridY + offset.y));
-    
+
     return gridToPercentage(companionGridX, companionGridY);
   };
 
@@ -328,7 +328,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const gridX = Math.floor(Math.random() * 15);
       const gridY = Math.floor(Math.random() * 15);
       const cellKey = `${gridX},${gridY}`;
-      
+
       if (!excludeCells.has(cellKey)) {
         excludeCells.add(cellKey);
         return { gridX, gridY };
@@ -343,7 +343,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const generateTacticalData = (data: RoomData) => {
     const { room, availableDirections, playersInRoom } = data;
     const occupiedCells = new Set<string>();
-    
+
     return {
       background: getRoomBackgroundType(room.environment, room.type),
       loot: generateLootPositions(room.hasLoot, room.type, occupiedCells),
@@ -481,13 +481,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (roomType === "treasure") {
       const chest = getRandomEmptyCell(occupiedCells);
       const chestPos = gridToPercentage(chest.gridX, chest.gridY);
-      
+
       const coins = getRandomEmptyCell(occupiedCells);
       const coinsPos = gridToPercentage(coins.gridX, coins.gridY);
-      
+
       const gems = getRandomEmptyCell(occupiedCells);
       const gemsPos = gridToPercentage(gems.gridX, gems.gridY);
-      
+
       lootItems.push(
         { type: "treasure", name: "Treasure Chest", x: chestPos.x, y: chestPos.y },
         { type: "treasure", name: "Golden Coins", x: coinsPos.x, y: coinsPos.y },
@@ -499,7 +499,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       for (let i = 0; i < lootCount; i++) {
         const cell = getRandomEmptyCell(occupiedCells);
         const pos = gridToPercentage(cell.gridX, cell.gridY);
-        
+
         lootItems.push({
           type: Math.random() > 0.5 ? "treasure" : "weapon",
           name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
@@ -519,7 +519,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (roomType === "boss") {
       const cell = getRandomEmptyCell(occupiedCells);
       const pos = gridToPercentage(cell.gridX, cell.gridY);
-      
+
       mobs.push({
         type: "hostile",
         name: "Boss Monster",
@@ -533,7 +533,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       for (let i = 0; i < enemyCount; i++) {
         const cell = getRandomEmptyCell(occupiedCells);
         const pos = gridToPercentage(cell.gridX, cell.gridY);
-        
+
         mobs.push({
           type: "hostile",
           name: "Faction Warrior",
@@ -547,7 +547,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (Math.random() > 0.6) {
         const cell = getRandomEmptyCell(occupiedCells);
         const pos = gridToPercentage(cell.gridX, cell.gridY);
-        
+
         mobs.push({
           type: "hostile",
           name: "Wild Monster",
@@ -567,7 +567,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (isSafe || roomType === "safe") {
       const cell = getRandomEmptyCell(occupiedCells);
       const pos = gridToPercentage(cell.gridX, cell.gridY);
-      
+
       npcs.push({
         name: "Sanctuary Keeper",
         x: pos.x,
@@ -577,7 +577,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     } else if (Math.random() > 0.8) {
       const cell = getRandomEmptyCell(occupiedCells);
       const pos = gridToPercentage(cell.gridX, cell.gridY);
-      
+
       npcs.push({
         name: "Wandering Merchant",
         x: pos.x,
@@ -704,8 +704,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
               </div>
 
-              {/* HP bar for non-player entities */}
-              {entity.type !== 'player' && (
+              {/* HP bar for non-player entities (only show if damaged) */}
+              {entity.type !== 'player' && entity.hp !== undefined && entity.maxHp !== undefined && entity.hp < entity.maxHp && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
                   <div 
                     className={`h-full rounded transition-all duration-300 ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
@@ -773,7 +773,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             const gridX = 2 + (index % 3) * 2; // Spread horizontally: 2, 4, 6, then wrap
             const gridY = 12 + Math.floor(index / 3); // Stack vertically if more than 3 players
             const pos = gridToPercentage(gridX, gridY);
-            
+
             return (
               <div
                 key={`player-${index}`}
