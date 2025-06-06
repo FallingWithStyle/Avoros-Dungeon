@@ -16,7 +16,7 @@ import {
 import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { eventsSystem, type RoomEvent } from "@/features/events/events-system";
+import { eventsSystem, type RoomEvent } from "@shared/events-system";
 
 interface RoomEventsPanelProps {
   crawler: CrawlerWithDetails;

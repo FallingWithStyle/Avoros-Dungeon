@@ -1,5 +1,5 @@
-import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "@shared/schema";
-import { eventsSystem } from "../events/events-system";
+
+import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
 
 export interface CombatEntity {
   id: string;
@@ -52,6 +52,7 @@ export class CombatSystem {
   public actionDefinitions: Map<string, CombatAction>;
   private listeners: Set<(state: CombatState) => void> = new Set();
   private actionCooldowns: Map<string, number> = new Map();
+  private combatInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.state = {
@@ -253,14 +254,19 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
 
-    // Combat processing is always running
-
     console.log("queueAction:", queuedAction);
 
     this.notifyListeners();
 
-    // Generate event for the action
-    eventsSystem.onCombatAction(action, entityId, targetId, action.damage);
+    // Generate event for the action (only in client environment)
+    if (typeof window !== 'undefined') {
+      // Import eventsSystem dynamically only in client
+      import('./events-system').then(({ eventsSystem }) => {
+        eventsSystem.onCombatAction(action, entityId, targetId, action.damage);
+      }).catch(() => {
+        // Events system not available, skip
+      });
+    }
 
     return true;
   }
@@ -380,10 +386,16 @@ export class CombatSystem {
 
     console.log("queueMoveAction:", queuedAction);
 
-    // Combat processing is always running
-
     this.notifyListeners();
-    eventsSystem.onCombatAction(moveAction, entityId);
+    
+    // Generate event for the action (only in client environment)
+    if (typeof window !== 'undefined') {
+      import('./events-system').then(({ eventsSystem }) => {
+        eventsSystem.onCombatAction(moveAction, entityId);
+      }).catch(() => {
+        // Events system not available, skip
+      });
+    }
 
     return true;
   }
@@ -478,8 +490,6 @@ export class CombatSystem {
       console.log("Combat processing stopped (clearInterval)");
     }
   }
-
-  private combatInterval: NodeJS.Timeout | null = null;
 
   private executeAction(queuedAction: QueuedAction): void {
     const { entityId, action, targetId, targetPosition } = queuedAction;
@@ -715,8 +725,6 @@ export class CombatSystem {
 
     return baseActions;
   }
-
-
 }
 
 // Singleton instance
