@@ -1,0 +1,116 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=4hwaX1o6BYII' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=4hwaX1o6BYII' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=33f60440:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+room-navigation.tsx:131 Fetched factions: (51) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+chunk-WERSD76P.js?v=33f60440:1232 Error: <path> attribute d: Expected number, "M 6.67% 0 L 0 0 0 6.67…".
+setValueForProperty @ chunk-WERSD76P.js?v=33f60440:1232
+setInitialDOMProperties @ chunk-WERSD76P.js?v=33f60440:7462
+setInitialProperties @ chunk-WERSD76P.js?v=33f60440:7595
+finalizeInitialChildren @ chunk-WERSD76P.js?v=33f60440:8345
+completeWork @ chunk-WERSD76P.js?v=33f60440:16293
+completeUnitOfWork @ chunk-WERSD76P.js?v=33f60440:19224
+performUnitOfWork @ chunk-WERSD76P.js?v=33f60440:19206
+workLoopSync @ chunk-WERSD76P.js?v=33f60440:19137
+renderRootSync @ chunk-WERSD76P.js?v=33f60440:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=33f60440:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=33f60440:9119
+(anonymous) @ chunk-WERSD76P.js?v=33f60440:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=33f60440:555
+flush @ @tanstack_react-query.js?v=33f60440:569
+batch @ @tanstack_react-query.js?v=33f60440:587
+dispatch_fn @ @tanstack_react-query.js?v=33f60440:996
+setData @ @tanstack_react-query.js?v=33f60440:696
+onSuccess @ @tanstack_react-query.js?v=33f60440:897
+resolve @ @tanstack_react-query.js?v=33f60440:456
+Promise.then
+run @ @tanstack_react-query.js?v=33f60440:498
+start @ @tanstack_react-query.js?v=33f60440:536
+fetch @ @tanstack_react-query.js?v=33f60440:926
+executeFetch_fn @ @tanstack_react-query.js?v=33f60440:2211
+onSubscribe @ @tanstack_react-query.js?v=33f60440:1898
+subscribe @ @tanstack_react-query.js?v=33f60440:24
+(anonymous) @ @tanstack_react-query.js?v=33f60440:3022
+subscribeToStore @ chunk-WERSD76P.js?v=33f60440:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=33f60440:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=33f60440:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=33f60440:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=33f60440:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=33f60440:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=33f60440:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=33f60440:19447
+commitRootImpl @ chunk-WERSD76P.js?v=33f60440:19416
+commitRoot @ chunk-WERSD76P.js?v=33f60440:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=33f60440:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=33f60440:9119
+(anonymous) @ chunk-WERSD76P.js?v=33f60440:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=33f60440:555
+flush @ @tanstack_react-query.js?v=33f60440:569
+batch @ @tanstack_react-query.js?v=33f60440:587
+dispatch_fn @ @tanstack_react-query.js?v=33f60440:996
+setData @ @tanstack_react-query.js?v=33f60440:696
+onSuccess @ @tanstack_react-query.js?v=33f60440:897
+resolve @ @tanstack_react-query.js?v=33f60440:456
+Promise.then
+run @ @tanstack_react-query.js?v=33f60440:498
+start @ @tanstack_react-query.js?v=33f60440:536
+fetch @ @tanstack_react-query.js?v=33f60440:926
+executeFetch_fn @ @tanstack_react-query.js?v=33f60440:2211
+onSubscribe @ @tanstack_react-query.js?v=33f60440:1898
+subscribe @ @tanstack_react-query.js?v=33f60440:24
+(anonymous) @ @tanstack_react-query.js?v=33f60440:3022
+subscribeToStore @ chunk-WERSD76P.js?v=33f60440:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=33f60440:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=33f60440:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=33f60440:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=33f60440:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=33f60440:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=33f60440:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=33f60440:19447
+commitRootImpl @ chunk-WERSD76P.js?v=33f60440:19416
+commitRoot @ chunk-WERSD76P.js?v=33f60440:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=33f60440:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=33f60440:9119
+(anonymous) @ chunk-WERSD76P.js?v=33f60440:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=33f60440:555
+flush @ @tanstack_react-query.js?v=33f60440:569
+batch @ @tanstack_react-query.js?v=33f60440:587
+dispatch_fn @ @tanstack_react-query.js?v=33f60440:996
+setData @ @tanstack_react-query.js?v=33f60440:696
+onSuccess @ @tanstack_react-query.js?v=33f60440:897
+resolve @ @tanstack_react-query.js?v=33f60440:456
+Promise.then
+run @ @tanstack_react-query.js?v=33f60440:498
+start @ @tanstack_react-query.js?v=33f60440:536
+fetch @ @tanstack_react-query.js?v=33f60440:926
+executeFetch_fn @ @tanstack_react-query.js?v=33f60440:2211
+onSubscribe @ @tanstack_react-query.js?v=33f60440:1898
+subscribe @ @tanstack_react-query.js?v=33f60440:24
+(anonymous) @ @tanstack_react-query.js?v=33f60440:3022
+subscribeToStore @ chunk-WERSD76P.js?v=33f60440:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=33f60440:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=33f60440:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=33f60440:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=33f60440:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=33f60440:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=33f60440:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=33f60440:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=33f60440:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=33f60440:9119
+commitRootImpl @ chunk-WERSD76P.js?v=33f60440:19432
+commitRoot @ chunk-WERSD76P.js?v=33f60440:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=33f60440:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=33f60440:18718
+workLoop @ chunk-WERSD76P.js?v=33f60440:197
+flushWork @ chunk-WERSD76P.js?v=33f60440:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=33f60440:384
