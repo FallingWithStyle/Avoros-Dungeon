@@ -564,44 +564,57 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   };
 
   const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (contextMenu) {
-      setContextMenu(null);
-      return;
-    }
-
-    const selectedEntity = combatSystem.getSelectedEntity();
-    if (!selectedEntity || selectedEntity.id !== 'player') {
-      console.log('No valid entity selected for movement');
-      return;
-    }
+    event.stopPropagation();
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    console.log(`Map clicked at: ${x.toFixed(1)}%, ${y.toFixed(1)}% for entity: ${selectedEntity.name}`);
+    // Force immediate state refresh
+    const currentState = combatSystem.getState();
+    setCombatState(currentState);
 
-    // Check if move action is available
-    const availableActions = combatSystem.getAvailableActions(selectedEntity.id);
-    const moveAction = availableActions.find(action => action.id === 'move');
-
-    if (moveAction) {
-      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
-      if (success) {
-        console.log(`Successfully queued move action to ${x.toFixed(1)}, ${y.toFixed(1)}`);
-        // Force a state update to ensure UI reflects the queued action
-        setTimeout(() => {
-          const currentState = combatSystem.getState();
-          console.log(`Current action queue: ${currentState.actionQueue.length} actions`);
-        }, 50);
-      } else {
-        console.log('Failed to queue move action - entity may be on cooldown or already have an action queued');
+    if (activeActionMode?.type === 'move') {
+      const selectedEntity = currentState.entities.find(e => e.isSelected);
+      if (selectedEntity) {
+        const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+        if (success) {
+          console.log(`Queued move action for ${selectedEntity.name} to position (${x.toFixed(1)}, ${y.toFixed(1)})`);
+          setActiveActionMode(null);
+          // Force another state refresh after action
+          setTimeout(() => setCombatState(combatSystem.getState()), 50);
+        }
+      }
+    } else if (activeActionMode?.type === 'attack') {
+      // Handle attack targeting if clicked on an entity
+      const clickedEntity = getEntityAtPosition(x, y);
+      if (clickedEntity && clickedEntity.type === 'hostile') {
+        const selectedEntity = currentState.entities.find(e => e.isSelected);
+        if (selectedEntity) {
+          const success = combatSystem.queueAction(selectedEntity.id, activeActionMode.actionId, clickedEntity.id);
+          if (success) {
+            console.log(`Queued ${activeActionMode.actionName} for ${selectedEntity.name} targeting ${clickedEntity.name}`);
+            setActiveActionMode(null);
+            // Force another state refresh after action
+            setTimeout(() => setCombatState(combatSystem.getState()), 50);
+          }
+        }
       }
     } else {
-      console.log('Move action not available - entity may be on cooldown');
+      // Normal click behavior - select entity
+      const clickedEntity = getEntityAtPosition(x, y);
+      if (clickedEntity) {
+        if (clickedEntity.isSelected) {
+          // Deselect if clicking on already selected entity
+          combatSystem.selectEntity(null);
+        } else {
+          combatSystem.selectEntity(clickedEntity.id);
+        }
+      } else {
+        // Clicked on empty space, deselect
+        combatSystem.selectEntity(null);
+      }
     }
-
-    event.stopPropagation();
   };
 
   if (isLoading || !roomData) {
@@ -832,6 +845,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
+  // Helper function to get entity at a given percentage position
+  const getEntityAtPosition = (x: number, y: number): CombatEntity | undefined => {
+    return combatState.entities.find(entity => {
+      const entityX = entity.position.x;
+      const entityY = entity.position.y;
+
+      // Define a threshold for considering the click to be "on" the entity
+      const threshold = 5; // Adjust as needed
+
+      const distance = Math.sqrt(Math.pow(x - entityX, 2) + Math.pow(y - entityY, 2));
+      return distance <= threshold;
+    });
+  };
+
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
@@ -877,4 +904,128 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
-          {/*
+          {/* Entities */}
+          {combatState.entities.map((entity) => {
+            const position = entity.position;
+
+            return (
+              <div
+                key={entity.id}
+                className={`absolute transition-all duration-200 ease-out`}
+                style={{
+                  left: `calc(${position.x}% - 1rem)`,
+                  top: `calc(${position.y}% - 1rem)`,
+                  zIndex: entity.isSelected ? 50 : 10,
+                }}
+              >
+                <button
+                  onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
+                  onClick={(e) => handleEntityClick(entity.id, e)}
+                  onMouseOver={() => setHoveredEntity(entity.id)}
+                  onMouseOut={() => setHoveredEntity(null)}
+                  className={`relative rounded-full flex items-center justify-center w-8 h-8 text-white
+                              ${entity.isSelected ? 'ring-2 ring-blue-500' : ''}
+                              ${entity.type === 'player' ? 'bg-blue-600' : entity.type === 'hostile' ? 'bg-red-600' : 'bg-orange-500'}`}
+                >
+                  {getMobIcon(entity.type)}
+                  {/* Health Bar */}
+                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 h-1">
+                    <div
+                      className="bg-green-500 h-1"
+                      style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                    ></div>
+                  </div>
+                </button>
+              </div>
+            );
+          })}
+
+          {/* Loot */}
+          {tacticalData.loot.map((loot, index) => {
+            return (
+              <div
+                key={`loot-${index}`}
+                className="absolute"
+                style={{
+                  left: `calc(${loot.x}% - 0.75rem)`,
+                  top: `calc(${loot.y}% - 0.75rem)`,
+                  zIndex: hoveredLoot === index ? 50 : 10
+                }}
+              >
+                <button
+                  onClick={(e) => handleLootClick(index, loot, e)}
+                  onContextMenu={(e) => handleLootClick(index, loot, e)}
+                  onMouseOver={() => setHoveredLoot(index)}
+                  onMouseOut={() => setHoveredLoot(null)}
+                  className="relative rounded-full flex items-center justify-center w-6 h-6 text-white bg-gray-700 hover:scale-110 transition-transform"
+                >
+                  {getLootIcon(loot.type)}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Context Menu */}
+        {contextMenu && (
+          <div
+            ref={contextMenuRef}
+            className="fixed z-50 bg-game-panel border-game-border rounded-md shadow-lg py-1"
+            style={{
+              left: contextMenu.x,
+              top: contextMenu.y,
+            }}
+          >
+            {contextMenu.entityId === 'grid' ? (
+              <div className="px-4 py-2 text-slate-200">Move Here</div>
+            ) : (
+              <div className="px-4 py-2 text-slate-200">{contextMenu.entity.name}</div>
+            )}
+            <ul className="text-slate-300">
+              {contextMenu.actions.map((action) => (
+                <li key={action.id}>
+                  <button
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+                    onClick={() => {
+                      handleActionClick(action, contextMenu.entityId);
+                      setContextMenu(null);
+                    }}
+                  >
+                    {action.name}
+                  </button>
+                </li>
+              ))}
+              {contextMenu.entityId === 'grid' && (
+                <li>
+                  <button
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+                    onClick={() => {
+                      handleMoveToPosition(contextMenu.clickPosition);
+                      setContextMenu(null);
+                    }}
+                  >
+                    Move Here
+                  </button>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        {/* Action Hotbar */}
+        <div className="flex justify-center mt-4">
+          {hotbarActions.map(action => (
+            <button
+              key={action.id}
+              className={`mx-1 px-3 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 focus:outline-none ${activeActionMode?.actionId === action.id ? 'bg-blue-500' : ''}`}
+              onClick={() => handleHotbarClick(action.id, action.type, action.name)}
+              title={action.name}
+            >
+              {action.icon}
+            </button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -420,9 +420,10 @@ export class CombatSystem {
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
-    // Always notify listeners if the state changed
+    // Always notify listeners if anything happened
     if (stateChanged || readyActions.length > 0) {
-      this.notifyListeners();
+      // Force notification after all processing is complete
+      setTimeout(() => this.notifyListeners(), 10);
     }
   }
 
@@ -488,6 +489,9 @@ export class CombatSystem {
         }
         break;
     }
+
+    // Force notification after action execution
+    this.notifyListeners();
   }
 
   private dealDamage(targetId: string, baseDamage: number, attackStat: number): void {
