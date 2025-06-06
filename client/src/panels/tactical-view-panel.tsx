@@ -628,16 +628,28 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       activeActionMode,
     );
 
-    // Ensure we have a player selected
+    // Check if clicked on an entity
+    const clickedEntity = combatState.entities.find(entity => {
+      const dx = Math.abs(entity.position.x - x);
+      const dy = Math.abs(entity.position.y - y);
+      return dx < 3 && dy < 3; // 3% tolerance for clicking on entities
+    });
+
+    if (clickedEntity) {
+      // Clicking on an entity - select it
+      combatSystem.selectEntity(clickedEntity.id);
+      return;
+    }
+
+    // Clicking on empty space - only allow move actions for player
     const selectedEntity = combatSystem.getSelectedEntity();
     const playerEntity = combatState.entities.find((e) => e.id === "player");
 
-    if (selectedEntity?.type !== "player" && playerEntity) {
-      combatSystem.selectEntity("player");
+    if (selectedEntity?.type !== 'player' && playerEntity) {
+      combatSystem.selectEntity('player');
     }
 
-    const activePlayer =
-      selectedEntity?.type === "player" ? selectedEntity : playerEntity;
+    const activePlayer = selectedEntity?.type === "player" ? selectedEntity : playerEntity;
 
     if (!activePlayer) {
       console.log("No player entity found");
@@ -939,7 +951,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     {
       id: "ability3",
       name: "Ability 3",
-      icon: <Target className="w-4 h-4" />,
+      icon: <TargetclassName="w-4 h-4" />,
       type: "ability",
     },
     {

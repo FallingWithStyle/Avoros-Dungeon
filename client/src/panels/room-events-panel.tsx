@@ -147,7 +147,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                 Waiting for room activity...
               </div>
             ) : (
-              events.map((event) => (
+              events.slice().reverse().map((event) => (
                 <div
                   key={event.id}
                   className="flex items-center gap-2 p-2 rounded bg-slate-800/30 border border-slate-700/30 hover:bg-slate-700/30 transition-colors duration-150"
