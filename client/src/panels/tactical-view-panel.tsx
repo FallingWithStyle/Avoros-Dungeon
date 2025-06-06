@@ -1,9 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown, Footprints, Clock } from "lucide-react";
+import {
+  Eye,
+  Gem,
+  Skull,
+  Users,
+  Sword,
+  Shield,
+  Target,
+  MessageCircle,
+  Package,
+  Home,
+  ArrowDown,
+  Footprints,
+  Clock,
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
+import {
+  combatSystem,
+  type CombatEntity,
+  type CombatAction,
+} from "@/features/combat/combat-system";
 import { useEffect, useState, useRef } from "react";
 import ActionQueuePanel from "./action-queue-panel";
 
@@ -69,7 +87,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   } | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
   const [activeActionMode, setActiveActionMode] = useState<{
-    type: 'move' | 'attack' | 'ability';
+    type: "move" | "attack" | "ability";
     actionId: string;
     actionName: string;
   } | null>(null);
@@ -77,32 +95,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Subscribe to combat system updates
   useEffect(() => {
-    const unsubscribe = combatSystem.subscribe(setCombatState);
+    const unsubscribe = combatSystem.subscribe((state) => {
+      console.log("Combat state changed", state);
+      setCombatState(state);
+    });
     return unsubscribe;
   }, []);
 
   // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target as Node)
+      ) {
         setContextMenu(null);
       }
     };
 
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setContextMenu(null);
       }
     };
 
     if (contextMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscapeKey);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [contextMenu]);
 
@@ -116,35 +140,49 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   useEffect(() => {
     if (roomData) {
       // Detect room change and calculate entry direction
-      let entryDirection: 'north' | 'south' | 'east' | 'west' | null = null;
+      let entryDirection: "north" | "south" | "east" | "west" | null = null;
 
       if (lastRoomId !== null && lastRoomId !== roomData.room.id) {
         // Room has changed, get the movement direction from storage
-        const storedDirection = sessionStorage.getItem('lastMovementDirection');
-        if (storedDirection && ['north', 'south', 'east', 'west'].includes(storedDirection)) {
-          entryDirection = storedDirection as 'north' | 'south' | 'east' | 'west';
+        const storedDirection = sessionStorage.getItem("lastMovementDirection");
+        if (
+          storedDirection &&
+          ["north", "south", "east", "west"].includes(storedDirection)
+        ) {
+          entryDirection = storedDirection as
+            | "north"
+            | "south"
+            | "east"
+            | "west";
           // Clear the stored direction after using it
-          sessionStorage.removeItem('lastMovementDirection');
+          sessionStorage.removeItem("lastMovementDirection");
         }
       }
 
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player and party members
-      combatState.entities.forEach(entity => {
-        if (!entity.id.startsWith('player') && !entity.id.startsWith('party-') && !entity.id.startsWith('companion-')) {
+      combatState.entities.forEach((entity) => {
+        if (
+          !entity.id.startsWith("player") &&
+          !entity.id.startsWith("party-") &&
+          !entity.id.startsWith("companion-")
+        ) {
           combatSystem.removeEntity(entity.id);
         }
       });
 
       // Calculate entry position for the party
-      const partyEntryPositions = getPartyEntryPositions(entryDirection, roomData.playersInRoom.length + 1); // +1 for main player
+      const partyEntryPositions = getPartyEntryPositions(
+        entryDirection,
+        roomData.playersInRoom.length + 1,
+      ); // +1 for main player
 
       // Add/update main player entity
       const playerEntity: CombatEntity = {
-        id: 'player',
+        id: "player",
         name: crawler.name,
-        type: 'player',
+        type: "player",
         hp: crawler.hp,
         maxHp: crawler.maxHp,
         attack: crawler.attack,
@@ -154,10 +192,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         entryDirection,
       };
 
-      if (!combatState.entities.find(e => e.id === 'player')) {
+      if (!combatState.entities.find((e) => e.id === "player")) {
         combatSystem.addEntity(playerEntity);
       } else {
-        combatSystem.updateEntity('player', playerEntity);
+        combatSystem.updateEntity("player", playerEntity);
       }
 
       // TODO: Add party members when party system is implemented
@@ -211,7 +249,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const mobEntity: CombatEntity = {
           id: `mob-${index}`,
           name: mob.name,
-          type: 'hostile',
+          type: "hostile",
           hp: maxHp, // Always spawn with full health
           maxHp: maxHp,
           attack: 15,
@@ -227,7 +265,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const npcEntity: CombatEntity = {
           id: `npc-${index}`,
           name: npc.name,
-          type: 'neutral',
+          type: "neutral",
           hp: 100,
           maxHp: 100,
           attack: 0,
@@ -241,51 +279,57 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }, [roomData, crawler]);
 
   // Helper function to convert grid coordinates to percentage
-  const gridToPercentage = (gridX: number, gridY: number): { x: number; y: number } => {
+  const gridToPercentage = (
+    gridX: number,
+    gridY: number,
+  ): { x: number; y: number } => {
     // Convert 0-14 grid coordinates to percentage (with padding)
     const cellWidth = 100 / 15;
     const cellHeight = 100 / 15;
     return {
       x: (gridX + 0.5) * cellWidth, // Center of the cell
-      y: (gridY + 0.5) * cellHeight
+      y: (gridY + 0.5) * cellHeight,
     };
   };
 
   // Helper function to get party entry positions based on direction
-  const getPartyEntryPositions = (direction: 'north' | 'south' | 'east' | 'west' | null, partySize: number): { x: number; y: number }[] => {
+  const getPartyEntryPositions = (
+    direction: "north" | "south" | "east" | "west" | null,
+    partySize: number,
+  ): { x: number; y: number }[] => {
     const positions: { x: number; y: number }[] = [];
 
     // Get base entry position
     let baseGridX = 7; // Center
     let baseGridY = 7; // Center
-    let spreadDirection: 'horizontal' | 'vertical' = 'horizontal';
+    let spreadDirection: "horizontal" | "vertical" = "horizontal";
 
     switch (direction) {
-      case 'north':
+      case "north":
         baseGridX = 7;
         baseGridY = 13; // Enter from south side (bottom)
-        spreadDirection = 'horizontal';
+        spreadDirection = "horizontal";
         break;
-      case 'south':
+      case "south":
         baseGridX = 7;
         baseGridY = 1; // Enter from north side (top)
-        spreadDirection = 'horizontal';
+        spreadDirection = "horizontal";
         break;
-      case 'east':
+      case "east":
         baseGridX = 1;
         baseGridY = 7; // Enter from west side (left)
-        spreadDirection = 'vertical';
+        spreadDirection = "vertical";
         break;
-      case 'west':
+      case "west":
         baseGridX = 13;
         baseGridY = 7; // Enter from east side (right)
-        spreadDirection = 'vertical';
+        spreadDirection = "vertical";
         break;
       default:
         // No direction or center spawn
         baseGridX = 7;
         baseGridY = 7;
-        spreadDirection = 'horizontal';
+        spreadDirection = "horizontal";
     }
 
     // Calculate positions for party members
@@ -298,7 +342,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (partySize > 1) {
         const offset = i - halfParty;
 
-        if (spreadDirection === 'horizontal') {
+        if (spreadDirection === "horizontal") {
           gridX = Math.max(0, Math.min(14, baseGridX + offset));
         } else {
           gridY = Math.max(0, Math.min(14, baseGridY + offset));
@@ -312,21 +356,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   };
 
   // Helper function to position companions near their owner
-  const getCompanionPosition = (ownerPosition: { x: number; y: number }, companionIndex: number): { x: number; y: number } => {
+  const getCompanionPosition = (
+    ownerPosition: { x: number; y: number },
+    companionIndex: number,
+  ): { x: number; y: number } => {
     // Convert owner position back to grid coordinates
     const ownerGridX = Math.floor((ownerPosition.x / 100) * 15);
     const ownerGridY = Math.floor((ownerPosition.y / 100) * 15);
 
     // Position companions in adjacent cells
     const companionOffsets = [
-      { x: 1, y: 0 },   // Right
-      { x: -1, y: 0 },  // Left
-      { x: 0, y: 1 },   // Down
-      { x: 0, y: -1 },  // Up
-      { x: 1, y: 1 },   // Diagonal down-right
+      { x: 1, y: 0 }, // Right
+      { x: -1, y: 0 }, // Left
+      { x: 0, y: 1 }, // Down
+      { x: 0, y: -1 }, // Up
+      { x: 1, y: 1 }, // Diagonal down-right
       { x: -1, y: -1 }, // Diagonal up-left
-      { x: 1, y: -1 },  // Diagonal up-right
-      { x: -1, y: 1 },  // Diagonal down-left
+      { x: 1, y: -1 }, // Diagonal up-right
+      { x: -1, y: 1 }, // Diagonal down-left
     ];
 
     const offset = companionOffsets[companionIndex % companionOffsets.length];
@@ -337,9 +384,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   };
 
   // Helper function to get a random empty grid cell
-  const getRandomEmptyCell = (excludeCells: Set<string> = new Set()): { gridX: number; gridY: number } => {
+  const getRandomEmptyCell = (
+    excludeCells: Set<string> = new Set(),
+  ): { gridX: number; gridY: number } => {
     let attempts = 0;
-    while (attempts < 100) { // Prevent infinite loops
+    while (attempts < 100) {
+      // Prevent infinite loops
       const gridX = Math.floor(Math.random() * 15);
       const gridY = Math.floor(Math.random() * 15);
       const cellKey = `${gridX},${gridY}`;
@@ -368,9 +418,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         north: availableDirections.includes("north"),
         south: availableDirections.includes("south"),
         east: availableDirections.includes("east"),
-        west: availableDirections.includes("west")
+        west: availableDirections.includes("west"),
       },
-      otherPlayers: playersInRoom.filter(p => p.id !== crawler.id)
+      otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
     };
   };
 
@@ -380,10 +430,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.stopPropagation();
     setContextMenu(null); // Close any open context menu
 
-    if (event.button === 0) { // Left click
-      if (activeActionMode?.type === 'attack') {
+    if (event.button === 0) {
+      // Left click
+      if (activeActionMode?.type === "attack") {
         // Queue the attack action on the selected entity
-        handleActionClick({ id: activeActionMode.actionId, name: activeActionMode.actionName, type: activeActionMode.type }, entityId);
+        handleActionClick(
+          {
+            id: activeActionMode.actionId,
+            name: activeActionMode.actionName,
+            type: activeActionMode.type,
+          },
+          entityId,
+        );
         setActiveActionMode(null); // Clear active action mode
       } else {
         // If clicking on already selected entity, deselect it
@@ -402,7 +460,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.stopPropagation();
 
     const selectedEntity = combatSystem.getSelectedEntity();
-    if (!selectedEntity || selectedEntity.type !== 'player') return;
+    if (!selectedEntity || selectedEntity.type !== "player") return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = ((event.clientX - rect.left) / rect.width) * 100;
@@ -412,39 +470,42 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       visible: true,
       x: event.clientX,
       y: event.clientY,
-      entityId: 'grid',
+      entityId: "grid",
       entity: {
-        id: 'grid',
-        name: 'Empty Space',
-        type: 'neutral',
+        id: "grid",
+        name: "Empty Space",
+        type: "neutral",
         hp: 1,
         maxHp: 1,
         attack: 0,
         defense: 0,
         speed: 0,
-        position: { x: clickX, y: clickY }
+        position: { x: clickX, y: clickY },
       } as CombatEntity,
       actions: [],
       clickPosition: { x: clickX, y: clickY },
     });
   };
 
-  const handleEntityRightClick = (entityId: string, event: React.MouseEvent) => {
+  const handleEntityRightClick = (
+    entityId: string,
+    event: React.MouseEvent,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const entity = combatState.entities.find(e => e.id === entityId);
+    const entity = combatState.entities.find((e) => e.id === entityId);
     if (!entity) return;
 
     const selectedEntity = combatSystem.getSelectedEntity();
     let availableActions: CombatAction[] = [];
 
-    if (selectedEntity && entity.type === 'hostile') {
+    if (selectedEntity && entity.type === "hostile") {
       availableActions = combatSystem.getAvailableActions(selectedEntity.id);
     }
 
     // Calculate click position relative to the grid
-    const gridElement = event.currentTarget.closest('.relative');
+    const gridElement = event.currentTarget.closest(".relative");
     if (gridElement) {
       const rect = gridElement.getBoundingClientRect();
       const clickX = ((event.clientX - rect.left) / rect.width) * 100;
@@ -462,12 +523,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  const handleLootClick = (lootIndex: number, lootItem: any, event: React.MouseEvent) => {
+  const handleLootClick = (
+    lootIndex: number,
+    lootItem: any,
+    event: React.MouseEvent,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null);
 
-    if (event.button === 2) { // Right click
+    if (event.button === 2) {
+      // Right click
       // Show loot context menu
       setContextMenu({
         x: event.clientX,
@@ -476,17 +542,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         entity: {
           id: `loot-${lootIndex}`,
           name: lootItem.name,
-          type: 'neutral',
+          type: "neutral",
           hp: 1,
           maxHp: 1,
           attack: 0,
           defense: 0,
           speed: 0,
-          position: { x: lootItem.x, y: lootItem.y }
+          position: { x: lootItem.x, y: lootItem.y },
         } as CombatEntity,
-        actions: []
+        actions: [],
       });
-    } else if (event.button === 0) { // Left click
+    } else if (event.button === 0) {
+      // Left click
       console.log(`Examining ${lootItem.name}`);
       // TODO: Implement loot examination/pickup
     }
@@ -495,11 +562,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleActionClick = (action: CombatAction, targetId: string) => {
     const selectedEntity = combatSystem.getSelectedEntity();
     if (selectedEntity) {
-      const success = combatSystem.queueAction(selectedEntity.id, action.id, targetId);
+      const success = combatSystem.queueAction(
+        selectedEntity.id,
+        action.id,
+        targetId,
+      );
       if (success) {
-        console.log(`${selectedEntity.name} queued ${action.name} on ${targetId}`);
+        console.log(
+          `${selectedEntity.name} queued ${action.name} on ${targetId}`,
+        );
       } else {
-        console.log(`Failed to queue ${action.name} - check cooldown, range, or existing action`);
+        console.log(
+          `Failed to queue ${action.name} - check cooldown, range, or existing action`,
+        );
       }
     }
     setContextMenu(null);
@@ -510,11 +585,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const selectedEntity = combatSystem.getSelectedEntity();
     if (selectedEntity) {
-      const success = combatSystem.queueMoveAction(selectedEntity.id, targetPosition);
+      const success = combatSystem.queueMoveAction(
+        selectedEntity.id,
+        targetPosition,
+      );
       if (success) {
-        console.log(`${selectedEntity.name} moving to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`);
+        console.log(
+          `${selectedEntity.name} moving to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`,
+        );
       } else {
-        console.log(`Failed to queue move action - check cooldown or existing action`);
+        console.log(
+          `Failed to queue move action - check cooldown or existing action`,
+        );
       }
     }
     setContextMenu(null);
@@ -526,7 +608,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     // Check if we actually clicked on the grid background, not on an entity
     const target = event.target as HTMLElement;
-    const clickedOnGrid = target === event.currentTarget || target.closest('.grid-background');
+    const clickedOnGrid =
+      target === event.currentTarget || target.closest(".grid-background");
 
     if (!clickedOnGrid) {
       // Clicked on an entity or other element, let their handlers deal with it
@@ -540,45 +623,57 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    console.log(`Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`, activeActionMode);
+    console.log(
+      `Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`,
+      activeActionMode,
+    );
 
     // Ensure we have a player selected
     const selectedEntity = combatSystem.getSelectedEntity();
-    const playerEntity = combatState.entities.find(e => e.id === 'player');
-    
-    if (!selectedEntity?.type === 'player' && playerEntity) {
-      combatSystem.selectEntity('player');
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
+
+    if (!selectedEntity?.type === "player" && playerEntity) {
+      combatSystem.selectEntity("player");
     }
 
-    const activePlayer = selectedEntity?.type === 'player' ? selectedEntity : playerEntity;
-    
+    const activePlayer =
+      selectedEntity?.type === "player" ? selectedEntity : playerEntity;
+
     if (!activePlayer) {
-      console.log('No player entity found');
+      console.log("No player entity found");
       return;
     }
 
     // If no action mode is active, automatically activate move mode
     if (!activeActionMode) {
-      setActiveActionMode({ type: 'move', actionId: 'move', actionName: 'Move' });
-      console.log('Auto-activated move mode');
+      setActiveActionMode({
+        type: "move",
+        actionId: "move",
+        actionName: "Move",
+      });
+      console.log("Auto-activated move mode");
     }
 
     // Handle different action modes
-    if (activeActionMode?.type === 'move' || !activeActionMode) {
+    if (activeActionMode?.type === "move" || !activeActionMode) {
       // Move action
       const success = combatSystem.queueMoveAction(activePlayer.id, { x, y });
-      console.log('Move action queued:', success);
-      
+      console.log("Move action queued:", success);
+
       if (success) {
-        console.log(`${activePlayer.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        console.log(
+          `${activePlayer.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`,
+        );
         // Keep move mode active for subsequent clicks
       } else {
-        console.log(`Failed to queue move action - check cooldown or existing action`);
+        console.log(
+          `Failed to queue move action - check cooldown or existing action`,
+        );
       }
-    } else if (activeActionMode?.type === 'attack') {
+    } else if (activeActionMode?.type === "attack") {
       // Attack mode - need to click on an entity, not empty grid
-      console.log('Attack mode active - click on an enemy to attack');
-    } else if (activeActionMode?.type === 'ability') {
+      console.log("Attack mode active - click on an enemy to attack");
+    } else if (activeActionMode?.type === "ability") {
       // Ability mode - handle based on specific ability
       console.log(`Ability mode active: ${activeActionMode.actionName}`);
       // TODO: Handle different abilities
@@ -620,13 +715,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (type === "boss") return "dark_chamber";
 
     switch (environment) {
-      case "outdoor": return "forest_clearing";
-      case "underground": return "dungeon_corridor";
-      default: return "stone_chamber";
+      case "outdoor":
+        return "forest_clearing";
+      case "underground":
+        return "dungeon_corridor";
+      default:
+        return "stone_chamber";
     }
   }
 
-  function generateLootPositions(hasLoot: boolean, roomType: string, occupiedCells: Set<string>) {
+  function generateLootPositions(
+    hasLoot: boolean,
+    roomType: string,
+    occupiedCells: Set<string>,
+  ) {
     if (!hasLoot) return [];
 
     const lootItems = [];
@@ -641,9 +743,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const gemsPos = gridToPercentage(gems.gridX, chest.gridY);
 
       lootItems.push(
-        { type: "treasure", name: "Treasure Chest", x: chestPos.x, y: chestPos.y },
-        { type: "treasure", name: "Golden Coins", x: coinsPos.x, y: coinsPos.y },
-        { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y }
+        {
+          type: "treasure",
+          name: "Treasure Chest",
+          x: chestPos.x,
+          y: chestPos.y,
+        },
+        {
+          type: "treasure",
+          name: "Golden Coins",
+          x: coinsPos.x,
+          y: coinsPos.y,
+        },
+        { type: "treasure", name: "Precious Gems", x: gemsPos.x, y: gemsPos.y },
       );
     } else {
       // Random loot positioning for normal rooms
@@ -656,14 +768,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           type: Math.random() > 0.5 ? "treasure" : "weapon",
           name: Math.random() > 0.5 ? "Dropped Item" : "Equipment",
           x: pos.x,
-          y: pos.y
+          y: pos.y,
         });
       }
     }
     return lootItems;
   }
 
-  function generateMobPositions(roomType: string, factionId: number | null | undefined, occupiedCells: Set<string>) {
+  function generateMobPositions(
+    roomType: string,
+    factionId: number | null | undefined,
+    occupiedCells: Set<string>,
+  ) {
     const mobs = [];
 
     if (roomType === "safe" || roomType === "entrance") return mobs;
@@ -677,7 +793,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         name: "Boss Monster",
         x: pos.x,
         y: pos.y,
-        hp: 100
+        hp: 100,
       });
     } else if (factionId) {
       // Add faction-based enemies
@@ -691,7 +807,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           name: "Faction Warrior",
           x: pos.x,
           y: pos.y,
-          hp: 100
+          hp: 100,
         });
       }
     } else {
@@ -705,7 +821,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           name: "Wild Monster",
           x: pos.x,
           y: pos.y,
-          hp: 100
+          hp: 100,
         });
       }
     }
@@ -713,7 +829,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return mobs;
   }
 
-  function generateNpcPositions(roomType: string, isSafe: boolean, occupiedCells: Set<string>) {
+  function generateNpcPositions(
+    roomType: string,
+    isSafe: boolean,
+    occupiedCells: Set<string>,
+  ) {
     const npcs = [];
 
     if (isSafe || roomType === "safe") {
@@ -724,7 +844,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         name: "Sanctuary Keeper",
         x: pos.x,
         y: pos.y,
-        dialogue: true
+        dialogue: true,
       });
     } else if (Math.random() > 0.8) {
       const cell = getRandomEmptyCell(occupiedCells);
@@ -734,7 +854,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         name: "Wandering Merchant",
         x: pos.x,
         y: pos.y,
-        dialogue: true
+        dialogue: true,
       });
     }
 
@@ -786,37 +906,103 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Add hotbar for actions
   const hotbarActions = [
-    { id: 'move', name: 'Move', icon: <Footprints className="w-4 h-4" />, type: 'move' },
-    { id: 'attack', name: 'Attack', icon: <Sword className="w-4 h-4" />, type: 'attack' },
-    { id: 'defend', name: 'Defend', icon: <Shield className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability1', name: 'Ability 1', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability2', name: 'Ability 2', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability3', name: 'Ability 3', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability4', name: 'Ability 4', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability5', name: 'Ability 5', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'ability6', name: 'Ability 6', icon: <Target className="w-4 h-4" />, type: 'ability' },
-    { id: 'wait', name: 'Wait', icon: <Clock className="w-4 h-4" />, type: 'ability' },
+    {
+      id: "move",
+      name: "Move",
+      icon: <Footprints className="w-4 h-4" />,
+      type: "move",
+    },
+    {
+      id: "attack",
+      name: "Attack",
+      icon: <Sword className="w-4 h-4" />,
+      type: "attack",
+    },
+    {
+      id: "defend",
+      name: "Defend",
+      icon: <Shield className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability1",
+      name: "Ability 1",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability2",
+      name: "Ability 2",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability3",
+      name: "Ability 3",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability4",
+      name: "Ability 4",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability5",
+      name: "Ability 5",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "ability6",
+      name: "Ability 6",
+      icon: <Target className="w-4 h-4" />,
+      type: "ability",
+    },
+    {
+      id: "wait",
+      name: "Wait",
+      icon: <Clock className="w-4 h-4" />,
+      type: "ability",
+    },
   ];
 
-  const handleHotbarClick = (actionId: string, actionType: string, actionName: string) => {
+  const handleHotbarClick = (
+    actionId: string,
+    actionType: string,
+    actionName: string,
+  ) => {
     console.log(`Hotbar action clicked: ${actionId}`);
 
     // Always select the player when any hotbar action is clicked, deselecting any other entity
-    const playerEntity = combatState.entities.find(e => e.id === 'player');
+    const playerEntity = combatState.entities.find((e) => e.id === "player");
     if (playerEntity) {
-      combatSystem.selectEntity('player');
+      combatSystem.selectEntity("player");
     }
 
-    if (actionId === 'move') {
+    if (actionId === "move") {
       // Activate move mode
-      setActiveActionMode({ type: 'move', actionId: 'move', actionName: 'Move' });
-    } else if (actionType === 'attack') {
+      setActiveActionMode({
+        type: "move",
+        actionId: "move",
+        actionName: "Move",
+      });
+    } else if (actionType === "attack") {
       // Activate attack mode
-      setActiveActionMode({ type: 'attack', actionId: actionId, actionName: actionName });
+      setActiveActionMode({
+        type: "attack",
+        actionId: actionId,
+        actionName: actionName,
+      });
     } else {
       // Handle other abilities/actions
       console.log(`Casting ability: ${actionId}`);
-      setActiveActionMode({ type: 'ability', actionId: actionId, actionName: actionName });
+      setActiveActionMode({
+        type: "ability",
+        actionId: actionId,
+        actionName: actionName,
+      });
     }
   };
 
@@ -829,23 +1015,46 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div 
-          className={`relative w-full aspect-square border-2 ${combatState.isInCombat ? 'border-red-400' : activeActionMode?.actionId === 'move' ? 'border-green-400' : 'border-game-border'} rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 transition-colors`}
+        <div
+          className={`relative w-full aspect-square border-2 ${combatState.isInCombat ? "border-red-400" : activeActionMode?.actionId === "move" ? "border-green-400" : "border-game-border"} rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 transition-colors`}
           onClick={handleGridClick}
           onContextMenu={handleGridRightClick}
           title="Click to move your character"
         >
           {/* Room Background */}
-          <div className={`absolute inset-0 grid-background ${getRoomBackground(tacticalData.background)}`}>
+          <div
+            className={`absolute inset-0 grid-background ${getRoomBackground(tacticalData.background)}`}
+          >
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20 grid-background">
-              <svg width="100%" height="100%" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+              <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 15 15"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+              >
                 <defs>
-                  <pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">
-                    <path d="M 1 0 L 0 0 0 1" fill="none" stroke="currentColor" strokeWidth="0.02"/>
+                  <pattern
+                    id="grid"
+                    width="1"
+                    height="1"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M 1 0 L 0 0 0 1"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.02"
+                    />
                   </pattern>
                 </defs>
-                <rect width="15" height="15" fill="url(#grid)" className="grid-background" />
+                <rect
+                  width="15"
+                  height="15"
+                  fill="url(#grid)"
+                  className="grid-background"
+                />
               </svg>
             </div>
           </div>
@@ -870,40 +1079,52 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div
               key={entity.id}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
-                entity.isSelected ? 'ring-2 ring-yellow-400 ring-offset-1' : ''
-              } ${hoveredEntity === entity.id ? 'scale-110 z-30' : ''} transition-all duration-200`}
-              style={{ left: `${entity.position.x}%`, top: `${entity.position.y}%` }}
+                entity.isSelected ? "ring-2 ring-yellow-400 ring-offset-1" : ""
+              } ${hoveredEntity === entity.id ? "scale-110 z-30" : ""} transition-all duration-200`}
+              style={{
+                left: `${entity.position.x}%`,
+                top: `${entity.position.y}%`,
+              }}
               onClick={(e) => handleEntityClick(entity.id, e)}
               onContextMenu={(e) => handleEntityRightClick(entity.id, e)}
               onMouseEnter={() => setHoveredEntity(entity.id)}
               onMouseLeave={() => setHoveredEntity(null)}
               title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
             >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
-                entity.type === 'player' 
-                  ? 'bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50' 
-                  : entity.type === 'hostile'
-                  ? 'bg-red-600 border-red-400 shadow-red-400/30'
-                  : entity.type === 'neutral'
-                  ? 'bg-orange-500 border-orange-300 shadow-orange-400/30'
-                  : 'bg-cyan-500 border-cyan-300 shadow-cyan-400/30'
-              } ${hoveredEntity === entity.id ? 'shadow-xl' : ''}`}>
-                {entity.type === 'player' && (
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
+                  entity.type === "player"
+                    ? "bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50"
+                    : entity.type === "hostile"
+                      ? "bg-red-600 border-red-400 shadow-red-400/30"
+                      : entity.type === "neutral"
+                        ? "bg-orange-500 border-orange-300 shadow-orange-400/30"
+                        : "bg-cyan-500 border-cyan-300 shadow-cyan-400/30"
+                } ${hoveredEntity === entity.id ? "shadow-xl" : ""}`}
+              >
+                {entity.type === "player" && (
                   <div className="absolute inset-1 bg-blue-300 rounded-full"></div>
                 )}
-                {entity.type === 'hostile' && <Skull className="w-3 h-3 text-white" />}
-                {(entity.type === 'neutral' || entity.type === 'npc') && <Users className="w-3 h-3 text-white" />}
+                {entity.type === "hostile" && (
+                  <Skull className="w-3 h-3 text-white" />
+                )}
+                {(entity.type === "neutral" || entity.type === "npc") && (
+                  <Users className="w-3 h-3 text-white" />
+                )}
               </div>
 
               {/* HP bar for non-player entities (only show if damaged) */}
-              {entity.type !== 'player' && entity.hp !== undefined && entity.maxHp !== undefined && entity.hp < entity.maxHp && (
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
-                  <div 
-                    className={`h-full rounded transition-all duration-300 ${entity.type === 'hostile' ? 'bg-red-400' : 'bg-green-400'}`}
-                    style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
-                  ></div>
-                </div>
-              )}
+              {entity.type !== "player" &&
+                entity.hp !== undefined &&
+                entity.maxHp !== undefined &&
+                entity.hp < entity.maxHp && (
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+                    <div
+                      className={`h-full rounded transition-all duration-300 ${entity.type === "hostile" ? "bg-red-400" : "bg-green-400"}`}
+                      style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                    ></div>
+                  </div>
+                )}
 
               {/* Selection indicator - always show when selected */}
               {entity.isSelected && (
@@ -914,12 +1135,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               {hoveredEntity === entity.id && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                   {entity.name}
-                  {entity.type !== 'player' && ` (${entity.hp}/${entity.maxHp})`}
+                  {entity.type !== "player" &&
+                    ` (${entity.hp}/${entity.maxHp})`}
                 </div>
               )}
 
               {/* Action queue indicator */}
-              {combatState.actionQueue.some(qa => qa.entityId === entity.id) && (
+              {combatState.actionQueue.some(
+                (qa) => qa.entityId === entity.id,
+              ) && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-spin">
                   <div className="w-full h-full bg-purple-300 rounded-full animate-ping"></div>
                 </div>
@@ -932,7 +1156,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
-                hoveredLoot === index ? 'scale-110 z-20' : ''
+                hoveredLoot === index ? "scale-110 z-20" : ""
               } transition-all duration-200`}
               style={{ left: `${item.x}%`, top: `${item.y}%` }}
               title={`${item.name} - Right-click to interact`}
@@ -941,9 +1165,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               onMouseEnter={() => setHoveredLoot(index)}
               onMouseLeave={() => setHoveredLoot(null)}
             >
-              <div className={`w-6 h-6 bg-yellow-500 rounded border-2 border-yellow-300 flex items-center justify-center shadow-lg ${
-                hoveredLoot === index ? 'animate-pulse shadow-yellow-400/50' : 'animate-bounce'
-              }`}>
+              <div
+                className={`w-6 h-6 bg-yellow-500 rounded border-2 border-yellow-300 flex items-center justify-center shadow-lg ${
+                  hoveredLoot === index
+                    ? "animate-pulse shadow-yellow-400/50"
+                    : "animate-bounce"
+                }`}
+              >
                 {getLootIcon(item.type)}
               </div>
 
@@ -956,8 +1184,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           ))}
 
-
-
           {/* Other Players */}
           {tacticalData.otherPlayers.map((player, index) => {
             // Generate a specific grid position for each other player
@@ -969,9 +1195,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <div
                 key={`player-${index}`}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
-                style={{ 
-                  left: `${pos.x}%`, 
-                  top: `${pos.y}%` 
+                style={{
+                  left: `${pos.x}%`,
+                  top: `${pos.y}%`,
                 }}
                 title={`${player.name} (Level ${player.level})`}
               >
@@ -991,8 +1217,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {hotbarActions.map((action, index) => (
             <button
               key={action.id}
-              className={`w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? 'bg-yellow-500' : 'bg-gray-800 hover:bg-gray-700'} text-white flex items-center justify-center`}
-              onClick={() => handleHotbarClick(action.id, action.type, action.name)}
+              className={`w-8 h-8 rounded-full ${activeActionMode?.actionId === action.id ? "bg-yellow-500" : "bg-gray-800 hover:bg-gray-700"} text-white flex items-center justify-center`}
+              onClick={() =>
+                handleHotbarClick(action.id, action.type, action.name)
+              }
               title={`${index + 1}: ${action.name}`}
             >
               {action.icon}
@@ -1005,20 +1233,29 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div
             ref={contextMenuRef}
             className="fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 py-2 min-w-48"
-            style={{ 
-              left: `${Math.min(contextMenu.x, window.innerWidth - 200)}px`, 
-              top: `${Math.min(contextMenu.y, window.innerHeight - 200)}px` 
+            style={{
+              left: `${Math.min(contextMenu.x, window.innerWidth - 200)}px`,
+              top: `${Math.min(contextMenu.y, window.innerHeight - 200)}px`,
             }}
           >
             {/* Entity Info Header */}
             <div className="px-3 py-2 border-b border-gray-700">
               <div className="flex items-center gap-2">
-                {contextMenu.entity.type === 'hostile' && <Skull className="w-4 h-4 text-red-400" />}
-                {(contextMenu.entity.type === 'neutral' || contextMenu.entity.type === 'npc') && <Users className="w-4 h-4 text-orange-400" />}
-                {contextMenu.entityId.startsWith('loot-') && <Package className="w-4 h-4 text-yellow-400" />}
+                {contextMenu.entity.type === "hostile" && (
+                  <Skull className="w-4 h-4 text-red-400" />
+                )}
+                {(contextMenu.entity.type === "neutral" ||
+                  contextMenu.entity.type === "npc") && (
+                  <Users className="w-4 h-4 text-orange-400" />
+                )}
+                {contextMenu.entityId.startsWith("loot-") && (
+                  <Package className="w-4 h-4 text-yellow-400" />
+                )}
                 <div>
-                  <div className="text-white font-medium">{contextMenu.entity.name}</div>
-                  {!contextMenu.entityId.startsWith('loot-') && (
+                  <div className="text-white font-medium">
+                    {contextMenu.entity.name}
+                  </div>
+                  {!contextMenu.entityId.startsWith("loot-") && (
                     <div className="text-xs text-gray-400">
                       {contextMenu.entity.hp}/{contextMenu.entity.maxHp} HP
                     </div>
@@ -1040,7 +1277,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 Examine
               </button>
 
-              {contextMenu.entity.type === 'npc' && (
+              {contextMenu.entity.type === "npc" && (
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                   onClick={() => {
@@ -1053,7 +1290,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 </button>
               )}
 
-              {contextMenu.entityId.startsWith('loot-') && (
+              {contextMenu.entityId.startsWith("loot-") && (
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                   onClick={() => {
@@ -1068,87 +1305,122 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
 
             {/* Movement Actions */}
-            {contextMenu.clickPosition && combatSystem.getSelectedEntity()?.type === 'player' && (
-              <div className="px-3 py-2 border-b border-gray-700">
-                <div className="text-xs text-gray-500 mb-2">Movement</div>
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => handleMoveToPosition(contextMenu.clickPosition)}
-                >
-                  <Footprints className="w-4 h-4 text-green-400" />
-                  <div>
-                    <div>Move Here</div>
-                    <div className="text-xs text-gray-500">Position: {contextMenu.clickPosition.x.toFixed(0)}, {contextMenu.clickPosition.y.toFixed(0)}</div>
-                  </div>
-                </button>
-              </div>
-            )}
-
-            {/* Grid-specific actions */}
-            {contextMenu.entityId === 'grid' && combatSystem.getSelectedEntity()?.type === 'player' && (
-              <div className="px-3 py-2">
-                <div className="text-xs text-gray-500 mb-2">Grid Actions</div>
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                  onClick={() => {
-                    const selectedEntity = combatSystem.getSelectedEntity();
-                    if (selectedEntity && contextMenu.clickPosition) {
-                      const success = combatSystem.queueMoveAction(selectedEntity.id, contextMenu.clickPosition);
-                      if (success) {
-                        console.log(`${selectedEntity.name} moving to ${contextMenu.clickPosition.x.toFixed(1)}, ${contextMenu.clickPosition.y.toFixed(1)}`);
-                      } else {
-                        console.log(`Failed to queue move action - check cooldown or existing action`);
-                      }
-                    }
-                    setContextMenu(null);
-                  }}
-                >
-                  <Footprints className="w-4 h-4 text-green-400" />
-                  <div>
-                    <div>Move to Position</div>
-                    <div className="text-xs text-gray-500">Grid: {contextMenu.clickPosition?.x.toFixed(0)}, {contextMenu.clickPosition?.y.toFixed(0)}</div>
-                  </div>
-                </button>
-              </div>
-            )}
-
-            {/* Combat Actions */}
-            {contextMenu.actions.length > 0 && contextMenu.entity.type === 'hostile' && (
-              <div className="px-3 py-2">
-                <div className="text-xs text-gray-500 mb-2">Combat Actions</div>
-                {contextMenu.actions.map((action) => (
+            {contextMenu.clickPosition &&
+              combatSystem.getSelectedEntity()?.type === "player" && (
+                <div className="px-3 py-2 border-b border-gray-700">
+                  <div className="text-xs text-gray-500 mb-2">Movement</div>
                   <button
-                    key={action.id}
                     className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
-                    onClick={() => handleActionClick(action, contextMenu.entityId)}
+                    onClick={() =>
+                      handleMoveToPosition(contextMenu.clickPosition)
+                    }
                   >
-                    {action.type === 'attack' && <Sword className="w-4 h-4 text-red-400" />}
-                    {action.type === 'ability' && <Target className="w-4 h-4 text-blue-400" />}
+                    <Footprints className="w-4 h-4 text-green-400" />
                     <div>
-                      <div>{action.name}</div>
-                      {action.damage && (
-                        <div className="text-xs text-gray-500">Damage: {action.damage}</div>
-                      )}
-                      <div className="text-xs text-gray-500">Cooldown: {action.cooldown/1000}s</div>
+                      <div>Move Here</div>
+                      <div className="text-xs text-gray-500">
+                        Position: {contextMenu.clickPosition.x.toFixed(0)},{" "}
+                        {contextMenu.clickPosition.y.toFixed(0)}
+                      </div>
                     </div>
                   </button>
-                ))}
-              </div>
-            )}
+                </div>
+              )}
+
+            {/* Grid-specific actions */}
+            {contextMenu.entityId === "grid" &&
+              combatSystem.getSelectedEntity()?.type === "player" && (
+                <div className="px-3 py-2">
+                  <div className="text-xs text-gray-500 mb-2">Grid Actions</div>
+                  <button
+                    className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                    onClick={() => {
+                      const selectedEntity = combatSystem.getSelectedEntity();
+                      if (selectedEntity && contextMenu.clickPosition) {
+                        const success = combatSystem.queueMoveAction(
+                          selectedEntity.id,
+                          contextMenu.clickPosition,
+                        );
+                        if (success) {
+                          console.log(
+                            `${selectedEntity.name} moving to ${contextMenu.clickPosition.x.toFixed(1)}, ${contextMenu.clickPosition.y.toFixed(1)}`,
+                          );
+                        } else {
+                          console.log(
+                            `Failed to queue move action - check cooldown or existing action`,
+                          );
+                        }
+                      }
+                      setContextMenu(null);
+                    }}
+                  >
+                    <Footprints className="w-4 h-4 text-green-400" />
+                    <div>
+                      <div>Move to Position</div>
+                      <div className="text-xs text-gray-500">
+                        Grid: {contextMenu.clickPosition?.x.toFixed(0)},{" "}
+                        {contextMenu.clickPosition?.y.toFixed(0)}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+
+            {/* Combat Actions */}
+            {contextMenu.actions.length > 0 &&
+              contextMenu.entity.type === "hostile" && (
+                <div className="px-3 py-2">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Combat Actions
+                  </div>
+                  {contextMenu.actions.map((action) => (
+                    <button
+                      key={action.id}
+                      className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
+                      onClick={() =>
+                        handleActionClick(action, contextMenu.entityId)
+                      }
+                    >
+                      {action.type === "attack" && (
+                        <Sword className="w-4 h-4 text-red-400" />
+                      )}
+                      {action.type === "ability" && (
+                        <Target className="w-4 h-4 text-blue-400" />
+                      )}
+                      <div>
+                        <div>{action.name}</div>
+                        {action.damage && (
+                          <div className="text-xs text-gray-500">
+                            Damage: {action.damage}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500">
+                          Cooldown: {action.cooldown / 1000}s
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
 
             {/* No actions available */}
-            {contextMenu.actions.length === 0 && contextMenu.entity.type === 'hostile' && (
-              <div className="px-3 py-2 text-xs text-gray-500">
-                No actions available (on cooldown)
-              </div>
-            )}
+            {contextMenu.actions.length === 0 &&
+              contextMenu.entity.type === "hostile" && (
+                <div className="px-3 py-2 text-xs text-gray-500">
+                  No actions available (on cooldown)
+                </div>
+              )}
           </div>
         )}
 
         {/* Room info */}
         <div className="mt-3 text-xs text-slate-400">
-          <p className="font-medium text-slate-300">Current Room: {room.name}</p>
-          <p>Environment: {room.environment} • Type: {room.type}</p>
+          <p className="font-medium text-slate-300">
+            Current Room: {room.name}
+          </p>
+          <p>
+            Environment: {room.environment} • Type: {room.type}
+          </p>
           <div className="flex items-center gap-4 mt-1">
             <span className="flex items-center gap-1">
               <Gem className="w-3 h-3 text-yellow-400" />
@@ -1160,7 +1432,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </span>
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3 text-cyan-400" />
-              {combatSystem.getFriendlyEntities().length - 1 + tacticalData.otherPlayers.length} friendlies
+              {combatSystem.getFriendlyEntities().length -
+                1 +
+                tacticalData.otherPlayers.length}{" "}
+              friendlies
             </span>
             {combatState.isInCombat && (
               <span className="flex items-center gap-1 text-red-400 animate-pulse">
@@ -1171,7 +1446,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             {combatState.selectedEntityId && (
               <span className="flex items-center gap-1 text-yellow-400">
                 <Eye className="w-3 h-3" />
-                {combatState.entities.find(e => e.id === combatState.selectedEntityId)?.name} selected
+                {
+                  combatState.entities.find(
+                    (e) => e.id === combatState.selectedEntityId,
+                  )?.name
+                }{" "}
+                selected
               </span>
             )}
           </div>
