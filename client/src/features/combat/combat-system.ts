@@ -323,16 +323,23 @@ export class CombatSystem {
     const now = Date.now();
     const readyActions = this.state.actionQueue.filter(qa => now >= qa.executesAt);
 
+    // Execute ready actions and remove them from queue
     readyActions.forEach(queuedAction => {
       this.executeAction(queuedAction);
+      
+      // Remove this specific action from the queue
+      const actionIndex = this.state.actionQueue.findIndex(qa => 
+        qa.entityId === queuedAction.entityId && qa.queuedAt === queuedAction.queuedAt
+      );
+      if (actionIndex !== -1) {
+        this.state.actionQueue.splice(actionIndex, 1);
+      }
     });
-
-    // Remove executed actions
-    this.state.actionQueue = this.state.actionQueue.filter(qa => now < qa.executesAt);
 
     // Process AI for hostile entities that don't have queued actions
     this.processEnemyAI();
 
+    // Always notify listeners if we processed any actions or if the queue changed
     if (readyActions.length > 0) {
       this.notifyListeners();
     }
