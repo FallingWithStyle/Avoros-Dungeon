@@ -17,15 +17,21 @@ export interface PersistentTacticalData {
   environmental: TacticalEntity[];
 }
 
-export async function generatePersistentTacticalData(roomData: any): Promise<PersistentTacticalData> {
-  try {
-    // First, try to get persistent room state from the server
-    const response = await fetch(`/api/rooms/${roomData?.room?.id}/state`);
+export async function generatePersistentTacticalData(roomId: number): Promise<PersistentTacticalData> {
+  if (!roomId || roomId === undefined) {
+    console.warn('Invalid roomId provided to generatePersistentTacticalData:', roomId);
+    throw new Error('Invalid room ID');
+  }
 
-    if (response.ok) {
-      const roomState = await response.json();
-      return convertRoomStateToTacticalData(roomState);
+  try {
+    // Fetch current room state from server
+    const response = await fetch(`/api/rooms/${roomId}/state`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch room state: ${response.statusText}`);
     }
+
+    const roomState = await response.json();
+    return convertRoomStateToTacticalData(roomState);
   } catch (error) {
     console.warn("Failed to fetch persistent room state, generating fresh data:", error);
   }
