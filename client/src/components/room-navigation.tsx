@@ -198,6 +198,12 @@ export default function RoomNavigation({
         });
         return;
       }
+      
+      // Store the movement direction for tactical view positioning
+      if (['north', 'south', 'east', 'west'].includes(direction)) {
+        sessionStorage.setItem('lastMovementDirection', direction);
+      }
+      
       setPendingDirection(direction);
       moveMutation.mutate(direction);
     },
@@ -342,43 +348,6 @@ export default function RoomNavigation({
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-
-  const handleMove = async (direction: string) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      // Store the movement direction for tactical view positioning
-      if (['north', 'south', 'east', 'west'].includes(direction)) {
-        sessionStorage.setItem('lastMovementDirection', direction);
-      }
-
-      await apiRequest(`/api/crawlers/${crawler.id}/move`, {
-        method: "POST",
-        body: { direction },
-      });
-
-      // Refresh data after successful move
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}`],
-      });
-    } catch (error: any) {
-      console.error("Movement error:", error);
-      toast({
-        title: "Movement Failed",
-        description: error.message || "Unable to move in that direction",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <Card>
