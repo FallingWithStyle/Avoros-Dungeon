@@ -260,33 +260,33 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
               events.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-all duration-200"
+                  className="flex items-center gap-2 p-2 rounded bg-slate-800/30 border border-slate-700/30 hover:bg-slate-700/30 transition-colors duration-150"
                 >
-                  <div className={`mt-0.5 ${getEventColor(event)}`}>
+                  <div className={`${getEventColor(event)} flex-shrink-0`}>
                     {getEventIcon(event)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm text-slate-200 leading-relaxed">
-                        {event.message}
-                        {event.damage && (
-                          <span className="text-red-400 font-medium ml-1">
-                            (dealing {event.damage} damage)
-                          </span>
-                        )}
-                      </p>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${getEventBadgeStyle(event)}`}
-                        >
-                          {event.type}
-                        </Badge>
-                        <span className="text-xs text-slate-500">
-                          {formatTimestamp(event.timestamp)}
+                    <p className="text-sm text-slate-200 leading-snug">
+                      {event.message}
+                      {event.damage && (
+                        <span className="text-red-400 font-medium ml-1">
+                          (dealing {event.damage} damage)
                         </span>
-                      </div>
-                    </div>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {event.type === 'combat' && (
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getEventBadgeStyle(event)}`}
+                      >
+                        combat
+                      </Badge>
+                    )}
+                    <span className="text-xs text-slate-500">
+                      {formatTimestamp(event.timestamp)}
+                    </span>
                   </div>
                 </div>
               ))
@@ -294,23 +294,31 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
           </div>
         </ScrollArea>
 
-        {/* Quick Stats */}
-        <div className="mt-3 pt-3 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
-          <span>
+        {/* Legend */}
+        <div className="mt-3 pt-3 border-t border-slate-700">
+          <div className="text-xs text-slate-400 mb-2">
             Room entered: {formatTimestamp(roomEntryTime)}
-          </span>
-          <div className="flex items-center gap-4">
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3 text-blue-400" />
+              Movement
+            </span>
             <span className="flex items-center gap-1">
               <Sword className="w-3 h-3 text-red-400" />
-              {events.filter(e => e.type === 'combat').length}
+              Combat
             </span>
             <span className="flex items-center gap-1">
               <Eye className="w-3 h-3 text-green-400" />
-              {events.filter(e => e.type === 'discovery').length}
+              Discovery
             </span>
             <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-blue-400" />
-              {events.filter(e => e.type === 'movement').length}
+              <Users className="w-3 h-3 text-purple-400" />
+              Interaction
+            </span>
+            <span className="flex items-center gap-1">
+              <Heart className="w-3 h-3 text-yellow-400" />
+              Status
             </span>
           </div>
         </div>
