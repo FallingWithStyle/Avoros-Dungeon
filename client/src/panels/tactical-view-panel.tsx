@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown, Move } from "lucide-react";
+import { Eye, Gem, Skull, Users, Sword, Shield, Target, MessageCircle, Package, Home, ArrowDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity, type CombatAction } from "@/features/combat/combat-system";
@@ -445,12 +445,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleActionClick = (action: CombatAction, targetId: string) => {
     const selectedEntity = combatSystem.getSelectedEntity();
     if (selectedEntity) {
-      const result = combatSystem.queueAction(selectedEntity.id, action.id, targetId);
-      if (result.success) {
+      const success = combatSystem.queueAction(selectedEntity.id, action.id, targetId);
+      if (success) {
         console.log(`${selectedEntity.name} queued ${action.name} on ${targetId}`);
       } else {
-        console.log(`Failed to queue ${action.name}: ${result.reason}`);
-        // You could show a toast notification here for better UX
+        console.log(`Failed to queue ${action.name} - check cooldown, range, or existing action`);
       }
     }
     setContextMenu(null);
@@ -467,7 +466,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     setContextMenu(null);
   };
 
-  const handleGridClick = (event: React.MouseEvent) => {
+  const handleGridClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -789,8 +788,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
                 hoveredLoot === index ? 'scale-110 z-20' : ''
               } transition-all duration-200`}
-              ```text
-style={{ left: `${item.x}%`, top: `${item.y}%` }}
+              style={{ left: `${item.x}%`, top: `${item.y}%` }}
               title={`${item.name} - Right-click to interact`}
               onClick={(e) => handleLootClick(index, item, e)}
               onContextMenu={(e) => handleLootClick(index, item, e)}
