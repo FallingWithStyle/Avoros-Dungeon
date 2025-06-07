@@ -3077,8 +3077,8 @@ class ContentStorage {
       "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
       "Ice cream truck driver who discovered their route was being used to smuggle contraband",
       "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
-      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",```text
-"Dog walker who overheard the wrong conversation in the wrong corporate park",
+      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
+        "Dog walker who overheard the wrong conversation in the wrong corporate park",
     ];
 
     const allBackgrounds = [...desperateBackgrounds, ...wackyBackgrounds];
