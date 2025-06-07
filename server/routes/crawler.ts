@@ -158,4 +158,84 @@ export function registerCrawlerRoutes(app: Express) {
       res.status(500).json({ message: "Failed to advance floor" });
     }
   });
+
+  app.post("/api/crawlers/:id/apply-effect/:effectId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const effectId = req.params.effectId;
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Import effect definitions
+      const { EFFECT_DEFINITIONS } = await import("@shared/effects");
+      const effectDef = EFFECT_DEFINITIONS[effectId];
+
+      if (!effectDef) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Unknown effect" 
+        });
+      }
+
+      // For debug mode, allow eyes_of_debug without energy cost
+      if (effectId === 'eyes_of_debug') {
+        // Check if effect is already active
+        const activeEffects = crawler.activeEffects || [];
+        const existingEffect = activeEffects.find(effect => effect.effectId === effectId);
+        
+        if (existingEffect && existingEffect.expiresAt && new Date(existingEffect.expiresAt) > new Date()) {
+          return res.json({
+            success: false,
+            error: "Eyes of D'Bug is already active"
+          });
+        }
+
+        // Add or update the effect
+        const newEffect = {
+          effectId: effectId,
+          appliedAt: new Date(),
+          expiresAt: new Date(Date.now() + effectDef.duration),
+          properties: effectDef.properties
+        };
+
+        const updatedEffects = activeEffects.filter(effect => effect.effectId !== effectId);
+        updatedEffects.push(newEffect);
+
+        await storage.updateCrawler(crawlerId, {
+          activeEffects: updatedEffects,
+          scanRange: crawler.scanRange + (effectDef.properties?.scanRangeBonus || 0)
+        });
+
+        await storage.createActivity({
+          userId,
+          crawlerId,
+          type: "effect_applied",
+          message: `${crawler.name} activated ${effectDef.name}!`,
+          details: { effectId, duration: effectDef.duration }
+        });
+
+        return res.json({ 
+          success: true, 
+          message: `${effectDef.name} applied successfully!`,
+          effect: newEffect
+        });
+      }
+
+      res.status(400).json({ 
+        success: false, 
+        error: "Effect not implemented" 
+      });
+    } catch (error) {
+      console.error("Error applying effect:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to apply effect" 
+      });
+    }
+  });
 }

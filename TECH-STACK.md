@@ -20,6 +20,11 @@
 - **Passport** for authentication middleware
 - **openid-client** for OpenID Connect (e.g., Replit or other providers)
 
+## Testing
+- **Jest** for unit testing with TypeScript support
+- **ts-jest** for TypeScript preprocessing
+- **@types/jest** for TypeScript definitions
+
 ---
 
 This setup supports scalable, type-safe APIs with real-time features, secure authentication, and cloud-native in-memory data storage for MMO-style game state and caching.

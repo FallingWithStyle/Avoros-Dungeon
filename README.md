@@ -106,6 +106,10 @@ The application will be available at `http://localhost:5000`
 - `npm run build` - Build for production
 - `npm run start` - Start the production server
 - `npm run check` - Run TypeScript type checking
+- `npm test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:ci` - Run tests for CI (no watch, with coverage)
 - `npm run db:push` - Push database schema changes
 - `npm run db:migrate` - Run database migrations
 - `npm run seed:factions` - Seed faction data
@@ -175,12 +179,26 @@ The application will be available at `http://localhost:5000`
    - Create components in appropriate `client/src/` subdirectory
    - Follow existing patterns for styling and state management
 
+4. **Testing**
+   - Write unit tests for new functionality
+   - Place tests in `__tests__` directories or use `.test.ts` suffix
+   - Run `npm test` to execute all tests
+   - Use `npm run test:watch` during development
+
+### Testing Strategy
+
+- **Unit Tests**: Test individual functions and components
+- **Integration Tests**: Test API endpoints and database interactions
+- **Coverage**: Aim for meaningful test coverage of critical paths
+- **Test Structure**: Use `describe` and `it` blocks for clear organization
+
 ### Code Style
 
 - TypeScript for all new code
 - ESLint configuration for code consistency
 - Tailwind CSS for styling
 - Component-first architecture
+- Jest for unit testing
 
 ## 🚀 Deployment
 
