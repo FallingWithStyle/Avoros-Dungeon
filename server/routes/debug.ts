@@ -98,6 +98,14 @@ export function registerDebugRoutes(app: Express) {
 
       // Delete related data first - use inArray for multiple crawler IDs
       if (crawlerIds.length > 0) {
+        // Import activities table
+        const { activities } = await import("@shared/schema");
+        
+        // Delete activities first (foreign key constraint)
+        await db
+          .delete(activities)
+          .where(inArray(activities.crawlerId, crawlerIds));
+        
         await db
           .delete(crawlerPositions)
           .where(inArray(crawlerPositions.crawlerId, crawlerIds));
