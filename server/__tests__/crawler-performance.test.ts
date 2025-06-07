@@ -1,23 +1,20 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { redisService } from '../lib/redis-service';
-import { CrawlerStorage } from '../storage/crawler-storage';
+import { storage } from '../storage';
 import { db } from '../db';
 import { crawlers, crawlerClasses } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 describe('Crawler Performance Benchmarks', () => {
-  let crawlerStorage: CrawlerStorage;
+  const crawlerStorage = storage;
   let testCrawlerId: number;
 
   beforeEach(async () => {
-    // Use the singleton instance instead of creating new one
-    crawlerStorage = CrawlerStorage.getInstance();
-    
     // Create a test crawler
     const [testClass] = await db.select().from(crawlerClasses).limit(1);
     const [testCrawler] = await db.insert(crawlers).values({
-      userId: 'test-user-perf',
+      sponsorId: 'test-user-perf',
       name: 'Performance Test Crawler',
       serial: 54321,
       classId: testClass.id,
@@ -58,16 +55,16 @@ describe('Crawler Performance Benchmarks', () => {
     const dbStart = Date.now();
     for (let i = 0; i < iterations; i++) {
       await redisService.invalidateCrawler(testCrawlerId);
-      await crawlerStorage.getCrawler(testCrawlerId);
+      await storage.getCrawler(testCrawlerId);
     }
     const dbTime = Date.now() - dbStart;
 
     // Benchmark: With caching (first call populates cache)
-    await crawlerStorage.getCrawler(testCrawlerId); // Prime the cache
+    await storage.getCrawler(testCrawlerId); // Prime the cache
     
     const cacheStart = Date.now();
     for (let i = 0; i < iterations; i++) {
-      await crawlerStorage.getCrawler(testCrawlerId);
+      await storage.getCrawler(testCrawlerId);
     }
     const cacheTime = Date.now() - cacheStart;
 
