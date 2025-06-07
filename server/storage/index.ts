@@ -13,6 +13,24 @@ export class ModularStorage implements IStorage {
   private contentStorage = new ContentStorage();
   private corporationStorage = new CorporationStorage(); // Added corporation storage
 
+  // Expose content storage publicly
+  get content() {
+    return this.contentStorage;
+  }
+
+  // Content operations
+  async getRandomCompetencies() {
+    return this.contentStorage.getRandomCompetencies();
+  }
+
+  async getRandomPreDungeonJob() {
+    return this.contentStorage.getRandomPreDungeonJob();
+  }
+
+  async getStartingEquipment(background: string) {
+    return this.contentStorage.getStartingEquipment(background);
+  }
+
   // User operations
   async getUser(id: string) {
     return this.userStorage.getUser(id);
@@ -126,17 +144,17 @@ export class ModularStorage implements IStorage {
     // For now, return a default season - this should be implemented properly later
     return { id: 1, seasonNumber: 1, isActive: true };
   }
-  
+
   async canCreatePrimaryCrawler(userId: string) {
     // For now, allow crawler creation - this should check sponsorship limits later
     return true;
   }
-  
+
   async getAvailableSecondarySponsorships() {
     // For now, return empty array - this should be implemented later
     return [];
   }
-  
+
   async resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number) {
     // For now, do nothing - this should be implemented later
     return;
@@ -145,7 +163,7 @@ export class ModularStorage implements IStorage {
   async getEquipment() { return []; }
   async getEquipmentById(id: number) { return null; }
   async getCrawlerEquipment(crawlerId: number) { return []; }
-  
+
   // Encounter operations - delegate to appropriate storage modules
   async createEncounter(data: any) { return null; }
   async getActiveEncounter(crawlerId: number) { return null; }
@@ -154,7 +172,7 @@ export class ModularStorage implements IStorage {
   async applyCompetencyBonus(crawlerId: number, competency: string) { return; }
   async getFloor(floorNumber: number) { return null; }
   async getEnemiesForFloor(floorNumber: number) { return []; }
-  
+
   // Activity operations - delegate to appropriate storage modules  
   async createActivity(data: any) {
     // Simple implementation for now
@@ -164,20 +182,20 @@ export class ModularStorage implements IStorage {
     return activity;
   }
   async getRecentActivities(limit: number = 10) { return []; }
-  
+
   // Chat operations - delegate to appropriate storage modules
   async createChatMessage(data: any) { return null; }
   async getRecentChatMessages(limit: number = 50) { return []; }
-  
+
   // Leaderboard operations - delegate to appropriate storage modules
   async getTopCrawlers(limit: number = 10) { return []; }
-  
+
   // Marketplace operations - delegate to appropriate storage modules
   async getMarketplaceListings() { return []; }
-  
+
   // Combat operations - delegate to appropriate storage modules
   async processEncounterChoice(encounterId: number, choiceId: string) { return null; }
-  
+
   // Debug operations - delegate to appropriate storage modules
   async resetUserCrawlers(userId: string) { return; }
   async resetCrawlerToEntrance(crawlerId: number) { return; }
