@@ -507,36 +507,50 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   const maxY = centerY + radius;
 
   // Build roomMap: explored, scanned, and unexplored neighbors
-  // Ensure roomMapMini is always a Map by re-declaring it here.
+  // Ensure roomMapMini is always a Map by properly declaring it
   const roomMapMini = new Map<string, ExploredRoom>();
-  // Add explored
-  floorRooms.forEach((room) => {
-    roomMapMini.set(`${room.x},${room.y}`, {
-      ...room,
-      isCurrentRoom: room.id === actualCurrentRoomId,
+  
+  // Add explored rooms to the map
+  if (floorRooms && Array.isArray(floorRooms)) {
+    floorRooms.forEach((room) => {
+      if (room && typeof room.x === 'number' && typeof room.y === 'number') {
+        roomMapMini.set(`${room.x},${room.y}`, {
+          ...room,
+          isCurrentRoom: room.id === actualCurrentRoomId,
+        });
+      }
     });
-  });
-  // Add scanned
-  floorScannedRooms.forEach((room) => {
-    if (!roomMapMini.has(`${room.x},${room.y}`)) {
-      roomMapMini.set(`${room.x},${room.y}`, {
-        ...room,
-        isScanned: true,
-        isCurrentRoom: room.id === actualCurrentRoomId,
-      });
-    }
-  });
+  }
+  
+  // Add scanned rooms to the map
+  if (floorScannedRooms && Array.isArray(floorScannedRooms)) {
+    floorScannedRooms.forEach((room) => {
+      if (room && typeof room.x === 'number' && typeof room.y === 'number') {
+        const key = `${room.x},${room.y}`;
+        if (!roomMapMini.has(key)) {
+          roomMapMini.set(key, {
+            ...room,
+            isScanned: true,
+            isCurrentRoom: room.id === actualCurrentRoomId,
+          });
+        }
+      }
+    });
+  }
   // Add unexplored neighbors
   const addUnexploredNeighbors = () => {
     // Only add for explored or scanned rooms
-    [...roomMapMini.values()].forEach((room) => {
-      if (room.isExplored || room.isScanned) {
-        [
+    const roomsToCheck = Array.from(roomMapMini.values());
+    roomsToCheck.forEach((room) => {
+      if (room && (room.isExplored || room.isScanned)) {
+        const neighbors = [
           [room.x + 1, room.y],
           [room.x - 1, room.y],
           [room.x, room.y + 1],
           [room.x, room.y - 1],
-        ].forEach(([x, y]) => {
+        ];
+        
+        neighbors.forEach(([x, y]) => {
           const key = `${x},${y}`;
           if (!roomMapMini.has(key)) {
             roomMapMini.set(key, {
@@ -559,6 +573,8 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
       }
     });
   };
+  
+  // Call the function to add unexplored neighbors
   addUnexploredNeighbors();
 
   // Only connect real rooms (explored or scanned, not unexplored neighbor)
@@ -981,9 +997,14 @@ function ExpandedMapView({
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
   // Build roomMap for expanded view
   const roomMapExpanded = new Map<string, ExploredRoom>();
-  exploredRooms.forEach((room) => {
-    roomMapExpanded.set(`${room.x},${room.y}`, room);
-  });
+  
+  if (exploredRooms && Array.isArray(exploredRooms)) {
+    exploredRooms.forEach((room) => {
+      if (room && typeof room.x === 'number' && typeof room.y === 'number') {
+        roomMapExpanded.set(`${room.x},${room.y}`, room);
+      }
+    });
+  }
   // Only connect real rooms (not unexplored neighbors)
   const isRealRoom = (room: ExploredRoom | undefined) =>
     room &&
