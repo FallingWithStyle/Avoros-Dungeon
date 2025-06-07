@@ -341,10 +341,31 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
+  // Fetch ALL rooms on the current floor
+  const { data: allRoomsOnFloor = [] } = useQuery({
+    queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
+    refetchInterval: 60000, // Refresh every minute since floor layout doesn't change often
+    staleTime: 300000, // 5 minutes
+    retry: false,
+  });
+
   // All rooms that exist on the floor (by (x, y)), regardless of exploration status
+  // Combine all floor rooms with exploration/scan status
   const allFloorRooms: ExploredRoom[] = Array.from(
     new Map(
-      [...(exploredRooms ?? []), ...(scannedRooms ?? [])].map((room) => [
+      [
+        // Start with all rooms on the floor
+        ...(allRoomsOnFloor ?? []).map((room: any) => ({
+          ...room,
+          isCurrentRoom: false,
+          isExplored: false,
+          isScanned: false,
+        })),
+        // Override with explored rooms data
+        ...(exploredRooms ?? []),
+        // Override with scanned rooms data
+        ...(scannedRooms ?? [])
+      ].map((room) => [
         `${room.x},${room.y}`,
         room,
       ]),

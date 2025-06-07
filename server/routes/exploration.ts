@@ -148,4 +148,16 @@ export function registerExplorationRoutes(app: Express) {
       res.status(500).json({ error: "Failed to fetch floor bounds" });
     }
   });
+
+  // Get all rooms on a floor (for complete map display)
+  app.get("/api/floors/:floorId/rooms", async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const rooms = await storage.getRoomsForFloor(floorId);
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching floor rooms:", error);
+      res.status(500).json({ error: "Failed to fetch floor rooms" });
+    }
+  });
 }
