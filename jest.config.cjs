@@ -1,26 +1,47 @@
-
 module.exports = {
-  preset: 'ts-jest',
+  preset: "ts-jest",
+  testEnvironment: "node",
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/client/src/$1",
+    "^@shared/(.*)$": "<rootDir>/shared/$1"
+  },
+  transformIgnorePatterns: [
+    "node_modules/(?!(some-esm-package)/)"
+  ],
+  testTimeout: 10000, // 10 second timeout for individual tests
+  maxWorkers: 1, // Run tests serially to avoid timer conflicts
+  verbose: false // Reduce test output
+};
+module.exports = {
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapping: {
+    '^@shared/(.*)$': '<rootDir>/shared/$1',
+    '^@/(.*)$': '<rootDir>/client/src/$1',
+  },
   testEnvironment: 'node',
-  roots: ['<rootDir>/server', '<rootDir>/shared', '<rootDir>/client/src'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testMatch: [
-    '**/__tests__/**/*.ts',
-    '**/?(*.)+(spec|test).ts'
+    '<rootDir>/server/**/*.test.ts',
+    '<rootDir>/shared/**/*.test.ts',
+    '<rootDir>/client/src/**/*.test.ts'
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.tsx?$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        module: 'ESNext'
+      }
+    }]
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   collectCoverageFrom: [
     'server/**/*.ts',
     'shared/**/*.ts',
-    'client/src/**/*.ts',
+    'client/src/**/*.{ts,tsx}',
     '!**/*.d.ts',
-    '!**/node_modules/**',
-    '!**/dist/**'
-  ],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/client/src/$1',
-    '^@shared/(.*)$': '<rootDir>/shared/$1'
-  },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js']
+    '!**/*.test.ts',
+    '!**/node_modules/**'
+  ]
 };
