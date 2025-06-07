@@ -118,7 +118,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           {/* Right Column - Floor Info & Mini-map */}
           <div className="space-y-6">
             <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
-            <MapPanel crawler={crawler} />
+            {crawler && <MapPanel crawler={crawler} />}
           </div>
         </div>
       </div>

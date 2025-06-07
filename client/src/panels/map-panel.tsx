@@ -7,12 +7,9 @@ interface MapPanelProps {
 }
 
 export default function MapPanel({ crawler }: MapPanelProps) {
+  // Don't render anything if crawler is not available
   if (!crawler) {
-    return (
-      <div className="space-y-4">
-        <div className="text-slate-400">Loading crawler data...</div>
-      </div>
-    );
+    return null;
   }
 
   return (

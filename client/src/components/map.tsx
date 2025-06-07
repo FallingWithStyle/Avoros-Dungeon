@@ -287,7 +287,7 @@ const getFactionBorderStyle = (
   };
 };
 
-export default function Map({ crawler }: MapProps) {
+export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   if (!crawler) {
     return (
       <Card className="bg-game-panel border-game-border">
