@@ -1,4 +1,3 @@
-
 import { db } from "../db";
 import {
   crawlers,
@@ -151,7 +150,7 @@ export class CrawlerStorage extends BaseStorage {
       const species = "human";
       const planetType = "earth-like";
       const name = this.generateCrawlerName(species, planetType);
-      const startingEquipment = this.generateStartingEquipment(background);
+      const startingEquipment = await this.generateStartingEquipment(background);
 
       const statValues = [
         { name: "Combat", value: stats.attack, description: "Direct confrontation" },
@@ -301,7 +300,16 @@ export class CrawlerStorage extends BaseStorage {
     return jobs[Math.floor(Math.random() * jobs.length)];
   }
 
-  private generateStartingEquipment(background: string): any[] {
+  private shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  private async generateStartingEquipment(background: string): Promise<any[]> {
     const survivalGear = [
       { name: "Emergency Rations", description: "Compressed nutrition bars" },
       { name: "Water Recycler", description: "Converts moisture into drinking water" },
