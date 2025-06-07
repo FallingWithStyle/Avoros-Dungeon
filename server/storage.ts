@@ -16,6 +16,12 @@ import {
   chatMessages,
   marketplaceListings,
   seasons,
+  corporationPrefixes,
+  corporationSuffixes,
+  humanFirstNames,
+  humanLastNames,
+  competencies,
+  startingEquipment,
   type UpsertUser,
   type User,
   type InsertCrawler,
@@ -166,7 +172,7 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     // Generate corporation name if not provided
     const corporationName =
-      userData.corporationName || this.generateCorporationName();
+      userData.corporationName || await this.generateCorporationName();
 
     const [user] = await db
       .insert(users)
@@ -186,58 +192,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  private generateCorporationName(): string {
-    const prefixes = [
-      "Stellar",
-      "Cosmic",
-      "Quantum",
-      "Neural",
-      "Cyber",
-      "Nano",
-      "Void",
-      "Dark",
-      "Prime",
-      "Omega",
-      "Alpha",
-      "Beta",
-      "Gamma",
-      "Delta",
-      "Nexus",
-      "Core",
-      "Apex",
-      "Matrix",
-      "Vector",
-      "Phoenix",
-      "Titan",
-      "Nova",
-      "Orbital",
-      "Galactic",
-    ];
-
-    const suffixes = [
-      "Industries",
-      "Corporation",
-      "Enterprises",
-      "Dynamics",
-      "Systems",
-      "Technologies",
-      "Solutions",
-      "Consortium",
-      "Holdings",
-      "Syndicate",
-      "Alliance",
-      "Collective",
-      "Federation",
-      "Empire",
-      "Conglomerate",
-      "Group",
-      "Labs",
-      "Works",
-    ];
-
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-
+  private async generateCorporationName(): Promise<string> {
+    const storage = new Storage();
+    const prefix = await storage.content.getRandomCorporationPrefix();
+    const suffix = await storage.content.getRandomCorporationSuffix();
     return `${prefix} ${suffix}`;
   }
 
@@ -276,235 +234,29 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  private generateRandomCompetencies(): string[] {
-    const allCompetencies = [
-      "Scavenging",
-      "Lock Picking",
-      "Electronics",
-      "First Aid",
-      "Stealth",
-      "Combat Reflexes",
-      "Jury Rigging",
-      "Negotiation",
-      "Intimidation",
-      "Hacking",
-      "Demolitions",
-      "Survival",
-      "Leadership",
-      "Marksmanship",
-      "Athletics",
-      "Engineering",
-      "Chemistry",
-      "Psychology",
-      "Linguistics",
-      "Navigation",
-    ];
-
+  private async generateRandomCompetencies(): Promise<string[]> {
     // Give each crawler 2-4 random competencies
     const numCompetencies = 2 + Math.floor(Math.random() * 3);
-    const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numCompetencies);
+    const storage = new Storage();
+    return await storage.content.getRandomCompetencies(numCompetencies);
   }
 
-  private generatePreDungeonJob(): string {
-    const jobs = [
-      // Mundane jobs
-      "office clerk",
-      "cashier",
-      "data entry specialist",
-      "customer service representative",
-      "insurance adjuster",
-      "tax preparer",
-      "filing clerk",
-      "receptionist",
-      "bookkeeper",
-      "security guard",
-      "janitor",
-      "mail carrier",
-      "bus driver",
-      "parking attendant",
-      "inventory manager",
-      "call center operator",
-      "copy machine technician",
-      "payroll clerk",
-      "administrative assistant",
-      "quality control inspector",
-      "warehouse worker",
-      "delivery driver",
-
-      // Professional jobs
-      "accountant",
-      "lawyer",
-      "teacher",
-      "nurse",
-      "engineer",
-      "architect",
-      "dentist",
-      "pharmacist",
-      "veterinarian",
-      "therapist",
-      "consultant",
-      "project manager",
-      "marketing specialist",
-      "sales representative",
-      "human resources coordinator",
-      "graphic designer",
-      "web developer",
-      "database administrator",
-      "financial advisor",
-
-      // Weird/unusual jobs
-      "professional line waiter",
-      "cheese sculptor",
-      "pet psychic",
-      "fortune cookie writer",
-      "professional apologizer",
-      "social media influencer for plants",
-      "elevator music composer",
-      "professional mourner",
-      "dog food taster",
-      "golf ball diver",
-      "ostrich babysitter",
-      "professional sleeper",
-      "fortune teller for pets",
-      "bubble wrap quality tester",
-      "professional Netflix watcher",
-      "chicken sexer",
-      "paint drying observer",
-      "food stylist",
-      "professional cuddler",
-      "grass growing supervisor",
-      "professional queue holder",
-
-      // Sci-fi/fantastic jobs
-      "space traffic controller",
-      "alien interpreter",
-      "robot therapist",
-      "time travel agent",
-      "interdimensional courier",
-      "gravity adjuster",
-      "memory editor",
-      "dream architect",
-      "virtual reality tester",
-      "hologram maintenance technician",
-      "teleporter calibrator",
-      "artificial intelligence trainer",
-      "parallel universe monitor",
-      "cosmic weather forecaster",
-      "quantum entanglement specialist",
-      "nano-technology farmer",
-      "digital ghost hunter",
-      "synthetic emotion designer",
-      "planetary atmosphere engineer",
-      "galactic tour guide",
-
-      // Blue collar with a twist
-      "underwater welder",
-      "professional food critic",
-      "wine tester",
-      "mattress tester",
-      "theme park ride tester",
-      "video game tester",
-      "chocolate taster",
-      "perfume evaluator",
-      "fireworks technician",
-      "special effects coordinator",
-      "stunt double",
-      "voice actor",
-      "professional wrestler",
-      "circus performer",
-      "street performer",
-      "wedding planner",
-    ];
-
-    return jobs[Math.floor(Math.random() * jobs.length)];
+  private async generatePreDungeonJob(): Promise<string> {
+    const storage = new Storage();
+    return await storage.content.getRandomPreDungeonJob();
   }
 
-  private generateCrawlerBackground(): string {
-    const job = this.generatePreDungeonJob();
-    const desperateBackgrounds = [
-      "Hiding from ex-partner's criminal associates who want them dead",
-      "Fled into the dungeon after witnessing a mob assassination",
-      "Chasing their missing sibling who entered the dungeon weeks ago",
-      "Escaping massive gambling debts to dangerous loan sharks",
-      "On the run after accidentally uncovering corporate corruption",
-      "Homeless and desperate after being evicted from their apartment",
-      "Seeking their missing child who was kidnapped by cultists",
-      "Fleeing after their medical practice was shut down for whistleblowing",
-      "Running from a private investigator hired by their former employer",
-      "Lost everything in a Ponzi scheme and has nowhere else to go",
-      "Trying to disappear after their research exposed government secrets",
-      "Following their mentor who vanished into the dungeon with vital evidence",
-    ];
+  private async generateCrawlerBackground(): Promise<string> {
+    const job = await this.generatePreDungeonJob();
 
-    const wackyBackgrounds = [
-      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a nationwide manhunt",
-      "Used to run an underground origami club that accidentally became a resistance movement",
-      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
-      "Librarian who discovered that late fees were being used to fund illegal weapons research",
-      "Freelance mime who broke character at the wrong moment and saw too much",
-      "Pet groomer whose client's 'dog' turned out to be an escaped lab animal",
-      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
-      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
-      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
-      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
-      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
-      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
-      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
-      "Dog walker who overheard the wrong conversation in the wrong corporate park",
-      "Amateur beekeeper whose honey business was a front for something much bigger (they had no idea)",
-      "Former mall Santa who saw executives discussing 'naughty list eliminations' and thought they meant something else",
-      "Freelance translator who accidentally translated a corporate love letter that was actually assassination orders",
-      "Part-time tour guide whose historical facts about corporate buildings were apparently classified information",
-      "Rideshare driver who picked up the wrong passenger at the wrong time and heard the wrong phone call",
-      "Karaoke host whose song requests app was secretly monitoring corporate communications",
-      "Personal trainer whose client confessed to war crimes during a particularly intense workout",
-      "Flower delivery person who delivered the wrong bouquet to the wrong office and saw too much",
-      "Professional cosplayer whose costume was too realistic and got them mistaken for an actual corporate spy",
-      "Food truck owner whose lunch rush happened to coincide with an illegal corporate meeting in the park",
-      "Freelance furniture assembler who found corporate secrets hidden inside furniture boxes",
-      "Amateur archaeologist who dug up corporate waste in their backyard and connected the wrong dots",
-      "Part-time janitor who cleaned the wrong office on the wrong night and emptied the wrong trash",
-      "Etsy seller whose handmade crafts accidentally incorporated corporate microchips they found on the street",
-      "Professional cat sitter whose feline client belonged to a corporate whistleblower",
-      "Escape room designer whose puzzles were based on real corporate security flaws (oops)",
-      "Food blogger whose restaurant review accidentally described a corporate money laundering operation",
-      "Freelance cartographer whose maps revealed corporate illegal dumping sites by pure coincidence",
-      "Amateur radio operator who intercepted the wrong frequency at the wrong time",
-      "Professional gift wrapper whose artistic paper folding skills revealed hidden corporate documents",
-      "Part-time children's birthday entertainer who performed at a corporate executive's house during a business meeting",
-    ];
+    // Choose category randomly
+    const categories = ["desperate", "wacky"];
+    const category = categories[Math.floor(Math.random() * categories.length)];
 
-    const tragicBackgrounds = [
-      "Their entire extended family was killed in a 'gas leak' explosion after their uncle asked too many questions at work",
-      "Woke up to find their memory of the last three years had been surgically removed, and this seemed safer than staying",
-      "Their hometown was evacuated for 'routine maintenance' and never reopened - they're the only one who made it out",
-      "Former corporate executive who grew a conscience too late and is now running from their former colleagues",
-      "Their identical twin was murdered and replaced by a corporate double - they're next",
-      "Discovered their late parents' charity was actually a human trafficking front and assassins came calling",
-      "Their DNA was patented by a corporation and they're technically corporate property now",
-      "Former corporate lawyer who found out their adoption agency was actually a corporate breeding program",
-      "Their therapy sessions were being used to identify and eliminate potential dissidents",
-      "Learned their life insurance policy had a 'corporate termination clause' that kicked in last Tuesday",
-    ];
+    const storage = new Storage();
+    const backgroundStory = await storage.content.getRandomCrawlerBackground(category);
 
-    // Mix of desperation levels for variety - 40% desperate, 50% wacky, 10% tragic
-    const roll = Math.random();
-    let reason;
-    if (roll < 0.4) {
-      reason =
-        desperateBackgrounds[
-          Math.floor(Math.random() * desperateBackgrounds.length)
-        ];
-    } else if (roll < 0.9) {
-      reason =
-        wackyBackgrounds[Math.floor(Math.random() * wackyBackgrounds.length)];
-    } else {
-      reason =
-        tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
-    }
-
-    return `Former ${job}. ${reason}`;
+    return `Former ${job}. ${backgroundStory}`;
   }
 
   async createCrawler(crawlerData: any): Promise<Crawler> {
@@ -974,498 +726,16 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    // Generate encounter based on floor and crawler capabilities
-    const encounter = await this.generateEncounter(crawler);
-
-    // Return the encounter for the frontend to display choices
-    // Don't process it automatically anymore
-    return encounter;
+    // This method is now deprecated - exploration should be handled through 
+    // database-driven content and the room movement system
+    throw new Error("exploreFloor is deprecated - use room movement and database encounters");
   }
 
-  private async generateEncounter(crawler: any): Promise<any> {
-    const encounterTypes = ["combat", "treasure", "npc", "trap", "event"];
-    const weights = this.getEncounterWeights(crawler);
+  
 
-    const encounterType = this.weightedRandom(encounterTypes, weights);
-    const floor = await this.getFloor(crawler.currentFloor);
+  
 
-    // Generate choice-based encounter with multiple options
-    const encounterData = this.generateChoiceEncounter(encounterType, crawler);
-
-    return {
-      type: encounterType,
-      crawlerId: crawler.id,
-      floorId: floor?.id || 1,
-      energyCost: 10,
-      ...encounterData,
-    };
-  }
-
-  private generateChoiceEncounter(type: string, crawler: any): any {
-    const encounters = {
-      combat: [
-        {
-          title: "Hostile Creature",
-          description: `A snarling beast blocks ${crawler.name}'s path through the narrow corridor. Its eyes gleam with predatory hunger, and escape routes are limited.`,
-          choices: [
-            {
-              id: "attack",
-              text: "Attack directly with weapons",
-              requirements: { attack: 8 },
-              riskLevel: "high",
-              primaryStat: "attack",
-            },
-            {
-              id: "defensive",
-              text: "Take a defensive stance and wait for an opening",
-              requirements: { defense: 6 },
-              riskLevel: "medium",
-              primaryStat: "defense",
-            },
-            {
-              id: "stealth",
-              text: "Attempt to sneak past quietly",
-              requirements: { speed: 10 },
-              riskLevel: "low",
-              primaryStat: "speed",
-            },
-            {
-              id: "wit",
-              text: "Use clever tactics to outmaneuver it",
-              requirements: { wit: 6 },
-              riskLevel: "medium",
-              primaryStat: "wit",
-            },
-          ],
-        },
-        {
-          title: "Armed Scavenger",
-          description: `Another crawler emerges from the shadows, weapon drawn. They look desperate and hostile, eyeing ${crawler.name}'s equipment hungrily.`,
-          choices: [
-            {
-              id: "intimidate",
-              text: "Try to intimidate them into backing down",
-              requirements: { attack: 12 },
-              riskLevel: "medium",
-              primaryStat: "attack",
-            },
-            {
-              id: "negotiate",
-              text: "Offer to trade something valuable",
-              requirements: {},
-              riskLevel: "low",
-              primaryStat: "none",
-            },
-            {
-              id: "flee",
-              text: "Run before they can react",
-              requirements: { speed: 8 },
-              riskLevel: "medium",
-              primaryStat: "speed",
-            },
-            {
-              id: "ambush",
-              text: "Use the environment to set up an ambush",
-              requirements: { wit: 6, speed: 6 },
-              riskLevel: "high",
-              primaryStat: "wit",
-            },
-          ],
-        },
-      ],
-      treasure: [
-        {
-          title: "Secured Cache",
-          description: `${crawler.name} discovers a locked corporate supply cache. Advanced security systems protect valuable contents within.`,
-          choices: [
-            {
-              id: "hack",
-              text: "Attempt to hack the security system",
-              requirements: { wit: 8 },
-              riskLevel: "medium",
-              primaryStat: "wit",
-            },
-            {
-              id: "force",
-              text: "Break it open with brute force",
-              requirements: { attack: 6 },
-              riskLevel: "high",
-              primaryStat: "attack",
-            },
-            {
-              id: "bypass",
-              text: "Look for hidden maintenance access",
-              requirements: { speed: 4 },
-              riskLevel: "low",
-              primaryStat: "speed",
-            },
-            {
-              id: "leave",
-              text: "Leave it alone - too risky",
-              requirements: {},
-              riskLevel: "none",
-              primaryStat: "none",
-            },
-          ],
-        },
-        {
-          title: "Abandoned Equipment Locker",
-          description: `A military-style locker sits half-buried in debris. The lock appears damaged but functional.`,
-          choices: [
-            {
-              id: "pick_lock",
-              text: "Carefully pick the lock",
-              requirements: { wit: 5 },
-              riskLevel: "low",
-              primaryStat: "wit",
-            },
-            {
-              id: "smash",
-              text: "Smash it open with available tools",
-              requirements: { attack: 4 },
-              riskLevel: "medium",
-              primaryStat: "attack",
-            },
-            {
-              id: "examine",
-              text: "Examine for traps before opening",
-              requirements: { memory: 3 },
-              riskLevel: "none",
-              primaryStat: "memory",
-            },
-          ],
-        },
-        {
-          title: "Glowing Crystal Formation",
-          description: `Strange crystals emit a soft blue glow. They might be valuable energy sources.`,
-          choices: [
-            {
-              id: "harvest",
-              text: "Carefully harvest the crystals",
-              requirements: { wit: 6 },
-              riskLevel: "medium",
-              primaryStat: "wit",
-            },
-            {
-              id: "break_off",
-              text: "Break off a piece quickly",
-              requirements: { speed: 4 },
-              riskLevel: "high",
-              primaryStat: "speed",
-            },
-            {
-              id: "study",
-              text: "Study the formation first",
-              requirements: { memory: 4 },
-              riskLevel: "low",
-              primaryStat: "memory",
-            },
-          ],
-        },
-      ],
-      trap: [
-        {
-          title: "Pressure Plate Corridor",
-          description: `The floor ahead is littered with suspicious tiles. Some look recently disturbed, and ${crawler.name} can see scorch marks on the walls.`,
-          choices: [
-            {
-              id: "careful",
-              text: "Move very slowly and test each step",
-              requirements: { speed: 4 },
-              riskLevel: "low",
-              primaryStat: "speed",
-            },
-            {
-              id: "tech_scan",
-              text: "Use sensors to map the safe path",
-              requirements: { tech: 8 },
-              riskLevel: "none",
-              primaryStat: "tech",
-            },
-            {
-              id: "sprint",
-              text: "Sprint across as fast as possible",
-              requirements: { speed: 12 },
-              riskLevel: "high",
-              primaryStat: "speed",
-            },
-            {
-              id: "tank",
-              text: "Walk through and absorb any damage",
-              requirements: { defense: 10 },
-              riskLevel: "medium",
-              primaryStat: "defense",
-            },
-          ],
-        },
-      ],
-      npc: [
-        {
-          title: "Mysterious Trader",
-          description: `A hooded figure sits beside valuable-looking equipment. They gesture ${crawler.name} over with promises of rare technology and useful information.`,
-          choices: [
-            {
-              id: "trade_credits",
-              text: "Offer credits for their best item",
-              requirements: {},
-              riskLevel: "low",
-              primaryStat: "none",
-            },
-            {
-              id: "negotiate",
-              text: "Try to get a better deal through charm",
-              requirements: {},
-              riskLevel: "medium",
-              primaryStat: "none",
-            },
-            {
-              id: "rob",
-              text: "Attempt to take what you want by force",
-              requirements: { attack: 10 },
-              riskLevel: "high",
-              primaryStat: "attack",
-            },
-            {
-              id: "info",
-              text: "Ask for information about deeper floors",
-              requirements: {},
-              riskLevel: "none",
-              primaryStat: "none",
-            },
-          ],
-        },
-      ],
-      event: [
-        {
-          title: "Ancient Terminal",
-          description: `${crawler.name} finds a still-functioning terminal displaying cryptic data about the dungeon's deeper levels. The information could be valuable, but accessing it might trigger security protocols.`,
-          choices: [
-            {
-              id: "download",
-              text: "Download all available data",
-              requirements: { tech: 8 },
-              riskLevel: "medium",
-              primaryStat: "tech",
-            },
-            {
-              id: "selective",
-              text: "Carefully extract only specific files",
-              requirements: { tech: 12 },
-              riskLevel: "low",
-              primaryStat: "tech",
-            },
-            {
-              id: "observe",
-              text: "Simply read what's on screen without touching",
-              requirements: {},
-              riskLevel: "none",
-              primaryStat: "none",
-            },
-            {
-              id: "destroy",
-              text: "Destroy the terminal to prevent others from using it",
-              requirements: { attack: 6 },
-              riskLevel: "none",
-              primaryStat: "attack",
-            },
-          ],
-        },
-      ],
-    };
-
-    const typeEncounters = (encounters as any)[type] || encounters.event;
-    const selectedEncounter =
-      typeEncounters[Math.floor(Math.random() * typeEncounters.length)];
-
-    return {
-      title: selectedEncounter.title,
-      description: selectedEncounter.description,
-      choices: selectedEncounter.choices,
-      storyText: selectedEncounter.description,
-    };
-  }
-
-  private getEncounterWeights(crawler: any): number[] {
-    // Base weights [combat, treasure, npc, trap, event]
-    let weights = [40, 20, 15, 15, 10];
-
-    // Modify based on competencies
-    if (crawler.competencies?.includes("Scavenging")) weights[1] += 10; // More treasure
-    if (crawler.competencies?.includes("Stealth")) weights[3] -= 5; // Fewer traps
-    if (crawler.competencies?.includes("Negotiation")) weights[2] += 10; // More NPCs
-    if (crawler.competencies?.includes("Combat Reflexes")) weights[0] += 5; // More combat
-
-    // Modify based on stats
-    if (crawler.tech > 12) weights[4] += 5; // More events for high-tech crawlers
-    if (crawler.speed > 12) weights[3] -= 3; // Avoid traps with high speed
-
-    return weights;
-  }
-
-  private weightedRandom(items: string[], weights: number[]): string {
-    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-    const random = Math.random() * totalWeight;
-
-    let currentWeight = 0;
-    for (let i = 0; i < items.length; i++) {
-      currentWeight += weights[i];
-      if (random <= currentWeight) {
-        return items[i];
-      }
-    }
-    return items[0];
-  }
-
-  private generateEncounterStory(type: string, crawler: any): string {
-    const stories = {
-      combat: [
-        `${crawler.name} encounters a hostile creature in the dimly lit corridor!`,
-        `A mechanical guardian emerges from the shadows, weapons charging!`,
-        `${crawler.name} stumbles into a territorial beast's den!`,
-        `Warning alarms blare as security drones detect an intruder!`,
-      ],
-      treasure: [
-        `${crawler.name} discovers a hidden cache of valuable equipment!`,
-        `Ancient technology gleams from within a forgotten storage unit!`,
-        `A previous crawler's abandoned gear lies scattered nearby!`,
-        `${crawler.name} finds a corporate supply drop that went off-course!`,
-      ],
-      npc: [
-        `A mysterious figure approaches ${crawler.name} in the darkness...`,
-        `${crawler.name} encounters another crawler who seems friendly!`,
-        `An eccentric merchant has set up shop in this unlikely location!`,
-        `A strange being offers ${crawler.name} information about the depths below!`,
-      ],
-      trap: [
-        `${crawler.name} narrowly avoids a pressure plate trap!`,
-        `Ancient security systems activate around ${crawler.name}!`,
-        `The floor gives way beneath ${crawler.name}'s feet!`,
-        `Poison gas begins to fill the chamber!`,
-      ],
-      event: [
-        `${crawler.name} discovers a fascinating piece of dungeon lore!`,
-        `Strange energies in this area seem to affect ${crawler.name}!`,
-        `A holographic message from a previous expedition plays nearby!`,
-        `${crawler.name} finds evidence of the dungeon's mysterious past!`,
-      ],
-    };
-
-    const typeStories = (stories as any)[type] || stories.event;
-    return typeStories[Math.floor(Math.random() * typeStories.length)];
-  }
-
-  private async processEncounter(crawler: any, encounter: any): Promise<any> {
-    let rewards = { credits: 0, experience: 0, equipment: [], damage: 0 };
-
-    switch (encounter.type) {
-      case "combat":
-        rewards = await this.processCombatEncounter(crawler);
-        break;
-      case "treasure":
-        rewards = await this.processTreasureEncounter(crawler);
-        break;
-      case "npc":
-        rewards = await this.processNpcEncounter(crawler);
-        break;
-      case "trap":
-        rewards = await this.processTrapEncounter(crawler);
-        break;
-      case "event":
-        rewards = await this.processEventEncounter(crawler);
-        break;
-    }
-
-    // Apply rewards and damage
-    await this.applyCrawlerUpdates(crawler.id, rewards);
-
-    return {
-      ...encounter,
-      result: rewards,
-      storyText: encounter.storyText,
-    };
-  }
-
-  private async processCombatEncounter(crawler: any): Promise<any> {
-    const baseReward = Math.floor(crawler.currentFloor * 10);
-    const attackBonus = this.applyCompetencyBonus(crawler, "combat");
-
-    // Simple combat resolution
-    const combatPower = crawler.attack + attackBonus;
-    const enemyPower = 15 + crawler.currentFloor * 2;
-
-    if (combatPower >= enemyPower) {
-      return {
-        credits: baseReward + Math.floor(Math.random() * 50),
-        experience: 25 + Math.floor(Math.random() * 25),
-        equipment: [],
-        damage: Math.max(0, enemyPower - crawler.defense),
-      };
-    } else {
-      return {
-        credits: Math.floor(baseReward * 0.3),
-        experience: 10,
-        equipment: [],
-        damage: Math.max(5, enemyPower - crawler.defense + 10),
-      };
-    }
-  }
-
-  private async processTreasureEncounter(crawler: any): Promise<any> {
-    const scavengingBonus = this.applyCompetencyBonus(crawler, "treasure");
-    const baseCredits = Math.floor(crawler.currentFloor * 15);
-
-    return {
-      credits: baseCredits + scavengingBonus + Math.floor(Math.random() * 100),
-      experience: 15 + Math.floor(Math.random() * 15),
-      equipment: [], // Could add equipment finding logic here
-      damage: 0,
-    };
-  }
-
-  private async processNpcEncounter(crawler: any): Promise<any> {
-    const negotiationBonus = this.applyCompetencyBonus(crawler, "npc");
-
-    return {
-      credits: Math.floor(Math.random() * 50) + negotiationBonus,
-      experience: 20 + Math.floor(Math.random() * 20),
-      equipment: [],
-      damage: 0,
-    };
-  }
-
-  private async processTrapEncounter(crawler: any): Promise<any> {
-    const avoidanceBonus = this.applyCompetencyBonus(crawler, "trap");
-    const techBonus = Math.floor(crawler.tech / 2);
-
-    const avoidChance = (crawler.speed + avoidanceBonus + techBonus) / 100;
-
-    if (Math.random() < avoidChance) {
-      return {
-        credits: 0,
-        experience: 10, // Experience for avoiding trap
-        equipment: [],
-        damage: 0,
-      };
-    } else {
-      return {
-        credits: 0,
-        experience: 5,
-        equipment: [],
-        damage: 15 + Math.floor(crawler.currentFloor * 2),
-      };
-    }
-  }
-
-  private async processEventEncounter(crawler: any): Promise<any> {
-    const techBonus = this.applyCompetencyBonus(crawler, "event");
-
-    return {
-      credits: Math.floor(Math.random() * 30),
-      experience: 30 + techBonus,
-      equipment: [],
-      damage: 0,
-    };
-  }
+  
 
   applyCompetencyBonus(crawler: any, encounterType: string): number {
     if (!crawler.competencies) return 0;
@@ -1587,492 +857,29 @@ export class DatabaseStorage implements IStorage {
     return crawler;
   }
 
-  private generateHumanName(): string {
-    const firstNames = [
-      // Male names
-      "Aaron",
-      "Adam",
-      "Adrian",
-      "Albert",
-      "Alexander",
-      "Andrew",
-      "Anthony",
-      "Arthur",
-      "Benjamin",
-      "Brian",
-      "Bruce",
-      "Carl",
-      "Charles",
-      "Christopher",
-      "Daniel",
-      "David",
-      "Dennis",
-      "Donald",
-      "Douglas",
-      "Earl",
-      "Edward",
-      "Eric",
-      "Eugene",
-      "Frank",
-      "Gary",
-      "George",
-      "Gerald",
-      "Gregory",
-      "Harold",
-      "Henry",
-      "Jack",
-      "James",
-      "Jason",
-      "Jeffrey",
-      "Jerry",
-      "John",
-      "Joseph",
-      "Joshua",
-      "Kenneth",
-      "Kevin",
-      "Lawrence",
-      "Mark",
-      "Matthew",
-      "Michael",
-      "Nicholas",
-      "Patrick",
-      "Paul",
-      "Peter",
-      "Philip",
-      "Raymond",
-      "Richard",
-      "Robert",
-      "Roger",
-      "Ronald",
-      "Russell",
-      "Samuel",
-      "Scott",
-      "Stephen",
-      "Steven",
-      "Thomas",
-      "Timothy",
-      "Walter",
-      "Wayne",
-      "William",
-      "Eugene",
-      "Leonard",
-      "Stanley",
-      "Ralph",
-      "Frank",
-      "Louis",
-
-      // Female names
-      "Alice",
-      "Amanda",
-      "Amy",
-      "Andrea",
-      "Angela",
-      "Anna",
-      "Anne",
-      "Barbara",
-      "Betty",
-      "Beverly",
-      "Brenda",
-      "Carol",
-      "Catherine",
-      "Christine",
-      "Cynthia",
-      "Deborah",
-      "Diana",
-      "Donna",
-      "Dorothy",
-      "Elizabeth",
-      "Emily",
-      "Frances",
-      "Francine",
-      "Helen",
-      "Janet",
-      "Janice",
-      "Jean",
-      "Jennifer",
-      "Jessica",
-      "Joan",
-      "Joyce",
-      "Judith",
-      "Julie",
-      "Karen",
-      "Katherine",
-      "Kathleen",
-      "Kelly",
-      "Kimberly",
-      "Laura",
-      "Linda",
-      "Lisa",
-      "Margaret",
-      "Maria",
-      "Marie",
-      "Martha",
-      "Mary",
-      "Michelle",
-      "Nancy",
-      "Nicole",
-      "Pamela",
-      "Patricia",
-      "Rachel",
-      "Rebecca",
-      "Ruth",
-      "Sandra",
-      "Sarah",
-      "Sharon",
-      "Stephanie",
-      "Susan",
-      "Teresa",
-      "Virginia",
-      "Wanda",
-      "Gloria",
-      "Rose",
-      "Evelyn",
-      "Mildred",
-      "Florence",
-      "Irene",
-      "Grace",
-      "Carolyn",
-    ];
-
-    const lastNames = [
-      "Adams",
-      "Allen",
-      "Anderson",
-      "Baker",
-      "Barnes",
-      "Bell",
-      "Bennett",
-      "Brooks",
-      "Brown",
-      "Butler",
-      "Campbell",
-      "Carter",
-      "Clark",
-      "Collins",
-      "Cooper",
-      "Cox",
-      "Davis",
-      "Edwards",
-      "Evans",
-      "Fisher",
-      "Foster",
-      "Garcia",
-      "Gray",
-      "Green",
-      "Hall",
-      "Harris",
-      "Henderson",
-      "Hill",
-      "Howard",
-      "Hughes",
-      "Jackson",
-      "James",
-      "Johnson",
-      "Jones",
-      "Kelly",
-      "King",
-      "Lee",
-      "Lewis",
-      "Long",
-      "Lopez",
-      "Martin",
-      "Martinez",
-      "McArthur",
-      "Miller",
-      "Mitchell",
-      "Moore",
-      "Morgan",
-      "Morris",
-      "Murphy",
-      "Nelson",
-      "Parker",
-      "Patterson",
-      "Perez",
-      "Peterson",
-      "Phillips",
-      "Powell",
-      "Price",
-      "Reed",
-      "Richardson",
-      "Roberts",
-      "Robinson",
-      "Rodriguez",
-      "Rogers",
-      "Ross",
-      "Russell",
-      "Sanchez",
-      "Scott",
-      "Simmons",
-      "Smith",
-      "Stewart",
-      "Taylor",
-      "Thomas",
-      "Thompson",
-      "Turner",
-      "Walker",
-      "Ward",
-      "Washington",
-      "Watson",
-      "White",
-      "Williams",
-      "Wilson",
-      "Wood",
-      "Wright",
-      "Young",
-      "Armstrong",
-      "Bryant",
-      "Crawford",
-      "Duncan",
-      "Ferguson",
-      "Fletcher",
-      "Graham",
-      "Hampton",
-      "Harrison",
-      "Irving",
-      "Lawson",
-      "Maxwell",
-      "Preston",
-      "Sullivan",
-      "Thornton",
-      "Vaughn",
-      "Blackwood",
-      "Fairfax",
-      "Goodwin",
-      "Harrington",
-      "Lancaster",
-      "Mansfield",
-      "Montgomery",
-      "Pemberton",
-      "Sinclair",
-      "Whitmore",
-      "Worthington",
-      "Ashford",
-      "Bradford",
-      "Donovan",
-      "Grayson",
-      "Hartwell",
-    ];
-
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  private async generateHumanName(): Promise<string> {
+    const storage = new Storage();
+    const firstName = await storage.content.getRandomHumanFirstName();
+    const lastName = await storage.content.getRandomHumanLastName();
     return `${firstName} ${lastName}`;
   }
 
-  private generateCrawlerName(
+  private async generateCrawlerName(
     species: string = "human",
     planetType: string = "earth-like",
-  ): string {
+  ): Promise<string> {
     // For now, only human names are implemented
     // Future species will have their own name generation methods
     switch (species) {
       case "human":
       default:
-        return this.generateHumanName();
+        return await this.generateHumanName();
     }
   }
 
-  private generateStartingEquipment(background: string): any[] {
-    // Varied equipment pools for more interesting combinations
-    const survivalGear = [
-      { name: "Emergency Rations", description: "Compressed nutrition bars" },
-      { name: "Nutrient Paste", description: "Emergency food rations" },
-      {
-        name: "Water Recycler",
-        description: "Converts moisture into drinking water",
-      },
-      { name: "Thermal Blanket", description: "Reflective emergency shelter" },
-      { name: "Multi-tool", description: "Basic cutting and repair implement" },
-      { name: "Credit Chip", description: "Contains 50 emergency credits" },
-      { name: "Stim Pack", description: "Basic medical supplies" },
-      { name: "Flashlight", description: "Battery-powered illumination" },
-      {
-        name: "Water Purification Tablets",
-        description: "Makes questionable water safer",
-      },
-      {
-        name: "Rope Coil",
-        description: "20 meters of synthetic climbing rope",
-      },
-      { name: "Fire Starter", description: "Magnesium striker with tinder" },
-    ];
-
-    const personalItems = [
-      { name: "Wedding Ring", description: "Worn platinum band, still warm" },
-      {
-        name: "Family Photo",
-        description: "Cracked holoframe showing happier times",
-      },
-      {
-        name: "Lucky Dice",
-        description: "Clearly haven't been working lately",
-      },
-      { name: "Diary", description: "Half-burned journal with torn pages" },
-      {
-        name: "Pocket Watch",
-        description: "Stopped at the exact moment everything went wrong",
-      },
-      { name: "House Key", description: "To a home that no longer exists" },
-      {
-        name: "Love Letters",
-        description: "From someone who's probably dead now",
-      },
-      {
-        name: "Childhood Toy",
-        description: "A stuffed animal, one eye missing",
-      },
-      { name: "Concert Ticket", description: "For a show that never happened" },
-      { name: "Business Card", description: "Your old job, your old life" },
-    ];
-
-    const weirdItems = [
-      { name: "Rubber Duck", description: "Squeaks ominously when pressed" },
-      {
-        name: "Magic 8-Ball",
-        description: "All answers are 'Outlook not so good'",
-      },
-      { name: "Broken Violin", description: "Missing three strings and hope" },
-      {
-        name: "Expired Lottery Ticket",
-        description: "Would have won 10 million credits",
-      },
-      { name: "Pet Rock", description: "Named Gerald, good listener" },
-      {
-        name: "Fake Mustache",
-        description: "For when you need to be someone else",
-      },
-      {
-        name: "Unopened Fortune Cookie",
-        description: "Too afraid to read the fortune",
-      },
-      { name: "Mood Ring", description: "Permanently stuck on 'despair'" },
-      {
-        name: "Snow Globe",
-        description: "Contains tiny city that looks suspiciously like home",
-      },
-      {
-        name: "Rubber Chicken",
-        description: "Makes realistic screaming sounds",
-      },
-      {
-        name: "Whoopee Cushion",
-        description: "Because even apocalypses need comedy",
-      },
-      { name: "Origami Crane", description: "Made from eviction notice" },
-    ];
-
-    const contextualGear = [];
-    if (background.includes("clinic") || background.includes("medical")) {
-      contextualGear.push(
-        { name: "Medical Scanner", description: "Handheld diagnostic device" },
-        { name: "Expired Painkillers", description: "Better than nothing" },
-        { name: "Tongue Depressor", description: "Wooden stick of hope" },
-        { name: "Stethoscope", description: "Listen to your heart break" },
-      );
-    } else if (
-      background.includes("research") ||
-      background.includes("experiment")
-    ) {
-      contextualGear.push(
-        { name: "Data Pad", description: "Encrypted research notes" },
-        { name: "Safety Goggles", description: "Cracked but still protective" },
-        {
-          name: "Test Tube",
-          description: "Contains unidentified green liquid",
-        },
-        {
-          name: "Lab Notebook",
-          description: "Documenting the end of the world",
-        },
-      );
-    } else if (
-      background.includes("security") ||
-      background.includes("criminal") ||
-      background.includes("gang")
-    ) {
-      contextualGear.push(
-        { name: "Ceramic Shiv", description: "Prison-made cutting tool" },
-        { name: "Brass Knuckles", description: "Dented but functional" },
-        {
-          name: "Lock Pick Set",
-          description: "For when doors don't cooperate",
-        },
-        { name: "Fake ID", description: "Someone else's face, your new life" },
-      );
-    } else if (
-      background.includes("restaurant") ||
-      background.includes("food") ||
-      background.includes("chef")
-    ) {
-      contextualGear.push(
-        { name: "Chef's Knife", description: "Sharp and well-maintained" },
-        { name: "Spice Packet", description: "Makes anything taste better" },
-        {
-          name: "Grease-Stained Apron",
-          description: "Smells like home cooking",
-        },
-        { name: "Recipe Book", description: "Grandmother's secret techniques" },
-      );
-    } else if (
-      background.includes("tech") ||
-      background.includes("hacker") ||
-      background.includes("programmer")
-    ) {
-      contextualGear.push(
-        {
-          name: "Portable Hard Drive",
-          description: "Contains someone else's secrets",
-        },
-        {
-          name: "Jury-Rigged Phone",
-          description: "Can probably hack a toaster",
-        },
-        { name: "Circuit Board", description: "Might be useful for something" },
-        { name: "USB Drive", description: "Labeled 'DO NOT OPEN'" },
-      );
-    } else if (
-      background.includes("teacher") ||
-      background.includes("school") ||
-      background.includes("student")
-    ) {
-      contextualGear.push(
-        { name: "Red Pen", description: "For marking final grades" },
-        {
-          name: "Textbook",
-          description: "Everything you need to know (apparently not)",
-        },
-        {
-          name: "Apple",
-          description: "For the teacher you'll never see again",
-        },
-        { name: "Report Card", description: "All A's, fat lot of good it did" },
-      );
-    }
-
-    // Build equipment list with more variety
-    const equipment = [];
-
-    // 2-3 survival items
-    equipment.push(
-      ...this.shuffleArray(survivalGear).slice(
-        0,
-        2 + Math.floor(Math.random() * 2),
-      ),
-    );
-
-    // Always include one personal item for emotional depth
-    equipment.push(...this.shuffleArray(personalItems).slice(0, 1));
-
-    // 60% chance of weird item for personality
-    if (Math.random() < 0.6) {
-      equipment.push(...this.shuffleArray(weirdItems).slice(0, 1));
-    }
-
-    // Include contextual gear if available
-    if (contextualGear.length > 0 && Math.random() < 0.7) {
-      equipment.push(...this.shuffleArray(contextualGear).slice(0, 1));
-    }
-
-    return equipment;
+  private async generateStartingEquipment(background: string): Promise<any[]> {
+    const storage = new Storage();
+    return await storage.content.getStartingEquipment(background);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -2094,12 +901,12 @@ export class DatabaseStorage implements IStorage {
 
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
-      const competencies = this.generateRandomCompetencies();
-      const background = this.generateCrawlerBackground();
+      const competencies = await this.generateRandomCompetencies();
+      const background = await this.generateCrawlerBackground();
       const species = "human"; // All crawlers are human for now
       const planetType = "earth-like"; // All from earth-like planets for now
-      const name = this.generateCrawlerName(species, planetType);
-      const startingEquipment = this.generateStartingEquipment(background);
+      const name = await this.generateCrawlerName(species, planetType);
+      const startingEquipment = await this.generateStartingEquipment(background);
 
       // Determine top ability based on highest stat
       const statValues = [
@@ -3191,6 +1998,83 @@ export class DatabaseStorage implements IStorage {
     });
 
     return { success: true, newRoom: entranceRoom };
+  }
+}
+
+// Mock Storage class for content retrieval from database
+class Storage {
+  content: ContentStorage;
+
+  constructor() {
+    this.content = new ContentStorage();
+  }
+}
+
+class ContentStorage {
+  async getRandomPreDungeonJob(): Promise<string> {
+    const jobs = [
+      "Accountant",
+      "Barista",
+      "Marketing Specialist",
+      "Software Developer",
+      "Nurse",
+      "Teacher",
+      "Security Guard",
+      "Chef",
+      "Retail Manager",
+      "Graphic Designer",
+      "Mechanic",
+      "Librarian",
+      "Sales Representative",
+      "Data Analyst",
+      "Customer Service Rep",
+      "Photographer",
+      "Writer",
+      "Personal Trainer",
+      "Event Coordinator",
+      "Lab Technician",
+    ];
+
+    return jobs[Math.floor(Math.random() * jobs.length)];
+  }
+
+  async getRandomCrawlerBackground(category: string): Promise<string> {
+    const desperateBackgrounds = [
+      "Hiding from ex-partner's criminal associates who want them dead",
+      "Fled into the dungeon after witnessing a mob assassination",
+      "Chasing their missing sibling who entered the dungeon weeks ago",
+      "Escaping massive gambling debts to dangerous loan sharks",
+      "On the run after accidentally uncovering corporate corruption",
+      "Homeless and desperate after being evicted from their apartment",
+      "Seeking their missing child who was kidnapped by cultists",
+      "Fleeing after their medical practice was shut down for whistleblowing",
+      "Running from a private investigator hired by their former employer",
+      "Lost everything in a Ponzi scheme and has nowhere else to go",
+      "Trying to disappear after their research exposed government secrets",
+      "Following their mentor who vanished into the dungeon with vital evidence",
+    ];
+
+    const wackyBackgrounds = [
+      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a nationwide manhunt",
+      "Used to run an underground origami club that accidentally became a resistance movement",
+      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
+      "Librarian who discovered that late fees were being used to fund illegal weapons research",
+      "Freelance mime who broke character at the wrong moment and saw too much",
+      "Pet groomer whose client's 'dog' turned out to be an escaped lab animal",
+      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
+      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
+      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
+      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
+      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
+      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
+      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
+        "Dog walker who overheard the wrong conversation in the wrong corporate park",
+    ];
+
+    const allBackgrounds = [...desperateBackgrounds, ...wackyBackgrounds];
+    const backgroundStory =
+      allBackgrounds[Math.floor(Math.random() * allBackgrounds.length)];
+    return backgroundStory
   }
 }
 

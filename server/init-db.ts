@@ -372,20 +372,40 @@ async function initializeSeasons() {
   const { seasons } = await import("@shared/schema");
 
   // Check if seasons already exist
-  const existingSeason = await db.select().from(seasons).limit(1);
-  if (existingSeason.length > 0) {
-    return; // Season already initialized
+  const existingSeasons = await db.select().from(seasons).limit(1);
+  if (existingSeasons.length > 0) {
+    return; // Seasons already initialized
   }
 
-  // Create Season 1
+  // Create initial season
   await db.insert(seasons).values({
-    seasonNumber: 1,
-    name: "The Descent Begins",
-    description:
-      "The first brave souls venture into the mysterious depths beneath the old castle.",
+    name: "Season 1: The Awakening",
+    description: "The first season of corporate crawler expeditions",
     startDate: new Date(),
-    endDate: null, // Ongoing
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
     isActive: true,
-    maxPrimarySponsorsips: 1000,
+  });
+}
+
+async function initializeDynamicContent() {
+  const { floorThemes } = await import("@shared/schema");
+
+  // Check if content already exists
+  const existingContent = await db.select().from(floorThemes).limit(1);
+  if (existingContent.length > 0) {
+    return; // Content already initialized
+  }
+
+  // Run the content seeding script
+  const { spawn } = require('child_process');
+  return new Promise((resolve, reject) => {
+    const child = spawn('npm', ['run', 'seed:content'], { stdio: 'inherit' });
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve(undefined);
+      } else {
+        reject(new Error(`Content seeding failed with code ${code}`));
+      }
+    });
   });
 }

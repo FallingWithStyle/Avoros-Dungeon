@@ -10,6 +10,11 @@ import { Faction, Room } from "./faction-assignment.js";
 type RoomInsert = Omit<Room, "id">;
 import { logErrorToFile } from "../../../../../shared/logger.js";
 
+import {
+  floorThemes,
+  roomTypes,
+} from "../../../../../shared/schema.js";
+
 // Floor theme definitions
 interface RoomType {
   name: string;
@@ -22,208 +27,33 @@ interface FloorTheme {
   roomTypes: RoomType[];
 }
 
-const floorThemes: FloorTheme[] = [
-  {
-    name: "Ruined Castle Grounds",
-    description: "Crumbling battlements and overgrown courtyards",
-    roomTypes: [
-      {
-        name: "Collapsed Watchtower",
-        description: "Stone debris blocks most passages",
-      },
-      {
-        name: "Overgrown Courtyard",
-        description: "Weeds grow through cracked flagstones",
-      },
-      {
-        name: "Ruined Barracks",
-        description: "Rotting wooden bunks and rusted weapons",
-      },
-      {
-        name: "Old Armory",
-        description: "Empty weapon racks and broken shields",
-      },
-    ],
-  },
-  {
-    name: "Ancient Crypts",
-    description: "Stone tombs and burial chambers",
-    roomTypes: [
-      {
-        name: "Burial Chamber",
-        description: "Ancient sarcophagi line the walls",
-      },
-      { name: "Ossuary", description: "Bones arranged in intricate patterns" },
-      {
-        name: "Tomb Antechamber",
-        description: "Carved reliefs tell forgotten stories",
-      },
-      {
-        name: "Catacombs",
-        description: "Narrow passages between burial niches",
-      },
-    ],
-  },
-  {
-    name: "Alchemical Laboratories",
-    description:
-      "Chambers filled with strange apparatus and bubbling concoctions",
-    roomTypes: [
-      {
-        name: "Distillation Chamber",
-        description: "Complex glassware covers every surface",
-      },
-      {
-        name: "Reagent Storage",
-        description: "Shelves of mysterious bottles and powders",
-      },
-      {
-        name: "Experimentation Lab",
-        description: "Tables scarred by acid and fire",
-      },
-      {
-        name: "Transmutation Circle",
-        description: "Arcane symbols etched into the floor",
-      },
-    ],
-  },
-  {
-    name: "Prison Complex",
-    description: "Cells and interrogation chambers",
-    roomTypes: [
-      { name: "Prison Cell", description: "Iron bars and moldy straw" },
-      {
-        name: "Guard Station",
-        description: "Keys hang from hooks on the wall",
-      },
-      {
-        name: "Interrogation Room",
-        description: "Ominous stains mark the floor",
-      },
-      {
-        name: "Solitary Confinement",
-        description: "A small, windowless chamber",
-      },
-    ],
-  },
-  {
-    name: "Flooded Caverns",
-    description: "Water-filled chambers with slippery surfaces",
-    roomTypes: [
-      {
-        name: "Underground Pool",
-        description: "Dark water reflects the ceiling",
-      },
-      {
-        name: "Dripping Grotto",
-        description: "Constant water droplets echo endlessly",
-      },
-      {
-        name: "Flooded Passage",
-        description: "Ankle-deep water covers the floor",
-      },
-      {
-        name: "Underground River",
-        description: "Fast-moving water blocks the way",
-      },
-    ],
-  },
-  {
-    name: "Mechanical Workshop",
-    description: "Halls filled with gears, pistons, and steam",
-    roomTypes: [
-      {
-        name: "Gear Chamber",
-        description: "Massive clockwork mechanisms fill the space",
-      },
-      {
-        name: "Steam Engine Room",
-        description: "Pipes release jets of hot vapor",
-      },
-      { name: "Assembly Line", description: "Conveyor belts and robotic arms" },
-      { name: "Control Room", description: "Dozens of levers and gauges" },
-    ],
-  },
-  {
-    name: "Crystal Mines",
-    description: "Sparkling chambers carved from living rock",
-    roomTypes: [
-      {
-        name: "Crystal Cavern",
-        description: "Brilliant gems illuminate the walls",
-      },
-      {
-        name: "Mining Shaft",
-        description: "Pick marks score the tunnel walls",
-      },
-      {
-        name: "Gem Processing",
-        description: "Cutting tools and polishing stations",
-      },
-      {
-        name: "Crystal Formation",
-        description: "Natural crystals grow in impossible shapes",
-      },
-    ],
-  },
-  {
-    name: "Ancient Temple",
-    description: "Sacred halls dedicated to forgotten gods",
-    roomTypes: [
-      { name: "Prayer Hall", description: "Rows of stone pews face an altar" },
-      {
-        name: "Shrine Room",
-        description: "Offerings lie before weathered statues",
-      },
-      {
-        name: "Ceremonial Chamber",
-        description: "Ritual circles mark the floor",
-      },
-      {
-        name: "Sanctum",
-        description: "The most sacred space, radiating power",
-      },
-    ],
-  },
-  {
-    name: "Dragon's Lair",
-    description: "Scorched chambers reeking of sulfur",
-    roomTypes: [
-      {
-        name: "Treasure Hoard",
-        description: "Piles of gold and precious objects",
-      },
-      {
-        name: "Sleeping Chamber",
-        description: "Massive indentations in the stone floor",
-      },
-      { name: "Scorched Hall", description: "Walls blackened by dragonfire" },
-      { name: "Bone Yard", description: "Remains of unfortunate adventurers" },
-    ],
-  },
-  {
-    name: "Cosmic Observatory",
-    description: "Chambers focused on celestial observation",
-    roomTypes: [
-      {
-        name: "Star Chart Room",
-        description: "Constellation maps cover the ceiling",
-      },
-      {
-        name: "Telescope Chamber",
-        description: "Massive brass instruments point skyward",
-      },
-      {
-        name: "Astrolabe Workshop",
-        description: "Precise instruments for celestial navigation",
-      },
-      {
-        name: "Portal Nexus",
-        description: "Swirling energies connect to distant realms",
-      },
-    ],
-  },
-];
+async function getFloorThemeData(floorNumber: number): Promise<FloorTheme | null> {
+  try {
+    const [theme] = await db
+      .select()
+      .from(floorThemes)
+      .where(eq(floorThemes.floorNumber, floorNumber));
+    
+    if (!theme) return null;
+
+    const themeRoomTypes = await db
+      .select()
+      .from(roomTypes)
+      .where(eq(roomTypes.floorThemeId, theme.id));
+
+    return {
+      name: theme.name,
+      description: theme.description,
+      roomTypes: themeRoomTypes.map(rt => ({
+        name: rt.name,
+        description: rt.description,
+      })),
+    };
+  } catch (error) {
+    await logErrorToFile(error, `Error fetching floor theme for floor ${floorNumber}`);
+    return null;
+  }
+}
 
 function getRandomRoomType(theme: FloorTheme): RoomType {
   return theme.roomTypes[Math.floor(Math.random() * theme.roomTypes.length)];
@@ -450,7 +280,12 @@ export async function generateFullDungeon(factions: Faction[]) {
     for (let floorNum = 1; floorNum <= 10; floorNum++) {
       try {
         await logErrorToFile(`Generating Floor ${floorNum}...`, "info");
-        const theme = floorThemes[floorNum - 1];
+        const theme = await getFloorThemeData(floorNum);
+        
+        if (!theme) {
+          await logErrorToFile(`No theme found for floor ${floorNum}! Skipping...`, "warn");
+          continue;
+        }
 
         let floor, floorId;
         try {
@@ -530,11 +365,12 @@ export async function generateFullDungeon(factions: Faction[]) {
             (staircasePos.x === 0 && staircasePos.y === 0)
           );
           staircasePositions.push(staircasePos);
+          const nextTheme = await getFloorThemeData(floorNum + 1);
           roomsToInsert.push({
             floorId,
             x: staircasePos.x,
             y: staircasePos.y,
-            name: `Descent to ${floorThemes[floorNum]?.name || "Deeper Levels"}`,
+            name: `Descent to ${nextTheme?.name || "Deeper Levels"}`,
             description: `Stairs leading down to level ${floorNum + 1}`,
             type: "stairs",
             isSafe: false,
