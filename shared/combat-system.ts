@@ -473,7 +473,10 @@ export class CombatSystem {
 
   // Start automatic combat processing
   startCombatProcessing(): void {
-    if (this.combatInterval) return; // Already running
+    if (this.combatInterval) {
+      console.log("Combat processing already running, skipping start");
+      return; // Already running
+    }
 
     this.combatInterval = setInterval(() => {
       this.processCombatTick();

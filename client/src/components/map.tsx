@@ -979,9 +979,9 @@ function ExpandedMapView({
   const minY = Math.min(...exploredRooms.map((r) => r.y));
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
   // Build roomMap for expanded view
-  const roomMap = new Map<string, ExploredRoom>();
+  const roomMapExpanded = new Map<string, ExploredRoom>();
   exploredRooms.forEach((room) => {
-    roomMap.set(`${room.x},${room.y}`, room);
+    roomMapExpanded.set(`${room.x},${room.y}`, room);
   });
   // Only connect real rooms (not unexplored neighbors)
   const isRealRoom = (room: ExploredRoom | undefined) =>
@@ -994,8 +994,8 @@ function ExpandedMapView({
     x2: number,
     y2: number,
   ) => {
-    const room1 = roomMap.get(`${x1},${y1}`);
-    const room2 = roomMap.get(`${x2},${y2}`);
+    const room1 = roomMapExpanded.get(`${x1},${y1}`);
+    const room2 = roomMapExpanded.get(`${x2},${y2}`);
     return isRealRoom(room1) && isRealRoom(room2);
   };
 
@@ -1041,7 +1041,7 @@ function ExpandedMapView({
                   const roomCol = Math.floor(col / 2);
                   const x = minX + roomCol;
                   const y = maxY - roomRow;
-                  const room = roomMap.get(`${x},${y}`);
+                  const room = roomMapExpanded.get(`${x},${y}`);
                   if (room) {
                     return (
                       <div
