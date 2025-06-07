@@ -37,6 +37,51 @@ export const seasons = pgTable("seasons", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Floor themes for dungeon generation
+export const floorThemes = pgTable("floor_themes", {
+  id: serial("id").primaryKey(),
+  floorNumber: integer("floor_number").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Room types for each floor theme
+export const roomTypes = pgTable("room_types", {
+  id: serial("id").primaryKey(),
+  floorThemeId: integer("floor_theme_id").references(() => floorThemes.id),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  weight: integer("weight").default(1), // For random selection weighting
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Crawler background stories
+export const crawlerBackgrounds = pgTable("crawler_backgrounds", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // 'desperate', 'wacky', 'normal'
+  story: text("story").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pre-dungeon job descriptions
+export const preDungeonJobs = pgTable("pre_dungeon_jobs", {
+  id: serial("id").primaryKey(),
+  jobTitle: text("job_title").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Combat flavor text
+export const combatFlavorText = pgTable("combat_flavor_text", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // 'encounter_start', 'victory', 'discovery', etc.
+  text: text("text").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),

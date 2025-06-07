@@ -306,205 +306,22 @@ export class DatabaseStorage implements IStorage {
     return shuffled.slice(0, numCompetencies);
   }
 
-  private generatePreDungeonJob(): string {
-    const jobs = [
-      // Mundane jobs
-      "office clerk",
-      "cashier",
-      "data entry specialist",
-      "customer service representative",
-      "insurance adjuster",
-      "tax preparer",
-      "filing clerk",
-      "receptionist",
-      "bookkeeper",
-      "security guard",
-      "janitor",
-      "mail carrier",
-      "bus driver",
-      "parking attendant",
-      "inventory manager",
-      "call center operator",
-      "copy machine technician",
-      "payroll clerk",
-      "administrative assistant",
-      "quality control inspector",
-      "warehouse worker",
-      "delivery driver",
-
-      // Professional jobs
-      "accountant",
-      "lawyer",
-      "teacher",
-      "nurse",
-      "engineer",
-      "architect",
-      "dentist",
-      "pharmacist",
-      "veterinarian",
-      "therapist",
-      "consultant",
-      "project manager",
-      "marketing specialist",
-      "sales representative",
-      "human resources coordinator",
-      "graphic designer",
-      "web developer",
-      "database administrator",
-      "financial advisor",
-
-      // Weird/unusual jobs
-      "professional line waiter",
-      "cheese sculptor",
-      "pet psychic",
-      "fortune cookie writer",
-      "professional apologizer",
-      "social media influencer for plants",
-      "elevator music composer",
-      "professional mourner",
-      "dog food taster",
-      "golf ball diver",
-      "ostrich babysitter",
-      "professional sleeper",
-      "fortune teller for pets",
-      "bubble wrap quality tester",
-      "professional Netflix watcher",
-      "chicken sexer",
-      "paint drying observer",
-      "food stylist",
-      "professional cuddler",
-      "grass growing supervisor",
-      "professional queue holder",
-
-      // Sci-fi/fantastic jobs
-      "space traffic controller",
-      "alien interpreter",
-      "robot therapist",
-      "time travel agent",
-      "interdimensional courier",
-      "gravity adjuster",
-      "memory editor",
-      "dream architect",
-      "virtual reality tester",
-      "hologram maintenance technician",
-      "teleporter calibrator",
-      "artificial intelligence trainer",
-      "parallel universe monitor",
-      "cosmic weather forecaster",
-      "quantum entanglement specialist",
-      "nano-technology farmer",
-      "digital ghost hunter",
-      "synthetic emotion designer",
-      "planetary atmosphere engineer",
-      "galactic tour guide",
-
-      // Blue collar with a twist
-      "underwater welder",
-      "professional food critic",
-      "wine tester",
-      "mattress tester",
-      "theme park ride tester",
-      "video game tester",
-      "chocolate taster",
-      "perfume evaluator",
-      "fireworks technician",
-      "special effects coordinator",
-      "stunt double",
-      "voice actor",
-      "professional wrestler",
-      "circus performer",
-      "street performer",
-      "wedding planner",
-    ];
-
-    return jobs[Math.floor(Math.random() * jobs.length)];
+  private async generatePreDungeonJob(): Promise<string> {
+    const storage = new Storage();
+    return await storage.content.getRandomPreDungeonJob();
   }
 
-  private generateCrawlerBackground(): string {
-    const job = this.generatePreDungeonJob();
-    const desperateBackgrounds = [
-      "Hiding from ex-partner's criminal associates who want them dead",
-      "Fled into the dungeon after witnessing a mob assassination",
-      "Chasing their missing sibling who entered the dungeon weeks ago",
-      "Escaping massive gambling debts to dangerous loan sharks",
-      "On the run after accidentally uncovering corporate corruption",
-      "Homeless and desperate after being evicted from their apartment",
-      "Seeking their missing child who was kidnapped by cultists",
-      "Fleeing after their medical practice was shut down for whistleblowing",
-      "Running from a private investigator hired by their former employer",
-      "Lost everything in a Ponzi scheme and has nowhere else to go",
-      "Trying to disappear after their research exposed government secrets",
-      "Following their mentor who vanished into the dungeon with vital evidence",
-    ];
+  private async generateCrawlerBackground(): Promise<string> {
+    const job = await this.generatePreDungeonJob();
 
-    const wackyBackgrounds = [
-      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a nationwide manhunt",
-      "Used to run an underground origami club that accidentally became a resistance movement",
-      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
-      "Librarian who discovered that late fees were being used to fund illegal weapons research",
-      "Freelance mime who broke character at the wrong moment and saw too much",
-      "Pet groomer whose client's 'dog' turned out to be an escaped lab animal",
-      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
-      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
-      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
-      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
-      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
-      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
-      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
-      "Dog walker who overheard the wrong conversation in the wrong corporate park",
-      "Amateur beekeeper whose honey business was a front for something much bigger (they had no idea)",
-      "Former mall Santa who saw executives discussing 'naughty list eliminations' and thought they meant something else",
-      "Freelance translator who accidentally translated a corporate love letter that was actually assassination orders",
-      "Part-time tour guide whose historical facts about corporate buildings were apparently classified information",
-      "Rideshare driver who picked up the wrong passenger at the wrong time and heard the wrong phone call",
-      "Karaoke host whose song requests app was secretly monitoring corporate communications",
-      "Personal trainer whose client confessed to war crimes during a particularly intense workout",
-      "Flower delivery person who delivered the wrong bouquet to the wrong office and saw too much",
-      "Professional cosplayer whose costume was too realistic and got them mistaken for an actual corporate spy",
-      "Food truck owner whose lunch rush happened to coincide with an illegal corporate meeting in the park",
-      "Freelance furniture assembler who found corporate secrets hidden inside furniture boxes",
-      "Amateur archaeologist who dug up corporate waste in their backyard and connected the wrong dots",
-      "Part-time janitor who cleaned the wrong office on the wrong night and emptied the wrong trash",
-      "Etsy seller whose handmade crafts accidentally incorporated corporate microchips they found on the street",
-      "Professional cat sitter whose feline client belonged to a corporate whistleblower",
-      "Escape room designer whose puzzles were based on real corporate security flaws (oops)",
-      "Food blogger whose restaurant review accidentally described a corporate money laundering operation",
-      "Freelance cartographer whose maps revealed corporate illegal dumping sites by pure coincidence",
-      "Amateur radio operator who intercepted the wrong frequency at the wrong time",
-      "Professional gift wrapper whose artistic paper folding skills revealed hidden corporate documents",
-      "Part-time children's birthday entertainer who performed at a corporate executive's house during a business meeting",
-    ];
+    // Choose category randomly
+    const categories = ["desperate", "wacky"];
+    const category = categories[Math.floor(Math.random() * categories.length)];
 
-    const tragicBackgrounds = [
-      "Their entire extended family was killed in a 'gas leak' explosion after their uncle asked too many questions at work",
-      "Woke up to find their memory of the last three years had been surgically removed, and this seemed safer than staying",
-      "Their hometown was evacuated for 'routine maintenance' and never reopened - they're the only one who made it out",
-      "Former corporate executive who grew a conscience too late and is now running from their former colleagues",
-      "Their identical twin was murdered and replaced by a corporate double - they're next",
-      "Discovered their late parents' charity was actually a human trafficking front and assassins came calling",
-      "Their DNA was patented by a corporation and they're technically corporate property now",
-      "Former corporate lawyer who found out their adoption agency was actually a corporate breeding program",
-      "Their therapy sessions were being used to identify and eliminate potential dissidents",
-      "Learned their life insurance policy had a 'corporate termination clause' that kicked in last Tuesday",
-    ];
+    const storage = new Storage();
+    const backgroundStory = await storage.content.getRandomCrawlerBackground(category);
 
-    // Mix of desperation levels for variety - 40% desperate, 50% wacky, 10% tragic
-    const roll = Math.random();
-    let reason;
-    if (roll < 0.4) {
-      reason =
-        desperateBackgrounds[
-          Math.floor(Math.random() * desperateBackgrounds.length)
-        ];
-    } else if (roll < 0.9) {
-      reason =
-        wackyBackgrounds[Math.floor(Math.random() * wackyBackgrounds.length)];
-    } else {
-      reason =
-        tragicBackgrounds[Math.floor(Math.random() * tragicBackgrounds.length)];
-    }
-
-    return `Former ${job}. ${reason}`;
+    return `Former ${job}. ${backgroundStory}`;
   }
 
   async createCrawler(crawlerData: any): Promise<Crawler> {
@@ -1239,7 +1056,8 @@ export class DatabaseStorage implements IStorage {
         {
           title: "Ancient Terminal",
           description: `${crawler.name} finds a still-functioning terminal displaying cryptic data about the dungeon's deeper levels. The information could be valuable, but accessing it might trigger security protocols.`,
-          choices: [
+          ```text
+choices: [
             {
               id: "download",
               text: "Download all available data",
@@ -2095,7 +1913,7 @@ export class DatabaseStorage implements IStorage {
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
       const competencies = this.generateRandomCompetencies();
-      const background = this.generateCrawlerBackground();
+      const background = await this.generateCrawlerBackground();
       const species = "human"; // All crawlers are human for now
       const planetType = "earth-like"; // All from earth-like planets for now
       const name = this.generateCrawlerName(species, planetType);
@@ -2289,8 +2107,7 @@ export class DatabaseStorage implements IStorage {
     if (luck > challengeLevel) {
       return 0.1; // +10% success chance
     } else if (primaryStat + luck < challengeLevel) {
-      return -0.1; // -10% success chance
-    }
+      return -0.1; // -10% success chance    }
 
     return 0; // No luck bonus/penalty
   }
@@ -3191,6 +3008,83 @@ export class DatabaseStorage implements IStorage {
     });
 
     return { success: true, newRoom: entranceRoom };
+  }
+}
+
+// Mock Storage class for content retrieval from database
+class Storage {
+  content: ContentStorage;
+
+  constructor() {
+    this.content = new ContentStorage();
+  }
+}
+
+class ContentStorage {
+  async getRandomPreDungeonJob(): Promise<string> {
+    const jobs = [
+      "Accountant",
+      "Barista",
+      "Marketing Specialist",
+      "Software Developer",
+      "Nurse",
+      "Teacher",
+      "Security Guard",
+      "Chef",
+      "Retail Manager",
+      "Graphic Designer",
+      "Mechanic",
+      "Librarian",
+      "Sales Representative",
+      "Data Analyst",
+      "Customer Service Rep",
+      "Photographer",
+      "Writer",
+      "Personal Trainer",
+      "Event Coordinator",
+      "Lab Technician",
+    ];
+
+    return jobs[Math.floor(Math.random() * jobs.length)];
+  }
+
+  async getRandomCrawlerBackground(category: string): Promise<string> {
+    const desperateBackgrounds = [
+      "Hiding from ex-partner's criminal associates who want them dead",
+      "Fled into the dungeon after witnessing a mob assassination",
+      "Chasing their missing sibling who entered the dungeon weeks ago",
+      "Escaping massive gambling debts to dangerous loan sharks",
+      "On the run after accidentally uncovering corporate corruption",
+      "Homeless and desperate after being evicted from their apartment",
+      "Seeking their missing child who was kidnapped by cultists",
+      "Fleeing after their medical practice was shut down for whistleblowing",
+      "Running from a private investigator hired by their former employer",
+      "Lost everything in a Ponzi scheme and has nowhere else to go",
+      "Trying to disappear after their research exposed government secrets",
+      "Following their mentor who vanished into the dungeon with vital evidence",
+    ];
+
+    const wackyBackgrounds = [
+      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a nationwide manhunt",
+      "Used to run an underground origami club that accidentally became a resistance movement",
+      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
+      "Librarian who discovered that late fees were being used to fund illegal weapons research",
+      "Freelance mime who broke character at the wrong moment and saw too much",
+      "Pet groomer whose client's 'dog' turned out to be an escaped lab animal",
+      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
+      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
+      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
+      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
+      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
+      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
+      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",```text
+"Dog walker who overheard the wrong conversation in the wrong corporate park",
+    ];
+
+    const allBackgrounds = [...desperateBackgrounds, ...wackyBackgrounds];
+    const backgroundStory =
+      allBackgrounds[Math.floor(Math.random() * allBackgrounds.length)];
+    return backgroundStory
   }
 }
 

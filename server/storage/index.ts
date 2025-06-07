@@ -1,7 +1,7 @@
-
 import { UserStorage } from "./user-storage";
 import { CrawlerStorage } from "./crawler-storage";
 import { ExplorationStorage } from "./exploration-storage";
+import { ContentStorage } from "./content-storage";
 import type { IStorage } from "../storage";
 
 // Main storage orchestrator that combines all storage modules
@@ -9,6 +9,7 @@ export class ModularStorage implements IStorage {
   private userStorage = new UserStorage();
   private crawlerStorage = new CrawlerStorage();
   private explorationStorage = new ExplorationStorage();
+  private contentStorage = new ContentStorage();
 
   // User operations
   async getUser(id: string) {
@@ -86,7 +87,7 @@ export class ModularStorage implements IStorage {
     }
 
     const result = await this.explorationStorage.moveToRoom(crawlerId, direction, debugEnergyDisabled);
-    
+
     if (result.success && !debugEnergyDisabled) {
       // Deduct energy - this is where modules coordinate
       const energyCost = 10; // Could be calculated based on room type, etc.
