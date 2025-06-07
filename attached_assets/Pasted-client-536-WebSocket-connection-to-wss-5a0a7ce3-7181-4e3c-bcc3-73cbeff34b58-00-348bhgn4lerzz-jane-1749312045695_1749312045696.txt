@@ -1,7 +1,7 @@
-client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=OrvAKk8Deqp_' failed: 
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=rGNen2wQ54X2' failed: 
 setupWebSocket @ client:536
 (anonymous) @ client:531
-client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=OrvAKk8Deqp_' is invalid.
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=rGNen2wQ54X2' is invalid.
     at setupWebSocket (client:536:19)
     at fallback (client:509:16)
     at WebSocket.<anonymous> (client:555:7)
