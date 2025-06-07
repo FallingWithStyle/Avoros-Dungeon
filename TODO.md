@@ -49,6 +49,10 @@
   - Implement different weapon types with unique mechanics
   - Add status effects (poison, burn, stun, etc.)
   - Create boss encounters with special mechanics
+  - Fix combat stats and make them meaningful
+- [ ] **Add more Crawler Generation variety**
+  - More names
+  - Level 1 class = pre-dungeon career 
 
 ### User Experience
 - [ ] **Map & Navigation**
@@ -56,6 +60,8 @@
   - Implement fog of war for unexplored areas
   - Add room bookmarking/waypoints
   - Show other players' locations on map
+- [ ] **Login Screen**
+  - Update with current classes, system info, theming 
 
 ### Social Features
 - [ ] **Corporation/Guild System**
@@ -63,6 +69,7 @@
   - Implement corporation-wide benefits
   - Add corporation leaderboards
   - Enable resource sharing between corporation members
+  - Enable corporation representative names
 
 ### Equipment & Progression
 - [ ] **Advanced Equipment System**
@@ -87,7 +94,7 @@
   - Seasonal leaderboards with unique prizes
 
 - [ ] **PvP System**
-  - Arena battles between crawlers
+  - Allow fights between crawlers
   - Corporation vs corporation battles
   - Ranking system for competitive play
 
