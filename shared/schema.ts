@@ -82,6 +82,56 @@ export const combatFlavorText = pgTable("combat_flavor_text", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Corporation name parts
+export const corporationPrefixes = pgTable("corporation_prefixes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const corporationSuffixes = pgTable("corporation_suffixes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Human names
+export const humanFirstNames = pgTable("human_first_names", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const humanLastNames = pgTable("human_last_names", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Competencies
+export const competencies = pgTable("competencies", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Starting equipment templates
+export const startingEquipment = pgTable("starting_equipment", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // 'survival', 'personal', 'weird', 'contextual'
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  contextualTrigger: text("contextual_trigger"), // For contextual gear like 'medical', 'tech'
+  weight: integer("weight").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User storage table (required for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),

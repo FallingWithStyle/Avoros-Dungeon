@@ -16,6 +16,12 @@ import {
   chatMessages,
   marketplaceListings,
   seasons,
+  corporationPrefixes,
+  corporationSuffixes,
+  humanFirstNames,
+  humanLastNames,
+  competencies,
+  startingEquipment,
   type UpsertUser,
   type User,
   type InsertCrawler,
@@ -166,7 +172,7 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     // Generate corporation name if not provided
     const corporationName =
-      userData.corporationName || this.generateCorporationName();
+      userData.corporationName || await this.generateCorporationName();
 
     const [user] = await db
       .insert(users)
@@ -186,58 +192,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  private generateCorporationName(): string {
-    const prefixes = [
-      "Stellar",
-      "Cosmic",
-      "Quantum",
-      "Neural",
-      "Cyber",
-      "Nano",
-      "Void",
-      "Dark",
-      "Prime",
-      "Omega",
-      "Alpha",
-      "Beta",
-      "Gamma",
-      "Delta",
-      "Nexus",
-      "Core",
-      "Apex",
-      "Matrix",
-      "Vector",
-      "Phoenix",
-      "Titan",
-      "Nova",
-      "Orbital",
-      "Galactic",
-    ];
-
-    const suffixes = [
-      "Industries",
-      "Corporation",
-      "Enterprises",
-      "Dynamics",
-      "Systems",
-      "Technologies",
-      "Solutions",
-      "Consortium",
-      "Holdings",
-      "Syndicate",
-      "Alliance",
-      "Collective",
-      "Federation",
-      "Empire",
-      "Conglomerate",
-      "Group",
-      "Labs",
-      "Works",
-    ];
-
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-
+  private async generateCorporationName(): Promise<string> {
+    const storage = new Storage();
+    const prefix = await storage.content.getRandomCorporationPrefix();
+    const suffix = await storage.content.getRandomCorporationSuffix();
     return `${prefix} ${suffix}`;
   }
 
@@ -276,34 +234,11 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  private generateRandomCompetencies(): string[] {
-    const allCompetencies = [
-      "Scavenging",
-      "Lock Picking",
-      "Electronics",
-      "First Aid",
-      "Stealth",
-      "Combat Reflexes",
-      "Jury Rigging",
-      "Negotiation",
-      "Intimidation",
-      "Hacking",
-      "Demolitions",
-      "Survival",
-      "Leadership",
-      "Marksmanship",
-      "Athletics",
-      "Engineering",
-      "Chemistry",
-      "Psychology",
-      "Linguistics",
-      "Navigation",
-    ];
-
+  private async generateRandomCompetencies(): Promise<string[]> {
     // Give each crawler 2-4 random competencies
     const numCompetencies = 2 + Math.floor(Math.random() * 3);
-    const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numCompetencies);
+    const storage = new Storage();
+    return await storage.content.getRandomCompetencies(numCompetencies);
   }
 
   private async generatePreDungeonJob(): Promise<string> {
@@ -922,492 +857,29 @@ export class DatabaseStorage implements IStorage {
     return crawler;
   }
 
-  private generateHumanName(): string {
-    const firstNames = [
-      // Male names
-      "Aaron",
-      "Adam",
-      "Adrian",
-      "Albert",
-      "Alexander",
-      "Andrew",
-      "Anthony",
-      "Arthur",
-      "Benjamin",
-      "Brian",
-      "Bruce",
-      "Carl",
-      "Charles",
-      "Christopher",
-      "Daniel",
-      "David",
-      "Dennis",
-      "Donald",
-      "Douglas",
-      "Earl",
-      "Edward",
-      "Eric",
-      "Eugene",
-      "Frank",
-      "Gary",
-      "George",
-      "Gerald",
-      "Gregory",
-      "Harold",
-      "Henry",
-      "Jack",
-      "James",
-      "Jason",
-      "Jeffrey",
-      "Jerry",
-      "John",
-      "Joseph",
-      "Joshua",
-      "Kenneth",
-      "Kevin",
-      "Lawrence",
-      "Mark",
-      "Matthew",
-      "Michael",
-      "Nicholas",
-      "Patrick",
-      "Paul",
-      "Peter",
-      "Philip",
-      "Raymond",
-      "Richard",
-      "Robert",
-      "Roger",
-      "Ronald",
-      "Russell",
-      "Samuel",
-      "Scott",
-      "Stephen",
-      "Steven",
-      "Thomas",
-      "Timothy",
-      "Walter",
-      "Wayne",
-      "William",
-      "Eugene",
-      "Leonard",
-      "Stanley",
-      "Ralph",
-      "Frank",
-      "Louis",
-
-      // Female names
-      "Alice",
-      "Amanda",
-      "Amy",
-      "Andrea",
-      "Angela",
-      "Anna",
-      "Anne",
-      "Barbara",
-      "Betty",
-      "Beverly",
-      "Brenda",
-      "Carol",
-      "Catherine",
-      "Christine",
-      "Cynthia",
-      "Deborah",
-      "Diana",
-      "Donna",
-      "Dorothy",
-      "Elizabeth",
-      "Emily",
-      "Frances",
-      "Francine",
-      "Helen",
-      "Janet",
-      "Janice",
-      "Jean",
-      "Jennifer",
-      "Jessica",
-      "Joan",
-      "Joyce",
-      "Judith",
-      "Julie",
-      "Karen",
-      "Katherine",
-      "Kathleen",
-      "Kelly",
-      "Kimberly",
-      "Laura",
-      "Linda",
-      "Lisa",
-      "Margaret",
-      "Maria",
-      "Marie",
-      "Martha",
-      "Mary",
-      "Michelle",
-      "Nancy",
-      "Nicole",
-      "Pamela",
-      "Patricia",
-      "Rachel",
-      "Rebecca",
-      "Ruth",
-      "Sandra",
-      "Sarah",
-      "Sharon",
-      "Stephanie",
-      "Susan",
-      "Teresa",
-      "Virginia",
-      "Wanda",
-      "Gloria",
-      "Rose",
-      "Evelyn",
-      "Mildred",
-      "Florence",
-      "Irene",
-      "Grace",
-      "Carolyn",
-    ];
-
-    const lastNames = [
-      "Adams",
-      "Allen",
-      "Anderson",
-      "Baker",
-      "Barnes",
-      "Bell",
-      "Bennett",
-      "Brooks",
-      "Brown",
-      "Butler",
-      "Campbell",
-      "Carter",
-      "Clark",
-      "Collins",
-      "Cooper",
-      "Cox",
-      "Davis",
-      "Edwards",
-      "Evans",
-      "Fisher",
-      "Foster",
-      "Garcia",
-      "Gray",
-      "Green",
-      "Hall",
-      "Harris",
-      "Henderson",
-      "Hill",
-      "Howard",
-      "Hughes",
-      "Jackson",
-      "James",
-      "Johnson",
-      "Jones",
-      "Kelly",
-      "King",
-      "Lee",
-      "Lewis",
-      "Long",
-      "Lopez",
-      "Martin",
-      "Martinez",
-      "McArthur",
-      "Miller",
-      "Mitchell",
-      "Moore",
-      "Morgan",
-      "Morris",
-      "Murphy",
-      "Nelson",
-      "Parker",
-      "Patterson",
-      "Perez",
-      "Peterson",
-      "Phillips",
-      "Powell",
-      "Price",
-      "Reed",
-      "Richardson",
-      "Roberts",
-      "Robinson",
-      "Rodriguez",
-      "Rogers",
-      "Ross",
-      "Russell",
-      "Sanchez",
-      "Scott",
-      "Simmons",
-      "Smith",
-      "Stewart",
-      "Taylor",
-      "Thomas",
-      "Thompson",
-      "Turner",
-      "Walker",
-      "Ward",
-      "Washington",
-      "Watson",
-      "White",
-      "Williams",
-      "Wilson",
-      "Wood",
-      "Wright",
-      "Young",
-      "Armstrong",
-      "Bryant",
-      "Crawford",
-      "Duncan",
-      "Ferguson",
-      "Fletcher",
-      "Graham",
-      "Hampton",
-      "Harrison",
-      "Irving",
-      "Lawson",
-      "Maxwell",
-      "Preston",
-      "Sullivan",
-      "Thornton",
-      "Vaughn",
-      "Blackwood",
-      "Fairfax",
-      "Goodwin",
-      "Harrington",
-      "Lancaster",
-      "Mansfield",
-      "Montgomery",
-      "Pemberton",
-      "Sinclair",
-      "Whitmore",
-      "Worthington",
-      "Ashford",
-      "Bradford",
-      "Donovan",
-      "Grayson",
-      "Hartwell",
-    ];
-
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  private async generateHumanName(): Promise<string> {
+    const storage = new Storage();
+    const firstName = await storage.content.getRandomHumanFirstName();
+    const lastName = await storage.content.getRandomHumanLastName();
     return `${firstName} ${lastName}`;
   }
 
-  private generateCrawlerName(
+  private async generateCrawlerName(
     species: string = "human",
     planetType: string = "earth-like",
-  ): string {
+  ): Promise<string> {
     // For now, only human names are implemented
     // Future species will have their own name generation methods
     switch (species) {
       case "human":
       default:
-        return this.generateHumanName();
+        return await this.generateHumanName();
     }
   }
 
-  private generateStartingEquipment(background: string): any[] {
-    // Varied equipment pools for more interesting combinations
-    const survivalGear = [
-      { name: "Emergency Rations", description: "Compressed nutrition bars" },
-      { name: "Nutrient Paste", description: "Emergency food rations" },
-      {
-        name: "Water Recycler",
-        description: "Converts moisture into drinking water",
-      },
-      { name: "Thermal Blanket", description: "Reflective emergency shelter" },
-      { name: "Multi-tool", description: "Basic cutting and repair implement" },
-      { name: "Credit Chip", description: "Contains 50 emergency credits" },
-      { name: "Stim Pack", description: "Basic medical supplies" },
-      { name: "Flashlight", description: "Battery-powered illumination" },
-      {
-        name: "Water Purification Tablets",
-        description: "Makes questionable water safer",
-      },
-      {
-        name: "Rope Coil",
-        description: "20 meters of synthetic climbing rope",
-      },
-      { name: "Fire Starter", description: "Magnesium striker with tinder" },
-    ];
-
-    const personalItems = [
-      { name: "Wedding Ring", description: "Worn platinum band, still warm" },
-      {
-        name: "Family Photo",
-        description: "Cracked holoframe showing happier times",
-      },
-      {
-        name: "Lucky Dice",
-        description: "Clearly haven't been working lately",
-      },
-      { name: "Diary", description: "Half-burned journal with torn pages" },
-      {
-        name: "Pocket Watch",
-        description: "Stopped at the exact moment everything went wrong",
-      },
-      { name: "House Key", description: "To a home that no longer exists" },
-      {
-        name: "Love Letters",
-        description: "From someone who's probably dead now",
-      },
-      {
-        name: "Childhood Toy",
-        description: "A stuffed animal, one eye missing",
-      },
-      { name: "Concert Ticket", description: "For a show that never happened" },
-      { name: "Business Card", description: "Your old job, your old life" },
-    ];
-
-    const weirdItems = [
-      { name: "Rubber Duck", description: "Squeaks ominously when pressed" },
-      {
-        name: "Magic 8-Ball",
-        description: "All answers are 'Outlook not so good'",
-      },
-      { name: "Broken Violin", description: "Missing three strings and hope" },
-      {
-        name: "Expired Lottery Ticket",
-        description: "Would have won 10 million credits",
-      },
-      { name: "Pet Rock", description: "Named Gerald, good listener" },
-      {
-        name: "Fake Mustache",
-        description: "For when you need to be someone else",
-      },
-      {
-        name: "Unopened Fortune Cookie",
-        description: "Too afraid to read the fortune",
-      },
-      { name: "Mood Ring", description: "Permanently stuck on 'despair'" },
-      {
-        name: "Snow Globe",
-        description: "Contains tiny city that looks suspiciously like home",
-      },
-      {
-        name: "Rubber Chicken",
-        description: "Makes realistic screaming sounds",
-      },
-      {
-        name: "Whoopee Cushion",
-        description: "Because even apocalypses need comedy",
-      },
-      { name: "Origami Crane", description: "Made from eviction notice" },
-    ];
-
-    const contextualGear = [];
-    if (background.includes("clinic") || background.includes("medical")) {
-      contextualGear.push(
-        { name: "Medical Scanner", description: "Handheld diagnostic device" },
-        { name: "Expired Painkillers", description: "Better than nothing" },
-        { name: "Tongue Depressor", description: "Wooden stick of hope" },
-        { name: "Stethoscope", description: "Listen to your heart break" },
-      );
-    } else if (
-      background.includes("research") ||
-      background.includes("experiment")
-    ) {
-      contextualGear.push(
-        { name: "Data Pad", description: "Encrypted research notes" },
-        { name: "Safety Goggles", description: "Cracked but still protective" },
-        {
-          name: "Test Tube",
-          description: "Contains unidentified green liquid",
-        },
-        {
-          name: "Lab Notebook",
-          description: "Documenting the end of the world",
-        },
-      );
-    } else if (
-      background.includes("security") ||
-      background.includes("criminal") ||
-      background.includes("gang")
-    ) {
-      contextualGear.push(
-        { name: "Ceramic Shiv", description: "Prison-made cutting tool" },
-        { name: "Brass Knuckles", description: "Dented but functional" },
-        {
-          name: "Lock Pick Set",
-          description: "For when doors don't cooperate",
-        },
-        { name: "Fake ID", description: "Someone else's face, your new life" },
-      );
-    } else if (
-      background.includes("restaurant") ||
-      background.includes("food") ||
-      background.includes("chef")
-    ) {
-      contextualGear.push(
-        { name: "Chef's Knife", description: "Sharp and well-maintained" },
-        { name: "Spice Packet", description: "Makes anything taste better" },
-        {
-          name: "Grease-Stained Apron",
-          description: "Smells like home cooking",
-        },
-        { name: "Recipe Book", description: "Grandmother's secret techniques" },
-      );
-    } else if (
-      background.includes("tech") ||
-      background.includes("hacker") ||
-      background.includes("programmer")
-    ) {
-      contextualGear.push(
-        {
-          name: "Portable Hard Drive",
-          description: "Contains someone else's secrets",
-        },
-        {
-          name: "Jury-Rigged Phone",
-          description: "Can probably hack a toaster",
-        },
-        { name: "Circuit Board", description: "Might be useful for something" },
-        { name: "USB Drive", description: "Labeled 'DO NOT OPEN'" },
-      );
-    } else if (
-      background.includes("teacher") ||
-      background.includes("school") ||
-      background.includes("student")
-    ) {
-      contextualGear.push(
-        { name: "Red Pen", description: "For marking final grades" },
-        {
-          name: "Textbook",
-          description: "Everything you need to know (apparently not)",
-        },
-        {
-          name: "Apple",
-          description: "For the teacher you'll never see again",
-        },
-        { name: "Report Card", description: "All A's, fat lot of good it did" },
-      );
-    }
-
-    // Build equipment list with more variety
-    const equipment = [];
-
-    // 2-3 survival items
-    equipment.push(
-      ...this.shuffleArray(survivalGear).slice(
-        0,
-        2 + Math.floor(Math.random() * 2),
-      ),
-    );
-
-    // Always include one personal item for emotional depth
-    equipment.push(...this.shuffleArray(personalItems).slice(0, 1));
-
-    // 60% chance of weird item for personality
-    if (Math.random() < 0.6) {
-      equipment.push(...this.shuffleArray(weirdItems).slice(0, 1));
-    }
-
-    // Include contextual gear if available
-    if (contextualGear.length > 0 && Math.random() < 0.7) {
-      equipment.push(...this.shuffleArray(contextualGear).slice(0, 1));
-    }
-
-    return equipment;
+  private async generateStartingEquipment(background: string): Promise<any[]> {
+    const storage = new Storage();
+    return await storage.content.getStartingEquipment(background);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -1429,12 +901,12 @@ export class DatabaseStorage implements IStorage {
 
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
-      const competencies = this.generateRandomCompetencies();
+      const competencies = await this.generateRandomCompetencies();
       const background = await this.generateCrawlerBackground();
       const species = "human"; // All crawlers are human for now
       const planetType = "earth-like"; // All from earth-like planets for now
-      const name = this.generateCrawlerName(species, planetType);
-      const startingEquipment = this.generateStartingEquipment(background);
+      const name = await this.generateCrawlerName(species, planetType);
+      const startingEquipment = await this.generateStartingEquipment(background);
 
       // Determine top ability based on highest stat
       const statValues = [
