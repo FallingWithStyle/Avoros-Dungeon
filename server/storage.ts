@@ -193,10 +193,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async generateCorporationName(): Promise<string> {
-    const storage = new Storage();
-    const prefix = await storage.content.getRandomCorporationPrefix();
-    const suffix = await storage.content.getRandomCorporationSuffix();
-    return `${prefix} ${suffix}`;
+    const corporationStorage = new (await import("./storage/corporation-storage")).CorporationStorage();
+    return await corporationStorage.generateCorporationName();
   }
 
   // Crawler operations
@@ -2001,81 +1999,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Mock Storage class for content retrieval from database
-class Storage {
-  content: ContentStorage;
 
-  constructor() {
-    this.content = new ContentStorage();
-  }
-}
-
-class ContentStorage {
-  async getRandomPreDungeonJob(): Promise<string> {
-    const jobs = [
-      "Accountant",
-      "Barista",
-      "Marketing Specialist",
-      "Software Developer",
-      "Nurse",
-      "Teacher",
-      "Security Guard",
-      "Chef",
-      "Retail Manager",
-      "Graphic Designer",
-      "Mechanic",
-      "Librarian",
-      "Sales Representative",
-      "Data Analyst",
-      "Customer Service Rep",
-      "Photographer",
-      "Writer",
-      "Personal Trainer",
-      "Event Coordinator",
-      "Lab Technician",
-    ];
-
-    return jobs[Math.floor(Math.random() * jobs.length)];
-  }
-
-  async getRandomCrawlerBackground(category: string): Promise<string> {
-    const desperateBackgrounds = [
-      "Hiding from ex-partner's criminal associates who want them dead",
-      "Fled into the dungeon after witnessing a mob assassination",
-      "Chasing their missing sibling who entered the dungeon weeks ago",
-      "Escaping massive gambling debts to dangerous loan sharks",
-      "On the run after accidentally uncovering corporate corruption",
-      "Homeless and desperate after being evicted from their apartment",
-      "Seeking their missing child who was kidnapped by cultists",
-      "Fleeing after their medical practice was shut down for whistleblowing",
-      "Running from a private investigator hired by their former employer",
-      "Lost everything in a Ponzi scheme and has nowhere else to go",
-      "Trying to disappear after their research exposed government secrets",
-      "Following their mentor who vanished into the dungeon with vital evidence",
-    ];
-
-    const wackyBackgrounds = [
-      "Professional food critic whose scathing review of a corporate cafeteria somehow led to a nationwide manhunt",
-      "Used to run an underground origami club that accidentally became a resistance movement",
-      "Former birthday party clown who witnessed something they shouldn't have at a corporate executive's kid's party",
-      "Librarian who discovered that late fees were being used to fund illegal weapons research",
-      "Freelance mime who broke character at the wrong moment and saw too much",
-      "Pet groomer whose client's 'dog' turned out to be an escaped lab animal",
-      "Wedding photographer who captured evidence of corporate conspiracy in the background of a family photo",
-      "Substitute teacher who found their lesson plans were actually coded instructions for industrial sabotage",
-      "Street magician whose 'magic' trick accidentally hacked into corporate mainframes",
-      "Yoga instructor whose meditation sessions were unknowingly being used as cover for money laundering meetings",
-      "Ice cream truck driver who discovered their route was being used to smuggle contraband",
-      "Professional stand-up comedian whose jokes about corporate life were too accurate for comfort",
-      "Crossword puzzle creator who embedded secret messages and didn't realize until corporate goons showed up",
-        "Dog walker who overheard the wrong conversation in the wrong corporate park",
-    ];
-
-    const allBackgrounds = [...desperateBackgrounds, ...wackyBackgrounds];
-    const backgroundStory =
-      allBackgrounds[Math.floor(Math.random() * allBackgrounds.length)];
-    return backgroundStory
-  }
-}
 
 export const storage = new DatabaseStorage();

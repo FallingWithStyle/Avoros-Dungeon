@@ -3,6 +3,7 @@ import { CrawlerStorage } from "./crawler-storage";
 import { ExplorationStorage } from "./exploration-storage";
 import { ContentStorage } from "./content-storage";
 import type { IStorage } from "../storage";
+import { CorporationStorage } from "./corporation-storage";
 
 // Main storage orchestrator that combines all storage modules
 export class ModularStorage implements IStorage {
@@ -10,6 +11,7 @@ export class ModularStorage implements IStorage {
   private crawlerStorage = new CrawlerStorage();
   private explorationStorage = new ExplorationStorage();
   private contentStorage = new ContentStorage();
+  private corporationStorage = new CorporationStorage(); // Added corporation storage
 
   // User operations
   async getUser(id: string) {

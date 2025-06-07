@@ -1,7 +1,7 @@
-
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
+import { redisService } from "../lib/redis-service";
 
 export function registerCrawlerRoutes(app: Express) {
   // Crawler routes
