@@ -341,6 +341,9 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
+  // Current room ID - declare this early so it can be used throughout
+  const actualCurrentRoomId = currentRoomData?.room?.id;
+
   // Fetch ALL rooms on the current floor
   const { data: allRoomsOnFloor = [] } = useQuery({
     queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
@@ -351,7 +354,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
 
   // Create a set of all real room coordinates on the floor for adjacency checking
   const realRoomCoords = new Set(
-    (allRoomsOnFloor ?? []).map((room: any) => `${room.x},${room.y}`)
+    (allRoomsOnFloor ?? []).map((room: any) => `${room.x},${room.y}`),
   );
 
   // Build the visible rooms map - only show what the player should see
@@ -436,9 +439,6 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
         room.floorId === crawler.currentFloor ||
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
-
-  // Current room ID
-  const actualCurrentRoomId = currentRoomData?.room?.id;
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
@@ -601,7 +601,8 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   ): boolean => {
     const room1 = roomMapMini.get(`${x1},${y1}`);
     const room2 = roomMapMini.get(`${x2},${y2}`);
-    return isRealRoom(room1) && isRealRoom(room2);
+    // Draw path if both rooms are present on the map (any status)
+    return !!room1 && !!room2;
   };
 
   return (
@@ -1031,11 +1032,65 @@ function ExpandedMapView({
     y1: number,
     x2: number,
     y2: number,
-  ) => {
+  ): boolean => {
     const room1 = roomMapExpanded.get(`${x1},${y1}`);
     const room2 = roomMapExpanded.get(`${x2},${y2}`);
-    return isRealRoom(room1) && isRealRoom(room2);
+    return !!room1 && !!room2;
   };
+
+  // Auto-center on current room
+  useEffect(() => {
+    const currentRoom = allFloorRooms.find((r) => r.id === actualCurrentRoomId);
+    if (currentRoom) {
+      // Calculate where the current room should be positioned to be centered
+      const roomSize = 48; // w-12 h-12 in pixels
+      const spacing = 8; // gap-2 in pixels
+      const cellSize = roomSize + spacing;
+
+      // Find current room's position in the grid
+      const currentRoomX = currentRoom.x;
+      const currentRoomY = currentRoom.y;
+
+      // Calculate grid position
+      const roomCol = currentRoomX - minX;
+      const roomRow = maxY - currentRoomY;
+
+      // Convert to pixel position (accounting for grid structure with connections)
+      const pixelX = roomCol * 2 * cellSize;
+      const pixelY = roomRow * 2 * cellSize;
+
+      // Center the current room in the viewport
+      const containerWidth = 900;
+      const containerHeight = 600;
+      const centerX = containerWidth / 2;
+      const centerY = containerHeight / 2;
+
+      const newOffset = {
+        x: centerX - pixelX - roomSize / 2,
+        y: centerY - pixelY - roomSize / 2,
+      };
+
+      // Apply bounds checking
+      const mapWidthCells = maxX - minX + 1;
+      const mapHeightCells = maxY - minY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+      const paddedWidth =
+        ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedHeight =
+        ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
+
+      const boundedOffset = {
+        x: Math.max(-maxPanX, Math.min(maxPanX, newOffset.x)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newOffset.y)),
+      };
+
+      setPanOffset(boundedOffset);
+      expandedMapPanOffset = boundedOffset;
+    }
+  }, [actualCurrentRoomId, allFloorRooms, minX, maxX, minY, maxY, scale]);
 
   return (
     <div className="h-full">

@@ -51,14 +51,17 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/season/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/leaderboards/crawlers"] });
-      
+
       // Clear any specific crawler queries
       queryClient.removeQueries({ queryKey: ["/api/crawlers/"], exact: false });
-      
+
       toast({
         title: "Crawlers Deleted",
         description: data.message || "All crawlers have been permanently deleted.",
       });
+
+      // Navigate back to sponsor screen
+      window.location.href = '/';
     },
     onError: (error) => {
       showErrorToast("Delete Failed", error);
@@ -83,7 +86,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
-  
+
 
   // Debug position reset
   const resetPositionMutation = useMutation({
@@ -125,15 +128,15 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   // Apply Eyes of D'Bug spell
   const applyEyesOfDebug = async () => {
     if (!activeCrawler) return;
-    
+
     try {
       const result = await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/apply-effect/eyes_of_debug`);
-      
+
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
         queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler.id}`] });
         queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler.id}/explored-rooms`] });
-        
+
         toast({
           title: "Eyes of D'Bug Active",
           description: "Scan range increased by 100 for 10 minutes! Debug power unleashed!",
@@ -201,7 +204,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 Delete All Crawlers
               </Button>
 
-              
+
 
               <Button
                 onClick={toggleEnergyUsage}
