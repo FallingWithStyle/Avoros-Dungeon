@@ -5,7 +5,7 @@ export interface IBaseStorage {
 
 // Base class with shared utilities
 export abstract class BaseStorage {
-  protected constructor() {}
+  constructor() {}
   
   // Shared utility methods can go here
   protected shuffleArray<T>(array: T[]): T[] {
