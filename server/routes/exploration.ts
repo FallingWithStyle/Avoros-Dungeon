@@ -1,0 +1,132 @@
+
+import type { Express } from "express";
+import { storage } from "../storage";
+import { isAuthenticated } from "../replitAuth";
+
+export function registerExplorationRoutes(app: Express) {
+  // Exploration routes
+  app.post("/api/crawlers/:id/explore", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "Not authorized to control this crawler" });
+      }
+
+      const encounter = await storage.exploreFloor(crawlerId);
+      res.json(encounter);
+    } catch (error) {
+      console.error("Error during exploration:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Room navigation routes
+  app.get("/api/crawlers/:id/current-room", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const room = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      const availableDirections = await storage.getAvailableDirections(room.id);
+      const playersInRoom = await storage.getPlayersInRoom(room.id);
+
+      res.json({
+        room,
+        availableDirections,
+        playersInRoom,
+      });
+    } catch (error) {
+      console.error("Error fetching current room:", error);
+      res.status(500).json({ message: "Failed to fetch current room" });
+    }
+  });
+
+  app.get("/api/crawlers/:id/explored-rooms", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      const exploredRooms = await storage.getExploredRooms(crawlerId);
+      res.json(exploredRooms);
+    } catch (error) {
+      console.error("Error fetching explored rooms:", error);
+      res.status(500).json({ message: "Failed to fetch explored rooms" });
+    }
+  });
+
+  app.post("/api/crawlers/:id/move", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { direction, debugEnergyDisabled } = req.body;
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      if (!crawler.isAlive) {
+        return res.status(400).json({ message: "Dead crawlers cannot move" });
+      }
+
+      // Check minimum energy requirement (unless debug mode is enabled)
+      if (!debugEnergyDisabled && crawler.energy < 5) {
+        return res.status(400).json({ message: "Not enough energy to move" });
+      }
+
+      const result = await storage.moveToRoom(
+        crawlerId,
+        direction,
+        debugEnergyDisabled,
+      );
+
+      if (!result.success) {
+        return res
+          .status(400)
+          .json({ message: result.error || "Cannot move in that direction" });
+      }
+
+      await storage.createActivity({
+        userId: req.user.claims.sub,
+        crawlerId,
+        type: "room_movement",
+        message: `${crawler.name} moved ${direction} to ${result.newRoom?.name}`,
+        details: null,
+      });
+
+      res.json({ success: true, newRoom: result.newRoom });
+    } catch (error) {
+      console.error("Error moving crawler:", error);
+      res.status(500).json({ message: "Failed to move crawler" });
+    }
+  });
+
+  // Get full map bounds for a floor
+  app.get("/api/floors/:floorId/bounds", async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const bounds = await storage.getFloorBounds(floorId);
+      res.json(bounds);
+    } catch (error) {
+      console.error("Error fetching floor bounds:", error);
+      res.status(500).json({ error: "Failed to fetch floor bounds" });
+    }
+  });
+}

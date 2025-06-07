@@ -14,8 +14,6 @@ interface CrawlerCardProps {
 export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   const [, setLocation] = useLocation();
 
-  const healthPercent = (crawler.health / crawler.maxHealth) * 100;
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -84,42 +82,46 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Core Stats Grid - Fixed height */}
-        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50 h-20">
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">ATK</div>
-            <div className="text-lg font-bold text-red-400">
-              {crawler.attack}
+        {/* Core Stats Grid - Fixed height with proper spacing */}
+        <div className="mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">ATK</div>
+              <div className="text-lg font-bold text-red-400">
+                {crawler.attack}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">DEF</div>
+              <div className="text-lg font-bold text-blue-400">
+                {crawler.defense}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">SPD</div>
+              <div className="text-lg font-bold text-green-400">
+                {crawler.speed}
+              </div>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">DEF</div>
-            <div className="text-lg font-bold text-blue-400">
-              {crawler.defense}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">WIT</div>
+              <div className="text-lg font-bold text-purple-400">
+                {crawler.wit}
+              </div>
             </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">SPD</div>
-            <div className="text-lg font-bold text-green-400">
-              {crawler.speed}
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">CHA</div>
+              <div className="text-lg font-bold text-yellow-400">
+                {crawler.charisma}
+              </div>
             </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">WIT</div>
-            <div className="text-lg font-bold text-purple-400">
-              {crawler.wit}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">CHA</div>
-            <div className="text-lg font-bold text-yellow-400">
-              {crawler.charisma}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">MEM</div>
-            <div className="text-lg font-bold text-cyan-400">
-              {crawler.memory}
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">MEM</div>
+              <div className="text-lg font-bold text-cyan-400">
+                {crawler.memory}
+              </div>
             </div>
           </div>
         </div>
@@ -143,23 +145,16 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         <div className="space-y-2 mb-4 h-20">
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Floor</span>
-            <span className="text-sm font-mono text-crawler font-bold">
+            <span className="text-sm font-mono text-red-400 font-bold">
               {crawler.currentFloor}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Health</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-20 h-2 bg-game-bg rounded-full overflow-hidden">
-                <Progress value={healthPercent} className="h-full" />
-              </div>
-              <span
-                className={`text-xs font-mono ${healthPercent > 60 ? "text-green-400" : healthPercent > 30 ? "text-yellow-400" : "text-red-400"}`}
-              >
-                {crawler.health}/{crawler.maxHealth}
-              </span>
-            </div>
+            <span className="text-sm font-mono text-green-400">
+              {crawler.health}/{crawler.maxHealth}
+            </span>
           </div>
 
           <div className="flex justify-between items-center">
@@ -171,18 +166,18 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Credits</span>
-            <span className="text-sm font-mono text-green-400">
+            <span className="text-sm font-mono text-yellow-400">
               {crawler.credits.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Action Button - Fixed at bottom */}
-        <div className="pt-4 border-t border-game-border mt-auto">
+        <div className="mt-auto pt-4">
           {crawler.isAlive && crawler.status === "active" ? (
             <Button
               onClick={handleEnterCrawlerMode}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
             >
               <i className="fas fa-gamepad mr-2"></i>
               Enter Crawler Mode
@@ -190,7 +185,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           ) : crawler.status === "resting" ? (
             <Button
               disabled
-              className="w-full bg-gray-600 text-gray-300 cursor-not-allowed"
+              className="w-full bg-gray-600 text-gray-300 cursor-not-allowed border-0"
             >
               <i className="fas fa-bed mr-2"></i>
               Recovering...
@@ -198,7 +193,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           ) : (
             <Button
               disabled
-              className="w-full bg-red-600 text-red-300 cursor-not-allowed"
+              className="w-full bg-red-600 text-red-300 cursor-not-allowed border-0"
             >
               <i className="fas fa-skull mr-2"></i>
               Deceased
