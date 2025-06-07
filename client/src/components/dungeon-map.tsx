@@ -341,6 +341,9 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
+  // Current room ID - declare this early so it can be used throughout
+  const actualCurrentRoomId = currentRoomData?.room?.id;
+
   // Fetch ALL rooms on the current floor
   const { data: allRoomsOnFloor = [] } = useQuery({
     queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
@@ -437,8 +440,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
 
-  // Current room ID
-  const actualCurrentRoomId = currentRoomData?.room?.id;
+  
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
