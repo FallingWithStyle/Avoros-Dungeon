@@ -11,7 +11,19 @@ describe('Combat System', () => {
   });
 
   afterEach(() => {
+    // Ensure combat processing is stopped and state is cleared
     combatSystem.stopCombatProcessing();
+    
+    // Clear all entities and reset state
+    const state = combatSystem.getState();
+    state.entities.forEach(entity => {
+      combatSystem.removeEntity(entity.id);
+    });
+    
+    // Clear any remaining actions
+    while (combatSystem.getState().actionQueue.length > 0) {
+      combatSystem.getState().actionQueue.pop();
+    }
   });
 
   describe('Entity Management', () => {
@@ -204,13 +216,16 @@ describe('Combat System', () => {
     });
 
     it('should process combat ticks and execute ready actions', (done) => {
+      // Stop automatic processing to control timing manually
+      combatSystem.stopCombatProcessing();
+      
       // Queue an action with very short execution time
       combatSystem.queueAction('player', 'basic_attack', 'enemy');
       
       const initialState = combatSystem.getState();
       expect(initialState.actionQueue).toHaveLength(1);
 
-      // Wait for action to be ready and process tick
+      // Wait for action execution time to pass, then manually process
       setTimeout(() => {
         combatSystem.processCombatTick();
         const finalState = combatSystem.getState();
@@ -223,19 +238,26 @@ describe('Combat System', () => {
         expect(enemy?.hp).toBeLessThan(80);
         
         done();
-      }, 50);
+      }, 1100); // Wait longer than execution time (1000ms)
     });
 
-    it('should start combat when hostile entities are present and detected', () => {
+    it('should start combat when hostile entities are present and detected', (done) => {
+      // Stop automatic processing to control timing
+      combatSystem.stopCombatProcessing();
+      
       const initialState = combatSystem.getState();
       expect(initialState.isInCombat).toBe(false);
 
       // Trigger enemy detection by having player attack
       combatSystem.queueAction('player', 'basic_attack', 'enemy');
-      combatSystem.processCombatTick();
-
-      const finalState = combatSystem.getState();
-      expect(finalState.isInCombat).toBe(true);
+      
+      // Wait for action to execute, then process
+      setTimeout(() => {
+        combatSystem.processCombatTick();
+        const finalState = combatSystem.getState();
+        expect(finalState.isInCombat).toBe(true);
+        done();
+      }, 1100);
     });
   });
 
@@ -255,7 +277,7 @@ describe('Combat System', () => {
       const eastEntry = combatSystem.getEntryPosition('east');
       const westEntry = combatSystem.getEntryPosition('west');
 
-      expect(northEntry.y).toBeGreaterThan(southEntry.y); // North entry should be lower on screen
+      expect(southEntry.y).toBeGreaterThan(northEntry.y); // South entry should be lower on screen (higher y value)
       expect(eastEntry.x).toBeGreaterThan(westEntry.x); // East entry should be more to the right
     });
 
