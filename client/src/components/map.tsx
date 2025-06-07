@@ -303,8 +303,8 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
     // Handle unexplored rooms (including adjacent rooms that show as ?)
     if (room.isExplored === false && !room.isScanned) {
-      return hasFactionBorder ? "bg-slate-800/50" : "bg-slate-800/50 border-slate-600/50";
-    }
+      return hasFactionBorder ? "bg-slate-800/30" : "bg-slate-800/30 border-slate-600/30";
+    }</old_str>
 
     // Check for safe rooms first (including entrance)
     if (room.isSafe) {
@@ -444,6 +444,48 @@ export default function MiniMap({ crawler }: MiniMapProps) {
       });
     }
   });
+
+  // Add adjacent rooms that haven't been explored yet
+  const addAdjacentRooms = () => {
+    const adjacentRooms = new Set<string>();
+    
+    // For each explored room, check for adjacent positions
+    floorRooms.forEach(room => {
+      const adjacent = [
+        `${room.x + 1},${room.y}`,
+        `${room.x - 1},${room.y}`,
+        `${room.x},${room.y + 1}`,
+        `${room.x},${room.y - 1}`
+      ];
+      
+      adjacent.forEach(pos => {
+        if (!roomMap.has(pos)) {
+          adjacentRooms.add(pos);
+        }
+      });
+    });
+
+    // Add adjacent room placeholders
+    adjacentRooms.forEach(pos => {
+      const [x, y] = pos.split(',').map(Number);
+      roomMap.set(pos, {
+        id: `adjacent-${x}-${y}`,
+        name: "Unknown Room",
+        type: "unknown",
+        environment: "unknown",
+        isSafe: false,
+        hasLoot: false,
+        x,
+        y,
+        floorId: crawler.currentFloor,
+        isCurrentRoom: false,
+        isExplored: false,
+        isScanned: false,
+      });
+    });
+  };
+
+  addAdjacentRooms();
 
   // console.log("Map Debug - Room map size:", roomMap.size);
   // console.log("Map Debug - Room positions:", Array.from(roomMap.keys()));
@@ -966,7 +1008,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
     }
 
     if (!room.isExplored && !room.isScanned) {
-      return hasFactionBorder ? "bg-slate-800/50" : "bg-slate-800/50 border-slate-600/50";
+      return hasFactionBorder ? "bg-slate-800/30" : "bg-slate-800/30 border-slate-600/30";
     }
 
     // Check for safe rooms first (by isSafe property)
@@ -1033,6 +1075,48 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   exploredRooms.forEach((room) => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
+
+  // Add adjacent rooms that haven't been explored yet
+  const addAdjacentRoomsToExpanded = () => {
+    const adjacentRooms = new Set<string>();
+    
+    // For each explored room, check for adjacent positions
+    exploredRooms.forEach(room => {
+      const adjacent = [
+        `${room.x + 1},${room.y}`,
+        `${room.x - 1},${room.y}`,
+        `${room.x},${room.y + 1}`,
+        `${room.x},${room.y - 1}`
+      ];
+      
+      adjacent.forEach(pos => {
+        if (!roomMap.has(pos)) {
+          adjacentRooms.add(pos);
+        }
+      });
+    });
+
+    // Add adjacent room placeholders
+    adjacentRooms.forEach(pos => {
+      const [x, y] = pos.split(',').map(Number);
+      roomMap.set(pos, {
+        id: `adjacent-${x}-${y}`,
+        name: "Unknown Room",
+        type: "unknown",
+        environment: "unknown",
+        isSafe: false,
+        hasLoot: false,
+        x,
+        y,
+        floorId: exploredRooms[0]?.floorId || 1,
+        isCurrentRoom: false,
+        isExplored: false,
+        isScanned: false,
+      });
+    });
+  };
+
+  addAdjacentRoomsToExpanded();
 
   return (
     <div className="h-full">
