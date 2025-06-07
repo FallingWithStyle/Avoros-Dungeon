@@ -173,7 +173,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         </div>
 
         {/* Action Button - Fixed at bottom */}
-        <div className="mt-auto">
+        <div className="mt-auto pt-4">
           {crawler.isAlive && crawler.status === "active" ? (
             <Button
               onClick={handleEnterCrawlerMode}
