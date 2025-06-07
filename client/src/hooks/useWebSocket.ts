@@ -18,7 +18,7 @@ export function useWebSocket() {
     
     // Construct WebSocket URL properly
     let wsUrl;
-    if (port && port !== "80" && port !== "443") {
+    if (port && port !== "" && port !== "80" && port !== "443") {
       wsUrl = `${protocol}//${host}:${port}/ws`;
     } else {
       wsUrl = `${protocol}//${host}/ws`;
