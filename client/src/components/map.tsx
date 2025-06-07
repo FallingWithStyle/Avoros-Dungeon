@@ -202,17 +202,20 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     setIsDragging(false);
   };
 
-  const getRoomIcon = (room: ExploredRoom) => {
+  const getRoomIcon = (room: ExploredRoom, isExpanded: boolean = false) => {
+    const iconSize = isExpanded ? "w-6 h-6" : "w-3 h-3";
+    const textSize = isExpanded ? "text-sm" : "text-xs";
+    
     // Use actual current room ID for accurate player position
     if (room.id === actualCurrentRoomId) {
       // Always show the blue dot for the player crawler location
       return (
-        <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
+        <div className={`${iconSize} bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10`} />
       );
     }
     if (room.isExplored === false && !room.isScanned) {
       return (
-        <div className="w-3 h-3 text-slate-500 text-xs flex items-center justify-center font-bold">
+        <div className={`${iconSize} text-slate-500 ${textSize} flex items-center justify-center font-bold`}>
           ?
         </div>
       );
@@ -221,7 +224,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     // For scanned rooms, use a different icon to indicate they're scanned but not explored
     if (room.isScanned) {
       return (
-        <div className="w-3 h-3 text-slate-400 text-xs flex items-center justify-center font-bold border border-slate-400 rounded">
+        <div className={`${iconSize} text-slate-400 ${textSize} flex items-center justify-center font-bold border border-slate-400 rounded`}>
           S
         </div>
       );
@@ -229,49 +232,77 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
     // Check for safe rooms first (including entrance which is also safe)
     if (room.isSafe && room.type !== "entrance") {
-      return <Shield className="w-3 h-3 text-green-400" />;
+      return <Shield className={`${iconSize} text-green-400`} />;
     }
 
     switch (room.type) {
       case "entrance":
-        return <Home className="w-3 h-3 text-green-400" />;
+        return <Home className={`${iconSize} text-green-400`} />;
       case "treasure":
-        return <Gem className="w-3 h-3 text-yellow-400" />;
+        return <Gem className={`${iconSize} text-yellow-400`} />;
       case "boss":
       case "exit":
-        return <Skull className="w-3 h-3 text-red-400" />;
+        return <Skull className={`${iconSize} text-red-400`} />;
       case "stairs":
-        return <ArrowDown className="w-3 h-3 text-purple-400" />;
+        return <ArrowDown className={`${iconSize} text-purple-400`} />;
       default:
-        return <div className="w-3 h-3 bg-slate-600 rounded" />;
+        return <div className={`${iconSize} bg-slate-600 rounded`} />;
     }
   };
 
-  const getRoomIndicators = (room: ExploredRoom) => {
+  const getRoomIndicators = (room: ExploredRoom, isExpanded: boolean = false) => {
     const indicators = [];
 
-    // Enemy indicators (example: if room has hasEnemies property)
-    if (room.hasEnemies) {
-      indicators.push(
-        <div key="enemy" className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-red-300 animate-pulse" 
-             title="Enemies present" />
-      );
-    }
+    if (isExpanded) {
+      // Expanded view indicators with icons and numbers
+      if (room.hasEnemies) {
+        indicators.push(
+          <div key="enemy" className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-red-300 animate-pulse flex items-center justify-center" 
+               title="Enemies present">
+            <Skull className="w-2 h-2 text-white" />
+          </div>
+        );
+      }
 
-    // Neutral mobs indicator (example: if room has neutralCount property)
-    if (room.neutralCount && room.neutralCount > 0) {
-      indicators.push(
-        <div key="neutral" className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full border border-orange-200" 
-             title={`${room.neutralCount} neutral creatures`} />
-      );
-    }
+      if (room.neutralCount && room.neutralCount > 0) {
+        indicators.push(
+          <div key="neutral" className="absolute -top-1 -left-1 w-4 h-3 bg-orange-400 rounded-full border border-orange-200 flex items-center justify-center text-xs font-bold text-white" 
+               title={`${room.neutralCount} neutral creatures`}>
+            {room.neutralCount}
+          </div>
+        );
+      }
 
-    // Other players indicator (example: if room has playerCount > 1)
-    if (room.playerCount && room.playerCount > 1) {
-      indicators.push(
-        <div key="players" className="absolute -bottom-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200" 
-             title={`${room.playerCount} players here`} />
-      );
+      if (room.playerCount && room.playerCount > 1) {
+        indicators.push(
+          <div key="players" className="absolute -bottom-1 -right-1 w-4 h-3 bg-cyan-400 rounded-full border border-cyan-200 flex items-center justify-center text-xs font-bold text-white" 
+               title={`${room.playerCount} players here`}>
+            {room.playerCount}
+          </div>
+        );
+      }
+    } else {
+      // Mini-map view indicators (smaller, simple dots)
+      if (room.hasEnemies) {
+        indicators.push(
+          <div key="enemy" className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-red-300 animate-pulse" 
+               title="Enemies present" />
+        );
+      }
+
+      if (room.neutralCount && room.neutralCount > 0) {
+        indicators.push(
+          <div key="neutral" className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full border border-orange-200" 
+               title={`${room.neutralCount} neutral creatures`} />
+        );
+      }
+
+      if (room.playerCount && room.playerCount > 1) {
+        indicators.push(
+          <div key="players" className="absolute -bottom-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200" 
+               title={`${room.playerCount} players here`} />
+        );
+      }
     }
 
     return indicators;
@@ -325,17 +356,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
   };
 
-  const getFactionBorderStyle = (room: ExploredRoom) => {
+  const getFactionBorderStyle = (room: ExploredRoom, isExpanded: boolean = false) => {
     if (!room.factionId) return {};
 
     const faction = factions.find(f => f.id === room.factionId);
     if (!faction) return {};
 
+    const borderWidth = isExpanded ? (room.isScanned ? '3px' : '4px') : (room.isScanned ? '2px' : '3px');
+
     // For scanned rooms, use a fainter border
     if (room.isScanned) {
       return {
         borderColor: faction.color,
-        borderWidth: '2px',
+        borderWidth,
         borderStyle: 'dashed',
         opacity: 0.6,
       };
@@ -344,7 +377,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     // For fully explored rooms, use solid borders
     return {
       borderColor: faction.color,
-      borderWidth: '3px',
+      borderWidth,
       borderStyle: 'solid',
     };
   };
@@ -567,11 +600,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                                   ? "scale-110 animate-pulse"
                                   : ""
                               }`}
-                              style={getFactionBorderStyle(room)}
+                              style={getFactionBorderStyle(room, false)}
                               title={`${room.name} (${x}, ${y})`}
                             >
-                              {getRoomIcon(room)}
-                              {getRoomIndicators(room)}
+                              {getRoomIcon(room, false)}
+                              {getRoomIndicators(room, false)}
                             </div>
                           );
                         } else {
@@ -894,160 +927,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
     setIsDragging(false);
   };
 
-  const getRoomIcon = (room: ExploredRoom) => {
-    // Use the passed currentRoomId for consistency
-    const currentRoomId = exploredRooms.find(r => r.isCurrentRoom)?.id;
-    if (room.id === currentRoomId) {
-      // Always show the blue dot for the player crawler location
-      return (
-        <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
-      );
-    }
-    if (!room.isExplored && !room.isScanned) {
-      return (
-        <div className="w-6 h-6 text-slate-500 text-sm flex items-center justify-center font-bold">
-          ?
-        </div>
-      );
-    }
-
-    // For scanned rooms, use a different icon to indicate they're scanned but not explored
-    if (room.isScanned) {
-      return (
-        <div className="w-6 h-6 text-slate-400 text-sm flex items-center justify-center font-bold border border-slate-400 rounded">
-          S
-        </div>
-      );
-    }
-
-    // Check for safe rooms first (by isSafe property)
-    if (room.isSafe) {
-      return <Shield className="w-6 h-6 text-green-400" />;
-    }
-
-    switch (room.type) {
-      case "entrance":
-        return <Home className="w-6 h-6 text-green-400" />;
-      case "treasure":
-        return <Gem className="w-6 h-6 text-yellow-400" />;
-      case "boss":
-      case "exit":
-        return <Skull className="w-6 h-6 text-red-400" />;
-      case "stairs":
-        return <ArrowDown className="w-6 h-6 text-purple-400" />;
-      default:
-        return <div className="w-6 h-6 bg-slate-600 rounded" />;
-    }
-  };
-
-  const getExpandedRoomIndicators = (room: ExploredRoom) => {
-    const indicators = [];
-
-    // Enemy indicators for expanded view
-    if (room.hasEnemies) {
-      indicators.push(
-        <div key="enemy" className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-red-300 animate-pulse flex items-center justify-center" 
-             title="Enemies present">
-          <Skull className="w-2 h-2 text-white" />
-        </div>
-      );
-    }
-
-    // Neutral mobs indicator for expanded view
-    if (room.neutralCount && room.neutralCount > 0) {
-      indicators.push(
-        <div key="neutral" className="absolute -top-1 -left-1 w-4 h-3 bg-orange-400 rounded-full border border-orange-200 flex items-center justify-center text-xs font-bold text-white" 
-             title={`${room.neutralCount} neutral creatures`}>
-          {room.neutralCount}
-        </div>
-      );
-    }
-
-    // Other players indicator for expanded view
-    if (room.playerCount && room.playerCount > 1) {
-      indicators.push(
-        <div key="players" className="absolute -bottom-1 -right-1 w-4 h-3 bg-cyan-400 rounded-full border border-cyan-200 flex items-center justify-center text-xs font-bold text-white" 
-             title={`${room.playerCount} players here`}>
-          {room.playerCount}
-        </div>
-      );
-    }
-
-    return indicators;
-  };
-
-  const getRoomColor = (room: ExploredRoom) => {
-    // If room has faction, don't apply border classes - let faction borders take precedence
-    const hasFactionBorder = room.factionId && factions.find(f => f.id === room.factionId);
-
-    // Handle scanned rooms with color coding based on actual room type
-    if (room.isScanned && room.actualType) {
-      const opacity = "30"; // Medium opacity for scanned rooms in expanded view
-      if (room.isSafe) {
-        return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
-      }
-      switch (room.actualType) {
-        case "entrance":
-          return hasFactionBorder ? `bg-green-600/${opacity}` : `bg-green-600/${opacity} border-green-600/40`;
-        case "treasure":
-          return hasFactionBorder ? `bg-yellow-600/${opacity}` : `bg-yellow-600/${opacity} border-yellow-600/40`;
-        case "boss":
-        case "exit":
-          return hasFactionBorder ? `bg-red-600/${opacity}` : `bg-red-600/${opacity} border-red-600/40`;
-        case "stairs":
-          return hasFactionBorder ? `bg-purple-600/${opacity}` : `bg-purple-600/${opacity} border-purple-600/40`;
-        default:
-          return hasFactionBorder ? `bg-slate-600/${opacity}` : `bg-slate-600/${opacity} border-slate-600/40`;
-      }
-    }
-
-    if (!room.isExplored && !room.isScanned) {
-      return hasFactionBorder ? "bg-slate-800/30" : "bg-slate-800/30 border-slate-600/30";
-    }
-
-    // Check for safe rooms first (by isSafe property)
-    if (room.isSafe) {
-      return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
-    }
-
-    switch (room.type) {
-      case "entrance":
-        return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
-      case "treasure":
-        return hasFactionBorder ? "bg-yellow-600/20" : "bg-yellow-600/20 border-yellow-600/50";
-      case "boss":
-      case "exit":
-        return hasFactionBorder ? "bg-red-600/20" : "bg-red-600/20 border-red-600/50";
-      case "stairs":
-        return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
-      default:
-        return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
-    }
-  };
-
-  const getExpandedFactionBorderStyle = (room: ExploredRoom) => {
-    if (!room.factionId) return {};
-
-    const faction = factions.find(f => f.id === room.factionId);
-    if (!faction) return {};
-
-    // For scanned rooms, use a fainter border
-    if (room.isScanned) {
-      return {
-        borderColor: faction.color,
-        borderWidth: '3px',
-        borderStyle: 'dashed',
-        opacity: 0.6,
-      };
-    }
-
-    // For fully explored rooms, use solid borders
-    return {
-      borderColor: faction.color,
-      borderWidth: '4px',
-      borderStyle: 'solid',
-    };
-  };
+  
 
   if (!exploredRooms || exploredRooms.length === 0) {
     return (
@@ -1163,14 +1043,11 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
                       <div
                         key={`room-${room.id}`}
                         className={`w-12 h-12 border-2 rounded flex items-center justify-center relative ${getRoomColor(room)}`}
-                        style={getExpandedFactionBorderStyle(room)}
+                        style={getFactionBorderStyle(room, true)}
                         title={`${room.name} (${x}, ${y})`}
                       >
-                        {getRoomIcon(room)}
-                        {getExpandedRoomIndicators(room)}
-                        {room.id === exploredRooms.find(r => r.isCurrentRoom)?.id && (
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
-                        )}
+                        {getRoomIcon(room, true)}
+                        {getRoomIndicators(room, true)}
                       </div>
                     );
                   } else {
