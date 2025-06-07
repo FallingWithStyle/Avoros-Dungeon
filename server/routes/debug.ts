@@ -74,10 +74,15 @@ export function registerDebugRoutes(app: Express) {
   // DEBUG: Delete all crawlers (complete removal)
   app.post("/api/debug/delete-crawlers", isAuthenticated, async (req: any, res) => {
     try {
+      // Check if user is properly authenticated
+      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const userId = req.user.claims.sub;
       const { db } = await import("../db");
       const { crawlers, crawlerPositions, crawlerEquipment } = await import("@shared/schema");
-      const { eq } = await import("drizzle-orm");
+      const { eq, inArray } = await import("drizzle-orm");
 
       // Get all user's crawlers first
       const userCrawlers = await db
@@ -91,20 +96,15 @@ export function registerDebugRoutes(app: Express) {
 
       const crawlerIds = userCrawlers.map(c => c.id);
 
-      // Delete related data first
-      await db
-        .delete(crawlerPositions)
-        .where(eq(crawlerPositions.crawlerId, crawlerIds[0])); // Delete for first crawler
-
-      // Delete positions for all crawlers
-      for (const crawlerId of crawlerIds) {
+      // Delete related data first - use inArray for multiple crawler IDs
+      if (crawlerIds.length > 0) {
         await db
           .delete(crawlerPositions)
-          .where(eq(crawlerPositions.crawlerId, crawlerId));
+          .where(inArray(crawlerPositions.crawlerId, crawlerIds));
         
         await db
           .delete(crawlerEquipment)
-          .where(eq(crawlerEquipment.crawlerId, crawlerId));
+          .where(inArray(crawlerEquipment.crawlerId, crawlerIds));
       }
 
       // Finally delete the crawlers themselves
@@ -121,7 +121,10 @@ export function registerDebugRoutes(app: Express) {
       });
     } catch (error) {
       console.error("Error deleting crawlers:", error);
-      res.status(500).json({ message: "Failed to delete crawlers" });
+      res.status(500).json({ 
+        message: "Failed to delete crawlers",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
