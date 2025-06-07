@@ -1,0 +1,78 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=OrvAKk8Deqp_' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=OrvAKk8Deqp_' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=8cad5f40:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+combat-system.ts:482 Combat processing started (setInterval)
+crawler-selection.tsx:51 Candidates data: undefined
+crawler-selection.tsx:52 Is loading: true
+crawler-selection.tsx:53 Error: null
+@radix-ui_react-dialog.js?v=8cad5f40:1400 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ @radix-ui_react-dialog.js?v=8cad5f40:1400
+commitHookEffectListMount @ chunk-WERSD76P.js?v=8cad5f40:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=8cad5f40:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=8cad5f40:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=8cad5f40:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=8cad5f40:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=8cad5f40:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=8cad5f40:19447
+commitRootImpl @ chunk-WERSD76P.js?v=8cad5f40:19416
+commitRoot @ chunk-WERSD76P.js?v=8cad5f40:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=8cad5f40:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=8cad5f40:9119
+(anonymous) @ chunk-WERSD76P.js?v=8cad5f40:18627
+@radix-ui_react-dialog.js?v=8cad5f40:1414 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=8cad5f40:1414
+commitHookEffectListMount @ chunk-WERSD76P.js?v=8cad5f40:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=8cad5f40:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=8cad5f40:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=8cad5f40:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=8cad5f40:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=8cad5f40:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=8cad5f40:19447
+commitRootImpl @ chunk-WERSD76P.js?v=8cad5f40:19416
+commitRoot @ chunk-WERSD76P.js?v=8cad5f40:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=8cad5f40:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=8cad5f40:9119
+(anonymous) @ chunk-WERSD76P.js?v=8cad5f40:18627
+queryClient.ts:32 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/candidates 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=8cad5f40:840
+run @ @tanstack_react-query.js?v=8cad5f40:494
+start @ @tanstack_react-query.js?v=8cad5f40:536
+fetch @ @tanstack_react-query.js?v=8cad5f40:926
+executeFetch_fn @ @tanstack_react-query.js?v=8cad5f40:2211
+onSubscribe @ @tanstack_react-query.js?v=8cad5f40:1898
+subscribe @ @tanstack_react-query.js?v=8cad5f40:24
+(anonymous) @ @tanstack_react-query.js?v=8cad5f40:3022
+subscribeToStore @ chunk-WERSD76P.js?v=8cad5f40:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=8cad5f40:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=8cad5f40:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=8cad5f40:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=8cad5f40:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=8cad5f40:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=8cad5f40:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=8cad5f40:19447
+commitRootImpl @ chunk-WERSD76P.js?v=8cad5f40:19416
+commitRoot @ chunk-WERSD76P.js?v=8cad5f40:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=8cad5f40:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=8cad5f40:9119
+(anonymous) @ chunk-WERSD76P.js?v=8cad5f40:18627
+crawler-selection.tsx:51 Candidates data: undefined
+crawler-selection.tsx:52 Is loading: false
+crawler-selection.tsx:53 Error: Error: 500: {"message":"Failed to fetch crawler candidates"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async queryClient.ts:40:5
