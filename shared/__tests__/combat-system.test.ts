@@ -5,6 +5,8 @@ describe('Combat System', () => {
   let combatSystem: CombatSystem;
 
   beforeEach(() => {
+    // Mock timers for faster tests
+    jest.useFakeTimers();
     combatSystem = new CombatSystem();
     // Stop automatic processing during tests
     combatSystem.stopCombatProcessing();
@@ -24,6 +26,10 @@ describe('Combat System', () => {
     while (combatSystem.getState().actionQueue.length > 0) {
       combatSystem.getState().actionQueue.pop();
     }
+    
+    // Clean up timers
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   describe('Entity Management', () => {
@@ -215,7 +221,7 @@ describe('Combat System', () => {
       combatSystem.addEntity(enemy);
     });
 
-    it('should process combat ticks and execute ready actions', (done) => {
+    it('should process combat ticks and execute ready actions', () => {
       // Stop automatic processing to control timing manually
       combatSystem.stopCombatProcessing();
       
@@ -225,23 +231,22 @@ describe('Combat System', () => {
       const initialState = combatSystem.getState();
       expect(initialState.actionQueue).toHaveLength(1);
 
-      // Wait for action execution time to pass, then manually process
-      setTimeout(() => {
-        combatSystem.processCombatTick();
-        const finalState = combatSystem.getState();
-        
-        // Action should be executed and removed from queue
-        expect(finalState.actionQueue).toHaveLength(0);
-        
-        // Enemy should have taken damage
-        const enemy = finalState.entities.find(e => e.id === 'enemy');
-        expect(enemy?.hp).toBeLessThan(80);
-        
-        done();
-      }, 1100); // Wait longer than execution time (1000ms)
+      // Advance time past action execution time (1000ms)
+      jest.advanceTimersByTime(1100);
+      
+      // Manually process combat tick
+      combatSystem.processCombatTick();
+      const finalState = combatSystem.getState();
+      
+      // Action should be executed and removed from queue
+      expect(finalState.actionQueue).toHaveLength(0);
+      
+      // Enemy should have taken damage
+      const enemy = finalState.entities.find(e => e.id === 'enemy');
+      expect(enemy?.hp).toBeLessThan(80);
     });
 
-    it('should start combat when hostile entities are present and detected', (done) => {
+    it('should start combat when hostile entities are present and detected', () => {
       // Stop automatic processing to control timing
       combatSystem.stopCombatProcessing();
       
@@ -251,13 +256,13 @@ describe('Combat System', () => {
       // Trigger enemy detection by having player attack
       combatSystem.queueAction('player', 'basic_attack', 'enemy');
       
-      // Wait for action to execute, then process
-      setTimeout(() => {
-        combatSystem.processCombatTick();
-        const finalState = combatSystem.getState();
-        expect(finalState.isInCombat).toBe(true);
-        done();
-      }, 1100);
+      // Advance time past action execution time
+      jest.advanceTimersByTime(1100);
+      
+      // Process combat tick
+      combatSystem.processCombatTick();
+      const finalState = combatSystem.getState();
+      expect(finalState.isInCombat).toBe(true);
     });
   });
 
