@@ -13,6 +13,11 @@ export class ModularStorage implements IStorage {
   private contentStorage = new ContentStorage();
   private corporationStorage = new CorporationStorage(); // Added corporation storage
 
+  // Expose content storage publicly
+  get content() {
+    return this.contentStorage;
+  }
+
   // User operations
   async getUser(id: string) {
     return this.userStorage.getUser(id);
