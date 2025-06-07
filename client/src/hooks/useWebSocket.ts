@@ -14,15 +14,10 @@ export function useWebSocket() {
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.hostname;
-    const port = window.location.port;
     
-    // Construct WebSocket URL properly
-    let wsUrl;
-    if (port && port !== "" && port !== "80" && port !== "443") {
-      wsUrl = `${protocol}//${host}:${port}/ws`;
-    } else {
-      wsUrl = `${protocol}//${host}/ws`;
-    }
+    // For Replit, use the same host and protocol as the current page
+    // The server should handle WebSocket connections on the same port
+    const wsUrl = `${protocol}//${host}/ws`;
     
     console.log("Attempting WebSocket connection to:", wsUrl);
     ws.current = new WebSocket(wsUrl);
