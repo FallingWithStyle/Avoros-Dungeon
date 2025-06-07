@@ -9,6 +9,10 @@
 - **Drizzle ORM** for type-safe database access
 - **connect-pg-simple** for storing sessions in Postgres
 
+## In-Memory / Real-Time Data
+- **ioredis** for fast, in-memory data storage (game state, caching, etc.)
+- **Upstash** for managed, serverless Redis (cloud-hosted Redis instance)
+
 ## Real-Time Communication
 - **ws** WebSocket library
 
@@ -18,4 +22,4 @@
 
 ---
 
-This setup supports scalable, type-safe APIs with real-time features and secure authentication.
+This setup supports scalable, type-safe APIs with real-time features, secure authentication, and cloud-native in-memory data storage for MMO-style game state and caching.
