@@ -304,7 +304,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     // Handle unexplored rooms (including adjacent rooms that show as ?)
     if (room.isExplored === false && !room.isScanned) {
       return hasFactionBorder ? "bg-slate-800/30" : "bg-slate-800/30 border-slate-600/30";
-    }</old_str>
+    }
+
+    // Check for safe rooms first (including entrance)
+    if (room.isSafe) {</old_str>
 
     // Check for safe rooms first (including entrance)
     if (room.isSafe) {
