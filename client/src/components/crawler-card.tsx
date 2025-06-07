@@ -147,7 +147,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         <div className="space-y-2 mb-4 h-20">
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Floor</span>
-            <span className="text-sm font-mono text-crawler font-bold">
+            <span className="text-sm font-mono text-red-400 font-bold">
               {crawler.currentFloor}
             </span>
           </div>
@@ -175,18 +175,18 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Credits</span>
-            <span className="text-sm font-mono text-green-400">
+            <span className="text-sm font-mono text-yellow-400">
               {crawler.credits.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Action Button - Fixed at bottom */}
-        <div className="pt-4 border-t border-game-border mt-auto">
+        <div className="mt-auto">
           {crawler.isAlive && crawler.status === "active" ? (
             <Button
               onClick={handleEnterCrawlerMode}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
             >
               <i className="fas fa-gamepad mr-2"></i>
               Enter Crawler Mode
@@ -194,7 +194,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           ) : crawler.status === "resting" ? (
             <Button
               disabled
-              className="w-full bg-gray-600 text-gray-300 cursor-not-allowed"
+              className="w-full bg-gray-600 text-gray-300 cursor-not-allowed border-0"
             >
               <i className="fas fa-bed mr-2"></i>
               Recovering...
@@ -202,7 +202,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           ) : (
             <Button
               disabled
-              className="w-full bg-red-600 text-red-300 cursor-not-allowed"
+              className="w-full bg-red-600 text-red-300 cursor-not-allowed border-0"
             >
               <i className="fas fa-skull mr-2"></i>
               Deceased
