@@ -14,8 +14,6 @@ interface CrawlerCardProps {
 export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   const [, setLocation] = useLocation();
 
-  const healthPercent = (crawler.health / crawler.maxHealth) * 100;
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -150,20 +148,6 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
             <span className="text-sm font-mono text-red-400 font-bold">
               {crawler.currentFloor}
             </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-400">Health</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-20 h-2 bg-game-bg rounded-full overflow-hidden">
-                <Progress value={healthPercent} className="h-full" />
-              </div>
-              <span
-                className={`text-xs font-mono ${healthPercent > 60 ? "text-green-400" : healthPercent > 30 ? "text-yellow-400" : "text-red-400"}`}
-              >
-                {crawler.health}/{crawler.maxHealth}
-              </span>
-            </div>
           </div>
 
           <div className="flex justify-between items-center">
