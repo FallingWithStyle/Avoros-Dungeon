@@ -1,5 +1,3 @@
-import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
-
 export interface CombatEntity {
   id: string;
   name: string;
@@ -121,7 +119,7 @@ export class CombatSystem {
   }
 
   private notifyListeners(): void {
-    console.log("notifyListeners called", { entities: this.state.entities.map(e => ({ id: e.id, position: e.position })) });
+    console.log("notifyListeners called", { entities: this.state.entities.map((e: CombatEntity) => ({ id: e.id, position: e.position })) });
     const stateCopy = this.getState();
     this.listeners.forEach(listener => listener(stateCopy));
   }
@@ -152,7 +150,7 @@ export class CombatSystem {
 
   removeEntity(entityId: string): void {
     console.log("removeEntity:", entityId);
-    this.state.entities = this.state.entities.filter(e => e.id !== entityId);
+    this.state.entities = this.state.entities.filter((e: CombatEntity) => e.id !== entityId);
     if (this.state.selectedEntityId === entityId) {
       this.state.selectedEntityId = null;
     }
@@ -160,7 +158,7 @@ export class CombatSystem {
   }
 
   updateEntity(entityId: string, updates: Partial<CombatEntity>): void {
-    const entity = this.state.entities.find(e => e.id === entityId);
+    const entity = this.state.entities.find((e: CombatEntity) => e.id === entityId);
     if (entity) {
       Object.assign(entity, updates);
       console.log("updateEntity:", entityId, updates);
@@ -170,11 +168,11 @@ export class CombatSystem {
 
   selectEntity(entityId: string | null): void {
     // Deselect previous entity
-    this.state.entities.forEach(e => e.isSelected = false);
+    this.state.entities.forEach((e: CombatEntity) => e.isSelected = false);
 
     // Select new entity
     if (entityId) {
-      const entity = this.state.entities.find(e => e.id === entityId);
+      const entity = this.state.entities.find((e: CombatEntity) => e.id === entityId);
       if (entity) {
         entity.isSelected = true;
       }
@@ -186,7 +184,7 @@ export class CombatSystem {
   }
 
   getSelectedEntity(): CombatEntity | null {
-    return this.state.entities.find(e => e.id === this.state.selectedEntityId) || null;
+    return this.state.entities.find((e: CombatEntity) => e.id === this.state.selectedEntityId) || null;
   }
 
   // Combat actions
