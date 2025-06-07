@@ -1056,8 +1056,7 @@ export class DatabaseStorage implements IStorage {
         {
           title: "Ancient Terminal",
           description: `${crawler.name} finds a still-functioning terminal displaying cryptic data about the dungeon's deeper levels. The information could be valuable, but accessing it might trigger security protocols.`,
-          ```text
-choices: [
+          choices: [
             {
               id: "download",
               text: "Download all available data",
