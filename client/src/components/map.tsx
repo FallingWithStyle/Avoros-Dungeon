@@ -66,11 +66,19 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms with reduced polling to minimize console noise
+  // Fetch explored rooms with reduced polling
   const { data: exploredRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
     refetchInterval: 30000, // Reduced to 30s to minimize console noise
     staleTime: 120000, // Cache for 2 minutes
+    retry: false,
+  });
+
+  // Fetch scanned rooms (passive scan ability)
+  const { data: scannedRooms = [] } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/scanned-rooms`],
+    refetchInterval: 30000,
+    staleTime: 120000,
     retry: false,
   });
 
@@ -94,6 +102,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   // Filter rooms for current floor (strict number comparison first, then string fallback)
   const floorRooms =
     exploredRooms?.filter(
+      (room) =>
+        room.floorId === crawler.currentFloor ||
+        String(room.floorId) === String(crawler.currentFloor),
+    ) ?? [];
+
+  const floorScannedRooms =
+    scannedRooms?.filter(
       (room) =>
         room.floorId === crawler.currentFloor ||
         String(room.floorId) === String(crawler.currentFloor),
@@ -229,7 +244,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
   const getRoomIndicators = (room: ExploredRoom) => {
     const indicators = [];
-    
+
     // Enemy indicators (example: if room has hasEnemies property)
     if (room.hasEnemies) {
       indicators.push(
@@ -237,7 +252,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
              title="Enemies present" />
       );
     }
-    
+
     // Neutral mobs indicator (example: if room has neutralCount property)
     if (room.neutralCount && room.neutralCount > 0) {
       indicators.push(
@@ -245,7 +260,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
              title={`${room.neutralCount} neutral creatures`} />
       );
     }
-    
+
     // Other players indicator (example: if room has playerCount > 1)
     if (room.playerCount && room.playerCount > 1) {
       indicators.push(
@@ -253,14 +268,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
              title={`${room.playerCount} players here`} />
       );
     }
-    
+
     return indicators;
   };
 
   const getRoomColor = (room: ExploredRoom) => {
     // If room has faction, don't apply border classes - let faction borders take precedence
     const hasFactionBorder = room.factionId && factions.find(f => f.id === room.factionId);
-    
+
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
       const opacity = "50"; // Medium opacity for scanned rooms
@@ -307,10 +322,10 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
   const getFactionBorderStyle = (room: ExploredRoom) => {
     if (!room.factionId) return {};
-    
+
     const faction = factions.find(f => f.id === room.factionId);
     if (!faction) return {};
-    
+
     // For scanned rooms, use a fainter border
     if (room.isScanned) {
       return {
@@ -320,7 +335,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         opacity: 0.6,
       };
     }
-    
+
     // For fully explored rooms, use solid borders
     return {
       borderColor: faction.color,
@@ -364,12 +379,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   }
 
   const currentRoom = floorRooms.find((r) => r.isCurrentRoom);
-  
+
   // console.log("Map Debug - Current room found:", !!currentRoom);
   // if (currentRoom) {
   //   console.log("Map Debug - Current room position:", currentRoom.x, currentRoom.y);
   // }
-  
+
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -409,7 +424,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   floorRooms.forEach((room) => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
-  
+
+    floorScannedRooms.forEach((room) => {
+    roomMap.set(`${room.x},${room.y}`, {...room, isScanned: true});
+  });
+
   // console.log("Map Debug - Room map size:", roomMap.size);
   // console.log("Map Debug - Room positions:", Array.from(roomMap.keys()));
 
@@ -774,7 +793,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const handleWheel = (e: React.WheelEvent) => {
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.max(0.3, Math.min(3, scale * zoomFactor));
-    
+
     expandedMapScale = newScale;
     setScale(newScale);
   };
@@ -869,7 +888,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
 
   const getExpandedRoomIndicators = (room: ExploredRoom) => {
     const indicators = [];
-    
+
     // Enemy indicators for expanded view
     if (room.hasEnemies) {
       indicators.push(
@@ -879,7 +898,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         </div>
       );
     }
-    
+
     // Neutral mobs indicator for expanded view
     if (room.neutralCount && room.neutralCount > 0) {
       indicators.push(
@@ -889,7 +908,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         </div>
       );
     }
-    
+
     // Other players indicator for expanded view
     if (room.playerCount && room.playerCount > 1) {
       indicators.push(
@@ -899,14 +918,14 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         </div>
       );
     }
-    
+
     return indicators;
   };
 
   const getRoomColor = (room: ExploredRoom) => {
     // If room has faction, don't apply border classes - let faction borders take precedence
     const hasFactionBorder = room.factionId && factions.find(f => f.id === room.factionId);
-    
+
     // Handle scanned rooms with color coding based on actual room type
     if (room.isScanned && room.actualType) {
       const opacity = "30"; // Medium opacity for scanned rooms in expanded view
@@ -954,10 +973,10 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
 
   const getExpandedFactionBorderStyle = (room: ExploredRoom) => {
     if (!room.factionId) return {};
-    
+
     const faction = factions.find(f => f.id === room.factionId);
     if (!faction) return {};
-    
+
     // For scanned rooms, use a fainter border
     if (room.isScanned) {
       return {
@@ -967,7 +986,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         opacity: 0.6,
       };
     }
-    
+
     // For fully explored rooms, use solid borders
     return {
       borderColor: faction.color,
@@ -983,12 +1002,12 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
       </div>
     );
   }
-  
+
   const minX = Math.min(...exploredRooms.map((r) => r.x));
   const maxX = Math.max(...exploredRooms.map((r) => r.x));
   const minY = Math.min(...exploredRooms.map((r) => r.y));
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
-  
+
   // console.log("Expanded Map Debug - Bounds:", { minX, maxX, minY, maxY });
 
   // Create room map

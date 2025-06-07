@@ -1,4 +1,3 @@
-
 # TODO List
 
 ## 🚨 High Priority / Critical Items
