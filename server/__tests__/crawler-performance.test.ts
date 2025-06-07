@@ -4,20 +4,22 @@ import { redisService } from '../lib/redis-service';
 import { CrawlerStorage } from '../storage/crawler-storage';
 import { db } from '../db';
 import { crawlers, crawlerClasses } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 describe('Crawler Performance Benchmarks', () => {
   let crawlerStorage: CrawlerStorage;
   let testCrawlerId: number;
 
   beforeEach(async () => {
-    crawlerStorage = new CrawlerStorage();
+    // Use the singleton instance instead of creating new one
+    crawlerStorage = CrawlerStorage.getInstance();
     
     // Create a test crawler
     const [testClass] = await db.select().from(crawlerClasses).limit(1);
     const [testCrawler] = await db.insert(crawlers).values({
-      sponsorId: 'test-user-perf',
+      userId: 'test-user-perf',
       name: 'Performance Test Crawler',
-      serial: '54321',
+      serial: 54321,
       classId: testClass.id,
       background: 'Performance test',
       health: 100,
@@ -36,13 +38,14 @@ describe('Crawler Performance Benchmarks', () => {
       level: 1,
       credits: 1000,
       isAlive: true,
+      competencies: [],
     }).returning();
     
     testCrawlerId = testCrawler.id;
   });
 
   afterEach(async () => {
-    await db.delete(crawlers).where({ id: testCrawlerId });
+    await db.delete(crawlers).where(eq(crawlers.id, testCrawlerId));
     await redisService.invalidateCrawler(testCrawlerId);
   });
 
