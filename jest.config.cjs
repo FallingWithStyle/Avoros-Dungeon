@@ -18,7 +18,7 @@ module.exports = {
     '!**/node_modules/**',
     '!**/dist/**'
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/client/src/$1',
     '^@shared/(.*)$': '<rootDir>/shared/$1'
   },
