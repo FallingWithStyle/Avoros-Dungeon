@@ -729,5 +729,28 @@ export class CombatSystem {
   }
 }
 
+// Combat calculation functions for testing
+export function calculateDamage(
+  attacker: { attack: number; level: number },
+  defender: { defense: number; level: number }
+): number {
+  const baseDamage = Math.max(1, attacker.attack - defender.defense);
+  const levelBonus = Math.floor(attacker.level * 0.5);
+  return Math.max(1, baseDamage + levelBonus);
+}
+
+export function calculateHitChance(
+  attacker: { accuracy: number; level: number },
+  defender: { evasion: number; level: number }
+): number {
+  const baseHitChance = 0.8; // 80% base hit chance
+  const accuracyBonus = attacker.accuracy * 0.02;
+  const evasionPenalty = defender.evasion * 0.015;
+  const levelDifference = (attacker.level - defender.level) * 0.01;
+  
+  const hitChance = baseHitChance + accuracyBonus - evasionPenalty + levelDifference;
+  return Math.max(0.05, Math.min(0.95, hitChance)); // Clamp between 5% and 95%
+}
+
 // Singleton instance
 export const combatSystem = new CombatSystem();

@@ -1,0 +1,157 @@
+ FAIL  shared/__tests__/combat-system.test.ts
+  ● Test suite failed to run
+
+    shared/combat-system.ts:1:15 - error TS2305: Module '"./schema"' has no exported member 'CombatEntity'.
+
+    1 import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
+                    ~~~~~~~~~~~~
+    shared/combat-system.ts:1:29 - error TS2305: Module '"./schema"' has no exported member 'CombatAction'.
+
+    1 import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
+                                  ~~~~~~~~~~~~
+    shared/combat-system.ts:1:43 - error TS2305: Module '"./schema"' has no exported member 'CombatState'.
+
+    1 import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
+                                                ~~~~~~~~~~~
+    shared/combat-system.ts:1:56 - error TS2305: Module '"./schema"' has no exported member 'QueuedAction'.
+
+    1 import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
+                                                             ~~~~~~~~~~~~
+    shared/combat-system.ts:124:79 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    124     console.log("notifyListeners called", { entities: this.state.entities.map(e => ({ id: e.id, position: e.position })) });
+                                                                                      ~
+    shared/combat-system.ts:155:54 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    155     this.state.entities = this.state.entities.filter(e => e.id !== entityId);
+                                                             ~
+    shared/combat-system.ts:163:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    163     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:173:33 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    173     this.state.entities.forEach(e => e.isSelected = false);
+                                        ~
+    shared/combat-system.ts:177:47 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    177       const entity = this.state.entities.find(e => e.id === entityId);
+                                                      ~
+    shared/combat-system.ts:189:37 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    189     return this.state.entities.find(e => e.id === this.state.selectedEntityId) || null;
+                                            ~
+    shared/combat-system.ts:194:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    194     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:205:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    205     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:216:56 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    216     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
+                                                               ~~
+    shared/combat-system.ts:221:47 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    221       const target = this.state.entities.find(e => e.id === targetId);
+                                                      ~
+    shared/combat-system.ts:223:37 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    223         this.state.entities.forEach(e => {
+                                            ~
+    shared/combat-system.ts:235:47 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    235       const target = this.state.entities.find(e => e.id === targetId);
+                                                      ~
+    shared/combat-system.ts:275:56 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    275     const hostileEntities = this.state.entities.filter(e => e.type === 'hostile');
+                                                               ~
+    shared/combat-system.ts:276:51 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    276     const playerEntity = this.state.entities.find(e => e.id === 'player');
+                                                          ~
+    shared/combat-system.ts:282:29 - error TS7006: Parameter 'enemy' implicitly has an 'any' type.
+
+    282     hostileEntities.forEach(enemy => {
+                                    ~~~~~
+    shared/combat-system.ts:284:59 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    284       const hasQueuedAction = this.state.actionQueue.some(qa => qa.entityId === enemy.id);
+                                                                  ~~
+    shared/combat-system.ts:322:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    322     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:346:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    346     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:360:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    360     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:363:56 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    363     const existingAction = this.state.actionQueue.find(qa => qa.entityId === entityId);
+                                                               ~~
+    shared/combat-system.ts:403:52 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    403     const index = this.state.actionQueue.findIndex(qa => qa.entityId === entityId);
+                                                           ~~
+    shared/combat-system.ts:446:56 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    446     const readyActions = this.state.actionQueue.filter(qa => now >= qa.executesAt);
+                                                               ~~
+    shared/combat-system.ts:449:26 - error TS7006: Parameter 'queuedAction' implicitly has an 'any' type.
+
+    449     readyActions.forEach(queuedAction => {
+                                 ~~~~~~~~~~~~
+    shared/combat-system.ts:453:60 - error TS7006: Parameter 'qa' implicitly has an 'any' type.
+
+    453       const actionIndex = this.state.actionQueue.findIndex(qa =>
+                                                                   ~~
+    shared/combat-system.ts:469:76 - error TS7006: Parameter 'a' implicitly has an 'any' type.
+
+    469       console.log("processCombatTick: processed actions", readyActions.map(a => ({ entityId: a.entityId, action: a.action.id })));
+                                                                                   ~
+    shared/combat-system.ts:498:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    498     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+    shared/combat-system.ts:526:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    526     const target = this.state.entities.find(e => e.id === targetId);
+                                                    ~
+    shared/combat-system.ts:552:52 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    552             entity.effects = entity.effects.filter(e => e !== 'dodging');
+                                                           ~
+    shared/combat-system.ts:570:39 - error TS7006: Parameter 'entity' implicitly has an 'any' type.
+
+    570     return this.state.entities.filter(entity => {
+                                              ~~~~~~
+    shared/combat-system.ts:580:39 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    580     return this.state.entities.filter(e => e.type === 'hostile');
+                                              ~
+    shared/combat-system.ts:584:39 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    584     return this.state.entities.filter(e => e.type === 'player' || e.type === 'neutral');
+                                              ~
+    shared/combat-system.ts:664:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    664     const player = this.state.entities.find(e => e.id === 'player');
+                                                    ~
+    shared/combat-system.ts:676:45 - error TS7006: Parameter 'e' implicitly has an 'any' type.
+
+    676     const entity = this.state.entities.find(e => e.id === entityId);
+                                                    ~
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        15.156 s, estimated 16 s
+Ran all test suites.
