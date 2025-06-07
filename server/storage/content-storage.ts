@@ -50,7 +50,25 @@ export class ContentStorage extends BaseStorage {
     return backgrounds[0].story;
   }
 
-  
+  async getRandomPreDungeonJob(): Promise<string> {
+    const jobs = await db.select().from(preDungeonJobs);
+    
+    if (jobs.length === 0) {
+      return "Office Worker";
+    }
+    
+    const totalWeight = jobs.reduce((sum, job) => sum + (job.weight || 1), 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const job of jobs) {
+      random -= (job.weight || 1);
+      if (random <= 0) {
+        return job.jobTitle;
+      }
+    }
+    
+    return jobs[0].jobTitle;
+  }
 
   async getRandomCorporationPrefix(): Promise<string> {
     const prefixes = await db.select().from(corporationPrefixes);
@@ -143,28 +161,6 @@ export class ContentStorage extends BaseStorage {
     const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, Math.min(count, allCompetencies.length)).map(c => c.name);
   }
-
-  async getRandomPreDungeonJob(): Promise<string> {
-    const jobs = await db.select().from(preDungeonJobs);
-    
-    if (jobs.length === 0) {
-      return "office clerk";
-    }
-    
-    const totalWeight = jobs.reduce((sum, job) => sum + (job.weight || 1), 0);
-    let random = Math.random() * totalWeight;
-    
-    for (const job of jobs) {
-      random -= (job.weight || 1);
-      if (random <= 0) {
-        return job.name;
-      }
-    }
-    
-    return jobs[0].name;
-  }
-
-  
 
   async getStartingEquipment(backgroundText: string): Promise<any[]> {
     const equipment = [];

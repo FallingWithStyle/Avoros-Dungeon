@@ -142,15 +142,17 @@ export class CrawlerStorage extends BaseStorage {
   async generateCrawlerCandidates(count = 30): Promise<any[]> {
     const candidates = [];
     const sharedSerial = Math.floor(Math.random() * 1000000);
+    const { ContentStorage } = await import("./content-storage");
+    const contentStorage = new ContentStorage();
 
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
-      const competencies = this.generateRandomCompetencies();
+      const competencies = await contentStorage.getRandomCompetencies();
       const background = await this.generateCrawlerBackground();
       const species = "human";
       const planetType = "earth-like";
       const name = await this.generateCrawlerName(species, planetType);
-      const startingEquipment = await this.generateStartingEquipment(background);
+      const startingEquipment = await contentStorage.getStartingEquipment(background);
 
       const statValues = [
         { name: "Combat", value: stats.attack, description: "Direct confrontation" },
@@ -246,60 +248,22 @@ export class CrawlerStorage extends BaseStorage {
     };
   }
 
-  private generateRandomCompetencies(): string[] {
-    const allCompetencies = [
-      "Scavenging", "Lock Picking", "Electronics", "First Aid", "Stealth",
-      "Combat Reflexes", "Jury Rigging", "Negotiation", "Intimidation", "Hacking",
-      "Demolitions", "Survival", "Leadership", "Marksmanship", "Athletics",
-      "Engineering", "Chemistry", "Psychology", "Linguistics", "Navigation",
-    ];
-
-    const numCompetencies = 2 + Math.floor(Math.random() * 3);
-    const shuffled = [...allCompetencies].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numCompetencies);
+  private async generateCrawlerName(species: string = "human", planetType: string = "earth-like"): Promise<string> {
+    const { ContentStorage } = await import("./content-storage");
+    const contentStorage = new ContentStorage();
+    
+    const firstName = await contentStorage.getRandomHumanFirstName();
+    const lastName = await contentStorage.getRandomHumanLastName();
+    return `${firstName} ${lastName}`;
   }
-
-  
 
   private async generateCrawlerBackground(): Promise<string> {
-    const job = await this.generatePreDungeonJob();
-    const desperateBackgrounds = [
-      "Hiding from ex-partner's criminal associates who want them dead",
-      "Fled into the dungeon after witnessing a mob assassination",
-      "Chasing their missing sibling who entered the dungeon weeks ago",
-    ];
-
-    const reason = desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
-    return `Former ${job}. ${reason}`;
-  }
-
-  private async generatePreDungeonJob(): Promise<string> {
-    const jobs = [
-      "office clerk", "cashier", "data entry specialist", "customer service representative",
-      "insurance adjuster", "tax preparer", "filing clerk", "receptionist",
-      "bookkeeper", "security guard", "janitor", "mail carrier",
-    ];
-    return jobs[Math.floor(Math.random() * jobs.length)];
-  }
-
-  private async generateCrawlerName(species: string = "human", planetType: string = "earth-like"): Promise<string> {
-    const firstNames = [
-      "Aaron", "Adam", "Adrian", "Albert", "Alexander", "Andrew", "Anthony",
-      "Arthur", "Benjamin", "Brian", "Bruce", "Carl", "Charles", "Christopher",
-      "Daniel", "David", "Dennis", "Donald", "Douglas", "Edward", "Eric",
-      "Alice", "Amanda", "Amy", "Andrea", "Angela", "Anna", "Anne", "Barbara",
-      "Betty", "Beverly", "Brenda", "Carol", "Catherine", "Christine", "Cynthia",
-    ];
-
-    const lastNames = [
-      "Adams", "Allen", "Anderson", "Baker", "Barnes", "Bell", "Bennett",
-      "Brooks", "Brown", "Butler", "Campbell", "Carter", "Clark", "Collins",
-      "Cooper", "Cox", "Davis", "Edwards", "Evans", "Fisher", "Foster",
-    ];
-
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    return `${firstName} ${lastName}`;
+    const { ContentStorage } = await import("./content-storage");
+    const contentStorage = new ContentStorage();
+    
+    const job = await contentStorage.getRandomPreDungeonJob();
+    const backgroundStory = await contentStorage.getRandomCrawlerBackground("desperate");
+    return `Former ${job}. ${backgroundStory}`;
   }
 
   private shuffleArray<T>(array: T[]): T[] {
