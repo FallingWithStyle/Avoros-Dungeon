@@ -15,7 +15,6 @@ import {
   Shield,
   Gem,
   Skull,
-  DoorOpen,
   Home,
   ArrowDown,
   Maximize2,
@@ -25,7 +24,7 @@ import {
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
 
-interface MapProps {
+interface DungeonMapProps {
   crawler: CrawlerWithDetails;
 }
 
@@ -58,7 +57,6 @@ interface Faction {
   color: string;
 }
 
-// Helper function to get the icon for a room
 const getRoomIcon = (
   room: ExploredRoom,
   isExpanded: boolean = false,
@@ -287,7 +285,7 @@ const getFactionBorderStyle = (
   };
 };
 
-export default function Map(props: MapProps | undefined) {
+export default function DungeonMap(props: DungeonMapProps | undefined) {
   const crawler = props?.crawler;
   if (!crawler) {
     return <div>Loading crawler data...</div>;
@@ -342,6 +340,19 @@ export default function Map(props: MapProps | undefined) {
     staleTime: 30000,
     retry: false,
   });
+
+  // All rooms that exist on the floor (by (x, y)), regardless of exploration status
+  const allFloorRooms: ExploredRoom[] = Array.from(
+    new Map(
+      [...(exploredRooms ?? []), ...(scannedRooms ?? [])].map((room) => [
+        `${room.x},${room.y}`,
+        room,
+      ]),
+    ).values(),
+  );
+  const realRoomCoords = new Set(
+    allFloorRooms.map((room) => `${room.x},${room.y}`),
+  );
 
   // Filter for current floor
   const floorRooms =
@@ -502,26 +513,34 @@ export default function Map(props: MapProps | undefined) {
 
   // Build roomMapMini: explored, scanned, and unexplored neighbors
   const roomMapMini = new Map<string, ExploredRoom>();
-  floorRooms.forEach((room) => {
-    roomMapMini.set(`${room.x},${room.y}`, {
-      ...room,
-      isCurrentRoom: room.id === actualCurrentRoomId,
+  if (floorRooms && Array.isArray(floorRooms)) {
+    floorRooms.forEach((room) => {
+      if (room && typeof room.x === "number" && typeof room.y === "number") {
+        roomMapMini.set(`${room.x},${room.y}`, {
+          ...room,
+          isCurrentRoom: room.id === actualCurrentRoomId,
+        });
+      }
     });
-  });
-  floorScannedRooms.forEach((room) => {
-    const key = `${room.x},${room.y}`;
-    if (!roomMapMini.has(key)) {
-      roomMapMini.set(key, {
-        ...room,
-        isScanned: true,
-        isCurrentRoom: room.id === actualCurrentRoomId,
-      });
-    }
-  });
+  }
+  if (floorScannedRooms && Array.isArray(floorScannedRooms)) {
+    floorScannedRooms.forEach((room) => {
+      if (room && typeof room.x === "number" && typeof room.y === "number") {
+        const key = `${room.x},${room.y}`;
+        if (!roomMapMini.has(key)) {
+          roomMapMini.set(key, {
+            ...room,
+            isScanned: true,
+            isCurrentRoom: room.id === actualCurrentRoomId,
+          });
+        }
+      }
+    });
+  }
 
-  // Add unexplored neighbors
-  const addUnexploredNeighbors = () => {
-    const roomsToCheck = Array.from(roomMapMini.values());
+  // Add unexplored neighbors ONLY IF that coordinate is a real room
+  const addUnexploredNeighbors = (roomMap: Map<string, ExploredRoom>) => {
+    const roomsToCheck = Array.from(roomMap.values());
     roomsToCheck.forEach((room) => {
       if (room && (room.isExplored || room.isScanned)) {
         const neighbors = [
@@ -532,8 +551,8 @@ export default function Map(props: MapProps | undefined) {
         ];
         neighbors.forEach(([x, y]) => {
           const key = `${x},${y}`;
-          if (!roomMapMini.has(key)) {
-            roomMapMini.set(key, {
+          if (realRoomCoords.has(key) && !roomMap.has(key)) {
+            roomMap.set(key, {
               id: `unexplored-${x}-${y}`,
               name: "Unexplored Neighbor",
               type: "unknown",
@@ -553,9 +572,8 @@ export default function Map(props: MapProps | undefined) {
       }
     });
   };
-  addUnexploredNeighbors();
+  addUnexploredNeighbors(roomMapMini);
 
-  // Only connect real rooms (explored or scanned, not unexplored neighbor)
   const isRealRoom = (room: ExploredRoom | undefined) =>
     room &&
     !room.isUnexploredNeighbor &&
@@ -599,9 +617,11 @@ export default function Map(props: MapProps | undefined) {
               </DialogHeader>
               <div className="flex-1 w-full h-full min-h-0">
                 <ExpandedMapView
-                  exploredRooms={[...roomMapMini.values()]}
+                  allFloorRooms={allFloorRooms}
                   factions={factions}
                   actualCurrentRoomId={actualCurrentRoomId}
+                  realRoomCoords={realRoomCoords}
+                  floorId={crawler.currentFloor}
                 />
               </div>
             </DialogContent>
@@ -744,7 +764,6 @@ export default function Map(props: MapProps | undefined) {
               </div>
             </div>
           </div>
-          {/* Legend */}
           <div className="mt-4 space-y-1 text-xs">
             <div className="font-medium text-slate-300 mb-2">Legend:</div>
             <div className="grid grid-cols-2 gap-1 text-slate-400">
@@ -797,9 +816,11 @@ export default function Map(props: MapProps | undefined) {
 }
 
 interface ExpandedMapViewProps {
-  exploredRooms: ExploredRoom[];
+  allFloorRooms: ExploredRoom[];
   factions: Faction[];
   actualCurrentRoomId?: number | string;
+  realRoomCoords: Set<string>;
+  floorId: number | string;
 }
 
 let expandedMapScale = 0.7;
@@ -840,9 +861,11 @@ function ExpandedMapControls() {
 }
 
 function ExpandedMapView({
-  exploredRooms,
+  allFloorRooms,
   factions,
   actualCurrentRoomId,
+  realRoomCoords,
+  floorId,
 }: ExpandedMapViewProps) {
   const [scale, setScale] = useState(expandedMapScale);
   const [panOffset, setPanOffset] = useState(expandedMapPanOffset);
@@ -892,10 +915,10 @@ function ExpandedMapView({
         (keys.has("s") ? moveSpeed : 0) + (keys.has("w") ? -moveSpeed : 0);
       if (deltaX !== 0 || deltaY !== 0) {
         setPanOffset((current) => {
-          const minX = Math.min(...exploredRooms.map((r) => r.x));
-          const maxX = Math.max(...exploredRooms.map((r) => r.x));
-          const minY = Math.min(...exploredRooms.map((r) => r.y));
-          const maxY = Math.max(...exploredRooms.map((r) => r.y));
+          const minX = Math.min(...allFloorRooms.map((r) => r.x));
+          const maxX = Math.max(...allFloorRooms.map((r) => r.x));
+          const minY = Math.min(...allFloorRooms.map((r) => r.y));
+          const maxY = Math.max(...allFloorRooms.map((r) => r.y));
           const mapWidthCells = maxX - minX + 1;
           const mapHeightCells = maxY - minY + 1;
           const paddingX = Math.ceil(mapWidthCells * 0.1);
@@ -918,7 +941,7 @@ function ExpandedMapView({
       }
     }, 16);
     return () => clearInterval(interval);
-  }, [keys, scale, exploredRooms]);
+  }, [keys, scale, allFloorRooms]);
 
   const handleWheel = (e: React.WheelEvent) => {
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
@@ -937,10 +960,10 @@ function ExpandedMapView({
     if (isDragging) {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
-      const minX = Math.min(...exploredRooms.map((r) => r.x));
-      const maxX = Math.max(...exploredRooms.map((r) => r.x));
-      const minY = Math.min(...exploredRooms.map((r) => r.y));
-      const maxY = Math.max(...exploredRooms.map((r) => r.y));
+      const minX = Math.min(...allFloorRooms.map((r) => r.x));
+      const maxX = Math.max(...allFloorRooms.map((r) => r.x));
+      const minY = Math.min(...allFloorRooms.map((r) => r.y));
+      const maxY = Math.max(...allFloorRooms.map((r) => r.y));
       const mapWidthCells = maxX - minX + 1;
       const mapHeightCells = maxY - minY + 1;
       const paddingX = Math.ceil(mapWidthCells * 0.1);
@@ -963,32 +986,68 @@ function ExpandedMapView({
   };
   const handleMouseUp = () => setIsDragging(false);
 
-  if (!exploredRooms || exploredRooms.length === 0) {
+  if (!allFloorRooms || allFloorRooms.length === 0) {
     return (
       <div className="h-96 flex items-center justify-center text-slate-400">
         No rooms explored yet on this floor
       </div>
     );
   }
-  const minX = Math.min(...exploredRooms.map((r) => r.x));
-  const maxX = Math.max(...exploredRooms.map((r) => r.x));
-  const minY = Math.min(...exploredRooms.map((r) => r.y));
-  const maxY = Math.max(...exploredRooms.map((r) => r.y));
-  // Build roomMap for expanded view
-  const roomMapExpanded = new Map<string, ExploredRoom>();
 
-  if (exploredRooms && Array.isArray(exploredRooms)) {
-    exploredRooms.forEach((room) => {
-      if (room && typeof room.x === "number" && typeof room.y === "number") {
-        roomMapExpanded.set(`${room.x},${room.y}`, room);
+  // Build the expanded map: include all rooms, and add unexplored neighbors only where a real room exists
+  const roomMapExpanded = new Map<string, ExploredRoom>();
+  allFloorRooms.forEach((room) => {
+    if (room && typeof room.x === "number" && typeof room.y === "number") {
+      roomMapExpanded.set(`${room.x},${room.y}`, room);
+    }
+  });
+
+  // Add unexplored neighbors ONLY IF that coordinate is a real room
+  const addUnexploredNeighbors = (roomMap: Map<string, ExploredRoom>) => {
+    const roomsToCheck = Array.from(roomMap.values());
+    roomsToCheck.forEach((room) => {
+      if (room && (room.isExplored || room.isScanned)) {
+        const neighbors = [
+          [room.x + 1, room.y],
+          [room.x - 1, room.y],
+          [room.x, room.y + 1],
+          [room.x, room.y - 1],
+        ];
+        neighbors.forEach(([x, y]) => {
+          const key = `${x},${y}`;
+          if (realRoomCoords.has(key) && !roomMap.has(key)) {
+            roomMap.set(key, {
+              id: `unexplored-${x}-${y}`,
+              name: "Unexplored Neighbor",
+              type: "unknown",
+              environment: "unknown",
+              isSafe: false,
+              hasLoot: false,
+              x,
+              y,
+              floorId,
+              isCurrentRoom: false,
+              isExplored: false,
+              isScanned: false,
+              isUnexploredNeighbor: true,
+            });
+          }
+        });
       }
     });
-  }
-  // Only connect real rooms (not unexplored neighbors)
+  };
+  addUnexploredNeighbors(roomMapExpanded);
+
+  const minX = Math.min(...allFloorRooms.map((r) => r.x));
+  const maxX = Math.max(...allFloorRooms.map((r) => r.x));
+  const minY = Math.min(...allFloorRooms.map((r) => r.y));
+  const maxY = Math.max(...allFloorRooms.map((r) => r.y));
+
   const isRealRoom = (room: ExploredRoom | undefined) =>
     room &&
     !room.isUnexploredNeighbor &&
     (room.isExplored || room.isScanned || room.isCurrentRoom);
+
   const hasConnectionExpanded = (
     x1: number,
     y1: number,
