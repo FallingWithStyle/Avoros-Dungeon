@@ -1036,8 +1036,65 @@ function ExpandedMapView({
   ) => {
     const room1 = roomMapExpanded.get(`${x1},${y1}`);
     const room2 = roomMapExpanded.get(`${x2},${y2}`);
-    return isRealRoom(room1) && isRealRoom(room2);
+    
+    // Allow connections if at least one room is real and both rooms exist
+    if (!room1 || !room2) return false;
+    
+    // Connection exists if at least one room is explored/scanned
+    return isRealRoom(room1) || isRealRoom(room2);
   };
+
+  // Auto-center on current room
+  useEffect(() => {
+    const currentRoom = allFloorRooms.find(r => r.id === actualCurrentRoomId);
+    if (currentRoom) {
+      // Calculate where the current room should be positioned to be centered
+      const roomSize = 48; // w-12 h-12 in pixels
+      const spacing = 8; // gap-2 in pixels
+      const cellSize = roomSize + spacing;
+      
+      // Find current room's position in the grid
+      const currentRoomX = currentRoom.x;
+      const currentRoomY = currentRoom.y;
+      
+      // Calculate grid position
+      const roomCol = currentRoomX - minX;
+      const roomRow = maxY - currentRoomY;
+      
+      // Convert to pixel position (accounting for grid structure with connections)
+      const pixelX = roomCol * 2 * cellSize;
+      const pixelY = roomRow * 2 * cellSize;
+      
+      // Center the current room in the viewport
+      const containerWidth = 900;
+      const containerHeight = 600;
+      const centerX = containerWidth / 2;
+      const centerY = containerHeight / 2;
+      
+      const newOffset = {
+        x: centerX - pixelX - roomSize / 2,
+        y: centerY - pixelY - roomSize / 2
+      };
+      
+      // Apply bounds checking
+      const mapWidthCells = maxX - minX + 1;
+      const mapHeightCells = maxY - minY + 1;
+      const paddingX = Math.ceil(mapWidthCells * 0.1);
+      const paddingY = Math.ceil(mapHeightCells * 0.1);
+      const paddedWidth = ((mapWidthCells + paddingX * 2) * 2 - 1) * 48 * scale + 16;
+      const paddedHeight = ((mapHeightCells + paddingY * 2) * 2 - 1) * 48 * scale + 16;
+      const maxPanX = Math.max(0, (paddedWidth - containerWidth) / 2);
+      const maxPanY = Math.max(0, (paddedHeight - containerHeight) / 2);
+      
+      const boundedOffset = {
+        x: Math.max(-maxPanX, Math.min(maxPanX, newOffset.x)),
+        y: Math.max(-maxPanY, Math.min(maxPanY, newOffset.y))
+      };
+      
+      setPanOffset(boundedOffset);
+      expandedMapPanOffset = boundedOffset;
+    }
+  }, [actualCurrentRoomId, allFloorRooms, minX, maxX, minY, maxY, scale]);
 
   return (
     <div className="h-full">
