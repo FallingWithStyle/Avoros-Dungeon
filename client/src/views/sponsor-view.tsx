@@ -101,14 +101,14 @@ export default function SponsorView() {
             </Card>
           </div>
 
-          {/* Middle Column - Season Status & Activity Feed */}
-          <div className="space-y-6">
-            <SeasonStatus />
+          {/* Middle Column - Activity Feed */}
+          <div>
             <ActivityFeed />
           </div>
 
-          {/* Right Column - Leaderboard */}
-          <div>
+          {/* Right Column - Season Status & Leaderboard */}
+          <div className="space-y-6">
+            <SeasonStatus />
             <Leaderboard />
           </div>
         </div>

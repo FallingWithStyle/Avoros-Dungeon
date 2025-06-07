@@ -84,42 +84,46 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
         </div>
 
-        {/* Core Stats Grid - Fixed height */}
-        <div className="grid grid-cols-3 gap-3 mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50 h-20">
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">ATK</div>
-            <div className="text-lg font-bold text-red-400">
-              {crawler.attack}
+        {/* Core Stats Grid - Fixed height with proper spacing */}
+        <div className="mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">ATK</div>
+              <div className="text-lg font-bold text-red-400">
+                {crawler.attack}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">DEF</div>
+              <div className="text-lg font-bold text-blue-400">
+                {crawler.defense}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">SPD</div>
+              <div className="text-lg font-bold text-green-400">
+                {crawler.speed}
+              </div>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">DEF</div>
-            <div className="text-lg font-bold text-blue-400">
-              {crawler.defense}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">WIT</div>
+              <div className="text-lg font-bold text-purple-400">
+                {crawler.wit}
+              </div>
             </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">SPD</div>
-            <div className="text-lg font-bold text-green-400">
-              {crawler.speed}
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">CHA</div>
+              <div className="text-lg font-bold text-yellow-400">
+                {crawler.charisma}
+              </div>
             </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">WIT</div>
-            <div className="text-lg font-bold text-purple-400">
-              {crawler.wit}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">CHA</div>
-            <div className="text-lg font-bold text-yellow-400">
-              {crawler.charisma}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-slate-400 mb-1">MEM</div>
-            <div className="text-lg font-bold text-cyan-400">
-              {crawler.memory}
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">MEM</div>
+              <div className="text-lg font-bold text-cyan-400">
+                {crawler.memory}
+              </div>
             </div>
           </div>
         </div>
