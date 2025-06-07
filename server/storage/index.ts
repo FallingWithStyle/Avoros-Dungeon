@@ -5,6 +5,9 @@ import { ContentStorage } from "./content-storage";
 import type { IStorage } from "../storage";
 import { CorporationStorage } from "./corporation-storage";
 
+// Export the interface for type checking
+export type { IStorage };
+
 // Main storage orchestrator that combines all storage modules
 export class ModularStorage implements IStorage {
   private userStorage = new UserStorage();
