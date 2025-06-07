@@ -288,6 +288,22 @@ const getFactionBorderStyle = (
 };
 
 export default function Map({ crawler }: MapProps) {
+  if (!crawler) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Mini-Map
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-slate-400">Loading crawler data...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [isMoving, setIsMoving] = useState(false);
   const [previousCurrentRoom, setPreviousCurrentRoom] =
     useState<ExploredRoom | null>(null);
