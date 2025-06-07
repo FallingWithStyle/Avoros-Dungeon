@@ -856,8 +856,7 @@ function ExpandedMapView({
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    expandedMapSetters = { setScale, setPanOffset };
+  useEffect(() => {    expandedMapSetters = { setScale, setPanOffset };
     return () => {
       expandedMapSetters = null;
     };

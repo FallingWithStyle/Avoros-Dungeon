@@ -1,4 +1,3 @@
-
 import type { CombatEntity, CombatAction, CombatState, QueuedAction } from "./schema";
 
 export interface CombatEntity {
@@ -387,7 +386,7 @@ export class CombatSystem {
     console.log("queueMoveAction:", queuedAction);
 
     this.notifyListeners();
-    
+
     // Generate event for the action (only in client environment)
     if (typeof window !== 'undefined') {
       import('./events-system').then(({ eventsSystem }) => {
