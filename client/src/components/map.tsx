@@ -307,7 +307,21 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     }
 
     // Check for safe rooms first (including entrance)
-    if (room.isSafe) {</old_str>
+    if (room.isSafe) {
+      return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
+    }
+
+    switch (room.type) {
+      case "treasure":
+        return hasFactionBorder ? "bg-yellow-600/20" : "bg-yellow-600/20 border-yellow-600/50";
+      case "boss":
+      case "exit":
+        return hasFactionBorder ? "bg-red-600/20" : "bg-red-600/20 border-red-600/50";
+      case "stairs":
+        return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
+      default:
+        return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
+    }</old_str>
 
     // Check for safe rooms first (including entrance)
     if (room.isSafe) {
