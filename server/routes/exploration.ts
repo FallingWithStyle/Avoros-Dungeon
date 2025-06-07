@@ -72,6 +72,25 @@ export function registerExplorationRoutes(app: Express) {
     }
   });
 
+  app.get("/api/crawlers/:id/scanned-rooms", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Use the crawler's effective scan range (includes bonuses from spells/equipment)
+      const scanRange = crawler.scanRange || 2; // Default scan range of 2
+      const scannedRooms = await storage.getScannedRooms(crawlerId, scanRange);
+      res.json(scannedRooms);
+    } catch (error) {
+      console.error("Error fetching scanned rooms:", error);
+      res.status(500).json({ message: "Failed to fetch scanned rooms" });
+    }
+  });
+
   app.post("/api/crawlers/:id/move", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);

@@ -135,6 +135,10 @@ export class ModularStorage implements IStorage {
     return this.explorationStorage.getExploredRooms(crawlerId);
   }
 
+  async getScannedRooms(crawlerId: number, scanRange: number) {
+    return this.explorationStorage.getScannedRooms(crawlerId, scanRange);
+  }
+
   async getFloorBounds(floorId: number) {
     return this.explorationStorage.getFloorBounds(floorId);
   }

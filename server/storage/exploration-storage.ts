@@ -247,6 +247,61 @@ export class ExplorationStorage extends BaseStorage {
     }));
   }
 
+  async getScannedRooms(crawlerId: number, scanRange: number): Promise<any[]> {
+    // Get current position
+    const [currentPosition] = await db
+      .select()
+      .from(crawlerPositions)
+      .where(eq(crawlerPositions.crawlerId, crawlerId))
+      .orderBy(desc(crawlerPositions.enteredAt))
+      .limit(1);
+
+    if (!currentPosition) {
+      return [];
+    }
+
+    const currentRoom = await this.getRoom(currentPosition.roomId);
+    if (!currentRoom) {
+      return [];
+    }
+
+    // Get all rooms within scan range on the same floor
+    const nearbyRooms = await db
+      .select()
+      .from(rooms)
+      .where(
+        and(
+          eq(rooms.floorId, currentRoom.floorId),
+          sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`
+        )
+      );
+
+    // Get visited rooms to mark them as explored
+    const visitedRooms = await db
+      .select({ roomId: crawlerPositions.roomId })
+      .from(crawlerPositions)
+      .where(eq(crawlerPositions.crawlerId, crawlerId));
+
+    const visitedRoomIds = new Set(visitedRooms.map(vr => vr.roomId));
+
+    return nearbyRooms.map(room => ({
+      id: room.id,
+      name: room.name,
+      description: visitedRoomIds.has(room.id) ? room.description : "Detected by scan",
+      type: room.type,
+      environment: room.environment,
+      isSafe: room.isSafe,
+      hasLoot: room.hasLoot,
+      x: room.x,
+      y: room.y,
+      floorId: room.floorId,
+      isCurrentRoom: room.id === currentPosition.roomId,
+      isExplored: visitedRoomIds.has(room.id),
+      isScanned: !visitedRoomIds.has(room.id),
+      factionId: room.factionId,
+    }));
+  }
+
   async getFloorBounds(floorId: number): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
     const floorRooms = await db
       .select({ x: rooms.x, y: rooms.y })
