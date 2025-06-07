@@ -46,7 +46,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, asc, like, inArray, not } from "drizzle-orm";
-import { ModularStorage } from "./storage";
+import { ModularStorage } from "./storage/index";
 
 // Re-export the main storage instance
 export const storage = new ModularStorage();
