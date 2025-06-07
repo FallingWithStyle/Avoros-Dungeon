@@ -146,10 +146,10 @@ export class CrawlerStorage extends BaseStorage {
     for (let i = 0; i < count; i++) {
       const stats = this.generateRandomStats();
       const competencies = this.generateRandomCompetencies();
-      const background = this.generateCrawlerBackground();
+      const background = await this.generateCrawlerBackground();
       const species = "human";
       const planetType = "earth-like";
-      const name = this.generateCrawlerName(species, planetType);
+      const name = await this.generateCrawlerName(species, planetType);
       const startingEquipment = await this.generateStartingEquipment(background);
 
       const statValues = [
@@ -259,7 +259,30 @@ export class CrawlerStorage extends BaseStorage {
     return shuffled.slice(0, numCompetencies);
   }
 
-  private generateCrawlerName(species: string = "human", planetType: string = "earth-like"): string {
+  
+
+  private async generateCrawlerBackground(): Promise<string> {
+    const job = await this.generatePreDungeonJob();
+    const desperateBackgrounds = [
+      "Hiding from ex-partner's criminal associates who want them dead",
+      "Fled into the dungeon after witnessing a mob assassination",
+      "Chasing their missing sibling who entered the dungeon weeks ago",
+    ];
+
+    const reason = desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
+    return `Former ${job}. ${reason}`;
+  }
+
+  private async generatePreDungeonJob(): Promise<string> {
+    const jobs = [
+      "office clerk", "cashier", "data entry specialist", "customer service representative",
+      "insurance adjuster", "tax preparer", "filing clerk", "receptionist",
+      "bookkeeper", "security guard", "janitor", "mail carrier",
+    ];
+    return jobs[Math.floor(Math.random() * jobs.length)];
+  }
+
+  private async generateCrawlerName(species: string = "human", planetType: string = "earth-like"): Promise<string> {
     const firstNames = [
       "Aaron", "Adam", "Adrian", "Albert", "Alexander", "Andrew", "Anthony",
       "Arthur", "Benjamin", "Brian", "Bruce", "Carl", "Charles", "Christopher",
@@ -277,27 +300,6 @@ export class CrawlerStorage extends BaseStorage {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     return `${firstName} ${lastName}`;
-  }
-
-  private generateCrawlerBackground(): string {
-    const job = this.generatePreDungeonJob();
-    const desperateBackgrounds = [
-      "Hiding from ex-partner's criminal associates who want them dead",
-      "Fled into the dungeon after witnessing a mob assassination",
-      "Chasing their missing sibling who entered the dungeon weeks ago",
-    ];
-
-    const reason = desperateBackgrounds[Math.floor(Math.random() * desperateBackgrounds.length)];
-    return `Former ${job}. ${reason}`;
-  }
-
-  private generatePreDungeonJob(): string {
-    const jobs = [
-      "office clerk", "cashier", "data entry specialist", "customer service representative",
-      "insurance adjuster", "tax preparer", "filing clerk", "receptionist",
-      "bookkeeper", "security guard", "janitor", "mail carrier",
-    ];
-    return jobs[Math.floor(Math.random() * jobs.length)];
   }
 
   private shuffleArray<T>(array: T[]): T[] {
