@@ -15,14 +15,22 @@ import {
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
+import { redisService } from "../lib/redis-service";
 
 export class ContentStorage extends BaseStorage {
   
   async getRandomCrawlerBackground(category: string = "desperate"): Promise<string> {
-    const backgrounds = await db
-      .select()
-      .from(crawlerBackgrounds)
-      .where(eq(crawlerBackgrounds.category, category));
+    const cacheKey = `backgrounds:${category}`;
+    let backgrounds = await redisService.getContentData(cacheKey);
+    
+    if (!backgrounds) {
+      backgrounds = await db
+        .select()
+        .from(crawlerBackgrounds)
+        .where(eq(crawlerBackgrounds.category, category));
+      
+      await redisService.setContentData(cacheKey, backgrounds);
+    }
     
     if (backgrounds.length === 0) {
       return "A person with a mysterious past seeking fortune in the depths.";
@@ -270,6 +278,9 @@ export class ContentStorage extends BaseStorage {
     description: string;
     roomTypes: Array<{ name: string; description: string }>;
   } | null> {
+    const cached = await redisService.getFloorTheme(floorNumber);
+    if (cached) return cached;
+
     const [theme] = await db
       .select()
       .from(floorThemes)
@@ -282,7 +293,7 @@ export class ContentStorage extends BaseStorage {
       .from(roomTypes)
       .where(eq(roomTypes.floorThemeId, theme.id));
 
-    return {
+    const result = {
       name: theme.name,
       description: theme.description,
       roomTypes: themeRoomTypes.map(rt => ({
@@ -290,6 +301,9 @@ export class ContentStorage extends BaseStorage {
         description: rt.description,
       })),
     };
+
+    await redisService.setFloorTheme(floorNumber, result);
+    return result;
   }
 
   async addCrawlerBackground(category: string, story: string, weight: number = 1): Promise<void> {
