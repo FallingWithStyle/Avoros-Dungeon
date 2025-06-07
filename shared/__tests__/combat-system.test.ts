@@ -4,9 +4,23 @@ import { calculateDamage, calculateHitChance, CombatSystem, type CombatEntity } 
 describe('Combat System', () => {
   let combatSystem: CombatSystem;
 
+  // Mock console.log to reduce test output overhead
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
-    // Mock timers for faster tests
+    // Mock timers before creating the combat system
     jest.useFakeTimers();
+    // Mock setTimeout and setInterval specifically
+    jest.spyOn(global, 'setTimeout');
+    jest.spyOn(global, 'setInterval');
+    jest.spyOn(global, 'clearInterval');
+    
     combatSystem = new CombatSystem();
     // Stop automatic processing during tests
     combatSystem.stopCombatProcessing();
@@ -27,8 +41,9 @@ describe('Combat System', () => {
       combatSystem.getState().actionQueue.pop();
     }
     
-    // Clean up timers
-    jest.runOnlyPendingTimers();
+    // Clean up timers more aggressively
+    jest.clearAllTimers();
+    jest.restoreAllMocks();
     jest.useRealTimers();
   });
 
