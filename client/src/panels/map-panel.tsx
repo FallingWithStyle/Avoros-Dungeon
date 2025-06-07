@@ -1,5 +1,5 @@
 import React from "react";
-import Map from "@/components/map";
+import DungeonMap from "@/components/dungeon-map";
 import { CrawlerWithDetails } from "@shared/schema";
 
 interface MapPanelProps {
@@ -14,7 +14,7 @@ export default function MapPanel({ crawler }: MapPanelProps) {
 
   return (
     <div className="space-y-4">
-      <Map crawler={crawler} />
+      <DungeonMap crawler={crawler} />
     </div>
   );
 }
