@@ -341,18 +341,87 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
-  // All rooms that exist on the floor (by (x, y)), regardless of exploration status
-  const allFloorRooms: ExploredRoom[] = Array.from(
-    new Map(
-      [...(exploredRooms ?? []), ...(scannedRooms ?? [])].map((room) => [
-        `${room.x},${room.y}`,
-        room,
-      ]),
-    ).values(),
-  );
+  // Fetch ALL rooms on the current floor
+  const { data: allRoomsOnFloor = [] } = useQuery({
+    queryKey: [`/api/floors/${crawler.currentFloor}/rooms`],
+    refetchInterval: 60000, // Refresh every minute since floor layout doesn't change often
+    staleTime: 300000, // 5 minutes
+    retry: false,
+  });
+
+  // Create a set of all real room coordinates on the floor for adjacency checking
   const realRoomCoords = new Set(
-    allFloorRooms.map((room) => `${room.x},${room.y}`),
+    (allRoomsOnFloor ?? []).map((room: any) => `${room.x},${room.y}`)
   );
+
+  // Build the visible rooms map - only show what the player should see
+  const visibleRoomsMap = new Map<string, ExploredRoom>();
+
+  // 1. Add explored rooms
+  (exploredRooms ?? []).forEach((room) => {
+    if (room && typeof room.x === "number" && typeof room.y === "number") {
+      visibleRoomsMap.set(`${room.x},${room.y}`, {
+        ...room,
+        isCurrentRoom: room.id === actualCurrentRoomId,
+        isExplored: true,
+      });
+    }
+  });
+
+  // 2. Add scanned rooms (if not already explored)
+  (scannedRooms ?? []).forEach((room) => {
+    if (room && typeof room.x === "number" && typeof room.y === "number") {
+      const key = `${room.x},${room.y}`;
+      if (!visibleRoomsMap.has(key)) {
+        visibleRoomsMap.set(key, {
+          ...room,
+          isCurrentRoom: room.id === actualCurrentRoomId,
+          isExplored: false,
+          isScanned: true,
+        });
+      }
+    }
+  });
+
+  // 3. Add adjacent rooms to explored/scanned rooms (show as unknown with "?")
+  const addAdjacentRooms = () => {
+    const roomsToCheck = Array.from(visibleRoomsMap.values());
+    roomsToCheck.forEach((room) => {
+      if (room && (room.isExplored || room.isScanned)) {
+        const neighbors = [
+          [room.x + 1, room.y],
+          [room.x - 1, room.y],
+          [room.x, room.y + 1],
+          [room.x, room.y - 1],
+        ];
+        neighbors.forEach(([x, y]) => {
+          const key = `${x},${y}`;
+          // Only add if it's a real room and not already visible
+          if (realRoomCoords.has(key) && !visibleRoomsMap.has(key)) {
+            visibleRoomsMap.set(key, {
+              id: `adjacent-${x}-${y}`,
+              name: "Unexplored",
+              type: "unknown",
+              environment: "unknown",
+              isSafe: false,
+              hasLoot: false,
+              x,
+              y,
+              floorId: crawler.currentFloor,
+              isCurrentRoom: false,
+              isExplored: false,
+              isScanned: false,
+              isUnexploredNeighbor: true,
+            });
+          }
+        });
+      }
+    });
+  };
+  addAdjacentRooms();
+
+  // Convert to array for compatibility with existing code
+  const allFloorRooms: ExploredRoom[] = Array.from(visibleRoomsMap.values());
 
   // Filter for current floor
   const floorRooms =
@@ -511,68 +580,13 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   const minY = centerY - radius;
   const maxY = centerY + radius;
 
-  // Build roomMapMini: explored, scanned, and unexplored neighbors
+  // Use the same filtered visible rooms for mini-map
   const roomMapMini = new Map<string, ExploredRoom>();
-  if (floorRooms && Array.isArray(floorRooms)) {
-    floorRooms.forEach((room) => {
-      if (room && typeof room.x === "number" && typeof room.y === "number") {
-        roomMapMini.set(`${room.x},${room.y}`, {
-          ...room,
-          isCurrentRoom: room.id === actualCurrentRoomId,
-        });
-      }
-    });
-  }
-  if (floorScannedRooms && Array.isArray(floorScannedRooms)) {
-    floorScannedRooms.forEach((room) => {
-      if (room && typeof room.x === "number" && typeof room.y === "number") {
-        const key = `${room.x},${room.y}`;
-        if (!roomMapMini.has(key)) {
-          roomMapMini.set(key, {
-            ...room,
-            isScanned: true,
-            isCurrentRoom: room.id === actualCurrentRoomId,
-          });
-        }
-      }
-    });
-  }
-
-  // Add unexplored neighbors ONLY IF that coordinate is a real room
-  const addUnexploredNeighbors = (roomMap: Map<string, ExploredRoom>) => {
-    const roomsToCheck = Array.from(roomMap.values());
-    roomsToCheck.forEach((room) => {
-      if (room && (room.isExplored || room.isScanned)) {
-        const neighbors = [
-          [room.x + 1, room.y],
-          [room.x - 1, room.y],
-          [room.x, room.y + 1],
-          [room.x, room.y - 1],
-        ];
-        neighbors.forEach(([x, y]) => {
-          const key = `${x},${y}`;
-          if (realRoomCoords.has(key) && !roomMap.has(key)) {
-            roomMap.set(key, {
-              id: `unexplored-${x}-${y}`,
-              name: "Unexplored Neighbor",
-              type: "unknown",
-              environment: "unknown",
-              isSafe: false,
-              hasLoot: false,
-              x,
-              y,
-              floorId: crawler.currentFloor,
-              isCurrentRoom: false,
-              isExplored: false,
-              isScanned: false,
-              isUnexploredNeighbor: true,
-            });
-          }
-        });
-      }
-    });
-  };
-  addUnexploredNeighbors(roomMapMini);
+  allFloorRooms.forEach((room) => {
+    if (room && typeof room.x === "number" && typeof room.y === "number") {
+      roomMapMini.set(`${room.x},${room.y}`, room);
+    }
+  });
 
   const isRealRoom = (room: ExploredRoom | undefined) =>
     room &&
@@ -994,49 +1008,13 @@ function ExpandedMapView({
     );
   }
 
-  // Build the expanded map: include all rooms, and add unexplored neighbors only where a real room exists
+  // Use the same filtered rooms for expanded view - only show what player should see
   const roomMapExpanded = new Map<string, ExploredRoom>();
   allFloorRooms.forEach((room) => {
     if (room && typeof room.x === "number" && typeof room.y === "number") {
       roomMapExpanded.set(`${room.x},${room.y}`, room);
     }
   });
-
-  // Add unexplored neighbors ONLY IF that coordinate is a real room
-  const addUnexploredNeighbors = (roomMap: Map<string, ExploredRoom>) => {
-    const roomsToCheck = Array.from(roomMap.values());
-    roomsToCheck.forEach((room) => {
-      if (room && (room.isExplored || room.isScanned)) {
-        const neighbors = [
-          [room.x + 1, room.y],
-          [room.x - 1, room.y],
-          [room.x, room.y + 1],
-          [room.x, room.y - 1],
-        ];
-        neighbors.forEach(([x, y]) => {
-          const key = `${x},${y}`;
-          if (realRoomCoords.has(key) && !roomMap.has(key)) {
-            roomMap.set(key, {
-              id: `unexplored-${x}-${y}`,
-              name: "Unexplored Neighbor",
-              type: "unknown",
-              environment: "unknown",
-              isSafe: false,
-              hasLoot: false,
-              x,
-              y,
-              floorId,
-              isCurrentRoom: false,
-              isExplored: false,
-              isScanned: false,
-              isUnexploredNeighbor: true,
-            });
-          }
-        });
-      }
-    });
-  };
-  addUnexploredNeighbors(roomMapExpanded);
 
   const minX = Math.min(...allFloorRooms.map((r) => r.x));
   const maxX = Math.max(...allFloorRooms.map((r) => r.x));
