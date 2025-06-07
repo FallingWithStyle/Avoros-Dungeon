@@ -512,6 +512,21 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     });
   };
 
+  // Helper function to check if there should be a connection between two rooms
+  const hasConnection = (x1: number, y1: number, x2: number, y2: number) => {
+    const room1 = roomMap.get(`${x1},${y1}`);
+    const room2 = roomMap.get(`${x2},${y2}`);
+    
+    // Only show connections if both rooms exist (explored, scanned, or adjacent unknown)
+    if (!room1 || !room2) return false;
+    
+    // Show connection if either room is explored/scanned or if one is current room and other is adjacent
+    const room1Accessible = room1.isExplored || room1.isScanned || room1.isCurrentRoom;
+    const room2Accessible = room2.isExplored || room2.isScanned || room2.isCurrentRoom;
+    
+    return room1Accessible || room2Accessible;
+  };
+
   addAdjacentRooms();
 
   return (
@@ -626,7 +641,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                         const leftRoom = roomMap.get(`${leftX},${y}`);
                         const rightRoom = roomMap.get(`${rightX},${y}`);
 
-                        if (leftRoom && rightRoom) {
+                        if (hasConnection(leftX, y, rightX, y)) {
                           return (
                             <div
                               key={`h-${leftX}-${rightX}-${y}`}
@@ -652,7 +667,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                         const topRoom = roomMap.get(`${x},${topY}`);
                         const bottomRoom = roomMap.get(`${x},${bottomY}`);
 
-                        if (topRoom && bottomRoom) {
+                        if (hasConnection(x, topY, x, bottomY)) {
                           return (
                             <div
                               key={`v-${x}-${topY}-${bottomY}`}
@@ -990,6 +1005,21 @@ function ExpandedMapView({ exploredRooms, factions, actualCurrentRoomId }: Expan
     });
   };
 
+  // Helper function to check if there should be a connection between two rooms (expanded map)
+  const hasConnectionExpanded = (x1: number, y1: number, x2: number, y2: number) => {
+    const room1 = roomMap.get(`${x1},${y1}`);
+    const room2 = roomMap.get(`${x2},${y2}`);
+    
+    // Only show connections if both rooms exist (explored, scanned, or adjacent unknown)
+    if (!room1 || !room2) return false;
+    
+    // Show connection if either room is explored/scanned or if one is current room and other is adjacent
+    const room1Accessible = room1.isExplored || room1.isScanned || room1.id === actualCurrentRoomId;
+    const room2Accessible = room2.isExplored || room2.isScanned || room2.id === actualCurrentRoomId;
+    
+    return room1Accessible || room2Accessible;
+  };
+
   addAdjacentRoomsToExpanded();
 
   return (
@@ -1068,7 +1098,7 @@ function ExpandedMapView({ exploredRooms, factions, actualCurrentRoomId }: Expan
                   const leftRoom = roomMap.get(`${leftX},${y}`);
                   const rightRoom = roomMap.get(`${rightX},${y}`);
 
-                  if (leftRoom && rightRoom) {
+                  if (hasConnectionExpanded(leftX, y, rightX, y)) {
                     return (
                       <div
                         key={`h-${leftX}-${rightX}-${y}`}
@@ -1092,7 +1122,7 @@ function ExpandedMapView({ exploredRooms, factions, actualCurrentRoomId }: Expan
                   const topRoom = roomMap.get(`${x},${topY}`);
                   const bottomRoom = roomMap.get(`${x},${bottomY}`);
 
-                  if (topRoom && bottomRoom) {
+                  if (hasConnectionExpanded(x, topY, x, bottomY)) {
                     return (
                       <div
                         key={`v-${x}-${topY}-${bottomY}`}
