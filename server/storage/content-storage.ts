@@ -162,6 +162,44 @@ export class ContentStorage extends BaseStorage {
     return shuffled.slice(0, Math.min(count, allCompetencies.length)).map(c => c.name);
   }
 
+  async getRandomPreDungeonJob(): Promise<string> {
+    const jobs = await db.select().from(preDungeonJobs);
+    
+    if (jobs.length === 0) {
+      return "office clerk";
+    }
+    
+    const totalWeight = jobs.reduce((sum, job) => sum + (job.weight || 1), 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const job of jobs) {
+      random -= (job.weight || 1);
+      if (random <= 0) {
+        return job.name;
+      }
+    }
+    
+    return jobs[0].name;
+  }
+
+  async getStartingEquipment(background: string): Promise<any[]> {
+    const equipment = await db.select().from(startingEquipment);
+    
+    if (equipment.length === 0) {
+      return [
+        { name: "Emergency Rations", description: "Compressed nutrition bars" },
+        { name: "Multi-tool", description: "Basic cutting and repair implement" },
+      ];
+    }
+    
+    // For now, return a simple selection - in the future this could be based on background
+    const shuffled = [...equipment].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3).map(eq => ({
+      name: eq.name,
+      description: eq.description,
+    }));
+  }
+
   async getStartingEquipment(backgroundText: string): Promise<any[]> {
     const equipment = [];
     

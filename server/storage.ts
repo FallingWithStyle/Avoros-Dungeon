@@ -235,12 +235,12 @@ export class DatabaseStorage implements IStorage {
   private async generateRandomCompetencies(): Promise<string[]> {
     // Give each crawler 2-4 random competencies
     const numCompetencies = 2 + Math.floor(Math.random() * 3);
-    const storage = new Storage();
+    const { storage } = await import("./storage");
     return await storage.content.getRandomCompetencies(numCompetencies);
   }
 
   private async generatePreDungeonJob(): Promise<string> {
-    const storage = new Storage();
+    const { storage } = await import("./storage");
     return await storage.content.getRandomPreDungeonJob();
   }
 
@@ -251,7 +251,7 @@ export class DatabaseStorage implements IStorage {
     const categories = ["desperate", "wacky"];
     const category = categories[Math.floor(Math.random() * categories.length)];
 
-    const storage = new Storage();
+    const { storage } = await import("./storage");
     const backgroundStory = await storage.content.getRandomCrawlerBackground(category);
 
     return `Former ${job}. ${backgroundStory}`;
@@ -876,7 +876,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async generateStartingEquipment(background: string): Promise<any[]> {
-    const storage = new Storage();
+    const { storage } = await import("./storage");
     return await storage.content.getStartingEquipment(background);
   }
 
