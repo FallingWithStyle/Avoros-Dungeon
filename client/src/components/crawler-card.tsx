@@ -151,6 +151,13 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
 
           <div className="flex justify-between items-center">
+            <span className="text-sm text-slate-400">Health</span>
+            <span className="text-sm font-mono text-green-400">
+              {crawler.health}/{crawler.maxHealth}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Energy</span>
             <span className="text-sm font-mono text-blue-400">
               {crawler.energy}/{crawler.maxEnergy}
