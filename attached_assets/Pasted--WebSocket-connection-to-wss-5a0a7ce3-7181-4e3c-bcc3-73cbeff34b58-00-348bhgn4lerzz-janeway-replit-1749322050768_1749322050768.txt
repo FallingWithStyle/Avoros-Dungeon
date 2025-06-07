@@ -1,0 +1,1089 @@
+ WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=iws--A8c-aZq' failed: 
+setupWebSocket @ client:536
+/api/crawlers/110/explored-rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+/api/crawlers/110/current-room:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+/api/crawlers/110:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: mob-0
+ notifyListeners called Object
+ Combat state changed Object
+ removeEntity: npc-0
+ notifyListeners called Object
+ Combat state changed Object
+ updateEntity: player Object
+ notifyListeners called Object
+ Combat state changed Object
+ addEntity: Object
+ notifyListeners called Object
+ Combat state changed Object
+combat-system.ts:155 removeEntity: mob-0
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:150 addEntity: Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:155 removeEntity: npc-0
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:150 addEntity: Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:155 removeEntity: npc-0
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:150 addEntity: Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:155 removeEntity: mob-0
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:150 addEntity: Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:155 removeEntity: npc-0
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+combat-system.ts:167 updateEntity: player Object
+combat-system.ts:125 notifyListeners called Object
+tactical-view-panel.tsx:519 Combat state changed Object
+map.tsx:1045 Uncaught ReferenceError: getRoomColor is not defined
+    at map.tsx:1045:36
+    at Array.from (<anonymous>)
+    at ExpandedMapView (map.tsx:1020:20)
+    at renderWithHooks (chunk-WERSD76P.js?v=8cad5f40:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=8cad5f40:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=8cad5f40:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=8cad5f40:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=8cad5f40:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=8cad5f40:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=8cad5f40:19765:15)
+map.tsx:1045 Uncaught ReferenceError: getRoomColor is not defined
+    at map.tsx:1045:36
+    at Array.from (<anonymous>)
+    at ExpandedMapView (map.tsx:1020:20)
+    at renderWithHooks (chunk-WERSD76P.js?v=8cad5f40:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=8cad5f40:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=8cad5f40:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=8cad5f40:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=8cad5f40:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=8cad5f40:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=8cad5f40:19765:15)
+chunk-WERSD76P.js?v=8cad5f40:14032 The above error occurred in the <ExpandedMapView> component:
+
+    at ExpandedMapView (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/map.tsx:1131:28)
+    at div
+    at div
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GVTGVYSA.js?v=8cad5f40:42:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KFU554YL.js?v=8cad5f40:104:7
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=8cad5f40:79:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=8cad5f40:56:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GVTGVYSA.js?v=8cad5f40:42:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:51:5
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:1310:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:1233:58
+    at Presence (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ARAKXQVF.js?v=8cad5f40:34:11)
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:1224:64
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=8cad5f40:79:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=8cad5f40:56:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GVTGVYSA.js?v=8cad5f40:42:13
+    at https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KFU554YL.js?v=8cad5f40:303:22
+    at Presence (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ARAKXQVF.js?v=8cad5f40:34:11)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=8cad5f40:38:15)
+    at DialogPortal (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:1186:11)
+    at _c3 (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=8cad5f40:38:15)
+    at Dialog (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=8cad5f40:1127:5)
+    at div
+    at _c5 (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:67:12)
+    at div
+    at _c3 (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:45:12)
+    at div
+    at _c (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at MiniMap (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/map.tsx:42:35)
+    at div
+    at _c9 (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at MapPanel (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/panels/map-panel.tsx:19:36)
+    at div
+    at div
+    at div
+    at div
+    at CrawlerView (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/views/crawler-view.tsx:31:39)
+    at CrawlerMode (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/pages/crawler-mode.tsx:18:39)
+    at Route (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=8cad5f40:323:16)
+    at Switch (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=8cad5f40:379:17)
+    at div
+    at Router (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=tN-q6xNGaf71jZ4TULGXg:32:42)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=8cad5f40:38:15)
+    at TooltipProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=8cad5f40:2250:5)
+    at QueryClientProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=8cad5f40:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=8cad5f40:14032
+chunk-WERSD76P.js?v=8cad5f40:9129 Uncaught ReferenceError: getRoomColor is not defined
+    at map.tsx:1045:36
+    at Array.from (<anonymous>)
+    at ExpandedMapView (map.tsx:1020:20)
+    at renderWithHooks (chunk-WERSD76P.js?v=8cad5f40:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=8cad5f40:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=8cad5f40:15914:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=8cad5f40:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=8cad5f40:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=8cad5f40:19137:13)
+    at renderRootSync (chunk-WERSD76P.js?v=8cad5f40:19116:15)
