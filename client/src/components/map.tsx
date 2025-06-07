@@ -58,7 +58,7 @@ interface Faction {
   color: string;
 }
 
-// Shared utility functions for icons, indicators, and colors
+// Helper function to get the icon for a room
 const getRoomIcon = (
   room: ExploredRoom,
   isExpanded: boolean = false,
@@ -287,21 +287,10 @@ const getFactionBorderStyle = (
   };
 };
 
-export default function Map({ crawler }: MapProps = { crawler: undefined }) {
+export default function Map(props: MapProps | undefined) {
+  const crawler = props?.crawler;
   if (!crawler) {
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            Mini-Map
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-slate-400">Loading crawler data...</div>
-        </CardContent>
-      </Card>
-    );
+    return <div>Loading crawler data...</div>;
   }
 
   const [isMoving, setIsMoving] = useState(false);
@@ -413,6 +402,11 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
     if (isDragging) {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
+      // fallback values for minX, maxX, etc. for initial render
+      const minX = 0,
+        maxX = 0,
+        minY = 0,
+        maxY = 0;
       const boundsMinX = mapBounds?.minX ?? minX;
       const boundsMaxX = mapBounds?.maxX ?? maxX;
       const boundsMinY = mapBounds?.minY ?? minY;
@@ -506,37 +500,37 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   const minY = centerY - radius;
   const maxY = centerY + radius;
 
-  // Build roomMap: explored, scanned, and unexplored neighbors
-  // Ensure roomMapMini is always a Map by re-declaring it here.
+  // Build roomMapMini: explored, scanned, and unexplored neighbors
   const roomMapMini = new Map<string, ExploredRoom>();
-  // Add explored
   floorRooms.forEach((room) => {
     roomMapMini.set(`${room.x},${room.y}`, {
       ...room,
       isCurrentRoom: room.id === actualCurrentRoomId,
     });
   });
-  // Add scanned
   floorScannedRooms.forEach((room) => {
-    if (!roomMapMini.has(`${room.x},${room.y}`)) {
-      roomMapMini.set(`${room.x},${room.y}`, {
+    const key = `${room.x},${room.y}`;
+    if (!roomMapMini.has(key)) {
+      roomMapMini.set(key, {
         ...room,
         isScanned: true,
         isCurrentRoom: room.id === actualCurrentRoomId,
       });
     }
   });
+
   // Add unexplored neighbors
   const addUnexploredNeighbors = () => {
-    // Only add for explored or scanned rooms
-    [...roomMapMini.values()].forEach((room) => {
-      if (room.isExplored || room.isScanned) {
-        [
+    const roomsToCheck = Array.from(roomMapMini.values());
+    roomsToCheck.forEach((room) => {
+      if (room && (room.isExplored || room.isScanned)) {
+        const neighbors = [
           [room.x + 1, room.y],
           [room.x - 1, room.y],
           [room.x, room.y + 1],
           [room.x, room.y - 1],
-        ].forEach(([x, y]) => {
+        ];
+        neighbors.forEach(([x, y]) => {
           const key = `${x},${y}`;
           if (!roomMapMini.has(key)) {
             roomMapMini.set(key, {
@@ -605,7 +599,7 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
               </DialogHeader>
               <div className="flex-1 w-full h-full min-h-0">
                 <ExpandedMapView
-                  exploredRooms={[...roomMap.values()]}
+                  exploredRooms={[...roomMapMini.values()]}
                   factions={factions}
                   actualCurrentRoomId={actualCurrentRoomId}
                 />
@@ -857,7 +851,8 @@ function ExpandedMapView({
   const [keys, setKeys] = useState<Set<string>>(new Set());
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {    expandedMapSetters = { setScale, setPanOffset };
+  useEffect(() => {
+    expandedMapSetters = { setScale, setPanOffset };
     return () => {
       expandedMapSetters = null;
     };
@@ -981,9 +976,14 @@ function ExpandedMapView({
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
   // Build roomMap for expanded view
   const roomMapExpanded = new Map<string, ExploredRoom>();
-  exploredRooms.forEach((room) => {
-    roomMapExpanded.set(`${room.x},${room.y}`, room);
-  });
+
+  if (exploredRooms && Array.isArray(exploredRooms)) {
+    exploredRooms.forEach((room) => {
+      if (room && typeof room.x === "number" && typeof room.y === "number") {
+        roomMapExpanded.set(`${room.x},${room.y}`, room);
+      }
+    });
+  }
   // Only connect real rooms (not unexplored neighbors)
   const isRealRoom = (room: ExploredRoom | undefined) =>
     room &&
