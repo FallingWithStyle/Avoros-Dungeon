@@ -30,7 +30,7 @@ interface MiniMapProps {
 }
 
 interface ExploredRoom {
-  id: number;
+  id: number | string;
   name: string;
   type: string;
   actualType?: string; // For scanned rooms, this contains the real room type
@@ -48,6 +48,7 @@ interface ExploredRoom {
   enemyCount?: number;
   playerCount?: number;
   playersHere?: string[]; // player names
+  neutralCount?: number;
 }
 
 interface Faction {
@@ -321,23 +322,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
       default:
         return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
-    }</old_str>
-
-    // Check for safe rooms first (including entrance)
-    if (room.isSafe) {
-      return hasFactionBorder ? "bg-green-600/20" : "bg-green-600/20 border-green-600/50";
-    }
-
-    switch (room.type) {
-      case "treasure":
-        return hasFactionBorder ? "bg-yellow-600/20" : "bg-yellow-600/20 border-yellow-600/50";
-      case "boss":
-      case "exit":
-        return hasFactionBorder ? "bg-red-600/20" : "bg-red-600/20 border-red-600/50";
-      case "stairs":
-        return hasFactionBorder ? "bg-purple-600/20" : "bg-purple-600/20 border-purple-600/50";
-      default:
-        return hasFactionBorder ? "bg-slate-600/20" : "bg-slate-600/20 border-slate-600/50";
     }
   };
 
@@ -403,11 +387,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const currentRoom = floorRooms.find((r) => r.id === actualCurrentRoomId) || 
                      floorRooms.find((r) => r.isCurrentRoom);
 
-  // console.log("Map Debug - Current room found:", !!currentRoom);
-  // if (currentRoom) {
-  //   console.log("Map Debug - Current room position:", currentRoom.x, currentRoom.y);
-  // }
-
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -440,9 +419,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const minY = centerY - radius;
   const maxY = centerY + radius;
 
-  // console.log("Map Debug - View bounds:", { minX, maxX, minY, maxY });
-  // console.log("Map Debug - Center position:", { centerX, centerY });
-
   const roomMap = new Map();
   floorRooms.forEach((room) => {
     roomMap.set(`${room.x},${room.y}`, {
@@ -465,7 +441,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   // Add adjacent rooms that haven't been explored yet
   const addAdjacentRooms = () => {
     const adjacentRooms = new Set<string>();
-    
+
     // For each explored room, check for adjacent positions
     floorRooms.forEach(room => {
       const adjacent = [
@@ -474,7 +450,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         `${room.x},${room.y + 1}`,
         `${room.x},${room.y - 1}`
       ];
-      
+
       adjacent.forEach(pos => {
         if (!roomMap.has(pos)) {
           adjacentRooms.add(pos);
@@ -503,9 +479,6 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   addAdjacentRooms();
-
-  // console.log("Map Debug - Room map size:", roomMap.size);
-  // console.log("Map Debug - Room positions:", Array.from(roomMap.keys()));
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -785,7 +758,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Register setters for global control
-  React.useEffect(() => {
+  useEffect(() => {
     expandedMapSetters = { setScale, setPanOffset };
     return () => {
       expandedMapSetters = null;
@@ -793,7 +766,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   }, [setScale, setPanOffset]);
 
   // Keyboard event handlers
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
         e.preventDefault();
@@ -821,7 +794,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   }, []);
 
   // Handle WASD movement
-  React.useEffect(() => {
+  useEffect(() => {
     if (keys.size === 0) return;
 
     const moveSpeed = 10;
@@ -886,6 +859,10 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
       const newY = e.clientY - dragStart.y;
 
       // Calculate 10% padding for expanded view
+      const minX = Math.min(...exploredRooms.map((r) => r.x));
+      const maxX = Math.max(...exploredRooms.map((r) => r.x));
+      const minY = Math.min(...exploredRooms.map((r) => r.y));
+      const maxY = Math.max(...exploredRooms.map((r) => r.y));
       const mapWidthCells = maxX - minX + 1;
       const mapHeightCells = maxY - minY + 1;
       const paddingX = Math.ceil(mapWidthCells * 0.1);
@@ -1085,8 +1062,6 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   const minY = Math.min(...exploredRooms.map((r) => r.y));
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
 
-  // console.log("Expanded Map Debug - Bounds:", { minX, maxX, minY, maxY });
-
   // Create room map
   const roomMap = new Map();
   exploredRooms.forEach((room) => {
@@ -1096,7 +1071,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   // Add adjacent rooms that haven't been explored yet
   const addAdjacentRoomsToExpanded = () => {
     const adjacentRooms = new Set<string>();
-    
+
     // For each explored room, check for adjacent positions
     exploredRooms.forEach(room => {
       const adjacent = [
@@ -1105,7 +1080,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
         `${room.x},${room.y + 1}`,
         `${room.x},${room.y - 1}`
       ];
-      
+
       adjacent.forEach(pos => {
         if (!roomMap.has(pos)) {
           adjacentRooms.add(pos);
