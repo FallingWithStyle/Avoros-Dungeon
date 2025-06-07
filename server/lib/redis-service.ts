@@ -1,31 +1,18 @@
+
 import Redis from "ioredis";
 
 class RedisService {
-  private redis: Redis | null = null;
-  private isConnected = false;
+  private redis: Redis;
+  private defaultTTL = 300; // 5 minutes
 
   constructor() {
-    try {
-      this.redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
-      this.redis.on('connect', () => {
-        this.isConnected = true;
-      });
-      this.redis.on('error', (err) => {
-        console.warn('Redis connection error:', err.message);
-        this.isConnected = false;
-      });
-    } catch (error) {
-      console.warn('Failed to initialize Redis:', error);
-      this.redis = null;
-    }
+    this.redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
   }
-
-  private defaultTTL = 300; // 5 minutes
 
   // Generic cache methods
   async get<T>(key: string): Promise<T | null> {
     try {
-      const data = await this.redis?.get(key);
+      const data = await this.redis.get(key);
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error(`Redis GET error for key ${key}:`, error);
@@ -35,7 +22,7 @@ class RedisService {
 
   async set(key: string, value: any, ttl: number = this.defaultTTL): Promise<void> {
     try {
-      await this.redis?.setex(key, ttl, JSON.stringify(value));
+      await this.redis.setex(key, ttl, JSON.stringify(value));
     } catch (error) {
       console.error(`Redis SET error for key ${key}:`, error);
     }
@@ -43,7 +30,7 @@ class RedisService {
 
   async del(key: string): Promise<void> {
     try {
-      await this.redis?.del(key);
+      await this.redis.del(key);
     } catch (error) {
       console.error(`Redis DEL error for key ${key}:`, error);
     }
@@ -51,8 +38,7 @@ class RedisService {
 
   async exists(key: string): Promise<boolean> {
     try {
-      const result = await this.redis?.exists(key);
-      return result === 1;
+      return (await this.redis.exists(key)) === 1;
     } catch (error) {
       console.error(`Redis EXISTS error for key ${key}:`, error);
       return false;
@@ -62,9 +48,9 @@ class RedisService {
   // Pattern-based deletion
   async deletePattern(pattern: string): Promise<void> {
     try {
-      const keys = await this.redis?.keys(pattern);
-      if (keys && keys.length > 0) {
-        await this.redis?.del(...keys);
+      const keys = await this.redis.keys(pattern);
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
       }
     } catch (error) {
       console.error(`Redis DELETE PATTERN error for pattern ${pattern}:`, error);
@@ -102,56 +88,34 @@ class RedisService {
     await this.set(`crawler:${crawlerId}:current-room`, room, ttl);
   }
 
-  async getContentData(key: string): Promise<any> {
-    if (!this.redis || !this.isConnected) {
-      return null;
-    }
-
-    try {
-      const data = await this.redis.get(key);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis get error:', error);
-      return null;
-    }
+  // Content cache methods (longer TTL since this data changes rarely)
+  async getContentData(key: string) {
+    return this.get(`content:${key}`);
   }
 
-  async setContentData(key: string, data: any, ttl: number = 3600): Promise<void> {
-    if (!this.redis || !this.isConnected) {
-      return;
-    }
-
-    try {
-      await this.redis.setex(key, ttl, JSON.stringify(data));
-    } catch (error) {
-      console.error('Redis set error:', error);
-    }
+  async setContentData(key: string, data: any, ttl: number = 3600) {
+    await this.set(`content:${key}`, data, ttl);
   }
 
-  async getFloorTheme(floorNumber: number): Promise<any> {
-    if (!this.redis || !this.isConnected) {
-      return null;
-    }
-
-    try {
-      const data = await this.redis.get(`floor_theme:${floorNumber}`);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis get floor theme error:', error);
-      return null;
-    }
+  async invalidateContent() {
+    await this.deletePattern(`content:*`);
   }
 
-  async setFloorTheme(floorNumber: number, theme: any, ttl: number = 7200): Promise<void> {
-    if (!this.redis || !this.isConnected) {
-      return;
-    }
+  // Floor and map cache methods
+  async getFloorBounds(floorId: number) {
+    return this.get(`floor:${floorId}:bounds`);
+  }
 
-    try {
-      await this.redis.setex(`floor_theme:${floorNumber}`, ttl, JSON.stringify(theme));
-    } catch (error) {
-      console.error('Redis set floor theme error:', error);
-    }
+  async setFloorBounds(floorId: number, bounds: any, ttl: number = 1800) {
+    await this.set(`floor:${floorId}:bounds`, bounds, ttl);
+  }
+
+  async getFloorTheme(floorNumber: number) {
+    return this.get(`floor:${floorNumber}:theme`);
+  }
+
+  async setFloorTheme(floorNumber: number, theme: any, ttl: number = 3600) {
+    await this.set(`floor:${floorNumber}:theme`, theme, ttl);
   }
 
   // Leaderboard cache methods
