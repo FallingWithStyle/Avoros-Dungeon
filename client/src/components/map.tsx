@@ -66,11 +66,11 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms with optimized refresh
+  // Fetch explored rooms with reduced polling to minimize console noise
   const { data: exploredRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    refetchInterval: 15000, // Reduced frequency from 5s to 15s
-    staleTime: 60000, // Cache for 1 minute
+    refetchInterval: 30000, // Reduced to 30s to minimize console noise
+    staleTime: 120000, // Cache for 2 minutes
     retry: false,
   });
 
@@ -99,19 +99,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
 
-  // Room Debug logging
-  while (false) {
-    console.log(
-      "Current floor:",
-      crawler.currentFloor,
-      typeof crawler.currentFloor,
-    );
-    console.log(
-      "Room:",
-      exploredRooms?.map((r) => r),
-    );
-    console.log("Filtered floorRooms:", floorRooms);
-  }
+  // Debug logging temporarily disabled to reduce console noise
+  // console.log("Map Debug - Current floor:", crawler.currentFloor, typeof crawler.currentFloor);
+  // console.log("Map Debug - All explored rooms:", exploredRooms?.length || 0);
+  // console.log("Map Debug - Floor rooms:", floorRooms.length);
+  // if (floorRooms.length > 0) {
+  //   console.log("Map Debug - Sample room:", floorRooms[0]);
+  // }
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
@@ -370,6 +364,12 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   }
 
   const currentRoom = floorRooms.find((r) => r.isCurrentRoom);
+  
+  // console.log("Map Debug - Current room found:", !!currentRoom);
+  // if (currentRoom) {
+  //   console.log("Map Debug - Current room position:", currentRoom.x, currentRoom.y);
+  // }
+  
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -380,7 +380,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-slate-400">No current room</div>
+          <div className="text-sm text-slate-400">
+            No current room found. Crawler floor: {crawler.currentFloor}
+            {floorRooms.length > 0 && (
+              <div className="mt-1 text-xs">
+                Found {floorRooms.length} rooms on this floor, but none marked as current.
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -395,10 +402,16 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   const minY = centerY - radius;
   const maxY = centerY + radius;
 
+  // console.log("Map Debug - View bounds:", { minX, maxX, minY, maxY });
+  // console.log("Map Debug - Center position:", { centerX, centerY });
+
   const roomMap = new Map();
   floorRooms.forEach((room) => {
     roomMap.set(`${room.x},${room.y}`, room);
   });
+  
+  // console.log("Map Debug - Room map size:", roomMap.size);
+  // console.log("Map Debug - Room positions:", Array.from(roomMap.keys()));
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -970,12 +983,13 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
       </div>
     );
   }
-
-  // Calculate bounds
+  
   const minX = Math.min(...exploredRooms.map((r) => r.x));
   const maxX = Math.max(...exploredRooms.map((r) => r.x));
   const minY = Math.min(...exploredRooms.map((r) => r.y));
   const maxY = Math.max(...exploredRooms.map((r) => r.y));
+  
+  // console.log("Expanded Map Debug - Bounds:", { minX, maxX, minY, maxY });
 
   // Create room map
   const roomMap = new Map();

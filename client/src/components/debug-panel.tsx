@@ -40,20 +40,28 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     });
   };
 
-  // Debug crawler reset
+  // Debug crawler deletion
   const resetCrawlersMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/debug/reset-crawlers");
+      return await apiRequest("POST", "/api/debug/delete-crawlers");
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidate all crawler-related queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/season/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/leaderboards/crawlers"] });
+      
+      // Clear any specific crawler queries
+      queryClient.removeQueries({ queryKey: ["/api/crawlers/"], exact: false });
+      
       toast({
-        title: "Crawlers Reset",
-        description: "All crawlers have been reset to their initial state.",
+        title: "Crawlers Deleted",
+        description: data.message || "All crawlers have been permanently deleted.",
       });
     },
     onError: (error) => {
-      showErrorToast("Reset Failed", error);
+      showErrorToast("Delete Failed", error);
     },
   });
 
@@ -190,7 +198,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 ) : (
                   <RefreshCw className={miniIconClasses} />
                 )}
-                Reset All Crawlers
+                Delete All Crawlers
               </Button>
 
               

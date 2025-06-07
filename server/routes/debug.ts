@@ -71,6 +71,71 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Delete all crawlers (complete removal)
+  app.post("/api/debug/delete-crawlers", isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is properly authenticated
+      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = req.user.claims.sub;
+      const { db } = await import("../db");
+      const { crawlers, crawlerPositions, crawlerEquipment } = await import("@shared/schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get all user's crawlers first
+      const userCrawlers = await db
+        .select()
+        .from(crawlers)
+        .where(eq(crawlers.sponsorId, userId));
+
+      if (userCrawlers.length === 0) {
+        return res.json({ message: "No crawlers to delete" });
+      }
+
+      const crawlerIds = userCrawlers.map(c => c.id);
+
+      // Delete related data first - use inArray for multiple crawler IDs
+      if (crawlerIds.length > 0) {
+        // Import activities table
+        const { activities } = await import("@shared/schema");
+        
+        // Delete activities first (foreign key constraint)
+        await db
+          .delete(activities)
+          .where(inArray(activities.crawlerId, crawlerIds));
+        
+        await db
+          .delete(crawlerPositions)
+          .where(inArray(crawlerPositions.crawlerId, crawlerIds));
+        
+        await db
+          .delete(crawlerEquipment)
+          .where(inArray(crawlerEquipment.crawlerId, crawlerIds));
+      }
+
+      // Finally delete the crawlers themselves
+      await db
+        .delete(crawlers)
+        .where(eq(crawlers.sponsorId, userId));
+
+      // Reset user's active crawler
+      await storage.updateUserActiveCrawler(userId, 0);
+
+      res.json({ 
+        message: `Successfully deleted ${userCrawlers.length} crawler(s)`,
+        deletedCount: userCrawlers.length 
+      });
+    } catch (error) {
+      console.error("Error deleting crawlers:", error);
+      res.status(500).json({ 
+        message: "Failed to delete crawlers",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // DEBUG: Restore crawler energy (temporary for development)
   app.post("/api/crawlers/:id/restore-energy", isAuthenticated, async (req: any, res) => {
     try {
