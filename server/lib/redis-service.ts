@@ -11,7 +11,8 @@ class RedisService {
         this.isConnected = true;
       });
       this.redis.on('error', (err) => {
-        console.warn('Redis connection error:', err.message);
+        // Temporarily disabled Redis error logging to reduce console noise
+        // console.error('Redis connection error:', err);
         this.isConnected = false;
       });
     } catch (error) {

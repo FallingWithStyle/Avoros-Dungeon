@@ -115,7 +115,7 @@ export default function RoomNavigation({
   // Fetch current room data with reduced polling
   const { data: roomData, isLoading } = useQuery<RoomData>({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 10000, // Reduced from 5s to 10s
+    refetchInterval: 15000, // Reduced from 5s to 10s
     staleTime: 30000, // Cache for 30 seconds
     retry: false,
   });
@@ -198,12 +198,12 @@ export default function RoomNavigation({
         });
         return;
       }
-      
+
       // Store the movement direction for tactical view positioning
       if (['north', 'south', 'east', 'west'].includes(direction)) {
         sessionStorage.setItem('lastMovementDirection', direction);
       }
-      
+
       setPendingDirection(direction);
       moveMutation.mutate(direction);
     },
