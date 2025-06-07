@@ -18,9 +18,13 @@ export function useWebSocket() {
     
     // For Replit, construct the WebSocket URL to match the current page
     let wsUrl;
-    if (port && port !== "80" && port !== "443") {
+    
+    // In development, use the current port (usually 5000)
+    // In production, Replit handles the port mapping automatically
+    if (port && port !== "80" && port !== "443" && port !== "") {
       wsUrl = `${protocol}//${host}:${port}/ws`;
     } else {
+      // Production or when port is not available
       wsUrl = `${protocol}//${host}/ws`;
     }
     
