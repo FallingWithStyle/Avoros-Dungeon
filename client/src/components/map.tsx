@@ -99,6 +99,14 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     retry: false,
   });
 
+  // Fetch current room data for position reference
+  const { data: currentRoomData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    refetchInterval: 5000,
+    staleTime: 30000,
+    retry: false,
+  });
+
   // Filter rooms for current floor (strict number comparison first, then string fallback)
   const floorRooms =
     exploredRooms?.filter(
@@ -114,18 +122,13 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         String(room.floorId) === String(crawler.currentFloor),
     ) ?? [];
 
-  // Debug logging temporarily disabled to reduce console noise
-  // console.log("Map Debug - Current floor:", crawler.currentFloor, typeof crawler.currentFloor);
-  // console.log("Map Debug - All explored rooms:", exploredRooms?.length || 0);
-  // console.log("Map Debug - Floor rooms:", floorRooms.length);
-  // if (floorRooms.length > 0) {
-  //   console.log("Map Debug - Sample room:", floorRooms[0]);
-  // }
+  // Get the actual current room ID from the API response for accurate positioning
+  const actualCurrentRoomId = currentRoomData?.room?.id;
 
   // Track room changes for smooth transitions and reset pan
   useEffect(() => {
-    if (floorRooms) {
-      const currentRoom = floorRooms.find((room) => room.isCurrentRoom);
+    if (floorRooms && actualCurrentRoomId) {
+      const currentRoom = floorRooms.find((room) => room.id === actualCurrentRoomId);
       if (
         currentRoom &&
         previousCurrentRoom &&
@@ -145,7 +148,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
         setPreviousCurrentRoom(currentRoom);
       }
     }
-  }, [floorRooms, previousCurrentRoom, resetPanOnNextMove]);
+  }, [floorRooms, actualCurrentRoomId, previousCurrentRoom, resetPanOnNextMove]);
 
   // Handle mouse dragging for pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -199,7 +202,8 @@ export default function MiniMap({ crawler }: MiniMapProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
+    // Use actual current room ID for accurate player position
+    if (room.id === actualCurrentRoomId) {
       // Always show the blue dot for the player crawler location
       return (
         <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
@@ -378,7 +382,9 @@ export default function MiniMap({ crawler }: MiniMapProps) {
     );
   }
 
-  const currentRoom = floorRooms.find((r) => r.isCurrentRoom);
+  // Find current room using actual current room ID for consistency
+  const currentRoom = floorRooms.find((r) => r.id === actualCurrentRoomId) || 
+                     floorRooms.find((r) => r.isCurrentRoom);
 
   // console.log("Map Debug - Current room found:", !!currentRoom);
   // if (currentRoom) {
@@ -422,11 +428,21 @@ export default function MiniMap({ crawler }: MiniMapProps) {
 
   const roomMap = new Map();
   floorRooms.forEach((room) => {
-    roomMap.set(`${room.x},${room.y}`, room);
+    roomMap.set(`${room.x},${room.y}`, {
+      ...room,
+      isCurrentRoom: room.id === actualCurrentRoomId
+    });
   });
 
-    floorScannedRooms.forEach((room) => {
-    roomMap.set(`${room.x},${room.y}`, {...room, isScanned: true});
+  floorScannedRooms.forEach((room) => {
+    const existingRoom = roomMap.get(`${room.x},${room.y}`);
+    if (!existingRoom) {
+      roomMap.set(`${room.x},${room.y}`, {
+        ...room, 
+        isScanned: true,
+        isCurrentRoom: room.id === actualCurrentRoomId
+      });
+    }
   });
 
   // console.log("Map Debug - Room map size:", roomMap.size);
@@ -515,7 +531,7 @@ export default function MiniMap({ crawler }: MiniMapProps) {
                             <div
                               key={`room-${room.id}`}
                               className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all duration-300 relative ${getRoomColor(room)} ${
-                                isMoving && room.isCurrentRoom
+                                isMoving && room.id === actualCurrentRoomId
                                   ? "scale-110 animate-pulse"
                                   : ""
                               }`}
@@ -843,7 +859,9 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
   };
 
   const getRoomIcon = (room: ExploredRoom) => {
-    if (room.isCurrentRoom) {
+    // Use the passed currentRoomId for consistency
+    const currentRoomId = exploredRooms.find(r => r.isCurrentRoom)?.id;
+    if (room.id === currentRoomId) {
       // Always show the blue dot for the player crawler location
       return (
         <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
@@ -1074,7 +1092,7 @@ function ExpandedMapView({ exploredRooms, factions }: ExpandedMapViewProps) {
                       >
                         {getRoomIcon(room)}
                         {getExpandedRoomIndicators(room)}
-                        {room.isCurrentRoom && (
+                        {room.id === exploredRooms.find(r => r.isCurrentRoom)?.id && (
                           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10" />
                         )}
                       </div>
