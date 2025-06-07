@@ -507,18 +507,18 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   const maxY = centerY + radius;
 
   // Build roomMap: explored, scanned, and unexplored neighbors
-  const roomMap = new Map<string, ExploredRoom>();
+  const roomMapMini = new Map<string, ExploredRoom>();
   // Add explored
   floorRooms.forEach((room) => {
-    roomMap.set(`${room.x},${room.y}`, {
+    roomMapMini.set(`${room.x},${room.y}`, {
       ...room,
       isCurrentRoom: room.id === actualCurrentRoomId,
     });
   });
   // Add scanned
   floorScannedRooms.forEach((room) => {
-    if (!roomMap.has(`${room.x},${room.y}`)) {
-      roomMap.set(`${room.x},${room.y}`, {
+    if (!roomMapMini.has(`${room.x},${room.y}`)) {
+      roomMapMini.set(`${room.x},${room.y}`, {
         ...room,
         isScanned: true,
         isCurrentRoom: room.id === actualCurrentRoomId,
@@ -528,7 +528,7 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   // Add unexplored neighbors
   const addUnexploredNeighbors = () => {
     // Only add for explored or scanned rooms
-    [...roomMap.values()].forEach((room) => {
+    [...roomMapMini.values()].forEach((room) => {
       if (room.isExplored || room.isScanned) {
         [
           [room.x + 1, room.y],
@@ -537,8 +537,8 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
           [room.x, room.y - 1],
         ].forEach(([x, y]) => {
           const key = `${x},${y}`;
-          if (!roomMap.has(key)) {
-            roomMap.set(key, {
+          if (!roomMapMini.has(key)) {
+            roomMapMini.set(key, {
               id: `unexplored-${x}-${y}`,
               name: "Unexplored Neighbor",
               type: "unknown",
@@ -572,8 +572,8 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
     x2: number,
     y2: number,
   ): boolean => {
-    const room1 = roomMap.get(`${x1},${y1}`);
-    const room2 = roomMap.get(`${x2},${y2}`);
+    const room1 = roomMapMini.get(`${x1},${y1}`);
+    const room2 = roomMapMini.get(`${x2},${y2}`);
     return isRealRoom(room1) && isRealRoom(room2);
   };
 
@@ -657,7 +657,7 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
                         const roomCol = Math.floor(col / 2);
                         const x = minX + roomCol;
                         const y = maxY - roomRow;
-                        const room = roomMap.get(`${x},${y}`);
+                        const room = roomMapMini.get(`${x},${y}`);
                         if (room) {
                           return (
                             <div

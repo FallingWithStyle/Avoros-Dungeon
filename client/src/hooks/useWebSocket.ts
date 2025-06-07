@@ -14,9 +14,17 @@ export function useWebSocket() {
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.hostname;
-    const port = window.location.port || (protocol === "wss:" ? "443" : "80");
-    const wsUrl = `${protocol}//${host}:${port}/ws`;
+    const port = window.location.port;
     
+    // Construct WebSocket URL properly
+    let wsUrl;
+    if (port && port !== "80" && port !== "443") {
+      wsUrl = `${protocol}//${host}:${port}/ws`;
+    } else {
+      wsUrl = `${protocol}//${host}/ws`;
+    }
+    
+    console.log("Attempting WebSocket connection to:", wsUrl);
     ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
