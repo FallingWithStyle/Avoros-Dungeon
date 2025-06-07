@@ -81,21 +81,7 @@ export default function SponsorView() {
                 {crawlers && crawlers.length > 0 ? (
                   <div className="space-y-4">
                     {crawlers.map((crawler) => (
-                      <div key={crawler.id} className="relative">
-                        <CrawlerCard crawler={crawler} />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedCrawler(crawler)}
-                          className={`absolute top-2 right-2 text-xs ${
-                            activeCrawler?.id === crawler.id 
-                              ? 'bg-blue-600 text-white border-blue-600' 
-                              : 'bg-gray-700 text-gray-300 border-gray-600'
-                          }`}
-                        >
-                          {activeCrawler?.id === crawler.id ? 'Selected' : 'Select'}
-                        </Button>
-                      </div>
+                      <CrawlerCard key={crawler.id} crawler={crawler} />
                     ))}
                   </div>
                 ) : (
@@ -113,12 +99,11 @@ export default function SponsorView() {
                 )}
               </CardContent>
             </Card>
-
-            <SeasonStatus />
           </div>
 
-          {/* Middle Column - Activity Feed */}
-          <div>
+          {/* Middle Column - Season Status & Activity Feed */}
+          <div className="space-y-6">
+            <SeasonStatus />
             <ActivityFeed />
           </div>
 
