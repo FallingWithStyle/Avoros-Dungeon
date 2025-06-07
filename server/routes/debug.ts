@@ -71,6 +71,60 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Delete all crawlers (complete removal)
+  app.post("/api/debug/delete-crawlers", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { db } = await import("../db");
+      const { crawlers, crawlerPositions, crawlerEquipment } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+
+      // Get all user's crawlers first
+      const userCrawlers = await db
+        .select()
+        .from(crawlers)
+        .where(eq(crawlers.sponsorId, userId));
+
+      if (userCrawlers.length === 0) {
+        return res.json({ message: "No crawlers to delete" });
+      }
+
+      const crawlerIds = userCrawlers.map(c => c.id);
+
+      // Delete related data first
+      await db
+        .delete(crawlerPositions)
+        .where(eq(crawlerPositions.crawlerId, crawlerIds[0])); // Delete for first crawler
+
+      // Delete positions for all crawlers
+      for (const crawlerId of crawlerIds) {
+        await db
+          .delete(crawlerPositions)
+          .where(eq(crawlerPositions.crawlerId, crawlerId));
+        
+        await db
+          .delete(crawlerEquipment)
+          .where(eq(crawlerEquipment.crawlerId, crawlerId));
+      }
+
+      // Finally delete the crawlers themselves
+      await db
+        .delete(crawlers)
+        .where(eq(crawlers.sponsorId, userId));
+
+      // Reset user's active crawler
+      await storage.updateUserActiveCrawler(userId, 0);
+
+      res.json({ 
+        message: `Successfully deleted ${userCrawlers.length} crawler(s)`,
+        deletedCount: userCrawlers.length 
+      });
+    } catch (error) {
+      console.error("Error deleting crawlers:", error);
+      res.status(500).json({ message: "Failed to delete crawlers" });
+    }
+  });
+
   // DEBUG: Restore crawler energy (temporary for development)
   app.post("/api/crawlers/:id/restore-energy", isAuthenticated, async (req: any, res) => {
     try {
