@@ -57,7 +57,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
       <div className="space-y-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-2"></div>
-          <p className="text-slate-400">Generating 30 crawler candidates...</p>
+          <p className="text-slate-400">Locating 30 lucky crawlers just <em>dying</em> for you to be their patron.</p>
         </div>
       </div>
     );
