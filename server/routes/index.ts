@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
@@ -27,28 +26,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
   // WebSocket server for real-time features
-  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: "/ws",
+    perMessageDeflate: false
+  });
 
-  wss.on("connection", (ws) => {
-    console.log("WebSocket client connected");
+  wss.on("connection", (ws, request) => {
+    console.log("WebSocket client connected from:", request.socket.remoteAddress);
+
+    // Send welcome message
+    ws.send(JSON.stringify({
+      type: "connection",
+      data: { message: "Connected to game server" },
+      timestamp: Date.now()
+    }));
 
     ws.on("message", (data) => {
       try {
         const message = JSON.parse(data.toString());
+        console.log("WebSocket message received:", message);
 
-        // Broadcast message to all connected clients
+        // Echo the message back to sender
+        ws.send(JSON.stringify({
+          type: "echo",
+          data: message,
+          timestamp: Date.now()
+        }));
+
+        // Broadcast message to all other connected clients
         wss.clients.forEach((client) => {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(message));
+            client.send(JSON.stringify({
+              type: "broadcast",
+              data: message,
+              timestamp: Date.now()
+            }));
           }
         });
       } catch (error) {
         console.error("Error processing WebSocket message:", error);
+        ws.send(JSON.stringify({
+          type: "error",
+          data: { message: "Failed to process message" },
+          timestamp: Date.now()
+        }));
       }
     });
 
     ws.on("close", () => {
       console.log("WebSocket client disconnected");
+    });
+
+    ws.on("error", (error) => {
+      console.error("WebSocket error:", error);
     });
   });
 

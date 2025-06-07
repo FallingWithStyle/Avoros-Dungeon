@@ -507,6 +507,7 @@ export default function Map({ crawler }: MapProps = { crawler: undefined }) {
   const maxY = centerY + radius;
 
   // Build roomMap: explored, scanned, and unexplored neighbors
+  // Ensure roomMapMini is always a Map by re-declaring it here.
   const roomMapMini = new Map<string, ExploredRoom>();
   // Add explored
   floorRooms.forEach((room) => {
