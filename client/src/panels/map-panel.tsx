@@ -1,24 +1,23 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import MiniMap from "@/components/map";
-import type { CrawlerWithDetails } from "@shared/schema";
+import React from "react";
+import Map from "@/components/map";
+import { CrawlerWithDetails } from "@shared/schema";
 
 interface MapPanelProps {
   crawler: CrawlerWithDetails;
 }
 
 export default function MapPanel({ crawler }: MapPanelProps) {
+  if (!crawler) {
+    return (
+      <div className="space-y-4">
+        <div className="text-slate-400">Loading crawler data...</div>
+      </div>
+    );
+  }
+
   return (
-    <Card className="bg-game-surface border-game-border">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center">
-          <i className="fas fa-map mr-2 text-green-400"></i>
-          Mini-Map
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <MiniMap crawler={crawler} />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Map crawler={crawler} />
+    </div>
   );
 }
