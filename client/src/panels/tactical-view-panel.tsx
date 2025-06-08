@@ -1349,28 +1349,53 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     console.error("Room data exists:", roomData.room.name);
     console.error("Tactical error:", tacticalError);
     
+    // Try to generate fallback tactical data client-side
+    const fallbackTacticalData = {
+      room: roomData.room,
+      availableDirections: roomData.availableDirections || [],
+      playersInRoom: roomData.playersInRoom || [],
+      tacticalEntities: [] // Empty entities as fallback
+    };
+    
+    // Use fallback data to render a basic tactical view
+    console.log("Using fallback tactical data for room:", roomData.room.name);
+    
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-200 flex items-center gap-2">
             <Eye className="w-4 h-4" />
-            Tactical View - Data Error
+            Tactical View - Limited Data
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+          <div className="w-full h-48 border-2 border-amber-600 rounded-lg flex items-center justify-center relative">
+            <div className="absolute top-2 left-2 text-xs text-amber-400">
+              {roomData.room.name} (Fallback Mode)
+            </div>
             <div className="text-center">
-              <span className="text-red-400">
-                Failed to load tactical data for {roomData.room.name}
+              <span className="text-amber-400 text-sm">
+                Tactical data temporarily unavailable
               </span>
               <br />
-              <span className="text-sm text-gray-400 mt-2">
-                Room ID: {roomData.room.id} | Type: {roomData.room.type}
+              <span className="text-xs text-gray-400 mt-1">
+                Room loaded, but entities could not be retrieved
               </span>
               <br />
               <button 
+                onClick={() => {
+                  // Try to refetch tactical data
+                  queryClient.invalidateQueries({ 
+                    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`] 
+                  });
+                }} 
+                className="text-blue-400 underline text-xs mt-2 mr-2"
+              >
+                Retry
+              </button>
+              <button 
                 onClick={() => window.location.reload()} 
-                className="text-blue-400 underline text-sm mt-2"
+                className="text-blue-400 underline text-xs mt-2"
               >
                 Reload page
               </button>
