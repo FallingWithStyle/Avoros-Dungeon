@@ -14,23 +14,22 @@ export function useWebSocket() {
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.hostname;
-    const port = window.location.port;
-    
+
     // For Replit, construct the WebSocket URL to match the current page
     let wsUrl;
-    
+
     // In development, use the current port (usually 5000)
     // In production, Replit handles the port mapping automatically
-    if (port && port !== "80" && port !== "443" && port !== "") {
-      wsUrl = `${protocol}//${host}:${port}/ws`;
+    if (window.location.port) {
+      wsUrl = `${protocol}//${host}:${window.location.port}/ws`;
     } else {
       // Production or when port is not available
       wsUrl = `${protocol}//${host}/ws`;
     }
-    
+
     console.log("🔌 Attempting WebSocket connection to:", wsUrl);
     console.log("Current location:", window.location.href);
-    
+
     try {
       ws.current = new WebSocket(wsUrl);
 
@@ -53,7 +52,7 @@ export function useWebSocket() {
       ws.current.onclose = (event) => {
         setIsConnected(false);
         console.log('🔌 WebSocket disconnected. Code:', event.code, 'Reason:', event.reason);
-        
+
         // Attempt to reconnect after 3 seconds
         setTimeout(() => {
           console.log('🔄 Attempting to reconnect WebSocket...');
