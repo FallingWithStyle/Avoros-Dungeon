@@ -1,6 +1,6 @@
 
 import { db } from "../db";
-import { mobs, enemies, rooms, factions } from "@shared/schema";
+import { mobs, creatureTypes, rooms, factions } from "@shared/schema";
 import { eq, and, lt, isNull, or } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
@@ -9,7 +9,7 @@ export interface MobSpawnConfig {
   roomType: string;
   maxMobs: number;
   spawnChance: number;
-  enemyTypes: string[];
+  creatureCategories: string[];
   respawnHours: number;
 }
 
@@ -19,8 +19,14 @@ export interface ContextualSpawnConfig {
   factionId: number | null;
   maxMobs: number;
   spawnChance: number;
-  mobTypes: string[];
+  creatureTypes: string[];
   respawnHours: number;
+}
+
+export interface DispositionModifier {
+  creatureCategory: string;
+  factionAlignment: number; // -100 to +100
+  crawlerReputation: number; // -100 to +100
 }
 
 export class MobStorage extends BaseStorage {
@@ -29,35 +35,35 @@ export class MobStorage extends BaseStorage {
       roomType: "normal",
       maxMobs: 2,
       spawnChance: 0.6,
-      enemyTypes: ["normal"],
+      creatureCategories: ["combat", "neutral"],
       respawnHours: 4
     },
     {
       roomType: "boss",
       maxMobs: 1,
       spawnChance: 1.0,
-      enemyTypes: ["boss"],
+      creatureCategories: ["boss"],
       respawnHours: 12
     },
     {
       roomType: "treasure",
       maxMobs: 3,
       spawnChance: 0.8,
-      enemyTypes: ["guardian"],
+      creatureCategories: ["combat", "guardian"],
       respawnHours: 6
     },
     {
       roomType: "safe",
-      maxMobs: 0,
-      spawnChance: 0.0,
-      enemyTypes: [],
+      maxMobs: 1,
+      spawnChance: 0.8,
+      creatureCategories: ["npc", "merchant", "healer"],
       respawnHours: 0
     },
     {
       roomType: "entrance",
-      maxMobs: 0,
-      spawnChance: 0.0,
-      enemyTypes: [],
+      maxMobs: 1,
+      spawnChance: 0.3,
+      creatureCategories: ["npc", "guide"],
       respawnHours: 0
     }
   ];
@@ -91,11 +97,11 @@ export class MobStorage extends BaseStorage {
     const roomMobs = await db
       .select({
         mob: mobs,
-        enemy: enemies
+        creatureType: creatureTypes
       })
       .from(mobs)
-      .innerJoin(enemies, eq(mobs.enemyId, enemies.id))
-      .where(eq(mobs.roomId, roomId));
+      .innerJoin(creatureTypes, eq(mobs.creatureTypeId, creatureTypes.id))
+      .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
 
     // Cache for 10 minutes
     try {
@@ -105,6 +111,21 @@ export class MobStorage extends BaseStorage {
     }
 
     return roomMobs;
+  }
+
+  async getHostileMobs(roomId: number): Promise<any[]> {
+    const roomMobs = await this.getRoomMobs(roomId);
+    return roomMobs.filter(mobData => mobData.mob.disposition < 0 && mobData.mob.isAlive);
+  }
+
+  async getFriendlyMobs(roomId: number): Promise<any[]> {
+    const roomMobs = await this.getRoomMobs(roomId);
+    return roomMobs.filter(mobData => mobData.mob.disposition > 0 && mobData.mob.isAlive);
+  }
+
+  async getNeutralMobs(roomId: number): Promise<any[]> {
+    const roomMobs = await this.getRoomMobs(roomId);
+    return roomMobs.filter(mobData => mobData.mob.disposition === 0 && mobData.mob.isAlive);
   }
 
   async processRespawns(): Promise<void> {
@@ -373,8 +394,51 @@ export class MobStorage extends BaseStorage {
     }
   }
 
+  async updateMobDisposition(mobId: number, dispositionChange: number): Promise<void> {
+    const mob = await db.select().from(mobs).where(eq(mobs.id, mobId)).limit(1);
+    if (mob.length === 0) return;
+
+    const newDisposition = Math.max(-100, Math.min(100, mob[0].disposition + dispositionChange));
+    
+    await db
+      .update(mobs)
+      .set({
+        disposition: newDisposition,
+        lastInteractionAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(mobs.id, mobId));
+
+    // Invalidate cache
+    try {
+      await redisService.invalidateRoomMobs(mob[0].roomId);
+    } catch (error) {
+      console.log('Failed to invalidate room mobs cache');
+    }
+  }
+
+  async setMobActive(mobId: number, isActive: boolean): Promise<void> {
+    const mob = await db.select().from(mobs).where(eq(mobs.id, mobId)).limit(1);
+    if (mob.length === 0) return;
+
+    await db
+      .update(mobs)
+      .set({
+        isActive,
+        updatedAt: new Date()
+      })
+      .where(eq(mobs.id, mobId));
+
+    // Invalidate cache
+    try {
+      await redisService.invalidateRoomMobs(mob[0].roomId);
+    } catch (error) {
+      console.log('Failed to invalidate room mobs cache');
+    }
+  }
+
   private getMobSpawnConfig(roomType: string): MobSpawnConfig | null {
-    return this.mobSpawnConfigs.find(config => config.roomType === roomType) || null;
+    return this.baseMobSpawnConfigs.find(config => config.roomType === roomType) || null;
   }
 
   private getRandomPosition(): { x: number; y: number } {

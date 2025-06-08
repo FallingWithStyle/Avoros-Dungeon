@@ -318,7 +318,7 @@ export const factions = pgTable("factions", {
 });
 
 // Enemies
-export const enemies = pgTable("enemies", {
+export const creatureTypes = pgTable("enemies", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
@@ -367,7 +367,7 @@ export const entityRarityEnum = ["common", "uncommon", "rare", "epic", "legendar
 export const mobs = pgTable("mobs", {
   id: serial("id").primaryKey(),
   roomId: integer("room_id").notNull().references(() => rooms.id),
-  enemyId: integer("enemy_id").notNull().references(() => enemies.id),
+  enemyId: integer("enemy_id").notNull().references(() => creatureTypes.id),
   displayName: varchar("display_name", { length: 100 }).notNull(), // Player-readable name
   rarity: varchar("rarity", { length: 20 }).notNull().default("common"), // common, uncommon, rare, epic, legendary
   positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
@@ -404,7 +404,7 @@ export const encounters = pgTable("encounters", {
     .notNull()
     .references(() => floors.id),
   type: varchar("type", { length: 20 }).default("combat").notNull(), // combat, npc, treasure, trap, event
-  enemyId: integer("enemy_id").references(() => enemies.id),
+  enemyId: integer("enemy_id").references(() => creatureTypes.id),
   npcId: integer("npc_id").references(() => npcs.id),
   energyCost: integer("energy_cost").default(10).notNull(),
   status: varchar("status", { length: 20 }).default("active"), // active, completed, failed
@@ -583,7 +583,7 @@ export const crawlerPositionsRelations = relations(
   }),
 );
 
-export const enemiesRelations = relations(enemies, ({ many }) => ({
+export const enemiesRelations = relations(creatureTypes, ({ many }) => ({
   encounters: many(encounters),
   mobs: many(mobs),
 }));
@@ -593,9 +593,9 @@ export const mobsRelations = relations(mobs, ({ one }) => ({
     fields: [mobs.roomId],
     references: [rooms.id],
   }),
-  enemy: one(enemies, {
+  enemy: one(creatureTypes, {
     fields: [mobs.enemyId],
-    references: [enemies.id],
+    references: [creatureTypes.id],
   }),
 }));
 
@@ -627,9 +627,9 @@ export const encountersRelations = relations(encounters, ({ one }) => ({
     fields: [encounters.floorId],
     references: [floors.id],
   }),
-  enemy: one(enemies, {
+  enemy: one(creatureTypes, {
     fields: [encounters.enemyId],
-    references: [enemies.id],
+    references: [creatureTypes.id],
   }),
 }));
 
@@ -704,7 +704,7 @@ export const insertFloorSchema = createInsertSchema(floors).omit({
   id: true,
 });
 
-export const insertEnemySchema = createInsertSchema(enemies).omit({
+export const insertCreatureTypeSchema = createInsertSchema(creatureTypes).omit({
   id: true,
 });
 
@@ -783,7 +783,7 @@ export type Room = typeof rooms.$inferSelect;
 export type RoomConnection = typeof roomConnections.$inferSelect;
 export type CrawlerPosition = typeof crawlerPositions.$inferSelect;
 export type TacticalPosition = typeof tacticalPositions.$inferSelect;
-export type Enemy = typeof enemies.$inferSelect;
+export type Enemy = typeof creatureTypes.$inferSelect;
 export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
