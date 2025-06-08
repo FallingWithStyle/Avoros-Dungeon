@@ -6,6 +6,7 @@ import { RefreshCw, Zap, RotateCcw, Heart, Shield, ChevronDown, ChevronUp } from
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
+import { getVersionInfo } from "@/lib/version";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface DebugPanelProps {
@@ -175,6 +176,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             <CardDescription className="text-red-300 text-[0.60rem] ml-2">
               Development tools - these will be removed in production
             </CardDescription>
+            <span className="text-red-300 text-[0.60rem] ml-2 font-mono">
+              {getVersionInfo().displayVersion}
+            </span>
           </div>
           <Button
             size="icon"
@@ -277,6 +281,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             </div>
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-2 mt-1">
+              <span className="font-mono">
+                {getVersionInfo().fullVersion}
+              </span>
+              <span className="mx-1 text-red-400">|</span>
               <span>
                 Coordinates: Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
