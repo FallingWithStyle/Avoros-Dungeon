@@ -566,10 +566,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       console.log("Combat state changed", state);
+      
+      // Clear active action mode when combat ends
+      if (!state.isInCombat && combatState.isInCombat && activeActionMode) {
+        console.log("Combat ended - clearing active action mode");
+        setActiveActionMode(null);
+      }
+      
       setCombatState(state);
     });
     return unsubscribe;
-  }, []);
+  }, [combatState.isInCombat, activeActionMode]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -815,6 +822,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionName: string,
   ) => {
     console.log(`Hotbar action clicked: ${actionId}`);
+
+    // Check if this action is already selected - if so, deselect it
+    if (activeActionMode?.actionId === actionId) {
+      console.log(`Deselecting active action mode: ${actionId}`);
+      setActiveActionMode(null);
+      return;
+    }
 
     // Always select the player when any hotbar action is clicked, deselecting any other entity
     const playerEntity = combatState.entities.find((e) => e.id === "player");
