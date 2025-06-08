@@ -90,7 +90,14 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   const getEventColor = (event: RoomEvent) => {
     switch (event.type) {
       case "combat":
-        return "text-red-400";
+        // Check if it's a friendly outgoing attack (player attacking something)
+        if (event.message.includes(`${crawler.name} attacks`) || 
+            event.message.includes(`${crawler.name} uses`) ||
+            event.message.includes(`${crawler.name} casts`)) {
+          return "text-blue-400"; // Blue for friendly outgoing attacks
+        }
+        // Otherwise it's an enemy attack (incoming)
+        return "text-red-400"; // Red for enemy incoming attacks
       case "discovery":
         return event.priority === "high" ? "text-red-400" : "text-green-400";
       case "movement":
