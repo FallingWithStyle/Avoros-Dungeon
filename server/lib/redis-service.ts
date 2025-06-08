@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "@upstash/redis";
 
 class RedisService {
   private redis: Redis | null = null;
@@ -6,27 +6,21 @@ class RedisService {
 
   constructor() {
     try {
-      if (!process.env.REDIS_URL) {
-        console.warn('REDIS_URL environment variable not set - Redis will be disabled');
+      if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+        console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set - Redis will be disabled');
         this.redis = null;
         return;
       }
 
-      this.redis = new Redis(process.env.REDIS_URL);
-      this.redis.on('connect', () => {
-        this.isConnected = true;
-        console.log('Redis connected successfully');
+      this.redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
       });
-      this.redis.on('error', (err) => {
-        console.error('Redis connection error:', err);
-        this.isConnected = false;
-      });
-      this.redis.on('ready', () => {
-        this.isConnected = true;
-        console.log('Redis ready for commands');
-      });
+
+      this.isConnected = true;
+      console.log('Upstash Redis initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Redis:', error);
+      console.error('Failed to initialize Upstash Redis:', error);
       this.redis = null;
     }
   }
@@ -35,9 +29,11 @@ class RedisService {
 
   // Generic cache methods
   async get<T>(key: string): Promise<T | null> {
+    if (!this.redis || !this.isConnected) return null;
+
     try {
-      const data = await this.redis?.get(key);
-      return data ? JSON.parse(data) : null;
+      const data = await this.redis.get(key);
+      return data as T;
     } catch (error) {
       console.error(`Redis GET error for key ${key}:`, error);
       return null;
@@ -45,24 +41,30 @@ class RedisService {
   }
 
   async set(key: string, value: any, ttl: number = this.defaultTTL): Promise<void> {
+    if (!this.redis || !this.isConnected) return;
+
     try {
-      await this.redis?.setex(key, ttl, JSON.stringify(value));
+      await this.redis.setex(key, ttl, JSON.stringify(value));
     } catch (error) {
       console.error(`Redis SET error for key ${key}:`, error);
     }
   }
 
   async del(key: string): Promise<void> {
+    if (!this.redis || !this.isConnected) return;
+
     try {
-      await this.redis?.del(key);
+      await this.redis.del(key);
     } catch (error) {
       console.error(`Redis DEL error for key ${key}:`, error);
     }
   }
 
   async exists(key: string): Promise<boolean> {
+    if (!this.redis || !this.isConnected) return false;
+
     try {
-      const result = await this.redis?.exists(key);
+      const result = await this.redis.exists(key);
       return result === 1;
     } catch (error) {
       console.error(`Redis EXISTS error for key ${key}:`, error);
@@ -72,10 +74,12 @@ class RedisService {
 
   // Pattern-based deletion
   async deletePattern(pattern: string): Promise<void> {
+    if (!this.redis || !this.isConnected) return;
+
     try {
-      const keys = await this.redis?.keys(pattern);
+      const keys = await this.redis.keys(pattern);
       if (keys && keys.length > 0) {
-        await this.redis?.del(...keys);
+        await this.redis.del(...keys);
       }
     } catch (error) {
       console.error(`Redis DELETE PATTERN error for pattern ${pattern}:`, error);
@@ -88,7 +92,7 @@ class RedisService {
 
     try {
       const data = await this.redis?.get(`crawler:${crawlerId}`);
-      return data ? JSON.parse(data) : null;
+      return data ? JSON.parse(data as string) : null;
     } catch (error) {
       console.error('Redis getCrawler error:', error);
       return null;
@@ -116,43 +120,6 @@ class RedisService {
       await this.redis?.del(`crawler:${crawlerId}`);
     } catch (error) {
       console.error('Redis invalidateCrawler error:', error);
-    }
-  }
-
-  // Tactical positions cache methods
-  async getTacticalPositions(roomId: number): Promise<any[] | null> {
-    if (!this.isConnected) return null;
-
-    try {
-      const data = await this.redis?.get(`room:${roomId}:tactical-positions`);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis getTacticalPositions error:', error);
-      return null;
-    }
-  }
-
-  async setTacticalPositions(roomId: number, positions: any[], ttlSeconds = 1800): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.setex(
-        `room:${roomId}:tactical-positions`, 
-        ttlSeconds, 
-        JSON.stringify(positions)
-      );
-    } catch (error) {
-      console.error('Redis setTacticalPositions error:', error);
-    }
-  }
-
-  async invalidateTacticalPositions(roomId: number): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.del(`room:${roomId}:tactical-positions`);
-    } catch (error) {
-      console.error('Redis invalidateTacticalPositions error:', error);
     }
   }
 
@@ -204,7 +171,7 @@ class RedisService {
 
     try {
       const data = await this.redis.get(key);
-      return data ? JSON.parse(data) : null;
+      return data ? JSON.parse(data as string) : null;
     } catch (error) {
       console.error('Redis get error:', error);
       return null;
@@ -230,7 +197,7 @@ class RedisService {
 
     try {
       const data = await this.redis.get(`floor_theme:${floorNumber}`);
-      return data ? JSON.parse(data) : null;
+      return data ? JSON.parse(data as string) : null;
     } catch (error) {
       console.error('Redis get floor theme error:', error);
       return null;
@@ -260,131 +227,40 @@ class RedisService {
     }
   }
 
-  // Tactical view specific cache methods
-  async getCurrentRoomData(crawlerId: number): Promise<any | null> {
+  // Tactical positions cache methods
+  async getTacticalPositions(roomId: number): Promise<any[] | null> {
     if (!this.isConnected) return null;
 
     try {
-      const data = await this.redis?.get(`crawler:${crawlerId}:room-data`);
-      return data ? JSON.parse(data) : null;
+      const data = await this.redis?.get(`tactical:room:${roomId}`);
+      return data ? JSON.parse(data as string) : null;
     } catch (error) {
-      console.error('Redis getCurrentRoomData error:', error);
+      console.error('Redis getTacticalPositions error:', error);
       return null;
     }
   }
 
-  async setCurrentRoomData(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
+  async setTacticalPositions(roomId: number, positions: any[], ttlSeconds = 1800): Promise<void> {
     if (!this.isConnected) return;
 
     try {
       await this.redis?.setex(
-        `crawler:${crawlerId}:room-data`, 
+        `tactical:room:${roomId}`, 
         ttlSeconds, 
-        JSON.stringify(data)
+        JSON.stringify(positions)
       );
     } catch (error) {
-      console.error('Redis setCurrentRoomData error:', error);
+      console.error('Redis setTacticalPositions error:', error);
     }
   }
 
-  async getPlayersInRoom(roomId: number): Promise<any[] | null> {
-    if (!this.isConnected) return null;
-
-    try {
-      const data = await this.redis?.get(`room:${roomId}:players`);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis getPlayersInRoom error:', error);
-      return null;
-    }
-  }
-
-  async setPlayersInRoom(roomId: number, players: any[], ttlSeconds = 120): Promise<void> {
+  async invalidateTacticalPositions(roomId: number): Promise<void> {
     if (!this.isConnected) return;
 
     try {
-      await this.redis?.setex(
-        `room:${roomId}:players`, 
-        ttlSeconds, 
-        JSON.stringify(players)
-      );
+      await this.redis?.del(`tactical:room:${roomId}`);
     } catch (error) {
-      console.error('Redis setPlayersInRoom error:', error);
-    }
-  }
-
-  async getFactions(): Promise<any[] | null> {
-    if (!this.isConnected) return null;
-
-    try {
-      const data = await this.redis?.get('game:factions');
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis getFactions error:', error);
-      return null;
-    }
-  }
-
-  async setFactions(factions: any[], ttlSeconds = 1800): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.setex(
-        'game:factions', 
-        ttlSeconds, 
-        JSON.stringify(factions)
-      );
-    } catch (error) {
-      console.error('Redis setFactions error:', error);
-    }
-  }
-
-  async getAvailableDirections(roomId: number): Promise<string[] | null> {
-    if (!this.isConnected) return null;
-
-    try {
-      const data = await this.redis?.get(`room:${roomId}:directions`);
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
-      console.error('Redis getAvailableDirections error:', error);
-      return null;
-    }
-  }
-
-  async setAvailableDirections(roomId: number, directions: string[], ttlSeconds = 600): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.setex(
-        `room:${roomId}:directions`, 
-        ttlSeconds, 
-        JSON.stringify(directions)
-      );
-    } catch (error) {
-      console.error('Redis setAvailableDirections error:', error);
-    }
-  }
-
-  // Invalidate room-related data when things change
-  async invalidateRoomData(roomId: number): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.del(`room:${roomId}:players`);
-      await this.redis?.del(`room:${roomId}:directions`);
-    } catch (error) {
-      console.error('Redis invalidateRoomData error:', error);
-    }
-  }
-
-  async invalidateCrawlerRoomData(crawlerId: number): Promise<void> {
-    if (!this.isConnected) return;
-
-    try {
-      await this.redis?.del(`crawler:${crawlerId}:room-data`);
-      await this.redis?.del(`crawler:${crawlerId}:current-room`);
-    } catch (error) {
-      console.error('Redis invalidateCrawlerRoomData error:', error);
+      console.error('Redis invalidateTacticalPositions error:', error);
     }
   }
 
@@ -427,7 +303,7 @@ class RedisService {
     return true;
   }
 
-  // Leaderboard cache methods
+  // Additional cache methods
   async getLeaderboard(type: string) {
     return this.get(`leaderboard:${type}`);
   }
@@ -436,20 +312,6 @@ class RedisService {
     await this.set(`leaderboard:${type}`, data, ttl);
   }
 
-  // Enhanced tactical positions cache methods
-  async getTacticalPositions(roomId: number): Promise<any[] | null> {
-    return this.safeGet(`tactical:${roomId}`);
-  }
-
-  async setTacticalPositions(roomId: number, entities: any[], ttl: number = 1800): Promise<void> {
-    await this.safeSet(`tactical:${roomId}`, entities, ttl);
-  }
-
-  async invalidateTacticalPositions(roomId: number): Promise<void> {
-    await this.safeDel(`tactical:${roomId}`);
-  }
-
-  // Session cache methods
   async getUserCrawlers(userId: string) {
     return this.get(`user:${userId}:crawlers`);
   }
@@ -462,24 +324,58 @@ class RedisService {
     await this.deletePattern(`user:${userId}*`);
   }
 
-  // Tactical position methods
-  async getTacticalPositions(roomId: number): Promise<any[]> {
+  // Remaining methods for compatibility
+  async getCurrentRoomData(crawlerId: number): Promise<any | null> {
+    return this.get(`crawler:${crawlerId}:room-data`);
+  }
+
+  async setCurrentRoomData(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
+    await this.set(`crawler:${crawlerId}:room-data`, data, ttlSeconds);
+  }
+
+  async getPlayersInRoom(roomId: number): Promise<any[] | null> {
+    return this.get(`room:${roomId}:players`);
+  }
+
+  async setPlayersInRoom(roomId: number, players: any[], ttlSeconds = 120): Promise<void> {
+    await this.set(`room:${roomId}:players`, players, ttlSeconds);
+  }
+
+  async getFactions(): Promise<any[] | null> {
+    return this.get('game:factions');
+  }
+
+  async setFactions(factions: any[], ttlSeconds = 1800): Promise<void> {
+    await this.set('game:factions', factions, ttlSeconds);
+  }
+
+  async getAvailableDirections(roomId: number): Promise<string[] | null> {
+    return this.get(`room:${roomId}:directions`);
+  }
+
+  async setAvailableDirections(roomId: number, directions: string[], ttlSeconds = 600): Promise<void> {
+    await this.set(`room:${roomId}:directions`, directions, ttlSeconds);
+  }
+
+  async invalidateRoomData(roomId: number): Promise<void> {
+    if (!this.isConnected) return;
+
     try {
-      const key = `tactical:room:${roomId}`;
-      const data = await this.get(key);
-      return data ? JSON.parse(data) : [];
+      await this.redis?.del(`room:${roomId}:players`);
+      await this.redis?.del(`room:${roomId}:directions`);
     } catch (error) {
-      console.error('Redis getTacticalPositions error:', error);
-      return [];
+      console.error('Redis invalidateRoomData error:', error);
     }
   }
 
-  async setTacticalPositions(roomId: number, positions: any[]): Promise<void> {
+  async invalidateCrawlerRoomData(crawlerId: number): Promise<void> {
+    if (!this.isConnected) return;
+
     try {
-      const key = `tactical:room:${roomId}`;
-      await this.set(key, JSON.stringify(positions), 300); // 5 minutes
+      await this.redis?.del(`crawler:${crawlerId}:room-data`);
+      await this.redis?.del(`crawler:${crawlerId}:current-room`);
     } catch (error) {
-      console.error('Redis setTacticalPositions error:', error);
+      console.error('Redis invalidateCrawlerRoomData error:', error);
     }
   }
 }
