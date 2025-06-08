@@ -221,7 +221,9 @@ export class ExplorationStorage extends BaseStorage {
     }
 
     const result = await db
-      .select()
+      .select({
+        room: rooms
+      })
       .from(crawlerPositions)
       .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
       .where(eq(crawlerPositions.crawlerId, crawlerId))
@@ -232,7 +234,7 @@ export class ExplorationStorage extends BaseStorage {
       return undefined;
     }
 
-    const room = result[0].rooms;
+    const room = result[0].room;
 
     if (room) {
       // Cache the result
