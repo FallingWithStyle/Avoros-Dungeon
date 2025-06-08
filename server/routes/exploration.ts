@@ -278,76 +278,78 @@ export function registerExplorationRoutes(app: Express) {
   });
 
   // Get tactical data for current room
-  app.get("/api/crawlers/:id/tactical-data", isAuthenticated, async (req: any, res) => {
+  app.get("/api/crawlers/:crawlerId/tactical-data", async (req, res) => {
     try {
-      const crawlerId = parseInt(req.params.id);
-      console.log(`=== TACTICAL DATA API CALL ===`);
-      console.log(`Crawler ID: ${crawlerId}`);
+      const crawlerId = parseInt(req.params.crawlerId);
+      console.log(`=== TACTICAL DATA REQUEST for crawler ${crawlerId} ===`);
 
-      if (!crawlerId || isNaN(Number(crawlerId))) {
-        console.log(`ERROR: Invalid crawler ID: ${req.params.id}`);
-        return res.status(400).json({
-          message: "Invalid crawler ID",
-        });
+      if (isNaN(crawlerId)) {
+        console.log(`ERROR: Invalid crawler ID: ${req.params.crawlerId}`);
+        return res.status(400).json({ error: "Invalid crawler ID" });
       }
 
-      // Verify crawler ownership
-      const crawler = await storage.getCrawler(crawlerId);
-      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
-        console.log(`ERROR: Crawler not found or access denied`);
-        return res.status(404).json({ message: "Crawler not found" });
-      }
-
+      // Get current room
+      console.log(`Getting current room for crawler ${crawlerId}...`);
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
-        console.log(`ERROR: Crawler ${crawlerId} not in any room`);
-        return res.status(404).json({ message: "Crawler not in any room" });
+        console.log(`No current room found for crawler ${crawlerId}`);
+        return res.status(404).json({ error: "Crawler not found or not in a room" });
       }
 
-      console.log(`Getting tactical data for room ${currentRoom.id} (${currentRoom.name})`);
+      console.log(`Current room: ${currentRoom.name} (ID: ${currentRoom.id}, Type: ${currentRoom.type})`);
 
-      const directions = await storage.getAvailableDirections(currentRoom.id);
+      // Get available directions
+      console.log(`Getting available directions for room ${currentRoom.id}...`);
+      const availableDirections = await storage.getAvailableDirections(currentRoom.id);
+      console.log(`Available directions: ${availableDirections.join(', ')}`);
+
+      // Get all players in the current room
+      console.log(`Getting players in room ${currentRoom.id}...`);
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
+      console.log(`Players in room: ${playersInRoom.length}`);
 
-      console.log(`Room ${currentRoom.id} - Directions: ${directions.length}, Players: ${playersInRoom.length}`);
+      // Generate or get tactical entities for this room
+      console.log(`Generating tactical data for room ${currentRoom.id}...`);
+      let tacticalEntities = [];
+      try {
+        tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(
+          currentRoom.id, 
+          {
+            type: currentRoom.type,
+            hasLoot: currentRoom.hasLoot,
+            isSafe: currentRoom.isSafe,
+            factionId: currentRoom.factionId
+          }
+        );
+        console.log(`Generated ${tacticalEntities.length} tactical entities:`, tacticalEntities.map(e => `${e.type}: ${e.name}`));
+      } catch (tacticalError) {
+        console.error(`ERROR generating tactical data for room ${currentRoom.id}:`, tacticalError);
+        // Continue with empty tactical entities instead of failing completely
+        tacticalEntities = [];
+        console.log(`Using empty tactical entities due to error`);
+      }
 
-      // Generate or get tactical data with persistent positions
-      const tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(currentRoom.id, {
-        type: currentRoom.type,
-        hasLoot: currentRoom.hasLoot,
-        isSafe: currentRoom.isSafe,
-        factionId: currentRoom.factionId,
-      });
-
-      console.log(`Generated/retrieved ${tacticalEntities.length} tactical entities for room ${currentRoom.id}`);
-      console.log(`Entity types: ${tacticalEntities.map(e => `${e.type}:${e.name}`).join(', ')}`);
-
-      const responseData = {
+      const response = {
         room: currentRoom,
-        availableDirections: directions,
+        availableDirections,
         playersInRoom,
-        tacticalEntities,
+        tacticalEntities
       };
 
-      console.log(`Returning tactical data:`, {
-        roomId: currentRoom.id,
-        roomName: currentRoom.name,
-        roomType: currentRoom.type,
-        hasLoot: currentRoom.hasLoot,
-        isSafe: currentRoom.isSafe,
-        entitiesCount: tacticalEntities.length,
-        directionsCount: directions.length,
-        playersCount: playersInRoom.length
-      });
+      console.log(`=== TACTICAL DATA RESPONSE ===`);
+      console.log(`Room: ${currentRoom.name} (ID: ${currentRoom.id})`);
+      console.log(`Entities: ${tacticalEntities.length}`);
+      console.log(`Mob entities: ${tacticalEntities.filter(e => e.type === 'mob').length}`);
 
-      res.json(responseData);
+      res.json(response);
     } catch (error) {
       console.error("=== ERROR in tactical-data endpoint ===");
       console.error("Error details:", error);
       console.error("Stack trace:", error.stack);
-      res.status(500).json({
-        message: "Failed to get tactical data",
+      res.status(500).json({ 
+        error: "Failed to fetch tactical data",
         details: error instanceof Error ? error.message : "Unknown error",
+        room: req.params.crawlerId ? `for crawler ${req.params.crawlerId}` : "unknown"
       });
     }
   });

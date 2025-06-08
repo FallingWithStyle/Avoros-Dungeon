@@ -161,35 +161,43 @@ export class TacticalStorage extends BaseStorage {
     if (this.mobStorage && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
       console.log(`Getting fresh mob data for room ${roomId}`);
       
-      // Get current mobs for this room (this will get the freshly spawned ones)
-      const roomMobs = await this.mobStorage.getRoomMobs(roomId);
-      console.log(`Found ${roomMobs.length} mobs in room ${roomId}`);
-      
-      for (const mobData of roomMobs) {
-        if (mobData.mob.isAlive && mobData.mob.isActive) {
-          console.log(`Adding mob to tactical data: ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
-          entities.push({
-            type: 'mob',
-            name: mobData.mob.displayName, // Use display name from database
-            data: {
-              id: mobData.mob.id,
-              hp: mobData.mob.currentHealth,
-              maxHp: mobData.mob.maxHealth,
-              attack: mobData.mobType.attack,
-              defense: mobData.mobType.defense,
-              speed: mobData.mobType.speed,
-              creditsReward: mobData.mobType.creditsReward,
-              experienceReward: mobData.mobType.experienceReward,
-              hostileType: roomData.type === "boss" ? "boss" : "normal",
-              rarity: mobData.mob.rarity, // Include rarity information
-            },
-            position: {
-              x: parseFloat(mobData.mob.positionX),
-              y: parseFloat(mobData.mob.positionY)
-            },
-          });
+      try {
+        // Get current mobs for this room (this will get the freshly spawned ones)
+        const roomMobs = await this.mobStorage.getRoomMobs(roomId);
+        console.log(`Found ${roomMobs.length} mobs in room ${roomId}`);
+        
+        for (const mobData of roomMobs) {
+          if (mobData.mob.isAlive && mobData.mob.isActive) {
+            console.log(`Adding mob to tactical data: ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
+            entities.push({
+              type: 'mob',
+              name: mobData.mob.displayName, // Use display name from database
+              data: {
+                id: mobData.mob.id,
+                hp: mobData.mob.currentHealth,
+                maxHp: mobData.mob.maxHealth,
+                attack: mobData.mobType.attack,
+                defense: mobData.mobType.defense,
+                speed: mobData.mobType.speed,
+                creditsReward: mobData.mobType.creditsReward,
+                experienceReward: mobData.mobType.experienceReward,
+                hostileType: roomData.type === "boss" ? "boss" : "normal",
+                rarity: mobData.mob.rarity, // Include rarity information
+              },
+              position: {
+                x: parseFloat(mobData.mob.positionX),
+                y: parseFloat(mobData.mob.positionY)
+              },
+            });
+          }
         }
+      } catch (mobError) {
+        console.error(`ERROR getting mob data for room ${roomId}:`, mobError);
+        console.log(`Continuing without mob data for room ${roomId}`);
+        // Don't throw the error, just log it and continue without mobs
       }
+    } else {
+      console.log(`Skipping mob data for room ${roomId} - type: ${roomData.type}, isSafe: ${roomData.isSafe}`);
     }
 
     // Generate NPC positions if we don't have existing ones
