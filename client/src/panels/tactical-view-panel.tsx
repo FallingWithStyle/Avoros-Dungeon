@@ -769,8 +769,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
 
-      const speed = playerEntity.speed || 15; // Use entity speed or default
-      const moveDistance = speed; // Move in percentage units directly
+      const speed = playerEntity.speed || 3; // Much smaller movement increments for smoothness
+      const moveDistance = speed; // Move in small percentage units
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
 
