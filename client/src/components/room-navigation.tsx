@@ -82,7 +82,7 @@ function FactionBadge({
   if (!factionId || !faction) {
     return <Badge color="#6B7280">Neutral</Badge>;
   }
-  return <Badge color={faction.color || "#6B7280">{faction.name}</Badge>;
+  return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
 }
 
 function EnvironmentBadge({ environment }: { environment: string }) {
@@ -134,8 +134,6 @@ export default function RoomNavigation({
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });
-
-  const [isMoving, setIsMoving] = useState(false);
 
   // Movement mutation with optimistic updates
   const moveMutation = useMutation({
