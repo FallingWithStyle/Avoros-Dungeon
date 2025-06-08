@@ -62,7 +62,7 @@ export default function HeaderNavigation() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="text-xl font-bold text-amber-300">
-              Dungeon Depths
+              Avavor
             </div>
             
             <nav className="flex items-center space-x-1">

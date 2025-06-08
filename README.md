@@ -1,13 +1,13 @@
 
-# Dungeon Crawler MMO
+# Avavor Dungeon
 
 A real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory.
 
-![Game Screenshot](https://via.placeholder.com/800x400?text=Dungeon+Crawler+MMO)
+![Game Screenshot](https://via.placeholder.com/800x400?text=Avavor+Dungeon)
 
 ## 🎮 Game Overview
 
-**Dungeon Crawler MMO** is a turn-based exploration game where players take on the role of corporate sponsors managing individual crawlers. Each corporation gets one shot - sponsor a single crawler through deadly encounters and exploration. Death means starting over completely.
+**Avavor Dungeon** is a turn-based exploration game where players take on the role of corporate sponsors managing individual crawlers. Each corporation gets one shot - sponsor a single crawler through deadly encounters and exploration. Death means starting over completely.
 
 ### Key Features
 
@@ -75,7 +75,7 @@ NODE_ENV=development
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd dungeon-crawler-mmo
+   cd avavor-dungeon
    ```
 
 2. **Install dependencies**

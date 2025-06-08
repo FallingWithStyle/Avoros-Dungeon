@@ -425,7 +425,7 @@ const getMobIcon = (type: string) => {
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS AT TOP LEVEL - NEVER MOVE THESE OR ADD HOOKS ELSEWHERE
   const { toast } = useToast();
-  
+
   // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
   const handleCellClick = useCallback(
     (x: number, y: number) => {
@@ -457,7 +457,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
     [] // Empty dependency array since we'll handle data access in the click handler
   );
-  
+
   const hotbarActions = [
     {
       id: "move",
@@ -639,9 +639,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Update combat system when room data changes
   useEffect(() => {
     if (!roomData?.room) return;
-    
+
     const currentRoomId = roomData.room.id;
-    
+
     // Only proceed if we have a valid room
     let entryDirection: "north" | "south" | "east" | "west" | null = null;
     let shouldClearEntities = false;
@@ -649,14 +649,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Check if room changed
     if (lastRoomId !== null && lastRoomId !== currentRoomId) {
       shouldClearEntities = true;
-      
+
       // Get movement direction from storage
       const storedDirection = sessionStorage.getItem("lastMovementDirection");
       if (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) {
         entryDirection = storedDirection as "north" | "south" | "east" | "west";
         sessionStorage.removeItem("lastMovementDirection");
       }
-      
+
       console.log(`Room changed from ${lastRoomId} to ${currentRoomId}, will clear entities`);
     }
 
@@ -674,7 +674,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     // Check if player already exists to avoid duplicates
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
-    
+
     if (!existingPlayer) {
       // Calculate entry position for the party
       const partyEntryPositions = getPartyEntryPositions(
@@ -704,18 +704,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Separate effect for tactical entities to avoid conflicts
   useEffect(() => {
     if (!roomData?.room || !tacticalData?.tacticalEntities) return;
-    
+
     const currentRoomId = roomData.room.id;
-    
+
     // Check if tactical entities for this room already exist
     const existingTacticalEntities = combatSystem.getState().entities.filter(e => 
       e.id.includes(`-${currentRoomId}-`) && (e.type === "hostile" || e.type === "neutral")
     );
-    
+
     // Only add tactical entities if none exist for this room
     if (existingTacticalEntities.length === 0 && Array.isArray(tacticalData.tacticalEntities)) {
       console.log(`Adding ${tacticalData.tacticalEntities.length} tactical entities for room ${currentRoomId}`);
-      
+
       tacticalData.tacticalEntities.forEach((entity, index) => {
         if (entity.type === 'mob') {
           const mobEntity: CombatEntity = {
@@ -921,7 +921,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Queue the attack action on the selected entity
         handleActionClick(
           {
-            id: activeActionMode.actionId,
+            id: activeprevious_generation>
+            ActionMode.actionId,
             name: activeActionMode.actionName,
             type: activeActionMode.type,
           },
@@ -1348,7 +1349,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 
-  
+
 
   return (
     <Card className="bg-game-panel border-game-border">
