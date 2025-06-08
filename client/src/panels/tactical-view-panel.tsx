@@ -24,6 +24,7 @@ import {
 } from "@shared/combat-system";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { isEnergyDisabled } from "@/components/debug-panel";
 import ActionQueuePanel from "./action-queue-panel";
 
 interface TacticalViewPanelProps {
@@ -680,7 +681,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return unsubscribe;
   }, [combatState.isInCombat, activeActionMode]);
 
-  // Proximity-based exit detection
+  // Room movement function using the actual API
+  const handleRoomMovement = useCallback(async (direction: string) => {
+    if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
+      console.log(`Cannot move ${direction} - not available or no crawler`);
+      return;
+    }
+
+    try {
+      console.log(`Moving crawler ${crawler.id} ${direction} to new room`);
+      
+      // Store the movement direction for tactical view positioning in the next room
+      sessionStorage.setItem('lastMovementDirection', direction);
+      
+      const response = await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
+        direction,
+        debugEnergyDisabled: isEnergyDisabled(),
+      });
+
+      if (response.success) {
+        console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
+        // The page will refresh or navigate automatically via the backend
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(`Failed to move ${direction}:`, error);
+      toast({
+        title: "Movement failed",
+        description: error.message || "Could not move in that direction.",
+        variant: "destructive",
+      });
+    }
+  }, [crawler, effectiveTacticalData?.availableDirections, toast]);
+
+  // Proximity-based exit detection - triggers actual room movement
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -694,7 +728,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       west: effectiveTacticalData.availableDirections.includes("west"),
     };
 
-    const proximityThreshold = 5; // 5% from edge to trigger movement
+    const proximityThreshold = 8; // 8% from edge to trigger movement
     const { x, y } = playerEntity.position;
 
     // Check proximity to each available exit with more precise positioning
@@ -720,13 +754,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         console.log(`Player approached ${triggerDirection} exit - triggering room transition`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
-        // Store the movement direction for next room positioning
-        sessionStorage.setItem('lastMovementDirection', triggerDirection);
-
-        handleMove(triggerDirection);
+        handleRoomMovement(triggerDirection);
       }
     }
-  }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections]);
+  }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections, handleRoomMovement]);
 
   // WASD Movement Input
   useEffect(() => {
@@ -1630,19 +1661,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
 
-  const handleMove = (direction: string) => {
-    console.log(`Moving ${direction}`);
-    // Store the opposite direction - where the player came FROM for the next room
-    const oppositeDirection = {
-      north: "south",
-      south: "north", 
-      east: "west",
-      west: "east"
-    }[direction];
-    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
-    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
-    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
-  };
+  
 
 
 
