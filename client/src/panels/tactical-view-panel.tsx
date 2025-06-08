@@ -623,6 +623,101 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       setCombatState(state);
     });
+
+    // Proximity-based exit detection
+    useEffect(() => {
+      if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
+
+      const playerEntity = combatState.entities.find(e => e.id === "player");
+      if (!playerEntity) return;
+
+      const exits = {
+        north: effectiveTacticalData.availableDirections.includes("north"),
+        south: effectiveTacticalData.availableDirections.includes("south"),
+        east: effectiveTacticalData.availableDirections.includes("east"),
+        west: effectiveTacticalData.availableDirections.includes("west"),
+      };
+
+      const proximityThreshold = 5; // 5% from edge to trigger movement
+      const { x, y } = playerEntity.position;
+
+      // Check proximity to each available exit with more precise positioning
+      let triggerDirection: string | null = null;
+
+      if (exits.north && y <= proximityThreshold && x >= 35 && x <= 65) {
+        triggerDirection = "north";
+      } else if (exits.south && y >= (100 - proximityThreshold) && x >= 35 && x <= 65) {
+        triggerDirection = "south";
+      } else if (exits.east && x >= (100 - proximityThreshold) && y >= 35 && y <= 65) {
+        triggerDirection = "east";
+      } else if (exits.west && x <= proximityThreshold && y >= 35 && y <= 65) {
+        triggerDirection = "west";
+      }
+
+      if (triggerDirection) {
+        // Prevent rapid multiple movements with a simple debounce
+        const now = Date.now();
+        const lastMovement = sessionStorage.getItem('lastProximityMovement');
+        const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
+
+        if (now - lastMovementTime > 2000) { // 2 second cooldown to prevent accidental exits
+          console.log(`Player approached ${triggerDirection} exit - triggering room transition`);
+          sessionStorage.setItem('lastProximityMovement', now.toString());
+
+          // Store the movement direction for next room positioning
+          sessionStorage.setItem('lastMovementDirection', triggerDirection);
+
+          handleMove(triggerDirection);
+        }
+      }
+    }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections]);
+
+    // WASD Movement Input
+    useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
+          return;
+        }
+        const playerEntity = combatState.entities.find(e => e.id === "player");
+        if (!playerEntity) return;
+
+        let direction: { x: number, y: number } | null = null;
+        switch (event.key.toLowerCase()) {
+          case 'w':
+            direction = { x: 0, y: -1 };
+            break;
+          case 'a':
+            direction = { x: -1, y: 0 };
+            break;
+          case 's':
+            direction = { x: 0, y: 1 };
+            break;
+          case 'd':
+            direction = { x: 1, y: 0 };
+            break;
+          default:
+            return; // Ignore other keys
+        }
+
+        event.preventDefault(); // Prevent default scrolling
+
+        const speed = playerEntity.speed || 10; // Default speed
+        const moveDistance = speed / 100; // Convert speed to percentage units
+        let newX = playerEntity.position.x + direction.x * moveDistance;
+        let newY = playerEntity.position.y + direction.y * moveDistance;
+
+        // Clamp new position within the grid bounds (0-100%)
+        newX = Math.max(0, Math.min(100, newX));
+        newY = Math.max(0, Math.min(100, newY));
+
+        // Queue the move action
+        combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [combatState.entities]);
+
     return unsubscribe;
   }, [combatState.isInCombat, activeActionMode]);
 

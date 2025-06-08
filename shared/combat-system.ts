@@ -106,9 +106,9 @@ export class CombatSystem {
         id: 'move',
         name: 'Move',
         type: 'move',
-        cooldown: 1000,
+        cooldown: 200, // Shorter cooldown for responsive movement
         targetType: 'area',
-        executionTime: 800,
+        executionTime: 150, // Faster execution for smooth movement
       }],
     ]);
   }
@@ -373,7 +373,11 @@ export class CombatSystem {
 
     if (!entity.cooldowns) entity.cooldowns = {};
     const now = Date.now();
-    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveAction.cooldown) {
+    
+    // For player entities, use a shorter cooldown for responsive movement
+    const moveCooldown = entity.id === 'player' ? 50 : moveAction.cooldown;
+    
+    if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveCooldown) {
         return false;
     }
 
