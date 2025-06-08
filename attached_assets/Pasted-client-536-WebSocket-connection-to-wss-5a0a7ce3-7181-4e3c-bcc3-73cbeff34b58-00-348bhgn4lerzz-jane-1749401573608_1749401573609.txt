@@ -1,0 +1,296 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=0GsvMytDjPWP' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=0GsvMytDjPWP' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=6f2ced19:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+combat-system.ts:492 Combat processing started (setInterval)
+room-navigation.tsx:131 Fetched factions: (51) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53081
+tactical-view-panel.tsx:673 Player entering room 53081, came from direction: south
+combat-system.ts:607 getEntryPosition called with direction: south
+combat-system.ts:617 South entry position: 50, 90
+tactical-view-panel.tsx:676 Calculated entry position: 50, 90
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53081 {x: 50, y: 90}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53081
+combat-system.ts:148 addEntity: {id: 'mob-53081-0', name: 'Unknown', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53081-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53089
+tactical-view-panel.tsx:673 Player entering room 53089, came from direction: east
+combat-system.ts:607 getEntryPosition called with direction: east
+combat-system.ts:622 East entry position: 90, 50
+tactical-view-panel.tsx:676 Calculated entry position: 90, 50
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53089 {x: 90, y: 50}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53089
+combat-system.ts:148 addEntity: {id: 'mob-53089-0', name: 'Unknown', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53089-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53088
+tactical-view-panel.tsx:673 Player entering room 53088, came from direction: south
+combat-system.ts:607 getEntryPosition called with direction: south
+combat-system.ts:617 South entry position: 50, 90
+tactical-view-panel.tsx:676 Calculated entry position: 50, 90
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53088 {x: 50, y: 90}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53088
+combat-system.ts:148 addEntity: {id: 'mob-53088-0', name: 'Unknown', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'treasure', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53088-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53102
+tactical-view-panel.tsx:673 Player entering room 53102, came from direction: east
+combat-system.ts:607 getEntryPosition called with direction: east
+combat-system.ts:622 East entry position: 90, 50
+tactical-view-panel.tsx:676 Calculated entry position: 90, 50
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53102 {x: 90, y: 50}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53102
+combat-system.ts:148 addEntity: {id: 'mob-53102-0', name: 'Unknown', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'treasure', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53102-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53202
+tactical-view-panel.tsx:673 Player entering room 53202, came from direction: south
+combat-system.ts:607 getEntryPosition called with direction: south
+combat-system.ts:617 South entry position: 50, 90
+tactical-view-panel.tsx:676 Calculated entry position: 50, 90
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53202 {x: 50, y: 90}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53202
+combat-system.ts:148 addEntity: {id: 'mob-53202-0', name: 'Unknown', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53202-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53101
+tactical-view-panel.tsx:673 Player entering room 53101, came from direction: south
+combat-system.ts:607 getEntryPosition called with direction: south
+combat-system.ts:617 South entry position: 50, 90
+tactical-view-panel.tsx:676 Calculated entry position: 50, 90
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53101 {x: 50, y: 90}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53101
+combat-system.ts:148 addEntity: {id: 'mob-53101-0', name: 'Wild Monster', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53101-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53202
+tactical-view-panel.tsx:673 Player entering room 53202, came from direction: north
+combat-system.ts:607 getEntryPosition called with direction: north
+combat-system.ts:612 North entry position: 50, 10
+tactical-view-panel.tsx:676 Calculated entry position: 50, 10
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53202 {x: 50, y: 10}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53202
+combat-system.ts:148 addEntity: {id: 'mob-53202-0', name: 'Wild Monster', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53202-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53101
+tactical-view-panel.tsx:673 Player entering room 53101, came from direction: south
+combat-system.ts:607 getEntryPosition called with direction: south
+combat-system.ts:617 South entry position: 50, 90
+tactical-view-panel.tsx:676 Calculated entry position: 50, 90
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53101 {x: 50, y: 90}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53101
+combat-system.ts:148 addEntity: {id: 'mob-53101-0', name: 'Wild Monster', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:153 removeEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:153 removeEntity: mob-53101-0
+combat-system.ts:123 notifyListeners called {entities: Array(0)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(0), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:665 Cleared all entities for room 53202
+tactical-view-panel.tsx:673 Player entering room 53202, came from direction: north
+combat-system.ts:607 getEntryPosition called with direction: north
+combat-system.ts:612 North entry position: 50, 10
+tactical-view-panel.tsx:676 Calculated entry position: 50, 10
+combat-system.ts:148 addEntity: {id: 'player', name: 'Kenneth Cox', type: 'player', hp: 79, maxHp: 79, …}
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: null, actionQueue: Array(0), isInCombat: false}
+combat-system.ts:183 selectEntity: player
+combat-system.ts:123 notifyListeners called {entities: Array(1)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(1), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+tactical-view-panel.tsx:693 Added player entity at position for room 53202 {x: 50, y: 10}
+tactical-view-panel.tsx:729 Adding 1 tactical entities for room 53202
+combat-system.ts:148 addEntity: {id: 'mob-53202-0', name: 'Wild Monster', type: 'hostile', hp: 100, maxHp: 100, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:696 Combat system updated room data: {type: 'normal', isSafe: false}
+combat-system.ts:300 Wild Monster has detected the player!
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 94.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: false}
+combat-system.ts:421 Combat started!
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 92.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 90.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 88.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 86.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 84.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 82.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 80.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 78.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 76.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 74.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 72.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 70.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 68.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 66.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:344 moveEntityTowards: mob-53202-0 -> {x: 64.66666666666667, y: 10}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:261 queueAction: {entityId: 'mob-53202-0', action: {…}, targetId: 'player', targetPosition: undefined, queuedAt: 1749401561464, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(1), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:513 executeAction: {entityId: 'mob-53202-0', action: {…}, targetId: 'player', targetPosition: undefined, queuedAt: 1749401561464, …}
+combat-system.ts:541 dealDamage: {targetId: 'player', actualDamage: 25, hp: 54}
+combat-system.ts:477 processCombatTick: processed actions [{…}]
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:261 queueAction: {entityId: 'mob-53202-0', action: {…}, targetId: 'player', targetPosition: undefined, queuedAt: 1749401564564, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(1), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:513 executeAction: {entityId: 'mob-53202-0', action: {…}, targetId: 'player', targetPosition: undefined, queuedAt: 1749401564564, …}
+combat-system.ts:541 dealDamage: {targetId: 'player', actualDamage: 25, hp: 29}
+combat-system.ts:477 processCombatTick: processed actions [{…}]
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(0), isInCombat: true, combatStartTime: 1749401559964}
+combat-system.ts:261 queueAction: {entityId: 'mob-53202-0', action: {…}, targetId: 'player', targetPosition: undefined, queuedAt: 1749401567664, …}
+combat-system.ts:123 notifyListeners called {entities: Array(2)}
+tactical-view-panel.tsx:568 Combat state changed {entities: Array(2), selectedEntityId: 'player', actionQueue: Array(1), isInCombat: true, combatStartTime: 1749401559964}

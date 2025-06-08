@@ -50,6 +50,7 @@ export class CombatSystem {
   private listeners: Set<(state: CombatState) => void> = new Set();
   private actionCooldowns: Map<string, number> = new Map();
   private combatInterval: NodeJS.Timeout | null = null;
+  private currentRoomData: any = null;
 
   constructor() {
     this.state = {
@@ -204,6 +205,12 @@ export class CombatSystem {
     const action = this.actionDefinitions.get(actionId);
 
     if (!entity || !action) return false;
+
+    // Prevent attack actions in safe rooms
+    if (action.type === 'attack' && this.isCurrentRoomSafe()) {
+      console.log('Cannot attack in a safe room');
+      return false;
+    }
 
     // Check if action is on cooldown
     const now = Date.now();
@@ -431,9 +438,12 @@ export class CombatSystem {
     const hasHostiles = hostileEntities.length > 0;
     const hasDetectedHostiles = hostileEntities.some(e => e.hasDetectedPlayer);
 
-    if (hasDetectedHostiles && !this.state.isInCombat) {
+    // Check if we're in a safe room - if so, don't start combat
+    const isInSafeRoom = this.isCurrentRoomSafe();
+
+    if (hasDetectedHostiles && !this.state.isInCombat && !isInSafeRoom) {
       this.startCombat();
-    } else if (!hasHostiles && this.state.isInCombat) {
+    } else if ((!hasHostiles || isInSafeRoom) && this.state.isInCombat) {
       this.endCombat();
     }
   }
@@ -594,22 +604,33 @@ export class CombatSystem {
 
   // Calculate entry position based on direction using grid coordinates
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
+    console.log(`getEntryPosition called with direction: ${direction}`);
     switch (direction) {
       case 'north':
-        // Coming from north means entering from north side (top edge)
-        return this.gridToPercentage(7, 1);
+        // Came from north (entered through north door) - spawn at north edge (top)
+        const northPos = this.gridToPercentage(7, 1);
+        console.log(`North entry position: ${northPos.x}, ${northPos.y}`);
+        return northPos;
       case 'south':
-        // Coming from south means entering from south side (bottom edge)
-        return this.gridToPercentage(7, 13);
+        // Came from south (entered through south door) - spawn at south edge (bottom)
+        const southPos = this.gridToPercentage(7, 13);
+        console.log(`South entry position: ${southPos.x}, ${southPos.y}`);
+        return southPos;
       case 'east':
-        // Coming from east means entering from east side (right edge)
-        return this.gridToPercentage(13, 7);
+        // Came from east (entered through east door) - spawn at east edge (right)
+        const eastPos = this.gridToPercentage(13, 7);
+        console.log(`East entry position: ${eastPos.x}, ${eastPos.y}`);
+        return eastPos;
       case 'west':
-        // Coming from west means entering from west side (left edge)
-        return this.gridToPercentage(1, 7);
+        // Came from west (entered through west door) - spawn at west edge (left)
+        const westPos = this.gridToPercentage(1, 7);
+        console.log(`West entry position: ${westPos.x}, ${westPos.y}`);
+        return westPos;
       default:
         // No direction specified - spawn in center
-        return this.gridToPercentage(7, 7);
+        const centerPos = this.gridToPercentage(7, 7);
+        console.log(`Center entry position: ${centerPos.x}, ${centerPos.y}`);
+        return centerPos;
     }
   }
 
@@ -667,6 +688,19 @@ export class CombatSystem {
       console.log(`Player positioned at ${newPosition.x}, ${newPosition.y} after entering from ${direction}`);
       this.notifyListeners();
     }
+  }
+
+  // Safe room management
+  setCurrentRoomData(roomData: any): void {
+    this.currentRoomData = roomData;
+    console.log('Combat system updated room data:', { 
+      type: roomData?.type, 
+      isSafe: roomData?.isSafe 
+    });
+  }
+
+  isCurrentRoomSafe(): boolean {
+    return this.currentRoomData?.type === 'safe' || this.currentRoomData?.isSafe === true;
   }
 
   // Define available actions for each entity type

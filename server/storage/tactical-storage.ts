@@ -128,8 +128,8 @@ export class TacticalStorage extends BaseStorage {
       }
     }
 
-    // Generate mob positions
-    if (roomData.type !== "safe" && roomData.type !== "entrance") {
+    // Generate mob positions - no hostile mobs in safe rooms
+    if (roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
       let mobCount = 0;
 
       if (roomData.type === "boss") {

@@ -566,10 +566,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       console.log("Combat state changed", state);
+
+      // Clear active action mode when combat ends
+      if (!state.isInCombat && combatState.isInCombat && activeActionMode) {
+        console.log("Combat ended - clearing active action mode");
+        setActiveActionMode(null);
+      }
+
       setCombatState(state);
     });
     return unsubscribe;
-  }, []);
+  }, [combatState.isInCombat, activeActionMode]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -636,76 +643,81 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [hotbarActions]);
 
-  // Update combat system when room data changes
+  // Update room data and player position when room changes
   useEffect(() => {
     if (!roomData?.room) return;
 
     const currentRoomId = roomData.room.id;
-
-    // Only proceed if we have a valid room
-    let entryDirection: "north" | "south" | "east" | "west" | null = null;
-    let shouldClearEntities = false;
-
-    // Check if room changed
-    if (lastRoomId !== null && lastRoomId !== currentRoomId) {
-      shouldClearEntities = true;
-
-      // Get movement direction from storage
-      const storedDirection = sessionStorage.getItem("lastMovementDirection");
-      if (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) {
-        entryDirection = storedDirection as "north" | "south" | "east" | "west";
-        sessionStorage.removeItem("lastMovementDirection");
-      }
-
-      console.log(`Room changed from ${lastRoomId} to ${currentRoomId}, will clear entities`);
-    }
+    const shouldClearEntities = lastRoomId !== null && lastRoomId !== currentRoomId;
 
     // Update lastRoomId
     setLastRoomId(currentRoomId);
 
-    // Clear entities if needed
-    if (shouldClearEntities) {
+    // Update combat system with current room data for safe room detection
+    combatSystem.setCurrentRoomData(roomData.room);
+
+    // Clear ALL entities when room changes, then rebuild from scratch
+    if (shouldClearEntities || lastRoomId === null) {
       const currentEntities = combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
-      console.log(`Cleared all entities for room change`);
+      console.log(`Cleared all entities for room ${currentRoomId}`);
     }
 
-    // Check if player already exists to avoid duplicates
+    // Always ensure player entity exists
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
-
     if (!existingPlayer) {
-      // Calculate entry position for the party
-      const partyEntryPositions = getPartyEntryPositions(
-        entryDirection,
-        roomData.playersInRoom.length + 1,
-      );
-
-      // Add main player entity
+      // Get last movement direction from session storage to position player appropriately
+      const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
+      console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
+      
+      const entryPosition = combatSystem.getEntryPosition(lastDirection);
+      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
+      
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
         type: "player",
-        hp: crawler.hp,
-        maxHp: crawler.maxHp,
-        attack: crawler.attack,
-        defense: crawler.defense,
-        speed: crawler.speed,
-        position: partyEntryPositions[0],
-        entryDirection,
+        hp: crawler.health || 100,
+        maxHp: crawler.maxHealth || 100,
+        attack: 20, // Base attack for player
+        defense: 10, // Base defense for player
+        speed: 15,
+        position: entryPosition,
+        entryDirection: lastDirection,
       };
 
       combatSystem.addEntity(playerEntity);
-      console.log(`Added player entity for room ${currentRoomId}`);
+      combatSystem.selectEntity("player"); // Auto-select the player
+      console.log(`Added player entity at position for room ${currentRoomId}`, playerEntity.position);
     }
-  }, [roomData?.room?.id, lastRoomId, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed]);
+  }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
 
   // Separate effect for tactical entities to avoid conflicts
   useEffect(() => {
     if (!roomData?.room || !tacticalData?.tacticalEntities) return;
 
     const currentRoomId = roomData.room.id;
+
+    // Remove any existing tactical entities that don't belong to the current room
+    const currentEntities = combatSystem.getState().entities;
+    const staleEntities = currentEntities.filter(entity => {
+      // Keep the player entity
+      if (entity.id === "player") return false;
+
+      // Remove any tactical entities that don't match the current room ID
+      if (entity.type === "hostile" || entity.type === "neutral") {
+        return !entity.id.includes(`-${currentRoomId}-`);
+      }
+
+      return false;
+    });
+
+    staleEntities.forEach(entity => {
+      console.log(`Removing stale entity: ${entity.id} from previous room`);
+      combatSystem.removeEntity(entity.id);
+    });
 
     // Check if tactical entities for this room already exist
     const existingTacticalEntities = combatSystem.getState().entities.filter(e => 
@@ -796,6 +808,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionName: string,
   ) => {
     console.log(`Hotbar action clicked: ${actionId}`);
+
+    // Check if this action is already selected - if so, deselect it
+    if (activeActionMode?.actionId === actionId) {
+      console.log(`Deselecting active action mode: ${actionId}`);
+      setActiveActionMode(null);
+      return;
+    }
 
     // Always select the player when any hotbar action is clicked, deselecting any other entity
     const playerEntity = combatState.entities.find((e) => e.id === "player");
@@ -1345,7 +1364,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleMove = (direction: string) => {
     console.log(`Moving ${direction}`);
-    sessionStorage.setItem("lastMovementDirection", direction);
+    // Store the opposite direction - where the player came FROM for the next room
+    const oppositeDirection = {
+      north: "south",
+      south: "north", 
+      east: "west",
+      west: "east"
+    }[direction];
+    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
+    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 
