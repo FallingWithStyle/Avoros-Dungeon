@@ -6,17 +6,27 @@ class RedisService {
 
   constructor() {
     try {
-      this.redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
+      if (!process.env.REDIS_URL) {
+        console.warn('REDIS_URL environment variable not set - Redis will be disabled');
+        this.redis = null;
+        return;
+      }
+
+      this.redis = new Redis(process.env.REDIS_URL);
       this.redis.on('connect', () => {
         this.isConnected = true;
+        console.log('Redis connected successfully');
       });
       this.redis.on('error', (err) => {
-        // Temporarily disabled Redis error logging to reduce console noise
-        // console.error('Redis connection error:', err);
+        console.error('Redis connection error:', err);
         this.isConnected = false;
       });
+      this.redis.on('ready', () => {
+        this.isConnected = true;
+        console.log('Redis ready for commands');
+      });
     } catch (error) {
-      console.warn('Failed to initialize Redis:', error);
+      console.error('Failed to initialize Redis:', error);
       this.redis = null;
     }
   }
