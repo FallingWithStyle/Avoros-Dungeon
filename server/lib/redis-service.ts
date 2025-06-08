@@ -6,17 +6,27 @@ class RedisService {
 
   constructor() {
     try {
-      this.redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379");
+      if (!process.env.REDIS_URL) {
+        console.warn('REDIS_URL environment variable not set - Redis will be disabled');
+        this.redis = null;
+        return;
+      }
+
+      this.redis = new Redis(process.env.REDIS_URL);
       this.redis.on('connect', () => {
         this.isConnected = true;
+        console.log('Redis connected successfully');
       });
       this.redis.on('error', (err) => {
-        // Temporarily disabled Redis error logging to reduce console noise
-        // console.error('Redis connection error:', err);
+        console.error('Redis connection error:', err);
         this.isConnected = false;
       });
+      this.redis.on('ready', () => {
+        this.isConnected = true;
+        console.log('Redis ready for commands');
+      });
     } catch (error) {
-      console.warn('Failed to initialize Redis:', error);
+      console.error('Failed to initialize Redis:', error);
       this.redis = null;
     }
   }
@@ -378,6 +388,45 @@ class RedisService {
     }
   }
 
+  // System-wide bypass check
+  private async isRedisOperational(): Promise<boolean> {
+    if (!this.redis || !this.isConnected) {
+      return false;
+    }
+
+    try {
+      await this.redis.ping();
+      return true;
+    } catch (error) {
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  // Enhanced generic methods with bypass
+  async safeGet<T>(key: string): Promise<T | null> {
+    if (!(await this.isRedisOperational())) {
+      return null;
+    }
+    return this.get<T>(key);
+  }
+
+  async safeSet(key: string, value: any, ttl: number = this.defaultTTL): Promise<boolean> {
+    if (!(await this.isRedisOperational())) {
+      return false;
+    }
+    await this.set(key, value, ttl);
+    return true;
+  }
+
+  async safeDel(key: string): Promise<boolean> {
+    if (!(await this.isRedisOperational())) {
+      return false;
+    }
+    await this.del(key);
+    return true;
+  }
+
   // Leaderboard cache methods
   async getLeaderboard(type: string) {
     return this.get(`leaderboard:${type}`);
@@ -385,6 +434,19 @@ class RedisService {
 
   async setLeaderboard(type: string, data: any, ttl: number = 180) {
     await this.set(`leaderboard:${type}`, data, ttl);
+  }
+
+  // Enhanced tactical positions cache methods
+  async getTacticalPositions(roomId: number): Promise<any[] | null> {
+    return this.safeGet(`tactical:${roomId}`);
+  }
+
+  async setTacticalPositions(roomId: number, entities: any[], ttl: number = 1800): Promise<void> {
+    await this.safeSet(`tactical:${roomId}`, entities, ttl);
+  }
+
+  async invalidateTacticalPositions(roomId: number): Promise<void> {
+    await this.safeDel(`tactical:${roomId}`);
   }
 
   // Session cache methods
@@ -398,6 +460,27 @@ class RedisService {
 
   async invalidateUser(userId: string) {
     await this.deletePattern(`user:${userId}*`);
+  }
+
+  // Tactical position methods
+  async getTacticalPositions(roomId: number): Promise<any[]> {
+    try {
+      const key = `tactical:room:${roomId}`;
+      const data = await this.get(key);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Redis getTacticalPositions error:', error);
+      return [];
+    }
+  }
+
+  async setTacticalPositions(roomId: number, positions: any[]): Promise<void> {
+    try {
+      const key = `tactical:room:${roomId}`;
+      await this.set(key, JSON.stringify(positions), 300); // 5 minutes
+    } catch (error) {
+      console.error('Redis setTacticalPositions error:', error);
+    }
   }
 }
 

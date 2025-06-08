@@ -1,8 +1,6 @@
-
 import { db } from "../db";
 import {
   tacticalPositions,
-  type TacticalPosition,
 } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
@@ -16,6 +14,16 @@ export interface TacticalEntity {
 }
 
 export class TacticalStorage extends BaseStorage {
+  private crawlerStorage: any;
+  private explorationStorage: any;
+
+  setCrawlerStorage(storage: any) {
+    this.crawlerStorage = storage;
+  }
+
+  setExplorationStorage(storage: any) {
+    this.explorationStorage = storage;
+  }
   async getTacticalPositions(roomId: number): Promise<TacticalEntity[]> {
     // Try to get from cache first
     try {
@@ -39,8 +47,8 @@ export class TacticalStorage extends BaseStorage {
 
     const entities: TacticalEntity[] = positions.map(pos => ({
       type: pos.entityType as 'loot' | 'mob' | 'npc',
-      name: (pos.entityData as any).name || 'Unknown',
-      data: pos.entityData,
+      name: (pos.entityData as any)?.name || 'Unknown',
+      data: pos.entityData || {},
       position: {
         x: parseFloat(pos.positionX),
         y: parseFloat(pos.positionY),
@@ -73,6 +81,8 @@ export class TacticalStorage extends BaseStorage {
         positionX: entity.position.x.toString(),
         positionY: entity.position.y.toString(),
         isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }));
 
       await db.insert(tacticalPositions).values(insertData);
@@ -121,7 +131,7 @@ export class TacticalStorage extends BaseStorage {
     // Generate mob positions
     if (roomData.type !== "safe" && roomData.type !== "entrance") {
       let mobCount = 0;
-      
+
       if (roomData.type === "boss") {
         mobCount = 1;
       } else if (roomData.factionId) {
@@ -210,5 +220,33 @@ export class TacticalStorage extends BaseStorage {
       x: (gridX + 0.5) * cellWidth,
       y: (gridY + 0.5) * cellHeight,
     };
+  }
+
+  async getTacticalEntities(crawlerId: string | number): Promise<TacticalEntity[]> {
+    try {
+      const crawlerIdNum = Number(crawlerId);
+      if (isNaN(crawlerIdNum)) {
+        console.log(`Invalid crawler ID: ${crawlerId}`);
+        return [];
+      }
+
+      const crawler = await this.crawlerStorage.getCrawler(crawlerIdNum);
+      if (!crawler) {
+        console.log(`Crawler ${crawlerId} not found for tactical entities`);
+        return [];
+      }
+
+      const currentRoom = await this.explorationStorage.getCrawlerCurrentRoom(crawlerIdNum);
+      if (!currentRoom) {
+        console.log(`No current room found for crawler ${crawlerId}`);
+        return [];
+      }
+
+      // Get tactical entities for the current room
+      return await this.getTacticalPositions(currentRoom.id);
+    } catch (error) {
+      console.error("Error fetching tactical entities:", error);
+      return [];
+    }
   }
 }

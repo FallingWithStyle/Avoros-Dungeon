@@ -201,6 +201,12 @@ export function registerExplorationRoutes(app: Express) {
     try {
       const crawlerId = parseInt(req.params.id);
 
+      if (!crawlerId || isNaN(Number(crawlerId))) {
+        return res.status(400).json({
+          message: "Invalid crawler ID",
+        });
+      }
+
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
         return res.status(404).json({ message: "Crawler not in any room" });
@@ -225,7 +231,10 @@ export function registerExplorationRoutes(app: Express) {
       });
     } catch (error) {
       console.error("Get tactical data error:", error);
-      res.status(500).json({ message: "Failed to get tactical data" });
+      res.status(500).json({
+        message: "Failed to get tactical data",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   });
 }

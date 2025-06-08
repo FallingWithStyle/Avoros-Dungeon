@@ -5,7 +5,37 @@ export interface IBaseStorage {
 
 // Base class with shared utilities
 export abstract class BaseStorage {
-  constructor() {}
+  protected userStorage?: any;
+  protected crawlerStorage?: any;
+  protected explorationStorage?: any;
+  protected corporationStorage?: any;
+  protected redisService: any;
+
+  constructor() {
+    // Redis service will be injected via setRedisService method
+    this.redisService = null;
+  }
+
+  setRedisService(redisService: any) {
+    this.redisService = redisService;
+  }
+  
+  // Dependency injection methods
+  setUserStorage(storage: any) {
+    this.userStorage = storage;
+  }
+
+  setCrawlerStorage(storage: any) {
+    this.crawlerStorage = storage;
+  }
+
+  setExplorationStorage(storage: any) {
+    this.explorationStorage = storage;
+  }
+
+  setCorporationStorage(storage: any) {
+    this.corporationStorage = storage;
+  }
   
   // Shared utility methods can go here
   protected shuffleArray<T>(array: T[]): T[] {
