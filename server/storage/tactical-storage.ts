@@ -1,7 +1,6 @@
 import { db } from "../db";
 import {
   tacticalPositions,
-  type TacticalPosition,
 } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
@@ -15,6 +14,16 @@ export interface TacticalEntity {
 }
 
 export class TacticalStorage extends BaseStorage {
+  private crawlerStorage: any;
+  private explorationStorage: any;
+
+  setCrawlerStorage(storage: any) {
+    this.crawlerStorage = storage;
+  }
+
+  setExplorationStorage(storage: any) {
+    this.explorationStorage = storage;
+  }
   async getTacticalPositions(roomId: number): Promise<TacticalEntity[]> {
     // Try to get from cache first
     try {
@@ -38,8 +47,8 @@ export class TacticalStorage extends BaseStorage {
 
     const entities: TacticalEntity[] = positions.map(pos => ({
       type: pos.entityType as 'loot' | 'mob' | 'npc',
-      name: (pos.entityData as any).name || 'Unknown',
-      data: pos.entityData,
+      name: (pos.entityData as any)?.name || 'Unknown',
+      data: pos.entityData || {},
       position: {
         x: parseFloat(pos.positionX),
         y: parseFloat(pos.positionY),
@@ -72,6 +81,8 @@ export class TacticalStorage extends BaseStorage {
         positionX: entity.position.x.toString(),
         positionY: entity.position.y.toString(),
         isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }));
 
       await db.insert(tacticalPositions).values(insertData);
@@ -211,54 +222,5 @@ export class TacticalStorage extends BaseStorage {
     };
   }
 
-  async getTacticalEntities(crawlerId: string | number): Promise<TacticalEntity[]> {
-    try {
-      const crawlerIdNum = Number(crawlerId);
-      if (isNaN(crawlerIdNum)) {
-        console.log(`Invalid crawler ID: ${crawlerId}`);
-        return [];
-      }
-
-      const crawler = await this.crawlerStorage.getCrawler(crawlerIdNum);
-      if (!crawler) {
-        console.log(`Crawler ${crawlerId} not found for tactical entities`);
-        return [];
-      }
-
-      const currentRoom = await this.explorationStorage.getCurrentRoom(crawlerIdNum);
-      if (!currentRoom?.room) {
-        console.log(`No current room found for crawler ${crawlerId}`);
-        return [];
-      }
-
-      // Get all tactical positions for the current room
-      const positions = await db
-        .select()
-        .from(tacticalPositions)
-        .where(eq(tacticalPositions.roomId, currentRoom.room.id));
-
-      return positions.map(pos => {
-        let metadata = {};
-        try {
-          metadata = pos.metadata ? JSON.parse(pos.metadata) : {};
-        } catch (e) {
-          console.warn(`Failed to parse metadata for tactical entity ${pos.entityId}:`, e);
-          metadata = {};
-        }
-
-        return {
-          id: pos.entityId,
-          name: pos.entityType === 'hostile' ? pos.entityId : 'Unknown',
-          type: pos.entityType as 'hostile' | 'loot' | 'environmental',
-          position: { x: pos.x, y: pos.y },
-          hp: pos.entityType === 'hostile' ? 100 : undefined,
-          maxHp: pos.entityType === 'hostile' ? 100 : undefined,
-          metadata
-        };
-      });
-    } catch (error) {
-      console.error("Error fetching tactical entities:", error);
-      return [];
-    }
-  }
+  
 }

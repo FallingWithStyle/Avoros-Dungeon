@@ -517,6 +517,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
     refetchInterval: 10000, // Refresh every 10 seconds (less frequent since positions are persistent)
+    retry: 3,
+    retryDelay: 1000,
     onError: (error) => {
       console.error("Tactical data fetch error:", error);
     },
@@ -1250,24 +1252,28 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Handle case where tacticalData is missing but room data exists
   if (!tacticalData) {
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Tactical View
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-48 border-2 border-game-border rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-slate-400">No tactical data available</span>
-              <div className="text-slate-500 text-sm mt-1">Room: {roomData.room.name}</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    console.log("No tactical data available, using empty data for room:", roomData.room.name);
+    // Create empty tactical data to prevent breaking the UI
+    const emptyTacticalData = {
+      tacticalEntities: [],
+    };
+    
+    const { room, availableDirections, playersInRoom } = roomData;
+    const persistentTacticalData = {
+      background: getRoomBackgroundType(room.environment, room.type),
+      loot: [],
+      mobs: [],
+      npcs: [],
+      exits: {
+        north: availableDirections.includes("north"),
+        south: availableDirections.includes("south"),
+        east: availableDirections.includes("east"),
+        west: availableDirections.includes("west"),
+      },
+      otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
+    };
+
+    // Continue with the rest of the render using empty data
   }
 
   const { room, availableDirections, playersInRoom } = roomData;

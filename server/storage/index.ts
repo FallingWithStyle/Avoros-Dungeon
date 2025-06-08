@@ -1,3 +1,44 @@
+import { BaseStorage } from "./base-storage";
+import { CrawlerStorage } from "./crawler-storage";
+import { UserStorage } from "./user-storage";
+import { ExplorationStorage } from "./exploration-storage";
+import { CorporationStorage } from "./corporation-storage";
+import { ContentStorage } from "./content-storage";
+import { TacticalStorage } from "./tactical-storage";
+import { redisService } from "../lib/redis-service";
+import {
+  type UserAccount,
+  type Crawler,
+  type CrawlerWithDetails,
+  type Corporation,
+  type Activity,
+  type Room,
+  type ExploredRoom,
+  type Encounter,
+  type InsertActivity,
+  type InsertCrawler,
+  users,
+  crawlers,
+  corporations,
+  activities,
+  rooms,
+  exploredRooms,
+  encounters,
+  classes,
+  spells,
+  effects,
+  equipment,
+  type Class,
+  type Equipment,
+  type Effect,
+  type Spell,
+  type RoomConnection,
+  roomConnections,
+} from "@shared/schema";
+import { eq, desc, sql, and, or, not, inArray } from "drizzle-orm";
+import { db } from "../db";
+import { aliasedTable } from "drizzle-orm/pg-core";
+import { getRandomName, generateSerial } from "../lib/nameGenerator";
 import { UserStorage } from "./user-storage";
 import { CrawlerStorage } from "./crawler-storage";
 import { ExplorationStorage } from "./exploration-storage";
@@ -92,6 +133,12 @@ export interface IStorage {
 
 // Main storage orchestrator that combines all storage modules
 export class ModularStorage implements IStorage {
+  private _crawlerStorage: CrawlerStorage;
+  private _userStorage: UserStorage;
+  private _explorationStorage: ExplorationStorage;
+  private _corporationStorage: CorporationStorage;
+  private _contentStorage: ContentStorage;
+  private _tacticalStorage: TacticalStorage;
   private userStorage = new UserStorage();
   private crawlerStorage = new CrawlerStorage();
   private explorationStorage = new ExplorationStorage();
@@ -99,6 +146,27 @@ export class ModularStorage implements IStorage {
   private corporationStorage = new CorporationStorage(); // Added corporation storage
   private tacticalStorage = new TacticalStorage();
   redisService: typeof redisService = redisService;
+
+  constructor() {
+    this._crawlerStorage = new CrawlerStorage();
+    this._userStorage = new UserStorage();
+    this._explorationStorage = new ExplorationStorage();
+    this._corporationStorage = new CorporationStorage();
+    this._contentStorage = new ContentStorage();
+    this._tacticalStorage = new TacticalStorage();
+
+    // Set up cross-references
+    this._crawlerStorage.setUserStorage(this._userStorage);
+    this._crawlerStorage.setExplorationStorage(this._explorationStorage);
+    this._crawlerStorage.setCorporationStorage(this._corporationStorage);
+    this._explorationStorage.setCrawlerStorage(this._crawlerStorage);
+    this._corporationStorage.setCrawlerStorage(this._crawlerStorage);
+    this._corporationStorage.setUserStorage(this._userStorage);
+    this._userStorage.setCrawlerStorage(this._crawlerStorage);
+    this._userStorage.setCorporationStorage(this._corporationStorage);
+    this._tacticalStorage.setCrawlerStorage(this._crawlerStorage);
+    this._tacticalStorage.setExplorationStorage(this._explorationStorage);
+  }
 
   // Expose content storage publicly
   get content() {
