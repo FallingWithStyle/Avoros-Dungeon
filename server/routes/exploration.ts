@@ -210,7 +210,7 @@ export function registerExplorationRoutes(app: Express) {
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
 
       // Generate or get tactical data with persistent positions
-      const tacticalEntities = await storage.generateAndSaveTacticalData(currentRoom.id, {
+      const tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(currentRoom.id, {
         type: currentRoom.type,
         hasLoot: currentRoom.hasLoot,
         isSafe: currentRoom.isSafe,
