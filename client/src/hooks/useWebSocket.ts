@@ -12,19 +12,16 @@ export function useWebSocket() {
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.hostname;
+    const port = window.location.port;
 
-    // For Replit, construct the WebSocket URL to match the current page
     let wsUrl;
-
-    // In development, use the current port (usually 5000)
-    // In production, Replit handles the port mapping automatically
-    if (window.location.port) {
-      wsUrl = `${protocol}//${host}:${window.location.port}/ws`;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      const fallbackPort = port || '5000';
+      wsUrl = `${protocol}//${host}:${fallbackPort}/ws`;
     } else {
-      // Production or when port is not available
-      wsUrl = `${protocol}//${host}/ws`;
+      wsUrl = `${protocol}//${window.location.host}/ws`;
     }
 
     console.log("🔌 Attempting WebSocket connection to:", wsUrl);
