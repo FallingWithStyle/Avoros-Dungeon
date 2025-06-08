@@ -100,7 +100,7 @@ export class MobStorage extends BaseStorage {
         mobType: mobTypes
       })
       .from(mobs)
-      .innerJoin(mobTypes, eq(mobs.mobTypeId, mobTypes.id))
+      .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
 
     // Cache for 10 minutes
@@ -251,7 +251,7 @@ export class MobStorage extends BaseStorage {
 
       await db.insert(mobs).values({
         roomId,
-        mobTypeId: mobData.mobTypeId,
+        enemyId: mobData.mobTypeId, // Using enemyId to match schema
         displayName: mobData.displayName,
         rarity: mobData.rarity,
         positionX: position.x.toString(),
