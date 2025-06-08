@@ -42,6 +42,9 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(404).json({ message: "Crawler not found" });
       }
 
+      // Ensure crawler has a position
+      await storage.ensureCrawlerHasPosition(crawlerId);
+
       const room = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!room) {
         return res.status(404).json({ message: "Room not found" });
