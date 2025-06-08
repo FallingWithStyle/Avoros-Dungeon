@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
@@ -30,7 +29,7 @@ export function registerExplorationRoutes(app: Express) {
   app.get("/api/crawlers/:id/current-room", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      
+
       // Try to get cached room data first
       const cachedRoomData = await storage.redisService.getCurrentRoomData(crawlerId);
       if (cachedRoomData) {
@@ -176,6 +175,57 @@ export function registerExplorationRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching floor rooms:", error);
       res.status(500).json({ error: "Failed to fetch floor rooms" });
+    }
+  });
+
+  // Get available directions for current room
+  app.get("/api/crawlers/:id/directions", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ message: "Crawler not in any room" });
+      }
+
+      const directions = await storage.explorationStorage.getAvailableDirections(currentRoom.id);
+      res.json({ directions });
+    } catch (error) {
+      console.error("Get directions error:", error);
+      res.status(500).json({ message: "Failed to get directions" });
+    }
+  });
+
+  // Get tactical data for current room
+  app.get("/api/crawlers/:id/tactical-data", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ message: "Crawler not in any room" });
+      }
+
+      const directions = await storage.explorationStorage.getAvailableDirections(currentRoom.id);
+      const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
+
+      // Generate or get tactical data with persistent positions
+      const tacticalEntities = await storage.generateAndSaveTacticalData(currentRoom.id, {
+        type: currentRoom.type,
+        hasLoot: currentRoom.hasLoot,
+        isSafe: currentRoom.isSafe,
+        factionId: currentRoom.factionId,
+      });
+
+      res.json({
+        room: currentRoom,
+        availableDirections: directions,
+        playersInRoom,
+        tacticalEntities,
+      });
+    } catch (error) {
+      console.error("Get tactical data error:", error);
+      res.status(500).json({ message: "Failed to get tactical data" });
     }
   });
 }

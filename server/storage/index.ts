@@ -4,6 +4,7 @@ import { ExplorationStorage } from "./exploration-storage";
 import { ContentStorage } from "./content-storage";
 import { CorporationStorage } from "./corporation-storage";
 import { redisService } from "../lib/redis-service";
+import { TacticalStorage } from './tactical-storage';
 
 // Define the IStorage interface here to avoid circular imports
 export interface IStorage {
@@ -83,6 +84,10 @@ export interface IStorage {
   resetCrawlerToEntrance(crawlerId: number): Promise<any>;
   applyEffect(crawlerId: number, effect: any): Promise<any>;
   handleStaircaseMovement(crawlerId: number, direction: string): Promise<any>;
+
+  // Tactical positions methods
+  getTacticalPositions(roomId: number): Promise<any>;
+  generateAndSaveTacticalData(roomId: number, roomData: any): Promise<any>;
 }
 
 // Main storage orchestrator that combines all storage modules
@@ -92,6 +97,7 @@ export class ModularStorage implements IStorage {
   private explorationStorage = new ExplorationStorage();
   private contentStorage = new ContentStorage();
   private corporationStorage = new CorporationStorage(); // Added corporation storage
+  private tacticalStorage = new TacticalStorage();
   redisService: typeof redisService = redisService;
 
   // Expose content storage publicly
@@ -286,6 +292,15 @@ export class ModularStorage implements IStorage {
   async resetCrawlerToEntrance(crawlerId: number) { return; }
   async applyEffect(crawlerId: number, effect: any) { return; }
   async handleStaircaseMovement(crawlerId: number, direction: string) { return null; }
+
+  // Tactical positions methods
+  async getTacticalPositions(roomId: number) {
+    return this.tacticalStorage.getTacticalPositions(roomId);
+  }
+
+  async generateAndSaveTacticalData(roomId: number, roomData: any) {
+    return this.tacticalStorage.generateAndSaveTacticalData(roomId, roomData);
+  }
 }
 
 export const storage = new ModularStorage();

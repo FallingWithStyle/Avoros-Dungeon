@@ -365,6 +365,21 @@ export const encounters = pgTable("encounters", {
   completedAt: timestamp("completed_at"),
 });
 
+// Tactical positions for entities in rooms
+export const tacticalPositions = pgTable("tactical_positions", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id")
+    .notNull()
+    .references(() => rooms.id),
+  entityType: varchar("entity_type", { length: 20 }).notNull(), // 'loot', 'mob', 'npc'
+  entityData: jsonb("entity_data").notNull(), // Store entity details (name, type, hp, etc.)
+  positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
+  positionY: decimal("position_y", { precision: 5, scale: 2 }).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Activity feed
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
@@ -475,7 +490,18 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
   crawlerPositions: many(crawlerPositions),
   connectionsFrom: many(roomConnections, { relationName: "fromRoom" }),
   connectionsTo: many(roomConnections, { relationName: "toRoom" }),
+  tacticalPositions: many(tacticalPositions),
 }));
+
+export const tacticalPositionsRelations = relations(
+  tacticalPositions,
+  ({ one }) => ({
+    room: one(rooms, {
+      fields: [tacticalPositions.roomId],
+      references: [rooms.id],
+    }),
+  }),
+);
 
 export const roomConnectionsRelations = relations(
   roomConnections,
@@ -648,6 +674,14 @@ export const insertCrawlerPositionSchema = createInsertSchema(
   enteredAt: true,
 });
 
+export const insertTacticalPositionSchema = createInsertSchema(
+  tacticalPositions,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -661,6 +695,7 @@ export type Floor = typeof floors.$inferSelect;
 export type Room = typeof rooms.$inferSelect;
 export type RoomConnection = typeof roomConnections.$inferSelect;
 export type CrawlerPosition = typeof crawlerPositions.$inferSelect;
+export type TacticalPosition = typeof tacticalPositions.$inferSelect;
 export type Enemy = typeof enemies.$inferSelect;
 export type Encounter = typeof encounters.$inferSelect;
 export type Activity = typeof activities.$inferSelect;

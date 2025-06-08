@@ -109,6 +109,43 @@ class RedisService {
     }
   }
 
+  // Tactical positions cache methods
+  async getTacticalPositions(roomId: number): Promise<any[] | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`room:${roomId}:tactical-positions`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getTacticalPositions error:', error);
+      return null;
+    }
+  }
+
+  async setTacticalPositions(roomId: number, positions: any[], ttlSeconds = 1800): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `room:${roomId}:tactical-positions`, 
+        ttlSeconds, 
+        JSON.stringify(positions)
+      );
+    } catch (error) {
+      console.error('Redis setTacticalPositions error:', error);
+    }
+  }
+
+  async invalidateTacticalPositions(roomId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`room:${roomId}:tactical-positions`);
+    } catch (error) {
+      console.error('Redis invalidateTacticalPositions error:', error);
+    }
+  }
+
   // Room and exploration cache methods
   async getExploredRooms(crawlerId: number) {
     return this.get(`crawler:${crawlerId}:explored`);
