@@ -145,31 +145,60 @@ export function registerExplorationRoutes(app: Express) {
     try {
       const crawlerId = parseInt(req.params.id);
       const { direction, debugEnergyDisabled } = req.body;
+      
+      console.log(`=== MOVE CRAWLER API CALL ===`);
+      console.log(`Crawler ID: ${crawlerId}`);
+      console.log(`Direction: ${direction}`);
+      console.log(`Debug Energy Disabled: ${debugEnergyDisabled}`);
+      console.log(`User ID: ${req.user.claims.sub}`);
+
+      if (!direction) {
+        console.log(`ERROR: No direction provided`);
+        return res.status(400).json({ message: "Direction is required" });
+      }
+
+      // Ensure crawler has a position first
+      await storage.ensureCrawlerHasPosition(crawlerId);
+
       const crawler = await storage.getCrawler(crawlerId);
+      console.log(`Crawler lookup result:`, crawler ? `Found ${crawler.name}` : 'Not found');
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        console.log(`ERROR: Crawler not found or access denied`);
         return res.status(404).json({ message: "Crawler not found" });
       }
 
       if (!crawler.isAlive) {
+        console.log(`ERROR: Crawler is dead`);
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
       // Check minimum energy requirement (unless debug mode is enabled)
-      if (!debugEnergyDisabled && crawler.energy < 5) {
-        return res.status(400).json({ message: "Not enough energy to move" });
+      const energyRequired = 10; // Standard movement cost
+      if (!debugEnergyDisabled && crawler.energy < energyRequired) {
+        console.log(`ERROR: Not enough energy. Required: ${energyRequired}, Available: ${crawler.energy}`);
+        return res.status(400).json({ message: `Not enough energy to move. Need ${energyRequired}, have ${crawler.energy}` });
       }
 
+      console.log(`Attempting to move crawler ${crawlerId} ${direction}...`);
       const result = await storage.moveToRoom(
         crawlerId,
         direction,
         debugEnergyDisabled,
       );
 
+      console.log(`Move result:`, result.success ? `Success - moved to ${result.newRoom?.name}` : `Failed - ${result.error}`);
+
       if (!result.success) {
         return res
           .status(400)
           .json({ message: result.error || "Cannot move in that direction" });
+      }
+
+      // Deduct energy if not in debug mode
+      if (!debugEnergyDisabled) {
+        console.log(`Deducting ${energyRequired} energy from crawler ${crawlerId}`);
+        await storage.updateCrawlerEnergy(crawlerId, -energyRequired);
       }
 
       await storage.createActivity({
@@ -181,14 +210,21 @@ export function registerExplorationRoutes(app: Express) {
       });
 
       // Invalidate relevant caches when crawler moves
-      await storage.redisService.invalidateCrawlerRoomData(crawlerId);
-      if (result.newRoom) {
-        await storage.redisService.invalidateRoomData(result.newRoom.id);
+      try {
+        await storage.redisService.invalidateCrawlerRoomData(crawlerId);
+        if (result.newRoom) {
+          await storage.redisService.invalidateRoomData(result.newRoom.id);
+        }
+      } catch (cacheError) {
+        console.log('Failed to invalidate caches:', cacheError);
       }
 
+      console.log(`Movement successful - returning new room data`);
       res.json({ success: true, newRoom: result.newRoom });
     } catch (error) {
-      console.error("Error moving crawler:", error);
+      console.error("=== ERROR in move endpoint ===");
+      console.error("Error details:", error);
+      console.error("Stack trace:", error.stack);
       res.status(500).json({ message: "Failed to move crawler" });
     }
   });
