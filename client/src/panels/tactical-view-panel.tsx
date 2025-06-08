@@ -1360,7 +1360,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleMove = (direction: string) => {
     console.log(`Moving ${direction}`);
-    sessionStorage.setItem("lastMovementDirection", direction);
+    // Store the opposite direction - where the player came FROM for the next room
+    const oppositeDirection = {
+      north: "south",
+      south: "north", 
+      east: "west",
+      west: "east"
+    }[direction];
+    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 

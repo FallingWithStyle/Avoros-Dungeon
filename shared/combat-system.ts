@@ -606,16 +606,16 @@ export class CombatSystem {
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
     switch (direction) {
       case 'north':
-        // Coming from north means entering from north side (top edge)
+        // Entered from north door - spawn at north edge (top)
         return this.gridToPercentage(7, 1);
       case 'south':
-        // Coming from south means entering from south side (bottom edge)
+        // Entered from south door - spawn at south edge (bottom)
         return this.gridToPercentage(7, 13);
       case 'east':
-        // Coming from east means entering from east side (right edge)
+        // Entered from east door - spawn at east edge (right)
         return this.gridToPercentage(13, 7);
       case 'west':
-        // Coming from west means entering from west side (left edge)
+        // Entered from west door - spawn at west edge (left)
         return this.gridToPercentage(1, 7);
       default:
         // No direction specified - spawn in center
