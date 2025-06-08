@@ -143,9 +143,16 @@ export class MobStorage extends BaseStorage {
       );
 
     if (mobsToRespawn.length > 0) {
-      console.log(`Respawning ${mobsToRespawn.length} mobs`);
+      console.log(`Found ${mobsToRespawn.length} potential mobs to respawn`);
       
-      for (const mob of mobsToRespawn) {
+      // Filter out debug mobs from respawning
+      const normalMobsToRespawn = mobsToRespawn.filter(mob => 
+        !mob.displayName.startsWith('[Debug]')
+      );
+      
+      console.log(`Respawning ${normalMobsToRespawn.length} normal mobs (filtered out ${mobsToRespawn.length - normalMobsToRespawn.length} debug mobs)`);
+      
+      for (const mob of normalMobsToRespawn) {
         await db
           .update(mobs)
           .set({
@@ -157,11 +164,33 @@ export class MobStorage extends BaseStorage {
           })
           .where(eq(mobs.id, mob.id));
 
+        console.log(`Respawned normal mob: ${mob.displayName}`);
+
         // Invalidate cache for this room
         try {
           await redisService.invalidateRoomMobs(mob.roomId);
         } catch (error) {
           console.log('Failed to invalidate room mobs cache');
+        }
+      }
+      
+      // Clean up any debug mobs that somehow got respawn times set
+      const debugMobsWithRespawn = mobsToRespawn.filter(mob => 
+        mob.displayName.startsWith('[Debug]')
+      );
+      
+      if (debugMobsWithRespawn.length > 0) {
+        console.log(`Cleaning up ${debugMobsWithRespawn.length} debug mobs with respawn times`);
+        for (const debugMob of debugMobsWithRespawn) {
+          await db
+            .update(mobs)
+            .set({
+              respawnAt: null,
+              updatedAt: new Date()
+            })
+            .where(eq(mobs.id, debugMob.id));
+          
+          console.log(`Cleaned up debug mob respawn time: ${debugMob.displayName}`);
         }
       }
     }
