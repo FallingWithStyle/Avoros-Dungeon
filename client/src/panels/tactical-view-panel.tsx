@@ -1512,14 +1512,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </CardHeader>
       <CardContent>
         <div
-          className={`relative w-full aspect-square border-2 ${combatState.isInCombat ? "border-red-400" : activeActionMode?.actionId === "move" ? "border-green-400" : "border-game-border"} rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 transition-colors`}
+          className={`relative w-full aspect-square border-2 ${combatState.isInCombat ? "border-red-400" : activeActionMode?.actionId === "move" ? "border-green-400" : "border-game-border"} rounded-lg cursor-pointer hover:border-blue-400 transition-colors`}
           onClick={handleGridClick}
           onContextMenu={handleGridRightClick}
           title="Click to move your character"
         >
           {/* Room Background */}
           <div
-            className={`absolute inset-0 grid-background ${getRoomBackground(persistentTacticalData.background)}`}
+            className={`absolute inset-0 grid-background ${getRoomBackground(persistentTacticalData.background)} rounded-lg overflow-hidden`}
           >
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20 grid-background">
@@ -1626,9 +1626,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
               )}
 
-              {/* Hover name display */}
+              {/* Hover name display - positioned relative to viewport */}
               {hoveredEntity === entity.id && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                <div className="fixed bg-black/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50 shadow-lg border border-gray-600"
+                     style={{
+                       left: `${Math.min(window.innerWidth - 200, Math.max(10, (entity.position.x / 100) * 400 + 200))}px`,
+                       top: `${Math.max(10, (entity.position.y / 100) * 400 + 100)}px`
+                     }}>
                   {entity.name}
                   {entity.type !== "player" &&
                     ` (${entity.hp}/${entity.maxHp})`}
@@ -1670,9 +1674,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 {getLootIcon(item.type)}
               </div>
 
-              {/* Hover name display */}
+              {/* Hover name display - positioned relative to viewport */}
               {hoveredLoot === index && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                <div className="fixed bg-black/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50 shadow-lg border border-gray-600"
+                     style={{
+                       left: `${Math.min(window.innerWidth - 200, Math.max(10, (item.x / 100) * 400 + 200))}px`,
+                       top: `${Math.max(10, (item.y / 100) * 400 + 100)}px`
+                     }}>
                   {item.name}
                 </div>
               )}
@@ -1766,10 +1774,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         {contextMenu && (
           <div
             ref={contextMenuRef}
-            className="fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 py-2 min-w-48"
+            className="fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 py-2 min-w-48 max-w-64"
             style={{
-              left: `${Math.min(contextMenu.x, window.innerWidth - 200)}px`,
-              top: `${Math.min(contextMenu.y, window.innerHeight - 200)}px`,
+              left: `${Math.min(contextMenu.x, window.innerWidth - 250)}px`,
+              top: `${Math.min(contextMenu.y, window.innerHeight - 300)}px`,
             }}
           >
             {/* Entity Info Header */}
