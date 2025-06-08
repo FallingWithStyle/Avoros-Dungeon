@@ -1758,4 +1758,39 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                       {action.type === "attack" && (
                         <Sword className="w-4 h-4 text-red-400" />
                       )}
-                      {
+                      {action.type === "ability" && (
+                        <Target className="w-4 h-4 text-blue-400" />
+                      )}
+                      <div>
+                        <div>{action.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {action.type === "attack" && `Damage: ${action.damage || "N/A"}`}
+                          {action.type === "ability" && `Cooldown: ${action.cooldown || 0}ms`}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+          </div>
+        )}
+
+        {/* Action Queue Panel */}
+        <ActionQueuePanel />
+
+        {/* Status Messages */}
+        {activeActionMode && (
+          <div className="mt-2 p-2 bg-blue-900/30 border border-blue-500 rounded text-center">
+            <span className="text-blue-300 text-sm">
+              {activeActionMode.actionName} mode active - {
+                activeActionMode.type === "move" ? "Click to move" :
+                activeActionMode.type === "attack" ? "Click enemy to attack" :
+                "Click to use ability"
+              }
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
