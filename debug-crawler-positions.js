@@ -1,6 +1,6 @@
 
-import { db } from './server/db.ts';
-import { crawlers, crawlerPositions, rooms } from './shared/schema.ts';
+import { db } from './server/db.js';
+import { crawlers, crawlerPositions, rooms } from './shared/schema.js';
 import { eq } from 'drizzle-orm';
 
 (async () => {
