@@ -71,6 +71,17 @@ export class CrawlerStorage extends BaseStorage {
   }
 
   async getCrawler(id: number): Promise<CrawlerWithDetails | undefined> {
+    // Try to get from cache first
+    try {
+      const cached = await this.redisService.getCrawler(id);
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      // Redis error, continue with database query
+      console.log('Redis cache miss, fetching from database');
+    }
+
     const [result] = await db
       .select({
         crawler: crawlers,
@@ -84,16 +95,6 @@ export class CrawlerStorage extends BaseStorage {
       return undefined;
     }
 
-    const crawlerData: CrawlerWithDetails = {
-      ...result.crawler,
-      class: result.class,
-    };
-
-    // Cache the result for future requests
-    await this.redisService.setCrawler(id, crawlerData, 300); // 5 minutes TTL
-
-    return crawlerData;
-
     const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
     const crawlerEffects = Array.isArray(result.crawler.activeEffects) ? result.crawler.activeEffects : [];
     const activeEffects = cleanExpiredEffects(crawlerEffects);
@@ -104,13 +105,23 @@ export class CrawlerStorage extends BaseStorage {
 
     const effectiveStats = calculateEffectiveStats(result.crawler, activeEffects);
 
-    return {
+    const crawlerData: CrawlerWithDetails = {
       ...result.crawler,
       ...effectiveStats,
       activeEffects,
       class: result.class!,
       equipment: [],
     };
+
+    // Cache the result for future requests
+    try {
+      await this.redisService.setCrawler(id, crawlerData, 300); // 5 minutes TTL
+    } catch (error) {
+      // Redis error, but don't fail the request
+      console.log('Failed to cache crawler data');
+    }
+
+    return crawlerData;
   }
 
   async updateCrawler(id: number, updates: Partial<Crawler>): Promise<Crawler> {
@@ -119,6 +130,15 @@ export class CrawlerStorage extends BaseStorage {
       .set({ ...updates, lastAction: new Date() })
       .where(eq(crawlers.id, id))
       .returning();
+    
+    // Invalidate cache when crawler is updated
+    try {
+      await this.redisService.invalidateCrawler(id);
+    } catch (error) {
+      // Redis error, but don't fail the request
+      console.log('Failed to invalidate crawler cache');
+    }
+    
     return crawler;
   }
 

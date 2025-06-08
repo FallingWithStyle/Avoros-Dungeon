@@ -73,17 +73,40 @@ class RedisService {
   }
 
   // Crawler-specific cache methods
-  async getCrawler(crawlerId: number) {
-    return this.get(`crawler:${crawlerId}`);
+  async getCrawler(crawlerId: number): Promise<any | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`crawler:${crawlerId}`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getCrawler error:', error);
+      return null;
+    }
   }
 
-  async setCrawler(crawlerId: number, data: any, ttl: number = 300) {
-    await this.set(`crawler:${crawlerId}`, data, ttl);
+  async setCrawler(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `crawler:${crawlerId}`, 
+        ttlSeconds, 
+        JSON.stringify(data)
+      );
+    } catch (error) {
+      console.error('Redis setCrawler error:', error);
+    }
   }
 
-  async invalidateCrawler(crawlerId: number) {
-    await this.deletePattern(`crawler:${crawlerId}*`);
-    await this.del(`crawlers:leaderboard`);
+  async invalidateCrawler(crawlerId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`crawler:${crawlerId}`);
+    } catch (error) {
+      console.error('Redis invalidateCrawler error:', error);
+    }
   }
 
   // Room and exploration cache methods
