@@ -209,10 +209,13 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
+    console.log(`Getting current room for crawler ${crawlerId}`);
+
     // Try to get from cache first
     try {
       const cached = await redisService.getCurrentRoom(crawlerId);
       if (cached) {
+        console.log(`Found cached room for crawler ${crawlerId}:`, cached.name);
         return cached;
       }
     } catch (error) {
@@ -220,24 +223,35 @@ export class ExplorationStorage extends BaseStorage {
       console.log('Redis cache miss for current room, fetching from database');
     }
 
-    const [position] = await db
-      .select({ room: rooms })
+    const result = await db
+      .select({
+        room: rooms
+      })
       .from(crawlerPositions)
       .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt))
       .limit(1);
 
-    if (position?.room) {
+    console.log(`Database query result for crawler ${crawlerId}:`, result.length > 0 ? `Found room: ${result[0].room.name}` : 'No position found');
+
+    if (result.length === 0) {
+      console.log(`No position found for crawler ${crawlerId} - they may need to be placed in a room`);
+      return undefined;
+    }
+
+    const room = result[0].room;
+
+    if (room) {
       // Cache the result
       try {
-        await redisService.setCurrentRoom(crawlerId, position.room, 300); // 5 minutes TTL
+        await redisService.setCurrentRoom(crawlerId, room, 300); // 5 minutes TTL
       } catch (error) {
         console.log('Failed to cache current room data');
       }
     }
 
-    return position?.room;
+    return room;
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
@@ -488,6 +502,52 @@ export class ExplorationStorage extends BaseStorage {
     }
 
     return bounds;
+  }
+
+  async ensureCrawlerHasPosition(crawlerId: number): Promise<void> {
+    console.log(`Ensuring crawler ${crawlerId} has position...`);
+
+    const currentRoom = await this.getCrawlerCurrentRoom(crawlerId);
+    if (currentRoom) {
+      console.log(`Crawler ${crawlerId} already has position in room ${currentRoom.id} (${currentRoom.name})`);
+      return; // Crawler already has a position
+    }
+
+    console.log(`Crawler ${crawlerId} has no position, placing in entrance room...`);
+
+    // Place crawler in entrance room
+    const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+    if (!floor1) {
+      console.error("Floor 1 not found when ensuring crawler position");
+      throw new Error("Floor 1 not found");
+    }
+
+    const [entranceRoom] = await db
+      .select()
+      .from(rooms)
+      .where(and(eq(rooms.floorId, floor1.id), eq(rooms.type, "entrance")));
+
+    if (!entranceRoom) {
+      console.error("Entrance room not found when ensuring crawler position");
+      throw new Error("Entrance room not found");
+    }
+
+    console.log(`Placing crawler ${crawlerId} in entrance room ${entranceRoom.id} (${entranceRoom.name})`);
+
+    await db.insert(crawlerPositions).values({
+      crawlerId: crawlerId,
+      roomId: entranceRoom.id,
+      enteredAt: new Date(),
+    });
+
+    console.log(`Successfully placed crawler ${crawlerId} in room ${entranceRoom.id}`);
+
+    // Invalidate cache
+    try {
+      await redisService.invalidateCurrentRoom(crawlerId);
+    } catch (error) {
+      console.log('Failed to invalidate current room cache');
+    }
   }
 
   private async handleStaircaseMovement(
