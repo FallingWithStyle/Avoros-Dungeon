@@ -724,7 +724,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical]);
 
-  // Proximity-based exit detection - triggers actual room movement
+  // Gate crossing detection - requires player to move through the gate to trigger transition
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -738,19 +738,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       west: effectiveTacticalData.availableDirections.includes("west"),
     };
 
-    const proximityThreshold = 8; // 8% from edge to trigger movement
     const { x, y } = playerEntity.position;
+    
+    // Gate crossing threshold - player must actually cross the boundary
+    const gateThreshold = 2; // 2% past the edge to trigger movement
+    const gateWidth = 30; // Gates are centered and 30% wide (35-65%)
 
-    // Check proximity to each available exit with more precise positioning
+    // Check if player has crossed through a gate (moved past the room boundary)
     let triggerDirection: string | null = null;
 
-    if (exits.north && y <= proximityThreshold && x >= 35 && x <= 65) {
+    if (exits.north && y <= gateThreshold && x >= 35 && x <= 65) {
       triggerDirection = "north";
-    } else if (exits.south && y >= (100 - proximityThreshold) && x >= 35 && x <= 65) {
+    } else if (exits.south && y >= (100 - gateThreshold) && x >= 35 && x <= 65) {
       triggerDirection = "south";
-    } else if (exits.east && x >= (100 - proximityThreshold) && y >= 35 && y <= 65) {
+    } else if (exits.east && x >= (100 - gateThreshold) && y >= 35 && y <= 65) {
       triggerDirection = "east";
-    } else if (exits.west && x <= proximityThreshold && y >= 35 && y <= 65) {
+    } else if (exits.west && x <= gateThreshold && y >= 35 && y <= 65) {
       triggerDirection = "west";
     }
 
@@ -760,8 +763,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastMovement = sessionStorage.getItem('lastProximityMovement');
       const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
 
-      if (now - lastMovementTime > 2000) { // 2 second cooldown to prevent accidental exits
-        console.log(`Player approached ${triggerDirection} exit - triggering room transition`);
+      if (now - lastMovementTime > 1500) { // 1.5 second cooldown to prevent accidental exits
+        console.log(`Player crossed through ${triggerDirection} gate - triggering room transition`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
         handleRoomMovement(triggerDirection);
