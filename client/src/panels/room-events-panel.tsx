@@ -73,7 +73,14 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         if (event.direction === "west") return <ArrowLeft className="w-3 h-3" />;
         return <Footprints className="w-3 h-3" />;
       case "combat":
-        return <Sword className="w-3 h-3" />;
+        // Check if it's a friendly outgoing attack (player attacking something)
+        if (event.message.includes(`${crawler.name} attacks`) || 
+            event.message.includes(`${crawler.name} uses`) ||
+            event.message.includes(`${crawler.name} casts`)) {
+          return <Sword className="w-3 h-3 text-blue-400" />; // Blue icon for friendly attacks
+        }
+        // Red icon for enemy attacks
+        return <Sword className="w-3 h-3 text-red-400" />;
       case "discovery":
         return <Eye className="w-3 h-3" />;
       case "interaction":
@@ -90,14 +97,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   const getEventColor = (event: RoomEvent) => {
     switch (event.type) {
       case "combat":
-        // Check if it's a friendly outgoing attack (player attacking something)
-        if (event.message.includes(`${crawler.name} attacks`) || 
-            event.message.includes(`${crawler.name} uses`) ||
-            event.message.includes(`${crawler.name} casts`)) {
-          return "text-blue-400"; // Blue for friendly outgoing attacks
-        }
-        // Otherwise it's an enemy attack (incoming)
-        return "text-red-400"; // Red for enemy incoming attacks
+        return "text-red-400"; // Red text for all combat events
       case "discovery":
         return event.priority === "high" ? "text-red-400" : "text-green-400";
       case "movement":
