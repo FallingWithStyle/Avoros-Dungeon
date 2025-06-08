@@ -734,22 +734,32 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
         return;
       }
+      
       const playerEntity = combatState.entities.find(e => e.id === "player");
-      if (!playerEntity) return;
+      if (!playerEntity) {
+        console.log("WASD pressed but no player entity found. Entities:", combatState.entities.map(e => e.id));
+        return;
+      }
 
       let direction: { x: number, y: number } | null = null;
+      let keyPressed = "";
+      
       switch (event.key.toLowerCase()) {
         case 'w':
           direction = { x: 0, y: -1 };
+          keyPressed = "W (North)";
           break;
         case 'a':
           direction = { x: -1, y: 0 };
+          keyPressed = "A (West)";
           break;
         case 's':
           direction = { x: 0, y: 1 };
+          keyPressed = "S (South)";
           break;
         case 'd':
           direction = { x: 1, y: 0 };
+          keyPressed = "D (East)";
           break;
         default:
           return; // Ignore other keys
@@ -757,17 +767,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       event.preventDefault(); // Prevent default scrolling
 
-      const speed = playerEntity.speed || 10; // Default speed
-      const moveDistance = speed / 100; // Convert speed to percentage units
+      console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
+
+      const speed = playerEntity.speed || 15; // Use entity speed or default
+      const moveDistance = speed; // Move in percentage units directly
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
 
       // Clamp new position within the grid bounds (0-100%)
-      newX = Math.max(0, Math.min(100, newX));
-      newY = Math.max(0, Math.min(100, newY));
+      newX = Math.max(2, Math.min(98, newX)); // Leave small border
+      newY = Math.max(2, Math.min(98, newY));
+
+      console.log(`Moving from (${playerEntity.position.x.toFixed(1)}, ${playerEntity.position.y.toFixed(1)}) to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
 
       // Queue the move action
-      combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      const success = combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      console.log(`Move action queued:`, success);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -867,7 +882,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Cleared all entities for room ${currentRoomId}`);
     }
 
-    // Always ensure player entity exists
+    // Always ensure player entity exists - check after any clearing
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
     if (!existingPlayer) {
       // Get last movement direction from session storage to position player appropriately
@@ -894,6 +909,39 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Added player entity at position for room ${currentRoomId}`, playerEntity.position);
     }
   }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
+
+  // Additional effect to ensure player entity is always present
+  useEffect(() => {
+    const ensurePlayerExists = () => {
+      const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
+      if (!existingPlayer && roomData?.room) {
+        console.log("Player entity missing, creating fallback player");
+        const fallbackPosition = { x: 50, y: 50 }; // Center position
+        const playerEntity: CombatEntity = {
+          id: "player",
+          name: crawler.name,
+          type: "player",
+          hp: crawler.health || 100,
+          maxHp: crawler.maxHealth || 100,
+          attack: 20,
+          defense: 10,
+          speed: 15,
+          position: fallbackPosition,
+        };
+
+        combatSystem.addEntity(playerEntity);
+        combatSystem.selectEntity("player");
+        console.log(`Created fallback player entity at center position`);
+      }
+    };
+
+    // Check immediately
+    ensurePlayerExists();
+
+    // Also check every few seconds to make sure player entity doesn't get lost
+    const interval = setInterval(ensurePlayerExists, 3000);
+    return () => clearInterval(interval);
+  }, [crawler.name, crawler.health, crawler.maxHealth, roomData?.room]);
 
   // Separate effect for tactical entities to avoid conflicts
 
