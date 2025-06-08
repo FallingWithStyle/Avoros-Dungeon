@@ -390,3 +390,7 @@ export { TacticalStorage } from './tactical-storage';
 export { ContentStorage } from './content-storage';
 export { MobStorage } from './mob-storage';
 export { CorporationStorage } from './corporation-storage';
+export { CrawlerStorage } from './crawler-storage';
+export { UserStorage } from './user-storage';
+export { ExplorationStorage } from './exploration-storage';
+export { BaseStorage } from './base-storage';
