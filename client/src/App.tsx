@@ -24,9 +24,8 @@ function Router() {
         ) : (
           <>
             <Route path="/" component={Home} />
-            <Route path="/crawler/:crawlerId">
-              {(params) => <CrawlerMode crawlerId={params.crawlerId} />}
-            </Route>
+            <Route path="/crawler/:crawlerId" component={CrawlerMode} />
+            <Route path="/crawler/:crawlerId/*" component={CrawlerMode} />
             <Route path="/account" component={Account} />
           </>
         )}
