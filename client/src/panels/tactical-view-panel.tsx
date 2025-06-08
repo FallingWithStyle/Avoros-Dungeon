@@ -22,7 +22,8 @@ import {
   type CombatEntity,
   type CombatAction,
 } from "@shared/combat-system";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
 import ActionQueuePanel from "./action-queue-panel";
 
 interface TacticalViewPanelProps {
@@ -423,6 +424,8 @@ const getMobIcon = (type: string) => {
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS AT TOP LEVEL - NEVER MOVE THESE OR ADD HOOKS ELSEWHERE
+  const { toast } = useToast();
+  
   const hotbarActions = [
     {
       id: "move",
