@@ -558,6 +558,59 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchInterval: 2000, // Refresh every 2 seconds for more responsive room changes
   });
 
+    // Generate client-side fallback tactical data when server data is unavailable
+    const generateFallbackTacticalData = () => {
+      if (!roomData?.room) return null;
+  
+      const fallbackEntities: any[] = [];
+      const occupiedCells = new Set<string>();
+  
+      // Generate some basic entities based on room properties
+      if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
+        // Add a loot item
+        const lootCell = getRandomEmptyCell(occupiedCells);
+        const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
+        fallbackEntities.push({
+          type: 'loot',
+          name: 'Treasure',
+          position: lootPos,
+          data: { type: 'treasure' },
+          x: lootPos.x,
+          y: lootPos.y
+        });
+      }
+  
+      // Add basic enemies for non-safe rooms
+      if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
+        if (Math.random() > 0.5) { // 50% chance for enemies
+          const mobCell = getRandomEmptyCell(occupiedCells);
+          const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
+          fallbackEntities.push({
+            type: 'mob',
+            name: 'Unknown Enemy',
+            position: mobPos,
+            data: { 
+              hp: 50,
+              maxHp: 50,
+              attack: 10,
+              defense: 5,
+              hostile: true
+            }
+          });
+        }
+      }
+  
+      return {
+        room: roomData.room,
+        availableDirections: roomData.availableDirections || [],
+        playersInRoom: roomData.playersInRoom || [],
+        tacticalEntities: fallbackEntities
+      };
+    };
+  
+    // Use fallback data when tactical data is unavailable
+    const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
+
   // Fetch tactical data separately for better caching with improved error handling
   const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError, refetch: refetchTactical } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
@@ -823,7 +876,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       const entryPosition = combatSystem.getEntryPosition(lastDirection);
       console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
-
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
@@ -843,124 +895,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
 
-  // Generate client-side fallback tactical data when server data is unavailable
-  const generateFallbackTacticalData = () => {
-    if (!roomData?.room) return null;
-
-    const fallbackEntities: any[] = [];
-    const occupiedCells = new Set<string>();
-
-    // Generate some basic entities based on room properties
-    if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
-      // Add a loot item
-      const lootCell = getRandomEmptyCell(occupiedCells);
-      const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
-      fallbackEntities.push({
-        type: 'loot',
-        name: 'Treasure',
-        position: lootPos,
-        data: { type: 'treasure' },
-        x: lootPos.x,
-        y: lootPos.y
-      });
-    }
-
-    // Add basic enemies for non-safe rooms
-    if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
-      if (Math.random() > 0.5) { // 50% chance for enemies
-        const mobCell = getRandomEmptyCell(occupiedCells);
-        const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
-        fallbackEntities.push({
-          type: 'mob',
-          name: 'Unknown Enemy',
-          position: mobPos,
-          data: { 
-            hp: 50,
-            maxHp: 50,
-            attack: 10,
-            defense: 5,
-            hostile: true
-          }
-        });
-      }
-    }
-
-    return {
-      room: roomData.room,
-      availableDirections: roomData.availableDirections || [],
-      playersInRoom: roomData.playersInRoom || [],
-      tacticalEntities: fallbackEntities
-    };
-  };
-
-  // Use fallback data when tactical data is unavailable
-  const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
-
   // Separate effect for tactical entities to avoid conflicts
-  useEffect(() => {
-    if (!effectiveTacticalData?.room || !effectiveTacticalData?.tacticalEntities) return;
-
-    const currentRoomId = effectiveTacticalData.room.id;
-
-    // Remove any existing tactical entities that don't belong to the current room
-    const currentEntities = combatSystem.getState().entities;
-    const staleEntities = currentEntities.filter(entity => {
-      // Keep the player entity
-      if (entity.id === "player") return false;
-
-      // Remove any tactical entities that don't match the current room ID
-      if (entity.type === "hostile" || entity.type === "neutral") {
-        return !entity.id.includes(`-${currentRoomId}-`);
-      }
-
-      return false;
-    });
-
-    staleEntities.forEach(entity => {
-      console.log(`Removing stale entity: ${entity.id} from previous room`);
-      combatSystem.removeEntity(entity.id);
-    });
-
-    // Check if tactical entities for this room already exist
-    const existingTacticalEntities = combatSystem.getState().entities.filter(e => 
-      e.id.includes(`-${currentRoomId}-`) && (e.type === "hostile" || e.type === "neutral")
-    );
-
-    // Only add tactical entities if none exist for this room
-    if (existingTacticalEntities.length === 0 && Array.isArray(effectiveTacticalData.tacticalEntities)) {
-      console.log(`Adding ${effectiveTacticalData.tacticalEntities.length} tactical entities for room ${currentRoomId}`);
-
-      effectiveTacticalData.tacticalEntities.forEach((entity, index) => {
-        if (entity.type === 'mob') {
-          const mobEntity: CombatEntity = {
-            id: `mob-${currentRoomId}-${index}`,
-            name: entity.name,
-            type: "hostile",
-            hp: entity.data.hp || 100,
-            maxHp: entity.data.maxHp || 100,
-            attack: entity.data.attack || 15,
-            defense: entity.data.defense || 5,
-            speed: 10,
-            position: entity.position,
-          };
-          combatSystem.addEntity(mobEntity);
-        } else if (entity.type === 'npc') {
-          const npcEntity: CombatEntity = {
-            id: `npc-${currentRoomId}-${index}`,
-            name: entity.name,
-            type: "neutral",
-            hp: 100,
-            maxHp: 100,
-            attack: 0,
-            defense: 10,
-            speed: 5,
-            position: entity.position,
-          };
-          combatSystem.addEntity(npcEntity);
-        }
-      });
-    }
-  }, [effectiveTacticalData?.room?.id, effectiveTacticalData?.tacticalEntities]);
 
   // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
   const getCooldownPercentage = (actionId: string): number => {
