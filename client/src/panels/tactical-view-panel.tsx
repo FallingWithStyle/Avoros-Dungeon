@@ -663,16 +663,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Update lastRoomId
     setLastRoomId(currentRoomId);
 
-    // Clear entities if needed
-    if (shouldClearEntities) {
+    // Clear ALL entities when room changes, then rebuild from scratch
+    if (shouldClearEntities || lastRoomId === null) {
       const currentEntities = combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
-      console.log(`Cleared all entities for room change`);
+      console.log(`Cleared all entities for room ${currentRoomId}`);
     }
 
-    // Check if player already exists to avoid duplicates
+    // Always ensure we have the current player entity for this room
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
 
     if (!existingPlayer) {
@@ -706,6 +706,25 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (!roomData?.room || !tacticalData?.tacticalEntities) return;
 
     const currentRoomId = roomData.room.id;
+
+    // Remove any existing tactical entities that don't belong to the current room
+    const currentEntities = combatSystem.getState().entities;
+    const staleEntities = currentEntities.filter(entity => {
+      // Keep the player entity
+      if (entity.id === "player") return false;
+      
+      // Remove any tactical entities that don't match the current room ID
+      if (entity.type === "hostile" || entity.type === "neutral") {
+        return !entity.id.includes(`-${currentRoomId}-`);
+      }
+      
+      return false;
+    });
+
+    staleEntities.forEach(entity => {
+      console.log(`Removing stale entity: ${entity.id} from previous room`);
+      combatSystem.removeEntity(entity.id);
+    });
 
     // Check if tactical entities for this room already exist
     const existingTacticalEntities = combatSystem.getState().entities.filter(e => 
