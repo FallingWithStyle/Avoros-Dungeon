@@ -1,6 +1,6 @@
 
 import { db } from "../db";
-import { mobs, enemies, rooms } from "@shared/schema";
+import { mobs, enemies, rooms, factions } from "@shared/schema";
 import { eq, and, lt, isNull, or } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
@@ -13,8 +13,18 @@ export interface MobSpawnConfig {
   respawnHours: number;
 }
 
+export interface ContextualSpawnConfig {
+  roomType: string;
+  environment: string;
+  factionId: number | null;
+  maxMobs: number;
+  spawnChance: number;
+  mobTypes: string[];
+  respawnHours: number;
+}
+
 export class MobStorage extends BaseStorage {
-  private mobSpawnConfigs: MobSpawnConfig[] = [
+  private baseMobSpawnConfigs: MobSpawnConfig[] = [
     {
       roomType: "normal",
       maxMobs: 2,
@@ -51,6 +61,22 @@ export class MobStorage extends BaseStorage {
       respawnHours: 0
     }
   ];
+
+  // Fallback mob types for rooms without faction control
+  private neutralMobTypesByRoomType: Record<string, string[]> = {
+    "normal": ["wanderer", "scavenger", "lost_soul", "wild_beast"],
+    "treasure": ["guardian", "treasure_hunter", "construct", "ward"],
+    "boss": ["ancient_guardian", "dungeon_lord", "aberration"],
+    "stairs": ["sentinel", "gatekeeper"],
+    "safe": [], // Safe rooms shouldn't have hostile mobs
+    "entrance": [] // Entrance rooms are typically clear
+  };
+
+  private neutralMobTypesByEnvironment: Record<string, string[]> = {
+    "indoor": ["shadow", "construct", "undead", "cultist"],
+    "outdoor": ["wild_beast", "elemental", "nature_spirit", "bandit"],
+    "underground": ["dweller", "crawler", "cave_beast", "mushroom_folk"]
+  };
 
   async getRoomMobs(roomId: number): Promise<any[]> {
     try {
@@ -181,52 +207,36 @@ export class MobStorage extends BaseStorage {
   }
 
   async spawnMobsForRoom(roomId: number, roomData: any): Promise<void> {
-    const config = this.getMobSpawnConfig(roomData.type);
-    if (!config || config.maxMobs === 0) return;
+    const spawnConfig = await this.getContextualSpawnConfig(roomData);
+    if (!spawnConfig || spawnConfig.maxMobs === 0) return;
 
     // Check if room already has mobs
     const existingMobs = await this.getRoomMobs(roomId);
     const aliveMobs = existingMobs.filter(m => m.mob.isAlive);
     
-    if (aliveMobs.length >= config.maxMobs) return;
+    if (aliveMobs.length >= spawnConfig.maxMobs) return;
 
     // Spawn missing mobs
-    const mobsToSpawn = config.maxMobs - aliveMobs.length;
+    const mobsToSpawn = spawnConfig.maxMobs - aliveMobs.length;
     
     for (let i = 0; i < mobsToSpawn; i++) {
-      if (Math.random() > config.spawnChance) continue;
+      if (Math.random() > spawnConfig.spawnChance) continue;
 
-      // Get a random enemy of appropriate type
-      const availableEnemies = await db
-        .select()
-        .from(enemies)
-        .where(eq(enemies.minFloor, 1)); // TODO: Filter by floor
+      // Generate mob based on context
+      const mobData = await this.generateContextualMob(spawnConfig, roomData);
+      if (!mobData) continue;
 
-      if (availableEnemies.length === 0) continue;
-
-      const enemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
       const position = this.getRandomPosition();
-
-      // Generate display name with rarity modifier
-      const rarityModifiers = {
-        common: "",
-        uncommon: "Veteran ",
-        rare: "Elite ",
-        epic: "Champion ",
-        legendary: "Legendary "
-      };
-      
-      const displayName = `${rarityModifiers[enemy.rarity as keyof typeof rarityModifiers] || ""}${enemy.name}`;
 
       await db.insert(mobs).values({
         roomId,
-        enemyId: enemy.id,
-        displayName,
-        rarity: enemy.rarity,
+        enemyId: mobData.enemyId,
+        displayName: mobData.displayName,
+        rarity: mobData.rarity,
         positionX: position.x.toString(),
         positionY: position.y.toString(),
-        currentHealth: enemy.health,
-        maxHealth: enemy.health,
+        currentHealth: mobData.health,
+        maxHealth: mobData.health,
         isAlive: true,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -238,6 +248,128 @@ export class MobStorage extends BaseStorage {
       await redisService.invalidateRoomMobs(roomId);
     } catch (error) {
       console.log('Failed to invalidate room mobs cache');
+    }
+  }
+
+  private async getContextualSpawnConfig(roomData: any): Promise<ContextualSpawnConfig | null> {
+    const baseConfig = this.getMobSpawnConfig(roomData.type);
+    if (!baseConfig) return null;
+
+    let mobTypes: string[] = [];
+    
+    // If room is controlled by a faction, use faction mob types
+    if (roomData.factionId) {
+      const faction = await this.getFactionById(roomData.factionId);
+      if (faction && faction.mobTypes) {
+        mobTypes = faction.mobTypes;
+      }
+    }
+    
+    // Fallback to neutral mobs based on room type and environment
+    if (mobTypes.length === 0) {
+      mobTypes = [
+        ...(this.neutralMobTypesByRoomType[roomData.type] || []),
+        ...(this.neutralMobTypesByEnvironment[roomData.environment] || [])
+      ];
+    }
+    
+    // Further fallback to basic types
+    if (mobTypes.length === 0) {
+      mobTypes = baseConfig.enemyTypes;
+    }
+
+    return {
+      roomType: roomData.type,
+      environment: roomData.environment,
+      factionId: roomData.factionId,
+      maxMobs: baseConfig.maxMobs,
+      spawnChance: baseConfig.spawnChance,
+      mobTypes,
+      respawnHours: baseConfig.respawnHours
+    };
+  }
+
+  private async generateContextualMob(spawnConfig: ContextualSpawnConfig, roomData: any) {
+    // Get appropriate enemies based on mob types
+    const mobType = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+    
+    // Try to find enemies that match the mob type in their name or description
+    let availableEnemies = await db
+      .select()
+      .from(enemies)
+      .where(eq(enemies.minFloor, 1)); // TODO: Filter by actual floor
+
+    // Filter enemies by mob type if possible
+    const filteredEnemies = availableEnemies.filter(enemy => 
+      enemy.name.toLowerCase().includes(mobType.toLowerCase()) ||
+      (enemy.description && enemy.description.toLowerCase().includes(mobType.toLowerCase()))
+    );
+    
+    // Use filtered enemies if found, otherwise fall back to all available
+    const enemiesToChoose = filteredEnemies.length > 0 ? filteredEnemies : availableEnemies;
+    
+    if (enemiesToChoose.length === 0) return null;
+
+    const enemy = enemiesToChoose[Math.floor(Math.random() * enemiesToChoose.length)];
+    
+    // Generate contextual display name
+    const displayName = this.generateContextualDisplayName(enemy, spawnConfig, mobType);
+    
+    return {
+      enemyId: enemy.id,
+      displayName,
+      rarity: enemy.rarity,
+      health: enemy.health
+    };
+  }
+
+  private generateContextualDisplayName(enemy: any, spawnConfig: ContextualSpawnConfig, mobType: string): string {
+    const rarityModifiers = {
+      common: "",
+      uncommon: "Veteran ",
+      rare: "Elite ",
+      epic: "Champion ",
+      legendary: "Legendary "
+    };
+    
+    let prefix = rarityModifiers[enemy.rarity as keyof typeof rarityModifiers] || "";
+    
+    // Add faction-specific prefixes
+    if (spawnConfig.factionId) {
+      const factionPrefixes: Record<string, string> = {
+        "1": "Iron Legion ", // Iron Legion
+        "2": "Verdant ", // Verdant Pact
+        "3": "Shadow ", // Shadow Veil
+        "4": "Azure ", // Azure Order
+        "5": "Crimson " // Crimson Banner
+      };
+      
+      const factionPrefix = factionPrefixes[spawnConfig.factionId.toString()];
+      if (factionPrefix) {
+        prefix = factionPrefix + prefix;
+      }
+    }
+    
+    // Use mob type as the base name if enemy name is generic
+    const baseName = enemy.name === "Unknown" || enemy.name === "Generic Enemy" 
+      ? mobType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+      : enemy.name;
+    
+    return `${prefix}${baseName}`;
+  }
+
+  private async getFactionById(factionId: number) {
+    try {
+      const [faction] = await db
+        .select()
+        .from(factions)
+        .where(eq(factions.id, factionId))
+        .limit(1);
+      
+      return faction || null;
+    } catch (error) {
+      console.log('Failed to fetch faction data:', error);
+      return null;
     }
   }
 

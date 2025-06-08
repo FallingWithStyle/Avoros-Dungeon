@@ -61,7 +61,7 @@ export function registerExplorationRoutes(app: Express) {
       console.log(`Getting current room for crawler ${crawlerId}...`);
       const room = await storage.getCrawlerCurrentRoom(crawlerId);
       console.log(`Current room result:`, room ? `Found room ${room.id} (${room.name})` : 'No room found');
-      
+
       if (!room) {
         console.log(`ERROR: No room found for crawler ${crawlerId} after ensuring position`);
         return res.status(404).json({ message: "Room not found" });
@@ -145,7 +145,7 @@ export function registerExplorationRoutes(app: Express) {
     try {
       const crawlerId = parseInt(req.params.id);
       const { direction, debugEnergyDisabled } = req.body;
-      
+
       console.log(`=== MOVE CRAWLER API CALL ===`);
       console.log(`Crawler ID: ${crawlerId}`);
       console.log(`Direction: ${direction}`);
