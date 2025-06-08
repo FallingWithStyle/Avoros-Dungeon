@@ -131,27 +131,38 @@ export class ModularStorage implements IStorage {
   private _corporationStorage: CorporationStorage;
   private _contentStorage: ContentStorage;
   private _tacticalStorage: TacticalStorage;
-  redisService: typeof redisService = redisService;
 
-  constructor() {
+  private constructor() {
     this._crawlerStorage = new CrawlerStorage();
     this._userStorage = new UserStorage();
     this._explorationStorage = new ExplorationStorage();
     this._corporationStorage = new CorporationStorage();
     this._contentStorage = new ContentStorage();
     this._tacticalStorage = new TacticalStorage();
+  }
 
-    // Set up cross-references
-    this._crawlerStorage.setUserStorage(this._userStorage);
-    this._crawlerStorage.setExplorationStorage(this._explorationStorage);
-    this._crawlerStorage.setCorporationStorage(this._corporationStorage);
-    this._explorationStorage.setCrawlerStorage(this._crawlerStorage);
-    this._corporationStorage.setCrawlerStorage(this._crawlerStorage);
-    this._corporationStorage.setUserStorage(this._userStorage);
-    this._userStorage.setCrawlerStorage(this._crawlerStorage);
-    this._userStorage.setCorporationStorage(this._corporationStorage);
-    this._tacticalStorage.setCrawlerStorage(this._crawlerStorage);
-    this._tacticalStorage.setExplorationStorage(this._explorationStorage);
+  static async create(): Promise<ModularStorage> {
+    const instance = new ModularStorage();
+
+    // Cross-references will be set up in the factory method
+
+    // Import and inject Redis service
+    const { redisService } = await import("../lib/redis-service.js");
+
+    // Set up cross-references between storage modules
+    instance._userStorage.setCrawlerStorage(instance._crawlerStorage);
+    instance._userStorage.setRedisService(redisService);
+    instance._crawlerStorage.setUserStorage(instance._userStorage);
+    instance._crawlerStorage.setExplorationStorage(instance._explorationStorage);
+    instance._crawlerStorage.setRedisService(redisService);
+    instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
+    instance._explorationStorage.setRedisService(redisService);
+    instance._tacticalStorage.setCrawlerStorage(instance._crawlerStorage);
+    instance._tacticalStorage.setExplorationStorage(instance._explorationStorage);
+    instance._tacticalStorage.setRedisService(redisService);
+    instance._contentStorage.setRedisService(redisService);
+
+    return instance;
   }
 
   // Expose content storage publicly
@@ -366,4 +377,5 @@ export class ModularStorage implements IStorage {
   }
 }
 
-export const storage = new ModularStorage();
+// Create and export a singleton instance
+export const storage = await ModularStorage.create();

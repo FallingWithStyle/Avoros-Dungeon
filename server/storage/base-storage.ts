@@ -12,8 +12,12 @@ export abstract class BaseStorage {
   protected redisService: any;
 
   constructor() {
-    // Import redis service
-    this.redisService = require("../lib/redis-service").redisService;
+    // Redis service will be injected via setRedisService method
+    this.redisService = null;
+  }
+
+  setRedisService(redisService: any) {
+    this.redisService = redisService;
   }
   
   // Dependency injection methods
