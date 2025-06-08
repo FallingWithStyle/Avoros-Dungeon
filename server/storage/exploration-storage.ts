@@ -1,3 +1,6 @@
+Fix: Corrects the getCrawlerCurrentRoom method to properly extract and return room data from the database query result.
+```
+```replit_final_file
 import { db } from "../db";
 import {
   rooms,
@@ -220,24 +223,30 @@ export class ExplorationStorage extends BaseStorage {
       console.log('Redis cache miss for current room, fetching from database');
     }
 
-    const [position] = await db
-      .select({ room: rooms })
+    const result = await db
+      .select()
       .from(crawlerPositions)
       .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt))
       .limit(1);
 
-    if (position?.room) {
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    const room = result[0].rooms;
+
+    if (room) {
       // Cache the result
       try {
-        await redisService.setCurrentRoom(crawlerId, position.room, 300); // 5 minutes TTL
+        await redisService.setCurrentRoom(crawlerId, room, 300); // 5 minutes TTL
       } catch (error) {
         console.log('Failed to cache current room data');
       }
     }
 
-    return position?.room;
+    return room;
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
