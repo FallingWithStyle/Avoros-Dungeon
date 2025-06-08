@@ -5,6 +5,7 @@ import { ExplorationStorage } from "./exploration-storage";
 import { CorporationStorage } from "./corporation-storage";
 import { ContentStorage } from "./content-storage";
 import { TacticalStorage } from "./tactical-storage";
+import { MobStorage } from "./mob-storage";
 import { redisService } from "../lib/redis-service";
 import {
   type UserAccount,
