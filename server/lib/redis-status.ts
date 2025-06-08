@@ -26,19 +26,24 @@ export class RedisStatus {
     try {
       // Try a simple Redis operation
       const { redisService } = await import('./redis-service');
-      await redisService.set('health-check', 'ok', 10);
-      const result = await redisService.get('health-check');
+      const testKey = `health-check-${Date.now()}`;
+      await redisService.set(testKey, 'ok', 10);
+      const result = await redisService.get(testKey);
+      await redisService.del(testKey);
       
       const newStatus = result === 'ok';
       if (newStatus !== this.isRedisAvailable) {
         this.isRedisAvailable = newStatus;
         this.notifyListeners(newStatus);
+        console.log(`Redis status changed to: ${newStatus ? 'available' : 'unavailable'}`);
       }
       this.lastCheckTime = now;
     } catch (error) {
+      console.error('Redis health check failed:', error);
       if (this.isRedisAvailable) {
         this.isRedisAvailable = false;
         this.notifyListeners(false);
+        console.log('Redis status changed to: unavailable');
       }
       this.lastCheckTime = now;
     }

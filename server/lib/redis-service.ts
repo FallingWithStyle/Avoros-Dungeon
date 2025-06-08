@@ -9,8 +9,11 @@ class RedisService {
       if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
         console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set - Redis will be disabled');
         this.redis = null;
+        this.isConnected = false;
         return;
       }
+
+      console.log('Initializing Upstash Redis with URL:', process.env.UPSTASH_REDIS_REST_URL?.substring(0, 50) + '...');
 
       this.redis = new Redis({
         url: process.env.UPSTASH_REDIS_REST_URL,
@@ -19,9 +22,32 @@ class RedisService {
 
       this.isConnected = true;
       console.log('Upstash Redis initialized successfully');
+      
+      // Test the connection immediately
+      this.testConnection();
     } catch (error) {
       console.error('Failed to initialize Upstash Redis:', error);
       this.redis = null;
+      this.isConnected = false;
+    }
+  }
+
+  private async testConnection(): Promise<void> {
+    try {
+      if (this.redis) {
+        // Use setex instead of set with TTL for Upstash compatibility
+        await this.redis.setex('connection-test', 5, 'ok');
+        const result = await this.redis.get('connection-test');
+        if (result === 'ok') {
+          console.log('Redis connection test successful');
+        } else {
+          console.warn('Redis connection test failed - unexpected result:', result);
+          this.isConnected = false;
+        }
+      }
+    } catch (error) {
+      console.error('Redis connection test failed:', error);
+      this.isConnected = false;
     }
   }
 
@@ -33,6 +59,16 @@ class RedisService {
 
     try {
       const data = await this.redis.get(key);
+      if (data === null || data === undefined) return null;
+      
+      // Handle both string and already-parsed data
+      if (typeof data === 'string') {
+        try {
+          return JSON.parse(data);
+        } catch {
+          return data as T;
+        }
+      }
       return data as T;
     } catch (error) {
       console.error(`Redis GET error for key ${key}:`, error);
@@ -92,7 +128,12 @@ class RedisService {
 
     try {
       const data = await this.redis?.get(`crawler:${crawlerId}`);
-      return data ? JSON.parse(data as string) : null;
+      if (!data) return null;
+      
+      if (typeof data === 'string') {
+        return JSON.parse(data);
+      }
+      return data;
     } catch (error) {
       console.error('Redis getCrawler error:', error);
       return null;
