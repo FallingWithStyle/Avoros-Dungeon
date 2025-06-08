@@ -876,7 +876,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return {
       room: roomData.room,
       availableDirections: roomData.availableDirections || [],
-      playersInRoom: roomData.availableDirections: roomData.availableDirections || [],
       playersInRoom: roomData.playersInRoom || [],
       tacticalEntities: fallbackEntities
     };
