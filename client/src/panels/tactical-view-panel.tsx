@@ -549,16 +549,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Fetch current room data with tactical positions
   const { data: roomData, isLoading } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 2000, // Refresh every 2 seconds for more responsive room changes
   });
 
   // Fetch tactical data separately for better caching with improved error handling
-  const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError } = useQuery({
+  const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError, refetch: refetchTactical } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
     refetchInterval: (data, error) => {
       // Stop auto-refetching if there's a persistent error
       if (error) return false;
-      return 5000; // Refresh every 5 seconds when successful
+      return 2000; // Refresh every 2 seconds when successful
     },
     retry: (failureCount, error) => {
       // Don't retry 500 errors more than once to prevent infinite loops
@@ -691,6 +691,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const currentRoomId = roomData.room.id;
     const shouldClearEntities = lastRoomId !== null && lastRoomId !== currentRoomId;
+
+    // If room changed, immediately refetch tactical data
+    if (shouldClearEntities) {
+      console.log(`Room changed from ${lastRoomId} to ${currentRoomId} - immediately refreshing tactical data`);
+      refetchTactical();
+    }
 
     // Update lastRoomId
     setLastRoomId(currentRoomId);
