@@ -77,10 +77,22 @@ export class CrawlerStorage extends BaseStorage {
         class: crawlerClasses,
       })
       .from(crawlers)
-      .leftJoin(crawlerClasses, eq(crawlers.classId, crawlerClasses.id))
-      .where(eq(crawlers.id, id));
+      .where(eq(crawlers.id, id))
+      .leftJoin(crawlerClasses, eq(crawlers.classId, crawlerClasses.id));
 
-    if (!result) return undefined;
+    if (!result) {
+      return undefined;
+    }
+
+    const crawlerData: CrawlerWithDetails = {
+      ...result.crawler,
+      class: result.class,
+    };
+
+    // Cache the result for future requests
+    await this.redisService.setCrawler(id, crawlerData, 300); // 5 minutes TTL
+
+    return crawlerData;
 
     const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
     const crawlerEffects = Array.isArray(result.crawler.activeEffects) ? result.crawler.activeEffects : [];
@@ -252,7 +264,7 @@ export class CrawlerStorage extends BaseStorage {
   private async generateCrawlerName(species: string = "human", planetType: string = "earth-like"): Promise<string> {
     const { ContentStorage } = await import("./content-storage");
     const contentStorage = new ContentStorage();
-    
+
     const firstName = await contentStorage.getRandomHumanFirstName();
     const lastName = await contentStorage.getRandomHumanLastName();
     return `${firstName} ${lastName}`;
@@ -261,13 +273,13 @@ export class CrawlerStorage extends BaseStorage {
   private async generateCrawlerBackground(): Promise<string> {
     const { ContentStorage } = await import("./content-storage");
     const contentStorage = new ContentStorage();
-    
+
     const job = await contentStorage.getRandomPreDungeonJob();
     const backgroundStory = await contentStorage.getRandomCrawlerBackground("desperate");
     return `Former ${job}. ${backgroundStory}`;
   }
 
-  
+
 
   private async generateStartingEquipment(background: string): Promise<any[]> {
     const survivalGear = [
