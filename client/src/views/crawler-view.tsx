@@ -8,6 +8,7 @@ import CrawlerStatusPanel from "@/panels/crawler-status-panel";
 import FloorInfoPanel from "@/panels/floor-info-panel";
 import TacticalViewPanel from "@/panels/tactical-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
+import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
@@ -115,6 +116,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           {/* Right Column - Floor Info, Map & Events Combined */}
           <div className="space-y-6">
             <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
+            <DungeonMap crawler={crawler} />
             <RoomEventsPanel crawler={crawler} />
           </div>
         </div>
