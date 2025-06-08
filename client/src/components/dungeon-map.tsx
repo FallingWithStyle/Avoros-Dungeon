@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   MapPin,
@@ -644,8 +643,9 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div className="flex justify-center">
+        <div className="flex gap-4">
+          {/* Map Container */}
+          <div className="flex-1">
             <div
               className="border border-slate-600 bg-slate-900/50 p-2 rounded relative overflow-hidden mx-auto"
               style={{ height: "250px", width: "250px" }}
@@ -779,6 +779,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
               </div>
             </div>
           </div>
+          </div>
           <div className="mt-4 space-y-1 text-xs">
             <div className="font-medium text-slate-300 mb-2">Legend:</div>
             <div className="grid grid-cols-2 gap-1 text-slate-400">
@@ -824,7 +825,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
               </div>
             </div>
           </div>
-        </div>
+        
       </CardContent>
     </Card>
   );
@@ -850,7 +851,7 @@ function ExpandedMapControls() {
     expandedMapScale = Math.min(expandedMapScale * 1.2, 3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
-  const zoomOut = () => {
+  const zoomOut() => {
     expandedMapScale = Math.max(expandedMapScale / 1.2, 0.3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
