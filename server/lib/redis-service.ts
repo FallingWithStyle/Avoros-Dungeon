@@ -35,7 +35,8 @@ class RedisService {
   private async testConnection(): Promise<void> {
     try {
       if (this.redis) {
-        await this.redis.set('connection-test', 'ok', 5);
+        // Use setex instead of set with TTL for Upstash compatibility
+        await this.redis.setex('connection-test', 5, 'ok');
         const result = await this.redis.get('connection-test');
         if (result === 'ok') {
           console.log('Redis connection test successful');
