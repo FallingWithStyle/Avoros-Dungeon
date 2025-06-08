@@ -158,7 +158,7 @@ export class TacticalStorage extends BaseStorage {
     }
 
     // ALWAYS get fresh mob data - never use cached mob positions
-    if (this.mobStorage && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
+    if (this.mobStorage && typeof this.mobStorage.getRoomMobs === 'function' && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
       console.log(`Getting fresh mob data for room ${roomId}`);
       
       try {
@@ -274,9 +274,19 @@ export class TacticalStorage extends BaseStorage {
         return [];
       }
 
+      if (!this.crawlerStorage || typeof this.crawlerStorage.getCrawler !== 'function') {
+        console.log(`Crawler storage not properly initialized`);
+        return [];
+      }
+
       const crawler = await this.crawlerStorage.getCrawler(crawlerIdNum);
       if (!crawler) {
         console.log(`Crawler ${crawlerId} not found for tactical entities`);
+        return [];
+      }
+
+      if (!this.explorationStorage || typeof this.explorationStorage.getCrawlerCurrentRoom !== 'function') {
+        console.log(`Exploration storage not properly initialized`);
         return [];
       }
 

@@ -161,12 +161,17 @@ export class ModularStorage implements IStorage {
     instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._explorationStorage.setRedisService(redisService);
     // Set up cross-dependencies
-    instance._tacticalStorage.setCrawlerStorage(instance._crawlerStorage);
-    instance._tacticalStorage.setExplorationStorage(instance._explorationStorage);
-    instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
-    instance._tacticalStorage.setRedisService(redisService);
-    instance._contentStorage.setRedisService(redisService);
-    instance._mobStorage.setRedisService(redisService);
+    this._tacticalStorage.setCrawlerStorage(this._crawlerStorage);
+    this._tacticalStorage.setExplorationStorage(this._explorationStorage);
+    this._tacticalStorage.setMobStorage(this._mobStorage);
+
+    // Ensure all storage components are properly initialized
+    console.log('Storage initialization complete:', {
+      crawlerStorage: !!this._crawlerStorage,
+      explorationStorage: !!this._explorationStorage, 
+      mobStorage: !!this._mobStorage,
+      tacticalStorage: !!this._tacticalStorage
+    });
 
     return instance;
   }

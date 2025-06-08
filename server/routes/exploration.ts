@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
+import { db } from "../db";
+import { crawlerPositions } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 export function registerExplorationRoutes(app: Express) {
   // Exploration routes
@@ -215,8 +218,18 @@ export function registerExplorationRoutes(app: Express) {
         if (result.newRoom) {
           await storage.redisService.invalidateRoomData(result.newRoom.id);
         }
+        // Get current position for cache invalidation
+        const [currentPos] = await db
+          .select()
+          .from(crawlerPositions)
+          .where(eq(crawlerPositions.crawlerId, crawlerId))
+          .orderBy(desc(crawlerPositions.enteredAt))
+          .limit(2); // Get current and previous
+        
         // Also invalidate tactical data for both old and new rooms
-        await storage.redisService.del(`tactical:${currentPosition.roomId}`);
+        if (currentPos) {
+          await storage.redisService.del(`tactical:${currentPos.roomId}`);
+        }
         if (result.newRoom) {
           await storage.redisService.del(`tactical:${result.newRoom.id}`);
         }
