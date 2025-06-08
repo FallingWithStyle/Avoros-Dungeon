@@ -875,7 +875,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
 
       const entryPosition = combatSystem.getEntryPosition(lastDirection);
-      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);<replit_final_file>
+      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
