@@ -1,8 +1,23 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, RotateCcw, Heart, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Wrench,
+  Zap,
+  RefreshCw,
+  RotateCcw,
+  Heart,
+  Shield,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -37,7 +52,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     globalEnergyDisabled = newState;
     toast({
       title: newState ? "Energy Usage Disabled" : "Energy Usage Enabled",
-      description: newState ? "Movement will not consume energy" : "Movement will consume energy normally",
+      description: newState
+        ? "Movement will not consume energy"
+        : "Movement will consume energy normally",
     });
   };
 
@@ -51,18 +68,21 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/season/current"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/leaderboards/crawlers"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/leaderboards/crawlers"],
+      });
 
       // Clear any specific crawler queries
       queryClient.removeQueries({ queryKey: ["/api/crawlers/"], exact: false });
 
       toast({
         title: "Crawlers Deleted",
-        description: data.message || "All crawlers have been permanently deleted.",
+        description:
+          data.message || "All crawlers have been permanently deleted.",
       });
 
       // Navigate back to sponsor screen
-      window.location.href = '/';
+      window.location.href = "/";
     },
     onError: (error) => {
       showErrorToast("Delete Failed", error);
@@ -73,7 +93,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const restoreEnergyMutation = useMutation({
     mutationFn: async () => {
       if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/restore-energy`);
+      return await apiRequest(
+        "POST",
+        `/api/crawlers/${activeCrawler.id}/restore-energy`,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
@@ -87,13 +110,14 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
-
-
   // Debug position reset
   const resetPositionMutation = useMutation({
     mutationFn: async () => {
       if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/reset-position`);
+      return await apiRequest(
+        "POST",
+        `/api/crawlers/${activeCrawler.id}/reset-position`,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
@@ -111,11 +135,16 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const healMutation = useMutation({
     mutationFn: async () => {
       if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/debug/heal`);
+      return await apiRequest(
+        "POST",
+        `/api/crawlers/${activeCrawler.id}/debug/heal`,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler?.id}`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${activeCrawler?.id}`],
+      });
       toast({
         title: "Crawler Healed",
         description: "Health and energy restored to maximum.",
@@ -131,16 +160,24 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     if (!activeCrawler) return;
 
     try {
-      const result = await apiRequest("POST", `/api/crawlers/${activeCrawler.id}/apply-effect/eyes_of_debug`);
+      const result = await apiRequest(
+        "POST",
+        `/api/crawlers/${activeCrawler.id}/apply-effect/eyes_of_debug`,
+      );
 
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-        queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler.id}`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/crawlers/${activeCrawler.id}/explored-rooms`] });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${activeCrawler.id}`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${activeCrawler.id}/explored-rooms`],
+        });
 
         toast({
           title: "Eyes of D'Bug Active",
-          description: "Scan range increased by 100 for 10 minutes! Debug power unleashed!",
+          description:
+            "Scan range increased by 100 for 10 minutes! Debug power unleashed!",
         });
       } else {
         toast({
@@ -172,10 +209,17 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
           {minimized ? (
             /* Collapsed: Single line with all info */
             <div className="text-[0.60rem] text-red-300 font-mono flex items-center gap-1">
-              <span>{getVersionInfo().displayVersion} ({getVersionInfo().buildTime.split('T')[0]})</span>
+              <span>
+                {getVersionInfo().displayVersion} (
+                {getVersionInfo().buildTime.split("T")[0]})
+              </span>
               <Wrench className="w-3 h-3 text-red-400" />
               <span>Debug Controls</span>
-              <span>Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}</span>
+              <span>
+                Floor{" "}
+                {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
+                Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
+              </span>
               <span className="text-red-400">|</span>
               <span>ID: {activeCrawler?.id ?? "N/A"}</span>
               <Button
@@ -193,9 +237,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             <>
               {/* Version and build date at top-left */}
               <div className="text-red-300 text-[0.60rem] font-mono mb-1">
-                {getVersionInfo().displayVersion} ({getVersionInfo().buildTime.split('T')[0]})
+                {getVersionInfo().displayVersion} (
+                {getVersionInfo().buildTime.split("T")[0]})
               </div>
-              
+
               <div className="flex flex-row items-center justify-between">
                 <div className="flex flex-row items-center gap-2">
                   <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
@@ -227,12 +272,15 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 onClick={() => resetCrawlersMutation.mutate()}
                 disabled={resetCrawlersMutation.isPending}
                 variant="destructive"
-                className={miniButtonClasses + " bg-red-600 hover:bg-red-700 border-red-600"}
+                className={
+                  miniButtonClasses +
+                  " bg-red-600 hover:bg-red-700 border-red-600"
+                }
               >
                 {resetCrawlersMutation.isPending ? (
-                  <Wrench className={miniIconClasses + " animate-spin"} />
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
                 ) : (
-                  <Wrench className={miniIconClasses} />
+                  <RefreshCw className={miniIconClasses} />
                 )}
                 Delete All Crawlers
               </Button>
@@ -257,7 +305,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 onClick={() => applyEyesOfDebug()}
                 disabled={!activeCrawler}
                 variant="outline"
-                className={miniButtonClasses + " border-purple-600 text-purple-400 hover:bg-purple-600/10"}
+                className={
+                  miniButtonClasses +
+                  " border-purple-600 text-purple-400 hover:bg-purple-600/10"
+                }
               >
                 <Zap className={miniIconClasses} />
                 Enhanced Scan
@@ -268,7 +319,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 onClick={() => resetPositionMutation.mutate()}
                 disabled={resetPositionMutation.isPending || !activeCrawler}
                 variant="outline"
-                className={miniButtonClasses + " border-blue-600 text-blue-400 hover:bg-blue-600/10"}
+                className={
+                  miniButtonClasses +
+                  " border-blue-600 text-blue-400 hover:bg-blue-600/10"
+                }
               >
                 {resetPositionMutation.isPending ? (
                   <Wrench className={miniIconClasses + " animate-spin"} />
@@ -283,7 +337,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 onClick={() => healMutation.mutate()}
                 disabled={healMutation.isPending || !activeCrawler}
                 variant="outline"
-                className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
+                className={
+                  miniButtonClasses +
+                  " border-green-600 text-green-400 hover:bg-green-600/10"
+                }
               >
                 {healMutation.isPending ? (
                   <Wrench className={miniIconClasses + " animate-spin"} />
@@ -296,7 +353,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 onClick={() => restoreEnergyMutation.mutate()}
                 disabled={restoreEnergyMutation.isPending || !activeCrawler}
                 variant="outline"
-                className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
+                className={
+                  miniButtonClasses +
+                  " border-green-600 text-green-400 hover:bg-green-600/10"
+                }
               >
                 {restoreEnergyMutation.isPending ? (
                   <Wrench className={miniIconClasses + " animate-spin"} />
@@ -309,20 +369,16 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
               <span>
-                Coordinates: Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
+                Coordinates: Floor{" "}
+                {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
+                Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
               <span className="text-red-400">|</span>
-              <span>
-                Crawler ID: {activeCrawler?.id ?? "N/A"}
-              </span>
+              <span>Crawler ID: {activeCrawler?.id ?? "N/A"}</span>
               <span className="text-red-400">|</span>
-              <span>
-                Luck: {activeCrawler?.luck ?? 0}
-              </span>
+              <span>Luck: {activeCrawler?.luck ?? 0}</span>
               <span className="text-red-400">|</span>
-              <span>
-                Scan: {activeCrawler?.scanRange ?? 0}
-              </span>
+              <span>Scan: {activeCrawler?.scanRange ?? 0}</span>
             </div>
           </CardContent>
         )}
