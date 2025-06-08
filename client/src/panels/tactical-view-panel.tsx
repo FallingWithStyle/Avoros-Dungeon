@@ -426,6 +426,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS AT TOP LEVEL - NEVER MOVE THESE OR ADD HOOKS ELSEWHERE
   const { toast } = useToast();
   
+  // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
+  const handleCellClick = useCallback(
+    (x: number, y: number) => {
+      if (!combatSystem) return;
+
+      const player = combatSystem.getState().entities.find(e => e.id === 'player');
+      if (!player) return;
+
+      // Calculate if the clicked cell is adjacent to player
+      const dx = Math.abs(x - player.position.x);
+      const dy = Math.abs(y - player.position.y);
+      const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+
+      if (!isAdjacent) return;
+
+      // Determine direction - fix the y-axis logic
+      let direction: string;
+      if (dx === 1) {
+        direction = x > player.position.x ? 'east' : 'west';
+      } else {
+        // In a grid where y increases downward, north should be y - 1, south should be y + 1
+        direction = y < player.position.y ? 'north' : 'south';
+      }
+
+      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
+
+      // Check if this direction is available - need to access roomData from queries
+      // This will be handled in the grid click handler where roomData is available
+    },
+    [] // Empty dependency array since we'll handle data access in the click handler
+  );
+  
   const hotbarActions = [
     {
       id: "move",
@@ -1302,48 +1334,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 
-  // Function to handle cell click and initiate the movement
-  const handleCellClick = useCallback(
-    (x: number, y: number) => {
-      if (!combatSystem) return;
-
-      const player = combatSystem.getState().entities.find(e => e.id === 'player');
-      if (!player) return;
-
-      // Calculate if the clicked cell is adjacent to player
-      const dx = Math.abs(x - player.position.x);
-      const dy = Math.abs(y - player.position.y);
-      const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
-
-      if (!isAdjacent) return;
-
-      // Determine direction - fix the y-axis logic
-      let direction: string;
-      if (dx === 1) {
-        direction = x > player.position.x ? 'east' : 'west';
-      } else {
-        // In a grid where y increases downward, north should be y - 1, south should be y + 1
-        direction = y < player.position.y ? 'north' : 'south';
-      }
-
-      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
-      console.log('Available directions:', roomData?.availableDirections);
-
-      // Check if this direction is available
-      if (!roomData?.availableDirections.includes(direction)) {
-        toast({
-          title: "Cannot move",
-          description: `No exit ${direction} from this room`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Trigger room movement
-      handleMove(direction);
-    },
-    [combatSystem, roomData, handleMove, toast]
-  );
+  
 
   return (
     <Card className="bg-game-panel border-game-border">
