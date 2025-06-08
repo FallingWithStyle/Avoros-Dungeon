@@ -378,6 +378,45 @@ class RedisService {
     }
   }
 
+  // System-wide bypass check
+  private async isRedisOperational(): Promise<boolean> {
+    if (!this.redis || !this.isConnected) {
+      return false;
+    }
+
+    try {
+      await this.redis.ping();
+      return true;
+    } catch (error) {
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  // Enhanced generic methods with bypass
+  async safeGet<T>(key: string): Promise<T | null> {
+    if (!(await this.isRedisOperational())) {
+      return null;
+    }
+    return this.get<T>(key);
+  }
+
+  async safeSet(key: string, value: any, ttl: number = this.defaultTTL): Promise<boolean> {
+    if (!(await this.isRedisOperational())) {
+      return false;
+    }
+    await this.set(key, value, ttl);
+    return true;
+  }
+
+  async safeDel(key: string): Promise<boolean> {
+    if (!(await this.isRedisOperational())) {
+      return false;
+    }
+    await this.del(key);
+    return true;
+  }
+
   // Leaderboard cache methods
   async getLeaderboard(type: string) {
     return this.get(`leaderboard:${type}`);
@@ -385,6 +424,19 @@ class RedisService {
 
   async setLeaderboard(type: string, data: any, ttl: number = 180) {
     await this.set(`leaderboard:${type}`, data, ttl);
+  }
+
+  // Enhanced tactical positions cache methods
+  async getTacticalPositions(roomId: number): Promise<any[] | null> {
+    return this.safeGet(`tactical:${roomId}`);
+  }
+
+  async setTacticalPositions(roomId: number, entities: any[], ttl: number = 1800): Promise<void> {
+    await this.safeSet(`tactical:${roomId}`, entities, ttl);
+  }
+
+  async invalidateTacticalPositions(roomId: number): Promise<void> {
+    await this.safeDel(`tactical:${roomId}`);
   }
 
   // Session cache methods

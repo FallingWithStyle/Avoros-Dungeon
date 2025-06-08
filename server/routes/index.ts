@@ -9,6 +9,7 @@ import { registerCombatRoutes } from "./combat";
 import { registerDebugRoutes } from "./debug";
 import { registerSeasonRoutes } from "./season";
 import { registerDataRoutes } from "./data";
+import { redisStatus } from "../lib/redis-status";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -81,6 +82,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on("error", (error) => {
       console.error("WebSocket error:", error);
     });
+  });
+
+  // Debug routes (if enabled)
+  app.use("/api/debug", debugRoutes);
+
+  // Redis status endpoint
+  app.get("/api/system/redis-status", async (req, res) => {
+    try {
+      const isAvailable = await redisStatus.getStatus();
+      res.json({ 
+        available: isAvailable,
+        message: isAvailable ? 'Redis is operational' : 'Redis is unavailable - using database fallback'
+      });
+    } catch (error) {
+      res.json({ 
+        available: false, 
+        message: 'Redis status check failed'
+      });
+    }
   });
 
   return httpServer;
