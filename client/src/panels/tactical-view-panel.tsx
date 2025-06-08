@@ -507,10 +507,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Fetch current room data
+  // Fetch current room data with tactical positions
   const { data: roomData, isLoading } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
     refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  // Fetch tactical data separately for better caching
+  const { data: tacticalData, isLoading: tacticalLoading } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
+    refetchInterval: 10000, // Refresh every 10 seconds (less frequent since positions are persistent)
   });
 
   // Subscribe to combat system updates
@@ -649,41 +655,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         combatSystem.updateEntity("player", playerEntity);
       }
 
-      // Add room entities based on tactical data
-      const tacticalData = generateTacticalData(roomData, crawler);
-
-      // Add mobs as combat entities
-      tacticalData.mobs.forEach((mob, index) => {
-        const maxHp = 100;
-        const mobEntity: CombatEntity = {
-          id: `mob-${index}`,
-          name: mob.name,
-          type: "hostile",
-          hp: maxHp, // Always spawn with full health
-          maxHp: maxHp,
-          attack: 15,
-          defense: 5,
-          speed: 10,
-          position: { x: mob.x, y: mob.y },
-        };
-        combatSystem.addEntity(mobEntity);
-      });
-
-      // Add NPCs as neutral entities
-      tacticalData.npcs.forEach((npc, index) => {
-        const npcEntity: CombatEntity = {
-          id: `npc-${index}`,
-          name: npc.name,
-          type: "neutral",
-          hp: 100,
-          maxHp: 100,
-          attack: 0,
-          defense: 10,
-          speed: 5,
-          position: { x: npc.x, y: npc.y },
-        };
-        combatSystem.addEntity(npcEntity);
-      });
+      // Add room entities based on persistent tactical data
+      if (tacticalData?.tacticalEntities) {
+        tacticalData.tacticalEntities.forEach((entity, index) => {
+          if (entity.type === 'mob') {
+            const mobEntity: CombatEntity = {
+              id: `mob-${index}`,
+              name: entity.name,
+              type: "hostile",
+              hp: entity.data.hp || 100,
+              maxHp: entity.data.maxHp || 100,
+              attack: entity.data.attack || 15,
+              defense: entity.data.defense || 5,
+              speed: 10,
+              position: entity.position,
+            };
+            combatSystem.addEntity(mobEntity);
+          } else if (entity.type === 'npc') {
+            const npcEntity: CombatEntity = {
+              id: `npc-${index}`,
+              name: entity.name,
+              type: "neutral",
+              hp: 100,
+              maxHp: 100,
+              attack: 0,
+              defense: 10,
+              speed: 5,
+              position: entity.position,
+            };
+            combatSystem.addEntity(npcEntity);
+          }
+        });
+      }
     }
   }, [roomData, crawler, combatState.entities, lastRoomId]);
 
@@ -1209,7 +1212,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  if (isLoading || !roomData) {
+  if (isLoading || tacticalLoading || !roomData || !tacticalData) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -1220,7 +1223,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardHeader>
         <CardContent>
           <div className="w-full h-48 border-2 border-game-border rounded-lg flex items-center justify-center">
-            <span className="text-slate-400">Loading room data...</span>
+            <span className="text-slate-400">Loading tactical data...</span>
           </div>
         </CardContent>
       </Card>
@@ -1228,7 +1231,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
-  const tacticalData = generateTacticalData(roomData, crawler);
+  const persistentTacticalData = {
+    background: getRoomBackgroundType(room.environment, room.type),
+    loot: tacticalData.tacticalEntities?.filter(e => e.type === 'loot') || [],
+    mobs: tacticalData.tacticalEntities?.filter(e => e.type === 'mob') || [],
+    npcs: tacticalData.tacticalEntities?.filter(e => e.type === 'npc') || [],
+    exits: {
+      north: availableDirections.includes("north"),
+      south: availableDirections.includes("south"),
+      east: availableDirections.includes("east"),
+      west: availableDirections.includes("west"),
+    },
+    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
+  };
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -1247,7 +1262,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         >
           {/* Room Background */}
           <div
-            className={`absolute inset-0 grid-background ${getRoomBackground(tacticalData.background)}`}
+            className={`absolute inset-0 grid-background ${getRoomBackground(persistentTacticalData.background)}`}
           >
             {/* Grid overlay for tactical feel */}
             <div className="absolute inset-0 opacity-20 grid-background">
@@ -1284,16 +1299,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           </div>
 
           {/* Exit indicators */}
-          {tacticalData.exits.north && (
+          {persistentTacticalData.exits.north && (
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-b"></div>
           )}
-          {tacticalData.exits.south && (
+          {persistentTacticalData.exits.south && (
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-green-400 rounded-t"></div>
           )}
-          {tacticalData.exits.east && (
+          {persistentTacticalData.exits.east && (
             <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-l"></div>
           )}
-          {tacticalData.exits.west && (
+          {persistentTacticalData.exits.west && (
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
 
@@ -1375,7 +1390,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           ))}
 
           {/* Loot items */}
-          {tacticalData.loot.map((item, index) => (
+          {persistentTacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
@@ -1408,7 +1423,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           ))}
 
           {/* Other Players */}
-          {tacticalData.otherPlayers.map((player, index) => {
+          {persistentTacticalData.otherPlayers.map((player, index) => {
             // Generate a specific grid position for each other player
             const gridX = 2 + (index % 3) * 2; // Spread horizontally: 2, 4, 6, then wrap
             const gridY = 12 + Math.floor(index / 3); // Stack vertically if more than 3 players
@@ -1686,7 +1701,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <div className="flex items-center gap-4 mt-1">
             <span className="flex items-center gap-1">
               <Gem className="w-3 h-3 text-yellow-400" />
-              {tacticalData.loot.length} items
+              {persistentTacticalData.loot.length} items
             </span>
             <span className="flex items-center gap-1">
               <Skull className="w-3 h-3 text-red-500" />
@@ -1696,7 +1711,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <Users className="w-3 h-3 text-cyan-400" />
               {combatSystem.getFriendlyEntities().length -
                 1 +
-                tacticalData.otherPlayers.length}{" "}
+                persistentTacticalData.otherPlayers.length}{" "}
               friendlies
             </span>
             {combatState.isInCombat && (
