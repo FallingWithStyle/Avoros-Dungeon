@@ -555,14 +555,25 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Fetch tactical data separately for better caching
   const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-    refetchInterval: 10000, // Refresh every 10 seconds (less frequent since positions are persistent)
+    refetchInterval: 5000, // Refresh every 5 seconds
     retry: 3,
     retryDelay: 1000,
     onError: (error) => {
-      console.error("Tactical data fetch error:", error);
+      console.error("=== TACTICAL DATA FETCH ERROR ===");
+      console.error("Error details:", error);
+      toast({
+        title: "Tactical Data Error",
+        description: "Failed to load tactical data. Check console for details.",
+        variant: "destructive",
+      });
     },
     onSuccess: (data) => {
-      console.log("Tactical data fetched successfully:", data);
+      console.log("=== TACTICAL DATA FETCH SUCCESS ===");
+      console.log("Room:", data.room?.name);
+      console.log("Entities:", data.tacticalEntities?.length || 0);
+      console.log("Directions:", data.availableDirections?.length || 0);
+      console.log("Players:", data.playersInRoom?.length || 0);
+      console.log("Full data:", data);
     },
   });
 
@@ -1315,7 +1326,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               </span>
               {tacticalError && (
                 <div className="text-red-400 text-sm mt-2">
-                  Error: {tacticalError.message || "Failed to load tactical data"}
+                  Error: {(tacticalError as any)?.message || "Failed to load tactical data"}
+                  <br />
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="text-blue-400 underline text-xs mt-1"
+                  >
+                    Reload page
+                  </button>
                 </div>
               )}
             </div>
@@ -1327,28 +1345,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Handle case where tacticalData is missing but room data exists
   if (!tacticalData) {
-    console.log("No tactical data available, using empty data for room:", roomData.room.name);
-    // Create empty tactical data to prevent breaking the UI
-    const emptyTacticalData = {
-      tacticalEntities: [],
-    };
-
-    const { room, availableDirections, playersInRoom } = roomData;
-    const persistentTacticalData = {
-      background: getRoomBackgroundType(room.environment, room.type),
-      loot: [],
-      mobs: [],
-      npcs: [],
-      exits: {
-        north: availableDirections.includes("north"),
-        south: availableDirections.includes("south"),
-        east: availableDirections.includes("east"),
-        west: availableDirections.includes("west"),
-      },
-      otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
-    };
-
-    // Continue with the rest of the render using empty data
+    console.error("=== CRITICAL: No tactical data available ===");
+    console.error("Room data exists:", roomData.room.name);
+    console.error("Tactical error:", tacticalError);
+    
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - Data Error
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">
+                Failed to load tactical data for {roomData.room.name}
+              </span>
+              <br />
+              <span className="text-sm text-gray-400 mt-2">
+                Room ID: {roomData.room.id} | Type: {roomData.room.type}
+              </span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-sm mt-2"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const { room, availableDirections, playersInRoom } = roomData;
