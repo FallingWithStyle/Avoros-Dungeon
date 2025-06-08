@@ -451,6 +451,27 @@ class RedisService {
   async invalidateUser(userId: string) {
     await this.deletePattern(`user:${userId}*`);
   }
+
+  // Tactical position methods
+  async getTacticalPositions(roomId: number): Promise<any[]> {
+    try {
+      const key = `tactical:room:${roomId}`;
+      const data = await this.get(key);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Redis getTacticalPositions error:', error);
+      return [];
+    }
+  }
+
+  async setTacticalPositions(roomId: number, positions: any[]): Promise<void> {
+    try {
+      const key = `tactical:room:${roomId}`;
+      await this.set(key, JSON.stringify(positions), 300); // 5 minutes
+    } catch (error) {
+      console.error('Redis setTacticalPositions error:', error);
+    }
+  }
 }
 
 export const redisService = new RedisService();
