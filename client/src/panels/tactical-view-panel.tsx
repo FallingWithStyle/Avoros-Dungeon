@@ -724,7 +724,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical]);
 
-  // Gate crossing detection - requires player to move through the gate to trigger transition
+  // Gate crossing detection - triggers when player approaches or crosses gates
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -740,20 +740,27 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const { x, y } = playerEntity.position;
     
-    // Gate crossing threshold - player must actually cross the boundary
-    const gateThreshold = 2; // 2% past the edge to trigger movement
-    const gateWidth = 30; // Gates are centered and 30% wide (35-65%)
-
-    // Check if player has crossed through a gate (moved past the room boundary)
+    // More lenient gate detection - trigger before hitting hard boundary
+    const approachThreshold = 5; // Trigger when 5% from edge
+    const crossThreshold = 1; // Or when crossing 1% past edge (for extended boundary movement)
+    
+    // Check if player is approaching or has crossed through a gate
     let triggerDirection: string | null = null;
 
-    if (exits.north && y <= gateThreshold && x >= 35 && x <= 65) {
+    // North gate - trigger when approaching top edge or crossing it
+    if (exits.north && x >= 35 && x <= 65 && (y <= approachThreshold || y <= crossThreshold)) {
       triggerDirection = "north";
-    } else if (exits.south && y >= (100 - gateThreshold) && x >= 35 && x <= 65) {
+    } 
+    // South gate - trigger when approaching bottom edge or crossing it  
+    else if (exits.south && x >= 35 && x <= 65 && (y >= (100 - approachThreshold) || y >= (100 - crossThreshold))) {
       triggerDirection = "south";
-    } else if (exits.east && x >= (100 - gateThreshold) && y >= 35 && y <= 65) {
+    }
+    // East gate - trigger when approaching right edge or crossing it
+    else if (exits.east && y >= 35 && y <= 65 && (x >= (100 - approachThreshold) || x >= (100 - crossThreshold))) {
       triggerDirection = "east";
-    } else if (exits.west && x <= gateThreshold && y >= 35 && y <= 65) {
+    }
+    // West gate - trigger when approaching left edge or crossing it
+    else if (exits.west && y >= 35 && y <= 65 && (x <= approachThreshold || x <= crossThreshold)) {
       triggerDirection = "west";
     }
 
@@ -763,8 +770,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastMovement = sessionStorage.getItem('lastProximityMovement');
       const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
 
-      if (now - lastMovementTime > 1500) { // 1.5 second cooldown to prevent accidental exits
-        console.log(`Player crossed through ${triggerDirection} gate - triggering room transition`);
+      if (now - lastMovementTime > 1000) { // 1 second cooldown
+        console.log(`Player triggered ${triggerDirection} gate transition at position (${x.toFixed(1)}, ${y.toFixed(1)})`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
         handleRoomMovement(triggerDirection);
@@ -818,9 +825,39 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
 
-      // Clamp new position within the grid bounds (0-100%)
-      newX = Math.max(2, Math.min(98, newX)); // Leave small border
-      newY = Math.max(2, Math.min(98, newY));
+      // Check if player is approaching a door and allow boundary crossing
+      const isApproachingDoor = (x: number, y: number, dir: { x: number, y: number }) => {
+        if (!effectiveTacticalData?.availableDirections) return false;
+        
+        const exits = {
+          north: effectiveTacticalData.availableDirections.includes("north"),
+          south: effectiveTacticalData.availableDirections.includes("south"),
+          east: effectiveTacticalData.availableDirections.includes("east"),
+          west: effectiveTacticalData.availableDirections.includes("west"),
+        };
+
+        // Check if moving toward a door (within gate area)
+        const inGateArea = (x >= 35 && x <= 65) || (y >= 35 && y <= 65);
+        
+        if (dir.y < 0 && exits.north && y <= 10 && x >= 35 && x <= 65) return true; // Moving north toward north door
+        if (dir.y > 0 && exits.south && y >= 90 && x >= 35 && x <= 65) return true; // Moving south toward south door  
+        if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
+        if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
+        
+        return false;
+      };
+
+      // Allow crossing boundaries if approaching a door, otherwise clamp
+      if (isApproachingDoor(playerEntity.position.x, playerEntity.position.y, direction)) {
+        // Allow movement beyond normal boundaries for door transitions
+        newX = Math.max(-5, Math.min(105, newX)); // Extended boundary for door crossing
+        newY = Math.max(-5, Math.min(105, newY));
+        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
+      } else {
+        // Normal boundary clamping
+        newX = Math.max(2, Math.min(98, newX)); // Leave small border
+        newY = Math.max(2, Math.min(98, newY));
+      }
 
       console.log(`Moving from (${playerEntity.position.x.toFixed(1)}, ${playerEntity.position.y.toFixed(1)}) to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
 
@@ -831,7 +868,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [combatState.entities]);
+  }, [combatState.entities, effectiveTacticalData?.availableDirections]);
 
   // Close context menu when clicking outside
   useEffect(() => {
