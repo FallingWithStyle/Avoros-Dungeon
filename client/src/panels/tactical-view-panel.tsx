@@ -610,15 +610,30 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   });
 
+  // Define handleMove function first to avoid hoisting issues
+  const handleMove = useCallback((direction: string) => {
+    console.log(`Moving ${direction}`);
+    // Store the opposite direction - where the player came FROM for the next room
+    const oppositeDirection = {
+      north: "south",
+      south: "north", 
+      east: "west",
+      west: "east"
+    }[direction];
+    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
+    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
+    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
+  }, [crawler.id]);
+
   // Define checkExitProximity function early to avoid hoisting issues
   const checkExitProximity = useCallback((playerPosition: { x: number; y: number }) => {
     const exitProximity = 8; // How close player needs to be to exit
-    
+
     // Check each available direction
     if (currentRoomData?.availableDirections) {
       currentRoomData.availableDirections.forEach((direction: string) => {
         let exitPosition: { x: number; y: number } | null = null;
-        
+
         switch (direction) {
           case "north":
             exitPosition = { x: 50, y: 5 }; // Top center
@@ -633,7 +648,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             exitPosition = { x: 5, y: 50 }; // Left center
             break;
         }
-        
+
         if (exitPosition) {
           const distance = combatSystem.calculateDistance(playerPosition, exitPosition);
           if (distance <= exitProximity) {
@@ -645,7 +660,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
     }
-  }, [currentRoomData]);
+  }, [currentRoomData, handleMove]);
 
   // Subscribe to combat system updates
   useEffect(() => {
@@ -661,7 +676,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       setCombatState(state);
     });
     return unsubscribe;
-  }, [currentRoomData, checkExitProximity]);
+  }, [checkExitProximity]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -704,12 +719,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       const key = event.key.toLowerCase();
       const playerEntity = combatState.entities.find((e) => e.id === "player");
-      
+
       if (!playerEntity) return;
 
       // Handle movement keys (WASD and arrow keys)
       let moveDirection: { x: number; y: number } | null = null;
-      
+
       if (key === "w" || key === "arrowup") {
         moveDirection = { x: 0, y: -8 }; // Move up
       } else if (key === "s" || key === "arrowdown") {
@@ -722,11 +737,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (moveDirection) {
         event.preventDefault();
-        
+
         // Calculate new position
         const newX = Math.max(5, Math.min(95, playerEntity.position.x + moveDirection.x));
         const newY = Math.max(5, Math.min(95, playerEntity.position.y + moveDirection.y));
-        
+
         // Queue move action
         const success = combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
         if (!success) {
@@ -793,10 +808,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       // Get last movement direction from session storage to position player appropriately
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
       console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
-      
+
       const entryPosition = combatSystem.getEntryPosition(lastDirection);
       console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
-      
+
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
@@ -999,7 +1014,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (actionType === "attack" || actionType === "ability") {
       // Find the best target automatically based on line of sight and proximity
       const target = findBestTarget(playerEntity, actionId);
-      
+
       if (target) {
         const action = combatSystem.actionDefinitions?.get(actionId) || {
           id: actionId,
@@ -1017,7 +1032,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           playerEntity.position,
           target.position,
         );
-        
+
         if (distance <= (action.range || 25)) {
           // Target is in range, use ability directly
           const success = combatSystem.queueAction(
@@ -1068,7 +1083,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Handle attack mode - move to target if necessary, then attack
         const playerEntity = combatState.entities.find((e) => e.id === "player");
         const target = combatState.entities.find((e) => e.id === entityId);
-        
+
         if (playerEntity && target && target.type === "hostile") {
           const attackAction = combatSystem.actionDefinitions?.get(activeActionMode.actionId) || {
             id: activeActionMode.actionId,
@@ -1083,7 +1098,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
           // Check if target is in range
           const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
-          
+
           if (distance <= (attackAction.range || 15)) {
             // Target is in range, attack directly
             const success = combatSystem.queueAction(
@@ -1115,10 +1130,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               x: moveX,
               y: moveY,
             });
-            
+
             if (moveSuccess) {
               console.log(`Queued movement to get in range of ${target.name}`);
-              
+
               // Schedule the attack to be queued after move completes
               setTimeout(() => {
                 const attackSuccess = combatSystem.queueAction(
@@ -1130,7 +1145,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   console.log(`Queued attack on ${target.name} after movement`);
                 }
               }, 900); // Slightly before move action completes (800ms execution time)
-              
+
               setActiveActionMode(null); // Clear active action mode
             } else {
               console.log(`Failed to queue movement - check cooldown or existing action`);
@@ -1357,13 +1372,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
   }
 
-  
+
 
   // Handle case where no data is available at all
   if (!effectiveTacticalData) {
     console.error("=== CRITICAL: No tactical or room data available ===");
     console.error("Tactical error:", tacticalError);
-    
+
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -1410,24 +1425,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
     otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
-
-  const handleMove = (direction: string) => {
-    console.log(`Moving ${direction}`);
-    // Store the opposite direction - where the player came FROM for the next room
-    const oppositeDirection = {
-      north: "south",
-      south: "north", 
-      east: "west",
-      west: "east"
-    }[direction];
-    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
-    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
-    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
-  };
-
-  
-
-
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -1883,7 +1880,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           </span>
         </div>
 
-        
+
       </CardContent>
     </Card>
   );
