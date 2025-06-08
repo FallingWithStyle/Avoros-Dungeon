@@ -188,7 +188,7 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(404).json({ message: "Crawler not in any room" });
       }
 
-      const directions = await storage.explorationStorage.getAvailableDirections(currentRoom.id);
+      const directions = await storage.getAvailableDirections(currentRoom.id);
       res.json({ directions });
     } catch (error) {
       console.error("Get directions error:", error);
@@ -212,7 +212,7 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(404).json({ message: "Crawler not in any room" });
       }
 
-      const directions = await storage.explorationStorage.getAvailableDirections(currentRoom.id);
+      const directions = await storage.getAvailableDirections(currentRoom.id);
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
 
       // Generate or get tactical data with persistent positions

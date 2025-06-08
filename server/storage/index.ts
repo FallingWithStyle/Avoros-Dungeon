@@ -157,8 +157,10 @@ export class ModularStorage implements IStorage {
     instance._crawlerStorage.setRedisService(redisService);
     instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._explorationStorage.setRedisService(redisService);
+    // Set up cross-dependencies
     instance._tacticalStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._tacticalStorage.setExplorationStorage(instance._explorationStorage);
+    instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._tacticalStorage.setRedisService(redisService);
     instance._contentStorage.setRedisService(redisService);
 
