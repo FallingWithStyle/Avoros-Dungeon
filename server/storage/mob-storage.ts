@@ -172,11 +172,24 @@ export class MobStorage extends BaseStorage {
     if (mob.length === 0) return;
 
     const mobData = mob[0];
-    const config = this.getMobSpawnConfig(mobData.roomId);
-    const respawnHours = config?.respawnHours || 4;
     
-    const respawnAt = new Date();
-    respawnAt.setHours(respawnAt.getHours() + respawnHours);
+    // Check if this is a debug spawned mob (identified by [Debug] prefix in displayName)
+    const isDebugMob = mobData.displayName.startsWith('[Debug]');
+    
+    let respawnAt = null;
+    
+    if (!isDebugMob) {
+      // Only set respawn time for normal spawned mobs
+      const config = this.getMobSpawnConfig(mobData.roomId);
+      const respawnHours = config?.respawnHours || 4;
+      
+      respawnAt = new Date();
+      respawnAt.setHours(respawnAt.getHours() + respawnHours);
+      
+      console.log(`Normal mob ${mobData.displayName} killed - will respawn in ${respawnHours} hours`);
+    } else {
+      console.log(`Debug mob ${mobData.displayName} killed - will NOT respawn`);
+    }
 
     await db
       .update(mobs)
@@ -184,7 +197,7 @@ export class MobStorage extends BaseStorage {
         isAlive: false,
         currentHealth: 0,
         lastKilledAt: new Date(),
-        respawnAt: respawnAt,
+        respawnAt: respawnAt, // null for debug mobs, future date for normal mobs
         updatedAt: new Date()
       })
       .where(eq(mobs.id, mobId));
@@ -554,8 +567,8 @@ export class MobStorage extends BaseStorage {
     return this.baseMobSpawnConfigs.find(config => config.roomType === roomType) || null;
   }
 
-  async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false): Promise<void> {
-    console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn);
+  async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false, isDebugSpawn: boolean = false): Promise<void> {
+    console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn, 'isDebugSpawn:', isDebugSpawn);
 
     try {
       // Validate inputs
@@ -601,7 +614,7 @@ export class MobStorage extends BaseStorage {
       const insertData = {
         roomId,
         enemyId: mobData.mobTypeId,
-        displayName: mobData.displayName,
+        displayName: isDebugSpawn ? `[Debug] ${mobData.displayName}` : mobData.displayName,
         rarity: mobData.rarity || 'common',
         positionX: position.x.toString(),
         positionY: position.y.toString(),
@@ -610,6 +623,7 @@ export class MobStorage extends BaseStorage {
         isAlive: true,
         disposition: -75, // More hostile for debug spawned mobs
         isActive: true,
+        // Add debug flag in the displayName or use a specific field if available
         createdAt: new Date(),
         updatedAt: new Date()
       };
