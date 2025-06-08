@@ -1,6 +1,3 @@
-Fix: Corrects the getCrawlerCurrentRoom method to properly extract and return room data from the database query result.
-```
-```replit_final_file
 import { db } from "../db";
 import {
   rooms,
