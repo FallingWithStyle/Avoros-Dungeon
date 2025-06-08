@@ -29,29 +29,51 @@ export function registerExplorationRoutes(app: Express) {
   app.get("/api/crawlers/:id/current-room", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
+      console.log(`=== CURRENT-ROOM API CALL ===`);
+      console.log(`Crawler ID: ${crawlerId}`);
+      console.log(`User ID: ${req.user.claims.sub}`);
 
       // Try to get cached room data first
-      const cachedRoomData = await storage.redisService.getCurrentRoomData(crawlerId);
-      if (cachedRoomData) {
-        return res.json(cachedRoomData);
+      try {
+        const cachedRoomData = await storage.redisService.getCurrentRoomData(crawlerId);
+        if (cachedRoomData) {
+          console.log(`Found cached room data for crawler ${crawlerId}`);
+          return res.json(cachedRoomData);
+        }
+        console.log(`No cached room data for crawler ${crawlerId}`);
+      } catch (cacheError) {
+        console.log(`Cache error (continuing with DB lookup):`, cacheError);
       }
 
       const crawler = await storage.getCrawler(crawlerId);
+      console.log(`Crawler lookup result:`, crawler ? `Found ${crawler.name}` : 'Not found');
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        console.log(`Access denied: crawler not found or not owned by user`);
         return res.status(404).json({ message: "Crawler not found" });
       }
 
+      console.log(`Ensuring crawler ${crawlerId} has position...`);
       // Ensure crawler has a position
       await storage.ensureCrawlerHasPosition(crawlerId);
+      console.log(`Position ensured for crawler ${crawlerId}`);
 
+      console.log(`Getting current room for crawler ${crawlerId}...`);
       const room = await storage.getCrawlerCurrentRoom(crawlerId);
+      console.log(`Current room result:`, room ? `Found room ${room.id} (${room.name})` : 'No room found');
+      
       if (!room) {
+        console.log(`ERROR: No room found for crawler ${crawlerId} after ensuring position`);
         return res.status(404).json({ message: "Room not found" });
       }
 
+      console.log(`Getting available directions for room ${room.id}...`);
       const availableDirections = await storage.getAvailableDirections(room.id);
+      console.log(`Available directions:`, availableDirections);
+
+      console.log(`Getting players in room ${room.id}...`);
       const playersInRoom = await storage.getPlayersInRoom(room.id);
+      console.log(`Players in room:`, playersInRoom.length);
 
       const roomData = {
         room,
@@ -59,12 +81,26 @@ export function registerExplorationRoutes(app: Express) {
         playersInRoom,
       };
 
+      console.log(`Returning room data for crawler ${crawlerId}:`, {
+        roomId: room.id,
+        roomName: room.name,
+        directionsCount: availableDirections.length,
+        playersCount: playersInRoom.length
+      });
+
       // Cache the result
-      await storage.redisService.setCurrentRoomData(crawlerId, roomData, 180); // 3 minutes TTL
+      try {
+        await storage.redisService.setCurrentRoomData(crawlerId, roomData, 180); // 3 minutes TTL
+        console.log(`Cached room data for crawler ${crawlerId}`);
+      } catch (cacheError) {
+        console.log(`Failed to cache room data:`, cacheError);
+      }
 
       res.json(roomData);
     } catch (error) {
-      console.error("Error fetching current room:", error);
+      console.error("=== ERROR in current-room endpoint ===");
+      console.error("Error details:", error);
+      console.error("Stack trace:", error.stack);
       res.status(500).json({ message: "Failed to fetch current room" });
     }
   });
