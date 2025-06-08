@@ -23,7 +23,6 @@ function Router() {
           <Route path="/" component={Landing} />
         ) : (
           <>
-            <Route path="/" component={Home} />
             <Route path="/crawler/:crawlerId" component={CrawlerMode} />
             <Route path="/crawler/:crawlerId/*" component={CrawlerMode} />
             <Route path="/account" component={Account} />
