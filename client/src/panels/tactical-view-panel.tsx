@@ -625,7 +625,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player and party members
-      combatState.entities.forEach((entity) => {
+      const currentEntities = combatSystem.getState().entities;
+      currentEntities.forEach((entity) => {
         if (
           !entity.id.startsWith("player") &&
           !entity.id.startsWith("party-") &&
@@ -655,7 +656,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         entryDirection,
       };
 
-      if (!combatState.entities.find((e) => e.id === "player")) {
+      if (!currentEntities.find((e) => e.id === "player")) {
         combatSystem.addEntity(playerEntity);
       } else {
         combatSystem.updateEntity("player", playerEntity);
@@ -694,7 +695,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         });
       }
     }
-  }, [roomData, crawler, combatState.entities, lastRoomId]);
+  }, [roomData?.room.id, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed, tacticalData?.tacticalEntities, lastRoomId]);
 
   // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
   const getCooldownPercentage = (actionId: string): number => {
