@@ -163,10 +163,15 @@ export class ModularStorage implements IStorage {
     // Set up cross-dependencies
     instance._tacticalStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._tacticalStorage.setExplorationStorage(instance._explorationStorage);
-    instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
-    instance._tacticalStorage.setRedisService(redisService);
-    instance._contentStorage.setRedisService(redisService);
-    instance._mobStorage.setRedisService(redisService);
+    instance._tacticalStorage.setMobStorage(instance._mobStorage);
+
+    // Ensure all storage components are properly initialized
+    console.log('Storage initialization complete:', {
+      crawlerStorage: !!instance._crawlerStorage,
+      explorationStorage: !!instance._explorationStorage, 
+      mobStorage: !!instance._mobStorage,
+      tacticalStorage: !!instance._tacticalStorage
+    });
 
     return instance;
   }
@@ -392,8 +397,26 @@ export class ModularStorage implements IStorage {
   }
 }
 
-// Create and export a singleton instance
+// Initialize storage instances
+const userStorage = new UserStorage();
+const corporationStorage = new CorporationStorage();
+const crawlerStorage = new CrawlerStorage();
+const explorationStorage = new ExplorationStorage();
+const mobStorage = new MobStorage();
+const tacticalStorage = new TacticalStorage();
+const contentStorage = new ContentStorage();
+
 export const storage = await ModularStorage.create();
+
+export {
+  userStorage,
+  corporationStorage,
+  crawlerStorage,
+  explorationStorage,
+  mobStorage,
+  tacticalStorage,
+  contentStorage,
+};
 
 export { TacticalStorage } from './tactical-storage';
 export { ContentStorage } from './content-storage';

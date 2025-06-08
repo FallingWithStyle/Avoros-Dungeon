@@ -552,20 +552,46 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
-  // Fetch tactical data separately for better caching
+  // Fetch tactical data separately for better caching with improved error handling
   const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-    refetchInterval: 5000, // Refresh every 5 seconds
-    retry: 3,
-    retryDelay: 1000,
+    refetchInterval: (data, error) => {
+      // Stop auto-refetching if there's a persistent error
+      if (error) return false;
+      return 5000; // Refresh every 5 seconds when successful
+    },
+    retry: (failureCount, error) => {
+      // Don't retry 500 errors more than once to prevent infinite loops
+      if (error?.message?.includes('500')) {
+        return failureCount < 1;
+      }
+      // Don't retry 4xx errors except timeouts
+      if (error?.message?.includes('4')) {
+        const status = parseInt(error.message.split(':')[0]);
+        if (status >= 400 && status < 500 && status !== 408) {
+          return false;
+        }
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 10000, // Consider data stale after 10 seconds
     onError: (error) => {
       console.error("=== TACTICAL DATA FETCH ERROR ===");
       console.error("Error details:", error);
-      toast({
-        title: "Tactical Data Error",
-        description: "Failed to load tactical data. Check console for details.",
-        variant: "destructive",
-      });
+      // Only show toast once per error to avoid spam
+      if (!sessionStorage.getItem(`tactical-error-${crawler.id}`)) {
+        sessionStorage.setItem(`tactical-error-${crawler.id}`, 'true');
+        toast({
+          title: "Tactical Data Error",
+          description: "Using fallback tactical data. Some features may be limited.",
+          variant: "destructive",
+        });
+        // Clear the flag after 30 seconds
+        setTimeout(() => {
+          sessionStorage.removeItem(`tactical-error-${crawler.id}`);
+        }, 30000);
+      }
     },
     onSuccess: (data) => {
       console.log("=== TACTICAL DATA FETCH SUCCESS ===");
@@ -573,7 +599,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log("Entities:", data.tacticalEntities?.length || 0);
       console.log("Directions:", data.availableDirections?.length || 0);
       console.log("Players:", data.playersInRoom?.length || 0);
-      console.log("Full data:", data);
+      // Clear any error flags on success
+      sessionStorage.removeItem(`tactical-error-${crawler.id}`);
     },
   });
 
@@ -711,9 +738,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Separate effect for tactical entities to avoid conflicts
   useEffect(() => {
-    if (!roomData?.room || !tacticalData?.tacticalEntities) return;
+    if (!effectiveTacticalData?.room || !effectiveTacticalData?.tacticalEntities) return;
 
-    const currentRoomId = roomData.room.id;
+    const currentRoomId = effectiveTacticalData.room.id;
 
     // Remove any existing tactical entities that don't belong to the current room
     const currentEntities = combatSystem.getState().entities;
@@ -740,10 +767,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
 
     // Only add tactical entities if none exist for this room
-    if (existingTacticalEntities.length === 0 && Array.isArray(tacticalData.tacticalEntities)) {
-      console.log(`Adding ${tacticalData.tacticalEntities.length} tactical entities for room ${currentRoomId}`);
+    if (existingTacticalEntities.length === 0 && Array.isArray(effectiveTacticalData.tacticalEntities)) {
+      console.log(`Adding ${effectiveTacticalData.tacticalEntities.length} tactical entities for room ${currentRoomId}`);
 
-      tacticalData.tacticalEntities.forEach((entity, index) => {
+      effectiveTacticalData.tacticalEntities.forEach((entity, index) => {
         if (entity.type === 'mob') {
           const mobEntity: CombatEntity = {
             id: `mob-${currentRoomId}-${index}`,
@@ -773,7 +800,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
     }
-  }, [roomData?.room?.id, tacticalData?.tacticalEntities]);
+  }, [effectiveTacticalData?.room?.id, effectiveTacticalData?.tacticalEntities]);
 
   // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
   const getCooldownPercentage = (actionId: string): number => {
@@ -1343,56 +1370,83 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
   }
 
-  // Handle case where tacticalData is missing but room data exists
-  if (!tacticalData) {
-    console.error("=== CRITICAL: No tactical data available ===");
-    console.error("Room data exists:", roomData.room.name);
-    console.error("Tactical error:", tacticalError);
-    
-    // Try to generate fallback tactical data client-side
-    const fallbackTacticalData = {
+  // Generate client-side fallback tactical data when server data is unavailable
+  const generateFallbackTacticalData = () => {
+    if (!roomData?.room) return null;
+
+    const fallbackEntities: any[] = [];
+    const occupiedCells = new Set<string>();
+
+    // Generate some basic entities based on room properties
+    if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
+      // Add a loot item
+      const lootCell = getRandomEmptyCell(occupiedCells);
+      const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
+      fallbackEntities.push({
+        type: 'loot',
+        name: 'Treasure',
+        position: lootPos,
+        data: { type: 'treasure' },
+        x: lootPos.x,
+        y: lootPos.y
+      });
+    }
+
+    // Add basic enemies for non-safe rooms
+    if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
+      if (Math.random() > 0.5) { // 50% chance for enemies
+        const mobCell = getRandomEmptyCell(occupiedCells);
+        const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
+        fallbackEntities.push({
+          type: 'mob',
+          name: 'Unknown Enemy',
+          position: mobPos,
+          data: { 
+            hp: 50,
+            maxHp: 50,
+            attack: 10,
+            defense: 5,
+            hostile: true
+          }
+        });
+      }
+    }
+
+    return {
       room: roomData.room,
       availableDirections: roomData.availableDirections || [],
       playersInRoom: roomData.playersInRoom || [],
-      tacticalEntities: [] // Empty entities as fallback
+      tacticalEntities: fallbackEntities
     };
-    
-    // Use fallback data to render a basic tactical view
-    console.log("Using fallback tactical data for room:", roomData.room.name);
+  };
+
+  // Use fallback data when tactical data is unavailable
+  const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
+
+  // Handle case where no data is available at all
+  if (!effectiveTacticalData) {
+    console.error("=== CRITICAL: No tactical or room data available ===");
+    console.error("Tactical error:", tacticalError);
     
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-slate-200 flex items-center gap-2">
             <Eye className="w-4 h-4" />
-            Tactical View - Limited Data
+            Tactical View - Offline
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-48 border-2 border-amber-600 rounded-lg flex items-center justify-center relative">
-            <div className="absolute top-2 left-2 text-xs text-amber-400">
-              {roomData.room.name} (Fallback Mode)
-            </div>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center relative">
             <div className="text-center">
-              <span className="text-amber-400 text-sm">
-                Tactical data temporarily unavailable
+              <span className="text-red-400 text-sm">
+                Unable to load tactical data
               </span>
               <br />
               <span className="text-xs text-gray-400 mt-1">
-                Room loaded, but entities could not be retrieved
+                Room data could not be retrieved
               </span>
               <br />
-              <button 
-                onClick={() => {
-                  // Try to refetch tactical data
-                  queryClient.invalidateQueries({ 
-                    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`] 
-                  });
-                }} 
-                className="text-blue-400 underline text-xs mt-2 mr-2"
-              >
-                Retry
-              </button>
               <button 
                 onClick={() => window.location.reload()} 
                 className="text-blue-400 underline text-xs mt-2"
@@ -1406,12 +1460,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
   }
 
-  const { room, availableDirections, playersInRoom } = roomData;
+  const { room, availableDirections, playersInRoom } = effectiveTacticalData;
   const persistentTacticalData = {
     background: getRoomBackgroundType(room.environment, room.type),
-    loot: tacticalData.tacticalEntities?.filter(e => e.type === 'loot') || [],
-    mobs: tacticalData.tacticalEntities?.filter(e => e.type === 'mob') || [],
-    npcs: tacticalData.tacticalEntities?.filter(e => e.type === 'npc') || [],
+    loot: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'loot') || [],
+    mobs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'mob') || [],
+    npcs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'npc') || [],
     exits: {
       north: availableDirections.includes("north"),
       south: availableDirections.includes("south"),
@@ -1443,6 +1497,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
           Tactical View
+          {!tacticalData && effectiveTacticalData && (
+            <span className="text-xs text-amber-400 ml-2">(Limited Data)</span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
