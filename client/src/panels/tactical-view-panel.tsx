@@ -1420,6 +1420,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     };
   };
 
+  
+
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
 

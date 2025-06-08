@@ -160,6 +160,10 @@ export class ModularStorage implements IStorage {
     instance._crawlerStorage.setRedisService(redisService);
     instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._explorationStorage.setRedisService(redisService);
+    
+    // Set up storage cross-references for exploration storage access
+    instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
+    instance._explorationStorage.setRedisService(redisService);
     // Set up cross-dependencies
     instance._tacticalStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._tacticalStorage.setExplorationStorage(instance._explorationStorage);
@@ -386,6 +390,11 @@ export class ModularStorage implements IStorage {
     return this._tacticalStorage.getTacticalEntities(crawlerId);
   }
 
+  // Expose exploration storage for direct access
+  get explorationStorage() {
+    return this._explorationStorage;
+  }
+
   // Expose tactical storage for direct access
   get tacticalStorage() {
     return this._tacticalStorage;
@@ -394,6 +403,11 @@ export class ModularStorage implements IStorage {
   // Expose mob storage for direct access
   get mobStorage() {
     return this._mobStorage;
+  }
+
+  // Expose redis service for direct access
+  get redisService() {
+    return this._explorationStorage.redisService;
   }
 }
 
