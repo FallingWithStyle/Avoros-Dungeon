@@ -879,7 +879,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const now = Date.now();
     const timeSinceLastUse = now - lastUsed;
 
-    if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
+    if```text
+if (timeSinceLastUse >= action.cooldown) return 0; // No cooldown
 
     return ((action.cooldown - timeSinceLastUse) / action.cooldown) * 100;
   };
