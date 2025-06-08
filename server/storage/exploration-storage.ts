@@ -210,7 +210,7 @@ export class ExplorationStorage extends BaseStorage {
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
     console.log(`Getting current room for crawler ${crawlerId}`);
-    
+
     // Try to get from cache first
     try {
       const cached = await redisService.getCurrentRoom(crawlerId);
@@ -504,53 +504,50 @@ export class ExplorationStorage extends BaseStorage {
     return bounds;
   }
 
-  async ensureCrawlerHasPosition(crawlerId: number): Promise<boolean> {
-    console.log(`Ensuring crawler ${crawlerId} has a position`);
-    
-    // Check if crawler already has a position
-    const [existingPosition] = await db
-      .select()
-      .from(crawlerPositions)
-      .where(eq(crawlerPositions.crawlerId, crawlerId))
-      .limit(1);
+  async ensureCrawlerHasPosition(crawlerId: number): Promise<void> {
+    console.log(`Ensuring crawler ${crawlerId} has position...`);
 
-    if (existingPosition) {
-      console.log(`Crawler ${crawlerId} already has position in room ${existingPosition.roomId}`);
-      return true;
+    const currentRoom = await this.getCrawlerCurrentRoom(crawlerId);
+    if (currentRoom) {
+      console.log(`Crawler ${crawlerId} already has position in room ${currentRoom.id} (${currentRoom.name})`);
+      return; // Crawler already has a position
     }
 
-    // Find the entrance room on floor 1
-    const [floor1] = await db
-      .select()
-      .from(floors)
-      .where(eq(floors.floorNumber, 1))
-      .limit(1);
+    console.log(`Crawler ${crawlerId} has no position, placing in entrance room...`);
 
+    // Place crawler in entrance room
+    const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
     if (!floor1) {
-      console.error('No floor 1 found');
-      return false;
+      console.error("Floor 1 not found when ensuring crawler position");
+      throw new Error("Floor 1 not found");
     }
 
     const [entranceRoom] = await db
       .select()
       .from(rooms)
-      .where(and(eq(rooms.floorId, floor1.id), eq(rooms.type, "entrance")))
-      .limit(1);
+      .where(and(eq(rooms.floorId, floor1.id), eq(rooms.type, "entrance")));
 
     if (!entranceRoom) {
-      console.error('No entrance room found on floor 1');
-      return false;
+      console.error("Entrance room not found when ensuring crawler position");
+      throw new Error("Entrance room not found");
     }
 
-    // Place crawler in entrance room
+    console.log(`Placing crawler ${crawlerId} in entrance room ${entranceRoom.id} (${entranceRoom.name})`);
+
     await db.insert(crawlerPositions).values({
-      crawlerId,
+      crawlerId: crawlerId,
       roomId: entranceRoom.id,
       enteredAt: new Date(),
     });
 
-    console.log(`Placed crawler ${crawlerId} in entrance room ${entranceRoom.id}`);
-    return true;
+    console.log(`Successfully placed crawler ${crawlerId} in room ${entranceRoom.id}`);
+
+    // Invalidate cache
+    try {
+      await redisService.invalidateCurrentRoom(crawlerId);
+    } catch (error) {
+      console.log('Failed to invalidate current room cache');
+    }
   }
 
   private async handleStaircaseMovement(
