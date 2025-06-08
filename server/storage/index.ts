@@ -397,8 +397,26 @@ export class ModularStorage implements IStorage {
   }
 }
 
-// Create and export a singleton instance
+// Initialize storage instances
+const userStorage = new UserStorage();
+const corporationStorage = new CorporationStorage();
+const crawlerStorage = new CrawlerStorage();
+const explorationStorage = new ExplorationStorage();
+const mobStorage = new MobStorage();
+const tacticalStorage = new TacticalStorage();
+const contentStorage = new ContentStorage();
+
 export const storage = await ModularStorage.create();
+
+export {
+  userStorage,
+  corporationStorage,
+  crawlerStorage,
+  explorationStorage,
+  mobStorage,
+  tacticalStorage,
+  contentStorage,
+};
 
 export { TacticalStorage } from './tactical-storage';
 export { ContentStorage } from './content-storage';

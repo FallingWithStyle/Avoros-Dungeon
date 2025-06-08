@@ -2,7 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./init-db";
-import { pool } from "./db";
 import { storage } from "./storage";
 
 const app = express();
@@ -40,10 +39,17 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize database with game data
-  await initializeDatabase();
+  try {
+    console.log('🚀 Starting server initialization...');
+    
+    // Initialize database with game data
+    console.log('📊 Initializing database...');
+    await initializeDatabase();
+    console.log('✅ Database initialized');
 
-  const server = await registerRoutes(app);
+    console.log('🛣️ Registering routes...');
+    const server = await registerRoutes(app);
+    console.log('✅ Routes registered');
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -77,10 +83,14 @@ app.use((req, res, next) => {
   }, 5 * 60 * 1000); // Every 5 minutes
 
   server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`serving on port ${port}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 })();
