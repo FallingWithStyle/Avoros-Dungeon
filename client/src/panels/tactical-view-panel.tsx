@@ -610,6 +610,21 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   });
 
+  // Define handleMove function first to avoid hoisting issues
+  const handleMove = useCallback((direction: string) => {
+    console.log(`Moving ${direction}`);
+    // Store the opposite direction - where the player came FROM for the next room
+    const oppositeDirection = {
+      north: "south",
+      south: "north", 
+      east: "west",
+      west: "east"
+    }[direction];
+    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
+    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
+    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
+  }, [crawler.id]);
+
   // Define checkExitProximity function early to avoid hoisting issues
   const checkExitProximity = useCallback((playerPosition: { x: number; y: number }) => {
     const exitProximity = 8; // How close player needs to be to exit
@@ -645,7 +660,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
     }
-  }, [currentRoomData]);
+  }, [currentRoomData, handleMove]);
 
   // Subscribe to combat system updates
   useEffect(() => {
