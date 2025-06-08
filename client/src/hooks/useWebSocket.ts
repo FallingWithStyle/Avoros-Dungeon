@@ -6,89 +6,62 @@ interface WebSocketMessage {
   timestamp: number;
 }
 
-export function useWebSocket() {
-  const ws = useRef<WebSocket | null>(null);
+export function useWebSocket(token: string | null) {
+  const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
   useEffect(() => {
+    if (!token) return;
+
+    // Handle WebSocket URL construction more safely
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.hostname;
+    const hostname = window.location.hostname;
     const port = window.location.port;
 
-    let wsUrl;
-    if (host === 'localhost' || host === '127.0.0.1') {
-      const fallbackPort = port || '5000';
-      wsUrl = `${protocol}//${host}:${fallbackPort}/ws`;
-    } else {
-      wsUrl = `${protocol}//${window.location.host}/ws`;
+    // Construct host with proper port handling
+    let host = hostname;
+    if (port && port !== '80' && port !== '443') {
+      host = `${hostname}:${port}`;
     }
 
-    console.log("🔌 Attempting WebSocket connection to:", wsUrl);
-    console.log("Current location:", window.location.href);
+    const wsUrl = `${protocol}//${host}/?token=${token}`;
+
+    console.log('Attempting WebSocket connection to:', wsUrl);
 
     try {
-      ws.current = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl);
 
-      ws.current.onopen = () => {
+      ws.onopen = () => {
+        console.log('WebSocket connected to:', wsUrl);
         setIsConnected(true);
-        console.log('✅ WebSocket connected successfully');
       };
 
-      ws.current.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          console.log('📨 WebSocket message received:', message);
-          setLastMessage(message);
-        } catch (error) {
-          console.error('❌ Error parsing WebSocket message:', error);
-          console.error('Raw message data:', event.data);
+      ws.onmessage = (event) => {
+        console.log('WebSocket message:', event.data);
+      };
+
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
+        setIsConnected(false);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error for URL:', wsUrl, error);
+        setIsConnected(false);
+      };
+
+      setSocket(ws);
+
+      return () => {
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          ws.close();
         }
       };
-
-      ws.current.onclose = (event) => {
-        setIsConnected(false);
-        console.log('🔌 WebSocket disconnected. Code:', event.code, 'Reason:', event.reason);
-
-        // Attempt to reconnect after 3 seconds
-        setTimeout(() => {
-          console.log('🔄 Attempting to reconnect WebSocket...');
-          // This will trigger the useEffect again
-          setLastMessage(null);
-        }, 3000);
-      };
-
-      ws.current.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        console.error('WebSocket state:', ws.current?.readyState);
-        console.error('WebSocket URL was:', wsUrl);
-      };
     } catch (error) {
-      console.error('❌ Failed to create WebSocket:', error);
+      console.error('Failed to create WebSocket connection:', error);
+      setIsConnected(false);
     }
+  }, [token]);
 
-    return () => {
-      if (ws.current) {
-        console.log('🔌 Closing WebSocket connection');
-        ws.current.close();
-      }
-    };
-  }, []);
-
-  const sendMessage = (type: string, data: any) => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      const message: WebSocketMessage = {
-        type,
-        data,
-        timestamp: Date.now(),
-      };
-      ws.current.send(JSON.stringify(message));
-    }
-  };
-
-  return {
-    isConnected,
-    lastMessage,
-    sendMessage,
-  };
+  return { socket, isConnected };
 }
