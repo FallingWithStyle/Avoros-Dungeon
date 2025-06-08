@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Zap, RotateCcw, Heart, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { Wrench, Zap, RotateCcw, Heart, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/errorToast";
@@ -168,37 +168,55 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     <div className="fixed bottom-0 left-0 right-0 z-50">
       <Card className="bg-red-900/20 border-red-600/30 rounded-none border-x-0 border-b-0 shadow-md">
         <CardHeader className="p-2 pb-1">
-          {/* Version number at top-left */}
-          <div className="text-red-300 text-[0.60rem] font-mono mb-1">
-            {getVersionInfo().displayVersion}
-          </div>
-          
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-2">
-              <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
-                <RefreshCw className="w-3 h-3" />
-                Debug Controls
-              </CardTitle>
-              <CardDescription className="text-red-300 text-[0.60rem]">
-                Development tools - these will be removed in production
-              </CardDescription>
+          {/* Show different content based on minimized state */}
+          {minimized ? (
+            /* Collapsed: Single line with all info */
+            <div className="text-[0.60rem] text-red-300 font-mono flex items-center gap-1">
+              <span>{getVersionInfo().displayVersion} ({getVersionInfo().buildTime.split('T')[0]})</span>
+              <Wrench className="w-3 h-3 text-red-400" />
+              <span>Debug Controls</span>
+              <span>Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}</span>
+              <span className="text-red-400">|</span>
+              <span>ID: {activeCrawler?.id ?? "N/A"}</span>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setMinimized((m) => !m)}
+                aria-label="Expand Debug Panel"
+                className="text-red-200 hover:bg-red-900/30 p-1 h-4 w-4 ml-auto"
+              >
+                <ChevronUp className="w-3 h-3" />
+              </Button>
             </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setMinimized((m) => !m)}
-              aria-label={minimized ? "Expand Debug Panel" : "Minimize Debug Panel"}
-              className="text-red-200 hover:bg-red-900/30 p-1 h-6 w-6"
-            >
-              {minimized ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </Button>
-          </div>
-          
-          {/* Show minimal info when minimized */}
-          {minimized && (
-            <div className="text-[0.60rem] text-red-300 font-mono">
-              {getVersionInfo().fullVersion} | Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0} | ID: {activeCrawler?.id ?? "N/A"}
-            </div>
+          ) : (
+            /* Expanded: Version at top, then title row */
+            <>
+              {/* Version and build date at top-left */}
+              <div className="text-red-300 text-[0.60rem] font-mono mb-1">
+                {getVersionInfo().displayVersion} ({getVersionInfo().buildTime.split('T')[0]})
+              </div>
+              
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-row items-center gap-2">
+                  <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
+                    <Wrench className="w-3 h-3" />
+                    Debug Controls
+                  </CardTitle>
+                  <CardDescription className="text-red-300 text-[0.60rem]">
+                    Development tools - these will be removed in production
+                  </CardDescription>
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setMinimized((m) => !m)}
+                  aria-label="Minimize Debug Panel"
+                  className="text-red-200 hover:bg-red-900/30 p-1 h-6 w-6"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </div>
+            </>
           )}
         </CardHeader>
         {!minimized && (
@@ -212,9 +230,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 className={miniButtonClasses + " bg-red-600 hover:bg-red-700 border-red-600"}
               >
                 {resetCrawlersMutation.isPending ? (
-                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                  <Wrench className={miniIconClasses + " animate-spin"} />
                 ) : (
-                  <RefreshCw className={miniIconClasses} />
+                  <Wrench className={miniIconClasses} />
                 )}
                 Delete All Crawlers
               </Button>
@@ -253,7 +271,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 className={miniButtonClasses + " border-blue-600 text-blue-400 hover:bg-blue-600/10"}
               >
                 {resetPositionMutation.isPending ? (
-                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                  <Wrench className={miniIconClasses + " animate-spin"} />
                 ) : (
                   <RotateCcw className={miniIconClasses} />
                 )}
@@ -268,7 +286,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
               >
                 {healMutation.isPending ? (
-                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                  <Wrench className={miniIconClasses + " animate-spin"} />
                 ) : (
                   <Heart className={miniIconClasses} />
                 )}
@@ -281,7 +299,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 className={miniButtonClasses + " border-green-600 text-green-400 hover:bg-green-600/10"}
               >
                 {restoreEnergyMutation.isPending ? (
-                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                  <Wrench className={miniIconClasses + " animate-spin"} />
                 ) : (
                   <Zap className={miniIconClasses} />
                 )}
@@ -290,10 +308,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             </div>
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
-              <span className="font-mono">
-                {getVersionInfo().fullVersion}
-              </span>
-              <span className="text-red-400">|</span>
               <span>
                 Coordinates: Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
