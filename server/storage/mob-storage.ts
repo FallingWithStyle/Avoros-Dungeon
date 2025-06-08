@@ -1,6 +1,6 @@
 
 import { db } from "../db";
-import { mobs, creatureTypes, rooms, factions } from "@shared/schema";
+import { mobs, mobTypes, rooms, factions } from "@shared/schema";
 import { eq, and, lt, isNull, or } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
@@ -97,10 +97,10 @@ export class MobStorage extends BaseStorage {
     const roomMobs = await db
       .select({
         mob: mobs,
-        creatureType: creatureTypes
+        mobType: mobTypes
       })
       .from(mobs)
-      .innerJoin(creatureTypes, eq(mobs.creatureTypeId, creatureTypes.id))
+      .innerJoin(mobTypes, eq(mobs.mobTypeId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
 
     // Cache for 10 minutes
@@ -251,7 +251,7 @@ export class MobStorage extends BaseStorage {
 
       await db.insert(mobs).values({
         roomId,
-        enemyId: mobData.enemyId,
+        mobTypeId: mobData.mobTypeId,
         displayName: mobData.displayName,
         rarity: mobData.rarity,
         positionX: position.x.toString(),
@@ -314,37 +314,37 @@ export class MobStorage extends BaseStorage {
     // Get appropriate enemies based on mob types
     const mobType = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
     
-    // Try to find enemies that match the mob type in their name or description
-    let availableEnemies = await db
+    // Try to find mob types that match the mob type in their name or description
+    let availableMobTypes = await db
       .select()
-      .from(enemies)
-      .where(eq(enemies.minFloor, 1)); // TODO: Filter by actual floor
+      .from(mobTypes)
+      .where(eq(mobTypes.minFloor, 1)); // TODO: Filter by actual floor
 
-    // Filter enemies by mob type if possible
-    const filteredEnemies = availableEnemies.filter(enemy => 
-      enemy.name.toLowerCase().includes(mobType.toLowerCase()) ||
-      (enemy.description && enemy.description.toLowerCase().includes(mobType.toLowerCase()))
+    // Filter mob types by mob type if possible
+    const filteredMobTypes = availableMobTypes.filter(mobType => 
+      mobType.name.toLowerCase().includes(mobType.toLowerCase()) ||
+      (mobType.description && mobType.description.toLowerCase().includes(mobType.toLowerCase()))
     );
     
-    // Use filtered enemies if found, otherwise fall back to all available
-    const enemiesToChoose = filteredEnemies.length > 0 ? filteredEnemies : availableEnemies;
+    // Use filtered mob types if found, otherwise fall back to all available
+    const mobTypesToChoose = filteredMobTypes.length > 0 ? filteredMobTypes : availableMobTypes;
     
-    if (enemiesToChoose.length === 0) return null;
+    if (mobTypesToChoose.length === 0) return null;
 
-    const enemy = enemiesToChoose[Math.floor(Math.random() * enemiesToChoose.length)];
+    const selectedMobType = mobTypesToChoose[Math.floor(Math.random() * mobTypesToChoose.length)];
     
     // Generate contextual display name
-    const displayName = this.generateContextualDisplayName(enemy, spawnConfig, mobType);
+    const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, mobType);
     
     return {
-      enemyId: enemy.id,
+      mobTypeId: selectedMobType.id,
       displayName,
-      rarity: enemy.rarity,
-      health: enemy.health
+      rarity: selectedMobType.rarity,
+      health: selectedMobType.health
     };
   }
 
-  private generateContextualDisplayName(enemy: any, spawnConfig: ContextualSpawnConfig, mobType: string): string {
+  private generateContextualDisplayName(selectedMobType: any, spawnConfig: ContextualSpawnConfig, mobType: string): string {
     const rarityModifiers = {
       common: "",
       uncommon: "Veteran ",
@@ -353,7 +353,7 @@ export class MobStorage extends BaseStorage {
       legendary: "Legendary "
     };
     
-    let prefix = rarityModifiers[enemy.rarity as keyof typeof rarityModifiers] || "";
+    let prefix = rarityModifiers[selectedMobType.rarity as keyof typeof rarityModifiers] || "";
     
     // Add faction-specific prefixes
     if (spawnConfig.factionId) {
@@ -371,10 +371,10 @@ export class MobStorage extends BaseStorage {
       }
     }
     
-    // Use mob type as the base name if enemy name is generic
-    const baseName = enemy.name === "Unknown" || enemy.name === "Generic Enemy" 
+    // Use mob type as the base name if mob name is generic
+    const baseName = selectedMobType.name === "Unknown" || selectedMobType.name === "Generic Mob" 
       ? mobType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
-      : enemy.name;
+      : selectedMobType.name;
     
     return `${prefix}${baseName}`;
   }

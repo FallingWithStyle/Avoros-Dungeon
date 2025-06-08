@@ -1,5 +1,5 @@
 // App version - update this when making releases or significant changes
-export const APP_VERSION = "0.1.1";
+export const APP_VERSION = "1.0.1";
 
 // Build timestamp for development tracking
 export const BUILD_TIMESTAMP = new Date().toISOString();
