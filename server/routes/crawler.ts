@@ -187,7 +187,7 @@ export function registerCrawlerRoutes(app: Express) {
         // Check if effect is already active
         const activeEffects = crawler.activeEffects || [];
         const existingEffect = activeEffects.find(effect => effect.effectId === effectId);
-        
+
         if (existingEffect && existingEffect.expiresAt && new Date(existingEffect.expiresAt) > new Date()) {
           return res.json({
             success: false,
@@ -236,6 +236,56 @@ export function registerCrawlerRoutes(app: Express) {
         success: false, 
         error: "Failed to apply effect" 
       });
+    }
+  });
+
+  // Get tactical data for current room
+  app.get("/api/crawlers/:crawlerId/tactical-data", async (req, res) => {
+    try {
+      const crawlerId = parseInt(req.params.crawlerId);
+      console.log(`=== TACTICAL DATA REQUEST for crawler ${crawlerId} ===`);
+
+      // Get current room
+      const currentRoom = await storage.explorationStorage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        console.log(`No current room found for crawler ${crawlerId}`);
+        return res.status(404).json({ error: "Crawler not found or not in a room" });
+      }
+
+      console.log(`Current room: ${currentRoom.name} (ID: ${currentRoom.id})`);
+
+      // Get all players in the current room
+      const playersInRoom = await storage.explorationStorage.getPlayersInRoom(currentRoom.id);
+      console.log(`Players in room: ${playersInRoom.length}`);
+
+      // Get available directions
+      const connections = await storage.explorationStorage.getRoomConnections(currentRoom.id);
+      const availableDirections = connections.map(conn => conn.direction);
+      console.log(`Available directions: ${availableDirections.join(', ')}`);
+
+      // Generate or get tactical entities for this room
+      console.log(`Generating tactical data for room ${currentRoom.id}...`);
+      const tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(
+        currentRoom.id, 
+        currentRoom
+      );
+      console.log(`Generated ${tacticalEntities.length} tactical entities:`, tacticalEntities.map(e => `${e.type}: ${e.name}`));
+
+      const response = {
+        room: currentRoom,
+        availableDirections,
+        playersInRoom,
+        tacticalEntities
+      };
+
+      console.log(`=== TACTICAL DATA RESPONSE ===`);
+      console.log(`Entities: ${tacticalEntities.length}`);
+      console.log(`Mob entities: ${tacticalEntities.filter(e => e.type === 'mob').length}`);
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error fetching tactical data:", error);
+      res.status(500).json({ error: "Failed to fetch tactical data" });
     }
   });
 }
