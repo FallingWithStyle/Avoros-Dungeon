@@ -5,6 +5,13 @@ import './index.css'
 
 // Add global unhandled rejection handler for debugging
 window.addEventListener('unhandledrejection', (event) => {
+  // Suppress Vite client WebSocket errors during development
+  if (event.reason && String(event.reason).includes('Failed to construct \'WebSocket\'') && 
+      String(event.reason).includes('localhost:undefined')) {
+    event.preventDefault();
+    return;
+  }
+  
   console.error('🚨 Unhandled promise rejection detected:');
   console.error('Reason:', event.reason);
   console.error('Promise:', event.promise);
@@ -14,6 +21,15 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // Add global error handler as well
 window.addEventListener('error', (event) => {
+  // Suppress Vite client WebSocket errors during development
+  if (event.message && (
+    event.message.includes('Failed to construct \'WebSocket\'') ||
+    event.message.includes('localhost:undefined')
+  )) {
+    event.preventDefault();
+    return;
+  }
+
   console.log('🚨 Global error detected:');
   console.log('Message:', event.message);
   console.log('Source:', event.filename);
@@ -31,6 +47,13 @@ window.addEventListener('error', (event) => {
 });
 
 window.addEventListener('unhandledrejection', (event) => {
+  // Suppress Vite client WebSocket errors during development
+  if (event.reason && String(event.reason).includes('Failed to construct \'WebSocket\'') && 
+      String(event.reason).includes('localhost:undefined')) {
+    event.preventDefault();
+    return;
+  }
+
   console.log('🚨 Unhandled promise rejection:');
   console.log('Reason:', event.reason);
 

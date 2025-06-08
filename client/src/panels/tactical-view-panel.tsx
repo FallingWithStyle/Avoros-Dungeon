@@ -623,6 +623,101 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       setCombatState(state);
     });
+
+    // Proximity-based exit detection
+    useEffect(() => {
+      if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
+
+      const playerEntity = combatState.entities.find(e => e.id === "player");
+      if (!playerEntity) return;
+
+      const exits = {
+        north: effectiveTacticalData.availableDirections.includes("north"),
+        south: effectiveTacticalData.availableDirections.includes("south"),
+        east: effectiveTacticalData.availableDirections.includes("east"),
+        west: effectiveTacticalData.availableDirections.includes("west"),
+      };
+
+      const proximityThreshold = 5; // 5% from edge to trigger movement
+      const { x, y } = playerEntity.position;
+
+      // Check proximity to each available exit with more precise positioning
+      let triggerDirection: string | null = null;
+
+      if (exits.north && y <= proximityThreshold && x >= 35 && x <= 65) {
+        triggerDirection = "north";
+      } else if (exits.south && y >= (100 - proximityThreshold) && x >= 35 && x <= 65) {
+        triggerDirection = "south";
+      } else if (exits.east && x >= (100 - proximityThreshold) && y >= 35 && y <= 65) {
+        triggerDirection = "east";
+      } else if (exits.west && x <= proximityThreshold && y >= 35 && y <= 65) {
+        triggerDirection = "west";
+      }
+
+      if (triggerDirection) {
+        // Prevent rapid multiple movements with a simple debounce
+        const now = Date.now();
+        const lastMovement = sessionStorage.getItem('lastProximityMovement');
+        const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
+
+        if (now - lastMovementTime > 2000) { // 2 second cooldown to prevent accidental exits
+          console.log(`Player approached ${triggerDirection} exit - triggering room transition`);
+          sessionStorage.setItem('lastProximityMovement', now.toString());
+
+          // Store the movement direction for next room positioning
+          sessionStorage.setItem('lastMovementDirection', triggerDirection);
+
+          handleMove(triggerDirection);
+        }
+      }
+    }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections]);
+
+    // WASD Movement Input
+    useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
+          return;
+        }
+        const playerEntity = combatState.entities.find(e => e.id === "player");
+        if (!playerEntity) return;
+
+        let direction: { x: number, y: number } | null = null;
+        switch (event.key.toLowerCase()) {
+          case 'w':
+            direction = { x: 0, y: -1 };
+            break;
+          case 'a':
+            direction = { x: -1, y: 0 };
+            break;
+          case 's':
+            direction = { x: 0, y: 1 };
+            break;
+          case 'd':
+            direction = { x: 1, y: 0 };
+            break;
+          default:
+            return; // Ignore other keys
+        }
+
+        event.preventDefault(); // Prevent default scrolling
+
+        const speed = playerEntity.speed || 10; // Default speed
+        const moveDistance = speed / 100; // Convert speed to percentage units
+        let newX = playerEntity.position.x + direction.x * moveDistance;
+        let newY = playerEntity.position.y + direction.y * moveDistance;
+
+        // Clamp new position within the grid bounds (0-100%)
+        newX = Math.max(0, Math.min(100, newX));
+        newY = Math.max(0, Math.min(100, newY));
+
+        // Queue the move action
+        combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [combatState.entities]);
+
     return unsubscribe;
   }, [combatState.isInCombat, activeActionMode]);
 
@@ -725,10 +820,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       // Get last movement direction from session storage to position player appropriately
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
       console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
-      
+
       const entryPosition = combatSystem.getEntryPosition(lastDirection);
       console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
-      
+
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
@@ -1047,7 +1142,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Handle attack mode - move to target if necessary, then attack
         const playerEntity = combatState.entities.find((e) => e.id === "player");
         const target = combatState.entities.find((e) => e.id === entityId);
-        
+
         if (playerEntity && target && target.type === "hostile") {
           const attackAction = combatSystem.actionDefinitions?.get(activeActionMode.actionId) || {
             id: activeActionMode.actionId,
@@ -1062,7 +1157,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
           // Check if target is in range
           const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
-          
+
           if (distance <= (attackAction.range || 15)) {
             // Target is in range, attack directly
             const success = combatSystem.queueAction(
@@ -1094,10 +1189,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               x: moveX,
               y: moveY,
             });
-            
+
             if (moveSuccess) {
               console.log(`Queued movement to get in range of ${target.name}`);
-              
+
               // Schedule the attack to be queued after move completes
               setTimeout(() => {
                 const attackSuccess = combatSystem.queueAction(
@@ -1109,7 +1204,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   console.log(`Queued attack on ${target.name} after movement`);
                 }
               }, 900); // Slightly before move action completes (800ms execution time)
-              
+
               setActiveActionMode(null); // Clear active action mode
             } else {
               console.log(`Failed to queue movement - check cooldown or existing action`);
@@ -1498,13 +1593,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
   }
 
-  
+
 
   // Handle case where no data is available at all
   if (!effectiveTacticalData) {
     console.error("=== CRITICAL: No tactical or room data available ===");
     console.error("Tactical error:", tacticalError);
-    
+
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -1740,6 +1835,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     : "animate-bounce"
                 }`}
               >
+                Hiding the WASD compass from the tacticalview panel while keeping the movement functionality intact.
                 {getLootIcon(item.type)}
               </div>
 
@@ -2028,74 +2124,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           </div>
         )}
 
-        {/* Compass Navigation */}
-        {currentRoomData?.availableDirections && (
-          <div className="mt-4 flex justify-center">
-            <div className="relative w-24 h-24">
-              {/* Compass Background */}
-              <div className="absolute inset-0 border-2 border-game-border rounded-full bg-game-surface/50"></div>
-              
-              {/* North */}
-              <button
-                className={`absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full border-2 text-xs font-bold transition-all duration-200 ${
-                  currentRoomData.availableDirections.includes("north")
-                    ? "bg-green-600 border-green-400 text-white hover:bg-green-500 cursor-pointer"
-                    : "bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={() => currentRoomData.availableDirections.includes("north") && handleMove("north")}
-                disabled={!currentRoomData.availableDirections.includes("north")}
-                title={currentRoomData.availableDirections.includes("north") ? "North (W key)" : "No exit north"}
-              >
-                W
-              </button>
-
-              {/* East */}
-              <button
-                className={`absolute -right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 text-xs font-bold transition-all duration-200 ${
-                  currentRoomData.availableDirections.includes("east")
-                    ? "bg-green-600 border-green-400 text-white hover:bg-green-500 cursor-pointer"
-                    : "bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={() => currentRoomData.availableDirections.includes("east") && handleMove("east")}
-                disabled={!currentRoomData.availableDirections.includes("east")}
-                title={currentRoomData.availableDirections.includes("east") ? "East (D key)" : "No exit east"}
-              >
-                D
-              </button>
-
-              {/* South */}
-              <button
-                className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full border-2 text-xs font-bold transition-all duration-200 ${
-                  currentRoomData.availableDirections.includes("south")
-                    ? "bg-green-600 border-green-400 text-white hover:bg-green-500 cursor-pointer"
-                    : "bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={() => currentRoomData.availableDirections.includes("south") && handleMove("south")}
-                disabled={!currentRoomData.availableDirections.includes("south")}
-                title={currentRoomData.availableDirections.includes("south") ? "South (S key)" : "No exit south"}
-              >
-                S
-              </button>
-
-              {/* West */}
-              <button
-                className={`absolute -left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 text-xs font-bold transition-all duration-200 ${
-                  currentRoomData.availableDirections.includes("west")
-                    ? "bg-green-600 border-green-400 text-white hover:bg-green-500 cursor-pointer"
-                    : "bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={() => currentRoomData.availableDirections.includes("west") && handleMove("west")}
-                disabled={!currentRoomData.availableDirections.includes("west")}
-                title={currentRoomData.availableDirections.includes("west") ? "West (A key)" : "No exit west"}
-              >
-                A
-              </button>
-
-              {/* Center indicator */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full border border-blue-300"></div>
-            </div>
-          </div>
-        )}
+        {/* Compass Navigation - Hidden but functionality preserved */}
+        {/* WASD compass is hidden but movement still works via keyboard */}
       </CardContent>
     </Card>
   );
