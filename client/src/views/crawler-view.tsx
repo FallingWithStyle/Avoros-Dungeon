@@ -23,10 +23,10 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const [energyDisabled, setEnergyDisabled] = useState(false);
 
   // Fetch crawler data with more frequent updates
-  const { data: crawler, isLoading: crawlerLoading, error } =
+  const { data: crawler, isLoading: crawlerLoading } =
     useQuery<CrawlerWithDetails>({
       queryKey: [`/api/crawlers/${crawlerId}`],
-      enabled: !!crawlerId && isAuthenticated,
+      enabled: !!crawlerId,
       refetchInterval: 3000, // Refresh every 3 seconds
     });
 
@@ -41,28 +41,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
-        <Card className="bg-game-surface border-game-border">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <i className="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-              <h2 className="text-xl font-bold text-white mb-2">
-                Authentication Required
-              </h2>
-              <p className="text-slate-400 mb-4">
-                Please log in to access this crawler.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!crawler && !crawlerLoading) {
-    console.log('Crawler not found - crawlerId:', crawlerId, 'error:', error);
+  if (!isAuthenticated || !crawler) {
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <Card className="bg-game-surface border-game-border">
@@ -76,9 +55,6 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
                 The requested crawler could not be found or you don't have
                 access to it.
               </p>
-              <div className="text-amber-300/70 text-sm">
-                Crawler ID: {crawlerId}
-              </div>
               <div className="text-amber-300/70 text-sm">
                 Use the navigation above to return to your corporation overview.
               </div>

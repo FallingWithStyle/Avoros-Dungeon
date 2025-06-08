@@ -20,8 +20,7 @@ export function useWebSocket(token: string | null) {
 
     // Construct host with proper port handling
     let host = hostname;
-    // Only add port if it exists and is not the default ports
-    if (port && port !== '' && port !== '80' && port !== '443') {
+    if (port && port !== '80' && port !== '443') {
       host = `${hostname}:${port}`;
     }
 
