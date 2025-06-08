@@ -557,66 +557,82 @@ export class MobStorage extends BaseStorage {
   async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false): Promise<void> {
     console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn);
 
-    const spawnConfig = await this.getContextualSpawnConfig(roomData);
-    if (!spawnConfig && !forceSpawn) {
-      console.log('❌ No spawn config and not forced, skipping spawn');
-      return;
-    }
-
-    // Use default config if none found but forced
-    const finalConfig = spawnConfig || {
-      roomType: roomData.type,
-      environment: roomData.environment,
-      factionId: roomData.factionId,
-      maxMobs: 1,
-      spawnChance: 1.0,
-      mobTypes: ["combat", "hostile"],
-      respawnHours: 4
-    };
-
-    // Generate mob based on context
-    const mobData = await this.generateContextualMob(finalConfig, roomData);
-    if (!mobData) {
-      console.log('❌ Failed to generate mob data for forced spawn');
-      return;
-    }
-
-    const position = this.getRandomPosition();
-    console.log('📍 Generated position for forced spawn:', position);
-
-    console.log('💾 Inserting forced mob into database:', {
-      roomId,
-      enemyId: mobData.mobTypeId,
-      displayName: mobData.displayName,
-      rarity: mobData.rarity,
-      health: mobData.health,
-      position
-    });
-
-    await db.insert(mobs).values({
-      roomId,
-      enemyId: mobData.mobTypeId,
-      displayName: mobData.displayName,
-      rarity: mobData.rarity,
-      positionX: position.x.toString(),
-      positionY: position.y.toString(),
-      currentHealth: mobData.health,
-      maxHealth: mobData.health,
-      isAlive: true,
-      disposition: -75, // More hostile for debug spawned mobs
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-
-    console.log('✅ Successfully force spawned mob:', mobData.displayName);
-
-    // Invalidate cache
     try {
-      await redisService.invalidateRoomMobs(roomId);
-      console.log('🗑️ Invalidated room mobs cache for forced spawn');
+      // Validate inputs
+      if (!roomId || !roomData) {
+        throw new Error('Invalid roomId or roomData provided');
+      }
+
+      const spawnConfig = await this.getContextualSpawnConfig(roomData);
+      if (!spawnConfig && !forceSpawn) {
+        console.log('❌ No spawn config and not forced, skipping spawn');
+        return;
+      }
+
+      // Use default config if none found but forced
+      const finalConfig = spawnConfig || {
+        roomType: roomData.type || 'normal',
+        environment: roomData.environment || 'indoor',
+        factionId: roomData.factionId,
+        maxMobs: 1,
+        spawnChance: 1.0,
+        mobTypes: ["combat", "hostile"],
+        respawnHours: 4
+      };
+
+      console.log('🎯 Final spawn config:', finalConfig);
+
+      // Generate mob based on context
+      const mobData = await this.generateContextualMob(finalConfig, roomData);
+      if (!mobData) {
+        console.log('❌ Failed to generate mob data for forced spawn');
+        throw new Error('Failed to generate mob data - no available mob types');
+      }
+
+      // Validate mob data
+      if (!mobData.mobTypeId || !mobData.displayName || !mobData.health) {
+        console.log('❌ Invalid mob data generated:', mobData);
+        throw new Error('Generated mob data is invalid');
+      }
+
+      const position = this.getRandomPosition();
+      console.log('📍 Generated position for forced spawn:', position);
+
+      const insertData = {
+        roomId,
+        enemyId: mobData.mobTypeId,
+        displayName: mobData.displayName,
+        rarity: mobData.rarity || 'common',
+        positionX: position.x.toString(),
+        positionY: position.y.toString(),
+        currentHealth: mobData.health,
+        maxHealth: mobData.health,
+        isAlive: true,
+        disposition: -75, // More hostile for debug spawned mobs
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      console.log('💾 Inserting forced mob into database:', insertData);
+
+      const result = await db.insert(mobs).values(insertData);
+      console.log('📝 Database insert result:', result);
+
+      console.log('✅ Successfully force spawned mob:', mobData.displayName);
+
+      // Invalidate cache
+      try {
+        await redisService.invalidateRoomMobs(roomId);
+        console.log('🗑️ Invalidated room mobs cache for forced spawn');
+      } catch (error) {
+        console.log('⚠️ Failed to invalidate room mobs cache:', error);
+        // Don't throw here, cache invalidation failure shouldn't break spawn
+      }
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      console.error('💥 Error in spawnSingleMob:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      throw error; // Re-throw to let caller handle it
     }
   }
 

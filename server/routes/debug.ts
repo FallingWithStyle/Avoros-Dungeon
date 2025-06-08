@@ -287,23 +287,37 @@ export function registerDebugRoutes(app: Express) {
       const crawlerId = parseInt(req.params.crawlerId);
       const userId = req.user.claims.sub;
 
+      console.log('🎯 Debug spawn mob request for crawler:', crawlerId);
+
       // Verify ownership
       const crawler = await storage.getCrawler(crawlerId);
       if (!crawler || crawler.sponsorId !== userId) {
+        console.log('❌ Crawler not found or access denied');
         return res.status(404).json({ message: "Crawler not found" });
       }
 
       // Get current room
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
+        console.log('❌ Crawler not in any room');
         return res.status(400).json({ 
           success: false, 
           error: "Crawler is not in any room" 
         });
       }
 
+      console.log('🏠 Current room:', {
+        id: currentRoom.id,
+        name: currentRoom.name,
+        type: currentRoom.type,
+        isSafe: currentRoom.isSafe,
+        environment: currentRoom.environment,
+        factionId: currentRoom.factionId
+      });
+
       // Don't spawn mobs in safe rooms
       if (currentRoom.isSafe || currentRoom.type === "safe" || currentRoom.type === "entrance") {
+        console.log('❌ Cannot spawn in safe area');
         return res.status(400).json({ 
           success: false, 
           error: "Cannot spawn hostile mobs in safe areas" 
@@ -317,24 +331,44 @@ export function registerDebugRoutes(app: Express) {
         factionId: currentRoom.factionId
       };
 
+      console.log('🎲 Room data for spawning:', roomData);
+
+      // Check current mobs before spawning
+      const mobsBefore = await storage.mobStorage.getRoomMobs(currentRoom.id);
+      console.log('📊 Mobs before spawn:', mobsBefore.length);
+
       // Force spawn a single mob
       await storage.mobStorage.spawnSingleMob(currentRoom.id, roomData, true);
 
+      // Get mobs after spawning
+      const mobsAfter = await storage.mobStorage.getRoomMobs(currentRoom.id);
+      console.log('📊 Mobs after spawn:', mobsAfter.length);
+
+      if (mobsAfter.length <= mobsBefore.length) {
+        console.log('❌ No new mob was spawned');
+        return res.status(500).json({
+          success: false,
+          error: "Mob spawn failed - no new mob created"
+        });
+      }
+
       // Get the newly spawned mob for response
-      const roomMobs = await storage.mobStorage.getRoomMobs(currentRoom.id);
-      const latestMob = roomMobs[roomMobs.length - 1];
+      const latestMob = mobsAfter[mobsAfter.length - 1];
+      console.log('✅ Successfully spawned mob:', latestMob?.mob?.displayName);
 
       res.json({
         success: true,
         message: "Hostile mob spawned successfully",
         mobName: latestMob?.mob?.displayName || "Unknown Mob",
-        roomName: currentRoom.name
+        roomName: currentRoom.name,
+        mobsCount: mobsAfter.length
       });
     } catch (error) {
-      console.error("Error spawning mob:", error);
+      console.error("❌ Error spawning mob:", error);
+      console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         success: false, 
-        error: "Failed to spawn mob" 
+        error: `Failed to spawn mob: ${error instanceof Error ? error.message : 'Unknown error'}` 
       });
     }
   });
