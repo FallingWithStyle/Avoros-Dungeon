@@ -107,12 +107,27 @@ export class TacticalStorage extends BaseStorage {
   }
 
   async generateAndSaveTacticalData(roomId: number, roomData: any, forceRegenerate: boolean = false): Promise<TacticalEntity[]> {
-    // Check if we already have positions for this room (unless forcing regeneration)
+    // Always get fresh mob data from the database - don't rely on cached tactical positions for mobs
+    const entities: TacticalEntity[] = [];
+    const occupiedCells = new Set<string>();
+
+    // Check if we already have NON-MOB positions for this room (unless forcing regeneration)
+    let existingNonMobEntities: TacticalEntity[] = [];
     if (!forceRegenerate) {
       const existingPositions = await this.getTacticalPositions(roomId);
-      if (existingPositions.length > 0) {
-        console.log(`Using existing tactical data for room ${roomId}`);
-        return existingPositions;
+      // Keep only loot and NPC entities from existing data
+      existingNonMobEntities = existingPositions.filter(entity => entity.type !== 'mob');
+      
+      if (existingNonMobEntities.length > 0) {
+        console.log(`Using existing non-mob tactical data for room ${roomId}`);
+        entities.push(...existingNonMobEntities);
+        
+        // Mark cells as occupied by existing entities
+        existingNonMobEntities.forEach(entity => {
+          const gridX = Math.floor((entity.position.x / 100) * 15);
+          const gridY = Math.floor((entity.position.y / 100) * 15);
+          occupiedCells.add(`${gridX},${gridY}`);
+        });
       }
     } else {
       // Clear existing positions if forcing regeneration
@@ -120,12 +135,9 @@ export class TacticalStorage extends BaseStorage {
       console.log(`Force regenerating tactical data for room ${roomId}`);
     }
 
-    // Generate new positions using the existing logic
-    const entities: TacticalEntity[] = [];
-    const occupiedCells = new Set<string>();
-
-    // Generate loot positions
-    if (roomData.hasLoot) {
+    // Generate loot positions if we don't have existing ones
+    const hasExistingLoot = existingNonMobEntities.some(e => e.type === 'loot');
+    if (!hasExistingLoot && roomData.hasLoot) {
       const lootCount = roomData.type === "treasure" ? 3 : Math.floor(Math.random() * 2) + 1;
       for (let i = 0; i < lootCount; i++) {
         const cell = this.getRandomEmptyCell(occupiedCells);
@@ -145,73 +157,86 @@ export class TacticalStorage extends BaseStorage {
       }
     }
 
-    // Get mobs from the mob storage system
+    // ALWAYS get fresh mob data - never use cached mob positions
     if (this.mobStorage && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
-      // Ensure room has proper mob spawns
-      await this.mobStorage.spawnMobsForRoom(roomId, roomData);
+      console.log(`Getting fresh mob data for room ${roomId}`);
       
-      // Get current mobs for this room
-      const roomMobs = await this.mobStorage.getRoomMobs(roomId);
-      
-      for (const mobData of roomMobs) {
-        if (mobData.mob.isAlive) {
-          entities.push({
-            type: 'mob',
-            name: mobData.mob.displayName, // Use display name from database
-            data: {
-              id: mobData.mob.id,
-              hp: mobData.mob.currentHealth,
-              maxHp: mobData.mob.maxHealth,
-              attack: mobData.enemy.attack,
-              defense: mobData.enemy.defense,
-              speed: mobData.enemy.speed,
-              creditsReward: mobData.enemy.creditsReward,
-              experienceReward: mobData.enemy.experienceReward,
-              hostileType: roomData.type === "boss" ? "boss" : "normal",
-              rarity: mobData.mob.rarity, // Include rarity information
-            },
-            position: {
-              x: parseFloat(mobData.mob.positionX),
-              y: parseFloat(mobData.mob.positionY)
-            },
-          });
+      try {
+        // Get current mobs for this room (this will get the freshly spawned ones)
+        const roomMobs = await this.mobStorage.getRoomMobs(roomId);
+        console.log(`Found ${roomMobs.length} mobs in room ${roomId}`);
+        
+        for (const mobData of roomMobs) {
+          if (mobData.mob.isAlive && mobData.mob.isActive) {
+            console.log(`Adding mob to tactical data: ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
+            entities.push({
+              type: 'mob',
+              name: mobData.mob.displayName, // Use display name from database
+              data: {
+                id: mobData.mob.id,
+                hp: mobData.mob.currentHealth,
+                maxHp: mobData.mob.maxHealth,
+                attack: mobData.mobType.attack,
+                defense: mobData.mobType.defense,
+                speed: mobData.mobType.speed,
+                creditsReward: mobData.mobType.creditsReward,
+                experienceReward: mobData.mobType.experienceReward,
+                hostileType: roomData.type === "boss" ? "boss" : "normal",
+                rarity: mobData.mob.rarity, // Include rarity information
+              },
+              position: {
+                x: parseFloat(mobData.mob.positionX),
+                y: parseFloat(mobData.mob.positionY)
+              },
+            });
+          }
         }
+      } catch (mobError) {
+        console.error(`ERROR getting mob data for room ${roomId}:`, mobError);
+        console.log(`Continuing without mob data for room ${roomId}`);
+        // Don't throw the error, just log it and continue without mobs
+      }
+    } else {
+      console.log(`Skipping mob data for room ${roomId} - type: ${roomData.type}, isSafe: ${roomData.isSafe}`);
+    }
+
+    // Generate NPC positions if we don't have existing ones
+    const hasExistingNPCs = existingNonMobEntities.some(e => e.type === 'npc');
+    if (!hasExistingNPCs) {
+      if (roomData.isSafe || roomData.type === "safe") {
+        const cell = this.getRandomEmptyCell(occupiedCells);
+        const pos = this.gridToPercentage(cell.gridX, cell.gridY);
+
+        entities.push({
+          type: 'npc',
+          name: "Sanctuary Keeper",
+          data: {
+            dialogue: true,
+            services: ["rest", "information"],
+            personality: "helpful",
+          },
+          position: pos,
+        });
+      } else if (Math.random() > 0.8) {
+        const cell = this.getRandomEmptyCell(occupiedCells);
+        const pos = this.gridToPercentage(cell.gridX, cell.gridY);
+
+        entities.push({
+          type: 'npc',
+          name: "Wandering Merchant",
+          data: {
+            dialogue: true,
+            services: ["trade", "information"],
+            personality: "quirky",
+          },
+          position: pos,
+        });
       }
     }
 
-    // Generate NPC positions
-    if (roomData.isSafe || roomData.type === "safe") {
-      const cell = this.getRandomEmptyCell(occupiedCells);
-      const pos = this.gridToPercentage(cell.gridX, cell.gridY);
-
-      entities.push({
-        type: 'npc',
-        name: "Sanctuary Keeper",
-        data: {
-          dialogue: true,
-          services: ["rest", "information"],
-          personality: "helpful",
-        },
-        position: pos,
-      });
-    } else if (Math.random() > 0.8) {
-      const cell = this.getRandomEmptyCell(occupiedCells);
-      const pos = this.gridToPercentage(cell.gridX, cell.gridY);
-
-      entities.push({
-        type: 'npc',
-        name: "Wandering Merchant",
-        data: {
-          dialogue: true,
-          services: ["trade", "information"],
-          personality: "quirky",
-        },
-        position: pos,
-      });
-    }
-
-    // Save to database
+    // Save to database (this will overwrite with fresh data)
     await this.saveTacticalPositions(roomId, entities);
+    console.log(`Saved ${entities.length} tactical entities for room ${roomId}`);
 
     return entities;
   }

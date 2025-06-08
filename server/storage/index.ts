@@ -5,6 +5,7 @@ import { ExplorationStorage } from "./exploration-storage";
 import { CorporationStorage } from "./corporation-storage";
 import { ContentStorage } from "./content-storage";
 import { TacticalStorage } from "./tactical-storage";
+import { MobStorage } from "./mob-storage";
 import { redisService } from "../lib/redis-service";
 import {
   type UserAccount,
@@ -131,6 +132,7 @@ export class ModularStorage implements IStorage {
   private _corporationStorage: CorporationStorage;
   private _contentStorage: ContentStorage;
   private _tacticalStorage: TacticalStorage;
+  private _mobStorage: MobStorage;
 
   private constructor() {
     this._crawlerStorage = new CrawlerStorage();
@@ -139,6 +141,7 @@ export class ModularStorage implements IStorage {
     this._corporationStorage = new CorporationStorage();
     this._contentStorage = new ContentStorage();
     this._tacticalStorage = new TacticalStorage();
+    this._mobStorage = new MobStorage();
   }
 
   static async create(): Promise<ModularStorage> {
@@ -163,6 +166,7 @@ export class ModularStorage implements IStorage {
     instance._explorationStorage.setCrawlerStorage(instance._crawlerStorage);
     instance._tacticalStorage.setRedisService(redisService);
     instance._contentStorage.setRedisService(redisService);
+    instance._mobStorage.setRedisService(redisService);
 
     return instance;
   }
@@ -380,6 +384,11 @@ export class ModularStorage implements IStorage {
   // Expose tactical storage for direct access
   get tacticalStorage() {
     return this._tacticalStorage;
+  }
+
+  // Expose mob storage for direct access
+  get mobStorage() {
+    return this._mobStorage;
   }
 }
 

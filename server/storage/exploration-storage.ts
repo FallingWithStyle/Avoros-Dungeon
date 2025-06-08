@@ -85,6 +85,15 @@ export class ExplorationStorage extends BaseStorage {
     return connection;
   }
 
+  async getRoomConnections(roomId: number): Promise<RoomConnection[]> {
+    const connections = await db
+      .select()
+      .from(roomConnections)
+      .where(eq(roomConnections.fromRoomId, roomId));
+    
+    return connections;
+  }
+
   async getAvailableDirections(roomId: number): Promise<string[]> {
     // Try to get from cache first
     try {

@@ -375,6 +375,9 @@ export const mobs = pgTable("mobs", {
   currentHealth: integer("current_health").notNull(),
   maxHealth: integer("max_health").notNull(),
   isAlive: boolean("is_alive").default(true).notNull(),
+  disposition: integer("disposition").default(-50).notNull(), // -100 to +100 scale
+  isActive: boolean("is_active").default(true).notNull(),
+  lastInteractionAt: timestamp("last_interaction_at"),
   lastKilledAt: timestamp("last_killed_at"),
   respawnAt: timestamp("respawn_at"),
   createdAt: timestamp("created_at").defaultNow(),

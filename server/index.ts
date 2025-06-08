@@ -3,7 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./init-db";
 import { pool } from "./db";
-import { userStorage, crawlerStorage, explorationStorage, mobStorage } from "./storage";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -70,7 +70,7 @@ app.use((req, res, next) => {
   // Start mob respawn background service
   setInterval(async () => {
     try {
-      await mobStorage.processRespawns();
+      await storage.mobStorage.processRespawns();
     } catch (error) {
       console.error('Error processing mob respawns:', error);
     }

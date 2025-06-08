@@ -200,6 +200,40 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     }
   };
 
+  // Spawn hostile mob
+  const spawnHostileMob = async () => {
+    if (!activeCrawler) return;
+
+    try {
+      const result = await apiRequest(
+        "POST",
+        `/api/debug/spawn-mob/${activeCrawler.id}`,
+      );
+
+      if (result.success) {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${activeCrawler.id}/current-room`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/crawlers/${activeCrawler.id}/tactical-view`],
+        });
+
+        toast({
+          title: "Hostile Mob Spawned",
+          description: `${result.mobName} has appeared in your room!`,
+        });
+      } else {
+        toast({
+          title: "Cannot Spawn Mob",
+          description: result.error || "Unknown error",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      showErrorToast("Spawn Mob Failed", error);
+    }
+  };
+
   // Don't render debug panel if not in debug mode
   if (!IS_DEBUG_MODE) {
     return null;
@@ -321,6 +355,20 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               >
                 <Zap className={miniIconClasses} />
                 Enhanced Scan
+              </Button>
+
+              {/* Spawn Hostile Mob */}
+              <Button
+                onClick={() => spawnHostileMob()}
+                disabled={!activeCrawler}
+                variant="outline"
+                className={
+                  miniButtonClasses +
+                  " border-red-600 text-red-400 hover:bg-red-600/10"
+                }
+              >
+                <Wrench className={miniIconClasses} />
+                Spawn Mob
               </Button>
 
               {/* Move Reset Position here, next to Energy */}
