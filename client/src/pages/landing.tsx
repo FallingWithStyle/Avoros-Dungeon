@@ -8,7 +8,7 @@ export default function Landing() {
         <div className="mb-8">
           <h1 className="text-6xl font-bold text-blue-400 mb-4">
             <i className="fas fa-dungeon mr-4"></i>
-            Dungeon Depths
+            Avavor Dungeon
           </h1>
           <p className="text-xl text-slate-300 mb-2">
             Corporate Crawler Consortium
