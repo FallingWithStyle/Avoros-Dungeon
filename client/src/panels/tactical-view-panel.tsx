@@ -437,6 +437,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchInterval: 2000,
   });
 
+  // Fetch explored rooms for map refresh
+  const { refetch: refetchExploredRooms } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
+    refetchInterval: 30000,
+    staleTime: 120000,
+    retry: false,
+  });
+
   // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
   const handleCellClick = useCallback(
     (x: number, y: number) => {
@@ -702,9 +710,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (response.success) {
         console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
         
-        // Instead of full page reload, just refetch the tactical data and room data
-        // The queries will automatically update the UI when new data arrives
+        // Refresh all relevant data when moving through doors
         refetchTactical();
+        refetchExploredRooms(); // This will refresh the dungeon map
         
         // Force a re-render by clearing and re-adding the player entity with new position
         const currentEntities = combatSystem.getState().entities;
@@ -712,7 +720,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           combatSystem.removeEntity(entity.id);
         });
         
-        console.log(`Room transition complete - tactical view will refresh with new data`);
+        console.log(`Room transition complete - tactical view and map will refresh with new data`);
       }
     } catch (error) {
       console.error(`Failed to move ${direction}:`, error);
@@ -722,7 +730,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         variant: "destructive",
       });
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical]);
+  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
 
   // Gate crossing detection - triggers when player approaches or crosses gates
   useEffect(() => {
