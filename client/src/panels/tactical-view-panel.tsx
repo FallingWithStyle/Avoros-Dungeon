@@ -514,9 +514,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   });
 
   // Fetch tactical data separately for better caching
-  const { data: tacticalData, isLoading: tacticalLoading } = useQuery({
+  const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
     refetchInterval: 10000, // Refresh every 10 seconds (less frequent since positions are persistent)
+    onError: (error) => {
+      console.error("Tactical data fetch error:", error);
+    },
+    onSuccess: (data) => {
+      console.log("Tactical data fetched successfully:", data);
+    },
   });
 
   // Subscribe to combat system updates
@@ -1212,7 +1218,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
-  if (isLoading || tacticalLoading || !roomData || !tacticalData) {
+  if (isLoading || tacticalLoading || !roomData) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -1223,7 +1229,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardHeader>
         <CardContent>
           <div className="w-full h-48 border-2 border-game-border rounded-lg flex items-center justify-center">
-            <span className="text-slate-400">Loading tactical data...</span>
+            <div className="text-center">
+              <span className="text-slate-400">
+                {isLoading ? "Loading room data..." : 
+                 tacticalLoading ? "Loading tactical data..." : 
+                 !roomData ? "No room data available" : "Loading..."}
+              </span>
+              {tacticalError && (
+                <div className="text-red-400 text-sm mt-2">
+                  Error: {tacticalError.message || "Failed to load tactical data"}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle case where tacticalData is missing but room data exists
+  if (!tacticalData) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-game-border rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-slate-400">No tactical data available</span>
+              <div className="text-slate-500 text-sm mt-1">Room: {roomData.room.name}</div>
+            </div>
           </div>
         </CardContent>
       </Card>

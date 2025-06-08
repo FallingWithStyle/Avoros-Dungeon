@@ -301,6 +301,11 @@ export class ModularStorage implements IStorage {
   async generateAndSaveTacticalData(roomId: number, roomData: any) {
     return this.tacticalStorage.generateAndSaveTacticalData(roomId, roomData);
   }
+
+  // Expose tactical storage for direct access
+  get tacticalStorage() {
+    return this._tacticalStorage;
+  }
 }
 
 export const storage = new ModularStorage();
