@@ -167,31 +167,42 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
       <Card className="bg-red-900/20 border-red-600/30 rounded-none border-x-0 border-b-0 shadow-md">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-2">
-            <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
-              <RefreshCw className="w-3 h-3" />
-              Debug Controls
-            </CardTitle>
-            <CardDescription className="text-red-300 text-[0.60rem] ml-2">
-              Development tools - these will be removed in production
-            </CardDescription>
-            <span className="text-red-300 text-[0.60rem] ml-2 font-mono">
-              {getVersionInfo().displayVersion}
-            </span>
+        <CardHeader className="p-2 pb-1">
+          {/* Version number at top-left */}
+          <div className="text-red-300 text-[0.60rem] font-mono mb-1">
+            {getVersionInfo().displayVersion}
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setMinimized((m) => !m)}
-            aria-label={minimized ? "Expand Debug Panel" : "Minimize Debug Panel"}
-            className="ml-2 text-red-200 hover:bg-red-900/30 p-1 h-7 w-7"
-          >
-            {minimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
+          
+          <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center gap-2">
+              <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
+                <RefreshCw className="w-3 h-3" />
+                Debug Controls
+              </CardTitle>
+              <CardDescription className="text-red-300 text-[0.60rem]">
+                Development tools - these will be removed in production
+              </CardDescription>
+            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setMinimized((m) => !m)}
+              aria-label={minimized ? "Expand Debug Panel" : "Minimize Debug Panel"}
+              className="text-red-200 hover:bg-red-900/30 p-1 h-6 w-6"
+            >
+              {minimized ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
+          </div>
+          
+          {/* Show minimal info when minimized */}
+          {minimized && (
+            <div className="text-[0.60rem] text-red-300 font-mono">
+              {getVersionInfo().fullVersion} | Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0} | ID: {activeCrawler?.id ?? "N/A"}
+            </div>
+          )}
         </CardHeader>
         {!minimized && (
-          <CardContent className="pt-0">
+          <CardContent className="p-2 pt-0">
             {/* Button Row */}
             <div className="flex gap-1 flex-wrap mb-1">
               <Button
@@ -207,8 +218,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 )}
                 Delete All Crawlers
               </Button>
-
-
 
               <Button
                 onClick={toggleEnergyUsage}
@@ -280,23 +289,23 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               </Button>
             </div>
             {/* Debug Info - all on one line, pipe-separated */}
-            <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-2 mt-1">
+            <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
               <span className="font-mono">
                 {getVersionInfo().fullVersion}
               </span>
-              <span className="mx-1 text-red-400">|</span>
+              <span className="text-red-400">|</span>
               <span>
                 Coordinates: Floor {roomData?.room?.floorId || activeCrawler?.currentFloor || 1}, Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
-              <span className="mx-1 text-red-400">|</span>
+              <span className="text-red-400">|</span>
               <span>
                 Crawler ID: {activeCrawler?.id ?? "N/A"}
               </span>
-              <span className="mx-1 text-red-400">|</span>
+              <span className="text-red-400">|</span>
               <span>
                 Luck: {activeCrawler?.luck ?? 0}
               </span>
-              <span className="mx-1 text-red-400">|</span>
+              <span className="text-red-400">|</span>
               <span>
                 Scan: {activeCrawler?.scanRange ?? 0}
               </span>
