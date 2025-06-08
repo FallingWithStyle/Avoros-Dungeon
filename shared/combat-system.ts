@@ -604,22 +604,33 @@ export class CombatSystem {
 
   // Calculate entry position based on direction using grid coordinates
   getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
+    console.log(`getEntryPosition called with direction: ${direction}`);
     switch (direction) {
       case 'north':
-        // Entered from north door - spawn at north edge (top)
-        return this.gridToPercentage(7, 1);
+        // Came from north (entered through north door) - spawn at north edge (top)
+        const northPos = this.gridToPercentage(7, 1);
+        console.log(`North entry position: ${northPos.x}, ${northPos.y}`);
+        return northPos;
       case 'south':
-        // Entered from south door - spawn at south edge (bottom)
-        return this.gridToPercentage(7, 13);
+        // Came from south (entered through south door) - spawn at south edge (bottom)
+        const southPos = this.gridToPercentage(7, 13);
+        console.log(`South entry position: ${southPos.x}, ${southPos.y}`);
+        return southPos;
       case 'east':
-        // Entered from east door - spawn at east edge (right)
-        return this.gridToPercentage(13, 7);
+        // Came from east (entered through east door) - spawn at east edge (right)
+        const eastPos = this.gridToPercentage(13, 7);
+        console.log(`East entry position: ${eastPos.x}, ${eastPos.y}`);
+        return eastPos;
       case 'west':
-        // Entered from west door - spawn at west edge (left)
-        return this.gridToPercentage(1, 7);
+        // Came from west (entered through west door) - spawn at west edge (left)
+        const westPos = this.gridToPercentage(1, 7);
+        console.log(`West entry position: ${westPos.x}, ${westPos.y}`);
+        return westPos;
       default:
         // No direction specified - spawn in center
-        return this.gridToPercentage(7, 7);
+        const centerPos = this.gridToPercentage(7, 7);
+        console.log(`Center entry position: ${centerPos.x}, ${centerPos.y}`);
+        return centerPos;
     }
   }
 

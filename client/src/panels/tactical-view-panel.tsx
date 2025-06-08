@@ -670,6 +670,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (!existingPlayer) {
       // Get last movement direction from session storage to position player appropriately
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
+      console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
+      
+      const entryPosition = combatSystem.getEntryPosition(lastDirection);
+      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
       
       const playerEntity: CombatEntity = {
         id: "player",
@@ -680,7 +684,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         attack: 20, // Base attack for player
         defense: 10, // Base defense for player
         speed: 15,
-        position: combatSystem.getEntryPosition(lastDirection),
+        position: entryPosition,
         entryDirection: lastDirection,
       };
 
@@ -1367,6 +1371,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       east: "west",
       west: "east"
     }[direction];
+    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
     sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
