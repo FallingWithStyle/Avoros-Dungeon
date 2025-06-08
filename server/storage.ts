@@ -58,8 +58,20 @@ import {
   type IStorage
 } from "./storage/index";
 
+// Create and initialize the main storage instance
+const createStorage = async () => {
+  const storageInstance = new ModularStorage();
+  
+  // Set up cross-dependencies between storage modules
+  storageInstance.tacticalStorage.setCrawlerStorage(storageInstance.crawlerStorage);
+  storageInstance.tacticalStorage.setExplorationStorage(storageInstance.explorationStorage);
+  storageInstance.tacticalStorage.setMobStorage(storageInstance.mobStorage);
+  
+  return storageInstance;
+};
+
 // Re-export the main storage instance
-export const storage = await ModularStorage.create();
+export const storage = await createStorage();
 
 // Re-export the interface for type checking
 export type { IStorage };

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Gem, Home, Skull } from "lucide-react";
@@ -13,7 +12,7 @@ export default function MapPreview() {
         <CardContent>
           <div className="space-y-4">
             <div className="text-sm text-slate-300 mb-4">Here's how the indicators will look:</div>
-            
+
             {/* Mini-map style examples */}
             <div className="space-y-3">
               <div className="text-xs font-medium text-slate-400">Mini-Map Style:</div>
@@ -23,7 +22,7 @@ export default function MapPreview() {
                   <div className="relative w-6 h-6 bg-slate-600/20 border-2 border-slate-600/50 rounded flex items-center justify-center">
                     <Shield className="w-3 h-3 text-green-400" />
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-red-300 animate-pulse" 
-                         title="Enemies present" />
+                         title="Hostile mobs present" />
                   </div>
                   <span className="text-xs text-slate-400">Room with Enemies</span>
                 </div>
@@ -53,13 +52,13 @@ export default function MapPreview() {
                   <div className="relative w-6 h-6 bg-yellow-600/20 border-2 border-yellow-600/50 rounded flex items-center justify-center">
                     <Gem className="w-3 h-3 text-yellow-400" />
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-red-300 animate-pulse" 
-                         title="Enemies present" />
+                         title="Hostile mobs present" />
                     <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full border border-orange-200" 
                          title="Neutral creatures" />
                     <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200" 
                          title="2 players here" />
                   </div>
-                  <span className="text-xs text-slate-400">All Mob Types</span>
+                  <span className="text-xs text-slate-400">All Creature Types</span>
                 </div>
               </div>
             </div>

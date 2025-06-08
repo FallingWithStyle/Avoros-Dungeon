@@ -61,7 +61,7 @@ export function registerExplorationRoutes(app: Express) {
       console.log(`Getting current room for crawler ${crawlerId}...`);
       const room = await storage.getCrawlerCurrentRoom(crawlerId);
       console.log(`Current room result:`, room ? `Found room ${room.id} (${room.name})` : 'No room found');
-      
+
       if (!room) {
         console.log(`ERROR: No room found for crawler ${crawlerId} after ensuring position`);
         return res.status(404).json({ message: "Room not found" });
@@ -145,7 +145,7 @@ export function registerExplorationRoutes(app: Express) {
     try {
       const crawlerId = parseInt(req.params.id);
       const { direction, debugEnergyDisabled } = req.body;
-      
+
       console.log(`=== MOVE CRAWLER API CALL ===`);
       console.log(`Crawler ID: ${crawlerId}`);
       console.log(`Direction: ${direction}`);
@@ -281,20 +281,35 @@ export function registerExplorationRoutes(app: Express) {
   app.get("/api/crawlers/:id/tactical-data", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
+      console.log(`=== TACTICAL DATA API CALL ===`);
+      console.log(`Crawler ID: ${crawlerId}`);
 
       if (!crawlerId || isNaN(Number(crawlerId))) {
+        console.log(`ERROR: Invalid crawler ID: ${req.params.id}`);
         return res.status(400).json({
           message: "Invalid crawler ID",
         });
       }
 
+      // Verify crawler ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        console.log(`ERROR: Crawler not found or access denied`);
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
+        console.log(`ERROR: Crawler ${crawlerId} not in any room`);
         return res.status(404).json({ message: "Crawler not in any room" });
       }
 
+      console.log(`Getting tactical data for room ${currentRoom.id} (${currentRoom.name})`);
+
       const directions = await storage.getAvailableDirections(currentRoom.id);
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
+
+      console.log(`Room ${currentRoom.id} - Directions: ${directions.length}, Players: ${playersInRoom.length}`);
 
       // Generate or get tactical data with persistent positions
       const tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(currentRoom.id, {
@@ -304,14 +319,32 @@ export function registerExplorationRoutes(app: Express) {
         factionId: currentRoom.factionId,
       });
 
-      res.json({
+      console.log(`Generated/retrieved ${tacticalEntities.length} tactical entities for room ${currentRoom.id}`);
+      console.log(`Entity types: ${tacticalEntities.map(e => `${e.type}:${e.name}`).join(', ')}`);
+
+      const responseData = {
         room: currentRoom,
         availableDirections: directions,
         playersInRoom,
         tacticalEntities,
+      };
+
+      console.log(`Returning tactical data:`, {
+        roomId: currentRoom.id,
+        roomName: currentRoom.name,
+        roomType: currentRoom.type,
+        hasLoot: currentRoom.hasLoot,
+        isSafe: currentRoom.isSafe,
+        entitiesCount: tacticalEntities.length,
+        directionsCount: directions.length,
+        playersCount: playersInRoom.length
       });
+
+      res.json(responseData);
     } catch (error) {
-      console.error("Get tactical data error:", error);
+      console.error("=== ERROR in tactical-data endpoint ===");
+      console.error("Error details:", error);
+      console.error("Stack trace:", error.stack);
       res.status(500).json({
         message: "Failed to get tactical data",
         details: error instanceof Error ? error.message : "Unknown error",

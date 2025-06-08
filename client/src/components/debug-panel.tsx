@@ -34,6 +34,15 @@ const IS_DEBUG_MODE = true;
 // Global energy disabled state - disabled by default for debug mode
 let globalEnergyDisabled = true;
 
+function formatTimestamp(): string {
+  return new Date().toLocaleTimeString('en-US', { 
+    hour12: false, 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit' 
+  });
+}
+
 export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(globalEnergyDisabled);
