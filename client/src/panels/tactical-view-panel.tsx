@@ -1038,17 +1038,80 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (event.button === 0) {
       // Left click
       if (activeActionMode?.type === "attack") {
-        // Queue the attack action on the selected entity
-        handleActionClick(
-          {
-            id: activeprevious_generation>
-            ActionMode.actionId,
+        // Handle attack mode - move to target if necessary, then attack
+        const playerEntity = combatState.entities.find((e) => e.id === "player");
+        const target = combatState.entities.find((e) => e.id === entityId);
+        
+        if (playerEntity && target && target.type === "hostile") {
+          const attackAction = combatSystem.actionDefinitions?.get(activeActionMode.actionId) || {
+            id: activeActionMode.actionId,
             name: activeActionMode.actionName,
-            type: activeActionMode.type,
-          },
-          entityId,
-        );
-        setActiveActionMode(null); // Clear active action mode
+            type: "attack",
+            cooldown: 2000,
+            damage: 20,
+            range: 15,
+            targetType: "single",
+            executionTime: 1000,
+          };
+
+          // Check if target is in range
+          const distance = combatSystem.calculateDistance(playerEntity.position, target.position);
+          
+          if (distance <= (attackAction.range || 15)) {
+            // Target is in range, attack directly
+            const success = combatSystem.queueAction(
+              playerEntity.id,
+              activeActionMode.actionId,
+              target.id,
+            );
+            if (success) {
+              console.log(`Attacking ${target.name} directly`);
+              setActiveActionMode(null); // Clear active action mode
+            } else {
+              console.log(`Failed to attack ${target.name} - check cooldown or existing action`);
+            }
+          } else {
+            // Target is out of range, queue move then attack
+            console.log(`Target out of range, moving closer to ${target.name}`);
+
+            // Calculate position to move to (just within attack range)
+            const dx = target.position.x - playerEntity.position.x;
+            const dy = target.position.y - playerEntity.position.y;
+            const targetDistance = Math.sqrt(dx * dx + dy * dy);
+            const moveDistance = Math.max(0, targetDistance - (attackAction.range || 15) + 2); // Leave small buffer
+
+            const moveX = playerEntity.position.x + (dx / targetDistance) * moveDistance;
+            const moveY = playerEntity.position.y + (dy / targetDistance) * moveDistance;
+
+            // Queue move action first
+            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, {
+              x: moveX,
+              y: moveY,
+            });
+            
+            if (moveSuccess) {
+              console.log(`Queued movement to get in range of ${target.name}`);
+              
+              // Schedule the attack to be queued after move completes
+              setTimeout(() => {
+                const attackSuccess = combatSystem.queueAction(
+                  playerEntity.id,
+                  activeActionMode.actionId,
+                  target.id,
+                );
+                if (attackSuccess) {
+                  console.log(`Queued attack on ${target.name} after movement`);
+                }
+              }, 900); // Slightly before move action completes (800ms execution time)
+              
+              setActiveActionMode(null); // Clear active action mode
+            } else {
+              console.log(`Failed to queue movement - check cooldown or existing action`);
+            }
+          }
+        } else {
+          console.log("Invalid target for attack - must be a hostile entity");
+        }
       } else {
         // If clicking on already selected entity, deselect it
         const currentlySelected = combatSystem.getSelectedEntity();
