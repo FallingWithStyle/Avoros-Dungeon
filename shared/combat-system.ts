@@ -607,24 +607,24 @@ export class CombatSystem {
     console.log(`getEntryPosition called with direction: ${direction}`);
     switch (direction) {
       case 'north':
-        // Came from north (entered through north door) - spawn at north edge (top)
-        const northPos = this.gridToPercentage(7, 1);
-        console.log(`North entry position: ${northPos.x}, ${northPos.y}`);
+        // Moved north (from south to north) - spawn at south edge (bottom) of new room
+        const northPos = this.gridToPercentage(7, 13);
+        console.log(`North movement entry position: ${northPos.x}, ${northPos.y}`);
         return northPos;
       case 'south':
-        // Came from south (entered through south door) - spawn at south edge (bottom)
-        const southPos = this.gridToPercentage(7, 13);
-        console.log(`South entry position: ${southPos.x}, ${southPos.y}`);
+        // Moved south (from north to south) - spawn at north edge (top) of new room
+        const southPos = this.gridToPercentage(7, 1);
+        console.log(`South movement entry position: ${southPos.x}, ${southPos.y}`);
         return southPos;
       case 'east':
-        // Came from east (entered through east door) - spawn at east edge (right)
-        const eastPos = this.gridToPercentage(13, 7);
-        console.log(`East entry position: ${eastPos.x}, ${eastPos.y}`);
+        // Moved east (from west to east) - spawn at west edge (left) of new room
+        const eastPos = this.gridToPercentage(1, 7);
+        console.log(`East movement entry position: ${eastPos.x}, ${eastPos.y}`);
         return eastPos;
       case 'west':
-        // Came from west (entered through west door) - spawn at west edge (left)
-        const westPos = this.gridToPercentage(1, 7);
-        console.log(`West entry position: ${westPos.x}, ${westPos.y}`);
+        // Moved west (from east to west) - spawn at east edge (right) of new room
+        const westPos = this.gridToPercentage(13, 7);
+        console.log(`West movement entry position: ${westPos.x}, ${westPos.y}`);
         return westPos;
       default:
         // No direction specified - spawn in center
@@ -656,7 +656,7 @@ export class CombatSystem {
 
       const offset = i - halfParty;
 
-      // Spread horizontally for north/south entries, vertically for east/west
+      // Spread horizontally for north/south movements, vertically for east/west movements
       if (direction === 'north' || direction === 'south') {
         gridX = Math.max(0, Math.min(14, baseGridX + offset));
       } else if (direction === 'east' || direction === 'west') {
@@ -779,7 +779,7 @@ export function calculateHitChance(
   const accuracyBonus = attacker.accuracy * 0.02;
   const evasionPenalty = defender.evasion * 0.015;
   const levelDifference = (attacker.level - defender.level) * 0.01;
-  
+
   const hitChance = baseHitChance + accuracyBonus - evasionPenalty + levelDifference;
   return Math.max(0.05, Math.min(0.95, hitChance)); // Clamp between 5% and 95%
 }

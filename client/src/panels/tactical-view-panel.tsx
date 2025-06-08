@@ -94,30 +94,34 @@ const getPartyEntryPositions = (
 ): { x: number; y: number }[] => {
   const positions: { x: number; y: number }[] = [];
 
-  // Get base entry position
+  // Get base entry position - spawn at opposite end from movement direction
   let baseGridX = 7; // Center
   let baseGridY = 7; // Center
   let spreadDirection: "horizontal" | "vertical" = "horizontal";
 
   switch (direction) {
     case "north":
+      // Moved north - spawn at south side (bottom) of new room
       baseGridX = 7;
-      baseGridY = 13; // Enter from south side (bottom)
+      baseGridY = 13;
       spreadDirection = "horizontal";
       break;
     case "south":
+      // Moved south - spawn at north side (top) of new room
       baseGridX = 7;
-      baseGridY = 1; // Enter from north side (top)
+      baseGridY = 1;
       spreadDirection = "horizontal";
       break;
     case "east":
+      // Moved east - spawn at west side (left) of new room
       baseGridX = 1;
-      baseGridY = 7; // Enter from west side (left)
+      baseGridY = 7;
       spreadDirection = "vertical";
       break;
     case "west":
+      // Moved west - spawn at east side (right) of new room
       baseGridX = 13;
-      baseGridY = 7; // Enter from east side (right)
+      baseGridY = 7;
       spreadDirection = "vertical";
       break;
     default:

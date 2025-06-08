@@ -215,6 +215,12 @@ export function registerExplorationRoutes(app: Express) {
         if (result.newRoom) {
           await storage.redisService.invalidateRoomData(result.newRoom.id);
         }
+        // Also invalidate tactical data for both old and new rooms
+        await storage.redisService.del(`tactical:${currentPosition.roomId}`);
+        if (result.newRoom) {
+          await storage.redisService.del(`tactical:${result.newRoom.id}`);
+        }
+        console.log(`Invalidated tactical data caches for room transition`);
       } catch (cacheError) {
         console.log('Failed to invalidate caches:', cacheError);
       }

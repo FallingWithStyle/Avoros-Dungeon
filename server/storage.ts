@@ -46,10 +46,33 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, asc, like, inArray, not } from "drizzle-orm";
-import { ModularStorage, type IStorage } from "./storage/index";
+import { 
+  UserStorage, 
+  CrawlerStorage, 
+  ExplorationStorage, 
+  TacticalStorage,
+  CorporationStorage,
+  ContentStorage,
+  MobStorage,
+  ModularStorage,
+  type IStorage
+} from "./storage/index";
 
 // Re-export the main storage instance
-export const storage = new ModularStorage();
+export const storage = await ModularStorage.create();
 
 // Re-export the interface for type checking
 export type { IStorage };
+
+export const userStorage = new UserStorage();
+export const crawlerStorage = new CrawlerStorage();
+export const explorationStorage = new ExplorationStorage();
+export const tacticalStorage = new TacticalStorage();
+export const corporationStorage = new CorporationStorage();
+export const contentStorage = new ContentStorage();
+export const mobStorage = new MobStorage();
+
+// Set up dependencies
+tacticalStorage.setCrawlerStorage(crawlerStorage);
+tacticalStorage.setExplorationStorage(explorationStorage);
+tacticalStorage.setMobStorage(mobStorage);

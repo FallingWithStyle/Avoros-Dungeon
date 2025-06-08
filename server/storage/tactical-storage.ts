@@ -16,6 +16,7 @@ export interface TacticalEntity {
 export class TacticalStorage extends BaseStorage {
   private crawlerStorage: any;
   private explorationStorage: any;
+  private mobStorage: any;
 
   setCrawlerStorage(storage: any) {
     this.crawlerStorage = storage;
@@ -23,6 +24,10 @@ export class TacticalStorage extends BaseStorage {
 
   setExplorationStorage(storage: any) {
     this.explorationStorage = storage;
+  }
+
+  setMobStorage(storage: any) {
+    this.mobStorage = storage;
   }
   async getTacticalPositions(roomId: number): Promise<TacticalEntity[]> {
     // Try to get from cache first
@@ -96,11 +101,23 @@ export class TacticalStorage extends BaseStorage {
     }
   }
 
-  async generateAndSaveTacticalData(roomId: number, roomData: any): Promise<TacticalEntity[]> {
-    // Check if we already have positions for this room
-    const existingPositions = await this.getTacticalPositions(roomId);
-    if (existingPositions.length > 0) {
-      return existingPositions;
+  async clearTacticalPositions(roomId: number): Promise<void> {
+    await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
+    console.log(`Cleared tactical positions for room ${roomId}`);
+  }
+
+  async generateAndSaveTacticalData(roomId: number, roomData: any, forceRegenerate: boolean = false): Promise<TacticalEntity[]> {
+    // Check if we already have positions for this room (unless forcing regeneration)
+    if (!forceRegenerate) {
+      const existingPositions = await this.getTacticalPositions(roomId);
+      if (existingPositions.length > 0) {
+        console.log(`Using existing tactical data for room ${roomId}`);
+        return existingPositions;
+      }
+    } else {
+      // Clear existing positions if forcing regeneration
+      await this.clearTacticalPositions(roomId);
+      console.log(`Force regenerating tactical data for room ${roomId}`);
     }
 
     // Generate new positions using the existing logic
@@ -128,35 +145,36 @@ export class TacticalStorage extends BaseStorage {
       }
     }
 
-    // Generate mob positions - no hostile mobs in safe rooms
-    if (roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
-      let mobCount = 0;
-
-      if (roomData.type === "boss") {
-        mobCount = 1;
-      } else if (roomData.factionId) {
-        mobCount = Math.floor(Math.random() * 3) + 1;
-      } else if (Math.random() > 0.6) {
-        mobCount = 1;
-      }
-
-      for (let i = 0; i < mobCount; i++) {
-        const cell = this.getRandomEmptyCell(occupiedCells);
-        const pos = this.gridToPercentage(cell.gridX, cell.gridY);
-
-        entities.push({
-          type: 'mob',
-          name: roomData.type === "boss" ? "Boss Monster" : 
-                roomData.factionId ? "Faction Warrior" : "Wild Monster",
-          data: {
-            hp: roomData.type === "boss" ? 150 : 100,
-            maxHp: roomData.type === "boss" ? 150 : 100,
-            attack: roomData.type === "boss" ? 25 : 15,
-            defense: roomData.type === "boss" ? 15 : 5,
-            hostileType: roomData.type === "boss" ? "boss" : "normal",
-          },
-          position: pos,
-        });
+    // Get mobs from the mob storage system
+    if (this.mobStorage && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
+      // Ensure room has proper mob spawns
+      await this.mobStorage.spawnMobsForRoom(roomId, roomData);
+      
+      // Get current mobs for this room
+      const roomMobs = await this.mobStorage.getRoomMobs(roomId);
+      
+      for (const mobData of roomMobs) {
+        if (mobData.mob.isAlive) {
+          entities.push({
+            type: 'mob',
+            name: mobData.enemy.name,
+            data: {
+              id: mobData.mob.id,
+              hp: mobData.mob.currentHealth,
+              maxHp: mobData.mob.maxHealth,
+              attack: mobData.enemy.attack,
+              defense: mobData.enemy.defense,
+              speed: mobData.enemy.speed,
+              creditsReward: mobData.enemy.creditsReward,
+              experienceReward: mobData.enemy.experienceReward,
+              hostileType: roomData.type === "boss" ? "boss" : "normal",
+            },
+            position: {
+              x: parseFloat(mobData.mob.positionX),
+              y: parseFloat(mobData.mob.positionY)
+            },
+          });
+        }
       }
     }
 

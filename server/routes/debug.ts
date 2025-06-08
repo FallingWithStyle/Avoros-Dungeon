@@ -195,6 +195,33 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Clear tactical data for current room
+  app.post("/api/debug/clear-tactical-data/:crawlerId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.crawlerId);
+      
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ message: "Crawler not in any room" });
+      }
+
+      // Clear tactical positions from database
+      await storage.tacticalStorage.clearTacticalPositions(currentRoom.id);
+      
+      // Clear from cache
+      await storage.redisService.del(`tactical:${currentRoom.id}`);
+
+      res.json({ 
+        message: `Cleared tactical data for room ${currentRoom.id} (${currentRoom.name})`,
+        roomId: currentRoom.id,
+        roomName: currentRoom.name
+      });
+    } catch (error) {
+      console.error("Clear tactical data error:", error);
+      res.status(500).json({ message: "Failed to clear tactical data" });
+    }
+  });
+
   // DEBUG: Regenerate dungeon layout
   app.post("/api/debug/regenerate-dungeon", isAuthenticated, async (req: any, res) => {
     try {
