@@ -46,7 +46,11 @@ function formatTimestamp(): string {
 export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(globalEnergyDisabled);
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(() => {
+    // Load minimized state from localStorage, default to false
+    const saved = localStorage.getItem('debug-panel-minimized');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   // Get current room data to show coordinates
   const { data: roomData } = useQuery({
@@ -54,6 +58,12 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     enabled: !!activeCrawler,
     retry: false,
   });
+
+  const toggleMinimized = () => {
+    const newState = !minimized;
+    setMinimized(newState);
+    localStorage.setItem('debug-panel-minimized', JSON.stringify(newState));
+  };
 
   const toggleEnergyUsage = () => {
     const newState = !energyDisabled;
@@ -268,7 +278,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => setMinimized((m) => !m)}
+                onClick={toggleMinimized}
                 aria-label="Expand Debug Panel"
                 className="text-red-200 hover:bg-red-900/30 p-1 h-4 w-4 ml-auto"
               >
@@ -297,7 +307,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => setMinimized((m) => !m)}
+                  onClick={toggleMinimized}
                   aria-label="Minimize Debug Panel"
                   className="text-red-200 hover:bg-red-900/30 p-1 h-6 w-6"
                 >
