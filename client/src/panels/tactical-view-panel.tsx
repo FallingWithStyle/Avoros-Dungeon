@@ -610,6 +610,43 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   });
 
+  // Define checkExitProximity function early to avoid hoisting issues
+  const checkExitProximity = useCallback((playerPosition: { x: number; y: number }) => {
+    const exitProximity = 8; // How close player needs to be to exit
+    
+    // Check each available direction
+    if (currentRoomData?.availableDirections) {
+      currentRoomData.availableDirections.forEach((direction: string) => {
+        let exitPosition: { x: number; y: number } | null = null;
+        
+        switch (direction) {
+          case "north":
+            exitPosition = { x: 50, y: 5 }; // Top center
+            break;
+          case "south":
+            exitPosition = { x: 50, y: 95 }; // Bottom center
+            break;
+          case "east":
+            exitPosition = { x: 95, y: 50 }; // Right center
+            break;
+          case "west":
+            exitPosition = { x: 5, y: 50 }; // Left center
+            break;
+        }
+        
+        if (exitPosition) {
+          const distance = combatSystem.calculateDistance(playerPosition, exitPosition);
+          if (distance <= exitProximity) {
+            // Player is close enough to the exit - show transition prompt
+            console.log(`Player near ${direction} exit - can transition`);
+            // For now, automatically transition (later we can add a prompt)
+            handleMove(direction);
+          }
+        }
+      });
+    }
+  }, [currentRoomData]);
+
   // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -624,7 +661,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       setCombatState(state);
     });
     return unsubscribe;
-  }, [currentRoomData]);
+  }, [currentRoomData, checkExitProximity]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -1388,42 +1425,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 
-  // Check if player is near an exit and can transition
-  const checkExitProximity = (playerPosition: { x: number; y: number }) => {
-    const exitProximity = 8; // How close player needs to be to exit
-    
-    // Check each available direction
-    if (currentRoomData?.availableDirections) {
-      currentRoomData.availableDirections.forEach((direction: string) => {
-        let exitPosition: { x: number; y: number } | null = null;
-        
-        switch (direction) {
-          case "north":
-            exitPosition = { x: 50, y: 5 }; // Top center
-            break;
-          case "south":
-            exitPosition = { x: 50, y: 95 }; // Bottom center
-            break;
-          case "east":
-            exitPosition = { x: 95, y: 50 }; // Right center
-            break;
-          case "west":
-            exitPosition = { x: 5, y: 50 }; // Left center
-            break;
-        }
-        
-        if (exitPosition) {
-          const distance = combatSystem.calculateDistance(playerPosition, exitPosition);
-          if (distance <= exitProximity) {
-            // Player is close enough to the exit - show transition prompt
-            console.log(`Player near ${direction} exit - can transition`);
-            // For now, automatically transition (later we can add a prompt)
-            handleMove(direction);
-          }
-        }
-      });
-    }
-  };
+  
 
 
 
