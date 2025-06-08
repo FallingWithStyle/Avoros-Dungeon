@@ -426,6 +426,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS AT TOP LEVEL - NEVER MOVE THESE OR ADD HOOKS ELSEWHERE
   const { toast } = useToast();
   
+  // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
+  const handleCellClick = useCallback(
+    (x: number, y: number) => {
+      if (!combatSystem) return;
+
+      const player = combatSystem.getState().entities.find(e => e.id === 'player');
+      if (!player) return;
+
+      // Calculate if the clicked cell is adjacent to player
+      const dx = Math.abs(x - player.position.x);
+      const dy = Math.abs(y - player.position.y);
+      const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+
+      if (!isAdjacent) return;
+
+      // Determine direction - fix the y-axis logic
+      let direction: string;
+      if (dx === 1) {
+        direction = x > player.position.x ? 'east' : 'west';
+      } else {
+        // In a grid where y increases downward, north should be y - 1, south should be y + 1
+        direction = y < player.position.y ? 'north' : 'south';
+      }
+
+      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
+
+      // Check if this direction is available - need to access roomData from queries
+      // This will be handled in the grid click handler where roomData is available
+    },
+    [] // Empty dependency array since we'll handle data access in the click handler
+  );
+  
   const hotbarActions = [
     {
       id: "move",
@@ -606,7 +638,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Update combat system when room data changes
   useEffect(() => {
-    if (roomData) {
+    if (roomData && roomData.room) {
       // Detect room change and calculate entry direction
       let entryDirection: "north" | "south" | "east" | "west" | null = null;
 
@@ -625,21 +657,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           // Clear the stored direction after using it
           sessionStorage.removeItem("lastMovementDirection");
         }
+
+        // Clear ALL entities immediately when room changes
+        const currentEntities = combatSystem.getState().entities;
+        currentEntities.forEach((entity) => {
+          combatSystem.removeEntity(entity.id);
+        });
+        
+        console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, cleared all entities`);
       }
 
       setLastRoomId(roomData.room.id);
-
-      // Clear existing entities except player and party members
-      const currentEntities = combatSystem.getState().entities;
-      currentEntities.forEach((entity) => {
-        if (
-          !entity.id.startsWith("player") &&
-          !entity.id.startsWith("party-") &&
-          !entity.id.startsWith("companion-")
-        ) {
-          combatSystem.removeEntity(entity.id);
-        }
-      });
 
       // Calculate entry position for the party
       const partyEntryPositions = getPartyEntryPositions(
@@ -661,18 +689,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         entryDirection,
       };
 
-      if (!currentEntities.find((e) => e.id === "player")) {
-        combatSystem.addEntity(playerEntity);
-      } else {
-        combatSystem.updateEntity("player", playerEntity);
-      }
+      combatSystem.addEntity(playerEntity);
+      console.log(`Added player entity for room ${roomData.room.id}`);
 
-      // Add room entities based on persistent tactical data
-      if (tacticalData?.tacticalEntities) {
+      // Add room entities based on persistent tactical data - but only if we have tactical data
+      if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
+        console.log(`Adding ${tacticalData.tacticalEntities.length} tactical entities for room ${roomData.room.id}`);
         tacticalData.tacticalEntities.forEach((entity, index) => {
           if (entity.type === 'mob') {
             const mobEntity: CombatEntity = {
-              id: `mob-${index}`,
+              id: `mob-${roomData.room.id}-${index}`, // Include room ID to prevent conflicts
               name: entity.name,
               type: "hostile",
               hp: entity.data.hp || 100,
@@ -685,7 +711,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             combatSystem.addEntity(mobEntity);
           } else if (entity.type === 'npc') {
             const npcEntity: CombatEntity = {
-              id: `npc-${index}`,
+              id: `npc-${roomData.room.id}-${index}`, // Include room ID to prevent conflicts
               name: entity.name,
               type: "neutral",
               hp: 100,
@@ -698,9 +724,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             combatSystem.addEntity(npcEntity);
           }
         });
+      } else {
+        console.log(`No tactical entities available for room ${roomData.room.id}`);
       }
     }
-  }, [roomData?.room.id, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed, tacticalData?.tacticalEntities, lastRoomId]);
+  }, [roomData?.room?.id, tacticalData?.tacticalEntities, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed, lastRoomId]);
 
   // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
   const getCooldownPercentage = (actionId: string): number => {
@@ -1302,48 +1330,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     window.location.href = `/crawler/${crawler.id}/move/${direction}`;
   };
 
-  // Function to handle cell click and initiate the movement
-  const handleCellClick = useCallback(
-    (x: number, y: number) => {
-      if (!combatSystem) return;
-
-      const player = combatSystem.getState().entities.find(e => e.id === 'player');
-      if (!player) return;
-
-      // Calculate if the clicked cell is adjacent to player
-      const dx = Math.abs(x - player.position.x);
-      const dy = Math.abs(y - player.position.y);
-      const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
-
-      if (!isAdjacent) return;
-
-      // Determine direction - fix the y-axis logic
-      let direction: string;
-      if (dx === 1) {
-        direction = x > player.position.x ? 'east' : 'west';
-      } else {
-        // In a grid where y increases downward, north should be y - 1, south should be y + 1
-        direction = y < player.position.y ? 'north' : 'south';
-      }
-
-      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
-      console.log('Available directions:', roomData?.availableDirections);
-
-      // Check if this direction is available
-      if (!roomData?.availableDirections.includes(direction)) {
-        toast({
-          title: "Cannot move",
-          description: `No exit ${direction} from this room`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Trigger room movement
-      handleMove(direction);
-    },
-    [combatSystem, roomData, handleMove, toast]
-  );
+  
 
   return (
     <Card className="bg-game-panel border-game-border">
