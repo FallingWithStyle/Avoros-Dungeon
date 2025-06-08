@@ -157,7 +157,7 @@ export class TacticalStorage extends BaseStorage {
         if (mobData.mob.isAlive) {
           entities.push({
             type: 'mob',
-            name: mobData.enemy.name,
+            name: mobData.mob.displayName, // Use display name from database
             data: {
               id: mobData.mob.id,
               hp: mobData.mob.currentHealth,
@@ -168,6 +168,7 @@ export class TacticalStorage extends BaseStorage {
               creditsReward: mobData.enemy.creditsReward,
               experienceReward: mobData.enemy.experienceReward,
               hostileType: roomData.type === "boss" ? "boss" : "normal",
+              rarity: mobData.mob.rarity, // Include rarity information
             },
             position: {
               x: parseFloat(mobData.mob.positionX),

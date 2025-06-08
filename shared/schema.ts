@@ -322,6 +322,7 @@ export const enemies = pgTable("enemies", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
+  rarity: varchar("rarity", { length: 20 }).notNull().default("common"), // common, uncommon, rare, epic, legendary
   health: integer("health").notNull(),
   attack: integer("attack").notNull(),
   defense: integer("defense").notNull(),
@@ -332,11 +333,43 @@ export const enemies = pgTable("enemies", {
   maxFloor: integer("max_floor").default(100),
 });
 
+// Loot items that can spawn in rooms
+export const lootItems = pgTable("loot_items", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  rarity: varchar("rarity", { length: 20 }).notNull().default("common"), // common, uncommon, rare, epic, legendary
+  itemType: varchar("item_type", { length: 30 }).notNull(), // treasure, weapon, armor, consumable, misc
+  value: integer("value").notNull(),
+  minFloor: integer("min_floor").default(1),
+  maxFloor: integer("max_floor").default(100),
+  spawnWeight: integer("spawn_weight").default(1).notNull(), // Higher = more likely to spawn
+});
+
+// Room-specific loot instances
+export const roomLoot = pgTable("room_loot", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").notNull().references(() => rooms.id),
+  lootItemId: integer("loot_item_id").notNull().references(() => lootItems.id),
+  displayName: varchar("display_name", { length: 100 }).notNull(), // Player-readable name
+  positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
+  positionY: decimal("position_y", { precision: 5, scale: 2 }).notNull(),
+  isCollected: boolean("is_collected").default(false).notNull(),
+  collectedAt: timestamp("collected_at"),
+  collectedBy: integer("collected_by").references(() => crawlers.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Entity rarity levels
+export const entityRarityEnum = ["common", "uncommon", "rare", "epic", "legendary"] as const;
+
 // Room-specific mob instances
 export const mobs = pgTable("mobs", {
   id: serial("id").primaryKey(),
   roomId: integer("room_id").notNull().references(() => rooms.id),
   enemyId: integer("enemy_id").notNull().references(() => enemies.id),
+  displayName: varchar("display_name", { length: 100 }).notNull(), // Player-readable name
+  rarity: varchar("rarity", { length: 20 }).notNull().default("common"), // common, uncommon, rare, epic, legendary
   positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
   positionY: decimal("position_y", { precision: 5, scale: 2 }).notNull(),
   currentHealth: integer("current_health").notNull(),
@@ -566,6 +599,25 @@ export const mobsRelations = relations(mobs, ({ one }) => ({
   }),
 }));
 
+export const lootItemsRelations = relations(lootItems, ({ many }) => ({
+  roomLoot: many(roomLoot),
+}));
+
+export const roomLootRelations = relations(roomLoot, ({ one }) => ({
+  room: one(rooms, {
+    fields: [roomLoot.roomId],
+    references: [rooms.id],
+  }),
+  lootItem: one(lootItems, {
+    fields: [roomLoot.lootItemId],
+    references: [lootItems.id],
+  }),
+  collectedBy: one(crawlers, {
+    fields: [roomLoot.collectedBy],
+    references: [crawlers.id],
+  }),
+}));
+
 export const encountersRelations = relations(encounters, ({ one }) => ({
   crawler: one(crawlers, {
     fields: [encounters.crawlerId],
@@ -738,6 +790,17 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
 export type Season = typeof seasons.$inferSelect;
 export type Mob = typeof mobs.$inferSelect;
+export type LootItem = typeof lootItems.$inferSelect;
+export type RoomLoot = typeof roomLoot.$inferSelect;
+
+// Extended types with relations
+export type MobWithEnemy = Mob & {
+  enemy: Enemy;
+};
+
+export type RoomLootWithItem = RoomLoot & {
+  lootItem: LootItem;
+};
 
 // Extended types with relations
 export type CrawlerWithDetails = Crawler & {

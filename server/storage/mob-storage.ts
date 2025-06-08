@@ -207,9 +207,22 @@ export class MobStorage extends BaseStorage {
       const enemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
       const position = this.getRandomPosition();
 
+      // Generate display name with rarity modifier
+      const rarityModifiers = {
+        common: "",
+        uncommon: "Veteran ",
+        rare: "Elite ",
+        epic: "Champion ",
+        legendary: "Legendary "
+      };
+      
+      const displayName = `${rarityModifiers[enemy.rarity as keyof typeof rarityModifiers] || ""}${enemy.name}`;
+
       await db.insert(mobs).values({
         roomId,
         enemyId: enemy.id,
+        displayName,
+        rarity: enemy.rarity,
         positionX: position.x.toString(),
         positionY: position.y.toString(),
         currentHealth: enemy.health,
