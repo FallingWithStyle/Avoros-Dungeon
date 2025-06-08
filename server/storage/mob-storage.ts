@@ -259,6 +259,8 @@ export class MobStorage extends BaseStorage {
         currentHealth: mobData.health,
         maxHealth: mobData.health,
         isAlive: true,
+        disposition: -50, // Default hostile disposition
+        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -296,7 +298,7 @@ export class MobStorage extends BaseStorage {
     
     // Further fallback to basic types
     if (mobTypes.length === 0) {
-      mobTypes = baseConfig.enemyTypes;
+      mobTypes = baseConfig.creatureCategories;
     }
 
     return {
@@ -312,18 +314,18 @@ export class MobStorage extends BaseStorage {
 
   private async generateContextualMob(spawnConfig: ContextualSpawnConfig, roomData: any) {
     // Get appropriate enemies based on mob types
-    const mobType = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+    const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
     
-    // Try to find mob types that match the mob type in their name or description
+    // Try to find mob types that match the selected category in their name or description
     let availableMobTypes = await db
       .select()
       .from(mobTypes)
       .where(eq(mobTypes.minFloor, 1)); // TODO: Filter by actual floor
 
-    // Filter mob types by mob type if possible
-    const filteredMobTypes = availableMobTypes.filter(mobType => 
-      mobType.name.toLowerCase().includes(mobType.toLowerCase()) ||
-      (mobType.description && mobType.description.toLowerCase().includes(mobType.toLowerCase()))
+    // Filter mob types by selected category if possible
+    const filteredMobTypes = availableMobTypes.filter(mobTypeRecord => 
+      mobTypeRecord.name.toLowerCase().includes(selectedMobCategory.toLowerCase()) ||
+      (mobTypeRecord.description && mobTypeRecord.description.toLowerCase().includes(selectedMobCategory.toLowerCase()))
     );
     
     // Use filtered mob types if found, otherwise fall back to all available
@@ -334,7 +336,7 @@ export class MobStorage extends BaseStorage {
     const selectedMobType = mobTypesToChoose[Math.floor(Math.random() * mobTypesToChoose.length)];
     
     // Generate contextual display name
-    const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, mobType);
+    const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, selectedMobCategory);
     
     return {
       mobTypeId: selectedMobType.id,
