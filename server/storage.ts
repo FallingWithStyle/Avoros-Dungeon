@@ -53,12 +53,13 @@ import {
   TacticalStorage,
   CorporationStorage,
   ContentStorage,
-  MobStorage
+  MobStorage,
+  ModularStorage,
+  type IStorage
 } from "./storage/index";
-import { ModularStorage, type IStorage } from "./storage/index";
 
 // Re-export the main storage instance
-export const storage = new ModularStorage();
+export const storage = await ModularStorage.create();
 
 // Re-export the interface for type checking
 export type { IStorage };

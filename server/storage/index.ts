@@ -389,3 +389,4 @@ export const storage = await ModularStorage.create();
 export { TacticalStorage } from './tactical-storage';
 export { ContentStorage } from './content-storage';
 export { MobStorage } from './mob-storage';
+export { CorporationStorage } from './corporation-storage';
