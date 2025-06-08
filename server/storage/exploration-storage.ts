@@ -124,6 +124,9 @@ export class ExplorationStorage extends BaseStorage {
     direction: string,
     debugEnergyDisabled?: boolean,
   ): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
+    console.log(`=== MOVE TO ROOM ===`);
+    console.log(`Crawler ID: ${crawlerId}, Direction: ${direction}`);
+
     const [currentPosition] = await db
       .select()
       .from(crawlerPositions)
@@ -132,20 +135,32 @@ export class ExplorationStorage extends BaseStorage {
       .limit(1);
 
     if (!currentPosition) {
+      console.log(`ERROR: No current position found for crawler ${crawlerId}`);
       return { success: false, error: "Crawler position not found" };
     }
 
+    console.log(`Current position: Room ${currentPosition.roomId}`);
+
     const currentRoom = await this.getRoom(currentPosition.roomId);
     if (!currentRoom) {
+      console.log(`ERROR: Current room ${currentPosition.roomId} not found in database`);
       return { success: false, error: "Current room not found" };
     }
 
+    console.log(`Current room: ${currentRoom.name} (${currentRoom.x}, ${currentRoom.y})`);
+
     if (direction === "staircase") {
       if (currentRoom.type !== "stairs") {
+        console.log(`ERROR: Attempted staircase movement but room type is ${currentRoom.type}, not stairs`);
         return { success: false, error: "No staircase in this room" };
       }
+      console.log(`Handling staircase movement...`);
       return await this.handleStaircaseMovement(crawlerId, currentRoom);
     }
+
+    // Get available directions for debugging
+    const availableDirections = await this.getAvailableDirections(currentPosition.roomId);
+    console.log(`Available directions from room ${currentPosition.roomId}:`, availableDirections);
 
     const [connection] = await db
       .select()
@@ -158,17 +173,25 @@ export class ExplorationStorage extends BaseStorage {
       );
 
     if (!connection) {
+      console.log(`ERROR: No connection found for direction ${direction} from room ${currentPosition.roomId}`);
+      console.log(`Available directions:`, availableDirections);
       return { success: false, error: `No exit ${direction} from current room` };
     }
 
+    console.log(`Found connection: ${connection.fromRoomId} -> ${connection.toRoomId} (${connection.direction})`);
+
     if (connection.isLocked) {
+      console.log(`ERROR: Connection is locked`);
       return { success: false, error: `The ${direction} exit is locked` };
     }
 
     const newRoom = await this.getRoom(connection.toRoomId);
     if (!newRoom) {
+      console.log(`ERROR: Destination room ${connection.toRoomId} not found`);
       return { success: false, error: "Destination room not found" };
     }
+
+    console.log(`Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`);
 
     const previousVisit = await db
       .select()
@@ -184,13 +207,12 @@ export class ExplorationStorage extends BaseStorage {
     let energyCost = 10;
     if (previousVisit.length > 0) {
       energyCost = 5;
+      console.log(`Revisiting room - reduced energy cost: ${energyCost}`);
+    } else {
+      console.log(`First visit to room - standard energy cost: ${energyCost}`);
     }
 
-    if (!debugEnergyDisabled) {
-      // We'd need to import crawler storage here or pass crawler as parameter
-      // For now, skipping energy check - this would be handled by the main storage orchestrator
-    }
-
+    console.log(`Inserting new crawler position...`);
     await db.insert(crawlerPositions).values({
       crawlerId,
       roomId: connection.toRoomId,
@@ -201,10 +223,12 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.del(`crawler:${crawlerId}:current-room`);
       await redisService.del(`crawler:${crawlerId}:explored`);
+      console.log(`Invalidated position caches for crawler ${crawlerId}`);
     } catch (error) {
-      console.log('Failed to invalidate position caches');
+      console.log('Failed to invalidate position caches:', error);
     }
 
+    console.log(`Movement successful: Crawler ${crawlerId} moved ${direction} to room ${newRoom.id} (${newRoom.name})`);
     return { success: true, newRoom };
   }
 

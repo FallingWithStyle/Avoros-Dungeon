@@ -831,7 +831,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   target.id,
                 );
                 if (attackSuccess) {
-                  console.log(`Queued attack on ${target.name} after movement`);
+                  console.log(
+                    `Queued attack on ${target.name} after movement`,
+                  );
                 }
               }, 900); // Slightly before move action completes (800ms execution time)
             }
@@ -1257,7 +1259,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const emptyTacticalData = {
       tacticalEntities: [],
     };
-    
+
     const { room, availableDirections, playersInRoom } = roomData;
     const persistentTacticalData = {
       background: getRoomBackgroundType(room.environment, room.type),
@@ -1290,6 +1292,55 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
     otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
+
+  const handleMove = (direction: string) => {
+    console.log(`Moving ${direction}`);
+    sessionStorage.setItem("lastMovementDirection", direction);
+    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
+  };
+
+  // Function to handle cell click and initiate the movement
+  const handleCellClick = useCallback(
+    (x: number, y: number) => {
+      if (!combatSystem) return;
+
+      const player = combatSystem.getState().entities.find(e => e.id === 'player');
+      if (!player) return;
+
+      // Calculate if the clicked cell is adjacent to player
+      const dx = Math.abs(x - player.position.x);
+      const dy = Math.abs(y - player.position.y);
+      const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+
+      if (!isAdjacent) return;
+
+      // Determine direction - fix the y-axis logic
+      let direction: string;
+      if (dx === 1) {
+        direction = x > player.position.x ? 'east' : 'west';
+      } else {
+        // In a grid where y increases downward, north should be y - 1, south should be y + 1
+        direction = y < player.position.y ? 'north' : 'south';
+      }
+
+      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
+      console.log('Available directions:', roomData?.availableDirections);
+
+      // Check if this direction is available
+      if (!roomData?.availableDirections.includes(direction)) {
+        toast({
+          title: "Cannot move",
+          description: `No exit ${direction} from this room`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Trigger room movement
+      handleMove(direction);
+    },
+    [combatSystem, roomData, handleMove, toast]
+  );
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -1712,78 +1763,33 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                       )}
                       <div>
                         <div>{action.name}</div>
-                        {action.damage && (
-                          <div className="text-xs text-gray-500">
-                            Damage: {action.damage}
-                          </div>
-                        )}
                         <div className="text-xs text-gray-500">
-                          Cooldown: {action.cooldown / 1000}s
+                          {action.type === "attack" && `Damage: ${action.damage || "N/A"}`}
+                          {action.type === "ability" && `Cooldown: ${action.cooldown || 0}ms`}
                         </div>
                       </div>
                     </button>
                   ))}
                 </div>
               )}
-
-            {/* No actions available */}
-            {contextMenu.actions.length === 0 &&
-              contextMenu.entity.type === "hostile" && (
-                <div className="px-3 py-2 text-xs text-gray-500">
-                  No actions available (on cooldown)
-                </div>
-              )}
           </div>
         )}
 
-        {/* Room info */}
-        <div className="mt-3 text-xs text-slate-400">
-          <p className="font-medium text-slate-300">
-            Current Room: {room.name}
-          </p>
-          <p>
-            Environment: {room.environment} • Type: {room.type}
-          </p>
-          <div className="flex items-center gap-4 mt-1">
-            <span className="flex items-center gap-1">
-              <Gem className="w-3 h-3 text-yellow-400" />
-              {persistentTacticalData.loot.length} items
-            </span>
-            <span className="flex items-center gap-1">
-              <Skull className="w-3 h-3 text-red-500" />
-              {combatSystem.getHostileEntities().length} enemies
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3 text-cyan-400" />
-              {combatSystem.getFriendlyEntities().length -
-                1 +
-                persistentTacticalData.otherPlayers.length}{" "}
-              friendlies
-            </span>
-            {combatState.isInCombat && (
-              <span className="flex items-center gap-1 text-red-400 animate-pulse">
-                <Sword className="w-3 h-3" />
-                IN COMBAT
-              </span>
-            )}
-            {combatState.selectedEntityId && (
-              <span className="flex items-center gap-1 text-yellow-400">
-                <Eye className="w-3 h-3" />
-                {
-                  combatState.entities.find(
-                    (e) => e.id === combatState.selectedEntityId,
-                  )?.name
-                }{" "}
-                selected
-              </span>
-            )}
-          </div>
-        </div>
-
         {/* Action Queue Panel */}
-        <div className="mt-4">
-          <ActionQueuePanel />
-        </div>
+        <ActionQueuePanel />
+
+        {/* Status Messages */}
+        {activeActionMode && (
+          <div className="mt-2 p-2 bg-blue-900/30 border border-blue-500 rounded text-center">
+            <span className="text-blue-300 text-sm">
+              {activeActionMode.actionName} mode active - {
+                activeActionMode.type === "move" ? "Click to move" :
+                activeActionMode.type === "attack" ? "Click enemy to attack" :
+                "Click to use ability"
+              }
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

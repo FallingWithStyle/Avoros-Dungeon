@@ -297,6 +297,10 @@ export class ModularStorage implements IStorage {
     return this._explorationStorage.getFloorBounds(floorId);
   }
 
+  async ensureCrawlerHasPosition(crawlerId: number) {
+    return this._explorationStorage.ensureCrawlerHasPosition(crawlerId);
+  }
+
   // Season and sponsorship operations
   async getCurrentSeason() {
     // For now, return a default season - this should be implemented properly later
