@@ -228,26 +228,60 @@ export class MobStorage extends BaseStorage {
   }
 
   async spawnMobsForRoom(roomId: number, roomData: any): Promise<void> {
+    console.log('🚀 spawnMobsForRoom called for room:', roomId, 'with data:', roomData);
+
     const spawnConfig = await this.getContextualSpawnConfig(roomData);
-    if (!spawnConfig || spawnConfig.maxMobs === 0) return;
+    if (!spawnConfig || spawnConfig.maxMobs === 0) {
+      console.log('❌ No spawn config or maxMobs is 0, skipping spawn');
+      return;
+    }
 
     // Check if room already has mobs
     const existingMobs = await this.getRoomMobs(roomId);
     const aliveMobs = existingMobs.filter(m => m.mob.isAlive);
     
-    if (aliveMobs.length >= spawnConfig.maxMobs) return;
+    console.log('📊 Room mob status:', {
+      existingMobs: existingMobs.length,
+      aliveMobs: aliveMobs.length,
+      maxMobs: spawnConfig.maxMobs
+    });
+    
+    if (aliveMobs.length >= spawnConfig.maxMobs) {
+      console.log('✋ Room already has maximum mobs, skipping spawn');
+      return;
+    }
 
     // Spawn missing mobs
     const mobsToSpawn = spawnConfig.maxMobs - aliveMobs.length;
+    console.log('🎲 Will attempt to spawn', mobsToSpawn, 'mobs with chance', spawnConfig.spawnChance);
     
     for (let i = 0; i < mobsToSpawn; i++) {
-      if (Math.random() > spawnConfig.spawnChance) continue;
+      const spawnRoll = Math.random();
+      console.log(`🎯 Spawn attempt ${i + 1}/${mobsToSpawn}: rolled ${spawnRoll} vs chance ${spawnConfig.spawnChance}`);
+      
+      if (spawnRoll > spawnConfig.spawnChance) {
+        console.log('❌ Spawn roll failed, skipping this mob');
+        continue;
+      }
 
       // Generate mob based on context
       const mobData = await this.generateContextualMob(spawnConfig, roomData);
-      if (!mobData) continue;
+      if (!mobData) {
+        console.log('❌ Failed to generate mob data, skipping');
+        continue;
+      }
 
       const position = this.getRandomPosition();
+      console.log('📍 Generated position:', position);
+
+      console.log('💾 Inserting mob into database:', {
+        roomId,
+        enemyId: mobData.mobTypeId,
+        displayName: mobData.displayName,
+        rarity: mobData.rarity,
+        health: mobData.health,
+        position
+      });
 
       await db.insert(mobs).values({
         roomId,
@@ -264,44 +298,66 @@ export class MobStorage extends BaseStorage {
         createdAt: new Date(),
         updatedAt: new Date()
       });
+
+      console.log('✅ Successfully spawned mob:', mobData.displayName);
     }
 
     // Invalidate cache
     try {
       await redisService.invalidateRoomMobs(roomId);
+      console.log('🗑️ Invalidated room mobs cache');
     } catch (error) {
       console.log('Failed to invalidate room mobs cache');
     }
   }
 
   private async getContextualSpawnConfig(roomData: any): Promise<ContextualSpawnConfig | null> {
+    console.log('🏠 getContextualSpawnConfig called with roomData:', {
+      type: roomData.type,
+      environment: roomData.environment,
+      factionId: roomData.factionId
+    });
+
     const baseConfig = this.getMobSpawnConfig(roomData.type);
-    if (!baseConfig) return null;
+    if (!baseConfig) {
+      console.log('❌ No base config found for room type:', roomData.type);
+      return null;
+    }
+
+    console.log('⚙️ Base config found:', baseConfig);
 
     let mobTypes: string[] = [];
     
     // If room is controlled by a faction, use faction mob types
     if (roomData.factionId) {
+      console.log('🏛️ Room controlled by faction:', roomData.factionId);
       const faction = await this.getFactionById(roomData.factionId);
+      console.log('📊 Faction data:', faction);
       if (faction && faction.mobTypes) {
         mobTypes = faction.mobTypes;
+        console.log('🎭 Using faction mob types:', mobTypes);
       }
     }
     
     // Fallback to neutral mobs based on room type and environment
     if (mobTypes.length === 0) {
-      mobTypes = [
-        ...(this.neutralMobTypesByRoomType[roomData.type] || []),
-        ...(this.neutralMobTypesByEnvironment[roomData.environment] || [])
-      ];
+      const roomTypeMobs = this.neutralMobTypesByRoomType[roomData.type] || [];
+      const environmentMobs = this.neutralMobTypesByEnvironment[roomData.environment] || [];
+      mobTypes = [...roomTypeMobs, ...environmentMobs];
+      console.log('🌍 Using neutral mob types:', {
+        roomTypeMobs,
+        environmentMobs,
+        combined: mobTypes
+      });
     }
     
     // Further fallback to basic types
     if (mobTypes.length === 0) {
       mobTypes = baseConfig.creatureCategories;
+      console.log('🔧 Using base config creature categories:', mobTypes);
     }
 
-    return {
+    const finalConfig = {
       roomType: roomData.type,
       environment: roomData.environment,
       factionId: roomData.factionId,
@@ -310,11 +366,22 @@ export class MobStorage extends BaseStorage {
       mobTypes,
       respawnHours: baseConfig.respawnHours
     };
+
+    console.log('✅ Final spawn config:', finalConfig);
+    return finalConfig;
   }
 
   private async generateContextualMob(spawnConfig: ContextualSpawnConfig, roomData: any) {
+    console.log('🎲 generateContextualMob called with:', {
+      roomType: spawnConfig.roomType,
+      environment: spawnConfig.environment,
+      factionId: spawnConfig.factionId,
+      mobTypes: spawnConfig.mobTypes
+    });
+
     // Get appropriate enemies based on mob types
     const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+    console.log('🎯 Selected mob category:', selectedMobCategory);
     
     // Try to find mob types that match the selected category in their name or description
     let availableMobTypes = await db
@@ -322,21 +389,48 @@ export class MobStorage extends BaseStorage {
       .from(mobTypes)
       .where(eq(mobTypes.minFloor, 1)); // TODO: Filter by actual floor
 
+    console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
+      id: mt.id,
+      name: mt.name,
+      description: mt.description
+    })));
+
     // Filter mob types by selected category if possible
     const filteredMobTypes = availableMobTypes.filter(mobTypeRecord => 
       mobTypeRecord.name.toLowerCase().includes(selectedMobCategory.toLowerCase()) ||
       (mobTypeRecord.description && mobTypeRecord.description.toLowerCase().includes(selectedMobCategory.toLowerCase()))
     );
     
+    console.log('🔍 Filtered mob types:', filteredMobTypes.map(mt => ({
+      id: mt.id,
+      name: mt.name,
+      matchedCategory: selectedMobCategory
+    })));
+    
     // Use filtered mob types if found, otherwise fall back to all available
     const mobTypesToChoose = filteredMobTypes.length > 0 ? filteredMobTypes : availableMobTypes;
     
-    if (mobTypesToChoose.length === 0) return null;
+    console.log('⚔️ Final mob types to choose from:', mobTypesToChoose.map(mt => ({
+      id: mt.id,
+      name: mt.name
+    })));
+    
+    if (mobTypesToChoose.length === 0) {
+      console.log('❌ No mob types available to choose from!');
+      return null;
+    }
 
     const selectedMobType = mobTypesToChoose[Math.floor(Math.random() * mobTypesToChoose.length)];
+    console.log('🎲 Selected mob type:', {
+      id: selectedMobType.id,
+      name: selectedMobType.name,
+      rarity: selectedMobType.rarity,
+      health: selectedMobType.health
+    });
     
     // Generate contextual display name
     const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, selectedMobCategory);
+    console.log('📝 Generated display name:', displayName);
     
     return {
       mobTypeId: selectedMobType.id,
@@ -347,6 +441,13 @@ export class MobStorage extends BaseStorage {
   }
 
   private generateContextualDisplayName(selectedMobType: any, spawnConfig: ContextualSpawnConfig, mobType: string): string {
+    console.log('🏷️ generateContextualDisplayName called with:', {
+      selectedMobTypeName: selectedMobType.name,
+      selectedMobTypeRarity: selectedMobType.rarity,
+      mobTypeCategory: mobType,
+      factionId: spawnConfig.factionId
+    });
+
     const rarityModifiers = {
       common: "",
       uncommon: "Veteran ",
@@ -356,6 +457,7 @@ export class MobStorage extends BaseStorage {
     };
     
     let prefix = rarityModifiers[selectedMobType.rarity as keyof typeof rarityModifiers] || "";
+    console.log('💎 Rarity prefix:', prefix);
     
     // Add faction-specific prefixes
     if (spawnConfig.factionId) {
@@ -370,15 +472,24 @@ export class MobStorage extends BaseStorage {
       const factionPrefix = factionPrefixes[spawnConfig.factionId.toString()];
       if (factionPrefix) {
         prefix = factionPrefix + prefix;
+        console.log('🏛️ Added faction prefix:', factionPrefix, 'Total prefix:', prefix);
       }
     }
     
     // Use mob type as the base name if mob name is generic
-    const baseName = selectedMobType.name === "Unknown" || selectedMobType.name === "Generic Mob" 
+    const isGenericName = selectedMobType.name === "Unknown" || selectedMobType.name === "Generic Mob";
+    console.log('🤔 Is generic name?', isGenericName, 'Original name:', selectedMobType.name);
+    
+    const baseName = isGenericName
       ? mobType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
       : selectedMobType.name;
     
-    return `${prefix}${baseName}`;
+    console.log('🎯 Base name determined:', baseName);
+    
+    const finalName = `${prefix}${baseName}`;
+    console.log('✨ Final display name:', finalName);
+    
+    return finalName;
   }
 
   private async getFactionById(factionId: number) {
