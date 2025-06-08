@@ -126,6 +126,30 @@ class RedisService {
     await this.set(`crawler:${crawlerId}:current-room`, room, ttl);
   }
 
+  async getScannedRooms(crawlerId: number, scanRange: number) {
+    return this.get(`crawler:${crawlerId}:scanned:${scanRange}`);
+  }
+
+  async setScannedRooms(crawlerId: number, scanRange: number, rooms: any[], ttl: number = 300) {
+    await this.set(`crawler:${crawlerId}:scanned:${scanRange}`, rooms, ttl);
+  }
+
+  async getFloorBounds(floorId: number) {
+    return this.get(`floor:${floorId}:bounds`);
+  }
+
+  async setFloorBounds(floorId: number, bounds: any, ttl: number = 3600) {
+    await this.set(`floor:${floorId}:bounds`, bounds, ttl);
+  }
+
+  async getFloorRooms(floorId: number) {
+    return this.get(`floor:${floorId}:rooms`);
+  }
+
+  async setFloorRooms(floorId: number, rooms: any[], ttl: number = 3600) {
+    await this.set(`floor:${floorId}:rooms`, rooms, ttl);
+  }
+
   async getContentData(key: string): Promise<any> {
     if (!this.redis || !this.isConnected) {
       return null;
