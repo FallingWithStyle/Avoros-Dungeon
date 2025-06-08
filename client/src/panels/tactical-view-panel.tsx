@@ -701,8 +701,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (response.success) {
         console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
-        // The page will refresh or navigate automatically via the backend
-        window.location.reload();
+        
+        // Instead of full page reload, just refetch the tactical data and room data
+        // The queries will automatically update the UI when new data arrives
+        refetchTactical();
+        
+        // Force a re-render by clearing and re-adding the player entity with new position
+        const currentEntities = combatSystem.getState().entities;
+        currentEntities.forEach((entity) => {
+          combatSystem.removeEntity(entity.id);
+        });
+        
+        console.log(`Room transition complete - tactical view will refresh with new data`);
       }
     } catch (error) {
       console.error(`Failed to move ${direction}:`, error);
@@ -712,7 +722,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         variant: "destructive",
       });
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast]);
+  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical]);
 
   // Proximity-based exit detection - triggers actual room movement
   useEffect(() => {
