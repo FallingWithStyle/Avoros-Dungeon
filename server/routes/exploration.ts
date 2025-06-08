@@ -30,6 +30,13 @@ export function registerExplorationRoutes(app: Express) {
   app.get("/api/crawlers/:id/current-room", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
+      
+      // Try to get cached room data first
+      const cachedRoomData = await storage.redisService.getCurrentRoomData(crawlerId);
+      if (cachedRoomData) {
+        return res.json(cachedRoomData);
+      }
+
       const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
@@ -44,11 +51,16 @@ export function registerExplorationRoutes(app: Express) {
       const availableDirections = await storage.getAvailableDirections(room.id);
       const playersInRoom = await storage.getPlayersInRoom(room.id);
 
-      res.json({
+      const roomData = {
         room,
         availableDirections,
         playersInRoom,
-      });
+      };
+
+      // Cache the result
+      await storage.redisService.setCurrentRoomData(crawlerId, roomData, 180); // 3 minutes TTL
+
+      res.json(roomData);
     } catch (error) {
       console.error("Error fetching current room:", error);
       res.status(500).json({ message: "Failed to fetch current room" });
@@ -129,6 +141,12 @@ export function registerExplorationRoutes(app: Express) {
         message: `${crawler.name} moved ${direction} to ${result.newRoom?.name}`,
         details: null,
       });
+
+      // Invalidate relevant caches when crawler moves
+      await storage.redisService.invalidateCrawlerRoomData(crawlerId);
+      if (result.newRoom) {
+        await storage.redisService.invalidateRoomData(result.newRoom.id);
+      }
 
       res.json({ success: true, newRoom: result.newRoom });
     } catch (error) {

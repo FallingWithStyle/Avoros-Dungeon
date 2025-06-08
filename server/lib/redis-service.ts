@@ -73,17 +73,40 @@ class RedisService {
   }
 
   // Crawler-specific cache methods
-  async getCrawler(crawlerId: number) {
-    return this.get(`crawler:${crawlerId}`);
+  async getCrawler(crawlerId: number): Promise<any | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`crawler:${crawlerId}`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getCrawler error:', error);
+      return null;
+    }
   }
 
-  async setCrawler(crawlerId: number, data: any, ttl: number = 300) {
-    await this.set(`crawler:${crawlerId}`, data, ttl);
+  async setCrawler(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `crawler:${crawlerId}`, 
+        ttlSeconds, 
+        JSON.stringify(data)
+      );
+    } catch (error) {
+      console.error('Redis setCrawler error:', error);
+    }
   }
 
-  async invalidateCrawler(crawlerId: number) {
-    await this.deletePattern(`crawler:${crawlerId}*`);
-    await this.del(`crawlers:leaderboard`);
+  async invalidateCrawler(crawlerId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`crawler:${crawlerId}`);
+    } catch (error) {
+      console.error('Redis invalidateCrawler error:', error);
+    }
   }
 
   // Room and exploration cache methods
@@ -95,12 +118,36 @@ class RedisService {
     await this.set(`crawler:${crawlerId}:explored`, rooms, ttl);
   }
 
-  async getCurrentRoom(crawlerId: number) {
+  async getCurrentRoom(crawlerId: number): Promise<any | null> {
     return this.get(`crawler:${crawlerId}:current-room`);
   }
 
   async setCurrentRoom(crawlerId: number, room: any, ttl: number = 300) {
     await this.set(`crawler:${crawlerId}:current-room`, room, ttl);
+  }
+
+  async getScannedRooms(crawlerId: number, scanRange: number) {
+    return this.get(`crawler:${crawlerId}:scanned:${scanRange}`);
+  }
+
+  async setScannedRooms(crawlerId: number, scanRange: number, rooms: any[], ttl: number = 300) {
+    await this.set(`crawler:${crawlerId}:scanned:${scanRange}`, rooms, ttl);
+  }
+
+  async getFloorBounds(floorId: number) {
+    return this.get(`floor:${floorId}:bounds`);
+  }
+
+  async setFloorBounds(floorId: number, bounds: any, ttl: number = 3600) {
+    await this.set(`floor:${floorId}:bounds`, bounds, ttl);
+  }
+
+  async getFloorRooms(floorId: number) {
+    return this.get(`floor:${floorId}:rooms`);
+  }
+
+  async setFloorRooms(floorId: number, rooms: any[], ttl: number = 3600) {
+    await this.set(`floor:${floorId}:rooms`, rooms, ttl);
   }
 
   async getContentData(key: string): Promise<any> {
@@ -152,6 +199,145 @@ class RedisService {
       await this.redis.setex(`floor_theme:${floorNumber}`, ttl, JSON.stringify(theme));
     } catch (error) {
       console.error('Redis set floor theme error:', error);
+    }
+  }
+
+  async invalidateFloor(floorId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`floor:${floorId}:bounds`);
+      await this.redis?.del(`floor:${floorId}:rooms`);
+    } catch (error) {
+      console.error('Redis invalidateFloor error:', error);
+    }
+  }
+
+  // Tactical view specific cache methods
+  async getCurrentRoomData(crawlerId: number): Promise<any | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`crawler:${crawlerId}:room-data`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getCurrentRoomData error:', error);
+      return null;
+    }
+  }
+
+  async setCurrentRoomData(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `crawler:${crawlerId}:room-data`, 
+        ttlSeconds, 
+        JSON.stringify(data)
+      );
+    } catch (error) {
+      console.error('Redis setCurrentRoomData error:', error);
+    }
+  }
+
+  async getPlayersInRoom(roomId: number): Promise<any[] | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`room:${roomId}:players`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getPlayersInRoom error:', error);
+      return null;
+    }
+  }
+
+  async setPlayersInRoom(roomId: number, players: any[], ttlSeconds = 120): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `room:${roomId}:players`, 
+        ttlSeconds, 
+        JSON.stringify(players)
+      );
+    } catch (error) {
+      console.error('Redis setPlayersInRoom error:', error);
+    }
+  }
+
+  async getFactions(): Promise<any[] | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get('game:factions');
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getFactions error:', error);
+      return null;
+    }
+  }
+
+  async setFactions(factions: any[], ttlSeconds = 1800): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        'game:factions', 
+        ttlSeconds, 
+        JSON.stringify(factions)
+      );
+    } catch (error) {
+      console.error('Redis setFactions error:', error);
+    }
+  }
+
+  async getAvailableDirections(roomId: number): Promise<string[] | null> {
+    if (!this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`room:${roomId}:directions`);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Redis getAvailableDirections error:', error);
+      return null;
+    }
+  }
+
+  async setAvailableDirections(roomId: number, directions: string[], ttlSeconds = 600): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.setex(
+        `room:${roomId}:directions`, 
+        ttlSeconds, 
+        JSON.stringify(directions)
+      );
+    } catch (error) {
+      console.error('Redis setAvailableDirections error:', error);
+    }
+  }
+
+  // Invalidate room-related data when things change
+  async invalidateRoomData(roomId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`room:${roomId}:players`);
+      await this.redis?.del(`room:${roomId}:directions`);
+    } catch (error) {
+      console.error('Redis invalidateRoomData error:', error);
+    }
+  }
+
+  async invalidateCrawlerRoomData(crawlerId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`crawler:${crawlerId}:room-data`);
+      await this.redis?.del(`crawler:${crawlerId}:current-room`);
+    } catch (error) {
+      console.error('Redis invalidateCrawlerRoomData error:', error);
     }
   }
 

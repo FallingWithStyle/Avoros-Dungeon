@@ -71,16 +71,29 @@ export class CrawlerStorage extends BaseStorage {
   }
 
   async getCrawler(id: number): Promise<CrawlerWithDetails | undefined> {
+    // Try to get from cache first
+    try {
+      const cached = await this.redisService.getCrawler(id);
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      // Redis error, continue with database query
+      console.log('Redis cache miss, fetching from database');
+    }
+
     const [result] = await db
       .select({
         crawler: crawlers,
         class: crawlerClasses,
       })
       .from(crawlers)
-      .leftJoin(crawlerClasses, eq(crawlers.classId, crawlerClasses.id))
-      .where(eq(crawlers.id, id));
+      .where(eq(crawlers.id, id))
+      .leftJoin(crawlerClasses, eq(crawlers.classId, crawlerClasses.id));
 
-    if (!result) return undefined;
+    if (!result) {
+      return undefined;
+    }
 
     const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
     const crawlerEffects = Array.isArray(result.crawler.activeEffects) ? result.crawler.activeEffects : [];
@@ -92,13 +105,23 @@ export class CrawlerStorage extends BaseStorage {
 
     const effectiveStats = calculateEffectiveStats(result.crawler, activeEffects);
 
-    return {
+    const crawlerData: CrawlerWithDetails = {
       ...result.crawler,
       ...effectiveStats,
       activeEffects,
       class: result.class!,
       equipment: [],
     };
+
+    // Cache the result for future requests
+    try {
+      await this.redisService.setCrawler(id, crawlerData, 300); // 5 minutes TTL
+    } catch (error) {
+      // Redis error, but don't fail the request
+      console.log('Failed to cache crawler data');
+    }
+
+    return crawlerData;
   }
 
   async updateCrawler(id: number, updates: Partial<Crawler>): Promise<Crawler> {
@@ -107,6 +130,15 @@ export class CrawlerStorage extends BaseStorage {
       .set({ ...updates, lastAction: new Date() })
       .where(eq(crawlers.id, id))
       .returning();
+    
+    // Invalidate cache when crawler is updated
+    try {
+      await this.redisService.invalidateCrawler(id);
+    } catch (error) {
+      // Redis error, but don't fail the request
+      console.log('Failed to invalidate crawler cache');
+    }
+    
     return crawler;
   }
 
@@ -252,7 +284,7 @@ export class CrawlerStorage extends BaseStorage {
   private async generateCrawlerName(species: string = "human", planetType: string = "earth-like"): Promise<string> {
     const { ContentStorage } = await import("./content-storage");
     const contentStorage = new ContentStorage();
-    
+
     const firstName = await contentStorage.getRandomHumanFirstName();
     const lastName = await contentStorage.getRandomHumanLastName();
     return `${firstName} ${lastName}`;
@@ -261,13 +293,13 @@ export class CrawlerStorage extends BaseStorage {
   private async generateCrawlerBackground(): Promise<string> {
     const { ContentStorage } = await import("./content-storage");
     const contentStorage = new ContentStorage();
-    
+
     const job = await contentStorage.getRandomPreDungeonJob();
     const backgroundStory = await contentStorage.getRandomCrawlerBackground("desperate");
     return `Former ${job}. ${backgroundStory}`;
   }
 
-  
+
 
   private async generateStartingEquipment(background: string): Promise<any[]> {
     const survivalGear = [

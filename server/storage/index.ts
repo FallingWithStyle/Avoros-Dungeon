@@ -3,6 +3,7 @@ import { CrawlerStorage } from "./crawler-storage";
 import { ExplorationStorage } from "./exploration-storage";
 import { ContentStorage } from "./content-storage";
 import { CorporationStorage } from "./corporation-storage";
+import { redisService } from "../lib/redis-service";
 
 // Define the IStorage interface here to avoid circular imports
 export interface IStorage {
@@ -10,13 +11,13 @@ export interface IStorage {
   getRandomCompetencies(): Promise<any>;
   getRandomPreDungeonJob(): Promise<any>;
   getStartingEquipment(background: string): Promise<any>;
-  
+
   // User operations
   getUser(id: string): Promise<any>;
   upsertUser(user: any): Promise<any>;
   updateUserCredits(userId: string, amount: number): Promise<any>;
   updateUserActiveCrawler(userId: string, crawlerId: number): Promise<any>;
-  
+
   // Crawler operations
   createCrawler(crawlerData: any): Promise<any>;
   getCrawlersBySponssor(sponsorId: string): Promise<any>;
@@ -25,7 +26,7 @@ export interface IStorage {
   getCrawlerClasses(): Promise<any>;
   regenerateEnergy(crawlerId: number): Promise<any>;
   generateCrawlerCandidates(count?: number): Promise<any>;
-  
+
   // Exploration operations
   createRoom(floorId: number, x: number, y: number, type: string, name: string, description: string): Promise<any>;
   getRoomsForFloor(floorId: number): Promise<any>;
@@ -39,18 +40,18 @@ export interface IStorage {
   getExploredRooms(crawlerId: number): Promise<any>;
   getScannedRooms(crawlerId: number, scanRange: number): Promise<any>;
   getFloorBounds(floorId: number): Promise<any>;
-  
+
   // Season and sponsorship operations
   getCurrentSeason(): Promise<any>;
   canCreatePrimaryCrawler(userId: string): Promise<any>;
   getAvailableSecondarySponsorships(): Promise<any>;
   resetUserPrimarySponsorshipForNewSeason(userId: string, seasonNumber: number): Promise<any>;
-  
+
   // Equipment operations
   getEquipment(): Promise<any>;
   getEquipmentById(id: number): Promise<any>;
   getCrawlerEquipment(crawlerId: number): Promise<any>;
-  
+
   // Encounter operations
   createEncounter(data: any): Promise<any>;
   getActiveEncounter(crawlerId: number): Promise<any>;
@@ -59,24 +60,24 @@ export interface IStorage {
   applyCompetencyBonus(crawlerId: number, competency: string): Promise<any>;
   getFloor(floorNumber: number): Promise<any>;
   getEnemiesForFloor(floorNumber: number): Promise<any>;
-  
+
   // Activity operations
   createActivity(data: any): Promise<any>;
   getRecentActivities(limit?: number): Promise<any>;
-  
+
   // Chat operations
   createChatMessage(data: any): Promise<any>;
   getRecentChatMessages(limit?: number): Promise<any>;
-  
+
   // Leaderboard operations
   getTopCrawlers(limit?: number): Promise<any>;
-  
+
   // Marketplace operations
   getMarketplaceListings(): Promise<any>;
-  
+
   // Combat operations
   processEncounterChoice(encounterId: number, choiceId: string): Promise<any>;
-  
+
   // Debug operations
   resetUserCrawlers(userId: string): Promise<any>;
   resetCrawlerToEntrance(crawlerId: number): Promise<any>;
@@ -91,6 +92,7 @@ export class ModularStorage implements IStorage {
   private explorationStorage = new ExplorationStorage();
   private contentStorage = new ContentStorage();
   private corporationStorage = new CorporationStorage(); // Added corporation storage
+  redisService: typeof redisService = redisService;
 
   // Expose content storage publicly
   get content() {
