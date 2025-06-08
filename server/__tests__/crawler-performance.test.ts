@@ -36,6 +36,7 @@ describe('Crawler Performance Benchmarks', () => {
       credits: 1000,
       isAlive: true,
       competencies: [],
+      abilities: [],
     }).returning();
     
     testCrawlerId = testCrawler.id;

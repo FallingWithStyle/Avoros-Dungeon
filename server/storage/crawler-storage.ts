@@ -83,9 +83,10 @@ export class CrawlerStorage extends BaseStorage {
     if (!result) return undefined;
 
     const { cleanExpiredEffects, calculateEffectiveStats } = await import("@shared/effects");
-    const activeEffects = cleanExpiredEffects(result.crawler.activeEffects || []);
+    const crawlerEffects = Array.isArray(result.crawler.activeEffects) ? result.crawler.activeEffects : [];
+    const activeEffects = cleanExpiredEffects(crawlerEffects);
 
-    if (activeEffects.length !== (result.crawler.activeEffects || []).length) {
+    if (activeEffects.length !== crawlerEffects.length) {
       await this.updateCrawler(id, { activeEffects });
     }
 
@@ -266,14 +267,7 @@ export class CrawlerStorage extends BaseStorage {
     return `Former ${job}. ${backgroundStory}`;
   }
 
-  private shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  }
+  
 
   private async generateStartingEquipment(background: string): Promise<any[]> {
     const survivalGear = [
