@@ -96,11 +96,23 @@ export class TacticalStorage extends BaseStorage {
     }
   }
 
-  async generateAndSaveTacticalData(roomId: number, roomData: any): Promise<TacticalEntity[]> {
-    // Check if we already have positions for this room
-    const existingPositions = await this.getTacticalPositions(roomId);
-    if (existingPositions.length > 0) {
-      return existingPositions;
+  async clearTacticalPositions(roomId: number): Promise<void> {
+    await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
+    console.log(`Cleared tactical positions for room ${roomId}`);
+  }
+
+  async generateAndSaveTacticalData(roomId: number, roomData: any, forceRegenerate: boolean = false): Promise<TacticalEntity[]> {
+    // Check if we already have positions for this room (unless forcing regeneration)
+    if (!forceRegenerate) {
+      const existingPositions = await this.getTacticalPositions(roomId);
+      if (existingPositions.length > 0) {
+        console.log(`Using existing tactical data for room ${roomId}`);
+        return existingPositions;
+      }
+    } else {
+      // Clear existing positions if forcing regeneration
+      await this.clearTacticalPositions(roomId);
+      console.log(`Force regenerating tactical data for room ${roomId}`);
     }
 
     // Generate new positions using the existing logic

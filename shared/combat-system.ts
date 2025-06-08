@@ -779,7 +779,7 @@ export function calculateHitChance(
   const accuracyBonus = attacker.accuracy * 0.02;
   const evasionPenalty = defender.evasion * 0.015;
   const levelDifference = (attacker.level - defender.level) * 0.01;
-  
+
   const hitChance = baseHitChance + accuracyBonus - evasionPenalty + levelDifference;
   return Math.max(0.05, Math.min(0.95, hitChance)); // Clamp between 5% and 95%
 }
