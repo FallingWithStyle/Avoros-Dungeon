@@ -280,4 +280,62 @@ export function registerDebugRoutes(app: Express) {
       res.status(500).json({ message: "Failed to regenerate dungeon" });
     }
   });
+
+  // DEBUG: Spawn hostile mob in current room
+  app.post("/api/debug/spawn-mob/:crawlerId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.crawlerId);
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Get current room
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Crawler is not in any room" 
+        });
+      }
+
+      // Don't spawn mobs in safe rooms
+      if (currentRoom.isSafe || currentRoom.type === "safe" || currentRoom.type === "entrance") {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Cannot spawn hostile mobs in safe areas" 
+        });
+      }
+
+      // Get room data for contextual spawning
+      const roomData = {
+        type: currentRoom.type,
+        environment: currentRoom.environment || "indoor",
+        factionId: currentRoom.factionId
+      };
+
+      // Force spawn a single mob
+      await storage.mobStorage.spawnSingleMob(currentRoom.id, roomData, true);
+
+      // Get the newly spawned mob for response
+      const roomMobs = await storage.mobStorage.getRoomMobs(currentRoom.id);
+      const latestMob = roomMobs[roomMobs.length - 1];
+
+      res.json({
+        success: true,
+        message: "Hostile mob spawned successfully",
+        mobName: latestMob?.mob?.displayName || "Unknown Mob",
+        roomName: currentRoom.name
+      });
+    } catch (error) {
+      console.error("Error spawning mob:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to spawn mob" 
+      });
+    }
+  });
 }
