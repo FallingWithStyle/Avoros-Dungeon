@@ -87,6 +87,17 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async getAvailableDirections(roomId: number): Promise<string[]> {
+    // Try to get from cache first
+    try {
+      const cached = await redisService.getAvailableDirections(roomId);
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      // Redis error, continue with database query
+      console.log('Redis cache miss for available directions, fetching from database');
+    }
+
     const connections = await db
       .select()
       .from(roomConnections)
@@ -97,6 +108,13 @@ export class ExplorationStorage extends BaseStorage {
     const room = await this.getRoom(roomId);
     if (room && room.type === "stairs") {
       directions.push("staircase");
+    }
+
+    // Cache the result (room connections rarely change)
+    try {
+      await redisService.setAvailableDirections(roomId, directions, 600); // 10 minutes TTL
+    } catch (error) {
+      console.log('Failed to cache available directions data');
     }
 
     return directions;
@@ -224,16 +242,48 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
+    // Try to get from cache first
+    try {
+      const cached = await redisService.getPlayersInRoom(roomId);
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      // Redis error, continue with database query
+      console.log('Redis cache miss for players in room, fetching from database');
+    }
+
     const crawlerIds = await db
       .selectDistinct({ crawlerId: crawlerPositions.crawlerId })
       .from(crawlerPositions)
       .where(eq(crawlerPositions.roomId, roomId));
 
     // Note: This would need access to crawler storage to get full details
-    return [];
+    // For now, returning empty array but caching the result
+    const players: CrawlerWithDetails[] = [];
+
+    // Cache the result (players in room changes frequently, short TTL)
+    try {
+      await redisService.setPlayersInRoom(roomId, players, 120); // 2 minutes TTL
+    } catch (error) {
+      console.log('Failed to cache players in room data');
+    }
+
+    return players;
   }
 
   async getFactions(): Promise<Array<{ id: number; name: string; color: string }>> {
+    // Try to get from cache first
+    try {
+      const cached = await redisService.getFactions();
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      // Redis error, continue with database query
+      console.log('Redis cache miss for factions, fetching from database');
+    }
+
     const result = await db
       .select({
         id: factions.id,
@@ -242,11 +292,20 @@ export class ExplorationStorage extends BaseStorage {
       })
       .from(factions);
 
-    return result.map((f) => ({
+    const formattedFactions = result.map((f) => ({
       id: f.id,
       name: f.name,
       color: f.color ?? "#6B7280",
     }));
+
+    // Cache the result (factions rarely change)
+    try {
+      await redisService.setFactions(formattedFactions, 1800); // 30 minutes TTL
+    } catch (error) {
+      console.log('Failed to cache factions data');
+    }
+
+    return formattedFactions;
   }
 
   async getExploredRooms(crawlerId: number): Promise<any[]> {
