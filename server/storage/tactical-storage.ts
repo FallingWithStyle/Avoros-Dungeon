@@ -1,4 +1,3 @@
-
 import { db } from "../db";
 import {
   tacticalPositions,
@@ -121,7 +120,7 @@ export class TacticalStorage extends BaseStorage {
     // Generate mob positions
     if (roomData.type !== "safe" && roomData.type !== "entrance") {
       let mobCount = 0;
-      
+
       if (roomData.type === "boss") {
         mobCount = 1;
       } else if (roomData.factionId) {
@@ -210,5 +209,56 @@ export class TacticalStorage extends BaseStorage {
       x: (gridX + 0.5) * cellWidth,
       y: (gridY + 0.5) * cellHeight,
     };
+  }
+
+  async getTacticalEntities(crawlerId: string | number): Promise<TacticalEntity[]> {
+    try {
+      const crawlerIdNum = Number(crawlerId);
+      if (isNaN(crawlerIdNum)) {
+        console.log(`Invalid crawler ID: ${crawlerId}`);
+        return [];
+      }
+
+      const crawler = await this.crawlerStorage.getCrawler(crawlerIdNum);
+      if (!crawler) {
+        console.log(`Crawler ${crawlerId} not found for tactical entities`);
+        return [];
+      }
+
+      const currentRoom = await this.explorationStorage.getCurrentRoom(crawlerIdNum);
+      if (!currentRoom?.room) {
+        console.log(`No current room found for crawler ${crawlerId}`);
+        return [];
+      }
+
+      // Get all tactical positions for the current room
+      const positions = await db
+        .select()
+        .from(tacticalPositions)
+        .where(eq(tacticalPositions.roomId, currentRoom.room.id));
+
+      return positions.map(pos => {
+        let metadata = {};
+        try {
+          metadata = pos.metadata ? JSON.parse(pos.metadata) : {};
+        } catch (e) {
+          console.warn(`Failed to parse metadata for tactical entity ${pos.entityId}:`, e);
+          metadata = {};
+        }
+
+        return {
+          id: pos.entityId,
+          name: pos.entityType === 'hostile' ? pos.entityId : 'Unknown',
+          type: pos.entityType as 'hostile' | 'loot' | 'environmental',
+          position: { x: pos.x, y: pos.y },
+          hp: pos.entityType === 'hostile' ? 100 : undefined,
+          maxHp: pos.entityType === 'hostile' ? 100 : undefined,
+          metadata
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching tactical entities:", error);
+      return [];
+    }
   }
 }
