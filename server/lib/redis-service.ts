@@ -22,7 +22,7 @@ class RedisService {
 
       this.isConnected = true;
       console.log('Upstash Redis initialized successfully');
-      
+
       // Test the connection immediately
       this.testConnection();
     } catch (error) {
@@ -60,7 +60,7 @@ class RedisService {
     try {
       const data = await this.redis.get(key);
       if (data === null || data === undefined) return null;
-      
+
       // Handle both string and already-parsed data
       if (typeof data === 'string') {
         try {
@@ -129,7 +129,7 @@ class RedisService {
     try {
       const data = await this.redis?.get(`crawler:${crawlerId}`);
       if (!data) return null;
-      
+
       if (typeof data === 'string') {
         return JSON.parse(data);
       }
@@ -302,6 +302,38 @@ class RedisService {
       await this.redis?.del(`tactical:room:${roomId}`);
     } catch (error) {
       console.error('Redis invalidateTacticalPositions error:', error);
+    }
+  }
+
+  async getRoomMobs(roomId: number): Promise<any[] | null> {
+    if (!this.redis || !this.isConnected) return null;
+
+    try {
+      const data = await this.redis?.get(`mobs:${roomId}`);
+      return data ? JSON.parse(data as string) : null;
+    } catch (error) {
+      console.error('Redis getRoomMobs error:', error);
+      return null;
+    }
+  }
+
+  async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
+    if (!this.redis || !this.isConnected) return;
+
+    try {
+      await this.redis?.setex(`mobs:${roomId}`, ttlSeconds, JSON.stringify(mobs));
+    } catch (error) {
+      console.error('Redis setRoomMobs error:', error);
+    }
+  }
+
+  async invalidateRoomMobs(roomId: number): Promise<void> {
+    if (!this.isConnected) return;
+
+    try {
+      await this.redis?.del(`mobs:${roomId}`);
+    } catch (error) {
+      console.error('Redis invalidateRoomMobs error:', error);
     }
   }
 

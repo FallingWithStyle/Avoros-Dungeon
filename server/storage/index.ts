@@ -385,3 +385,7 @@ export class ModularStorage implements IStorage {
 
 // Create and export a singleton instance
 export const storage = await ModularStorage.create();
+
+export { TacticalStorage } from './tactical-storage';
+export { ContentStorage } from './content-storage';
+export { MobStorage } from './mob-storage';

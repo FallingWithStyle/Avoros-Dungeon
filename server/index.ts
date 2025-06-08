@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./init-db";
+import { pool } from "./db";
+import { userStorage, crawlerStorage, explorationStorage, mobStorage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -40,7 +42,7 @@ app.use((req, res, next) => {
 (async () => {
   // Initialize database with game data
   await initializeDatabase();
-  
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -64,6 +66,16 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
+
+  // Start mob respawn background service
+  setInterval(async () => {
+    try {
+      await mobStorage.processRespawns();
+    } catch (error) {
+      console.error('Error processing mob respawns:', error);
+    }
+  }, 5 * 60 * 1000); // Every 5 minutes
+
   server.listen({
     port,
     host: "0.0.0.0",

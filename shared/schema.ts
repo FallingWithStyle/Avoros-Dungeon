@@ -332,6 +332,22 @@ export const enemies = pgTable("enemies", {
   maxFloor: integer("max_floor").default(100),
 });
 
+// Room-specific mob instances
+export const mobs = pgTable("mobs", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").notNull().references(() => rooms.id),
+  enemyId: integer("enemy_id").notNull().references(() => enemies.id),
+  positionX: decimal("position_x", { precision: 5, scale: 2 }).notNull(),
+  positionY: decimal("position_y", { precision: 5, scale: 2 }).notNull(),
+  currentHealth: integer("current_health").notNull(),
+  maxHealth: integer("max_health").notNull(),
+  isAlive: boolean("is_alive").default(true).notNull(),
+  lastKilledAt: timestamp("last_killed_at"),
+  respawnAt: timestamp("respawn_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // NPCs in the dungeon
 export const npcs = pgTable("npcs", {
   id: serial("id").primaryKey(),
@@ -491,6 +507,7 @@ export const roomsRelations = relations(rooms, ({ one, many }) => ({
   connectionsFrom: many(roomConnections, { relationName: "fromRoom" }),
   connectionsTo: many(roomConnections, { relationName: "toRoom" }),
   tacticalPositions: many(tacticalPositions),
+  mobs: many(mobs),
 }));
 
 export const tacticalPositionsRelations = relations(
@@ -535,6 +552,18 @@ export const crawlerPositionsRelations = relations(
 
 export const enemiesRelations = relations(enemies, ({ many }) => ({
   encounters: many(encounters),
+  mobs: many(mobs),
+}));
+
+export const mobsRelations = relations(mobs, ({ one }) => ({
+  room: one(rooms, {
+    fields: [mobs.roomId],
+    references: [rooms.id],
+  }),
+  enemy: one(enemies, {
+    fields: [mobs.enemyId],
+    references: [enemies.id],
+  }),
 }));
 
 export const encountersRelations = relations(encounters, ({ one }) => ({
@@ -650,6 +679,12 @@ export const insertMarketplaceListingSchema = createInsertSchema(
   createdAt: true,
 });
 
+export const insertMobSchema = createInsertSchema(mobs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertSeasonSchema = createInsertSchema(seasons).omit({
   id: true,
   createdAt: true,
@@ -702,6 +737,7 @@ export type Activity = typeof activities.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
 export type Season = typeof seasons.$inferSelect;
+export type Mob = typeof mobs.$inferSelect;
 
 // Extended types with relations
 export type CrawlerWithDetails = Crawler & {
