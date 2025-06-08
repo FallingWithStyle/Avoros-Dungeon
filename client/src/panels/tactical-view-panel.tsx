@@ -664,7 +664,31 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
       console.log(`Cleared all entities for room ${currentRoomId}`);
     }
-  }, [roomData?.room, lastRoomId]);
+
+    // Always ensure player entity exists
+    const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
+    if (!existingPlayer) {
+      // Get last movement direction from session storage to position player appropriately
+      const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
+      
+      const playerEntity: CombatEntity = {
+        id: "player",
+        name: crawler.name,
+        type: "player",
+        hp: crawler.health || 100,
+        maxHp: crawler.maxHealth || 100,
+        attack: 20, // Base attack for player
+        defense: 10, // Base defense for player
+        speed: 15,
+        position: combatSystem.getEntryPosition(lastDirection),
+        entryDirection: lastDirection,
+      };
+
+      combatSystem.addEntity(playerEntity);
+      combatSystem.selectEntity("player"); // Auto-select the player
+      console.log(`Added player entity at position for room ${currentRoomId}`, playerEntity.position);
+    }
+  }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
 
   // Separate effect for tactical entities to avoid conflicts
   useEffect(() => {
