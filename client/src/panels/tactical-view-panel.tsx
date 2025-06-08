@@ -1426,24 +1426,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
 
-  const handleMove = useCallback((direction: string) => {
-    console.log(`Moving ${direction}`);
-    // Store the opposite direction - where the player came FROM for the next room
-    const oppositeDirection = {
-      north: "south",
-      south: "north", 
-      east: "west",
-      west: "east"
-    }[direction];
-    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
-    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
-    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
-  }, [crawler.id]);
-
-
-
-
-
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
