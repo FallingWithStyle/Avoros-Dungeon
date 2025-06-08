@@ -84,8 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Debug routes (if enabled)
-  app.use("/api/debug", debugRoutes);
+  // Debug routes are already registered above with registerDebugRoutes(app)
 
   // Redis status endpoint
   app.get("/api/system/redis-status", async (req, res) => {
