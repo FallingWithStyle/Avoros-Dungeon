@@ -851,7 +851,7 @@ function ExpandedMapControls() {
     expandedMapScale = Math.min(expandedMapScale * 1.2, 3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
-  const zoomOut() => {
+  const zoomOut = () => {
     expandedMapScale = Math.max(expandedMapScale / 1.2, 0.3);
     expandedMapSetters?.setScale(expandedMapScale);
   };
