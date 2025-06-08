@@ -245,8 +245,8 @@ export function registerCrawlerRoutes(app: Express) {
       const crawlerId = parseInt(req.params.crawlerId);
       console.log(`=== TACTICAL DATA REQUEST for crawler ${crawlerId} ===`);
 
-      // Get current room
-      const currentRoom = await storage.explorationStorage.getCrawlerCurrentRoom(crawlerId);
+      // Get current room using the main storage interface
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
         console.log(`No current room found for crawler ${crawlerId}`);
         return res.status(404).json({ error: "Crawler not found or not in a room" });
@@ -255,17 +255,16 @@ export function registerCrawlerRoutes(app: Express) {
       console.log(`Current room: ${currentRoom.name} (ID: ${currentRoom.id})`);
 
       // Get all players in the current room
-      const playersInRoom = await storage.explorationStorage.getPlayersInRoom(currentRoom.id);
+      const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
       console.log(`Players in room: ${playersInRoom.length}`);
 
       // Get available directions
-      const connections = await storage.explorationStorage.getRoomConnections(currentRoom.id);
-      const availableDirections = connections.map(conn => conn.direction);
+      const availableDirections = await storage.getAvailableDirections(currentRoom.id);
       console.log(`Available directions: ${availableDirections.join(', ')}`);
 
       // Generate or get tactical entities for this room
       console.log(`Generating tactical data for room ${currentRoom.id}...`);
-      const tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(
+      const tacticalEntities = await storage.generateAndSaveTacticalData(
         currentRoom.id, 
         currentRoom
       );
