@@ -566,13 +566,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       console.log("Combat state changed", state);
-      
+
       // Clear active action mode when combat ends
       if (!state.isInCombat && combatState.isInCombat && activeActionMode) {
         console.log("Combat ended - clearing active action mode");
         setActiveActionMode(null);
       }
-      
+
       setCombatState(state);
     });
     return unsubscribe;
@@ -643,32 +643,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [hotbarActions]);
 
-  // Update combat system when room data changes
+  // Update room data and player position when room changes
   useEffect(() => {
     if (!roomData?.room) return;
 
     const currentRoomId = roomData.room.id;
-
-    // Only proceed if we have a valid room
-    let entryDirection: "north" | "south" | "east" | "west" | null = null;
-    let shouldClearEntities = false;
-
-    // Check if room changed
-    if (lastRoomId !== null && lastRoomId !== currentRoomId) {
-      shouldClearEntities = true;
-
-      // Get movement direction from storage
-      const storedDirection = sessionStorage.getItem("lastMovementDirection");
-      if (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) {
-        entryDirection = storedDirection as "north" | "south" | "east" | "west";
-        sessionStorage.removeItem("lastMovementDirection");
-      }
-
-      console.log(`Room changed from ${lastRoomId} to ${currentRoomId}, will clear entities`);
-    }
+    const shouldClearEntities = lastRoomId !== null && lastRoomId !== currentRoomId;
 
     // Update lastRoomId
     setLastRoomId(currentRoomId);
+
+    // Update combat system with current room data for safe room detection
+    combatSystem.setCurrentRoomData(roomData.room);
 
     // Clear ALL entities when room changes, then rebuild from scratch
     if (shouldClearEntities || lastRoomId === null) {
@@ -678,35 +664,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
       console.log(`Cleared all entities for room ${currentRoomId}`);
     }
-
-    // Always ensure we have the current player entity for this room
-    const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
-
-    if (!existingPlayer) {
-      // Calculate entry position for the party
-      const partyEntryPositions = getPartyEntryPositions(
-        entryDirection,
-        roomData.playersInRoom.length + 1,
-      );
-
-      // Add main player entity
-      const playerEntity: CombatEntity = {
-        id: "player",
-        name: crawler.name,
-        type: "player",
-        hp: crawler.hp,
-        maxHp: crawler.maxHp,
-        attack: crawler.attack,
-        defense: crawler.defense,
-        speed: crawler.speed,
-        position: partyEntryPositions[0],
-        entryDirection,
-      };
-
-      combatSystem.addEntity(playerEntity);
-      console.log(`Added player entity for room ${currentRoomId}`);
-    }
-  }, [roomData?.room?.id, lastRoomId, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed]);
+  }, [roomData?.room, lastRoomId]);
 
   // Separate effect for tactical entities to avoid conflicts
   useEffect(() => {
@@ -719,12 +677,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const staleEntities = currentEntities.filter(entity => {
       // Keep the player entity
       if (entity.id === "player") return false;
-      
+
       // Remove any tactical entities that don't match the current room ID
       if (entity.type === "hostile" || entity.type === "neutral") {
         return !entity.id.includes(`-${currentRoomId}-`);
       }
-      
+
       return false;
     });
 

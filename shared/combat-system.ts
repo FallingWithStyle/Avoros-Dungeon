@@ -50,6 +50,7 @@ export class CombatSystem {
   private listeners: Set<(state: CombatState) => void> = new Set();
   private actionCooldowns: Map<string, number> = new Map();
   private combatInterval: NodeJS.Timeout | null = null;
+  private currentRoomData: any = null;
 
   constructor() {
     this.state = {
@@ -204,6 +205,12 @@ export class CombatSystem {
     const action = this.actionDefinitions.get(actionId);
 
     if (!entity || !action) return false;
+
+    // Prevent attack actions in safe rooms
+    if (action.type === 'attack' && this.isCurrentRoomSafe()) {
+      console.log('Cannot attack in a safe room');
+      return false;
+    }
 
     // Check if action is on cooldown
     const now = Date.now();
@@ -431,9 +438,12 @@ export class CombatSystem {
     const hasHostiles = hostileEntities.length > 0;
     const hasDetectedHostiles = hostileEntities.some(e => e.hasDetectedPlayer);
 
-    if (hasDetectedHostiles && !this.state.isInCombat) {
+    // Check if we're in a safe room - if so, don't start combat
+    const isInSafeRoom = this.isCurrentRoomSafe();
+
+    if (hasDetectedHostiles && !this.state.isInCombat && !isInSafeRoom) {
       this.startCombat();
-    } else if (!hasHostiles && this.state.isInCombat) {
+    } else if ((!hasHostiles || isInSafeRoom) && this.state.isInCombat) {
       this.endCombat();
     }
   }
@@ -667,6 +677,19 @@ export class CombatSystem {
       console.log(`Player positioned at ${newPosition.x}, ${newPosition.y} after entering from ${direction}`);
       this.notifyListeners();
     }
+  }
+
+  // Safe room management
+  setCurrentRoomData(roomData: any): void {
+    this.currentRoomData = roomData;
+    console.log('Combat system updated room data:', { 
+      type: roomData?.type, 
+      isSafe: roomData?.isSafe 
+    });
+  }
+
+  isCurrentRoomSafe(): boolean {
+    return this.currentRoomData?.type === 'safe' || this.currentRoomData?.isSafe === true;
   }
 
   // Define available actions for each entity type
