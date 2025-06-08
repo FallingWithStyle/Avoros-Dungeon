@@ -638,7 +638,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Update combat system when room data changes
   useEffect(() => {
-    if (roomData) {
+    if (roomData && roomData.room) {
       // Detect room change and calculate entry direction
       let entryDirection: "north" | "south" | "east" | "west" | null = null;
 
@@ -657,21 +657,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           // Clear the stored direction after using it
           sessionStorage.removeItem("lastMovementDirection");
         }
+
+        // Clear ALL entities immediately when room changes
+        const currentEntities = combatSystem.getState().entities;
+        currentEntities.forEach((entity) => {
+          combatSystem.removeEntity(entity.id);
+        });
+        
+        console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, cleared all entities`);
       }
 
       setLastRoomId(roomData.room.id);
-
-      // Clear existing entities except player and party members
-      const currentEntities = combatSystem.getState().entities;
-      currentEntities.forEach((entity) => {
-        if (
-          !entity.id.startsWith("player") &&
-          !entity.id.startsWith("party-") &&
-          !entity.id.startsWith("companion-")
-        ) {
-          combatSystem.removeEntity(entity.id);
-        }
-      });
 
       // Calculate entry position for the party
       const partyEntryPositions = getPartyEntryPositions(
@@ -693,18 +689,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         entryDirection,
       };
 
-      if (!currentEntities.find((e) => e.id === "player")) {
-        combatSystem.addEntity(playerEntity);
-      } else {
-        combatSystem.updateEntity("player", playerEntity);
-      }
+      combatSystem.addEntity(playerEntity);
+      console.log(`Added player entity for room ${roomData.room.id}`);
 
-      // Add room entities based on persistent tactical data
-      if (tacticalData?.tacticalEntities) {
+      // Add room entities based on persistent tactical data - but only if we have tactical data
+      if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
+        console.log(`Adding ${tacticalData.tacticalEntities.length} tactical entities for room ${roomData.room.id}`);
         tacticalData.tacticalEntities.forEach((entity, index) => {
           if (entity.type === 'mob') {
             const mobEntity: CombatEntity = {
-              id: `mob-${index}`,
+              id: `mob-${roomData.room.id}-${index}`, // Include room ID to prevent conflicts
               name: entity.name,
               type: "hostile",
               hp: entity.data.hp || 100,
@@ -717,7 +711,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             combatSystem.addEntity(mobEntity);
           } else if (entity.type === 'npc') {
             const npcEntity: CombatEntity = {
-              id: `npc-${index}`,
+              id: `npc-${roomData.room.id}-${index}`, // Include room ID to prevent conflicts
               name: entity.name,
               type: "neutral",
               hp: 100,
@@ -730,9 +724,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             combatSystem.addEntity(npcEntity);
           }
         });
+      } else {
+        console.log(`No tactical entities available for room ${roomData.room.id}`);
       }
     }
-  }, [roomData?.room.id, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed, tacticalData?.tacticalEntities, lastRoomId]);
+  }, [roomData?.room?.id, tacticalData?.tacticalEntities, crawler.id, crawler.name, crawler.hp, crawler.maxHp, crawler.attack, crawler.defense, crawler.speed, lastRoomId]);
 
   // NON-HOOK FUNCTIONS DEFINED INSIDE COMPONENT (NO STATE/HOOK DEPENDENCIES)
   const getCooldownPercentage = (actionId: string): number => {
