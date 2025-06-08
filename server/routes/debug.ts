@@ -337,8 +337,8 @@ export function registerDebugRoutes(app: Express) {
       const mobsBefore = await storage.mobStorage.getRoomMobs(currentRoom.id);
       console.log('📊 Mobs before spawn:', mobsBefore.length);
 
-      // Force spawn a single mob
-      await storage.mobStorage.spawnSingleMob(currentRoom.id, roomData, true);
+      // Force spawn a single mob with debug flag
+      await storage.mobStorage.spawnSingleMob(currentRoom.id, roomData, true, true);
 
       // Get mobs after spawning
       const mobsAfter = await storage.mobStorage.getRoomMobs(currentRoom.id);

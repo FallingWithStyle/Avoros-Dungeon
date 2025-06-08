@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -5,10 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import CrawlerStatusPanel from "@/panels/crawler-status-panel";
 import FloorInfoPanel from "@/panels/floor-info-panel";
-import NavigationPanel from "@/panels/navigation-panel";
-import MapPanel from "@/panels/map-panel";
 import TacticalViewPanel from "@/panels/tactical-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
+import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
@@ -103,22 +103,21 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       {/* Main Content - 3 Column Layout */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Crawler Status & Equipment */}
+          {/* Left Column - Combined Status & Equipment */}
           <div className="space-y-6">
             <CrawlerStatusPanel crawler={crawler} />
           </div>
 
-          {/* Middle Column - Room Navigation & Tactical View */}
+          {/* Middle Column - Tactical View with Integrated Navigation */}
           <div className="space-y-6">
-            <NavigationPanel crawler={crawler} energyDisabled={energyDisabled} />
             <TacticalViewPanel crawler={crawler} />
-            <RoomEventsPanel crawler={crawler} />
           </div>
 
-          {/* Right Column - Floor Info & Mini-map */}
+          {/* Right Column - Floor Info, Map & Events Combined */}
           <div className="space-y-6">
             <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
-            {crawler && <MapPanel crawler={crawler} />}
+            <DungeonMap crawler={crawler} />
+            <RoomEventsPanel crawler={crawler} />
           </div>
         </div>
       </div>

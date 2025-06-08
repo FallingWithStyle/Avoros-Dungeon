@@ -1,16 +1,23 @@
+export type RoomEventType = 
+  | "movement" 
+  | "combat" 
+  | "discovery" 
+  | "interaction" 
+  | "status"
+  | "death";
 
 export interface RoomEvent {
   id: string;
-  timestamp: number;
-  type: "movement" | "combat" | "discovery" | "interaction" | "status";
+  type: RoomEventType;
   message: string;
+  timestamp: number;
+  priority: "low" | "medium" | "high";
+  direction?: "north" | "south" | "east" | "west";
+  damage?: number;
   entityId?: string;
   entityName?: string;
-  targetId?: string;
-  targetName?: string;
-  damage?: number;
-  direction?: string;
-  priority: "low" | "medium" | "high";
+  killedBy?: string;
+  victimType?: "player" | "mob" | "npc";
 }
 
 type EventsSubscriber = (events: RoomEvent[]) => void;
@@ -25,7 +32,7 @@ class EventsSystem {
     this.subscribers.add(callback);
     // Send current events immediately
     callback([...this.events]);
-    
+
     return () => {
       this.subscribers.delete(callback);
     };
@@ -38,7 +45,7 @@ class EventsSystem {
   addEvent(event: RoomEvent) {
     // Avoid duplicates
     if (this.events.find(e => e.id === event.id)) return;
-    
+
     this.events.push(event);
     this.notifySubscribers();
   }
@@ -63,7 +70,7 @@ class EventsSystem {
     if (typeof window !== 'undefined') {
       storedDirection = sessionStorage.getItem("lastMovementDirection");
     }
-    
+
     let entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered the room`;
 
     if (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) {
@@ -97,10 +104,10 @@ class EventsSystem {
   private generateDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
     // Only generate events in client environment
     if (typeof window === 'undefined') return;
-    
+
     import('./combat-system').then(({ combatSystem }) => {
       const combatState = combatSystem.getState();
-      
+
       combatState.entities.forEach((entity) => {
         if (entity.id !== "player") {
           this.addEvent({
@@ -125,7 +132,7 @@ class EventsSystem {
   onCombatAction(action: any, entityId: string, targetId?: string, damage?: number) {
     // Only generate events in client environment
     if (typeof window === 'undefined') return;
-    
+
     import('./combat-system').then(({ combatSystem }) => {
       const combatState = combatSystem.getState();
       const entity = combatState.entities.find(e => e.id === entityId);
@@ -134,7 +141,7 @@ class EventsSystem {
       if (!entity) return;
 
       const eventId = `action-${entityId}-${Date.now()}`;
-      
+
       let message: string;
       let eventType: "movement" | "combat" | "discovery" | "interaction" | "status";
       let priority: "low" | "medium" | "high";
@@ -165,6 +172,70 @@ class EventsSystem {
       });
     }).catch(() => {
       // Combat system not available, skip
+    });
+  }
+
+  // Combat events
+  onCombatStart(attackerName: string, defenderName: string): void {
+    this.addEvent({
+      type: "combat",
+      message: `${attackerName} attacks ${defenderName}!`,
+      priority: "medium",
+    });
+  }
+
+  onCombatDamage(attackerName: string, defenderName: string, damage: number): void {
+    this.addEvent({
+      type: "combat",
+      message: `${attackerName} deals damage to ${defenderName}`,
+      priority: "medium",
+      damage,
+    });
+  }
+
+  onCombatEnd(winnerName: string): void {
+    this.addEvent({
+      type: "combat",
+      message: `Combat ends - ${winnerName} is victorious!`,
+      priority: "high",
+    });
+  }
+
+  // Death events
+  onMobDeath(mobName: string, killerName: string): void {
+    this.addEvent({
+      type: "death",
+      message: `${mobName} has been slain by ${killerName}!`,
+      priority: "high",
+      entityName: mobName,
+      killedBy: killerName,
+      victimType: "mob",
+    });
+  }
+
+  onCrawlerDeath(crawlerName: string, killerName?: string): void {
+    const message = killerName 
+      ? `${crawlerName} has been killed by ${killerName}!`
+      : `${crawlerName} has died!`;
+
+    this.addEvent({
+      type: "death",
+      message,
+      priority: "high",
+      entityName: crawlerName,
+      killedBy: killerName,
+      victimType: "player",
+    });
+  }
+
+  onNpcDeath(npcName: string, killerName: string): void {
+    this.addEvent({
+      type: "death",
+      message: `${npcName} has been killed by ${killerName}!`,
+      priority: "high",
+      entityName: npcName,
+      killedBy: killerName,
+      victimType: "npc",
     });
   }
 

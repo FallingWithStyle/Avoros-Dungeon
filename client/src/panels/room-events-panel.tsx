@@ -12,6 +12,7 @@ import {
   Users,
   Footprints,
   Heart,
+  Skull,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -72,13 +73,22 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         if (event.direction === "west") return <ArrowLeft className="w-3 h-3" />;
         return <Footprints className="w-3 h-3" />;
       case "combat":
-        return <Sword className="w-3 h-3" />;
+        // Check if it's a friendly outgoing attack (player attacking something)
+        if (event.message.includes(`${crawler.name} attacks`) || 
+            event.message.includes(`${crawler.name} uses`) ||
+            event.message.includes(`${crawler.name} casts`)) {
+          return <Sword className="w-3 h-3 text-blue-400" />; // Blue icon for friendly attacks
+        }
+        // Red icon for enemy attacks
+        return <Sword className="w-3 h-3 text-red-400" />;
       case "discovery":
         return <Eye className="w-3 h-3" />;
       case "interaction":
         return <Users className="w-3 h-3" />;
       case "status":
         return <Heart className="w-3 h-3" />;
+      case "death":
+        return <Skull className="w-3 h-3" />;
       default:
         return <Clock className="w-3 h-3" />;
     }
@@ -87,7 +97,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   const getEventColor = (event: RoomEvent) => {
     switch (event.type) {
       case "combat":
-        return "text-red-400";
+        return "text-red-400"; // Red text for all combat events
       case "discovery":
         return event.priority === "high" ? "text-red-400" : "text-green-400";
       case "movement":
@@ -96,6 +106,8 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         return "text-purple-400";
       case "status":
         return "text-yellow-400";
+      case "death":
+        return event.victimType === "player" ? "text-red-600" : "text-orange-400";
       default:
         return "text-slate-300";
     }
@@ -115,6 +127,10 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         return "bg-purple-500/20 text-purple-300 border-purple-500/30";
       case "status":
         return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+      case "death":
+        return event.victimType === "player" 
+          ? "bg-red-600/20 text-red-300 border-red-600/30"
+          : "bg-orange-600/20 text-orange-300 border-orange-600/30";
       default:
         return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
@@ -179,6 +195,14 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
                         combat
                       </Badge>
                     )}
+                    {event.type === "death" && (
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${getEventBadgeStyle(event)}`}
+                      >
+                        {event.victimType === "player" ? "player death" : "death"}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               ))
@@ -211,6 +235,10 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
             <span className="flex items-center gap-1">
               <Heart className="w-3 h-3 text-yellow-400" />
               Status
+            </span>
+            <span className="flex items-center gap-1">
+              <Skull className="w-3 h-3 text-orange-400" />
+              Death
             </span>
           </div>
         </div>

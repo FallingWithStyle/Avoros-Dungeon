@@ -143,9 +143,16 @@ export class MobStorage extends BaseStorage {
       );
 
     if (mobsToRespawn.length > 0) {
-      console.log(`Respawning ${mobsToRespawn.length} mobs`);
+      console.log(`Found ${mobsToRespawn.length} potential mobs to respawn`);
       
-      for (const mob of mobsToRespawn) {
+      // Filter out debug mobs from respawning
+      const normalMobsToRespawn = mobsToRespawn.filter(mob => 
+        !mob.displayName.startsWith('[Debug]')
+      );
+      
+      console.log(`Respawning ${normalMobsToRespawn.length} normal mobs (filtered out ${mobsToRespawn.length - normalMobsToRespawn.length} debug mobs)`);
+      
+      for (const mob of normalMobsToRespawn) {
         await db
           .update(mobs)
           .set({
@@ -157,11 +164,33 @@ export class MobStorage extends BaseStorage {
           })
           .where(eq(mobs.id, mob.id));
 
+        console.log(`Respawned normal mob: ${mob.displayName}`);
+
         // Invalidate cache for this room
         try {
           await redisService.invalidateRoomMobs(mob.roomId);
         } catch (error) {
           console.log('Failed to invalidate room mobs cache');
+        }
+      }
+      
+      // Clean up any debug mobs that somehow got respawn times set
+      const debugMobsWithRespawn = mobsToRespawn.filter(mob => 
+        mob.displayName.startsWith('[Debug]')
+      );
+      
+      if (debugMobsWithRespawn.length > 0) {
+        console.log(`Cleaning up ${debugMobsWithRespawn.length} debug mobs with respawn times`);
+        for (const debugMob of debugMobsWithRespawn) {
+          await db
+            .update(mobs)
+            .set({
+              respawnAt: null,
+              updatedAt: new Date()
+            })
+            .where(eq(mobs.id, debugMob.id));
+          
+          console.log(`Cleaned up debug mob respawn time: ${debugMob.displayName}`);
         }
       }
     }
@@ -172,11 +201,24 @@ export class MobStorage extends BaseStorage {
     if (mob.length === 0) return;
 
     const mobData = mob[0];
-    const config = this.getMobSpawnConfig(mobData.roomId);
-    const respawnHours = config?.respawnHours || 4;
     
-    const respawnAt = new Date();
-    respawnAt.setHours(respawnAt.getHours() + respawnHours);
+    // Check if this is a debug spawned mob (identified by [Debug] prefix in displayName)
+    const isDebugMob = mobData.displayName.startsWith('[Debug]');
+    
+    let respawnAt = null;
+    
+    if (!isDebugMob) {
+      // Only set respawn time for normal spawned mobs
+      const config = this.getMobSpawnConfig(mobData.roomId);
+      const respawnHours = config?.respawnHours || 4;
+      
+      respawnAt = new Date();
+      respawnAt.setHours(respawnAt.getHours() + respawnHours);
+      
+      console.log(`Normal mob ${mobData.displayName} killed - will respawn in ${respawnHours} hours`);
+    } else {
+      console.log(`Debug mob ${mobData.displayName} killed - will NOT respawn`);
+    }
 
     await db
       .update(mobs)
@@ -184,7 +226,7 @@ export class MobStorage extends BaseStorage {
         isAlive: false,
         currentHealth: 0,
         lastKilledAt: new Date(),
-        respawnAt: respawnAt,
+        respawnAt: respawnAt, // null for debug mobs, future date for normal mobs
         updatedAt: new Date()
       })
       .where(eq(mobs.id, mobId));
@@ -554,8 +596,8 @@ export class MobStorage extends BaseStorage {
     return this.baseMobSpawnConfigs.find(config => config.roomType === roomType) || null;
   }
 
-  async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false): Promise<void> {
-    console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn);
+  async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false, isDebugSpawn: boolean = false): Promise<void> {
+    console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn, 'isDebugSpawn:', isDebugSpawn);
 
     try {
       // Validate inputs
@@ -601,7 +643,7 @@ export class MobStorage extends BaseStorage {
       const insertData = {
         roomId,
         enemyId: mobData.mobTypeId,
-        displayName: mobData.displayName,
+        displayName: isDebugSpawn ? `[Debug] ${mobData.displayName}` : mobData.displayName,
         rarity: mobData.rarity || 'common',
         positionX: position.x.toString(),
         positionY: position.y.toString(),
@@ -610,6 +652,7 @@ export class MobStorage extends BaseStorage {
         isAlive: true,
         disposition: -75, // More hostile for debug spawned mobs
         isActive: true,
+        // Add debug flag in the displayName or use a specific field if available
         createdAt: new Date(),
         updatedAt: new Date()
       };
