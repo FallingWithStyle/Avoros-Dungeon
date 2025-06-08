@@ -222,5 +222,31 @@ export class TacticalStorage extends BaseStorage {
     };
   }
 
-  
+  async getTacticalEntities(crawlerId: string | number): Promise<TacticalEntity[]> {
+    try {
+      const crawlerIdNum = Number(crawlerId);
+      if (isNaN(crawlerIdNum)) {
+        console.log(`Invalid crawler ID: ${crawlerId}`);
+        return [];
+      }
+
+      const crawler = await this.crawlerStorage.getCrawler(crawlerIdNum);
+      if (!crawler) {
+        console.log(`Crawler ${crawlerId} not found for tactical entities`);
+        return [];
+      }
+
+      const currentRoom = await this.explorationStorage.getCrawlerCurrentRoom(crawlerIdNum);
+      if (!currentRoom) {
+        console.log(`No current room found for crawler ${crawlerId}`);
+        return [];
+      }
+
+      // Get tactical entities for the current room
+      return await this.getTacticalPositions(currentRoom.id);
+    } catch (error) {
+      console.error("Error fetching tactical entities:", error);
+      return [];
+    }
+  }
 }

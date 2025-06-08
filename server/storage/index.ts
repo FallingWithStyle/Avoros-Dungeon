@@ -370,6 +370,10 @@ export class ModularStorage implements IStorage {
     return this.tacticalStorage.generateAndSaveTacticalData(roomId, roomData);
   }
 
+  async getTacticalEntities(crawlerId: string | number) {
+    return this.tacticalStorage.getTacticalEntities(crawlerId);
+  }
+
   // Expose tactical storage for direct access
   get tacticalStorage() {
     return this._tacticalStorage;
