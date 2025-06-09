@@ -825,12 +825,13 @@ export class CombatSystem {
     }
   }
 
-  // Always ensure player exists with proper positioning
+  // Method to ensure player exists with proper positioning
+  ensurePlayerExists(): void {
     let playerEntity = this.state.entities.find(e => e.id === "player");
     if (!playerEntity) {
       // Determine entry position based on movement direction
       let entryPosition = { x: 50, y: 50 }; // Default center
-      let entryDirection = "north"; // Default facing
+      let entryDirection: 'north' | 'south' | 'east' | 'west' = "north"; // Default facing
 
       // Check for stored entry direction first (more immediate)
       const storedEntryDirection = typeof window !== 'undefined' 
@@ -846,7 +847,8 @@ export class CombatSystem {
 
       if (effectiveDirection) {
         entryPosition = this.getEntryPosition(effectiveDirection);
-        entryDirection = effectiveDirection;        // Clear both stored directions after using them
+        entryDirection = effectiveDirection as 'north' | 'south' | 'east' | 'west';
+        // Clear both stored directions after using them
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('entryDirection');
           sessionStorage.removeItem('lastMovementDirection');
@@ -860,11 +862,15 @@ export class CombatSystem {
         position: entryPosition,
         hp: 100,
         maxHp: 100,
+        attack: 10,
+        defense: 5,
+        speed: 10,
         isSelected: false,
         facing: entryDirection
       };
       this.state.entities.push(playerEntity);
     }
+  }
 
   // Safe room management
   setCurrentRoomData(roomData: any): void {
