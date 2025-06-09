@@ -852,7 +852,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
         if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
 
-        return false;```text
+```text
 
       };
 
@@ -861,7 +861,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Allow movement beyond normal boundaries for door transitions
         newX = Math.max(-5, Math.min(105, newX)); // Extended boundary for door crossing
         newY = Math.max(-5, Math.min(105, newY));
-        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);;
+        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
       } else {
         // Normal boundary clamping
         newX = Math.max(2, Math.min(98, newX)); // Leave small border
