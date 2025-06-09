@@ -311,14 +311,14 @@ class RedisService {
     try {
       const data = await this.redis?.get(`mobs:${roomId}`);
       if (!data || data === null || data === undefined) return null;
-      
+
       // Handle empty string or malformed data
       if (typeof data === 'string' && data.trim() === '') {
         console.log(`Empty mob data for room ${roomId}, clearing cache`);
         await this.redis?.del(`mobs:${roomId}`);
         return null;
       }
-      
+
       try {
         return JSON.parse(data as string);
       } catch (parseError) {
@@ -336,9 +336,14 @@ class RedisService {
     if (!this.redis || !this.isConnected) return;
 
     try {
-      await this.redis?.setex(`mobs:${roomId}`, ttlSeconds, JSON.stringify(mobs));
+      // Ensure we're properly serializing the data
+      const serializedData = JSON.stringify(mobs);
+      console.log(`Storing mobs data for room ${roomId}: ${serializedData.length} characters`);
+      await this.redis.set(`mobs:${roomId}`, serializedData, 'EX', ttlSeconds);
     } catch (error) {
       console.error('Redis setRoomMobs error:', error);
+      // If JSON serialization fails, don't store anything
+      console.error('Failed to serialize mobs data:', mobs);
     }
   }
 

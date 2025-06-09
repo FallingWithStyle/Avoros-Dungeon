@@ -438,16 +438,28 @@ export class MobStorage extends BaseStorage {
     console.log('🎯 Selected mob category:', selectedMobCategory);
     
     // Try to find mob types that match the selected category in their name or description
-    let availableMobTypes = await db
-      .select()
-      .from(mobTypes)
-      .where(eq(mobTypes.minFloor, 1)); // TODO: Filter by actual floor
+    let availableMobTypes;
+    try {
+      availableMobTypes = await db
+        .select()
+        .from(mobTypes);
+        // Removed the floor filter temporarily to get all available types
 
-    console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
-      id: mt.id,
-      name: mt.name,
-      description: mt.description
-    })));
+      console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
+        id: mt.id,
+        name: mt.name,
+        description: mt.description,
+        minFloor: mt.minFloor
+      })));
+
+      if (availableMobTypes.length === 0) {
+        console.log('❌ No mob types exist in database at all!');
+        return null;
+      }
+    } catch (dbError) {
+      console.error('❌ Database error fetching mob types:', dbError);
+      return null;
+    }
 
     // Filter mob types by selected category if possible
     const filteredMobTypes = availableMobTypes.filter(mobTypeRecord => 
@@ -471,6 +483,7 @@ export class MobStorage extends BaseStorage {
     
     if (mobTypesToChoose.length === 0) {
       console.log('❌ No mob types available to choose from!');
+      console.error('This should not happen since we have mob types in the database');
       return null;
     }
 
