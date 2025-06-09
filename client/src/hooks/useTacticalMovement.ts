@@ -172,27 +172,27 @@ export function useTacticalMovement({
     // Define gate zones (center area of each wall)
     const gateZoneMin = 35;
     const gateZoneMax = 65;
-    const edgeThreshold = 10; // Increased threshold for more reliable detection
-    const minMovement = 0.1; // Lower minimum movement required
+    const boundaryThreshold = 5; // More lenient - trigger if even slightly past boundary
+    const minMovement = 0.01; // Very small movement required
 
     let triggerDirection: string | null = null;
 
-    // Check if player is in a gate zone AND actively moving through the door (not just near it)
-    // Also check if player has moved beyond the normal boundary (indicating door crossing)
-    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && (y <= edgeThreshold || y < 0) && deltaY < -minMovement) {
-      // Moving north through north gate - must be actively moving north
+    // Check if player has crossed past any boundary where an exit exists
+    // Much more lenient - if there's an exit and player is past the boundary, transition
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= boundaryThreshold) {
+      // Player is past north boundary and in gate zone
       triggerDirection = "north";
     } 
-    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && (y >= (100 - edgeThreshold) || y > 100) && deltaY > minMovement) {
-      // Moving south through south gate - must be actively moving south
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - boundaryThreshold)) {
+      // Player is past south boundary and in gate zone
       triggerDirection = "south";
     }
-    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && (x >= (100 - edgeThreshold) || x > 100) && deltaX > minMovement) {
-      // Moving east through east gate - must be actively moving east
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - boundaryThreshold)) {
+      // Player is past east boundary and in gate zone
       triggerDirection = "east";
     }
-    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && (x <= edgeThreshold || x < 0) && deltaX < -minMovement) {
-      // Moving west through west gate - must be actively moving west
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= boundaryThreshold) {
+      // Player is past west boundary and in gate zone
       triggerDirection = "west";
     }
 
