@@ -927,7 +927,7 @@ combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
-      console.log(`Cleared all entities for room ${currentRoomId}`);
+      console.log("Cleared all entities for room " + currentRoomId);
     }
 
     // Always ensure player entity exists - check after any clearing
