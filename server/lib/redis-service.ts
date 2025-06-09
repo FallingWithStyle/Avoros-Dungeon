@@ -6,27 +6,29 @@ class RedisService {
 
   constructor() {
     try {
-      if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-        console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set - Redis will be disabled');
+      // Check if Upstash Redis is configured
+      if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+        console.log('Initializing Upstash Redis with URL:', process.env.UPSTASH_REDIS_REST_URL?.substring(0, 50) + '...');
+
+        this.redis = new Redis({
+          url: process.env.UPSTASH_REDIS_REST_URL,
+          token: process.env.UPSTASH_REDIS_REST_TOKEN,
+        });
+
+        this.isConnected = true;
+        console.log('Upstash Redis initialized successfully');
+      } else {
+        console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set');
+        console.log('Redis will be disabled - falling back to database storage');
         this.redis = null;
         this.isConnected = false;
         return;
       }
 
-      console.log('Initializing Upstash Redis with URL:', process.env.UPSTASH_REDIS_REST_URL?.substring(0, 50) + '...');
-
-      this.redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      });
-
-      this.isConnected = true;
-      console.log('Upstash Redis initialized successfully');
-
       // Test the connection immediately
       this.testConnection();
     } catch (error) {
-      console.error('Failed to initialize Upstash Redis:', error);
+      console.error('Failed to initialize Redis:', error);
       this.redis = null;
       this.isConnected = false;
     }
@@ -339,7 +341,9 @@ class RedisService {
       // Ensure we're properly serializing the data
       const serializedData = JSON.stringify(mobs);
       console.log(`Storing mobs data for room ${roomId}: ${serializedData.length} characters`);
-      await this.redis.set(`mobs:${roomId}`, serializedData, 'EX', ttlSeconds);
+      
+      // Use setex instead of set with EX parameters for better compatibility
+      await this.redis.setex(`mobs:${roomId}`, ttlSeconds, serializedData);
     } catch (error) {
       console.error('Redis setRoomMobs error:', error);
       // If JSON serialization fails, don't store anything
