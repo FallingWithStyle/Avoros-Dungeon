@@ -674,8 +674,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (tacticalData) {
       console.log('🎯 Tactical data updated in panel:', {
         entities: tacticalData.entities?.length || 0,
+        tacticalEntities: tacticalData.tacticalEntities?.length || 0,
         entityTypes: tacticalData.entities?.map(e => `${e.type}: ${e.name}`) || [],
-        room: tacticalData.room?.name
+        tacticalEntityTypes: tacticalData.tacticalEntities?.map(e => `${e.type}: ${e.name}`) || [],
+        room: tacticalData.room?.name,
+        fullData: tacticalData
       });
     }
   }, [tacticalData]);
@@ -743,7 +746,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
 
-  // Gate crossing detection - triggers when player approaches or crosses gates
+  // Gate crossing detection - triggers when player crosses through gates in correct direction
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -759,28 +762,85 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const { x, y } = playerEntity.position;
 
-    // More lenient gate detection - trigger before hitting hard boundary
-    const approachThreshold = 5; // Trigger when 5% from edge
-    const crossThreshold = 1; // Or when crossing 1% past edge (for extended boundary movement)
+    // Track player's previous position to determine movement direction
+    const prevPosKey = 'prevPlayerPosition';
+    const prevPosString = sessionStorage.getItem(prevPosKey);
+    const prevPos = prevPosString ? JSON.parse(prevPosString) : { x, y };
 
-    // Check if player is approaching or has crossed through a gate
+    // Calculate movement direction
+    const deltaX = x - prevPos.x;
+    const deltaY = y - prevPos.y;
+
+    // Store current position for next frame
+    sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
+
+    // Define gate zones (center third of each wall)
+    const gateZoneMin = 35;
+    const gateZoneMax = 65;
+    const edgeThreshold = 3; // How close to edge before triggering
+
     let triggerDirection: string | null = null;
 
-    // North gate - trigger when approaching top edge or crossing it
-    if (exits.north && x >= 35 && x <= 65 && (y <= approachThreshold || y <= crossThreshold)) {
+    // Check if player is in a gate zone AND moving in the correct direction AND near the edge
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -0.5) {
+      // Moving north through north gate
       triggerDirection = "north";
     } 
-    // South gate - trigger when approaching bottom edge or crossing it  
-    else if (exits.south && x >= 35 && x <= 65 && (y >= (100 - approachThreshold) || y >= (100 - crossThreshold))) {
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > 0.5) {
+      // Moving south through south gate
       triggerDirection = "south";
     }
-    // East gate - trigger when approaching right edge or crossing it
-    else if (exits.east && y >= 35 && y <= 65 && (x >= (100 - approachThreshold) || x >= (100 - crossThreshold))) {
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > 0.5) {
+      // Moving east through east gate
       triggerDirection = "east";
     }
-    // West gate - trigger when approaching left edge or crossing it
-    else if (exits.west && y >= 35 && y <= 65 && (x <= approachThreshold || x <= crossThreshold)) {
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -0.5) {
+      // Moving west through west gate
       triggerDirection = "west";
+    }
+
+    // Log gate check failures for debugging
+    if (!triggerDirection) {
+      // Check each gate and log why it failed
+      if (exits.north) {
+        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+        const nearEdge = y <= edgeThreshold;
+        const movingCorrectly = deltaY < -0.5;
+        
+        if (!inXRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-0.5)`);
+        }
+      }
+      
+      if (exits.south) {
+        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+        const nearEdge = y >= (100 - edgeThreshold);
+        const movingCorrectly = deltaY > 0.5;
+        
+        if (!inXRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >0.5)`);
+        }
+      }
+      
+      if (exits.east) {
+        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+        const nearEdge = x >= (100 - edgeThreshold);
+        const movingCorrectly = deltaX > 0.5;
+        
+        if (!inYRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >0.5)`);
+        }
+      }
+      
+      if (exits.west) {
+        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+        const nearEdge = x <= edgeThreshold;
+        const movingCorrectly = deltaX < -0.5;
+        
+        if (!inYRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-0.5)`);
+        }
+      }
     }
 
     if (triggerDirection) {
@@ -790,7 +850,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
 
       if (now - lastMovementTime > 1000) { // 1 second cooldown
-        console.log(`Player triggered ${triggerDirection} gate transition at position (${x.toFixed(1)}, ${y.toFixed(1)})`);
+        console.log(`Player moving ${triggerDirection} through ${triggerDirection} gate at position (${x.toFixed(1)}, ${y.toFixed(1)}) with delta (${deltaX.toFixed(1)}, ${deltaY.toFixed(1)})`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
         handleRoomMovement(triggerDirection);
@@ -1706,11 +1766,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = effectiveTacticalData;
+  // Process tactical entities for rendering
+  const tacticalEntities = effectiveTacticalData.tacticalEntities || [];
+  console.log('🎯 Processing tactical entities for rendering:', {
+    total: tacticalEntities.length,
+    types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
+  });
+
   const persistentTacticalData = {
     background: getRoomBackgroundType(room.environment, room.type),
-    loot: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'loot') || [],
-    mobs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'mob') || [],
-    npcs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'npc') || [],
+    loot: tacticalEntities.filter(e => e.type === 'loot'),
+    mobs: tacticalEntities.filter(e => e.type === 'mob'),
+    npcs: tacticalEntities.filter(e => e.type === 'npc'),
     exits: {
       north: availableDirections.includes("north"),
       south: availableDirections.includes("south"),
@@ -1795,6 +1862,60 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {persistentTacticalData.exits.west && (
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
+
+          {/* Tactical Mobs from Server */}
+          {persistentTacticalData.mobs.map((mob, index) => (
+            <div
+              key={`tactical-mob-${index}`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+              style={{
+                left: `${mob.position.x}%`,
+                top: `${mob.position.y}%`,
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Clicked on tactical mob: ${mob.name}`);
+              }}
+              title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || 'Unknown'}`}
+            >
+              <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
+                <Skull className="w-3 h-3 text-white" />
+              </div>
+              
+              {/* HP bar for tactical mobs */}
+              {mob.data?.hp !== undefined && mob.data?.maxHp !== undefined && mob.data.hp < mob.data.maxHp && (
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+                  <div
+                    className="h-full rounded transition-all duration-300 bg-red-400"
+                    style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
+                  ></div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Tactical NPCs from Server */}
+          {persistentTacticalData.npcs.map((npc, index) => (
+            <div
+              key={`tactical-npc-${index}`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+              style={{
+                left: `${npc.position.x}%`,
+                top: `${npc.position.y}%`,
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Clicked on tactical NPC: ${npc.name}`);
+              }}
+              title={`${npc.name} (NPC)`}
+            >
+              <div className="w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg">
+                <Users className="w-3 h-3 text-white" />
+              </div>
+            </div>
+          ))}
 
           {/* Combat Entities */}
           {combatState.entities.map((entity) => (
@@ -1895,14 +2016,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           ))}
 
-          {/* Loot items */}
+          {/* Tactical Loot from Server */}
           {persistentTacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
                 hoveredLoot === index ? "scale-110 z-20" : ""
               } transition-all duration-200`}
-              style={{ left: `${item.x}%`, top: `${item.y}%` }}
+              style={{ left: `${item.position.x}%`, top: `${item.position.y}%` }}
               title={`${item.name} - Right-click to interact`}
               onClick={(e) => handleLootClick(index, item, e)}
               onContextMenu={(e) => handleLootClick(index, item, e)}
@@ -1916,7 +2037,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     : "animate-bounce"
                 }`}
               >
-                {getLootIcon(item.type)}
+                {getLootIcon(item.data?.type || 'treasure')}
               </div>
 
               {/* Hover name display - positioned relative to viewport */}
