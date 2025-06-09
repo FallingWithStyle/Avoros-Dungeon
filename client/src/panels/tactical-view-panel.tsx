@@ -990,6 +990,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         defense: 10, // Base defense for player
         speed: 15,
         position: entryPosition,
+        facing: lastDirection || 'south', // Face in the direction moved or default south
         entryDirection: lastDirection,
       };
 
@@ -1016,6 +1017,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           defense: 10,
           speed: 15,
           position: fallbackPosition,
+          facing: 'south', // Default facing direction
         };
 
         combatSystem.addEntity(playerEntity);
@@ -1104,92 +1106,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         actionName: "Move",
       });
     } else if (actionType === "attack") {
-      // Check if we're in combat
-      if (combatState.isInCombat) {
-        // Auto-select and attack viable target
-        const target = findViableTarget();
-        if (target && playerEntity) {
-          const attackAction = combatSystem.actionDefinitions?.get(
-            actionId,
-          ) || {
-            id: actionId,
-            name: actionName,
-            type: "attack",
-            cooldown: 2000,
-            damage: 20,
-            range: 15,
-            targetType: "single",
-            executionTime: 1000,
-          };
-
-          // Check if target is in range
-          const distance = combatSystem.calculateDistance(
-            playerEntity.position,
-            target.position,
-          );
-          if (distance <= (attackAction.range || 15)) {
-            // Target is in range, attack directly
-            const success = combatSystem.queueAction(
-              playerEntity.id,
-              actionId,
-              target.id,
-            );
-            if (success) {
-              console.log(`Auto-attacking ${target.name}`);
-            } else {
-              console.log(
-                `Failed to attack ${target.name} - check cooldown or existing action`,
-              );
-            }
-          } else {
-            // Target is out of range, queue move then attack
-            console.log(`Target out of range, moving closer to ${target.name}`);
-
-            // Calculate position to move to (just within attack range)
-            const dx = target.position.x - playerEntity.position.x;
-            const dy = target.position.y - playerEntity.position.y;
-            const targetDistance = Math.sqrt(dx * dx + dy * dy);
-            const moveDistance = Math.max(
-              0,
-              targetDistance - (attackAction.range || 15) + 2,
-            ); // Leave small buffer
-
-            const moveX =
-              playerEntity.position.x + (dx / targetDistance) * moveDistance;
-            const moveY =
-              playerEntity.position.y + (dy / targetDistance) * moveDistance;
-
-            // Queue move action first
-            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, {
-              x: moveX,
-              y: moveY,
-            });
-            if (moveSuccess) {
-              // Schedule the attack to be queued after move completes
-              setTimeout(() => {
-                const attackSuccess = combatSystem.queueAction(
-                  playerEntity.id,
-                  actionId,
-                  target.id,
-                );
-                if (attackSuccess) {
-                  console.log(
-                    `Queued attack on ${target.name} after movement`,
-                  );
-                }
-              }, 900); // Slightly before move action completes (800ms execution time)
-            }
-          }
+      // Execute directional attack immediately - attack all enemies in front of player
+      if (playerEntity) {
+        const success = combatSystem.executeDirectionalAttack(playerEntity.id, actionId);
+        if (success) {
+          console.log(`Executed directional attack: ${actionName}`);
         } else {
-          console.log("No viable targets found for auto-attack");
+          console.log(`Failed to execute directional attack - check cooldown, range, or no enemies in direction`);
         }
       } else {
-        // Not in combat, activate attack mode for manual target selection
-        setActiveActionMode({
-          type: "attack",
-          actionId: actionId,
-          actionName: actionName,
-        });
+        console.log("No player entity found for directional attack");
       }
     } else {
       // Handle other abilities/actions
@@ -1811,7 +1737,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
             >
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative ${
                   entity.type === "player"
                     ? "bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50"
                     : entity.type === "hostile"
@@ -1829,6 +1755,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 )}
                 {(entity.type === "neutral" || entity.type === "npc") && (
                   <Users className="w-3 h-3 text-white" />
+                )}
+                
+                {/* Facing direction indicator */}
+                {entity.facing && (
+                  <div 
+                    className={`absolute w-2 h-2 bg-yellow-400 rounded-sm transform ${
+                      entity.facing === 'north' ? '-translate-y-4' : 
+                      entity.facing === 'south' ? 'translate-y-4' :
+                      entity.facing === 'east' ? 'translate-x-4' : 
+                      '-translate-x-4'
+                    }`}
+                    style={{
+                      clipPath: entity.facing === 'north' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' :
+                               entity.facing === 'south' ? 'polygon(50% 100%, 0% 0%, 100% 0%)' :
+                               entity.facing === 'east' ? 'polygon(100% 50%, 0% 0%, 0% 100%)' :
+                               'polygon(0% 50%, 100% 0%, 100% 100%)'
+                    }}
+                  />
                 )}
               </div>
 
