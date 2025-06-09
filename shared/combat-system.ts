@@ -205,9 +205,12 @@ export class CombatSystem {
 
     this.state.actionQueue.push(queuedAction);
     
-    // Set cooldown
+    // Set cooldown AFTER successful queueing
     if (!entity.cooldowns) entity.cooldowns = {};
     entity.cooldowns[actionId] = now;
+
+    // Start processing if not already running
+    this.startCombatProcessing();
 
     console.log(`Queued action ${actionId} for entity ${entityId}`);
     this.notifySubscribers();
@@ -256,10 +259,15 @@ export class CombatSystem {
     // Remove executed actions
     this.state.actionQueue = this.state.actionQueue.filter(action => action.executesAt > now);
 
+    // Stop processing if queue is empty
+    if (this.state.actionQueue.length === 0) {
+      this.stopCombatProcessing();
+    }
+
     // Check for combat state changes
     this.updateCombatState();
     
-    if (readyActions.length > 0) {
+    if (readyActions.length > 0 || this.state.actionQueue.length === 0) {
       this.notifySubscribers();
     }
   }
