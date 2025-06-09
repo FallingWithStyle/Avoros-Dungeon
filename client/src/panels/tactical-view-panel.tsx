@@ -874,12 +874,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections, handleRoomMovement]);
 
-  // WASD Movement Input
+  // WASD Movement Input with diagonal support
   useEffect(() => {
+    const keysPressed = new Set<string>();
+    
     const handleKeyDown = (event: KeyboardEvent) => {
       if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
         return;
       }
+
+      const key = event.key.toLowerCase();
+      if (!['w', 'a', 's', 'd'].includes(key)) {
+        return; // Ignore other keys
+      }
+
+      keysPressed.add(key);
+      event.preventDefault(); // Prevent default scrolling
 
       const playerEntity = combatState.entities.find(e => e.id === "player");
       if (!playerEntity) {
@@ -887,36 +897,39 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         return;
       }
 
-      let direction: { x: number, y: number } | null = null;
+      // Calculate direction based on all currently pressed keys
+      let direction = { x: 0, y: 0 };
       let keyPressed = "";
 
-      switch (event.key.toLowerCase()) {
-        case 'w':
-          direction = { x: 0, y: -1 };
-          keyPressed = "W (North)";
-          break;
-        case 'a':
-          direction = { x: -1, y: 0 };
-          keyPressed = "A (West)";
-          break;
-        case 's':
-          direction = { x: 0, y: 1 };
-          keyPressed = "S (South)";
-          break;
-        case 'd':
-          direction = { x: 1, y: 0 };
-          keyPressed = "D (East)";
-          break;
-        default:
-          return; // Ignore other keys
+      if (keysPressed.has('w')) {
+        direction.y -= 1;
+        keyPressed += "W";
+      }
+      if (keysPressed.has('s')) {
+        direction.y += 1;
+        keyPressed += "S";
+      }
+      if (keysPressed.has('a')) {
+        direction.x -= 1;
+        keyPressed += "A";
+      }
+      if (keysPressed.has('d')) {
+        direction.x += 1;
+        keyPressed += "D";
       }
 
-      event.preventDefault(); // Prevent default scrolling
+      // Normalize diagonal movement to prevent faster diagonal speed
+      if (direction.x !== 0 && direction.y !== 0) {
+        const length = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+        direction.x /= length;
+        direction.y /= length;
+        keyPressed += " (Diagonal)";
+      }
 
       console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
 
-      const speed = 2; // Smaller movement increments for grid-based movement
-      const moveDistance = speed; // Move in small percentage units
+      const speed = 20; // 10x faster movement speed
+      const moveDistance = speed; // Move in larger percentage units
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
 
@@ -959,8 +972,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Move action queued:`, success);
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(key)) {
+        keysPressed.delete(key);
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
   }, [combatState.entities, effectiveTacticalData?.availableDirections]);
 
   // Close context menu when clicking outside
