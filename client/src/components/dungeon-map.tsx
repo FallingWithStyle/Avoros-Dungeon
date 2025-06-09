@@ -341,6 +341,14 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
+  // Fetch mob data for all explored rooms
+  const { data: roomMobsData = {} } = useQuery<Record<number, { hostileCount: number; neutralCount: number; playerCount: number }>>({
+    queryKey: [`/api/crawlers/${crawler.id}/room-mobs-summary`],
+    refetchInterval: 30000,
+    staleTime: 60000,
+    retry: false,
+  });
+
   // Current room ID - declare this early so it can be used throughout
   const actualCurrentRoomId = currentRoomData?.room?.id;
 
@@ -363,10 +371,14 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // 1. Add explored rooms
   (exploredRooms ?? []).forEach((room) => {
     if (room && typeof room.x === "number" && typeof room.y === "number") {
+      const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
       visibleRoomsMap.set(`${room.x},${room.y}`, {
         ...room,
         isCurrentRoom: room.id === actualCurrentRoomId,
         isExplored: true,
+        hasEnemies: mobData.hostileCount > 0,
+        neutralCount: mobData.neutralCount,
+        playerCount: mobData.playerCount,
       });
     }
   });
@@ -376,11 +388,15 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     if (room && typeof room.x === "number" && typeof room.y === "number") {
       const key = `${room.x},${room.y}`;
       if (!visibleRoomsMap.has(key)) {
+        const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
         visibleRoomsMap.set(key, {
           ...room,
           isCurrentRoom: room.id === actualCurrentRoomId,
           isExplored: false,
           isScanned: true,
+          hasEnemies: mobData.hostileCount > 0,
+          neutralCount: mobData.neutralCount,
+          playerCount: mobData.playerCount,
         });
       }
     }
