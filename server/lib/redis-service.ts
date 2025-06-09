@@ -315,14 +315,21 @@ class RedisService {
       if (!data || data === null || data === undefined) return null;
 
       // Handle empty string or malformed data
-      if (typeof data === 'string' && data.trim() === '') {
-        console.log(`Empty mob data for room ${roomId}, clearing cache`);
+      if (typeof data === 'string' && (data.trim() === '' || data === '[]' || data.length < 3)) {
+        console.log(`Empty or invalid mob data for room ${roomId}, clearing cache`);
         await this.redis?.del(`mobs:${roomId}`);
         return null;
       }
 
       try {
-        return JSON.parse(data as string);
+        const parsed = JSON.parse(data as string);
+        // Validate the parsed data structure
+        if (!Array.isArray(parsed)) {
+          console.log(`Invalid mob data structure for room ${roomId}, clearing cache`);
+          await this.redis?.del(`mobs:${roomId}`);
+          return null;
+        }
+        return parsed;
       } catch (parseError) {
         console.error(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, parseError);
         await this.redis?.del(`mobs:${roomId}`);

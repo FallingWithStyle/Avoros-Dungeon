@@ -39,6 +39,27 @@ export class MobStorage extends BaseStorage {
       respawnHours: 4
     },
     {
+      roomType: "corridor",
+      maxMobs: 1,
+      spawnChance: 0.4,
+      creatureCategories: ["combat", "wanderer"],
+      respawnHours: 4
+    },
+    {
+      roomType: "chamber",
+      maxMobs: 2,
+      spawnChance: 0.7,
+      creatureCategories: ["combat", "guardian"],
+      respawnHours: 6
+    },
+    {
+      roomType: "hall",
+      maxMobs: 3,
+      spawnChance: 0.5,
+      creatureCategories: ["combat", "patrol"],
+      respawnHours: 4
+    },
+    {
       roomType: "boss",
       maxMobs: 1,
       spawnChance: 1.0,
