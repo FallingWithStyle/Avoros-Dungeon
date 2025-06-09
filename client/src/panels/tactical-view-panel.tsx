@@ -852,8 +852,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
         if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
 
-```text
-
       };
 
       // Allow crossing boundaries if approaching a door, otherwise clamp
