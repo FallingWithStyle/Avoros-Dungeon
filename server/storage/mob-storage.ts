@@ -88,12 +88,14 @@ export class MobStorage extends BaseStorage {
     try {
       const cached = await redisService.getRoomMobs(roomId);
       if (cached) {
+        console.log(`Found ${cached.length} cached mobs for room ${roomId}`);
         return cached;
       }
     } catch (error) {
       console.log('Redis cache miss for room mobs, fetching from database');
     }
 
+    console.log(`Fetching mobs from database for room ${roomId}`);
     const roomMobs = await db
       .select({
         mob: mobs,
@@ -102,6 +104,16 @@ export class MobStorage extends BaseStorage {
       .from(mobs)
       .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
+
+    console.log(`Found ${roomMobs.length} mobs in database for room ${roomId}`);
+    if (roomMobs.length > 0) {
+      console.log(`Mob details:`, roomMobs.map(m => ({
+        id: m.mob.id,
+        name: m.mob.displayName,
+        alive: m.mob.isAlive,
+        active: m.mob.isActive
+      })));
+    }
 
     // Cache for 10 minutes
     try {

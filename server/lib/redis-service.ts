@@ -310,7 +310,22 @@ class RedisService {
 
     try {
       const data = await this.redis?.get(`mobs:${roomId}`);
-      return data ? JSON.parse(data as string) : null;
+      if (!data || data === null || data === undefined) return null;
+      
+      // Handle empty string or malformed data
+      if (typeof data === 'string' && data.trim() === '') {
+        console.log(`Empty mob data for room ${roomId}, clearing cache`);
+        await this.redis?.del(`mobs:${roomId}`);
+        return null;
+      }
+      
+      try {
+        return JSON.parse(data as string);
+      } catch (parseError) {
+        console.error(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, parseError);
+        await this.redis?.del(`mobs:${roomId}`);
+        return null;
+      }
     } catch (error) {
       console.error('Redis getRoomMobs error:', error);
       return null;
