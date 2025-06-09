@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { useIsMobile } from './use-mobile';
 
@@ -29,7 +28,7 @@ export function useSwipeMovement({
     }
 
     const container = containerRef.current;
-    
+
     const handleTouchStart = (event: TouchEvent) => {
       const touch = event.touches[0];
       touchStartRef.current = {
@@ -42,7 +41,7 @@ export function useSwipeMovement({
     const handleTouchMove = (event: TouchEvent) => {
       // Prevent scrolling while swiping
       event.preventDefault();
-      
+
       const touch = event.touches[0];
       touchEndRef.current = {
         x: touch.clientX,
@@ -52,17 +51,17 @@ export function useSwipeMovement({
 
     const handleTouchEnd = (event: TouchEvent) => {
       event.preventDefault();
-      
+
       if (!touchStartRef.current || !touchEndRef.current) {
         return;
       }
 
       const deltaX = touchEndRef.current.x - touchStartRef.current.x;
       const deltaY = touchEndRef.current.y - touchStartRef.current.y;
-      
+
       // Minimum swipe distance (in pixels)
       const minSwipeDistance = 50;
-      
+
       // Check if the swipe is long enough
       const swipeDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       if (swipeDistance < minSwipeDistance) {
@@ -72,9 +71,9 @@ export function useSwipeMovement({
       // Determine the primary direction
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
-      
+
       let direction = "";
-      
+
       if (absDeltaX > absDeltaY) {
         // Horizontal swipe
         direction = deltaX > 0 ? "east" : "west";
