@@ -890,7 +890,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const action = hotbarActions[actionIndex];
         const cooldownPercentage = getCooldownPercentage(action.id);
 
-        if (cooldownPercentage === 0) {
+        if (```python
+cooldownPercentage === 0) {
           // Only trigger if not on cooldown
           handleHotbarClick(action.id, action.type, action.name);
         }
