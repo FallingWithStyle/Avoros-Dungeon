@@ -393,6 +393,26 @@ export class CombatSystem {
       (e.type === 'player' || e.type === 'ally' || e.type === 'neutral') && e.hp > 0
     );
   }
+
+  // Room data management for tactical view
+  private currentRoomData: any = null;
+
+  setCurrentRoomData(roomData: any): void {
+    this.currentRoomData = roomData;
+    console.log("Combat system room data updated:", roomData?.room?.name || 'Unknown');
+  }
+
+  getCurrentRoomData(): any {
+    return this.currentRoomData;
+  }
+
+  // Clear room data when changing rooms
+  clearRoomData(): void {
+    this.currentRoomData = null;
+    // Clear entities except player when changing rooms
+    this.state.entities = this.state.entities.filter(e => e.id === 'player');
+    this.notifySubscribers();
+  }
 }
 
 // Create and export singleton instance

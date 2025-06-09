@@ -90,7 +90,7 @@ export class ExplorationStorage extends BaseStorage {
       .select()
       .from(roomConnections)
       .where(eq(roomConnections.fromRoomId, roomId));
-    
+
     return connections;
   }
 
@@ -621,5 +621,31 @@ export class ExplorationStorage extends BaseStorage {
     });
 
     return { success: true, newRoom: entranceRoom };
+  }
+
+  async clearExplorationData(crawlerId: number): Promise<void> {
+    await this.redis.del(`crawler:${crawlerId}:exploration`);
+    await this.redis.del(`crawler:${crawlerId}:scanned_rooms`);
+    await this.redis.del(`crawler:${crawlerId}:visited_rooms`);
+  }
+
+  async getScannedRooms(crawlerId: number): Promise<any[]> {
+    try {
+      const data = await this.redis.get(`crawler:${crawlerId}:scanned_rooms`);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Error getting scanned rooms:', error);
+      return [];
+    }
+  }
+
+  async getExploredRooms(crawlerId: number): Promise<any[]> {
+    try {
+      const data = await this.redis.get(`crawler:${crawlerId}:visited_rooms`);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Error getting explored rooms:', error);
+      return [];
+    }
   }
 }
