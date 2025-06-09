@@ -18,14 +18,14 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
   // Fetch current room data for navigation
   const { data: roomData, isLoading } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 2000,
+    refetchInterval: 5000, // Reduced from 2000ms to 5000ms
   });
 
-  // Fetch explored rooms for map refresh
+  // Fetch explored rooms for map refresh - only on demand, not polling
   const { refetch: refetchExploredRooms } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    refetchInterval: 30000,
-    staleTime: 120000,
+    enabled: false, // Only fetch when manually called
+    staleTime: 300000, // 5 minutes
     retry: false,
   });
 
@@ -39,7 +39,7 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
     queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
     refetchInterval: (data, error) => {
       if (error) return false;
-      return 2000;
+      return 3000; // Reduced from 2000ms to 3000ms
     },
     retry: (failureCount, error) => {
       if (error?.message?.includes('500')) {

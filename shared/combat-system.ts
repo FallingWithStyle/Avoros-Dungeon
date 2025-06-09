@@ -88,7 +88,7 @@ export function calculateDamage(attacker: any, defender: any): number {
   const baseDamage = attacker.attack || 1;
   const defense = defender.defense || 0;
   const levelMod = (attacker.level || 1) * 0.1;
-  
+
   const damage = Math.max(1, Math.floor((baseDamage + levelMod) - (defense * 0.5)));
   return damage;
 }
@@ -97,11 +97,11 @@ export function calculateHitChance(attacker: any, defender: any): number {
   const baseAccuracy = attacker.accuracy || 10;
   const evasion = defender.evasion || 5;
   const levelDiff = (attacker.level || 1) - (defender.level || 1);
-  
+
   const hitChance = Math.max(0.1, Math.min(0.95, 
     (baseAccuracy + levelDiff) / (baseAccuracy + evasion + Math.abs(levelDiff))
   ));
-  
+
   return hitChance;
 }
 
@@ -163,7 +163,7 @@ export class CombatSystem {
   selectEntity(entityId: string | null): void {
     // Clear previous selection
     this.state.entities.forEach(e => e.isSelected = false);
-    
+
     if (entityId) {
       const entity = this.state.entities.find(e => e.id === entityId);
       if (entity) {
@@ -204,7 +204,7 @@ export class CombatSystem {
     };
 
     this.state.actionQueue.push(queuedAction);
-    
+
     // Set cooldown AFTER successful queueing
     if (!entity.cooldowns) entity.cooldowns = {};
     entity.cooldowns[actionId] = now;
@@ -235,7 +235,7 @@ export class CombatSystem {
   // Combat processing
   startCombatProcessing(): void {
     if (this.processingInterval) return;
-    
+
     this.processingInterval = setInterval(() => {
       this.processCombatTick();
     }, 100);
@@ -266,7 +266,7 @@ export class CombatSystem {
 
     // Check for combat state changes
     this.updateCombatState();
-    
+
     if (readyActions.length > 0 || this.state.actionQueue.length === 0) {
       this.notifySubscribers();
     }
@@ -282,13 +282,13 @@ export class CombatSystem {
           this.moveEntityToPosition(queuedAction.entityId, queuedAction.targetPosition);
         }
         break;
-      
+
       case 'attack':
         if (queuedAction.targetId) {
           this.executeAttack(queuedAction.entityId, queuedAction.targetId);
         }
         break;
-      
+
       case 'ability':
         this.executeAbility(queuedAction.entityId, queuedAction.action.id);
         break;
@@ -298,7 +298,7 @@ export class CombatSystem {
   private executeAttack(attackerId: string, targetId: string): void {
     const attacker = this.state.entities.find(e => e.id === attackerId);
     const target = this.state.entities.find(e => e.id === targetId);
-    
+
     if (!attacker || !target) return;
 
     // Start combat if not already in combat
@@ -334,7 +334,7 @@ export class CombatSystem {
     // Update facing direction
     const dx = targetPosition.x - entity.position.x;
     const dy = targetPosition.y - entity.position.y;
-    
+
     if (Math.abs(dx) > Math.abs(dy)) {
       entity.facing = dx > 0 ? 'east' : 'west';
     } else if (dy !== 0) {
@@ -420,6 +420,88 @@ export class CombatSystem {
     // Clear entities except player when changing rooms
     this.state.entities = this.state.entities.filter(e => e.id === 'player');
     this.notifySubscribers();
+  }
+
+  private processActionQueue() {
+    if (this.state.actionQueue.length === 0) return;
+
+    // Process all queued actions in order
+    const actionsToProcess = [...this.state.actionQueue];
+    this.state.actionQueue = []; // Clear queue immediately to prevent re-processing
+
+    actionsToProcess.forEach(action => {
+      console.log(`Processing queued action:`, action);
+
+      if (action.type === 'move') {
+        const entity = this.state.entities.find(e => e.id === action.entityId);
+        if (entity) {
+          entity.position = { ...action.position };
+          console.log(`Applied queued move: ${entity.id} to (${entity.position.x.toFixed(1)}, ${entity.position.y.toFixed(1)})`);
+        } else {
+          console.warn(`Entity ${action.entityId} not found for queued move action`);
+        }
+      }
+    });
+
+    // Emit state change only once after processing all actions
+    if (actionsToProcess.length > 0) {
+      this.notifySubscribers();
+    }
+  }
+
+  initializePlayer(startPosition?: { x: number; y: number }) {
+    const existingPlayer = this.state.entities.find(e => e.id === "player");
+
+    // Get entry direction to determine starting position
+    const entryDirection = sessionStorage.getItem('entryDirection');
+    let calculatedPosition = startPosition;
+
+    if (!calculatedPosition && entryDirection) {
+      // Position player near the appropriate entrance
+      switch (entryDirection) {
+        case 'north':
+          calculatedPosition = { x: 50, y: 85 }; // Near south wall when entering from north
+          break;
+        case 'south':
+          calculatedPosition = { x: 50, y: 15 }; // Near north wall when entering from south
+          break;
+        case 'east':
+          calculatedPosition = { x: 15, y: 50 }; // Near west wall when entering from east
+          break;
+        case 'west':
+          calculatedPosition = { x: 85, y: 50 }; // Near east wall when entering from west
+          break;
+        default:
+          calculatedPosition = { x: 50, y: 50 }; // Center if no direction
+      }
+      console.log(`Positioning player based on entry direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`);
+    }
+
+    if (existingPlayer) {
+      if (calculatedPosition) {
+        existingPlayer.position = calculatedPosition;
+        console.log(`Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`);
+      }
+      return;
+    }
+
+    // Default starting position if none provided
+    const defaultPosition = calculatedPosition || { x: 50, y: 50 };
+
+    const playerEntity: CombatEntity = {
+      id: "player",
+      name: "Player",
+      type: "player",
+      position: defaultPosition,
+      hp: 100,
+      maxHp: 100,
+      isSelected: false,
+      facing: "north"
+    };
+
+    this.state.entities.push(playerEntity);
+    console.log(`Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`);
+    this.emitStateChange();
   }
 }
 

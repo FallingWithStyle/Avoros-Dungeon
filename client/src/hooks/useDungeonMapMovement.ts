@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { isUnauthorizedError } from '@/lib/authUtils';
@@ -96,45 +95,6 @@ export function useDungeonMapMovement({
     },
     [moveMutation, availableDirections, crawler.energy, toast],
   );
-
-  // WASD keyboard controls for dungeon navigation
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return;
-      }
-      const key = event.key.toLowerCase();
-      let direction: string | null = null;
-      switch (key) {
-        case "w":
-          direction = "north";
-          break;
-        case "s":
-          direction = "south";
-          break;
-        case "a":
-          direction = "west";
-          break;
-        case "d":
-          direction = "east";
-          break;
-        case "q":
-          direction = "staircase";
-          break;
-        default:
-          return;
-      }
-      event.preventDefault();
-      if (direction) {
-        handleMove(direction);
-      }
-    };
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [handleMove]);
 
   return {
     handleMove,
