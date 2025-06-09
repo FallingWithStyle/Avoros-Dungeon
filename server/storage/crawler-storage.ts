@@ -27,12 +27,14 @@ export class CrawlerStorage extends BaseStorage {
         background: crawlerData.background,
         health: crawlerData.health,
         maxHealth: crawlerData.maxHealth,
-        attack: crawlerData.attack,
-        defense: crawlerData.defense,
-        speed: crawlerData.speed,
-        wit: crawlerData.wit,
+        might: crawlerData.might,
+        agility: crawlerData.agility,
+        endurance: crawlerData.endurance,
+        intellect: crawlerData.intellect,
         charisma: crawlerData.charisma,
-        memory: crawlerData.memory,
+        wisdom: crawlerData.wisdom,
+        power: crawlerData.power,
+        maxPower: crawlerData.maxPower,
         luck: crawlerData.luck,
         competencies: crawlerData.competencies,
         abilities: crawlerData.abilities,
@@ -156,12 +158,14 @@ export class CrawlerStorage extends BaseStorage {
     const minutesPassed = Math.floor(timeDiff / 60000);
 
     const energyToRestore = Math.min(minutesPassed, crawler.maxEnergy - crawler.energy);
+    const powerToRestore = Math.min(minutesPassed, crawler.maxPower - crawler.power);
 
-    if (energyToRestore > 0) {
+    if (energyToRestore > 0 || powerToRestore > 0) {
       const [updatedCrawler] = await db
         .update(crawlers)
         .set({
           energy: crawler.energy + energyToRestore,
+          power: crawler.power + powerToRestore,
           lastEnergyRegen: now,
         })
         .where(eq(crawlers.id, crawlerId))
@@ -188,12 +192,13 @@ export class CrawlerStorage extends BaseStorage {
       const startingEquipment = await contentStorage.getStartingEquipment(background);
 
       const statValues = [
-        { name: "Combat", value: stats.attack, description: "Direct confrontation" },
-        { name: "Defense", value: stats.defense, description: "Survival specialist" },
-        { name: "Speed", value: stats.speed, description: "Agile movement" },
-        { name: "Wit", value: stats.wit, description: "Problem solving" },
-        { name: "Charisma", value: stats.charisma, description: "Social influence" },
-        { name: "Memory", value: stats.memory, description: "Information retention" },
+        { name: "Might", value: stats.might, description: "Physical power and strength" },
+        { name: "Agility", value: stats.agility, description: "Speed and dexterity" },
+        { name: "Endurance", value: stats.endurance, description: "Stamina and resilience" },
+        { name: "Intellect", value: stats.intellect, description: "Reasoning and magic" },
+        { name: "Charisma", value: stats.charisma, description: "Social presence" },
+        { name: "Wisdom", value: stats.wisdom, description: "Intuition and perception" },
+        { name: "Power", value: stats.power, description: "Skill energy and technique" },
       ];
       const topAbility = statValues.reduce((max, stat) => stat.value > max.value ? stat : max);
 
@@ -252,32 +257,44 @@ export class CrawlerStorage extends BaseStorage {
 
   private generateRandomStats() {
     const stats = [
-      Math.floor(Math.random() * 6),
-      Math.floor(Math.random() * 6),
-      Math.floor(Math.random() * 6),
-      Math.floor(Math.random() * 6),
-      Math.floor(Math.random() * 6),
-      Math.floor(Math.random() * 6),
+      Math.floor(Math.random() * 6) + 1, // 1-6 base range
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
     ];
 
-    const highlightStat = Math.floor(Math.random() * 6);
+    // Boost one random stat
+    const highlightStat = Math.floor(Math.random() * 8);
     if (Math.random() < 0.3) {
       stats[highlightStat] = 6 + Math.floor(Math.random() * 3);
     }
 
-    const health = 60 + Math.floor(Math.random() * 20);
-    const luck = Math.floor(Math.random() * 6);
+    const endurance = stats[2];
+    const intellect = stats[3];
+    const health = endurance * 10 + Math.floor(Math.random() * 10);
+    const maxEnergy = intellect * 10 + Math.floor(Math.random() * 10);
+    const power = Math.floor(Math.random() * 6) + 1;
+    const maxPower = power + Math.floor(Math.random() * 5);
+    const luck = Math.floor(Math.random() * 6) + 1;
 
     return {
       health,
       maxHealth: health,
-      attack: stats[0],
-      defense: stats[1],
-      speed: stats[2],
-      wit: stats[3],
+      might: stats[0],
+      agility: stats[1],
+      endurance: stats[2],
+      intellect: stats[3],
       charisma: stats[4],
-      memory: stats[5],
+      wisdom: stats[5],
+      power,
+      maxPower,
       luck,
+      energy: maxEnergy,
+      maxEnergy,
     };
   }
 

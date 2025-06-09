@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -129,15 +128,33 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-slate-300">Charisma</span>
-              <span className="text-sm font-mono text-pink-400">
+              <span className="text-sm font-mono text-yellow-400">
                 {crawler.charisma}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Memory</span>
+              <span className="text-sm text-slate-300">Wisdom</span>
               <span className="text-sm font-mono text-cyan-400">
-                {crawler.memory}
+                {crawler.wisdom}
               </span>
+            </div>
+          </div>
+
+          {/* Power Bar */}
+          <div className="mt-2">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs text-slate-300">Power</span>
+              <span className="text-xs text-cyan-400">
+                {crawler.power}/{crawler.maxPower}
+              </span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${Math.max(0, Math.min(100, (crawler.power / crawler.maxPower) * 100))}%`,
+                }}
+              />
             </div>
           </div>
         </CardContent>
@@ -168,7 +185,7 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
               );
             })}
           </div>
-          
+
           {/* Future expansion note */}
           <div className="mt-3 text-center text-slate-500 text-xs">
             Equipment system coming soon
