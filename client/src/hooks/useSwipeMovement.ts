@@ -79,8 +79,8 @@ export function useSwipeMovement({
         // Horizontal swipe
         direction = deltaX > 0 ? "east" : "west";
       } else {
-        // Vertical swipe
-        direction = deltaY > 0 ? "south" : "north";
+        // Vertical swipe - swipe up (negative deltaY) = north, swipe down (positive deltaY) = south
+        direction = deltaY < 0 ? "north" : "south";
       }
 
       // Only move if the direction is available

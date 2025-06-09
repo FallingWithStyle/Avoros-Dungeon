@@ -688,6 +688,35 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
 
+  // Defensive check for effectiveTacticalData
+  if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.error("No effective tactical data available");
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - No Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">No room data available</span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-xs mt-2"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -1643,16 +1672,16 @@ combatSystem.getState().entities;
     );
   }
 
-  const { room, availableDirections, playersInRoom } = effectiveTacticalData;
+  const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
   // Process tactical entities for rendering
-  const tacticalEntities = effectiveTacticalData.tacticalEntities || [];
+  const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
   console.log('🎯 Processing tactical entities for rendering:', {
     total: tacticalEntities.length,
     types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
   });
 
   const persistentTacticalData = {
-    background: getRoomBackgroundType(room.environment, room.type),
+    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
     loot: tacticalEntities.filter(e => e.type === 'loot'),
     mobs: tacticalEntities.filter(e => e.type === 'mob'),
     npcs: tacticalEntities.filter(e => e.type === 'npc'),
