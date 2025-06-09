@@ -526,6 +526,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
+  // Use fallback data when tactical data is unavailable
+  const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
+
+  // Defensive check for effectiveTacticalData - NOW BEFORE THE RETURN
+  if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.error("No effective tactical data available");
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - No Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">No room data available</span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-xs mt-2"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
   const handleCellClick = useCallback(
     (x: number, y: number) => {
@@ -695,9 +727,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
     }
   }, [crawler, tacticalData, generateFallbackTacticalData, toast, refetchTactical, refetchExploredRooms]);
-
-  // Use fallback data when tactical data is unavailable
-  const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
 
   // Use the tactical movement hook for in-room WASD controls
   useTacticalMovement({
@@ -981,59 +1010,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   ];
 
-  // Defensive check for effectiveTacticalData - AFTER ALL HOOKS
-  if (!effectiveTacticalData || !effectiveTacticalData.room) {
-    console.error("No effective tactical data available");
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Tactical View - No Data
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-red-400">No room data available</span>
-              <br />
-              <button 
-                onClick={() => window.location.reload()} 
-                className="text-blue-400 underline text-xs mt-2"
-              >
-                Reload page
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
-  // Process tactical entities for rendering
-  const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
-  console.log('🎯 Processing tactical entities for rendering:', {
-    total: tacticalEntities.length,
-    types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
-  });
-
-  const persistentTacticalData = {
-    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
-    loot: tacticalEntities.filter(e => e.type === 'loot'),
-    mobs: tacticalEntities.filter(e => e.type === 'mob'),
-    npcs: tacticalEntities.filter(e => e.type === 'npc'),
-    exits: {
-      north: availableDirections.includes("north"),
-      south: availableDirections.includes("south"),
-      east: availableDirections.includes("east"),
-      west: availableDirections.includes("west"),
-    },
-    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
-  };
-
-  const GRID_SIZE = 15;
-
+  // ALL CALLBACK HOOKS MUST BE DEFINED BEFORE EARLY RETURN
   // Grid click handler for movement
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     if (!effectiveTacticalData?.room) return;
@@ -1059,7 +1036,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Grid right-click handler for context menu
   const handleGridRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    
+
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -1079,7 +1056,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     console.log(`Clicked entity: ${entityId}`);
-    
+
     const success = combatSystem.selectEntity(entityId);
     if (success) {
       console.log(`Selected entity: ${entityId}`);
@@ -1111,7 +1088,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.preventDefault();
     event.stopPropagation();
     console.log(`Clicked loot: ${item.name}`);
-    
+
     toast({
       title: "Loot Interaction",
       description: `Interacting with ${item.name}`,
@@ -1175,6 +1152,30 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // For now, return 0 (no cooldown)
     return 0;
   }, []);
+
+  const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
+  // Process tactical entities for rendering
+  const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
+  console.log('🎯 Processing tactical entities for rendering:', {
+    total: tacticalEntities.length,
+    types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
+  });
+
+  const persistentTacticalData = {
+    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
+    loot: tacticalEntities.filter(e => e.type === 'loot'),
+    mobs: tacticalEntities.filter(e => e.type === 'mob'),
+    npcs: tacticalEntities.filter(e => e.type === 'npc'),
+    exits: {
+      north: availableDirections.includes("north"),
+      south: availableDirections.includes("south"),
+      east: availableDirections.includes("east"),
+      west: availableDirections.includes("west"),
+    },
+    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
+  };
+
+  const GRID_SIZE = 15;
 
   return (
     <Card className="bg-game-panel border-game-border">
@@ -1621,7 +1622,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
             {/* Grid-specific actions */}
             {contextMenu.entityId === "grid" &&
-              combatSystem.getSelectedEntity()?.type === "player" && (
+              combatsystem.getSelectedEntity()?.type === "player" && (
                 <div className="px-3 py-2">
                   <div className="text-xs text-gray-500 mb-2">Grid Actions</div>
                   <button
