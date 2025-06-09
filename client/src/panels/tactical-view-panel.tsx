@@ -669,6 +669,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   });
 
+  // Log tactical data for debugging
+  useEffect(() => {
+    if (tacticalData) {
+      console.log('🎯 Tactical data updated in panel:', {
+        entities: tacticalData.entities?.length || 0,
+        entityTypes: tacticalData.entities?.map(e => `${e.type}: ${e.name}`) || [],
+        room: tacticalData.room?.name
+      });
+    }
+  }, [tacticalData]);
+
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
 

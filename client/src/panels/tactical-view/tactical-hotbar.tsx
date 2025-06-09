@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Footprints, Sword, Shield, Target, Clock } from 'lucide-react';
 
