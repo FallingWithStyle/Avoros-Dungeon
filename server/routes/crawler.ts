@@ -300,7 +300,7 @@ export function registerCrawlerRoutes(app: Express) {
         return res.status(403).json({ error: "Access denied" });
       }
 
-      const scannedRooms = await storage.crawlerStorage.getScannedRooms(crawlerId);
+      const scannedRooms = await storage.getScannedRooms(crawlerId);
       res.json(scannedRooms);
     } catch (error) {
       console.error("Error fetching scanned rooms:", error);
@@ -319,8 +319,8 @@ export function registerCrawlerRoutes(app: Express) {
       }
 
       // Get all explored and scanned rooms
-      const exploredRooms = await storage.crawlerStorage.getExploredRooms(crawlerId);
-      const scannedRooms = await storage.crawlerStorage.getScannedRooms(crawlerId);
+      const exploredRooms = await storage.getExploredRooms(crawlerId);
+      const scannedRooms = await storage.getScannedRooms(crawlerId);
 
       const allRoomIds = new Set([
         ...exploredRooms.map(r => r.id),

@@ -631,7 +631,9 @@ export class ExplorationStorage extends BaseStorage {
 
   async getScannedRooms(crawlerId: number): Promise<any[]> {
     try {
-      const data = await this.redis.get(`crawler:${crawlerId}:scanned_rooms`);
+      // Use redisService instead of this.redis which may be undefined
+      const { redisService } = await import('../lib/redis-service');
+      const data = await redisService.get(`crawler:${crawlerId}:scanned_rooms`);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('Error getting scanned rooms:', error);
@@ -641,7 +643,9 @@ export class ExplorationStorage extends BaseStorage {
 
   async getExploredRooms(crawlerId: number): Promise<any[]> {
     try {
-      const data = await this.redis.get(`crawler:${crawlerId}:visited_rooms`);
+      // Use redisService instead of this.redis which may be undefined
+      const { redisService } = await import('../lib/redis-service');
+      const data = await redisService.get(`crawler:${crawlerId}:visited_rooms`);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('Error getting explored rooms:', error);
