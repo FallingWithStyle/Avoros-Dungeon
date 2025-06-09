@@ -310,3 +310,112 @@ function TacticalLoot({
   );
 }
 
+
+// Entity rendering with different colors for different types
+const getEntityColor = (entity: any) => {
+  switch (entity.type) {
+    case "player":
+      return "bg-blue-500";
+    case "hostile":
+    case "mob":
+      return "bg-red-500";
+    case "neutral":
+    case "npc":
+      return "bg-orange-500";
+    case "friendly":
+      return "bg-green-500";
+    default:
+      return "bg-gray-500";
+  }
+};
+
+const handleMove = async (direction: string, combatSystem: any, effectiveTacticalData: any, handleRoomTransition: any) => {
+    if (!effectiveTacticalData?.availableDirections.includes(direction)) {
+      console.log(`Cannot move ${direction} - not an available direction`);
+      return;
+    }
+
+    console.log(`🎯 Starting grid-based movement ${direction}...`);
+
+    const playerEntity = combatSystem.getState().entities.find((e: any) => e.id === "player");
+    if (!playerEntity) {
+      console.log("No player entity found for movement");
+      return;
+    }
+
+    // Calculate movement vector based on direction
+    const directionVectors = {
+      north: { x: 0, y: -1 },
+      south: { x: 0, y: 1 },
+      east: { x: 1, y: 0 },
+      west: { x: -1, y: 0 },
+    };
+
+    const dir = directionVectors[direction];
+    if (!dir) return;
+
+    // Convert current position to grid coordinates
+    const gridSize = 100 / 15; // Each grid cell is ~6.67% of the total area
+    const currentGridX = Math.round(playerEntity.position.x / gridSize);
+    const currentGridY = Math.round(playerEntity.position.y / gridSize);
+
+    // Calculate target grid position
+    const targetGridX = currentGridX + dir.x;
+    const targetGridY = currentGridY + dir.y;
+
+    // Check grid boundaries (0-14 for a 15x15 grid)
+    const exits = effectiveTacticalData?.room?.exits || {};
+    let finalGridX = targetGridX;
+    let finalGridY = targetGridY;
+
+    // Handle room transitions at grid boundaries
+    const shouldMoveToNewRoom = 
+      (direction === "north" && targetGridY < 0 && exits.north) ||
+      (direction === "south" && targetGridY > 14 && exits.south) ||
+      (direction === "east" && targetGridX > 14 && exits.east) ||
+      (direction === "west" && targetGridX < 0 && exits.west);
+
+    if (shouldMoveToNewRoom) {
+      console.log(`Moving to new room via ${direction}`);
+     // handleRoomTransition(direction); // This line needs to be passed in as a parameter
+      return;
+    }
+
+    // Clamp to grid boundaries for normal movement
+    finalGridX = Math.max(0, Math.min(14, targetGridX));
+    finalGridY = Math.max(0, Math.min(14, targetGridY));
+
+    // Convert back to percentage coordinates (center of target grid cell)
+    const targetX = (finalGridX + 0.5) * gridSize;
+    const targetY = (finalGridY + 0.5) * gridSize;
+
+    // Animate smooth movement to the target grid cell
+    const ANIMATION_DURATION = 300; // milliseconds
+    const ANIMATION_STEPS = 15;
+    const STEP_INTERVAL = ANIMATION_DURATION / ANIMATION_STEPS;
+
+    const startX = playerEntity.position.x;
+    const startY = playerEntity.position.y;
+    const deltaX = targetX - startX;
+    const deltaY = targetY - startY;
+
+    let currentStep = 0;
+
+    const animationInterval = setInterval(() => {
+      currentStep++;
+      const progress = Math.min(currentStep / ANIMATION_STEPS, 1);
+
+      // Use easing function for smoother animation
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease-out cubic
+
+      const newX = startX + deltaX * easeProgress;
+      const newY = startY + deltaY * easeProgress;
+
+      combatSystem.updateEntityPosition("player", newX, newY);
+
+      if (progress >= 1) {
+        clearInterval(animationInterval);
+        console.log(`Movement complete: Grid (${finalGridX}, ${finalGridY}) = Position (${targetX.toFixed(1)}, ${targetY.toFixed(1)})`);
+      }
+    }, STEP_INTERVAL);
+  };
