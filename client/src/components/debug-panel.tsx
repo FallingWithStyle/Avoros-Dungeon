@@ -433,6 +433,11 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 Restore Energy
               </Button>
             </div>
+            {/* Redis Fallback Control */}
+            <div className="mb-2 p-2 border border-red-600/30 rounded bg-red-900/10">
+              <RedisFallbackControl />
+            </div>
+
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
               <span>
