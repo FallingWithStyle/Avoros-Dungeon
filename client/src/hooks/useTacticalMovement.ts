@@ -177,21 +177,21 @@ export function useTacticalMovement({
 
     let triggerDirection: string | null = null;
 
-    // Check if player is in a gate zone AND moving in the correct direction OR very close to the edge
-    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && (deltaY < -minMovement || y <= 5)) {
-      // Moving north through north gate
+    // Check if player is in a gate zone AND actively moving through the door (not just near it)
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -minMovement) {
+      // Moving north through north gate - must be actively moving north
       triggerDirection = "north";
     } 
-    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && (deltaY > minMovement || y >= 95)) {
-      // Moving south through south gate
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > minMovement) {
+      // Moving south through south gate - must be actively moving south
       triggerDirection = "south";
     }
-    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && (deltaX > minMovement || x >= 95)) {
-      // Moving east through east gate
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > minMovement) {
+      // Moving east through east gate - must be actively moving east
       triggerDirection = "east";
     }
-    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && (deltaX < -minMovement || x <= 5)) {
-      // Moving west through west gate
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -minMovement) {
+      // Moving west through west gate - must be actively moving west
       triggerDirection = "west";
     }
 
