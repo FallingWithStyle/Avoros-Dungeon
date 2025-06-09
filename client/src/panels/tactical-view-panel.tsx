@@ -1034,9 +1034,147 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const GRID_SIZE = 15;
 
+  // Grid click handler for movement
+  const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!effectiveTacticalData?.room) return;
 
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
 
+    console.log(`Grid clicked at ${x.toFixed(1)}, ${y.toFixed(1)}`);
 
+    // If we have a selected player entity, try to move them
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (selectedEntity?.id === "player") {
+      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
+      if (success) {
+        console.log(`Player moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+      } else {
+        console.log("Move action failed - check cooldown or existing action");
+      }
+    }
+  }, [effectiveTacticalData?.room]);
+
+  // Grid right-click handler for context menu
+  const handleGridRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      entityId: "grid",
+      entity: { id: "grid", name: "Grid", type: "grid", hp: 0, maxHp: 0, attack: 0, defense: 0, speed: 0, position: { x, y } } as CombatEntity,
+      actions: [],
+      clickPosition: { x, y }
+    });
+  }, []);
+
+  // Entity click handler
+  const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    console.log(`Clicked entity: ${entityId}`);
+    
+    const success = combatSystem.selectEntity(entityId);
+    if (success) {
+      console.log(`Selected entity: ${entityId}`);
+    }
+  }, []);
+
+  // Entity right-click handler for context menu
+  const handleEntityRightClick = useCallback((entityId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const entity = combatState.entities.find(e => e.id === entityId);
+    if (!entity) return;
+
+    const actions = combatSystem.getAvailableActions(entityId);
+
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      entityId,
+      entity,
+      actions,
+    });
+  }, [combatState.entities]);
+
+  // Loot click handler
+  const handleLootClick = useCallback((index: number, item: any, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log(`Clicked loot: ${item.name}`);
+    
+    toast({
+      title: "Loot Interaction",
+      description: `Interacting with ${item.name}`,
+    });
+  }, [toast]);
+
+  // Action click handler
+  const handleActionClick = useCallback((action: CombatAction, targetEntityId: string) => {
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (!selectedEntity) {
+      console.log("No entity selected for action");
+      return;
+    }
+
+    const success = combatSystem.queueAction(selectedEntity.id, action, targetEntityId);
+    if (success) {
+      console.log(`Queued ${action.name} from ${selectedEntity.name} to ${targetEntityId}`);
+    } else {
+      console.log(`Failed to queue ${action.name} - check cooldown or existing action`);
+    }
+
+    setContextMenu(null);
+  }, []);
+
+  // Move to position handler
+  const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
+    if (!position) return;
+
+    const selectedEntity = combatSystem.getSelectedEntity();
+    if (!selectedEntity) {
+      console.log("No entity selected for movement");
+      return;
+    }
+
+    const success = combatSystem.queueMoveAction(selectedEntity.id, position);
+    if (success) {
+      console.log(`${selectedEntity.name} moving to ${position.x.toFixed(1)}, ${position.y.toFixed(1)}`);
+    } else {
+      console.log("Failed to queue move action - check cooldown or existing action");
+    }
+
+    setContextMenu(null);
+  }, []);
+
+  // Hotbar click handler
+  const handleHotbarClick = useCallback((actionId: string, actionType: string, actionName: string) => {
+    if (activeActionMode?.actionId === actionId) {
+      // Deactivate if clicking the same action
+      setActiveActionMode(null);
+      console.log(`Deactivated ${actionName} mode`);
+    } else {
+      // Activate the action mode
+      setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+      console.log(`Activated ${actionName} mode`);
+    }
+  }, [activeActionMode]);
+
+  // Get cooldown percentage for hotbar actions
+  const getCooldownPercentage = useCallback((actionId: string): number => {
+    // This would normally check actual cooldown state
+    // For now, return 0 (no cooldown)
+    return 0;
+  }, []);
 
   return (
     <Card className="bg-game-panel border-game-border">
