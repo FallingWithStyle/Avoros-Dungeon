@@ -24,6 +24,7 @@ import {
 } from "@shared/combat-system";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { isEnergyDisabled } from "@/components/debug-panel";
 import ActionQueuePanel from "./action-queue-panel";
 
 interface TacticalViewPanelProps {
@@ -436,6 +437,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchInterval: 2000,
   });
 
+  // Fetch explored rooms for map refresh
+  const { refetch: refetchExploredRooms } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
+    refetchInterval: 30000,
+    staleTime: 120000,
+    retry: false,
+  });
+
   // Function to handle cell click and initiate the movement - MUST BE AT TOP LEVEL
   const handleCellClick = useCallback(
     (x: number, y: number) => {
@@ -559,57 +568,54 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   });
 
     // Generate client-side fallback tactical data when server data is unavailable
-    const generateFallbackTacticalData = () => {
-      if (!roomData?.room) return null;
-  
-      const fallbackEntities: any[] = [];
-      const occupiedCells = new Set<string>();
-  
-      // Generate some basic entities based on room properties
-      if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
-        // Add a loot item
-        const lootCell = getRandomEmptyCell(occupiedCells);
-        const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
+  const generateFallbackTacticalData = () => {
+    if (!roomData?.room) return null;
+
+    const fallbackEntities: any[] = [];
+    const occupiedCells = new Set<string>();
+
+    // Generate some basic entities based on room properties
+    if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
+      // Add a loot item
+      const lootCell = getRandomEmptyCell(occupiedCells);
+      const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
+      fallbackEntities.push({
+        type: 'loot',
+        name: 'Treasure',
+        position: lootPos,
+        data: { type: 'treasure' },
+        x: lootPos.x,
+        y: lootPos.y
+      });
+    }
+
+    // Add basic enemies for non-safe rooms
+    if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
+      if (Math.random() > 0.5) { // 50% chance for enemies
+        const mobCell = getRandomEmptyCell(occupiedCells);
+        const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
         fallbackEntities.push({
-          type: 'loot',
-          name: 'Treasure',
-          position: lootPos,
-          data: { type: 'treasure' },
-          x: lootPos.x,
-          y: lootPos.y
+          type: 'mob',
+          name: 'Unknown Enemy',
+          position: mobPos,
+          data: { 
+            hp: 50,
+            maxHp: 50,
+            attack: 10,
+            defense: 5,
+            hostile: true
+          }
         });
       }
-  
-      // Add basic enemies for non-safe rooms
-      if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
-        if (Math.random() > 0.5) { // 50% chance for enemies
-          const mobCell = getRandomEmptyCell(occupiedCells);
-          const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
-          fallbackEntities.push({
-            type: 'mob',
-            name: 'Unknown Enemy',
-            position: mobPos,
-            data: { 
-              hp: 50,
-              maxHp: 50,
-              attack: 10,
-              defense: 5,
-              hostile: true
-            }
-          });
-        }
-      }
-  
-      return {
-        room: roomData.room,
-        availableDirections: roomData.availableDirections || [],
-        playersInRoom: roomData.playersInRoom || [],
-        tacticalEntities: fallbackEntities
-      };
+    }
+
+    return {
+      room: roomData.room,
+      availableDirections: roomData.availableDirections || [],
+      playersInRoom: roomData.playersInRoom || [],
+      tacticalEntities: fallbackEntities
     };
-  
-    // Use fallback data when tactical data is unavailable
-    const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
+  };
 
   // Fetch tactical data separately for better caching with improved error handling
   const { data: tacticalData, isLoading: tacticalLoading, error: tacticalError, refetch: refetchTactical } = useQuery({
@@ -663,6 +669,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     },
   });
 
+  // Use fallback data when tactical data is unavailable
+  const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
+
   // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -680,7 +689,50 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return unsubscribe;
   }, [combatState.isInCombat, activeActionMode]);
 
-  // Proximity-based exit detection
+  // Room movement function using the actual API
+  const handleRoomMovement = useCallback(async (direction: string) => {
+    if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
+      console.log(`Cannot move ${direction} - not available or no crawler`);
+      return;
+    }
+
+    try {
+      console.log(`Moving crawler ${crawler.id} ${direction} to new room`);
+
+      // Store the movement direction for tactical view positioning in the next room
+      sessionStorage.setItem('lastMovementDirection', direction);
+
+      const response = await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
+        direction,
+        debugEnergyDisabled: isEnergyDisabled(),
+      });
+
+      if (response.success) {
+        console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
+
+        // Refresh all relevant data when moving through doors
+        refetchTactical();
+        refetchExploredRooms(); // This will refresh the dungeon map
+
+        // Force a re-render by clearing and re-adding the player entity with new position
+        const currentEntities = combatSystem.getState().entities;
+        currentEntities.forEach((entity) => {
+          combatSystem.removeEntity(entity.id);
+        });
+
+        console.log(`Room transition complete - tactical view and map will refresh with new data`);
+      }
+    } catch (error) {
+      console.error(`Failed to move ${direction}:`, error);
+      toast({
+        title: "Movement failed",
+        description: error.message || "Could not move in that direction.",
+        variant: "destructive",
+      });
+    }
+  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
+
+  // Gate crossing detection - triggers when player approaches or crosses gates
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -694,19 +746,29 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       west: effectiveTacticalData.availableDirections.includes("west"),
     };
 
-    const proximityThreshold = 5; // 5% from edge to trigger movement
     const { x, y } = playerEntity.position;
 
-    // Check proximity to each available exit with more precise positioning
+    // More lenient gate detection - trigger before hitting hard boundary
+    const approachThreshold = 5; // Trigger when 5% from edge
+    const crossThreshold = 1; // Or when crossing 1% past edge (for extended boundary movement)
+
+    // Check if player is approaching or has crossed through a gate
     let triggerDirection: string | null = null;
 
-    if (exits.north && y <= proximityThreshold && x >= 35 && x <= 65) {
+    // North gate - trigger when approaching top edge or crossing it
+    if (exits.north && x >= 35 && x <= 65 && (y <= approachThreshold || y <= crossThreshold)) {
       triggerDirection = "north";
-    } else if (exits.south && y >= (100 - proximityThreshold) && x >= 35 && x <= 65) {
+    } 
+    // South gate - trigger when approaching bottom edge or crossing it  
+    else if (exits.south && x >= 35 && x <= 65 && (y >= (100 - approachThreshold) || y >= (100 - crossThreshold))) {
       triggerDirection = "south";
-    } else if (exits.east && x >= (100 - proximityThreshold) && y >= 35 && y <= 65) {
+    }
+    // East gate - trigger when approaching right edge or crossing it
+    else if (exits.east && y >= 35 && y <= 65 && (x >= (100 - approachThreshold) || x >= (100 - crossThreshold))) {
       triggerDirection = "east";
-    } else if (exits.west && x <= proximityThreshold && y >= 35 && y <= 65) {
+    }
+    // West gate - trigger when approaching left edge or crossing it
+    else if (exits.west && y >= 35 && y <= 65 && (x <= approachThreshold || x <= crossThreshold)) {
       triggerDirection = "west";
     }
 
@@ -716,17 +778,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastMovement = sessionStorage.getItem('lastProximityMovement');
       const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
 
-      if (now - lastMovementTime > 2000) { // 2 second cooldown to prevent accidental exits
-        console.log(`Player approached ${triggerDirection} exit - triggering room transition`);
+      if (now - lastMovementTime > 1000) { // 1 second cooldown
+        console.log(`Player triggered ${triggerDirection} gate transition at position (${x.toFixed(1)}, ${y.toFixed(1)})`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
-        // Store the movement direction for next room positioning
-        sessionStorage.setItem('lastMovementDirection', triggerDirection);
-
-        handleMove(triggerDirection);
+        handleRoomMovement(triggerDirection);
       }
     }
-  }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections]);
+  }, [combatState.entities, effectiveTacticalData?.room?.id, effectiveTacticalData?.availableDirections, handleRoomMovement]);
 
   // WASD Movement Input
   useEffect(() => {
@@ -734,22 +793,32 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
         return;
       }
+
       const playerEntity = combatState.entities.find(e => e.id === "player");
-      if (!playerEntity) return;
+      if (!playerEntity) {
+        console.log("WASD pressed but no player entity found. Entities:", combatState.entities.map(e => e.id));
+        return;
+      }
 
       let direction: { x: number, y: number } | null = null;
+      let keyPressed = "";
+
       switch (event.key.toLowerCase()) {
         case 'w':
           direction = { x: 0, y: -1 };
+          keyPressed = "W (North)";
           break;
         case 'a':
           direction = { x: -1, y: 0 };
+          keyPressed = "A (West)";
           break;
         case 's':
           direction = { x: 0, y: 1 };
+          keyPressed = "S (South)";
           break;
         case 'd':
           direction = { x: 1, y: 0 };
+          keyPressed = "D (East)";
           break;
         default:
           return; // Ignore other keys
@@ -757,22 +826,56 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       event.preventDefault(); // Prevent default scrolling
 
-      const speed = playerEntity.speed || 10; // Default speed
-      const moveDistance = speed / 100; // Convert speed to percentage units
+      console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
+
+      const speed = playerEntity.speed || 3; // Much smaller movement increments for smoothness
+      const moveDistance = speed; // Move in small percentage units
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
 
-      // Clamp new position within the grid bounds (0-100%)
-      newX = Math.max(0, Math.min(100, newX));
-      newY = Math.max(0, Math.min(100, newY));
+      // Check if player is approaching a door and allow boundary crossing
+      const isApproachingDoor = (x: number, y: number, dir: { x: number, y: number }) => {
+        if (!effectiveTacticalData?.availableDirections) return false;
+
+        const exits = {
+          north: effectiveTacticalData.availableDirections.includes("north"),
+          south: effectiveTacticalData.availableDirections.includes("south"),
+          east: effectiveTacticalData.availableDirections.includes("east"),
+          west: effectiveTacticalData.availableDirections.includes("west"),
+        };
+
+        // Check if moving toward a door (within gate area)
+        const inGateArea = (x >= 35 && x <= 65) || (y >= 35 && y <= 65);
+
+        if (dir.y < 0 && exits.north && y <= 10 && x >= 35 && x <= 65) return true; // Moving north toward north door
+        if (dir.y > 0 && exits.south && y >= 90 && x >= 35 && x <= 65) return true; // Moving south toward south door  
+        if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
+        if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
+
+      };
+
+      // Allow crossing boundaries if approaching a door, otherwise clamp
+      if (isApproachingDoor(playerEntity.position.x, playerEntity.position.y, direction)) {
+        // Allow movement beyond normal boundaries for door transitions
+        newX = Math.max(-5, Math.min(105, newX)); // Extended boundary for door crossing
+        newY = Math.max(-5, Math.min(105, newY));
+        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
+      } else {
+        // Normal boundary clamping
+        newX = Math.max(2, Math.min(98, newX)); // Leave small border
+        newY = Math.max(2, Math.min(98, newY));
+      }
+
+      console.log(`Moving from (${playerEntity.position.x.toFixed(1)}, ${playerEntity.position.y.toFixed(1)}) to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
 
       // Queue the move action
-      combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      const success = combatSystem.queueMoveAction(playerEntity.id, { x: newX, y: newY });
+      console.log(`Move action queued:`, success);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [combatState.entities]);
+  }, [combatState.entities, effectiveTacticalData?.availableDirections]);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -867,7 +970,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Cleared all entities for room ${currentRoomId}`);
     }
 
-    // Always ensure player entity exists
+    // Always ensure player entity exists - check after any clearing
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
     if (!existingPlayer) {
       // Get last movement direction from session storage to position player appropriately
@@ -886,6 +989,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         defense: 10, // Base defense for player
         speed: 15,
         position: entryPosition,
+        facing: lastDirection || 'south', // Face in the direction moved or default south
         entryDirection: lastDirection,
       };
 
@@ -894,6 +998,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`Added player entity at position for room ${currentRoomId}`, playerEntity.position);
     }
   }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
+
+  // Additional effect to ensure player entity is always present
+  useEffect(() => {
+    const ensurePlayerExists = () => {
+      const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
+      if (!existingPlayer && roomData?.room) {
+        console.log("Player entity missing, creating fallback player");
+        const fallbackPosition = { x: 50, y: 50 }; // Center position
+        const playerEntity: CombatEntity = {
+          id: "player",
+          name: crawler.name,
+          type: "player",
+          hp: crawler.health || 100,
+          maxHp: crawler.maxHealth || 100,
+          attack: 20,
+          defense: 10,
+          speed: 15,
+          position: fallbackPosition,
+          facing: 'south', // Default facing direction
+        };
+
+        combatSystem.addEntity(playerEntity);
+        combatSystem.selectEntity("player");
+        console.log(`Created fallback player entity at center position`);
+      }
+    };
+
+    // Check immediately
+    ensurePlayerExists();
+
+    // Also check every few seconds to make sure player entity doesn't get lost
+    const interval = setInterval(ensurePlayerExists, 3000);
+    return () => clearInterval(interval);
+  }, [crawler.name, crawler.health, crawler.maxHealth, roomData?.room]);
 
   // Separate effect for tactical entities to avoid conflicts
 
@@ -967,92 +1105,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         actionName: "Move",
       });
     } else if (actionType === "attack") {
-      // Check if we're in combat
-      if (combatState.isInCombat) {
-        // Auto-select and attack viable target
-        const target = findViableTarget();
-        if (target && playerEntity) {
-          const attackAction = combatSystem.actionDefinitions?.get(
-            actionId,
-          ) || {
-            id: actionId,
-            name: actionName,
-            type: "attack",
-            cooldown: 2000,
-            damage: 20,
-            range: 15,
-            targetType: "single",
-            executionTime: 1000,
-          };
-
-          // Check if target is in range
-          const distance = combatSystem.calculateDistance(
-            playerEntity.position,
-            target.position,
-          );
-          if (distance <= (attackAction.range || 15)) {
-            // Target is in range, attack directly
-            const success = combatSystem.queueAction(
-              playerEntity.id,
-              actionId,
-              target.id,
-            );
-            if (success) {
-              console.log(`Auto-attacking ${target.name}`);
-            } else {
-              console.log(
-                `Failed to attack ${target.name} - check cooldown or existing action`,
-              );
-            }
-          } else {
-            // Target is out of range, queue move then attack
-            console.log(`Target out of range, moving closer to ${target.name}`);
-
-            // Calculate position to move to (just within attack range)
-            const dx = target.position.x - playerEntity.position.x;
-            const dy = target.position.y - playerEntity.position.y;
-            const targetDistance = Math.sqrt(dx * dx + dy * dy);
-            const moveDistance = Math.max(
-              0,
-              targetDistance - (attackAction.range || 15) + 2,
-            ); // Leave small buffer
-
-            const moveX =
-              playerEntity.position.x + (dx / targetDistance) * moveDistance;
-            const moveY =
-              playerEntity.position.y + (dy / targetDistance) * moveDistance;
-
-            // Queue move action first
-            const moveSuccess = combatSystem.queueMoveAction(playerEntity.id, {
-              x: moveX,
-              y: moveY,
-            });
-            if (moveSuccess) {
-              // Schedule the attack to be queued after move completes
-              setTimeout(() => {
-                const attackSuccess = combatSystem.queueAction(
-                  playerEntity.id,
-                  actionId,
-                  target.id,
-                );
-                if (attackSuccess) {
-                  console.log(
-                    `Queued attack on ${target.name} after movement`,
-                  );
-                }
-              }, 900); // Slightly before move action completes (800ms execution time)
-            }
-          }
+      // Execute directional attack immediately - attack all enemies in front of player
+      if (playerEntity) {
+        const success = combatSystem.executeDirectionalAttack(playerEntity.id, actionId);
+        if (success) {
+          console.log(`Executed directional attack: ${actionName}`);
         } else {
-          console.log("No viable targets found for auto-attack");
+          console.log(`Failed to execute directional attack - check cooldown, range, or no enemies in direction`);
         }
       } else {
-        // Not in combat, activate attack mode for manual target selection
-        setActiveActionMode({
-          type: "attack",
-          actionId: actionId,
-          actionName: actionName,
-        });
+        console.log("No player entity found for directional attack");
       }
     } else {
       // Handle other abilities/actions
@@ -1492,6 +1554,71 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   };
 
+    // Render entities
+  const renderEntity = (entity: any) => {
+    console.log('Rendering entity:', entity.type, entity.name, entity.position);
+
+    const GRID_SIZE = 15;
+    const cellX = Math.floor((entity.position.x / 100) * GRID_SIZE);
+    const cellY = Math.floor((entity.position.y / 100) * GRID_SIZE);
+    const key = `${cellX}-${cellY}`;
+
+    if (entity.type === "loot") {
+      return (
+        <div
+          key={`loot-${entity.data.id}`}
+          className="absolute w-3 h-3 bg-yellow-400 rounded-full border border-yellow-600 animate-pulse"
+          style={{
+            left: `${entity.position.x}%`,
+            top: `${entity.position.y}%`,
+            transform: "translate(-50%, -50%)",
+            zIndex: 10,
+          }}
+          title={`${entity.name} (${entity.data.rarity})`}
+        />
+      );
+    }
+
+    if (entity.type === "npc") {
+      return (
+        <div
+          key={`npc-${entity.data.id || entity.name}`}
+          className="absolute w-4 h-4 bg-blue-400 rounded-full border-2 border-blue-600"
+          style={{
+            left: `${entity.position.x}%`,
+            top: `${entity.position.y}%`,
+            transform: "translate(-50%, -50%)",
+            zIndex: 10,
+          }}
+          title={`${entity.name} (NPC)`}
+        />
+      );
+    }
+
+    if (entity.type === "mob") {
+      const isHostile = entity.data.hostileType === "boss" || entity.data.hp > 0;
+      const colorClass = entity.data.hostileType === "boss" 
+        ? "bg-purple-600 border-purple-800" 
+        : "bg-red-500 border-red-700";
+
+      return (
+        <div
+          key={`mob-${entity.data.id}`}
+          className={`absolute w-4 h-4 ${colorClass} rounded-full border-2`}
+          style={{
+            left: `${entity.position.x}%`,
+            top: `${entity.position.y}%`,
+            transform: "translate(-50%, -50%)",
+            zIndex: 10,
+          }}
+          title={`${entity.name} (${entity.data.hp}/${entity.data.maxHp} HP)`}
+        />
+      );
+    }
+
+    return null;
+  };
+
   if (isLoading || tacticalLoading || !roomData) {
     return (
       <Card className="bg-game-panel border-game-border">
@@ -1582,19 +1709,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
 
-  const handleMove = (direction: string) => {
-    console.log(`Moving ${direction}`);
-    // Store the opposite direction - where the player came FROM for the next room
-    const oppositeDirection = {
-      north: "south",
-      south: "north", 
-      east: "west",
-      west: "east"
-    }[direction];
-    console.log(`Player moving ${direction}, storing came-from direction: ${oppositeDirection}`);
-    sessionStorage.setItem("lastMovementDirection", oppositeDirection || direction);
-    window.location.href = `/crawler/${crawler.id}/move/${direction}`;
-  };
+  const GRID_SIZE = 15;
+
+
 
 
 
@@ -1624,7 +1741,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute inset-0 opacity-20 grid-background">
               <svg
                 width="100%"
-                height="100%"
+                height="100%"```text
                 viewBox="0 0 15 15"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="none"
@@ -1686,7 +1803,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               title={`${entity.name} (${entity.hp}/${entity.maxHp} HP) - Right-click for actions`}
             >
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg ${
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative ${
                   entity.type === "player"
                     ? "bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50"
                     : entity.type === "hostile"
@@ -1704,6 +1821,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 )}
                 {(entity.type === "neutral" || entity.type === "npc") && (
                   <Users className="w-3 h-3 text-white" />
+                )}
+
+                {/* Facing direction indicator */}
+                {entity.facing && (
+                  <div 
+                    className={`absolute w-2 h-2 bg-yellow-400 rounded-sm transform ${
+                      entity.facing === 'north' ? '-translate-y-4' : 
+                      entity.facing === 'south' ? 'translate-y-4' :
+                      entity.facing === 'east' ? 'translate-x-4' : 
+                      '-translate-x-4'
+                    }`}
+                    style={{
+                      clipPath: entity.facing === 'north' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' :
+                               entity.facing === 'south' ? 'polygon(50% 100%, 0% 0%, 100% 0%)' :
+                               entity.facing === 'east' ? 'polygon(100% 50%, 0% 0%, 0% 100%)' :
+                               'polygon(0% 50%, 100% 0%, 100% 100%)'
+                    }}
+                  />
                 )}
               </div>
 
@@ -1770,7 +1905,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     : "animate-bounce"
                 }`}
               >
-                Hiding the WASD compass from the tacticalview panel while keeping the movement functionality intact.
                 {getLootIcon(item.type)}
               </div>
 

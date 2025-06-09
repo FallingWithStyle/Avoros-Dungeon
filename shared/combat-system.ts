@@ -8,6 +8,7 @@ export interface CombatEntity {
   defense: number;
   speed: number;
   position: { x: number; y: number };
+  facing: 'north' | 'south' | 'east' | 'west'; // Direction the entity is facing
   isSelected?: boolean;
   cooldowns?: Record<string, number>;
   effects?: string[];
@@ -106,9 +107,9 @@ export class CombatSystem {
         id: 'move',
         name: 'Move',
         type: 'move',
-        cooldown: 200, // Shorter cooldown for responsive movement
+        cooldown: 100, // Even shorter cooldown for smooth movement
         targetType: 'area',
-        executionTime: 150, // Faster execution for smooth movement
+        executionTime: 50, // Much faster execution for smooth movement
       }],
     ]);
   }
@@ -139,6 +140,7 @@ export class CombatSystem {
     const now = Date.now();
     const entityWithDefaults = { 
       ...entity, 
+      facing: entity.facing || 'south', // Default facing direction
       cooldowns: {},
       // Add 5-second grace period for hostile entities
       detectionGraceEnd: entity.type === 'hostile' ? now + 5000 : undefined,
@@ -322,6 +324,130 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  // Get entities in front of the attacking entity within range and cone
+  getEntitiesInAttackCone(attacker: CombatEntity, range: number, coneAngle: number = 60): CombatEntity[] {
+    const attackerPos = attacker.position;
+    const facingDirection = attacker.facing;
+    
+    // Define direction vectors
+    const directionVectors = {
+      north: { x: 0, y: -1 },
+      south: { x: 0, y: 1 },
+      east: { x: 1, y: 0 },
+      west: { x: -1, y: 0 }
+    };
+    
+    const facingVector = directionVectors[facingDirection];
+    const entitiesInCone: CombatEntity[] = [];
+    
+    this.state.entities.forEach(entity => {
+      if (entity.id === attacker.id) return; // Skip self
+      
+      const dx = entity.position.x - attackerPos.x;
+      const dy = entity.position.y - attackerPos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Check if within range
+      if (distance > range || distance === 0) return;
+      
+      // Normalize the vector to the target
+      const targetVector = { x: dx / distance, y: dy / distance };
+      
+      // Calculate the dot product to determine angle
+      const dotProduct = facingVector.x * targetVector.x + facingVector.y * targetVector.y;
+      const angleInDegrees = Math.acos(Math.max(-1, Math.min(1, dotProduct))) * (180 / Math.PI);
+      
+      // Check if within cone angle
+      if (angleInDegrees <= coneAngle / 2) {
+        entitiesInCone.push(entity);
+      }
+    });
+    
+    return entitiesInCone;
+  }
+
+  // Update entity facing direction
+  updateEntityFacing(entityId: string, direction: 'north' | 'south' | 'east' | 'west'): void {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (entity) {
+      entity.facing = direction;
+      this.notifyListeners();
+    }
+  }
+
+  // Execute directional attack on all enemies in cone
+  executeDirectionalAttack(attackerId: string, actionId: string): boolean {
+    const attacker = this.state.entities.find(e => e.id === attackerId);
+    const action = this.actionDefinitions.get(actionId);
+    
+    if (!attacker || !action || action.type !== 'attack') return false;
+    
+    // Prevent attack actions in safe rooms
+    if (this.isCurrentRoomSafe()) {
+      console.log('Cannot attack in a safe room');
+      return false;
+    }
+    
+    // Check if action is on cooldown
+    const now = Date.now();
+    const lastUsed = attacker.cooldowns?.[actionId] || 0;
+    if (now < lastUsed + action.cooldown) return false;
+    
+    // Check if entity already has an action queued
+    const existingAction = this.state.actionQueue.find(qa => qa.entityId === attackerId);
+    if (existingAction) return false;
+    
+    // Get all enemies in attack cone
+    const targetsInCone = this.getEntitiesInAttackCone(attacker, action.range || 15, 90);
+    const hostileTargets = targetsInCone.filter(entity => entity.type === 'hostile');
+    
+    if (hostileTargets.length === 0) {
+      console.log('No enemies in attack direction');
+      return false;
+    }
+    
+    // Alert all hostile entities when player attacks
+    if (attacker.type === 'player') {
+      this.state.entities.forEach(e => {
+        if (e.type === 'hostile') {
+          e.hasDetectedPlayer = true;
+          e.detectionGraceEnd = now; // End grace period immediately
+        }
+      });
+      console.log('Player attacked - all enemies are now alerted!');
+    }
+    
+    // Queue attack action that will hit all targets in cone
+    const queuedAction: QueuedAction = {
+      entityId: attackerId,
+      action,
+      targetId: 'directional_attack', // Special marker for directional attacks
+      targetPosition: undefined,
+      queuedAt: now,
+      executesAt: now + action.executionTime,
+    };
+    
+    // Store the target list in the action for execution
+    (queuedAction as any).directionalTargets = hostileTargets;
+    
+    this.state.actionQueue.push(queuedAction);
+    
+    console.log(`Queued directional attack hitting ${hostileTargets.length} enemies:`, hostileTargets.map(t => t.name));
+    
+    this.notifyListeners();
+    
+    // Generate event for the action (only in client environment)
+    if (typeof window !== 'undefined') {
+      import('./events-system').then(({ eventsSystem }) => {
+        eventsSystem.onCombatAction(action, attackerId, undefined, action.damage);
+      }).catch(() => {
+        // Events system not available, skip
+      });
+    }
+    
+    return true;
+  }
+
   // Move entity towards a target position (used by AI)
   private moveEntityTowards(entityId: string, targetPosition: { x: number; y: number }): void {
     const entity = this.state.entities.find(e => e.id === entityId);
@@ -351,11 +477,22 @@ export class CombatSystem {
     const entity = this.state.entities.find(e => e.id === entityId);
     if (!entity) return;
 
+    // Calculate movement direction to update facing
+    const dx = targetPosition.x - entity.position.x;
+    const dy = targetPosition.y - entity.position.y;
+    
+    // Update facing direction based on primary movement direction
+    if (Math.abs(dx) > Math.abs(dy)) {
+      entity.facing = dx > 0 ? 'east' : 'west';
+    } else if (Math.abs(dy) > 0.1) { // Small threshold to avoid jitter
+      entity.facing = dy > 0 ? 'south' : 'north';
+    }
+
     // Clamp position to grid bounds
     entity.position.x = Math.max(5, Math.min(95, targetPosition.x));
     entity.position.y = Math.max(5, Math.min(95, targetPosition.y));
 
-    console.log("moveEntityToPosition:", entityId, "->", entity.position);
+    console.log("moveEntityToPosition:", entityId, "->", entity.position, "facing:", entity.facing);
 
     this.notifyListeners();
   }
@@ -374,8 +511,8 @@ export class CombatSystem {
     if (!entity.cooldowns) entity.cooldowns = {};
     const now = Date.now();
     
-    // For player entities, use a shorter cooldown for responsive movement
-    const moveCooldown = entity.id === 'player' ? 50 : moveAction.cooldown;
+    // For player entities, use a much shorter cooldown for smooth movement
+    const moveCooldown = entity.id === 'player' ? 25 : moveAction.cooldown;
     
     if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveCooldown) {
         return false;
@@ -519,7 +656,16 @@ export class CombatSystem {
     // Execute action effects
     switch (action.type) {
       case 'attack':
-        if (targetId && action.damage) {
+        if (targetId === 'directional_attack') {
+          // Handle directional attack - damage all targets in cone
+          const directionalTargets = (queuedAction as any).directionalTargets || [];
+          directionalTargets.forEach((target: CombatEntity) => {
+            if (action.damage) {
+              this.dealDamage(target.id, action.damage, entity.attack);
+            }
+          });
+          console.log(`Directional attack hit ${directionalTargets.length} enemies`);
+        } else if (targetId && action.damage) {
           this.dealDamage(targetId, action.damage, entity.attack);
         }
         break;

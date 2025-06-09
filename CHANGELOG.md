@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-23
+
+### Added
+- Automatic dungeon map refresh when moving through doors
+- Enhanced room transition system with map data synchronization
+
+### Improved
+- Map data now updates immediately when crawler moves between rooms
+- Better coordination between tactical view and dungeon map components
+
 ## [0.2.0] - 2025-01-22
 
 ### Changed

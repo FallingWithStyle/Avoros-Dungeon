@@ -47,7 +47,8 @@ async function seedMobTypes() {
   }
 }
 
-if (require.main === module) {
+// Check if this file is being run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   seedMobTypes()
     .then(() => {
       console.log("Mob type seeding complete");

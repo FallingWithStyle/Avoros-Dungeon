@@ -13,18 +13,14 @@ export function useWebSocket(token: string | null) {
   useEffect(() => {
     if (!token) return;
 
-    // Handle WebSocket URL construction more safely
+    // Handle WebSocket URL construction more safely for Replit
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const hostname = window.location.hostname;
-    const port = window.location.port;
-
-    // Construct host with proper port handling
-    let host = hostname;
-    if (port && port !== '80' && port !== '443') {
-      host = `${hostname}:${port}`;
-    }
-
-    const wsUrl = `${protocol}//${host}/?token=${token}`;
+    
+    // For Replit deployments, use the current host without port manipulation
+    const host = window.location.host; // This includes port if present
+    
+    const wsUrl = `${protocol}//${host}/ws?token=${token}`;
 
     console.log('Attempting WebSocket connection to:', wsUrl);
 

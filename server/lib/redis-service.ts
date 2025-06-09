@@ -6,27 +6,29 @@ class RedisService {
 
   constructor() {
     try {
-      if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-        console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set - Redis will be disabled');
+      // Check if Upstash Redis is configured
+      if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+        console.log('Initializing Upstash Redis with URL:', process.env.UPSTASH_REDIS_REST_URL?.substring(0, 50) + '...');
+
+        this.redis = new Redis({
+          url: process.env.UPSTASH_REDIS_REST_URL,
+          token: process.env.UPSTASH_REDIS_REST_TOKEN,
+        });
+
+        this.isConnected = true;
+        console.log('Upstash Redis initialized successfully');
+      } else {
+        console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set');
+        console.log('Redis will be disabled - falling back to database storage');
         this.redis = null;
         this.isConnected = false;
         return;
       }
 
-      console.log('Initializing Upstash Redis with URL:', process.env.UPSTASH_REDIS_REST_URL?.substring(0, 50) + '...');
-
-      this.redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      });
-
-      this.isConnected = true;
-      console.log('Upstash Redis initialized successfully');
-
       // Test the connection immediately
       this.testConnection();
     } catch (error) {
-      console.error('Failed to initialize Upstash Redis:', error);
+      console.error('Failed to initialize Redis:', error);
       this.redis = null;
       this.isConnected = false;
     }
@@ -305,25 +307,78 @@ class RedisService {
     }
   }
 
-  async getRoomMobs(roomId: number): Promise<any[] | null> {
-    if (!this.redis || !this.isConnected) return null;
-
+  async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
     try {
-      const data = await this.redis?.get(`mobs:${roomId}`);
-      return data ? JSON.parse(data as string) : null;
+      // Create a clean, serializable version of the mob data
+      const cleanMobs = mobs.map(mobData => {
+        const cleanMob = {
+          mob: {
+            id: mobData.mob.id,
+            roomId: mobData.mob.roomId,
+            enemyId: mobData.mob.enemyId,
+            displayName: mobData.mob.displayName,
+            rarity: mobData.mob.rarity,
+            positionX: mobData.mob.positionX,
+            positionY: mobData.mob.positionY,
+            currentHealth: mobData.mob.currentHealth,
+            maxHealth: mobData.mob.maxHealth,
+            isAlive: mobData.mob.isAlive,
+            disposition: mobData.mob.disposition,
+            isActive: mobData.mob.isActive,
+            createdAt: mobData.mob.createdAt instanceof Date ? mobData.mob.createdAt.toISOString() : mobData.mob.createdAt,
+            updatedAt: mobData.mob.updatedAt instanceof Date ? mobData.mob.updatedAt.toISOString() : mobData.mob.updatedAt
+          },
+          mobType: {
+            id: mobData.mobType.id,
+            name: mobData.mobType.name,
+            description: mobData.mobType.description,
+            hitPoints: mobData.mobType.hitPoints,
+            attack: mobData.mobType.attack,
+            defense: mobData.mobType.defense,
+            speed: mobData.mobType.speed,
+            health: mobData.mobType.health,
+            rarity: mobData.mobType.rarity,
+            creditsReward: mobData.mobType.creditsReward,
+            experienceReward: mobData.mobType.experienceReward
+          }
+        };
+        return cleanMob;
+      });
+
+      const serializedMobs = JSON.stringify(cleanMobs);
+      await this.redis.setex(`room:${roomId}:mobs`, ttlSeconds, serializedMobs);
+      console.log(`Storing mobs data for room ${roomId}: ${serializedMobs.length} characters`);
     } catch (error) {
-      console.error('Redis getRoomMobs error:', error);
-      return null;
+      console.log('Failed to cache room mobs data:', error);
     }
   }
 
-  async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
-    if (!this.redis || !this.isConnected) return;
-
+  async getRoomMobs(roomId: number): Promise<any[] | null> {
     try {
-      await this.redis?.setex(`mobs:${roomId}`, ttlSeconds, JSON.stringify(mobs));
+      const cached = await this.redis.get(`room:${roomId}:mobs`);
+      if (!cached) return null;
+
+      // Validate that we have a string
+      if (typeof cached !== 'string') {
+        console.log(`Invalid cached data type for room ${roomId} mobs:`, typeof cached);
+        await this.invalidateRoomMobs(roomId);
+        return null;
+      }
+
+      // Parse and reconstruct Date objects
+      const parsed = JSON.parse(cached);
+      return parsed.map((mobData: any) => ({
+        ...mobData,
+        mob: {
+          ...mobData.mob,
+          createdAt: mobData.mob.createdAt ? new Date(mobData.mob.createdAt) : null,
+          updatedAt: mobData.mob.updatedAt ? new Date(mobData.mob.updatedAt) : null
+        }
+      }));
     } catch (error) {
-      console.error('Redis setRoomMobs error:', error);
+      console.log(`Error parsing cached mob data for room ${roomId}:`, error);
+      await this.invalidateRoomMobs(roomId);
+      return null;
     }
   }
 
@@ -331,7 +386,7 @@ class RedisService {
     if (!this.isConnected) return;
 
     try {
-      await this.redis?.del(`mobs:${roomId}`);
+      await this.redis?.del(`room:${roomId}:mobs`);
     } catch (error) {
       console.error('Redis invalidateRoomMobs error:', error);
     }

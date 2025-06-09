@@ -159,12 +159,34 @@ export class TacticalStorage extends BaseStorage {
 
     // ALWAYS get fresh mob data - never use cached mob positions
     if (this.mobStorage && typeof this.mobStorage.getRoomMobs === 'function' && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
-      console.log(`Getting fresh mob data for room ${roomId}`);
+      console.log(`Getting fresh mob data for room ${roomId} (type: ${roomData.type}, isSafe: ${roomData.isSafe})`);
       
       try {
-        // Get current mobs for this room (this will get the freshly spawned ones)
+        // Clear any corrupted mob cache first
+        try {
+          await redisService.invalidateRoomMobs(roomId);
+          console.log(`Cleared potentially corrupted mob cache for room ${roomId}`);
+        } catch (cacheError) {
+          console.log('Failed to clear mob cache, continuing:', cacheError);
+        }
+
+        // First check if we need to spawn mobs for this room
         const roomMobs = await this.mobStorage.getRoomMobs(roomId);
-        console.log(`Found ${roomMobs.length} mobs in room ${roomId}`);
+        console.log(`Found ${roomMobs.length} existing mobs in room ${roomId}`);
+        
+        // If no mobs exist and this isn't a safe room, try to spawn some
+        if (roomMobs.length === 0 && !roomData.isSafe) {
+          console.log(`No mobs found in room ${roomId}, attempting to spawn mobs`);
+          try {
+            await this.mobStorage.spawnMobsForRoom(roomId, roomData);
+            // Re-fetch after spawning
+            const newRoomMobs = await this.mobStorage.getRoomMobs(roomId);
+            console.log(`After spawning attempt: ${newRoomMobs.length} mobs in room ${roomId}`);
+            roomMobs.splice(0, roomMobs.length, ...newRoomMobs);
+          } catch (spawnError) {
+            console.error(`Failed to spawn mobs for room ${roomId}:`, spawnError);
+          }
+        }
         
         for (const mobData of roomMobs) {
           if (mobData.mob.isAlive && mobData.mob.isActive) {
@@ -189,6 +211,8 @@ export class TacticalStorage extends BaseStorage {
                 y: parseFloat(mobData.mob.positionY)
               },
             });
+          } else {
+            console.log(`Skipping mob ${mobData.mob.displayName}: alive=${mobData.mob.isAlive}, active=${mobData.mob.isActive}`);
           }
         }
       } catch (mobError) {

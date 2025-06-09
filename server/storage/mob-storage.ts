@@ -39,6 +39,27 @@ export class MobStorage extends BaseStorage {
       respawnHours: 4
     },
     {
+      roomType: "corridor",
+      maxMobs: 1,
+      spawnChance: 0.4,
+      creatureCategories: ["combat", "wanderer"],
+      respawnHours: 4
+    },
+    {
+      roomType: "chamber",
+      maxMobs: 2,
+      spawnChance: 0.7,
+      creatureCategories: ["combat", "guardian"],
+      respawnHours: 6
+    },
+    {
+      roomType: "hall",
+      maxMobs: 3,
+      spawnChance: 0.5,
+      creatureCategories: ["combat", "patrol"],
+      respawnHours: 4
+    },
+    {
       roomType: "boss",
       maxMobs: 1,
       spawnChance: 1.0,
@@ -88,12 +109,14 @@ export class MobStorage extends BaseStorage {
     try {
       const cached = await redisService.getRoomMobs(roomId);
       if (cached) {
+        console.log(`Found ${cached.length} cached mobs for room ${roomId}`);
         return cached;
       }
     } catch (error) {
       console.log('Redis cache miss for room mobs, fetching from database');
     }
 
+    console.log(`Fetching mobs from database for room ${roomId}`);
     const roomMobs = await db
       .select({
         mob: mobs,
@@ -102,6 +125,16 @@ export class MobStorage extends BaseStorage {
       .from(mobs)
       .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
+
+    console.log(`Found ${roomMobs.length} mobs in database for room ${roomId}`);
+    if (roomMobs.length > 0) {
+      console.log(`Mob details:`, roomMobs.map(m => ({
+        id: m.mob.id,
+        name: m.mob.displayName,
+        alive: m.mob.isAlive,
+        active: m.mob.isActive
+      })));
+    }
 
     // Cache for 10 minutes
     try {
@@ -426,16 +459,28 @@ export class MobStorage extends BaseStorage {
     console.log('🎯 Selected mob category:', selectedMobCategory);
     
     // Try to find mob types that match the selected category in their name or description
-    let availableMobTypes = await db
-      .select()
-      .from(mobTypes)
-      .where(eq(mobTypes.minFloor, 1)); // TODO: Filter by actual floor
+    let availableMobTypes;
+    try {
+      availableMobTypes = await db
+        .select()
+        .from(mobTypes);
+        // Removed the floor filter temporarily to get all available types
 
-    console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
-      id: mt.id,
-      name: mt.name,
-      description: mt.description
-    })));
+      console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
+        id: mt.id,
+        name: mt.name,
+        description: mt.description,
+        minFloor: mt.minFloor
+      })));
+
+      if (availableMobTypes.length === 0) {
+        console.log('❌ No mob types exist in database at all!');
+        return null;
+      }
+    } catch (dbError) {
+      console.error('❌ Database error fetching mob types:', dbError);
+      return null;
+    }
 
     // Filter mob types by selected category if possible
     const filteredMobTypes = availableMobTypes.filter(mobTypeRecord => 
@@ -459,6 +504,7 @@ export class MobStorage extends BaseStorage {
     
     if (mobTypesToChoose.length === 0) {
       console.log('❌ No mob types available to choose from!');
+      console.error('This should not happen since we have mob types in the database');
       return null;
     }
 
