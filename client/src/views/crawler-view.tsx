@@ -10,6 +10,7 @@ import TacticalViewPanel from "@/panels/tactical-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
 import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
+import MobileMenu from "@/components/mobile-menu";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 
@@ -100,27 +101,75 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
         </div>
       </header>
 
-      {/* Main Content - 3 Column Layout */}
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Combined Status & Equipment */}
-          <div className="space-y-6">
-            <CrawlerStatusPanel crawler={crawler} />
-          </div>
-
-          {/* Middle Column - Tactical View with Integrated Navigation */}
-          <div className="space-y-6">
+      {/* Main Content - Mobile-First Layout */}
+      <div className="max-w-7xl mx-auto p-4 lg:p-6 pb-20 lg:pb-6">
+        {/* Mobile: Single column stack, Desktop: 3 columns */}
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6">
+          
+          {/* Primary: Tactical View - Always first on mobile */}
+          <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
             <TacticalViewPanel crawler={crawler} />
           </div>
 
-          {/* Right Column - Floor Info, Map & Events Combined */}
-          <div className="space-y-6">
-            <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
-            <DungeonMap crawler={crawler} />
-            <RoomEventsPanel crawler={crawler} />
+          {/* Secondary: Status & Quick Info - Condensed on mobile */}
+          <div className="order-2 lg:order-1 space-y-4 lg:space-y-6" data-section="status">
+            <CrawlerStatusPanel crawler={crawler} />
+            
+            {/* Mobile: Compact Floor Info */}
+            <div className="lg:hidden">
+              <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
+            </div>
+          </div>
+
+          {/* Tertiary: Map & Events - Hidden on mobile by default */}
+          <div className="order-3 lg:order-3 space-y-4 lg:space-y-6">
+            {/* Desktop: Full panels */}
+            <div className="hidden lg:block">
+              <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
+            </div>
+            
+            <div className="hidden lg:block">
+              <DungeonMap crawler={crawler} />
+            </div>
+            
+            <div className="hidden lg:block">
+              <RoomEventsPanel crawler={crawler} />
+            </div>
+
+            {/* Mobile: Collapsible sections */}
+            <div className="lg:hidden space-y-4">
+              <details className="bg-game-surface border border-game-border rounded-lg" data-section="map">
+                <summary className="p-4 cursor-pointer text-white font-medium flex items-center justify-between">
+                  <span className="flex items-center">
+                    <i className="fas fa-map mr-2 text-blue-400"></i>
+                    Dungeon Map
+                  </span>
+                  <i className="fas fa-chevron-down"></i>
+                </summary>
+                <div className="p-4 pt-0">
+                  <DungeonMap crawler={crawler} />
+                </div>
+              </details>
+
+              <details className="bg-game-surface border border-game-border rounded-lg" data-section="events">
+                <summary className="p-4 cursor-pointer text-white font-medium flex items-center justify-between">
+                  <span className="flex items-center">
+                    <i className="fas fa-history mr-2 text-green-400"></i>
+                    Recent Events
+                  </span>
+                  <i className="fas fa-chevron-down"></i>
+                </summary>
+                <div className="p-4 pt-0">
+                  <RoomEventsPanel crawler={crawler} />
+                </div>
+              </details>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <MobileMenu />
 
       {/* Global Debug Panel */}
       <DebugPanel activeCrawler={crawler} />
