@@ -1895,7 +1895,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     : "animate-bounce"
                 }`}
               >
-                Hiding the WASD compass from the tacticalview panel while keeping the movement functionality intact.
                 {getLootIcon(item.type)}
               </div>
 
