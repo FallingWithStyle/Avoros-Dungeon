@@ -291,12 +291,12 @@ export function registerCrawlerRoutes(app: Express) {
   });
 
   // Get scanned rooms for a crawler
-  app.get("/api/crawlers/:id/scanned-rooms", async (req, res) => {
+  app.get("/api/crawlers/:id/scanned-rooms", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const userId = await storage.userStorage.getUserIdFromCrawlerId(crawlerId);
+      const crawler = await storage.getCrawler(crawlerId);
 
-      if (!userId || userId !== req.auth?.userId) {
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
         return res.status(403).json({ error: "Access denied" });
       }
 
@@ -309,12 +309,12 @@ export function registerCrawlerRoutes(app: Express) {
   });
 
   // Get mob summary for all rooms that the crawler has explored or scanned
-  app.get("/api/crawlers/:id/room-mobs-summary", async (req, res) => {
+  app.get("/api/crawlers/:id/room-mobs-summary", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const userId = await storage.userStorage.getUserIdFromCrawlerId(crawlerId);
+      const crawler = await storage.getCrawler(crawlerId);
 
-      if (!userId || userId !== req.auth?.userId) {
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
         return res.status(403).json({ error: "Access denied" });
       }
 
