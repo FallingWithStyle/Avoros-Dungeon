@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isEnergyDisabled } from "@/components/debug-panel";
 import { useTacticalMovement } from "@/hooks/useTacticalMovement";
 import ActionQueuePanel from "./action-queue-panel";
+import { useSwipeMovement } from '../hooks/useSwipeMovement';
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -470,7 +471,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         direction = y < player.position.y ? 'north' : 'south';
       }
 
-      console.log(`Attempting to move ${direction} from player position (${player.position.x}, ${player.position.y}) to (${x}, ${y})`);
+      console.log("Attempting to move " + direction + " from player position (" + player.position.x + ", " + player.position.y + ") to (" + x + ", " + y + ")");
 
       // Check if this direction is available - need to access roomData from queries
       // This will be handled in the grid click handler where roomData is available
@@ -687,6 +688,35 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData();
 
+  // Defensive check for effectiveTacticalData
+  if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.error("No effective tactical data available");
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - No Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">No room data available</span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-xs mt-2"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Subscribe to combat system updates
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -707,12 +737,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Room movement function using the actual API
   const handleRoomMovement = useCallback(async (direction: string) => {
     if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
-      console.log(`Cannot move ${direction} - not available or no crawler`);
+      console.log("Cannot move " + direction + " - not available or no crawler");
       return;
     }
 
     try {
-      console.log(`Moving crawler ${crawler.id} ${direction} to new room`);
+      console.log("Moving crawler " + crawler.id + " " + direction + " to new room");
 
       // Store the movement direction for tactical view positioning in the next room
       sessionStorage.setItem('lastMovementDirection', direction);
@@ -723,7 +753,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
 
       if (response.success) {
-        console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
+        console.log("Successfully moved " + direction + " to " + response.newRoom?.name);
 
         // Refresh all relevant data when moving through doors
         refetchTactical();
@@ -735,10 +765,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           combatSystem.removeEntity(entity.id);
         });
 
-        console.log(`Room transition complete - tactical view and map will refresh with new data`);
+        console.log("Room transition complete - tactical view and map will refresh with new data");
       }
     } catch (error) {
-      console.error(`Failed to move ${direction}:`, error);
+      console.error("Failed to move " + direction + ":", error);
       toast({
         title: "Movement failed",
         description: error.message || "Could not move in that direction.",
@@ -747,14 +777,64 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
 
+    // Room transition function using the actual API - to avoid hook naming clashes
+    const handleRoomTransition = useCallback(async (direction: string) => {
+      if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
+        console.log("Cannot move " + direction + " - not available or no crawler");
+        return;
+      }
+
+      try {
+        console.log("Moving crawler " + crawler.id + " " + direction + " to new room");
+
+        // Store the movement direction for tactical view positioning in the next room
+        sessionStorage.setItem('lastMovementDirection', direction);
+
+        const response = await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
+          direction,
+          debugEnergyDisabled: isEnergyDisabled(),
+        });
+
+        if (response.success) {
+          console.log("Successfully moved " + direction + " to " + response.newRoom?.name);
+
+          // Refresh all relevant data when moving through doors
+          refetchTactical();
+          refetchExploredRooms(); // This will refresh the dungeon map
+
+          // Force a re-render by clearing and re-adding the player entity with new position
+          const currentEntities = combatSystem.getState().entities;
+          currentEntities.forEach((entity) => {
+            combatSystem.removeEntity(entity.id);
+          });
+
+          console.log("Room transition complete - tactical view and map will refresh with new data");
+        }
+      } catch (error) {
+        console.error("Failed to move " + direction + ":", error);
+        toast({
+          title: "Movement failed",
+          description: error.message || "Could not move in that direction.",
+          variant: "destructive",
+        });
+      }
+    }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
+
   // Use the tactical movement hook for in-room WASD controls
   useTacticalMovement({
     effectiveTacticalData,
     combatState,
-    onRoomMovement: handleRoomMovement
+    onRoomMovement: handleRoomTransition
   });
 
-  
+  // Initialize swipe movement for mobile
+  const { containerRef, isMobile } = useSwipeMovement({
+    onRoomMovement: handleRoomTransition,
+    availableDirections: effectiveTacticalData?.availableDirections || [],
+    isEnabled: true
+  });
+
+
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -806,7 +886,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
 
       if (actionIndex >= 0 && actionIndex < hotbarActions.length) {
-        event.preventDefault();
+                event.preventDefault();
         const action = hotbarActions[actionIndex];
         const cooldownPercentage = getCooldownPercentage(action.id);
 
@@ -830,7 +910,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     // If room changed, immediately refetch tactical data
     if (shouldClearEntities) {
-      console.log(`Room changed from ${lastRoomId} to ${currentRoomId} - immediately refreshing tactical data`);
+      console.log("Room changed from " + lastRoomId + " to " + currentRoomId + " - immediately refreshing tactical data");
       refetchTactical();
     }
 
@@ -846,7 +926,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
-      console.log(`Cleared all entities for room ${currentRoomId}`);
+      console.log("Cleared all entities for room " + currentRoomId);
     }
 
     // Always ensure player entity exists - check after any clearing
@@ -856,16 +936,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
       const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
       const effectiveDirection = entryDirection || lastDirection;
-      
-      console.log(`Player entering room ${currentRoomId}, came from direction: ${effectiveDirection} (entry: ${entryDirection}, last: ${lastDirection})`);
+
+      console.log("Player entering room " + currentRoomId + ", came from direction: " + effectiveDirection + " (entry: " + entryDirection + ", last: " + lastDirection + ")");
 
       // Use combat system's entry position method for consistency
       let entryPosition = { x: 50, y: 50 }; // Default fallback
       if (effectiveDirection) {
         entryPosition = combatSystem.getEntryPosition(effectiveDirection);
       }
-      
-      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
+
+      console.log("Calculated entry position: " + entryPosition.x + ", " + entryPosition.y);
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
@@ -882,7 +962,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       combatSystem.addEntity(playerEntity);
       combatSystem.selectEntity("player"); // Auto-select the player
-      console.log(`Added player entity at position for room ${currentRoomId}`, playerEntity.position);
+      console.log("Added player entity at position for room " + currentRoomId, playerEntity.position);
     }
   }, [roomData?.room, lastRoomId, crawler.name, crawler.health, crawler.maxHealth]);
 
@@ -892,17 +972,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
       if (!existingPlayer && roomData?.room) {
         console.log("Player entity missing, creating fallback player");
-        
+
         // Get movement direction for proper positioning even in fallback
         const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
         const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
         const effectiveDirection = entryDirection || lastDirection;
-        
+
         let fallbackPosition = { x: 50, y: 50 }; // Default center
         if (effectiveDirection) {
           fallbackPosition = combatSystem.getEntryPosition(effectiveDirection);
         }
-        
+
         const playerEntity: CombatEntity = {
           id: "player",
           name: crawler.name,
@@ -918,7 +998,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
         combatSystem.addEntity(playerEntity);
         combatSystem.selectEntity("player");
-        console.log(`Created fallback player entity at position: ${fallbackPosition.x}, ${fallbackPosition.y}`);
+        console.log("Created fallback player entity at position: " + fallbackPosition.x + ", " + fallbackPosition.y);
       }
     };
 
@@ -979,11 +1059,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionType: string,
     actionName: string,
   ) => {
-    console.log(`Hotbar action clicked: ${actionId}`);
+    console.log("Hotbar action clicked: " + actionId);
 
     // Check if this action is already selected - if so, deselect it
     if (activeActionMode?.actionId === actionId) {
-      console.log(`Deselecting active action mode: ${actionId}`);
+      console.log("Deselecting active action mode: " + actionId);
       setActiveActionMode(null);
       return;
     }
@@ -1006,16 +1086,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (playerEntity) {
         const success = combatSystem.executeDirectionalAttack(playerEntity.id, actionId);
         if (success) {
-          console.log(`Executed directional attack: ${actionName}`);
+          console.log("Executed directional attack: " + actionName);
         } else {
-          console.log(`Failed to execute directional attack - check cooldown, range, or no enemies in direction`);
+          console.log("Failed to execute directional attack - check cooldown, range, or no enemies in direction");
         }
       } else {
         console.log("No player entity found for directional attack");
       }
     } else {
       // Handle other abilities/actions
-      console.log(`Casting ability: ${actionId}`);
+      console.log("Casting ability: " + actionId);
       setActiveActionMode({
         type: "ability",
         actionId: actionId,
@@ -1060,14 +1140,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               target.id,
             );
             if (success) {
-              console.log(`Attacking ${target.name} directly`);
+              console.log("Attacking " + target.name + " directly");
               setActiveActionMode(null); // Clear active action mode
             } else {
-              console.log(`Failed to attack ${target.name} - check cooldown or existing action`);
+              console.log("Failed to attack " + target.name + " - check cooldown or existing action");
             }
           } else {
             // Target is out of range, queue move then attack
-            console.log(`Target out of range, moving closer to ${target.name}`);
+            console.log("Target out of range, moving closer to " + target.name);
 
             // Calculate position to move to (just within attack range)
             const dx = target.position.x - playerEntity.position.x;
@@ -1085,7 +1165,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             });
 
             if (moveSuccess) {
-              console.log(`Queued movement to get in range of ${target.name}`);
+              console.log("Queued movement to get in range of " + target.name);
 
               // Schedule the attack to be queued after move completes
               setTimeout(() => {
@@ -1095,13 +1175,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                   target.id,
                 );
                 if (attackSuccess) {
-                  console.log(`Queued attack on ${target.name} after movement`);
+                  console.log("Queued attack on " + target.name + " after movement");
                 }
               }, 900); // Slightly before move action completes (800ms execution time)
 
               setActiveActionMode(null); // Clear active action mode
             } else {
-              console.log(`Failed to queue movement - check cooldown or existing action`);
+              console.log("Failed to queue movement - check cooldown or existing action");
             }
           }
         } else {
@@ -1219,7 +1299,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
     } else if (event.button === 0) {
       // Left click
-      console.log(`Examining ${lootItem.name}`);
+      console.log("Examining " + lootItem.name);
       // TODO: Implement loot examination/pickup
     }
   };
@@ -1234,11 +1314,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       );
       if (success) {
         console.log(
-          `${selectedEntity.name} queued ${action.name} on ${targetId}`,
+          selectedEntity.name + " queued " + action.name + " on " + targetId,
         );
       } else {
         console.log(
-          `Failed to queue ${action.name} - check cooldown, range, or existing action`,
+          "Failed to queue " + action.name + " - check cooldown, range, or existing action",
         );
       }
     }
@@ -1256,11 +1336,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       );
       if (success) {
         console.log(
-          `${selectedEntity.name} moving to ${targetPosition.x.toFixed(1)}, ${targetPosition.y.toFixed(1)}`,
+          selectedEntity.name + " moving to " + targetPosition.x.toFixed(1) + ", " + targetPosition.y.toFixed(1),
         );
       } else {
         console.log(
-          `Failed to queue move action - check cooldown or existing action`,
+          "Failed to queue move action - check cooldown or existing action",
         );
       }
     }
@@ -1289,7 +1369,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
     console.log(
-      `Grid clicked at: ${x.toFixed(1)}, ${y.toFixed(1)}, activeActionMode:`,
+      "Grid clicked at: " + x.toFixed(1) + ", " + y.toFixed(1) + ", activeActionMode:",
       activeActionMode,
     );
 
@@ -1340,12 +1420,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       if (success) {
         console.log(
-          `${activePlayer.name} moving to ${x.toFixed(1)}, ${y.toFixed(1)}`,
+          activePlayer.name + " moving to " + x.toFixed(1) + ", " + y.toFixed(1),
         );
         // Keep move mode active for subsequent clicks
       } else {
         console.log(
-          `Failed to queue move action - check cooldown or existing action`,
+          "Failed to queue move action - check cooldown or existing action",
         );
       }
     } else if (activeActionMode?.type === "attack") {
@@ -1384,17 +1464,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             clickedEntity.id,
           );
           if (success) {
-            console.log(`Attacking ${clickedEntity.name}`);
+            console.log("Attacking " + clickedEntity.name);
             setActiveActionMode(null); // Clear attack mode after successful attack
           } else {
             console.log(
-              `Failed to attack ${clickedEntity.name} - check cooldown or existing action`,
+              "Failed to attack " + clickedEntity.name + " - check cooldown or existing action",
             );
           }
         } else {
           // Target is out of range, queue move then attack
           console.log(
-            `Target out of range, moving closer to ${clickedEntity.name}`,
+            "Target out of range, moving closer to " + clickedEntity.name,
           );
 
           // Calculate position to move to (just within attack range)
@@ -1426,7 +1506,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               );
               if (attackSuccess) {
                 console.log(
-                  `Queued attack on ${clickedEntity.name} after movement`,
+                  "Queued attack on " + clickedEntity.name + " after movement",
                 );
               }
             }, 900); // Slightly before move action completes (800ms execution time)
@@ -1439,7 +1519,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
     } else if (activeActionMode?.type === "ability") {
       // Ability mode - handle based on specific ability
-      console.log(`Ability mode active: ${activeActionMode.actionName}`);
+      console.log("Ability mode active: " + activeActionMode.actionName);
       // TODO: Handle different abilities
     }
   };
@@ -1591,16 +1671,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     );
   }
 
-  const { room, availableDirections, playersInRoom } = effectiveTacticalData;
+  const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
   // Process tactical entities for rendering
-  const tacticalEntities = effectiveTacticalData.tacticalEntities || [];
+  const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
   console.log('🎯 Processing tactical entities for rendering:', {
     total: tacticalEntities.length,
     types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
   });
 
   const persistentTacticalData = {
-    background: getRoomBackgroundType(room.environment, room.type),
+    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
     loot: tacticalEntities.filter(e => e.type === 'loot'),
     mobs: tacticalEntities.filter(e => e.type === 'mob'),
     npcs: tacticalEntities.filter(e => e.type === 'npc'),
@@ -1636,6 +1716,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           onClick={handleGridClick}
           onContextMenu={handleGridRightClick}
           title="Click to move your character"
+          ref={containerRef} // Attach ref for swipe detection
         >
           {/* Room Background */}
           <div
@@ -1701,7 +1782,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log(`Clicked on tactical mob: ${mob.name}`);
+                console.log("Clicked on tactical mob: " + mob.name);
               }}
               title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || 'Unknown'}`}
             >
@@ -1733,7 +1814,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log(`Clicked on tactical NPC: ${npc.name}`);
+                console.log("Clicked on tactical NPC: " + npc.name);
               }}
               title={`${npc.name} (NPC)`}
             >
@@ -2003,7 +2084,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <button
                 className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                 onClick={() => {
-                  console.log(`Examining ${contextMenu.entity.name}`);
+                  console.log("Examining " + contextMenu.entity.name);
                   setContextMenu(null);
                 }}
               >
@@ -2015,7 +2096,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                   onClick={() => {
-                    console.log(`Talking to ${contextMenu.entity.name}`);
+                    console.log("Talking to " + contextMenu.entity.name);
                     setContextMenu(null);
                   }}
                 >
@@ -2028,7 +2109,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                 <button
                   className="flex items-center gap-2 w-full px-2 py-1 text-sm text-gray-300 hover:bg-gray-800 rounded"
                   onClick={() => {
-                    console.log(`Picking up ${contextMenu.entity.name}`);
+                    console.log("Picking up " + contextMenu.entity.name);
                     setContextMenu(null);
                   }}
                 >
@@ -2077,11 +2158,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                         );
                         if (success) {
                           console.log(
-                            `${selectedEntity.name} moving to ${contextMenu.clickPosition.x.toFixed(1)}, ${contextMenu.clickPosition.y.toFixed(1)}`,
+                            selectedEntity.name + " moving to " + contextMenu.clickPosition.x.toFixed(1) + ", " + contextMenu.clickPosition.y.toFixed(1),
                           );
                         } else {
                           console.log(
-                            `Failed to queue move action - check cooldown or existing action`,
+                            "Failed to queue move action - check cooldown or existing action",
                           );
                         }
                       }
@@ -2157,3 +2238,5 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     </Card>
   );
 }
+
+// This file has been modified to fix template literals in console.log statements to prevent crashing.

@@ -1,40 +1,53 @@
-import { Button } from "@/components/ui/button";
 
 export default function MobileMenu() {
+  const handleNavigation = (section: string) => {
+    // Scroll to section or toggle visibility
+    const element = document.querySelector(`[data-section="${section}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-game-surface border-t border-game-border z-50">
-      <div className="flex justify-around py-2">
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center p-3 text-blue-400 hover:text-blue-300"
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-game-surface/95 backdrop-blur-sm border-t border-game-border z-50 safe-area-pb">
+      <div className="flex justify-around py-2 px-2">
+        <button
+          onClick={() => handleNavigation('tactical')}
+          className="flex flex-col items-center p-2 min-w-0 flex-1 text-blue-400 hover:text-blue-300 active:bg-blue-400/10 rounded transition-colors"
         >
-          <i className="fas fa-tachometer-alt text-lg"></i>
-          <span className="text-xs mt-1">Overview</span>
-        </Button>
+          <i className="fas fa-crosshairs text-lg"></i>
+          <span className="text-xs mt-1 truncate">Combat</span>
+        </button>
         
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center p-3 text-slate-400 hover:text-white"
+        <button
+          onClick={() => handleNavigation('status')}
+          className="flex flex-col items-center p-2 min-w-0 flex-1 text-green-400 hover:text-green-300 active:bg-green-400/10 rounded transition-colors"
         >
-          <i className="fas fa-users text-lg"></i>
-          <span className="text-xs mt-1">Crawlers</span>
-        </Button>
+          <i className="fas fa-heart text-lg"></i>
+          <span className="text-xs mt-1 truncate">Status</span>
+        </button>
         
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center p-3 text-slate-400 hover:text-white"
+        <button
+          onClick={() => {
+            const mapDetails = document.querySelector('details:has([data-section="map"])');
+            if (mapDetails) mapDetails.toggleAttribute('open');
+          }}
+          className="flex flex-col items-center p-2 min-w-0 flex-1 text-amber-400 hover:text-amber-300 active:bg-amber-400/10 rounded transition-colors"
         >
-          <i className="fas fa-store text-lg"></i>
-          <span className="text-xs mt-1">Market</span>
-        </Button>
+          <i className="fas fa-map text-lg"></i>
+          <span className="text-xs mt-1 truncate">Map</span>
+        </button>
         
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center p-3 text-slate-400 hover:text-white"
+        <button
+          onClick={() => {
+            const eventsDetails = document.querySelector('details:has([data-section="events"])');
+            if (eventsDetails) eventsDetails.toggleAttribute('open');
+          }}
+          className="flex flex-col items-center p-2 min-w-0 flex-1 text-purple-400 hover:text-purple-300 active:bg-purple-400/10 rounded transition-colors"
         >
-          <i className="fas fa-comments text-lg"></i>
-          <span className="text-xs mt-1">Chat</span>
-        </Button>
+          <i className="fas fa-history text-lg"></i>
+          <span className="text-xs mt-1 truncate">Events</span>
+        </button>
       </div>
     </div>
   );
