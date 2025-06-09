@@ -790,25 +790,25 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Define gate zones (center area of each wall)
     const gateZoneMin = 35;
     const gateZoneMax = 65;
-    const edgeThreshold = 9; // Must be very close to edge (91% of way to wall)
-    const minMovement = 0.5; // Minimum movement required
+    const edgeThreshold = 7; // Must be very close to edge (93% of way to wall)
+    const minMovement = 0.1; // Lower minimum movement required
 
     let triggerDirection: string | null = null;
 
-    // Check if player is in a gate zone AND moving significantly in the correct direction AND very close to the edge
-    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -minMovement) {
+    // Check if player is in a gate zone AND moving in the correct direction OR very close to the edge
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && (deltaY < -minMovement || y <= 5)) {
       // Moving north through north gate
       triggerDirection = "north";
     } 
-    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > minMovement) {
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && (deltaY > minMovement || y >= 95)) {
       // Moving south through south gate
       triggerDirection = "south";
     }
-    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > minMovement) {
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && (deltaX > minMovement || x >= 95)) {
       // Moving east through east gate
       triggerDirection = "east";
     }
-    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -minMovement) {
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && (deltaX < -minMovement || x <= 5)) {
       // Moving west through west gate
       triggerDirection = "west";
     }
@@ -915,7 +915,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
 
-      const speed = playerEntity.speed || 3; // Much smaller movement increments for smoothness
+      const speed = 2; // Smaller movement increments for grid-based movement
       const moveDistance = speed; // Move in small percentage units
       let newX = playerEntity.position.x + direction.x * moveDistance;
       let newY = playerEntity.position.y + direction.y * moveDistance;
@@ -932,14 +932,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         };
 
         // Check if moving toward a door (within gate area)
-        const inGateArea = (x >= 35 && x <= 65) || (y >= 35 && y <= 65);
-
         if (dir.y < 0 && exits.north && y <= 10 && x >= 35 && x <= 65) return true; // Moving north toward north door
         if (dir.y > 0 && exits.south && y >= 90 && x >= 35 && x <= 65) return true; // Moving south toward south door  
         if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
-        if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
+        if (dir.x < 0 && exits.west && x <= 8 && y >= 35 && y <= 65) return true; // Moving west toward west door
 
-        return false;      };
+        return false;
+      };
 
       // Allow crossing boundaries if approaching a door, otherwise clamp
       if (isApproachingDoor(playerEntity.position.x, playerEntity.position.y, direction)) {
