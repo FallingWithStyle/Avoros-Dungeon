@@ -83,9 +83,12 @@ export function useDungeonMapMovement({
         return;
       }
 
-      // Store the movement direction for tactical view positioning
+      // Store the movement direction for tactical view positioning BEFORE the API call
+      // This ensures it's available immediately when the new room loads
       if (['north', 'south', 'east', 'west'].includes(direction)) {
         sessionStorage.setItem('lastMovementDirection', direction);
+        // Also store as entry direction for immediate use
+        sessionStorage.setItem('entryDirection', direction);
       }
 
       setPendingDirection(direction);

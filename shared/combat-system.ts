@@ -328,7 +328,7 @@ export class CombatSystem {
   getEntitiesInAttackCone(attacker: CombatEntity, range: number, coneAngle: number = 60): CombatEntity[] {
     const attackerPos = attacker.position;
     const facingDirection = attacker.facing;
-    
+
     // Define direction vectors
     const directionVectors = {
       north: { x: 0, y: -1 },
@@ -336,33 +336,33 @@ export class CombatSystem {
       east: { x: 1, y: 0 },
       west: { x: -1, y: 0 }
     };
-    
+
     const facingVector = directionVectors[facingDirection];
     const entitiesInCone: CombatEntity[] = [];
-    
+
     this.state.entities.forEach(entity => {
       if (entity.id === attacker.id) return; // Skip self
-      
+
       const dx = entity.position.x - attackerPos.x;
       const dy = entity.position.y - attackerPos.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       // Check if within range
       if (distance > range || distance === 0) return;
-      
+
       // Normalize the vector to the target
       const targetVector = { x: dx / distance, y: dy / distance };
-      
+
       // Calculate the dot product to determine angle
       const dotProduct = facingVector.x * targetVector.x + facingVector.y * targetVector.y;
       const angleInDegrees = Math.acos(Math.max(-1, Math.min(1, dotProduct))) * (180 / Math.PI);
-      
+
       // Check if within cone angle
       if (angleInDegrees <= coneAngle / 2) {
         entitiesInCone.push(entity);
       }
     });
-    
+
     return entitiesInCone;
   }
 
@@ -379,33 +379,33 @@ export class CombatSystem {
   executeDirectionalAttack(attackerId: string, actionId: string): boolean {
     const attacker = this.state.entities.find(e => e.id === attackerId);
     const action = this.actionDefinitions.get(actionId);
-    
+
     if (!attacker || !action || action.type !== 'attack') return false;
-    
+
     // Prevent attack actions in safe rooms
     if (this.isCurrentRoomSafe()) {
       console.log('Cannot attack in a safe room');
       return false;
     }
-    
+
     // Check if action is on cooldown
     const now = Date.now();
     const lastUsed = attacker.cooldowns?.[actionId] || 0;
     if (now < lastUsed + action.cooldown) return false;
-    
+
     // Check if entity already has an action queued
     const existingAction = this.state.actionQueue.find(qa => qa.entityId === attackerId);
     if (existingAction) return false;
-    
+
     // Get all enemies in attack cone
     const targetsInCone = this.getEntitiesInAttackCone(attacker, action.range || 15, 90);
     const hostileTargets = targetsInCone.filter(entity => entity.type === 'hostile');
-    
+
     if (hostileTargets.length === 0) {
       console.log('No enemies in attack direction');
       return false;
     }
-    
+
     // Alert all hostile entities when player attacks
     if (attacker.type === 'player') {
       this.state.entities.forEach(e => {
@@ -416,7 +416,7 @@ export class CombatSystem {
       });
       console.log('Player attacked - all enemies are now alerted!');
     }
-    
+
     // Queue attack action that will hit all targets in cone
     const queuedAction: QueuedAction = {
       entityId: attackerId,
@@ -426,16 +426,16 @@ export class CombatSystem {
       queuedAt: now,
       executesAt: now + action.executionTime,
     };
-    
+
     // Store the target list in the action for execution
     (queuedAction as any).directionalTargets = hostileTargets;
-    
+
     this.state.actionQueue.push(queuedAction);
-    
+
     console.log(`Queued directional attack hitting ${hostileTargets.length} enemies:`, hostileTargets.map(t => t.name));
-    
+
     this.notifyListeners();
-    
+
     // Generate event for the action (only in client environment)
     if (typeof window !== 'undefined') {
       import('./events-system').then(({ eventsSystem }) => {
@@ -444,7 +444,7 @@ export class CombatSystem {
         // Events system not available, skip
       });
     }
-    
+
     return true;
   }
 
@@ -480,7 +480,7 @@ export class CombatSystem {
     // Calculate movement direction to update facing
     const dx = targetPosition.x - entity.position.x;
     const dy = targetPosition.y - entity.position.y;
-    
+
     // Update facing direction based on primary movement direction
     if (Math.abs(dx) > Math.abs(dy)) {
       entity.facing = dx > 0 ? 'east' : 'west';
@@ -510,10 +510,10 @@ export class CombatSystem {
 
     if (!entity.cooldowns) entity.cooldowns = {};
     const now = Date.now();
-    
+
     // For player entities, use a much shorter cooldown for smooth movement
     const moveCooldown = entity.id === 'player' ? 25 : moveAction.cooldown;
-    
+
     if (entity.cooldowns[moveAction.id] && now < entity.cooldowns[moveAction.id] + moveCooldown) {
         return false;
     }
@@ -752,35 +752,20 @@ export class CombatSystem {
     };
   }
 
-  // Calculate entry position based on direction using grid coordinates
-  getEntryPosition(direction: 'north' | 'south' | 'east' | 'west' | null): { x: number; y: number } {
-    console.log(`getEntryPosition called with direction: ${direction}`);
+  private getEntryPosition(direction: string): { x: number; y: number } {
+    // Position near the entrance based on direction, closer to actual door locations
+    // Using grid-aligned positions that correspond to door areas
     switch (direction) {
-      case 'north':
-        // Moved north (from south to north) - spawn at south edge (bottom) of new room
-        const northPos = this.gridToPercentage(7, 13);
-        console.log(`North movement entry position: ${northPos.x}, ${northPos.y}`);
-        return northPos;
-      case 'south':
-        // Moved south (from north to south) - spawn at north edge (top) of new room
-        const southPos = this.gridToPercentage(7, 1);
-        console.log(`South movement entry position: ${southPos.x}, ${southPos.y}`);
-        return southPos;
-      case 'east':
-        // Moved east (from west to east) - spawn at west edge (left) of new room
-        const eastPos = this.gridToPercentage(1, 7);
-        console.log(`East movement entry position: ${eastPos.x}, ${eastPos.y}`);
-        return eastPos;
-      case 'west':
-        // Moved west (from east to west) - spawn at east edge (right) of new room
-        const westPos = this.gridToPercentage(13, 7);
-        console.log(`West movement entry position: ${westPos.x}, ${westPos.y}`);
-        return westPos;
+      case "north":
+        return { x: 50, y: 90 }; // Near bottom edge (came from north, door at bottom)
+      case "south":
+        return { x: 50, y: 10 }; // Near top edge (came from south, door at top)
+      case "east":
+        return { x: 10, y: 50 }; // Near left edge (came from east, door at left)
+      case "west":
+        return { x: 90, y: 50 }; // Near right edge (came from west, door at right)
       default:
-        // No direction specified - spawn in center
-        const centerPos = this.gridToPercentage(7, 7);
-        console.log(`Center entry position: ${centerPos.x}, ${centerPos.y}`);
-        return centerPos;
+        return { x: 50, y: 50 }; // Center as fallback
     }
   }
 
@@ -839,6 +824,47 @@ export class CombatSystem {
       this.notifyListeners();
     }
   }
+
+  // Always ensure player exists with proper positioning
+    let playerEntity = this.state.entities.find(e => e.id === "player");
+    if (!playerEntity) {
+      // Determine entry position based on movement direction
+      let entryPosition = { x: 50, y: 50 }; // Default center
+      let entryDirection = "north"; // Default facing
+
+      // Check for stored entry direction first (more immediate)
+      const storedEntryDirection = typeof window !== 'undefined' 
+        ? sessionStorage.getItem('entryDirection') 
+        : null;
+
+      // Fallback to last movement direction
+      const lastDirection = typeof window !== 'undefined' 
+        ? sessionStorage.getItem('lastMovementDirection') 
+        : null;
+
+      const effectiveDirection = storedEntryDirection || lastDirection;
+
+      if (effectiveDirection) {
+        entryPosition = this.getEntryPosition(effectiveDirection);
+        entryDirection = effectiveDirection;        // Clear both stored directions after using them
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('entryDirection');
+          sessionStorage.removeItem('lastMovementDirection');
+        }
+      }
+
+      playerEntity = {
+        id: "player",
+        name: "You",
+        type: "player",
+        position: entryPosition,
+        hp: 100,
+        maxHp: 100,
+        isSelected: false,
+        facing: entryDirection
+      };
+      this.state.entities.push(playerEntity);
+    }
 
   // Safe room management
   setCurrentRoomData(roomData: any): void {
