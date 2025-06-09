@@ -281,6 +281,58 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Clear all cached data for current room
+  app.post("/api/debug/clear-room-cache/:crawlerId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.crawlerId);
+      const userId = req.user.claims.sub;
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      // Get current room
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Crawler is not in any room" 
+        });
+      }
+
+      // Clear all cached data for this room
+      try {
+        await storage.redisService.invalidateRoomMobs(currentRoom.id);
+        await storage.redisService.invalidateTacticalPositions(currentRoom.id);
+        await storage.redisService.invalidateRoomData(currentRoom.id);
+        await storage.redisService.invalidateCrawlerRoomData(crawlerId);
+        
+        console.log(`Cleared all cached data for room ${currentRoom.id}`);
+        
+        res.json({
+          success: true,
+          message: `Cleared all cached data for room ${currentRoom.id} (${currentRoom.name})`,
+          roomId: currentRoom.id,
+          roomName: currentRoom.name
+        });
+      } catch (cacheError) {
+        console.error('Error clearing room cache:', cacheError);
+        res.status(500).json({
+          success: false,
+          error: "Failed to clear room cache"
+        });
+      }
+    } catch (error) {
+      console.error("Error in clear room cache:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to clear room cache" 
+      });
+    }
+  });
+
   // DEBUG: Spawn hostile mob in current room
   app.post("/api/debug/spawn-mob/:crawlerId", isAuthenticated, async (req: any, res) => {
     try {

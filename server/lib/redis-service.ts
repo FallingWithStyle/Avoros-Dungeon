@@ -309,14 +309,43 @@ class RedisService {
 
   async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
     try {
-      // Ensure we're properly serializing the mob data
-      const serializedMobs = JSON.stringify(mobs, (key, value) => {
-        // Handle Date objects and other non-serializable data
-        if (value instanceof Date) {
-          return value.toISOString();
-        }
-        return value;
+      // Create a clean, serializable version of the mob data
+      const cleanMobs = mobs.map(mobData => {
+        const cleanMob = {
+          mob: {
+            id: mobData.mob.id,
+            roomId: mobData.mob.roomId,
+            enemyId: mobData.mob.enemyId,
+            displayName: mobData.mob.displayName,
+            rarity: mobData.mob.rarity,
+            positionX: mobData.mob.positionX,
+            positionY: mobData.mob.positionY,
+            currentHealth: mobData.mob.currentHealth,
+            maxHealth: mobData.mob.maxHealth,
+            isAlive: mobData.mob.isAlive,
+            disposition: mobData.mob.disposition,
+            isActive: mobData.mob.isActive,
+            createdAt: mobData.mob.createdAt instanceof Date ? mobData.mob.createdAt.toISOString() : mobData.mob.createdAt,
+            updatedAt: mobData.mob.updatedAt instanceof Date ? mobData.mob.updatedAt.toISOString() : mobData.mob.updatedAt
+          },
+          mobType: {
+            id: mobData.mobType.id,
+            name: mobData.mobType.name,
+            description: mobData.mobType.description,
+            hitPoints: mobData.mobType.hitPoints,
+            attack: mobData.mobType.attack,
+            defense: mobData.mobType.defense,
+            speed: mobData.mobType.speed,
+            health: mobData.mobType.health,
+            rarity: mobData.mobType.rarity,
+            creditsReward: mobData.mobType.creditsReward,
+            experienceReward: mobData.mobType.experienceReward
+          }
+        };
+        return cleanMob;
       });
+
+      const serializedMobs = JSON.stringify(cleanMobs);
       await this.redis.setex(`room:${roomId}:mobs`, ttlSeconds, serializedMobs);
       console.log(`Storing mobs data for room ${roomId}: ${serializedMobs.length} characters`);
     } catch (error) {
@@ -329,16 +358,25 @@ class RedisService {
       const cached = await this.redis.get(`room:${roomId}:mobs`);
       if (!cached) return null;
 
-      // Validate JSON before parsing
+      // Validate that we have a string
       if (typeof cached !== 'string') {
-        console.log(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, typeof cached);
+        console.log(`Invalid cached data type for room ${roomId} mobs:`, typeof cached);
         await this.invalidateRoomMobs(roomId);
         return null;
       }
 
-      return JSON.parse(cached);
+      // Parse and reconstruct Date objects
+      const parsed = JSON.parse(cached);
+      return parsed.map((mobData: any) => ({
+        ...mobData,
+        mob: {
+          ...mobData.mob,
+          createdAt: mobData.mob.createdAt ? new Date(mobData.mob.createdAt) : null,
+          updatedAt: mobData.mob.updatedAt ? new Date(mobData.mob.updatedAt) : null
+        }
+      }));
     } catch (error) {
-      console.log(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, error);
+      console.log(`Error parsing cached mob data for room ${roomId}:`, error);
       await this.invalidateRoomMobs(roomId);
       return null;
     }

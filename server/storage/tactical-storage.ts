@@ -162,6 +162,14 @@ export class TacticalStorage extends BaseStorage {
       console.log(`Getting fresh mob data for room ${roomId} (type: ${roomData.type}, isSafe: ${roomData.isSafe})`);
       
       try {
+        // Clear any corrupted mob cache first
+        try {
+          await redisService.invalidateRoomMobs(roomId);
+          console.log(`Cleared potentially corrupted mob cache for room ${roomId}`);
+        } catch (cacheError) {
+          console.log('Failed to clear mob cache, continuing:', cacheError);
+        }
+
         // First check if we need to spawn mobs for this room
         const roomMobs = await this.mobStorage.getRoomMobs(roomId);
         console.log(`Found ${roomMobs.length} existing mobs in room ${roomId}`);
