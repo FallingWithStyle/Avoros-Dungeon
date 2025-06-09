@@ -65,6 +65,21 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
             />
           </div>
 
+          {/* Power Bar */}
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-slate-300">Power</span>
+              <span className="text-white">
+                {crawler.power}/{crawler.maxPower}
+              </span>
+            </div>
+            <Progress
+              value={(crawler.power / crawler.maxPower) * 100}
+              className="h-2"
+              barColor="#f97316"
+            />
+          </div>
+
           {/* Experience Bar */}
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -103,27 +118,27 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
         <CardContent className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Attack</span>
+              <span className="text-sm text-slate-300">Might</span>
               <span className="text-sm font-mono text-red-400">
-                {crawler.attack}
+                {crawler.might}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Defense</span>
-              <span className="text-sm font-mono text-blue-400">
-                {crawler.defense}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Speed</span>
+              <span className="text-sm text-slate-300">Agility</span>
               <span className="text-sm font-mono text-green-400">
-                {crawler.speed}
+                {crawler.agility}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Wit</span>
+              <span className="text-sm text-slate-300">Endurance</span>
+              <span className="text-sm font-mono text-blue-400">
+                {crawler.endurance}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-slate-300">Intellect</span>
               <span className="text-sm font-mono text-purple-400">
-                {crawler.wit}
+                {crawler.intellect}
               </span>
             </div>
             <div className="flex justify-between">
