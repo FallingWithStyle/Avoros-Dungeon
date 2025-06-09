@@ -86,29 +86,29 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         <div className="mb-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
           <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">ATK</div>
+              <div className="text-xs text-slate-400 mb-1">MGT</div>
               <div className="text-lg font-bold text-red-400">
-                {crawler.attack}
+                {crawler.might}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">DEF</div>
-              <div className="text-lg font-bold text-blue-400">
-                {crawler.defense}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">SPD</div>
+              <div className="text-xs text-slate-400 mb-1">AGI</div>
               <div className="text-lg font-bold text-green-400">
-                {crawler.speed}
+                {crawler.agility}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-400 mb-1">END</div>
+              <div className="text-lg font-bold text-blue-400">
+                {crawler.endurance}
               </div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">WIT</div>
+              <div className="text-xs text-slate-400 mb-1">INT</div>
               <div className="text-lg font-bold text-purple-400">
-                {crawler.wit}
+                {crawler.intellect}
               </div>
             </div>
             <div className="text-center">
@@ -118,9 +118,9 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">MEM</div>
+              <div className="text-xs text-slate-400 mb-1">WIS</div>
               <div className="text-lg font-bold text-cyan-400">
-                {crawler.memory}
+                {crawler.wisdom}
               </div>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         </div>
 
         {/* Quick Stats - Fixed height */}
-        <div className="space-y-2 mb-4 h-20">
+        <div className="space-y-2 mb-4 h-28">
           <div className="flex justify-between items-center">
             <span className="text-sm text-slate-400">Floor</span>
             <span className="text-sm font-mono text-red-400 font-bold">
@@ -161,6 +161,13 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
             <span className="text-sm text-slate-400">Energy</span>
             <span className="text-sm font-mono text-blue-400">
               {crawler.energy}/{crawler.maxEnergy}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-slate-400">Power</span>
+            <span className="text-sm font-mono text-orange-400">
+              {crawler.power}/{crawler.maxPower}
             </span>
           </div>
 

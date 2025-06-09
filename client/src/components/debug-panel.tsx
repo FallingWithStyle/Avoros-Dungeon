@@ -353,6 +353,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
               </Button>
 
+              {/* Redis Fallback Control - now inline */}
+              <RedisFallbackControl />
+
               {/* Eyes of D'Bug Spell */}
               <Button
                 onClick={() => applyEyesOfDebug()}
@@ -433,6 +436,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 Restore Energy
               </Button>
             </div>
+
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
               <span>
@@ -458,3 +462,75 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
 export const isEnergyDisabled = () => globalEnergyDisabled;
 
 export { IS_DEBUG_MODE };
+
+function RedisFallbackControl() {
+  const { toast } = useToast();
+  const { data: fallbackStatus, refetch } = useQuery({
+    queryKey: ["/api/debug/redis-fallback"],
+    refetchInterval: 5000,
+  });
+
+  const toggleFallbackMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const response = await fetch("/api/debug/redis-fallback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to toggle Redis fallback mode");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Redis Fallback Mode Updated",
+        description: "Cache behavior has been changed",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to toggle fallback mode: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggle = () => {
+    const newState = !fallbackStatus?.fallbackMode;
+    toggleFallbackMutation.mutate(newState);
+  };
+
+  // Button and text styles for "mini" buttons
+  const miniButtonClasses =
+    "h-7 px-2 py-1 text-[0.65rem] rounded border border-opacity-30 flex items-center gap-1";
+  const miniIconClasses = "w-3 h-3 mr-1";
+
+  return (
+    <Button
+      onClick={handleToggle}
+      disabled={toggleFallbackMutation.isPending}
+      variant="outline"
+      className={
+        miniButtonClasses +
+        " " +
+        (fallbackStatus?.fallbackMode
+          ? "border-cyan-600 text-cyan-400 hover:bg-cyan-600/10"
+          : "border-gray-600 text-gray-400 hover:bg-gray-600/10")
+      }
+      title="Forces database-only mode to conserve Redis bandwidth"
+    >
+      <RefreshCw className={miniIconClasses + (toggleFallbackMutation.isPending ? " animate-spin" : "")} />
+      {toggleFallbackMutation.isPending 
+        ? "Updating..." 
+        : fallbackStatus?.fallbackMode 
+          ? "Fallback On" 
+          : "Fallback Off"
+      }
+    </Button>
+  );
+}

@@ -65,6 +65,21 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
             />
           </div>
 
+          {/* Power Bar */}
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-slate-300">Power</span>
+              <span className="text-white">
+                {crawler.power}/{crawler.maxPower}
+              </span>
+            </div>
+            <Progress
+              value={(crawler.power / crawler.maxPower) * 100}
+              className="h-2"
+              barColor="#f97316"
+            />
+          </div>
+
           {/* Experience Bar */}
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -103,27 +118,27 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
         <CardContent className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Attack</span>
+              <span className="text-sm text-slate-300">Might</span>
               <span className="text-sm font-mono text-red-400">
-                {crawler.attack}
+                {crawler.might}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Defense</span>
-              <span className="text-sm font-mono text-blue-400">
-                {crawler.defense}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Speed</span>
+              <span className="text-sm text-slate-300">Agility</span>
               <span className="text-sm font-mono text-green-400">
-                {crawler.speed}
+                {crawler.agility}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Wit</span>
+              <span className="text-sm text-slate-300">Endurance</span>
+              <span className="text-sm font-mono text-blue-400">
+                {crawler.endurance}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-slate-300">Intellect</span>
               <span className="text-sm font-mono text-purple-400">
-                {crawler.wit}
+                {crawler.intellect}
               </span>
             </div>
             <div className="flex justify-between">
@@ -137,24 +152,6 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
               <span className="text-sm font-mono text-cyan-400">
                 {crawler.wisdom}
               </span>
-            </div>
-          </div>
-
-          {/* Power Bar */}
-          <div className="mt-2">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-slate-300">Power</span>
-              <span className="text-xs text-cyan-400">
-                {crawler.power}/{crawler.maxPower}
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${Math.max(0, Math.min(100, (crawler.power / crawler.maxPower) * 100))}%`,
-                }}
-              />
             </div>
           </div>
         </CardContent>

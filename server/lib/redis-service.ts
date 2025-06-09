@@ -3,6 +3,7 @@ import { Redis } from "@upstash/redis";
 class RedisService {
   private redis: Redis | null = null;
   private isConnected = false;
+  private forceFallbackMode = false; // Debug option to force fallback mode
 
   constructor() {
     try {
@@ -57,7 +58,7 @@ class RedisService {
 
   // Generic cache methods
   async get<T>(key: string): Promise<T | null> {
-    if (!this.redis || !this.isConnected) return null;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return null;
 
     try {
       const data = await this.redis.get(key);
@@ -79,7 +80,7 @@ class RedisService {
   }
 
   async set(key: string, value: any, ttl: number = this.defaultTTL): Promise<void> {
-    if (!this.redis || !this.isConnected) return;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return;
 
     try {
       await this.redis.setex(key, ttl, JSON.stringify(value));
@@ -89,7 +90,7 @@ class RedisService {
   }
 
   async del(key: string): Promise<void> {
-    if (!this.redis || !this.isConnected) return;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return;
 
     try {
       await this.redis.del(key);
@@ -99,7 +100,7 @@ class RedisService {
   }
 
   async exists(key: string): Promise<boolean> {
-    if (!this.redis || !this.isConnected) return false;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return false;
 
     try {
       const result = await this.redis.exists(key);
@@ -392,8 +393,22 @@ class RedisService {
     }
   }
 
+  // Debug methods for fallback mode control
+  setForceFallbackMode(enabled: boolean): void {
+    this.forceFallbackMode = enabled;
+    console.log(`Redis fallback mode ${enabled ? 'enabled' : 'disabled'} via debug override`);
+  }
+
+  isForceFallbackMode(): boolean {
+    return this.forceFallbackMode;
+  }
+
   // System-wide bypass check
   private async isRedisOperational(): Promise<boolean> {
+    if (this.forceFallbackMode) {
+      return false; // Force fallback when debug mode is enabled
+    }
+    
     if (!this.redis || !this.isConnected) {
       return false;
     }

@@ -854,9 +854,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (!existingPlayer) {
       // Get last movement direction from session storage to position player appropriately
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
-      console.log(`Player entering room ${currentRoomId}, came from direction: ${lastDirection}`);
+      const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
+      const effectiveDirection = entryDirection || lastDirection;
+      
+      console.log(`Player entering room ${currentRoomId}, came from direction: ${effectiveDirection} (entry: ${entryDirection}, last: ${lastDirection})`);
 
-      const entryPosition = combatSystem.getEntryPosition(lastDirection);
+      // Use combat system's entry position method for consistency
+      let entryPosition = { x: 50, y: 50 }; // Default fallback
+      if (effectiveDirection) {
+        entryPosition = combatSystem.getEntryPosition(effectiveDirection);
+      }
+      
       console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
       const playerEntity: CombatEntity = {
         id: "player",
@@ -868,8 +876,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         defense: 10, // Base defense for player
         speed: 15,
         position: entryPosition,
-        facing: lastDirection || 'south', // Face in the direction moved or default south
-        entryDirection: lastDirection,
+        facing: effectiveDirection || 'south', // Face in the direction moved or default south
+        entryDirection: effectiveDirection,
       };
 
       combatSystem.addEntity(playerEntity);
@@ -884,7 +892,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
       if (!existingPlayer && roomData?.room) {
         console.log("Player entity missing, creating fallback player");
-        const fallbackPosition = { x: 50, y: 50 }; // Center position
+        
+        // Get movement direction for proper positioning even in fallback
+        const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
+        const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
+        const effectiveDirection = entryDirection || lastDirection;
+        
+        let fallbackPosition = { x: 50, y: 50 }; // Default center
+        if (effectiveDirection) {
+          fallbackPosition = combatSystem.getEntryPosition(effectiveDirection);
+        }
+        
         const playerEntity: CombatEntity = {
           id: "player",
           name: crawler.name,
@@ -895,12 +913,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           defense: 10,
           speed: 15,
           position: fallbackPosition,
-          facing: 'south', // Default facing direction
+          facing: effectiveDirection || 'south', // Default facing direction
         };
 
         combatSystem.addEntity(playerEntity);
         combatSystem.selectEntity("player");
-        console.log(`Created fallback player entity at center position`);
+        console.log(`Created fallback player entity at position: ${fallbackPosition.x}, ${fallbackPosition.y}`);
       }
     };
 

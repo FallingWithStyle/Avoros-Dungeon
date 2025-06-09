@@ -79,19 +79,21 @@ export function registerCrawlerRoutes(app: Express) {
         sponsorId: userId,
         health: stats.health,
         maxHealth: stats.maxHealth,
-        attack: stats.attack,
-        defense: stats.defense,
-        speed: stats.speed,
-        wit: stats.wit,
+        might: stats.might,
+        agility: stats.agility,
+        endurance: stats.endurance,
+        intellect: stats.intellect,
         charisma: stats.charisma,
-        memory: stats.memory,
+        wisdom: stats.wisdom,
+        power: stats.power,
+        maxPower: stats.maxPower,
         luck: stats.luck,
         competencies,
         abilities: [], // Start with no special abilities
         background,
         currentFloor: 1,
-        energy: 100,
-        maxEnergy: 100,
+        energy: stats.energy,
+        maxEnergy: stats.maxEnergy,
         experience: 0,
         level: 1,
         credits: 0,
@@ -285,6 +287,78 @@ export function registerCrawlerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching tactical data:", error);
       res.status(500).json({ error: "Failed to fetch tactical data" });
+    }
+  });
+
+  // Get scanned rooms for a crawler
+  app.get("/api/crawlers/:id/scanned-rooms", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const scannedRooms = await storage.crawlerStorage.getScannedRooms(crawlerId);
+      res.json(scannedRooms);
+    } catch (error) {
+      console.error("Error fetching scanned rooms:", error);
+      res.status(500).json({ error: "Failed to fetch scanned rooms" });
+    }
+  });
+
+  // Get mob summary for all rooms that the crawler has explored or scanned
+  app.get("/api/crawlers/:id/room-mobs-summary", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      // Get all explored and scanned rooms
+      const exploredRooms = await storage.crawlerStorage.getExploredRooms(crawlerId);
+      const scannedRooms = await storage.crawlerStorage.getScannedRooms(crawlerId);
+
+      const allRoomIds = new Set([
+        ...exploredRooms.map(r => r.id),
+        ...scannedRooms.map(r => r.id)
+      ]);
+
+      const mobSummary: Record<number, { hostileCount: number; neutralCount: number; playerCount: number }> = {};
+
+      // Get mob data for each room
+      for (const roomId of allRoomIds) {
+        try {
+          const hostileMobs = await storage.mobStorage.getHostileMobs(roomId);
+          const neutralMobs = await storage.mobStorage.getNeutralMobs(roomId);
+
+          // Get player count for this room (you may need to implement this)
+          // For now, we'll set it to 0 as player tracking might be in a different system
+          const playerCount = 0;
+
+          mobSummary[roomId] = {
+            hostileCount: hostileMobs.length,
+            neutralCount: neutralMobs.length,
+            playerCount: playerCount
+          };
+        } catch (error) {
+          console.error(`Error getting mob data for room ${roomId}:`, error);
+          // Set default values if there's an error
+          mobSummary[roomId] = {
+            hostileCount: 0,
+            neutralCount: 0,
+            playerCount: 0
+          };
+        }
+      }
+
+      res.json(mobSummary);
+    } catch (error) {
+      console.error("Error fetching room mobs summary:", error);
+      res.status(500).json({ error: "Failed to fetch room mobs summary" });
     }
   });
 }

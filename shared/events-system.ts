@@ -81,6 +81,9 @@ class EventsSystem {
         west: "east",
       }[storedDirection];
       entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered from the ${oppositeDirection}`;
+
+      // Store the entry position for immediate use in combat system
+      sessionStorage.setItem('entryDirection', storedDirection);
     }
 
     // Add entry event
