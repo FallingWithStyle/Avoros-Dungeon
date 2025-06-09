@@ -353,6 +353,9 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
               </Button>
 
+              {/* Redis Fallback Control - now inline */}
+              <RedisFallbackControl />
+
               {/* Eyes of D'Bug Spell */}
               <Button
                 onClick={() => applyEyesOfDebug()}
@@ -433,10 +436,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 Restore Energy
               </Button>
             </div>
-            {/* Redis Fallback Control */}
-            <div className="mb-2 p-2 border border-red-600/30 rounded bg-red-900/10">
-              <RedisFallbackControl />
-            </div>
 
             {/* Debug Info - all on one line, pipe-separated */}
             <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
@@ -506,29 +505,32 @@ function RedisFallbackControl() {
     toggleFallbackMutation.mutate(newState);
   };
 
+  // Button and text styles for "mini" buttons
+  const miniButtonClasses =
+    "h-7 px-2 py-1 text-[0.65rem] rounded border border-opacity-30 flex items-center gap-1";
+  const miniIconClasses = "w-3 h-3 mr-1";
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-300">
-          Fallback Mode {fallbackStatus?.fallbackMode ? "(Enabled)" : "(Disabled)"}
-        </span>
-        <Button
-          onClick={handleToggle}
-          disabled={toggleFallbackMutation.isPending}
-          variant={fallbackStatus?.fallbackMode ? "destructive" : "outline"}
-          size="sm"
-        >
-          {toggleFallbackMutation.isPending 
-            ? "Updating..." 
-            : fallbackStatus?.fallbackMode 
-              ? "Disable" 
-              : "Enable"
-          }
-        </Button>
-      </div>
-      <p className="text-xs text-slate-400">
-        Forces database-only mode to conserve Redis bandwidth
-      </p>
-    </div>
+    <Button
+      onClick={handleToggle}
+      disabled={toggleFallbackMutation.isPending}
+      variant="outline"
+      className={
+        miniButtonClasses +
+        " " +
+        (fallbackStatus?.fallbackMode
+          ? "border-cyan-600 text-cyan-400 hover:bg-cyan-600/10"
+          : "border-gray-600 text-gray-400 hover:bg-gray-600/10")
+      }
+      title="Forces database-only mode to conserve Redis bandwidth"
+    >
+      <RefreshCw className={miniIconClasses + (toggleFallbackMutation.isPending ? " animate-spin" : "")} />
+      {toggleFallbackMutation.isPending 
+        ? "Updating..." 
+        : fallbackStatus?.fallbackMode 
+          ? "Fallback On" 
+          : "Fallback Off"
+      }
+    </Button>
   );
 }
