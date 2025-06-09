@@ -799,6 +799,50 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       triggerDirection = "west";
     }
 
+    // Log gate check failures for debugging
+    if (!triggerDirection) {
+      // Check each gate and log why it failed
+      if (exits.north) {
+        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+        const nearEdge = y <= edgeThreshold;
+        const movingCorrectly = deltaY < -0.5;
+        
+        if (!inXRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-0.5)`);
+        }
+      }
+      
+      if (exits.south) {
+        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+        const nearEdge = y >= (100 - edgeThreshold);
+        const movingCorrectly = deltaY > 0.5;
+        
+        if (!inXRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >0.5)`);
+        }
+      }
+      
+      if (exits.east) {
+        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+        const nearEdge = x >= (100 - edgeThreshold);
+        const movingCorrectly = deltaX > 0.5;
+        
+        if (!inYRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >0.5)`);
+        }
+      }
+      
+      if (exits.west) {
+        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+        const nearEdge = x <= edgeThreshold;
+        const movingCorrectly = deltaX < -0.5;
+        
+        if (!inYRange || !nearEdge || !movingCorrectly) {
+          console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-0.5)`);
+        }
+      }
+    }
+
     if (triggerDirection) {
       // Prevent rapid multiple movements with a simple debounce
       const now = Date.now();
