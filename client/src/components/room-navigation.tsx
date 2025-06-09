@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,10 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { useToast } from "@/hooks/use-toast";
-import { isEnergyDisabled } from "@/components/debug-panel";
+import { useDungeonMapMovement } from "@/hooks/useDungeonMapMovement";
 import { CrawlerWithDetails } from "@shared/schema";
 import {
   MapPin,
@@ -109,8 +106,6 @@ export default function RoomNavigation({
   crawler,
   energyDisabled = false,
 }: RoomNavigationProps) {
-  const { toast } = useToast();
-  const [pendingDirection, setPendingDirection] = useState<string | null>(null);
 
   // Fetch current room data with reduced polling
   const { data: roomData, isLoading } = useQuery<RoomData>({
@@ -135,118 +130,11 @@ export default function RoomNavigation({
     staleTime: 5 * 60 * 1000, // 5 min
   });
 
-  // Movement mutation with optimistic updates
-  const moveMutation = useMutation({
-    mutationFn: async (direction: string) => {
-      return await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
-        direction,
-        debugEnergyDisabled: isEnergyDisabled(),
-      });
-    },
-    onMutate: async (direction) => {
-      // Optimistic update - immediately show movement is happening
-      setPendingDirection(direction);
-    },
-    onSuccess: (data) => {
-      // Batch invalidations with shorter delay
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      }, 100); // Small delay to batch updates
-
-      setPendingDirection(null);
-    },
-    onError: (error) => {
-      setPendingDirection(null);
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Movement failed",
-        description: error.message || "Could not move in that direction.",
-        variant: "destructive",
-      });
-    },
+  // Use the dungeon map movement hook
+  const { handleMove, moveMutation, pendingDirection, isMoving } = useDungeonMapMovement({
+    crawler,
+    availableDirections: roomData?.availableDirections || []
   });
-
-  const handleMove = useCallback(
-    (direction: string) => {
-      if (
-        moveMutation.isPending ||
-        !roomData?.availableDirections.includes(direction)
-      ) {
-        return;
-      }
-      if (!energyDisabled && crawler.energy < 10) {
-        toast({
-          title: "Not enough energy",
-          description: "You need at least 10 energy to move between rooms.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Store the movement direction for tactical view positioning
-      if (['north', 'south', 'east', 'west'].includes(direction)) {
-        sessionStorage.setItem('lastMovementDirection', direction);
-      }
-
-      setPendingDirection(direction);
-      moveMutation.mutate(direction);
-    },
-    [moveMutation, roomData, crawler.energy, toast],
-  );
-
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return;
-      }
-      const key = event.key.toLowerCase();
-      let direction: string | null = null;
-      switch (key) {
-        case "w":
-          direction = "north";
-          break;
-        case "s":
-          direction = "south";
-          break;
-        case "a":
-          direction = "west";
-          break;
-        case "d":
-          direction = "east";
-          break;
-        case "q":
-          direction = "staircase";
-          break;
-        default:
-          return;
-      }
-      event.preventDefault();
-      if (direction) {
-        handleMove(direction);
-      }
-    };
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [handleMove]);
 
   const getDirectionIcon = (direction: string) => {
     switch (direction) {
