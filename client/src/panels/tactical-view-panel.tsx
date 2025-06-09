@@ -674,8 +674,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (tacticalData) {
       console.log('🎯 Tactical data updated in panel:', {
         entities: tacticalData.entities?.length || 0,
+        tacticalEntities: tacticalData.tacticalEntities?.length || 0,
         entityTypes: tacticalData.entities?.map(e => `${e.type}: ${e.name}`) || [],
-        room: tacticalData.room?.name
+        tacticalEntityTypes: tacticalData.tacticalEntities?.map(e => `${e.type}: ${e.name}`) || [],
+        room: tacticalData.room?.name,
+        fullData: tacticalData
       });
     }
   }, [tacticalData]);
@@ -1706,11 +1709,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }
 
   const { room, availableDirections, playersInRoom } = effectiveTacticalData;
+  // Process tactical entities for rendering
+  const tacticalEntities = effectiveTacticalData.tacticalEntities || [];
+  console.log('🎯 Processing tactical entities for rendering:', {
+    total: tacticalEntities.length,
+    types: tacticalEntities.map(e => `${e.type}: ${e.name}`)
+  });
+
   const persistentTacticalData = {
     background: getRoomBackgroundType(room.environment, room.type),
-    loot: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'loot') || [],
-    mobs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'mob') || [],
-    npcs: effectiveTacticalData.tacticalEntities?.filter(e => e.type === 'npc') || [],
+    loot: tacticalEntities.filter(e => e.type === 'loot'),
+    mobs: tacticalEntities.filter(e => e.type === 'mob'),
+    npcs: tacticalEntities.filter(e => e.type === 'npc'),
     exits: {
       north: availableDirections.includes("north"),
       south: availableDirections.includes("south"),
@@ -1795,6 +1805,60 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           {persistentTacticalData.exits.west && (
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
           )}
+
+          {/* Tactical Mobs from Server */}
+          {persistentTacticalData.mobs.map((mob, index) => (
+            <div
+              key={`tactical-mob-${index}`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+              style={{
+                left: `${mob.position.x}%`,
+                top: `${mob.position.y}%`,
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Clicked on tactical mob: ${mob.name}`);
+              }}
+              title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || 'Unknown'}`}
+            >
+              <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
+                <Skull className="w-3 h-3 text-white" />
+              </div>
+              
+              {/* HP bar for tactical mobs */}
+              {mob.data?.hp !== undefined && mob.data?.maxHp !== undefined && mob.data.hp < mob.data.maxHp && (
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+                  <div
+                    className="h-full rounded transition-all duration-300 bg-red-400"
+                    style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
+                  ></div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Tactical NPCs from Server */}
+          {persistentTacticalData.npcs.map((npc, index) => (
+            <div
+              key={`tactical-npc-${index}`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+              style={{
+                left: `${npc.position.x}%`,
+                top: `${npc.position.y}%`,
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Clicked on tactical NPC: ${npc.name}`);
+              }}
+              title={`${npc.name} (NPC)`}
+            >
+              <div className="w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg">
+                <Users className="w-3 h-3 text-white" />
+              </div>
+            </div>
+          ))}
 
           {/* Combat Entities */}
           {combatState.entities.map((entity) => (
@@ -1895,14 +1959,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           ))}
 
-          {/* Loot items */}
+          {/* Tactical Loot from Server */}
           {persistentTacticalData.loot.map((item, index) => (
             <div
               key={`loot-${index}`}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer ${
                 hoveredLoot === index ? "scale-110 z-20" : ""
               } transition-all duration-200`}
-              style={{ left: `${item.x}%`, top: `${item.y}%` }}
+              style={{ left: `${item.position.x}%`, top: `${item.position.y}%` }}
               title={`${item.name} - Right-click to interact`}
               onClick={(e) => handleLootClick(index, item, e)}
               onContextMenu={(e) => handleLootClick(index, item, e)}
@@ -1916,7 +1980,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
                     : "animate-bounce"
                 }`}
               >
-                {getLootIcon(item.type)}
+                {getLootIcon(item.data?.type || 'treasure')}
               </div>
 
               {/* Hover name display - positioned relative to viewport */}
