@@ -63,7 +63,7 @@ export default function Leaderboard() {
                 </Avatar>
                 <div>
                   <p className="text-sm font-medium text-white">{crawler.name || 'Unknown Crawler'}</p>
-                  <p className="text-xs text-slate-400">Floor {crawler.currentFloor}</p>
+                  <p className="text-xs text-slate-400">Floor {crawler.currentFloor} • Level {crawler.level}</p>
                 </div>
               </div>
               <div className="text-right">

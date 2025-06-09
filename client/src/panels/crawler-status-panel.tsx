@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -129,14 +128,26 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-slate-300">Charisma</span>
-              <span className="text-sm font-mono text-pink-400">
+              <span className="text-sm font-mono text-yellow-400">
                 {crawler.charisma}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Memory</span>
+              <span className="text-sm text-slate-300">Wisdom</span>
               <span className="text-sm font-mono text-cyan-400">
-                {crawler.memory}
+                {crawler.wisdom}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-slate-300">Vitality</span>
+              <span className="text-sm font-mono text-pink-400">
+                {crawler.vitality}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-slate-300">Focus</span>
+              <span className="text-sm font-mono text-indigo-400">
+                {crawler.focus}
               </span>
             </div>
           </div>
@@ -168,7 +179,7 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
               );
             })}
           </div>
-          
+
           {/* Future expansion note */}
           <div className="mt-3 text-center text-slate-500 text-xs">
             Equipment system coming soon
