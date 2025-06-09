@@ -746,7 +746,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
 
-  // Gate crossing detection - triggers when player approaches or crosses gates
+  // Gate crossing detection - triggers when player crosses through gates in correct direction
   useEffect(() => {
     if (!effectiveTacticalData?.room || !effectiveTacticalData?.availableDirections) return;
 
@@ -762,27 +762,40 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const { x, y } = playerEntity.position;
 
-    // More lenient gate detection - trigger before hitting hard boundary
-    const approachThreshold = 5; // Trigger when 5% from edge
-    const crossThreshold = 1; // Or when crossing 1% past edge (for extended boundary movement)
+    // Track player's previous position to determine movement direction
+    const prevPosKey = 'prevPlayerPosition';
+    const prevPosString = sessionStorage.getItem(prevPosKey);
+    const prevPos = prevPosString ? JSON.parse(prevPosString) : { x, y };
 
-    // Check if player is approaching or has crossed through a gate
+    // Calculate movement direction
+    const deltaX = x - prevPos.x;
+    const deltaY = y - prevPos.y;
+
+    // Store current position for next frame
+    sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
+
+    // Define gate zones (center third of each wall)
+    const gateZoneMin = 35;
+    const gateZoneMax = 65;
+    const edgeThreshold = 3; // How close to edge before triggering
+
     let triggerDirection: string | null = null;
 
-    // North gate - trigger when approaching top edge or crossing it
-    if (exits.north && x >= 35 && x <= 65 && (y <= approachThreshold || y <= crossThreshold)) {
+    // Check if player is in a gate zone AND moving in the correct direction AND near the edge
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -0.5) {
+      // Moving north through north gate
       triggerDirection = "north";
     } 
-    // South gate - trigger when approaching bottom edge or crossing it  
-    else if (exits.south && x >= 35 && x <= 65 && (y >= (100 - approachThreshold) || y >= (100 - crossThreshold))) {
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > 0.5) {
+      // Moving south through south gate
       triggerDirection = "south";
     }
-    // East gate - trigger when approaching right edge or crossing it
-    else if (exits.east && y >= 35 && y <= 65 && (x >= (100 - approachThreshold) || x >= (100 - crossThreshold))) {
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > 0.5) {
+      // Moving east through east gate
       triggerDirection = "east";
     }
-    // West gate - trigger when approaching left edge or crossing it
-    else if (exits.west && y >= 35 && y <= 65 && (x <= approachThreshold || x <= crossThreshold)) {
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -0.5) {
+      // Moving west through west gate
       triggerDirection = "west";
     }
 
@@ -793,7 +806,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastMovementTime = lastMovement ? parseInt(lastMovement) : 0;
 
       if (now - lastMovementTime > 1000) { // 1 second cooldown
-        console.log(`Player triggered ${triggerDirection} gate transition at position (${x.toFixed(1)}, ${y.toFixed(1)})`);
+        console.log(`Player moving ${triggerDirection} through ${triggerDirection} gate at position (${x.toFixed(1)}, ${y.toFixed(1)}) with delta (${deltaX.toFixed(1)}, ${deltaY.toFixed(1)})`);
         sessionStorage.setItem('lastProximityMovement', now.toString());
 
         handleRoomMovement(triggerDirection);
