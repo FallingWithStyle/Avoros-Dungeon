@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isEnergyDisabled } from "@/components/debug-panel";
 import { useTacticalMovement } from "@/hooks/useTacticalMovement";
 import ActionQueuePanel from "./action-queue-panel";
+import { useSwipeMovement } from '../hooks/useSwipeMovement';
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -747,14 +748,64 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
 
+    // Room transition function using the actual API - to avoid hook naming clashes
+    const handleRoomTransition = useCallback(async (direction: string) => {
+      if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
+        console.log(`Cannot move ${direction} - not available or no crawler`);
+        return;
+      }
+  
+      try {
+        console.log(`Moving crawler ${crawler.id} ${direction} to new room`);
+  
+        // Store the movement direction for tactical view positioning in the next room
+        sessionStorage.setItem('lastMovementDirection', direction);
+  
+        const response = await apiRequest("POST", `/api/crawlers/${crawler.id}/move`, {
+          direction,
+          debugEnergyDisabled: isEnergyDisabled(),
+        });
+  
+        if (response.success) {
+          console.log(`Successfully moved ${direction} to ${response.newRoom?.name}`);
+  
+          // Refresh all relevant data when moving through doors
+          refetchTactical();
+          refetchExploredRooms(); // This will refresh the dungeon map
+  
+          // Force a re-render by clearing and re-adding the player entity with new position
+          const currentEntities = combatSystem.getState().entities;
+          currentEntities.forEach((entity) => {
+            combatSystem.removeEntity(entity.id);
+          });
+  
+          console.log(`Room transition complete - tactical view and map will refresh with new data`);
+        }
+      } catch (error) {
+        console.error(`Failed to move ${direction}:`, error);
+        toast({
+          title: "Movement failed",
+          description: error.message || "Could not move in that direction.",
+          variant: "destructive",
+        });
+      }
+    }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
+
   // Use the tactical movement hook for in-room WASD controls
   useTacticalMovement({
     effectiveTacticalData,
     combatState,
-    onRoomMovement: handleRoomMovement
+    onRoomMovement: handleRoomTransition
   });
 
-  
+  // Initialize swipe movement for mobile
+  const { containerRef, isMobile } = useSwipeMovement({
+    onRoomMovement: handleRoomTransition,
+    availableDirections: effectiveTacticalData?.availableDirections || [],
+    isEnabled: true
+  });
+
+
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -842,7 +893,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     // Clear ALL entities when room changes, then rebuild from scratch
     if (shouldClearEntities || lastRoomId === null) {
-      const currentEntities = combatSystem.getState().entities;
+      const currentEntities =```text
+combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
@@ -856,7 +908,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
       const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
       const effectiveDirection = entryDirection || lastDirection;
-      
+
       console.log(`Player entering room ${currentRoomId}, came from direction: ${effectiveDirection} (entry: ${entryDirection}, last: ${lastDirection})`);
 
       // Use combat system's entry position method for consistency
@@ -864,7 +916,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (effectiveDirection) {
         entryPosition = combatSystem.getEntryPosition(effectiveDirection);
       }
-      
+
       console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
       const playerEntity: CombatEntity = {
         id: "player",
@@ -892,17 +944,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
       if (!existingPlayer && roomData?.room) {
         console.log("Player entity missing, creating fallback player");
-        
+
         // Get movement direction for proper positioning even in fallback
         const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
         const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
         const effectiveDirection = entryDirection || lastDirection;
-        
+
         let fallbackPosition = { x: 50, y: 50 }; // Default center
         if (effectiveDirection) {
           fallbackPosition = combatSystem.getEntryPosition(effectiveDirection);
         }
-        
+
         const playerEntity: CombatEntity = {
           id: "player",
           name: crawler.name,
@@ -1636,6 +1688,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           onClick={handleGridClick}
           onContextMenu={handleGridRightClick}
           title="Click to move your character"
+          ref={containerRef} // Attach ref for swipe detection
         >
           {/* Room Background */}
           <div
