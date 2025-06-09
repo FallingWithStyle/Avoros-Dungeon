@@ -915,20 +915,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       console.log(`${keyPressed} pressed. Player at:`, playerEntity.position);
 
-      const GRID_SIZE = 15; // 15x15 grid
-      const cellSize = 100 / GRID_SIZE; // Each cell is ~6.67% of the total area
-      const moveDistance = cellSize; // Move exactly one grid cell
-      // Calculate current grid position
-      const currentGridX = Math.round(playerEntity.position.x / cellSize);
-      const currentGridY = Math.round(playerEntity.position.y / cellSize);
-      
-      // Calculate target grid position
-      const targetGridX = currentGridX + direction.x;
-      const targetGridY = currentGridY + direction.y;
-      
-      // Convert target grid position back to percentage coordinates (center of cell)
-      let newX = (targetGridX + 0.5) * cellSize;
-      let newY = (targetGridY + 0.5) * cellSize;
+      const speed = 2; // Smaller movement increments for grid-based movement
+      const moveDistance = speed; // Move in small percentage units
+      let newX = playerEntity.position.x + direction.x * moveDistance;
+      let newY = playerEntity.position.y + direction.y * moveDistance;
 
       // Check if player is approaching a door and allow boundary crossing
       const isApproachingDoor = (x: number, y: number, dir: { x: number, y: number }) => {
