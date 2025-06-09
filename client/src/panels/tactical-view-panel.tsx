@@ -763,82 +763,98 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const { x, y } = playerEntity.position;
 
     // Track player's previous position to determine movement direction
-    const prevPosKey = 'prevPlayerPosition';
+    const prevPosKey = `prevPlayerPosition_${effectiveTacticalData.room.id}`;
     const prevPosString = sessionStorage.getItem(prevPosKey);
-    const prevPos = prevPosString ? JSON.parse(prevPosString) : { x, y };
+    const prevPos = prevPosString ? JSON.parse(prevPosString) : null;
+
+    // Skip detection if this is the first frame in a room (no previous position)
+    if (!prevPos) {
+      sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
+      return;
+    }
 
     // Calculate movement direction
     const deltaX = x - prevPos.x;
     const deltaY = y - prevPos.y;
 
+    // Ignore large movement deltas (likely from room transitions)
+    const maxDelta = 10; // Ignore movements larger than 10% of screen
+    if (Math.abs(deltaX) > maxDelta || Math.abs(deltaY) > maxDelta) {
+      sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
+      return;
+    }
+
     // Store current position for next frame
     sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
 
-    // Define gate zones (wider center area of each wall)
-    const gateZoneMin = 25;
-    const gateZoneMax = 75;
-    const edgeThreshold = 10; // How close to edge before triggering
+    // Define gate zones (center area of each wall)
+    const gateZoneMin = 35;
+    const gateZoneMax = 65;
+    const edgeThreshold = 9; // Must be very close to edge (91% of way to wall)
+    const minMovement = 0.5; // Minimum movement required
 
     let triggerDirection: string | null = null;
 
-    // Check if player is in a gate zone AND moving in the correct direction AND near the edge
-    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -0.1) {
+    // Check if player is in a gate zone AND moving significantly in the correct direction AND very close to the edge
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -minMovement) {
       // Moving north through north gate
       triggerDirection = "north";
     } 
-    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > 0.1) {
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > minMovement) {
       // Moving south through south gate
       triggerDirection = "south";
     }
-    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > 0.1) {
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > minMovement) {
       // Moving east through east gate
       triggerDirection = "east";
     }
-    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -0.1) {
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -minMovement) {
       // Moving west through west gate
       triggerDirection = "west";
     }
 
     // Log gate check failures for debugging
     if (!triggerDirection) {
-      // Check each gate and log why it failed
-      if (exits.north) {
-        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
-        const nearEdge = y <= edgeThreshold;
-        const movingCorrectly = deltaY < -0.5;
-        
-        if (!inXRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-0.1)`);
+      // Only log if player is actually moving
+      if (Math.abs(deltaX) > 0.1 || Math.abs(deltaY) > 0.1) {
+        if (exits.north) {
+          const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+          const nearEdge = y <= edgeThreshold;
+          const movingCorrectly = deltaY < -minMovement;
+
+          if (inXRange && (nearEdge || movingCorrectly)) {
+            console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-${minMovement})`);
+          }
         }
-      }
-      
-      if (exits.south) {
-        const inXRange = x >= gateZoneMin && x <= gateZoneMax;
-        const nearEdge = y >= (100 - edgeThreshold);
-        const movingCorrectly = deltaY > 0.5;
-        
-        if (!inXRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >0.1)`);
+
+        if (exits.south) {
+          const inXRange = x >= gateZoneMin && x <= gateZoneMax;
+          const nearEdge = y >= (100 - edgeThreshold);
+          const movingCorrectly = deltaY > minMovement;
+
+          if (inXRange && (nearEdge || movingCorrectly)) {
+            console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >${minMovement})`);
+          }
         }
-      }
-      
-      if (exits.east) {
-        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
-        const nearEdge = x >= (100 - edgeThreshold);
-        const movingCorrectly = deltaX > 0.5;
-        
-        if (!inYRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >0.1)`);
+
+        if (exits.east) {
+          const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+          const nearEdge = x >= (100 - edgeThreshold);
+          const movingCorrectly = deltaX > minMovement;
+
+          if (inYRange && (nearEdge || movingCorrectly)) {
+            console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >${minMovement})`);
+          }
         }
-      }
-      
-      if (exits.west) {
-        const inYRange = y >= gateZoneMin && y <= gateZoneMax;
-        const nearEdge = x <= edgeThreshold;
-        const movingCorrectly = deltaX < -0.5;
-        
-        if (!inYRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-0.1)`);
+
+        if (exits.west) {
+          const inYRange = y >= gateZoneMin && y <= gateZoneMax;
+          const nearEdge = x <= edgeThreshold;
+          const movingCorrectly = deltaX < -minMovement;
+
+          if (inYRange && (nearEdge || movingCorrectly)) {
+            console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-${minMovement})`);
+          }
         }
       }
     }
@@ -1882,7 +1898,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
               <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
                 <Skull className="w-3 h-3 text-white" />
               </div>
-              
+
               {/* HP bar for tactical mobs */}
               {mob.data?.hp !== undefined && mob.data?.maxHp !== undefined && mob.data.hp < mob.data.maxHp && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
