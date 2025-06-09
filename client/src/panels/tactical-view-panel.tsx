@@ -861,7 +861,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         // Allow movement beyond normal boundaries for door transitions
         newX = Math.max(-5, Math.min(105, newX)); // Extended boundary for door crossing
         newY = Math.max(-5, Math.min(105, newY));
-        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
+        console.log(`Door approach detected - allowing extended movement to (${newX.toFixed(1)}, ${newY.toFixed(1)})`);;
       } else {
         // Normal boundary clamping
         newX = Math.max(2, Math.min(98, newX)); // Leave small border
