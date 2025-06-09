@@ -70,7 +70,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     <div className="min-h-screen bg-game-bg text-slate-100">
       {/* Header */}
       <header className="bg-game-surface border-b border-game-border">
-        <div className="w-full px-4 py-4 lg:max-w-7xl lg:mx-auto lg:px-6"></div>
+        <div className="w-full px-4 py-4 lg:max-w-7xl lg:mx-auto lg:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Avatar image */}
@@ -104,7 +104,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       {/* Main Content - Mobile-First Layout */}
       <div className="w-full px-2 py-4 lg:max-w-7xl lg:mx-auto lg:p-6 pb-20 lg:pb-6">
         {/* Mobile: Single column stack, Desktop: 3 columns */}
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-2 lg:gap-6"></div>
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-2 lg:gap-6">
           
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
