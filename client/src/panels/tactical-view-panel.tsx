@@ -938,7 +938,7 @@ combatSystem.getState().entities;
       const entryDirection = sessionStorage.getItem("entryDirection") as 'north' | 'south' | 'east' | 'west' | null;
       const effectiveDirection = entryDirection || lastDirection;
 
-      console.log(`Player entering room ${currentRoomId}, came from direction: ${effectiveDirection} (entry: ${entryDirection}, last: ${lastDirection})`);
+      console.log("Player entering room " + currentRoomId + ", came from direction: " + effectiveDirection + " (entry: " + entryDirection + ", last: " + lastDirection + ")");
 
       // Use combat system's entry position method for consistency
       let entryPosition = { x: 50, y: 50 }; // Default fallback
