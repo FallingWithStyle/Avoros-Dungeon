@@ -774,27 +774,27 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     // Store current position for next frame
     sessionStorage.setItem(prevPosKey, JSON.stringify({ x, y }));
 
-    // Define gate zones (center third of each wall)
-    const gateZoneMin = 35;
-    const gateZoneMax = 65;
-    const edgeThreshold = 3; // How close to edge before triggering
+    // Define gate zones (wider center area of each wall)
+    const gateZoneMin = 25;
+    const gateZoneMax = 75;
+    const edgeThreshold = 10; // How close to edge before triggering
 
     let triggerDirection: string | null = null;
 
     // Check if player is in a gate zone AND moving in the correct direction AND near the edge
-    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -0.5) {
+    if (exits.north && x >= gateZoneMin && x <= gateZoneMax && y <= edgeThreshold && deltaY < -0.1) {
       // Moving north through north gate
       triggerDirection = "north";
     } 
-    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > 0.5) {
+    else if (exits.south && x >= gateZoneMin && x <= gateZoneMax && y >= (100 - edgeThreshold) && deltaY > 0.1) {
       // Moving south through south gate
       triggerDirection = "south";
     }
-    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > 0.5) {
+    else if (exits.east && y >= gateZoneMin && y <= gateZoneMax && x >= (100 - edgeThreshold) && deltaX > 0.1) {
       // Moving east through east gate
       triggerDirection = "east";
     }
-    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -0.5) {
+    else if (exits.west && y >= gateZoneMin && y <= gateZoneMax && x <= edgeThreshold && deltaX < -0.1) {
       // Moving west through west gate
       triggerDirection = "west";
     }
@@ -808,7 +808,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const movingCorrectly = deltaY < -0.5;
         
         if (!inXRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-0.5)`);
+          console.log(`❌ North gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need <-0.1)`);
         }
       }
       
@@ -818,7 +818,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const movingCorrectly = deltaY > 0.5;
         
         if (!inXRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >0.5)`);
+          console.log(`❌ South gate check failed: inXRange=${inXRange} (x=${x.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (y=${y.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaY=${deltaY.toFixed(2)}, need >0.1)`);
         }
       }
       
@@ -828,7 +828,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const movingCorrectly = deltaX > 0.5;
         
         if (!inYRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >0.5)`);
+          console.log(`❌ East gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need >=${100 - edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need >0.1)`);
         }
       }
       
@@ -838,7 +838,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const movingCorrectly = deltaX < -0.5;
         
         if (!inYRange || !nearEdge || !movingCorrectly) {
-          console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-0.5)`);
+          console.log(`❌ West gate check failed: inYRange=${inYRange} (y=${y.toFixed(1)}, need ${gateZoneMin}-${gateZoneMax}), nearEdge=${nearEdge} (x=${x.toFixed(1)}, need <=${edgeThreshold}), movingCorrectly=${movingCorrectly} (deltaX=${deltaX.toFixed(2)}, need <-0.1)`);
         }
       }
     }
