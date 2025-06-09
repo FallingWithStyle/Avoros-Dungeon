@@ -33,8 +33,8 @@ export class CrawlerStorage extends BaseStorage {
         intellect: crawlerData.intellect,
         charisma: crawlerData.charisma,
         wisdom: crawlerData.wisdom,
-        vitality: crawlerData.vitality,
-        focus: crawlerData.focus,
+        power: crawlerData.power,
+        maxPower: crawlerData.maxPower,
         luck: crawlerData.luck,
         competencies: crawlerData.competencies,
         abilities: crawlerData.abilities,
@@ -158,12 +158,14 @@ export class CrawlerStorage extends BaseStorage {
     const minutesPassed = Math.floor(timeDiff / 60000);
 
     const energyToRestore = Math.min(minutesPassed, crawler.maxEnergy - crawler.energy);
+    const powerToRestore = Math.min(minutesPassed, crawler.maxPower - crawler.power);
 
-    if (energyToRestore > 0) {
+    if (energyToRestore > 0 || powerToRestore > 0) {
       const [updatedCrawler] = await db
         .update(crawlers)
         .set({
           energy: crawler.energy + energyToRestore,
+          power: crawler.power + powerToRestore,
           lastEnergyRegen: now,
         })
         .where(eq(crawlers.id, crawlerId))
@@ -196,8 +198,7 @@ export class CrawlerStorage extends BaseStorage {
         { name: "Intellect", value: stats.intellect, description: "Reasoning and magic" },
         { name: "Charisma", value: stats.charisma, description: "Social presence" },
         { name: "Wisdom", value: stats.wisdom, description: "Intuition and perception" },
-        { name: "Vitality", value: stats.vitality, description: "Life force and health" },
-        { name: "Focus", value: stats.focus, description: "Mental energy and concentration" },
+        { name: "Power", value: stats.power, description: "Skill energy and technique" },
       ];
       const topAbility = statValues.reduce((max, stat) => stat.value > max.value ? stat : max);
 
@@ -272,10 +273,12 @@ export class CrawlerStorage extends BaseStorage {
       stats[highlightStat] = 6 + Math.floor(Math.random() * 3);
     }
 
-    const vitality = stats[6];
-    const focus = stats[7];
-    const health = vitality * 10 + Math.floor(Math.random() * 10);
-    const maxEnergy = focus * 10 + Math.floor(Math.random() * 10);
+    const endurance = stats[2];
+    const intellect = stats[3];
+    const health = endurance * 10 + Math.floor(Math.random() * 10);
+    const maxEnergy = intellect * 10 + Math.floor(Math.random() * 10);
+    const power = Math.floor(Math.random() * 6) + 1;
+    const maxPower = power + Math.floor(Math.random() * 5);
     const luck = Math.floor(Math.random() * 6) + 1;
 
     return {
@@ -287,8 +290,8 @@ export class CrawlerStorage extends BaseStorage {
       intellect: stats[3],
       charisma: stats[4],
       wisdom: stats[5],
-      vitality: stats[6],
-      focus: stats[7],
+      power,
+      maxPower,
       luck,
       energy: maxEnergy,
       maxEnergy,

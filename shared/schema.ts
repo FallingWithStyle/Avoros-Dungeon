@@ -167,8 +167,8 @@ export const crawlerClasses = pgTable("crawler_classes", {
   baseIntellect: integer("base_intellect").notNull(),
   baseCharisma: integer("base_charisma").notNull(),
   baseWisdom: integer("base_wisdom").notNull(),
-  baseVitality: integer("base_vitality").notNull(),
-  baseFocus: integer("base_focus").notNull(),
+  basePower: integer("base_power").notNull(),
+  baseMaxPower: integer("base_max_power").notNull(),
   baseLuck: integer("base_luck").notNull(),
 });
 
@@ -192,8 +192,8 @@ export const crawlers = pgTable("crawlers", {
   intellect: integer("intellect").notNull(),
   charisma: integer("charisma").notNull(),
   wisdom: integer("wisdom").notNull(),
-  vitality: integer("vitality").notNull(),
-  focus: integer("focus").notNull(),
+  power: integer("power").notNull(),
+  maxPower: integer("max_power").notNull(),
   luck: integer("luck").notNull(),
   credits: integer("credits").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
@@ -233,8 +233,8 @@ export const equipment = pgTable("equipment", {
   intellectBonus: integer("intellect_bonus").default(0),
   charismaBonus: integer("charisma_bonus").default(0),
   wisdomBonus: integer("wisdom_bonus").default(0),
-  vitalityBonus: integer("vitality_bonus").default(0),
-  focusBonus: integer("focus_bonus").default(0),
+  powerBonus: integer("power_bonus").default(0),
+  maxPowerBonus: integer("max_power_bonus").default(0),
   healthBonus: integer("health_bonus").default(0),
   rarity: varchar("rarity", { length: 20 }).default("common"), // common, uncommon, rare, epic, legendary
   price: integer("price").notNull(),

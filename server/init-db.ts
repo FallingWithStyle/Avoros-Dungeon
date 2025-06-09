@@ -89,19 +89,19 @@ async function initializeCrawlerClasses() {
     return; // Classes already initialized
   }
 
-  const classes = [
+  const classData = [
     {
       name: "Survivor",
-      description: "Hardy individuals who've learned to adapt and endure against all odds.",
-      baseMight: 2,
-      baseAgility: 3,
-      baseEndurance: 2,
-      baseIntellect: 2,
-      baseCharisma: 1,
-      baseWisdom: 2,
-      baseVitality: 2,
-      baseFocus: 2,
-      baseLuck: 5,
+      description: "Hardy individuals who excel at enduring harsh conditions and finding resources.",
+      baseMight: 3,
+      baseAgility: 4,
+      baseEndurance: 5,
+      baseIntellect: 3,
+      baseCharisma: 2,
+      baseWisdom: 4,
+      basePower: 4,
+      baseMaxPower: 15,
+      baseLuck: 3,
     },
     {
       name: "Scavenger",
@@ -112,8 +112,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 3,
       baseCharisma: 2,
       baseWisdom: 1,
-      baseVitality: 2,
-      baseFocus: 1,
+      basePower: 2,
+      baseMaxPower: 10,
       baseLuck: 5,
     },
     {
@@ -125,8 +125,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 1,
       baseCharisma: 1,
       baseWisdom: 2,
-      baseVitality: 4,
-      baseFocus: 1,
+      basePower: 6,
+      baseMaxPower: 20,
       baseLuck: 5,
     },
     {
@@ -138,8 +138,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 4,
       baseCharisma: 3,
       baseWisdom: 0,
-      baseVitality: 1,
-      baseFocus: 0,
+      basePower: 3,
+      baseMaxPower: 12,
       baseLuck: 5,
     },
     {
@@ -151,8 +151,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 3,
       baseCharisma: 2,
       baseWisdom: 4,
-      baseVitality: 0,
-      baseFocus: 4,
+      basePower: 2,
+      baseMaxPower: 8,
       baseLuck: 5,
     },
     {
@@ -164,8 +164,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 4,
       baseCharisma: 3,
       baseWisdom: 0,
-      baseVitality: 1,
-      baseFocus: 0,
+      basePower: 3,
+      baseMaxPower: 12,
       baseLuck: 5,
     },
     {
@@ -177,8 +177,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 3,
       baseCharisma: 4,
       baseWisdom: 3,
-      baseVitality: 8,
-      baseFocus: 4,
+      basePower: 7,
+      baseMaxPower: 25,
       baseLuck: 5,
     },
     {
@@ -190,8 +190,8 @@ async function initializeCrawlerClasses() {
       baseIntellect: 6,
       baseCharisma: 5,
       baseWisdom: 7,
-      baseVitality: 6,
-      baseFocus: 6,
+      basePower: 5,
+      baseMaxPower: 18,
       baseLuck: 6,
     },
     {
@@ -203,13 +203,13 @@ async function initializeCrawlerClasses() {
       baseIntellect: 8,
       baseCharisma: 4,
       baseWisdom: 6,
-      baseVitality: 5,
-      baseFocus: 8,
+      basePower: 4,
+      baseMaxPower: 15,
       baseLuck: 5,
     },
   ];
 
-  for (const crawlerClass of classes) {
+  for (const crawlerClass of classData) {
     await db.insert(crawlerClasses).values(crawlerClass);
   }
 }
