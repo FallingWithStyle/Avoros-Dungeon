@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-01-23
+
+### Changed
+- Complete stat system overhaul: Replaced old stats (attack, defense, speed, wit, memory) with new RPG system (might, agility, endurance, intellect, charisma, wisdom, power, maxPower, luck)
+- Updated all UI components to display new stat system
+- Added power bars to crawler status vitals section
+
+### Fixed
+- Crawler creation now properly uses new stat system instead of old stat names
+- Removed duplicate power bar display in combat stats section
+- Fixed stat display issues in crawler cards and status panels
+
+### Technical
+- Updated database schema with new stat columns
+- Modified crawler creation routes to use new stat names
+- Updated all frontend components to reference new stat system
+
 ## [0.3.0] - 2025-01-23
 
 ### Added

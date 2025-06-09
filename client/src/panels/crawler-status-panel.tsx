@@ -154,24 +154,6 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
               </span>
             </div>
           </div>
-
-          {/* Power Bar */}
-          <div className="mt-2">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-slate-300">Power</span>
-              <span className="text-xs text-cyan-400">
-                {crawler.power}/{crawler.maxPower}
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${Math.max(0, Math.min(100, (crawler.power / crawler.maxPower) * 100))}%`,
-                }}
-              />
-            </div>
-          </div>
         </CardContent>
       </Card>
 
