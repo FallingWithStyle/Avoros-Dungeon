@@ -946,7 +946,7 @@ combatSystem.getState().entities;
         entryPosition = combatSystem.getEntryPosition(effectiveDirection);
       }
 
-      console.log(`Calculated entry position: ${entryPosition.x}, ${entryPosition.y}`);
+      console.log("Calculated entry position: " + entryPosition.x + ", " + entryPosition.y);
       const playerEntity: CombatEntity = {
         id: "player",
         name: crawler.name,
