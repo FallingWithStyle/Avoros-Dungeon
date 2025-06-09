@@ -307,54 +307,40 @@ class RedisService {
     }
   }
 
-  async getRoomMobs(roomId: number): Promise<any[] | null> {
-    if (!this.redis || !this.isConnected) return null;
-
+  async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
     try {
-      const data = await this.redis?.get(`mobs:${roomId}`);
-      if (!data || data === null || data === undefined) return null;
-
-      // Handle empty string or malformed data
-      if (typeof data === 'string' && (data.trim() === '' || data === '[]' || data.length < 3)) {
-        console.log(`Empty or invalid mob data for room ${roomId}, clearing cache`);
-        await this.redis?.del(`mobs:${roomId}`);
-        return null;
-      }
-
-      try {
-        const parsed = JSON.parse(data as string);
-        // Validate the parsed data structure
-        if (!Array.isArray(parsed)) {
-          console.log(`Invalid mob data structure for room ${roomId}, clearing cache`);
-          await this.redis?.del(`mobs:${roomId}`);
-          return null;
+      // Ensure we're properly serializing the mob data
+      const serializedMobs = JSON.stringify(mobs, (key, value) => {
+        // Handle Date objects and other non-serializable data
+        if (value instanceof Date) {
+          return value.toISOString();
         }
-        return parsed;
-      } catch (parseError) {
-        console.error(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, parseError);
-        await this.redis?.del(`mobs:${roomId}`);
-        return null;
-      }
+        return value;
+      });
+      await this.redis.setex(`room:${roomId}:mobs`, ttlSeconds, serializedMobs);
+      console.log(`Storing mobs data for room ${roomId}: ${serializedMobs.length} characters`);
     } catch (error) {
-      console.error('Redis getRoomMobs error:', error);
-      return null;
+      console.log('Failed to cache room mobs data:', error);
     }
   }
 
-  async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
-    if (!this.redis || !this.isConnected) return;
-
+  async getRoomMobs(roomId: number): Promise<any[] | null> {
     try {
-      // Ensure we're properly serializing the data
-      const serializedData = JSON.stringify(mobs);
-      console.log(`Storing mobs data for room ${roomId}: ${serializedData.length} characters`);
-      
-      // Use setex instead of set with EX parameters for better compatibility
-      await this.redis.setex(`mobs:${roomId}`, ttlSeconds, serializedData);
+      const cached = await this.redis.get(`room:${roomId}:mobs`);
+      if (!cached) return null;
+
+      // Validate JSON before parsing
+      if (typeof cached !== 'string') {
+        console.log(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, typeof cached);
+        await this.invalidateRoomMobs(roomId);
+        return null;
+      }
+
+      return JSON.parse(cached);
     } catch (error) {
-      console.error('Redis setRoomMobs error:', error);
-      // If JSON serialization fails, don't store anything
-      console.error('Failed to serialize mobs data:', mobs);
+      console.log(`Invalid JSON data for room ${roomId} mobs, clearing cache:`, error);
+      await this.invalidateRoomMobs(roomId);
+      return null;
     }
   }
 
