@@ -386,7 +386,7 @@ class RedisService {
     if (!this.isConnected) return;
 
     try {
-      await this.redis?.del(`mobs:${roomId}`);
+      await this.redis?.del(`room:${roomId}:mobs`);
     } catch (error) {
       console.error('Redis invalidateRoomMobs error:', error);
     }
