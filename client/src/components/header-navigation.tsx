@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Bot, User, Settings } from "lucide-react";
+import { Building2, Bot, User, Settings, Menu, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function HeaderNavigation() {
   const { user } = useAuth();
@@ -58,14 +65,16 @@ export default function HeaderNavigation() {
 
   return (
     <header className="border-b border-amber-600/20 bg-gradient-to-r from-amber-950/30 to-orange-900/20 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-3">
+      <div className="w-full px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
+          {/* Logo and Primary Navigation */}
+          <div className="flex items-center space-x-2">
             <div className="text-xl font-bold text-amber-300">
               Avavor
             </div>
             
-            <nav className="flex items-center space-x-1">
+            {/* Desktop Navigation - Hidden on mobile */}
+            <nav className="hidden md:flex items-center space-x-1 ml-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
@@ -107,26 +116,87 @@ export default function HeaderNavigation() {
             </nav>
           </div>
 
-          <div className="flex items-center space-x-3">
+          {/* Right Side - User Info and Menu */}
+          <div className="flex items-center space-x-2">
+            {/* Credits Badge - Always visible but compact on mobile */}
             {user && (
-              <div className="flex items-center space-x-2 text-sm text-amber-200/70">
+              <Badge variant="outline" className="border-amber-600/30 text-amber-300 text-xs">
+                <span className="hidden sm:inline">Credits: </span>
+                {user.credits || 0}
+              </Badge>
+            )}
+            
+            {/* Desktop User Info */}
+            {user && (
+              <div className="hidden lg:flex items-center space-x-2 text-sm text-amber-200/70">
                 <span>{user.email || "Anonymous"}</span>
-                <Badge variant="outline" className="border-amber-600/30 text-amber-300">
-                  Credits: {user.credits || 0}
-                </Badge>
               </div>
             )}
             
-            <Link href="/api/logout">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-amber-300/70 hover:text-amber-200 hover:bg-amber-600/10"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </Link>
+            {/* Mobile Menu Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-amber-300/70 hover:text-amber-200 hover:bg-amber-600/10"
+                >
+                  <Menu className="w-4 h-4 md:hidden" />
+                  <div className="hidden md:flex items-center gap-1">
+                    <Settings className="w-4 h-4" />
+                    <ChevronDown className="w-3 h-3" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {/* Mobile Navigation Items */}
+                <div className="md:hidden">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    const disabled = item.disabled;
+                    
+                    if (disabled) {
+                      return (
+                        <DropdownMenuItem key={item.label} disabled>
+                          <Icon className="w-4 h-4 mr-2" />
+                          {item.label}
+                        </DropdownMenuItem>
+                      );
+                    }
+                    
+                    return (
+                      <Link key={item.href} href={item.href}>
+                        <DropdownMenuItem className={active ? "bg-amber-600/10" : ""}>
+                          <Icon className="w-4 h-4 mr-2" />
+                          {item.label}
+                        </DropdownMenuItem>
+                      </Link>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                </div>
+                
+                {/* User Info for Mobile */}
+                {user && (
+                  <div className="md:hidden">
+                    <DropdownMenuItem disabled>
+                      <User className="w-4 h-4 mr-2" />
+                      {user.email || "Anonymous"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </div>
+                )}
+                
+                {/* Logout */}
+                <Link href="/api/logout">
+                  <DropdownMenuItem>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
