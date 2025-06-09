@@ -852,7 +852,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         if (dir.x > 0 && exits.east && x >= 90 && y >= 35 && y <= 65) return true; // Moving east toward east door
         if (dir.x < 0 && exits.west && x <= 10 && y >= 35 && y <= 65) return true; // Moving west toward west door
 
-      };
+        return false;      };
 
       // Allow crossing boundaries if approaching a door, otherwise clamp
       if (isApproachingDoor(playerEntity.position.x, playerEntity.position.y, direction)) {
@@ -1741,7 +1741,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             <div className="absolute inset-0 opacity-20 grid-background">
               <svg
                 width="100%"
-                height="100%"```text
+                height="100%"
                 viewBox="0 0 15 15"
                 xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="none"
