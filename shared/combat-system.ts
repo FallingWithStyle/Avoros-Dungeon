@@ -831,7 +831,7 @@ export class CombatSystem {
     if (!playerEntity) {
       // Determine entry position based on movement direction
       let entryPosition = { x: 50, y: 50 }; // Default center
-      let entryDirection: 'north' | 'south' | 'east' | 'west' = "north"; // Default facing
+      let entryDirection: 'north' | 'south' | 'east' | 'west' = "south"; // Default facing
 
       // Check for stored entry direction first (more immediate)
       const storedEntryDirection = typeof window !== 'undefined' 
@@ -845,14 +845,18 @@ export class CombatSystem {
 
       const effectiveDirection = storedEntryDirection || lastDirection;
 
-      if (effectiveDirection) {
+      if (effectiveDirection && ['north', 'south', 'east', 'west'].includes(effectiveDirection)) {
         entryPosition = this.getEntryPosition(effectiveDirection);
         entryDirection = effectiveDirection as 'north' | 'south' | 'east' | 'west';
-        // Clear both stored directions after using them
+        console.log(`Combat system positioning player at ${entryPosition.x}, ${entryPosition.y} from direction ${effectiveDirection}`);
+        
+        // Clear stored directions after using them
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('entryDirection');
           sessionStorage.removeItem('lastMovementDirection');
         }
+      } else {
+        console.log(`Combat system placing player at center - no valid direction found (${effectiveDirection})`);
       }
 
       playerEntity = {
@@ -869,6 +873,7 @@ export class CombatSystem {
         facing: entryDirection
       };
       this.state.entities.push(playerEntity);
+      this.notifyListeners();
     }
   }
 
