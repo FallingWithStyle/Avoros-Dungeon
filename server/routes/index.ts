@@ -89,14 +89,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Redis status endpoint
   app.get("/api/system/redis-status", async (req, res) => {
     try {
+      const { redisService } = await import('./lib/redis-service');
       const isAvailable = await redisStatus.getStatus();
+      const isForcedFallback = redisService.isForceFallbackMode();
+      
+      let message = 'Redis is operational';
+      if (isForcedFallback) {
+        message = 'Redis fallback mode enabled (debug override)';
+      } else if (!isAvailable) {
+        message = 'Redis is unavailable - using database fallback';
+      }
+      
       res.json({ 
-        available: isAvailable,
-        message: isAvailable ? 'Redis is operational' : 'Redis is unavailable - using database fallback'
+        available: isAvailable && !isForcedFallback,
+        fallbackMode: isForcedFallback,
+        message
       });
     } catch (error) {
       res.json({ 
         available: false, 
+        fallbackMode: false,
         message: 'Redis status check failed'
       });
     }

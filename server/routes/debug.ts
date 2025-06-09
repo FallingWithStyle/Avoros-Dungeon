@@ -333,6 +333,53 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Enable/disable Redis fallback mode
+  app.post("/api/debug/redis-fallback", isAuthenticated, async (req: any, res) => {
+    try {
+      const { enabled } = req.body;
+      
+      if (typeof enabled !== 'boolean') {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Missing or invalid 'enabled' boolean parameter" 
+        });
+      }
+
+      storage.redisService.setForceFallbackMode(enabled);
+
+      res.json({
+        success: true,
+        message: `Redis fallback mode ${enabled ? 'enabled' : 'disabled'}`,
+        fallbackMode: enabled
+      });
+    } catch (error) {
+      console.error("Error toggling Redis fallback mode:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to toggle Redis fallback mode" 
+      });
+    }
+  });
+
+  // DEBUG: Get current Redis fallback mode status
+  app.get("/api/debug/redis-fallback", isAuthenticated, async (req: any, res) => {
+    try {
+      const isFallbackMode = storage.redisService.isForceFallbackMode();
+      
+      res.json({
+        success: true,
+        fallbackMode: isFallbackMode,
+        message: `Redis fallback mode is currently ${isFallbackMode ? 'enabled' : 'disabled'}`
+      });
+    } catch (error) {
+      console.error("Error getting Redis fallback mode status:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to get Redis fallback mode status" 
+      });
+    }
+  });
+
   // DEBUG: Spawn hostile mob in current room
   app.post("/api/debug/spawn-mob/:crawlerId", isAuthenticated, async (req: any, res) => {
     try {

@@ -458,3 +458,72 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
 export const isEnergyDisabled = () => globalEnergyDisabled;
 
 export { IS_DEBUG_MODE };
+
+function RedisFallbackControl() {
+  const { toast } = useToast();
+  const { data: fallbackStatus, refetch } = useQuery({
+    queryKey: ["/api/debug/redis-fallback"],
+    refetchInterval: 5000,
+  });
+
+  const toggleFallbackMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const response = await fetch("/api/debug/redis-fallback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to toggle Redis fallback mode");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Redis Fallback Mode Updated",
+        description: "Cache behavior has been changed",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to toggle fallback mode: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggle = () => {
+    const newState = !fallbackStatus?.fallbackMode;
+    toggleFallbackMutation.mutate(newState);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-slate-300">
+          Fallback Mode {fallbackStatus?.fallbackMode ? "(Enabled)" : "(Disabled)"}
+        </span>
+        <Button
+          onClick={handleToggle}
+          disabled={toggleFallbackMutation.isPending}
+          variant={fallbackStatus?.fallbackMode ? "destructive" : "outline"}
+          size="sm"
+        >
+          {toggleFallbackMutation.isPending 
+            ? "Updating..." 
+            : fallbackStatus?.fallbackMode 
+              ? "Disable" 
+              : "Enable"
+          }
+        </Button>
+      </div>
+      <p className="text-xs text-slate-400">
+        Forces database-only mode to conserve Redis bandwidth
+      </p>
+    </div>
+  );
+}
