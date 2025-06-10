@@ -473,15 +473,15 @@ export class ExplorationStorage extends BaseStorage {
       return [];
     }
 
-    // FIX: Correct usage of SQL expressions in Drizzle ORM
+    // Get nearby rooms using proper SQL parameter binding
     const nearbyRooms = await db
       .select()
       .from(rooms)
       .where(
         and(
           eq(rooms.floorId, currentRoom.floorId),
-          sql`${sql.raw("ABS")}(${rooms.x} - ${currentRoom.x}) + ${sql.raw("ABS")}(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`,
-        ),
+          sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`
+        )
       );
 
     // Get visited rooms to mark them as explored
