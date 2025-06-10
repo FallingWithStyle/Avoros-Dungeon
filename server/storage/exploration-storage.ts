@@ -1,3 +1,8 @@
+/**
+ * File: exploration-storage.ts
+ * Responsibility: Dungeon exploration and room navigation storage operations
+ * Notes: Manages room movement, position tracking, exploration history, and encounter processing
+ */
 import { db } from "../db";
 import {
   rooms,
@@ -10,11 +15,6 @@ import {
   type CrawlerWithDetails,
 } from "@shared/schema";
 import { eq, desc, and, inArray, not, sql } from "drizzle-orm";
-/**
- * File: exploration-storage.ts
- * Responsibility: Dungeon exploration and room navigation storage operations
- * Notes: Manages room movement, position tracking, exploration history, and encounter processing
- */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 
@@ -54,16 +54,19 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for floor rooms, fetching from database');
+      console.log("Redis cache miss for floor rooms, fetching from database");
     }
 
-    const floorRooms = await db.select().from(rooms).where(eq(rooms.floorId, floorId));
+    const floorRooms = await db
+      .select()
+      .from(rooms)
+      .where(eq(rooms.floorId, floorId));
 
     // Cache the result (floor rooms rarely change)
     try {
       await redisService.setFloorRooms(floorId, floorRooms, 3600); // 1 hour TTL
     } catch (error) {
-      console.log('Failed to cache floor rooms data');
+      console.log("Failed to cache floor rooms data");
     }
 
     return floorRooms;
@@ -108,7 +111,9 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for available directions, fetching from database');
+      console.log(
+        "Redis cache miss for available directions, fetching from database",
+      );
     }
 
     const connections = await db
@@ -127,7 +132,7 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.setAvailableDirections(roomId, directions, 600); // 10 minutes TTL
     } catch (error) {
-      console.log('Failed to cache available directions data');
+      console.log("Failed to cache available directions data");
     }
 
     return directions;
@@ -156,15 +161,21 @@ export class ExplorationStorage extends BaseStorage {
 
     const currentRoom = await this.getRoom(currentPosition.roomId);
     if (!currentRoom) {
-      console.log(`ERROR: Current room ${currentPosition.roomId} not found in database`);
+      console.log(
+        `ERROR: Current room ${currentPosition.roomId} not found in database`,
+      );
       return { success: false, error: "Current room not found" };
     }
 
-    console.log(`Current room: ${currentRoom.name} (${currentRoom.x}, ${currentRoom.y})`);
+    console.log(
+      `Current room: ${currentRoom.name} (${currentRoom.x}, ${currentRoom.y})`,
+    );
 
     if (direction === "staircase") {
       if (currentRoom.type !== "stairs") {
-        console.log(`ERROR: Attempted staircase movement but room type is ${currentRoom.type}, not stairs`);
+        console.log(
+          `ERROR: Attempted staircase movement but room type is ${currentRoom.type}, not stairs`,
+        );
         return { success: false, error: "No staircase in this room" };
       }
       console.log(`Handling staircase movement...`);
@@ -172,8 +183,13 @@ export class ExplorationStorage extends BaseStorage {
     }
 
     // Get available directions for debugging
-    const availableDirections = await this.getAvailableDirections(currentPosition.roomId);
-    console.log(`Available directions from room ${currentPosition.roomId}:`, availableDirections);
+    const availableDirections = await this.getAvailableDirections(
+      currentPosition.roomId,
+    );
+    console.log(
+      `Available directions from room ${currentPosition.roomId}:`,
+      availableDirections,
+    );
 
     const [connection] = await db
       .select()
@@ -186,12 +202,19 @@ export class ExplorationStorage extends BaseStorage {
       );
 
     if (!connection) {
-      console.log(`ERROR: No connection found for direction ${direction} from room ${currentPosition.roomId}`);
+      console.log(
+        `ERROR: No connection found for direction ${direction} from room ${currentPosition.roomId}`,
+      );
       console.log(`Available directions:`, availableDirections);
-      return { success: false, error: `No exit ${direction} from current room` };
+      return {
+        success: false,
+        error: `No exit ${direction} from current room`,
+      };
     }
 
-    console.log(`Found connection: ${connection.fromRoomId} -> ${connection.toRoomId} (${connection.direction})`);
+    console.log(
+      `Found connection: ${connection.fromRoomId} -> ${connection.toRoomId} (${connection.direction})`,
+    );
 
     if (connection.isLocked) {
       console.log(`ERROR: Connection is locked`);
@@ -204,7 +227,9 @@ export class ExplorationStorage extends BaseStorage {
       return { success: false, error: "Destination room not found" };
     }
 
-    console.log(`Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`);
+    console.log(
+      `Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`,
+    );
 
     console.log(`Inserting new crawler position...`);
     await db.insert(crawlerPositions).values({
@@ -219,10 +244,12 @@ export class ExplorationStorage extends BaseStorage {
       await redisService.del(`crawler:${crawlerId}:explored`);
       console.log(`Invalidated position caches for crawler ${crawlerId}`);
     } catch (error) {
-      console.log('Failed to invalidate position caches:', error);
+      console.log("Failed to invalidate position caches:", error);
     }
 
-    console.log(`Movement successful: Crawler ${crawlerId} moved ${direction} to room ${newRoom.id} (${newRoom.name})`);
+    console.log(
+      `Movement successful: Crawler ${crawlerId} moved ${direction} to room ${newRoom.id} (${newRoom.name})`,
+    );
     return { success: true, newRoom };
   }
 
@@ -238,38 +265,41 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for current room, fetching from database');
+      console.log("Redis cache miss for current room, fetching from database");
     }
 
+    // FIX: Use correct join syntax for Drizzle/SQL
     const result = await db
-      .select({
-        room: rooms
-      })
+      .select()
       .from(crawlerPositions)
       .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt))
       .limit(1);
 
-    console.log(`Database query result for crawler ${crawlerId}:`, result.length > 0 ? `Found room: ${result[0].room.name}` : 'No position found');
+    // Drizzle returns joined results as { crawlerPositions: ..., rooms: ... }
+    const joinedRoom = result[0]?.rooms;
 
-    if (result.length === 0) {
-      console.log(`No position found for crawler ${crawlerId} - they may need to be placed in a room`);
+    console.log(
+      `Database query result for crawler ${crawlerId}:`,
+      joinedRoom ? `Found room: ${joinedRoom.name}` : "No position found",
+    );
+
+    if (!joinedRoom) {
+      console.log(
+        `No position found for crawler ${crawlerId} - they may need to be placed in a room`,
+      );
       return undefined;
     }
 
-    const room = result[0].room;
-
-    if (room) {
-      // Cache the result
-      try {
-        await redisService.setCurrentRoom(crawlerId, room, 300); // 5 minutes TTL
-      } catch (error) {
-        console.log('Failed to cache current room data');
-      }
+    // Cache the result
+    try {
+      await redisService.setCurrentRoom(crawlerId, joinedRoom, 300); // 5 minutes TTL
+    } catch (error) {
+      console.log("Failed to cache current room data");
     }
 
-    return room;
+    return joinedRoom;
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {
@@ -281,7 +311,9 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for players in room, fetching from database');
+      console.log(
+        "Redis cache miss for players in room, fetching from database",
+      );
     }
 
     const crawlerIds = await db
@@ -297,13 +329,15 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.setPlayersInRoom(roomId, players, 120); // 2 minutes TTL
     } catch (error) {
-      console.log('Failed to cache players in room data');
+      console.log("Failed to cache players in room data");
     }
 
     return players;
   }
 
-  async getFactions(): Promise<Array<{ id: number; name: string; color: string }>> {
+  async getFactions(): Promise<
+    Array<{ id: number; name: string; color: string }>
+  > {
     // Try to get from cache first
     try {
       const cached = await redisService.getFactions();
@@ -312,7 +346,7 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for factions, fetching from database');
+      console.log("Redis cache miss for factions, fetching from database");
     }
 
     const result = await db
@@ -333,7 +367,7 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.setFactions(formattedFactions, 1800); // 30 minutes TTL
     } catch (error) {
-      console.log('Failed to cache factions data');
+      console.log("Failed to cache factions data");
     }
 
     return formattedFactions;
@@ -348,7 +382,9 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for explored rooms, fetching from database');
+      console.log(
+        "Redis cache miss for explored rooms, fetching from database",
+      );
     }
 
     const visitedRooms = await db
@@ -360,7 +396,9 @@ export class ExplorationStorage extends BaseStorage {
       .where(eq(crawlerPositions.crawlerId, crawlerId))
       .orderBy(desc(crawlerPositions.enteredAt));
 
-    const uniqueRoomIds = Array.from(new Set(visitedRooms.map(vr => vr.roomId)));
+    const uniqueRoomIds = Array.from(
+      new Set(visitedRooms.map((vr) => vr.roomId)),
+    );
 
     if (uniqueRoomIds.length === 0) {
       return [];
@@ -380,7 +418,7 @@ export class ExplorationStorage extends BaseStorage {
 
     const currentRoomId = currentPosition?.roomId;
 
-    const exploredRooms = roomDetails.map(room => ({
+    const exploredRooms = roomDetails.map((room) => ({
       id: room.id,
       name: room.name,
       description: room.description,
@@ -400,7 +438,7 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.setExploredRooms(crawlerId, exploredRooms, 600); // 10 minutes TTL
     } catch (error) {
-      console.log('Failed to cache explored rooms data');
+      console.log("Failed to cache explored rooms data");
     }
 
     return exploredRooms;
@@ -415,7 +453,7 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for scanned rooms, fetching from database');
+      console.log("Redis cache miss for scanned rooms, fetching from database");
     }
 
     // Get current position
@@ -435,15 +473,15 @@ export class ExplorationStorage extends BaseStorage {
       return [];
     }
 
-    // Get all rooms within scan range on the same floor
+    // FIX: Correct usage of SQL expressions in Drizzle ORM
     const nearbyRooms = await db
       .select()
       .from(rooms)
       .where(
         and(
           eq(rooms.floorId, currentRoom.floorId),
-          sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`
-        )
+          sql`${sql.raw("ABS")}(${rooms.x} - ${currentRoom.x}) + ${sql.raw("ABS")}(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`,
+        ),
       );
 
     // Get visited rooms to mark them as explored
@@ -452,12 +490,14 @@ export class ExplorationStorage extends BaseStorage {
       .from(crawlerPositions)
       .where(eq(crawlerPositions.crawlerId, crawlerId));
 
-    const visitedRoomIds = new Set(visitedRooms.map(vr => vr.roomId));
+    const visitedRoomIds = new Set(visitedRooms.map((vr) => vr.roomId));
 
-    const scannedRooms = nearbyRooms.map(room => ({
+    const scannedRooms = nearbyRooms.map((room) => ({
       id: room.id,
       name: room.name,
-      description: visitedRoomIds.has(room.id) ? room.description : "Detected by scan",
+      description: visitedRoomIds.has(room.id)
+        ? room.description
+        : "Detected by scan",
       type: room.type,
       environment: room.environment,
       isSafe: room.isSafe,
@@ -473,15 +513,22 @@ export class ExplorationStorage extends BaseStorage {
 
     // Cache the result
     try {
-      await redisService.setScannedRooms(crawlerId, scanRange, scannedRooms, 300); // 5 minutes TTL
+      await redisService.setScannedRooms(
+        crawlerId,
+        scanRange,
+        scannedRooms,
+        300,
+      ); // 5 minutes TTL
     } catch (error) {
-      console.log('Failed to cache scanned rooms data');
+      console.log("Failed to cache scanned rooms data");
     }
 
     return scannedRooms;
   }
 
-  async getFloorBounds(floorId: number): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
+  async getFloorBounds(
+    floorId: number,
+  ): Promise<{ minX: number; maxX: number; minY: number; maxY: number }> {
     // Try to get from cache first
     try {
       const cached = await redisService.getFloorBounds(floorId);
@@ -490,7 +537,7 @@ export class ExplorationStorage extends BaseStorage {
       }
     } catch (error) {
       // Redis error, continue with database query
-      console.log('Redis cache miss for floor bounds, fetching from database');
+      console.log("Redis cache miss for floor bounds, fetching from database");
     }
 
     const floorRooms = await db
@@ -502,8 +549,8 @@ export class ExplorationStorage extends BaseStorage {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
     }
 
-    const xs = floorRooms.map(r => r.x);
-    const ys = floorRooms.map(r => r.y);
+    const xs = floorRooms.map((r) => r.x);
+    const ys = floorRooms.map((r) => r.y);
 
     const bounds = {
       minX: Math.min(...xs),
@@ -516,7 +563,7 @@ export class ExplorationStorage extends BaseStorage {
     try {
       await redisService.setFloorBounds(floorId, bounds, 3600); // 1 hour TTL
     } catch (error) {
-      console.log('Failed to cache floor bounds data');
+      console.log("Failed to cache floor bounds data");
     }
 
     return bounds;
@@ -527,14 +574,20 @@ export class ExplorationStorage extends BaseStorage {
 
     const currentRoom = await this.getCrawlerCurrentRoom(crawlerId);
     if (currentRoom) {
-      console.log(`Crawler ${crawlerId} already has position in room ${currentRoom.id} (${currentRoom.name})`);
+      console.log(
+        `Crawler ${crawlerId} already has position in room ${currentRoom.id} (${currentRoom.name})`,
+      );
       return; // Crawler already has a position
     }
 
-    console.log(`Crawler ${crawlerId} has no position, placing in entrance room...`);
+    console.log(
+      `Crawler ${crawlerId} has no position, placing in entrance room...`,
+    );
 
-    // Place crawler in entrance room
-    const [floor1] = await db.select().from(floors).where(eq(floors.floorNumber, 1));
+    const [floor1] = await db
+      .select()
+      .from(floors)
+      .where(eq(floors.floorNumber, 1));
     if (!floor1) {
       console.error("Floor 1 not found when ensuring crawler position");
       throw new Error("Floor 1 not found");
@@ -550,7 +603,9 @@ export class ExplorationStorage extends BaseStorage {
       throw new Error("Entrance room not found");
     }
 
-    console.log(`Placing crawler ${crawlerId} in entrance room ${entranceRoom.id} (${entranceRoom.name})`);
+    console.log(
+      `Placing crawler ${crawlerId} in entrance room ${entranceRoom.id} (${entranceRoom.name})`,
+    );
 
     await db.insert(crawlerPositions).values({
       crawlerId: crawlerId,
@@ -558,13 +613,15 @@ export class ExplorationStorage extends BaseStorage {
       enteredAt: new Date(),
     });
 
-    console.log(`Successfully placed crawler ${crawlerId} in room ${entranceRoom.id}`);
+    console.log(
+      `Successfully placed crawler ${crawlerId} in room ${entranceRoom.id}`,
+    );
 
     // Invalidate cache
     try {
       await redisService.invalidateCurrentRoom(crawlerId);
     } catch (error) {
-      console.log('Failed to invalidate current room cache');
+      console.log("Failed to invalidate current room cache");
     }
   }
 
@@ -614,7 +671,7 @@ export class ExplorationStorage extends BaseStorage {
       await redisService.del(`crawler:${crawlerId}:scanned_rooms`);
       await redisService.del(`crawler:${crawlerId}:visited_rooms`);
     } catch (error) {
-      console.log('Failed to clear exploration data from cache');
+      console.log("Failed to clear exploration data from cache");
     }
   }
 }
