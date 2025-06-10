@@ -1,4 +1,10 @@
 
+/**
+ * File: tactical-utils.ts
+ * Responsibility: Provides utility functions for tactical grid calculations, positioning, and data generation
+ * Notes: Handles grid-to-percentage conversions, fallback data generation, and party positioning logic
+ */
+
 // Helper function to convert grid coordinates to percentage
 export const gridToPercentage = (
   gridX: number,

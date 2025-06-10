@@ -1,3 +1,9 @@
+/**
+ * File: tactical-hotbar.tsx
+ * Responsibility: Renders the tactical action hotbar with move, attack, defend, and ability buttons
+ * Notes: Displays cooldown states, active action modes, and keyboard shortcuts for tactical combat actions
+ */
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sword, Shield, Zap, Move } from 'lucide-react';
