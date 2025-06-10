@@ -4,12 +4,11 @@ import type { CrawlerWithDetails } from "@shared/schema";
 
 interface TacticalDataHooks {
   roomData: any;
+  exploredRooms: any[];
   tacticalData: any;
-  isLoading: boolean;
-  tacticalLoading: boolean;
-  tacticalError: any;
-  refetchTactical: () => void;
+  refetchRoomData: () => void;
   refetchExploredRooms: () => void;
+  refetchTacticalData: () => void;
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails | null) {

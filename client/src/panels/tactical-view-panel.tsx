@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
@@ -39,7 +38,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     isLoading,
     tacticalLoading,
     tacticalError,
-    refetchTactical,
+    refetchTacticalData,
     refetchExploredRooms
   } = useTacticalData(crawler);
 
@@ -81,7 +80,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         const result = await response.json();
         if (result.success) {
           console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
-          refetchTactical();
+          refetchTacticalData();
           refetchExploredRooms();
 
           // Clear entities for room transition
@@ -99,7 +98,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         variant: "destructive",
       });
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTactical, refetchExploredRooms]);
+  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
   // Use tactical movement hook
   useTacticalMovement({
@@ -134,7 +133,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const shouldClearEntities = lastRoomId !== null && lastRoomId !== currentRoomId;
 
     if (shouldClearEntities) {
-      refetchTactical();
+      refetchTacticalData();
       const currentEntities = combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
@@ -166,7 +165,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       combatSystem.addEntity(playerEntity);
       combatSystem.selectEntity("player");
     }
-  }, [roomData?.room, lastRoomId, crawler, refetchTactical]);
+  }, [roomData?.room, lastRoomId, crawler, refetchTacticalData]);
 
   // Grid event handlers
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
