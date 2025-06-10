@@ -1,3 +1,9 @@
+/**
+ * File: sponsor-view.tsx
+ * Responsibility: Main dashboard view for corporate sponsors to manage crawlers, view leaderboards, and monitor activity
+ * Notes: Handles crawler creation, selection, and provides overview of all sponsored crawler activities and season status
+ */
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
