@@ -80,7 +80,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const response = await fetch("/api/crawlers/" + crawler.id + "/move", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ direction, debugEnergyDisabled: false }),
+        body: JSON.stringify({ direction }),
       });
 
       if (response.ok) {

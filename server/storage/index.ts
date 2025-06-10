@@ -74,7 +74,7 @@ export interface IStorage {
   getRoom(roomId: number): Promise<any>;
   createRoomConnection(fromRoomId: number, toRoomId: number, direction: string): Promise<any>;
   getAvailableDirections(roomId: number): Promise<any>;
-  moveToRoom(crawlerId: number, direction: string, debugEnergyDisabled?: boolean): Promise<any>;
+  moveToRoom(crawlerId: number, direction: string): Promise<any>;
   getCrawlerCurrentRoom(crawlerId: number): Promise<any>;
   getPlayersInRoom(roomId: number): Promise<any>;
   getFactions(): Promise<any>;
@@ -271,7 +271,7 @@ export class ModularStorage implements IStorage {
     return this._explorationStorage.getAvailableDirections(roomId);
   }
 
-  async moveToRoom(crawlerId: number, direction: string, debugEnergyDisabled?: boolean) {
+  async moveToRoom(crawlerId: number, direction: string) {
     // This requires coordination between crawler and exploration storage
     // We'll need to handle energy deduction here
     const crawler = await this._crawlerStorage.getCrawler(crawlerId);
@@ -279,16 +279,7 @@ export class ModularStorage implements IStorage {
       return { success: false, error: "Crawler not found" };
     }
 
-    const result = await this._explorationStorage.moveToRoom(crawlerId, direction, debugEnergyDisabled);
-
-    if (result.success && !debugEnergyDisabled) {
-      // Deduct energy - this is where modules coordinate
-      const energyCost = 10; // Could be calculated based on room type, etc.
-      await this._crawlerStorage.updateCrawler(crawlerId, {
-        energy: Math.max(0, crawler.energy - energyCost),
-      });
-    }
-
+    const result = await this._explorationStorage.moveToRoom(crawlerId, direction);
     return result;
   }
 

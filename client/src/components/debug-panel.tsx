@@ -114,26 +114,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
-  // Debug energy restoration
-  const restoreEnergyMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeCrawler) throw new Error("No active crawler");
-      return await apiRequest(
-        "POST",
-        `/api/crawlers/${activeCrawler.id}/restore-energy`,
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      toast({
-        title: "Energy Restored",
-        description: "Crawler energy has been restored to 100%.",
-      });
-    },
-    onError: (error) => {
-      showErrorToast("Energy Restore Failed", error);
-    },
-  });
 
   // Debug position reset
   const resetPositionMutation = useMutation({
@@ -344,20 +324,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 Delete All Crawlers
               </Button>
 
-              <Button
-                onClick={toggleEnergyUsage}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " " +
-                  (energyDisabled
-                    ? "border-orange-600 text-orange-400 hover:bg-orange-600/10"
-                    : "border-gray-600 text-gray-400 hover:bg-gray-600/10")
-                }
-              >
-                <Shield className={miniIconClasses} />
-                {energyDisabled ? "Energy Disabled" : "Energy Enabled"}
-              </Button>
 
               {/* Redis Fallback Control - now inline */}
               <RedisFallbackControl />
@@ -424,22 +390,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                   <Heart className={miniIconClasses} />
                 )}
                 Heal Crawler
-              </Button>
-              <Button
-                onClick={() => restoreEnergyMutation.mutate()}
-                disabled={restoreEnergyMutation.isPending || !activeCrawler}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " border-green-600 text-green-400 hover:bg-green-600/10"
-                }
-              >
-                {restoreEnergyMutation.isPending ? (
-                  <Wrench className={miniIconClasses + " animate-spin"} />
-                ) : (
-                  <Zap className={miniIconClasses} />
-                )}
-                Restore Energy
               </Button>
             </div>
 

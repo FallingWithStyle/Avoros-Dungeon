@@ -136,7 +136,6 @@ export class ExplorationStorage extends BaseStorage {
   async moveToRoom(
     crawlerId: number,
     direction: string,
-    debugEnergyDisabled?: boolean,
   ): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
     console.log(`=== MOVE TO ROOM ===`);
     console.log(`Crawler ID: ${crawlerId}, Direction: ${direction}`);
@@ -206,25 +205,6 @@ export class ExplorationStorage extends BaseStorage {
     }
 
     console.log(`Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`);
-
-    const previousVisit = await db
-      .select()
-      .from(crawlerPositions)
-      .where(
-        and(
-          eq(crawlerPositions.crawlerId, crawlerId),
-          eq(crawlerPositions.roomId, connection.toRoomId),
-        ),
-      )
-      .limit(1);
-
-    let energyCost = 10;
-    if (previousVisit.length > 0) {
-      energyCost = 5;
-      console.log(`Revisiting room - reduced energy cost: ${energyCost}`);
-    } else {
-      console.log(`First visit to room - standard energy cost: ${energyCost}`);
-    }
 
     console.log(`Inserting new crawler position...`);
     await db.insert(crawlerPositions).values({

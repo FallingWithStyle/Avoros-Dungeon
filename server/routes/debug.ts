@@ -141,29 +141,6 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
-  // DEBUG: Restore crawler energy (temporary for development)
-  app.post("/api/crawlers/:id/restore-energy", isAuthenticated, async (req: any, res) => {
-    try {
-      const crawlerId = parseInt(req.params.id);
-      const crawler = await storage.getCrawler(crawlerId);
-
-      if (!crawler) {
-        return res.status(404).json({ message: "Crawler not found" });
-      }
-
-      // Update crawler energy to 100%
-      await storage.updateCrawler(crawlerId, {
-        energy: 100,
-        lastEnergyRegen: new Date(),
-      });
-
-      res.json({ message: "Energy restored successfully" });
-    } catch (error) {
-      console.error("Restore energy error:", error);
-      res.status(500).json({ message: "Failed to restore energy" });
-    }
-  });
-
   // DEBUG: Reset crawler to entrance
   app.post("/api/crawlers/:id/reset-position", isAuthenticated, async (req: any, res) => {
     try {

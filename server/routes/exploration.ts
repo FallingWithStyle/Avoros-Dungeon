@@ -152,12 +152,11 @@ export function registerExplorationRoutes(app: Express) {
   app.post("/api/crawlers/:id/move", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const { direction, debugEnergyDisabled } = req.body;
+      const { direction } = req.body;
 
       console.log(`=== MOVE CRAWLER API CALL ===`);
       console.log(`Crawler ID: ${crawlerId}`);
       console.log(`Direction: ${direction}`);
-      console.log(`Debug Energy Disabled: ${debugEnergyDisabled}`);
       console.log(`User ID: ${req.user.claims.sub}`);
 
       if (!direction) {
@@ -181,19 +180,8 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
-      // Check minimum energy requirement (unless debug mode is enabled)
-      const energyRequired = 10; // Standard movement cost
-      if (!debugEnergyDisabled && crawler.energy < energyRequired) {
-        console.log(`ERROR: Not enough energy. Required: ${energyRequired}, Available: ${crawler.energy}`);
-        return res.status(400).json({ message: `Not enough energy to move. Need ${energyRequired}, have ${crawler.energy}` });
-      }
-
       console.log(`Attempting to move crawler ${crawlerId} ${direction}...`);
-      const result = await storage.moveToRoom(
-        crawlerId,
-        direction,
-        debugEnergyDisabled,
-      );
+      const result = await storage.moveToRoom(crawlerId, direction);
 
       console.log(`Move result:`, result.success ? `Success - moved to ${result.newRoom?.name}` : `Failed - ${result.error}`);
 
@@ -201,12 +189,6 @@ export function registerExplorationRoutes(app: Express) {
         return res
           .status(400)
           .json({ message: result.error || "Cannot move in that direction" });
-      }
-
-      // Deduct energy if not in debug mode
-      if (!debugEnergyDisabled) {
-        console.log(`Deducting ${energyRequired} energy from crawler ${crawlerId}`);
-        await storage.updateCrawlerEnergy(crawlerId, -energyRequired);
       }
 
       await storage.createActivity({
