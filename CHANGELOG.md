@@ -268,3 +268,9 @@
 - Crawler movement errors and data cleanup after deletion
 - Error handling for dungeon exploration failures
 - Crawler selection and generation improvements
+## [0.8.5] - 2025-01-26
+
+### Changed
+- Renamed dungeon from "Avavor" to "Avoros" throughout the application
+
+## [0.8.4] - 2025-01-26

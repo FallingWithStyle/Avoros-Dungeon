@@ -53,7 +53,7 @@ export default function GameHeader() {
                 <i className="fas fa-user-ninja mr-2"></i>Crawler
               </Button>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="text-right hidden sm:block">
                 <div className="text-sm font-medium">{getDisplayName()}</div>
@@ -61,7 +61,7 @@ export default function GameHeader() {
                   Credits: <span className="text-green-400 font-mono">{user?.credits?.toLocaleString() || 0}</span>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Avatar className="w-10 h-10 border-2 border-sponsor">
                   <AvatarImage src={user?.profileImageUrl || undefined} alt={getDisplayName()} />
@@ -69,7 +69,7 @@ export default function GameHeader() {
                     {getDisplayName().charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
