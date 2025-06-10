@@ -24,9 +24,10 @@ export function registerDebugRoutes(app: Express) {
       const healedCrawler = await storage.updateCrawler(crawlerId, {
         health: crawler.maxHealth,
         energy: crawler.maxEnergy,
+        power: crawler.maxPower,
       });
 
-      res.json({ message: "Crawler healed", crawler: healedCrawler });
+      res.json({ message: "Crawler healed - health, energy, and power restored", crawler: healedCrawler });
     } catch (error) {
       console.error("Error healing crawler:", error);
       res.status(500).json({ message: "Failed to heal crawler" });
