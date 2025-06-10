@@ -1,11 +1,10 @@
-
 /**
  * File: useKeyboardMovement.ts
- * Responsibility: Handle keyboard input for 360-degree tactical movement (WASD keys)
- * Notes: Detects movement direction from keyboard input combinations and passes to movement handler
+ * Responsibility: Handle keyboard input for 360-degree tactical movement (WASD/arrows)
+ * Notes: Uses interval to ensure continuous, normalized movement while any valid key is held.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from "react";
 
 interface UseKeyboardMovementProps {
   onMovement: (direction: { x: number; y: number }) => void;
@@ -14,47 +13,42 @@ interface UseKeyboardMovementProps {
 
 export function useKeyboardMovement({
   onMovement,
-  isEnabled
+  isEnabled,
 }: UseKeyboardMovementProps) {
   const keysPressed = useRef<Set<string>>(new Set());
-  const movementInterval = useRef<NodeJS.Timeout | null>(null);
+  const movementInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Compute movement vector from keys
   const calculateMovementVector = useCallback(() => {
-    let x = 0;
-    let y = 0;
-
-    if (keysPressed.current.has('w') || keysPressed.current.has('arrowup')) y -= 1;
-    if (keysPressed.current.has('s') || keysPressed.current.has('arrowdown')) y += 1;
-    if (keysPressed.current.has('a') || keysPressed.current.has('arrowleft')) x -= 1;
-    if (keysPressed.current.has('d') || keysPressed.current.has('arrowright')) x += 1;
-
-    // Normalize diagonal movement to prevent faster diagonal movement
+    let x = 0,
+      y = 0;
+    if (keysPressed.current.has("w") || keysPressed.current.has("arrowup"))
+      y -= 1;
+    if (keysPressed.current.has("s") || keysPressed.current.has("arrowdown"))
+      y += 1;
+    if (keysPressed.current.has("a") || keysPressed.current.has("arrowleft"))
+      x -= 1;
+    if (keysPressed.current.has("d") || keysPressed.current.has("arrowright"))
+      x += 1;
+    // Normalize diagonals
     if (x !== 0 && y !== 0) {
-      const length = Math.sqrt(x * x + y * y);
-      x = x / length;
-      y = y / length;
+      const len = Math.sqrt(x * x + y * y);
+      x /= len;
+      y /= len;
     }
-
     return { x, y };
   }, []);
 
+  // Start the interval to send movement
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
-
-    // Immediately send first movement
-    const initialVector = calculateMovementVector();
-    if (initialVector.x !== 0 || initialVector.y !== 0) {
-      onMovement(initialVector);
-    }
-
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
-      if (vector.x !== 0 || vector.y !== 0) {
-        onMovement(vector);
-      }
-    }, 50); // 20 FPS continuous movement updates
+      onMovement(vector);
+    }, 50);
   }, [calculateMovementVector, onMovement]);
 
+  // Stop the interval
   const stopMovement = useCallback(() => {
     if (movementInterval.current) {
       clearInterval(movementInterval.current);
@@ -62,60 +56,87 @@ export function useKeyboardMovement({
     }
   }, []);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!isEnabled) return;
-
-    const key = event.key.toLowerCase();
-    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+  // Keydown: start movement loop if this is the first movement key pressed
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!isEnabled) return;
+      const key = event.key.toLowerCase();
+      const valid = [
+        "w",
+        "a",
+        "s",
+        "d",
+        "arrowup",
+        "arrowdown",
+        "arrowleft",
+        "arrowright",
+      ];
+      if (!valid.includes(key)) return;
       event.preventDefault();
-      
-      // Prevent key repeat events from restarting movement
-      if (event.repeat) return;
-      
-      const wasEmpty = keysPressed.current.size === 0;
+      const before = keysPressed.current.size;
       keysPressed.current.add(key);
-      
-      if (wasEmpty) {
+      if (before === 0 && keysPressed.current.size > 0) {
         startMovement();
       }
-    }
-  }, [isEnabled, startMovement]);
+    },
+    [isEnabled, startMovement],
+  );
 
-  const handleKeyUp = useCallback((event: KeyboardEvent) => {
-    if (!isEnabled) return;
-
-    const key = event.key.toLowerCase();
-    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+  // Keyup: stop movement loop if this was the last key released
+  const handleKeyUp = useCallback(
+    (event: KeyboardEvent) => {
+      if (!isEnabled) return;
+      const key = event.key.toLowerCase();
+      const valid = [
+        "w",
+        "a",
+        "s",
+        "d",
+        "arrowup",
+        "arrowdown",
+        "arrowleft",
+        "arrowright",
+      ];
+      if (!valid.includes(key)) return;
       keysPressed.current.delete(key);
-      
       if (keysPressed.current.size === 0) {
         stopMovement();
+        onMovement({ x: 0, y: 0 }); // Ensure stop
       }
-    }
-  }, [isEnabled, stopMovement]);
+    },
+    [isEnabled, stopMovement, onMovement],
+  );
 
+  // Proper effect setup (no stale closures)
   useEffect(() => {
     if (!isEnabled) {
       stopMovement();
       keysPressed.current.clear();
       return;
     }
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    
-    // Clear keys when window loses focus
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    // On window blur, stop movement
     const handleBlur = () => {
       keysPressed.current.clear();
       stopMovement();
+      onMovement({ x: 0, y: 0 });
     };
-    window.addEventListener('blur', handleBlur);
-
+    window.addEventListener("blur", handleBlur);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleBlur);
       stopMovement();
     };
-  }, [handleKeyDown, handleKeyUp, isEnabled, stopMovement]);
+  }, [isEnabled, handleKeyDown, handleKeyUp, stopMovement, onMovement]);
+
+  // Stop if disabled
+  useEffect(() => {
+    if (!isEnabled) {
+      stopMovement();
+      keysPressed.current.clear();
+      onMovement({ x: 0, y: 0 });
+    }
+  }, [isEnabled, stopMovement, onMovement]);
 }
