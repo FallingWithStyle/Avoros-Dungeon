@@ -139,58 +139,35 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Handle room changes and entity management
   useEffect(() => {
-    if (!roomData?.room) return;
+    if (roomData?.room && roomData.room.id !== lastRoomId) {
+      console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, reinitializing player`);
+      setLastRoomId(roomData.room.id);
 
-    const currentRoomId = roomData.room.id;
-    const shouldClearEntities = lastRoomId !== null && lastRoomId !== currentRoomId;
+      // Clear existing entities except player
+      const currentState = combatSystem.getState();
 
-    if (shouldClearEntities) {
-      refetchTacticalData();
-      const currentEntities = combatSystem.getState().entities;
-      currentEntities.forEach((entity) => {
-        combatSystem.removeEntity(entity.id);
+      // Clear all non-player entities
+      currentState.entities.forEach(entity => {
+        if (entity.id !== "player") {
+          combatSystem.removeEntity(entity.id);
+        }
       });
-    }
 
-    setLastRoomId(currentRoomId);
-    combatSystem.setCurrentRoomData(roomData.room);
+      // Determine entry position based on movement direction
+      const lastDirection = sessionStorage.getItem('lastMovementDirection') as any;
+      const entryPosition = combatSystem.getEntryPosition(lastDirection || 'south');
 
-    // Ensure player entity exists
-    const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
-    if (!existingPlayer) {
-      const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
-      let entryPosition;
+      console.log(`Entry position for direction ${lastDirection}:`, entryPosition);
 
-      // When you move in a direction, you enter the new room from the OPPOSITE side
-      if (lastDirection === 'north') {
-        entryPosition = { x: 50, y: 90 }; // Enter from south when you moved north
-      } else if (lastDirection === 'south') {
-        entryPosition = { x: 50, y: 10 }; // Enter from north when you moved south
-      } else if (lastDirection === 'east') {
-        entryPosition = { x: 10, y: 50 }; // Enter from west when you moved east
-      } else if (lastDirection === 'west') {
-        entryPosition = { x: 90, y: 50 }; // Enter from east when you moved west
-      } else {
-        entryPosition = { x: 50, y: 50 }; // Default center position
-      }
-
-      const playerEntity: CombatEntity = {
-        id: "player",
+      // Initialize player with crawler data
+      combatSystem.initializePlayer(entryPosition, {
         name: crawler.name,
-        type: "player",
-        hp: crawler.health || 100,
-        maxHp: crawler.maxHealth || 100,
-        attack: 20,
-        defense: 10,
-        speed: 15,
-        position: entryPosition,
-        facing: lastDirection || 'south',
-      };
+        serial: crawler.serial
+      });
 
-      combatSystem.addEntity(playerEntity);
       combatSystem.selectEntity("player");
     }
-  }, [roomData?.room, lastRoomId, crawler, refetchTacticalData]);
+  }, [roomData?.room, lastRoomId, crawler]);
 
   // Grid event handlers
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {

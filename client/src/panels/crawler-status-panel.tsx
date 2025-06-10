@@ -104,9 +104,9 @@ export default function CrawlerStatusPanel({ crawler }: CrawlerStatusPanelProps)
           {/* Inventory Info */}
           <div className="pt-2 border-t border-game-border">
             <div className="flex justify-between">
-              <span className="text-sm text-slate-300">Credits</span>
-              <span className="text-sm font-mono text-green-400">
-                {crawler.credits}
+              <span className="text-sm text-slate-300">Gold</span>
+              <span className="text-sm font-mono text-yellow-400">
+                {crawler.gold}
               </span>
             </div>
           </div>

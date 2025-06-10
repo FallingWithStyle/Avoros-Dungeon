@@ -178,9 +178,9 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-400">Credits</span>
+            <span className="text-sm text-slate-400">Gold</span>
             <span className="text-sm font-mono text-yellow-400">
-              {crawler.credits.toLocaleString()}
+              {crawler.gold.toLocaleString()}
             </span>
           </div>
         </div>

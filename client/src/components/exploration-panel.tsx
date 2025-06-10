@@ -275,9 +275,9 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm">Credits</span>
+            <span className="text-sm">Gold</span>
           </div>
-          <span className="text-sm font-mono text-yellow-400">{crawler.credits.toLocaleString()}</span>
+          <span className="text-sm font-mono text-yellow-400">{crawler.gold.toLocaleString()}</span>
         </div>
 
         <div className="flex items-center justify-between">

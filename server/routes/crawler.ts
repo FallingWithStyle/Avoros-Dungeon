@@ -101,7 +101,7 @@ export function registerCrawlerRoutes(app: Express) {
         maxEnergy: stats.maxEnergy,
         experience: 0,
         level: 1,
-        credits: 0,
+        gold: 0,
         isAlive: true,
       });
 

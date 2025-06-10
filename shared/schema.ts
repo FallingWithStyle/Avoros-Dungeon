@@ -200,7 +200,7 @@ export const crawlers = pgTable("crawlers", {
   power: integer("power").notNull(),
   maxPower: integer("max_power").notNull(),
   luck: integer("luck").notNull(),
-  credits: integer("credits").default(0).notNull(),
+  gold: integer("gold").default(0).notNull(),
   experience: integer("experience").default(0).notNull(),
   energy: integer("energy").default(100).notNull(),
   maxEnergy: integer("max_energy").default(100).notNull(),
