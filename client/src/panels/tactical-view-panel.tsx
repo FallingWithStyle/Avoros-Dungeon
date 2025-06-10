@@ -29,8 +29,6 @@ interface ContextMenu {
 }
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
-  const { toast } = useToast();
-
   // Use the extracted tactical data hooks
   const {
     roomData,
@@ -42,24 +40,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchExploredRooms
   } = useTacticalData(crawler);
 
-  // Local state
-  const [combatState, setCombatState] = useState(combatSystem.getState());
-  const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
-  const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
-  const [lastRoomId, setLastRoomId] = useState<number | null>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
-  const [activeActionMode, setActiveActionMode] = useState<{
-    type: "move" | "attack" | "ability";
-    actionId: string;
-    actionName: string;
-  } | null>(null);
-
-  const contextMenuRef = useRef<HTMLDivElement>(null);
-
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
 
-  // Early return if no data
+  // Early return if no data - MUST be after all hooks
   if (!effectiveTacticalData || !effectiveTacticalData.room) {
     console.log("No effective tactical data available");
     return (
@@ -87,6 +71,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </Card>
     );
   }
+
+  const { toast } = useToast();
+
+  // Local state
+  const [combatState, setCombatState] = useState(combatSystem.getState());
+  const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
+  const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
+  const [lastRoomId, setLastRoomId] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [activeActionMode, setActiveActionMode] = useState<{
+    type: "move" | "attack" | "ability";
+    actionId: string;
+    actionName: string;
+  } | null>(null);
+
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Room movement handler
   const handleRoomMovement = useCallback(async (direction: string) => {
