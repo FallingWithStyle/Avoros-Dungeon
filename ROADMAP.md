@@ -1,4 +1,3 @@
-
 # Avoros Dungeon - Development Roadmap
 
 ## Project Vision
@@ -198,6 +197,29 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 - [ ] **Limited-Time Content** - Exclusive temporary dungeons
 - [ ] **Community Challenges** - Server-wide cooperative goals
 - [ ] **Player-Generated Content** - User-created dungeons and quests
+
+### Phase 5: Advanced Features
+
+### Currency Exchange System
+- Dynamic exchange rate between sponsor credits and crawler gold
+- Rate varies based on dungeon floor depth and market conditions
+- Exchange transactions with fees and limits
+- Economic balancing between sponsor and crawler economies
+
+### Multi-floor Management
+- Floor-specific challenges and themes
+- Boss encounters on specific floors
+- Floor progression rewards and penalties
+
+### Enhanced Social Features
+- Guild/team formation
+- Shared objectives and rewards
+- Cross-player interactions and trading
+
+### Advanced Combat Mechanics
+- Combo systems and special abilities
+- Environmental interactions in combat
+- Status effects and buff/debuff systems
 
 ## Success Metrics by Phase
 

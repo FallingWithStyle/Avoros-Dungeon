@@ -35,7 +35,7 @@ export default function Leaderboard() {
       <div className="p-4 border-b border-game-border">
         <h3 className="text-lg font-semibold text-white flex items-center">
           <i className="fas fa-trophy mr-2"></i>
-          Top Crawlers
+          Top Crawlers by Gold
         </h3>
       </div>
 

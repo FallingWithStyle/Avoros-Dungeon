@@ -48,7 +48,7 @@ export class CrawlerStorage extends BaseStorage {
         maxEnergy: crawlerData.maxEnergy,
         experience: crawlerData.experience,
         level: crawlerData.level,
-        credits: crawlerData.credits,
+        gold: crawlerData.gold,
         isAlive: crawlerData.isAlive,
       })
       .returning();
