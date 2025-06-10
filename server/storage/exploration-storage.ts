@@ -14,7 +14,7 @@ import {
   type RoomConnection,
   type CrawlerWithDetails,
 } from "@shared/schema";
-import { eq, desc, and, inArray, not, sql } from "drizzle-orm";
+import { eq, desc, and, inArray, not, sql, gte, lte } from "drizzle-orm";
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 
@@ -473,16 +473,30 @@ export class ExplorationStorage extends BaseStorage {
       return [];
     }
 
-    // Get nearby rooms using proper SQL parameter binding
-    const nearbyRooms = await db
+    // Get nearby rooms using safe range filtering
+    const minX = currentRoom.x - scanRange;
+    const maxX = currentRoom.x + scanRange;
+    const minY = currentRoom.y - scanRange;
+    const maxY = currentRoom.y + scanRange;
+
+    const allRoomsInRange = await db
       .select()
       .from(rooms)
       .where(
         and(
           eq(rooms.floorId, currentRoom.floorId),
-          sql`ABS(${rooms.x} - ${currentRoom.x}) + ABS(${rooms.y} - ${currentRoom.y}) <= ${scanRange}`
+          gte(rooms.x, minX),
+          lte(rooms.x, maxX),
+          gte(rooms.y, minY),
+          lte(rooms.y, maxY)
         )
       );
+
+    // Filter by Manhattan distance (more precise than bounding box)
+    const nearbyRooms = allRoomsInRange.filter(room => {
+      const manhattanDistance = Math.abs(room.x - currentRoom.x) + Math.abs(room.y - currentRoom.y);
+      return manhattanDistance <= scanRange;
+    });
 
     // Get visited rooms to mark them as explored
     const visitedRooms = await db
