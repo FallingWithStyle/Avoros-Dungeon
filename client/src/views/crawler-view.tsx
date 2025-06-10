@@ -181,4 +181,3 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     </div>
   );
 }
-```Analysis: The task is to remove energy cost for room movement and related debug tools.
