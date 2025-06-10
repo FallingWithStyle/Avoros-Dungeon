@@ -73,7 +73,7 @@ export function useTacticalMovement({
     }
 
     // Normal movement within the room
-    const speed = 1; // Precise grid movement
+    const speed = 5; // Increased movement speed for better visibility
     const newX = playerEntity.position.x + dir.x * speed;
     const newY = playerEntity.position.y + dir.y * speed;
 
