@@ -1,3 +1,9 @@
+/**
+ * File: version.ts
+ * Responsibility: Application version management and build information tracking
+ * Notes: Provides version constants and utilities for displaying app version in UI
+ */
+
 // App version - update this when making releases or significant changes
 export const APP_VERSION = "0.4.1";
 

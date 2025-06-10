@@ -1,3 +1,9 @@
+/**
+ * File: errorToast.tsx
+ * Responsibility: Error toast notification utility with copy-to-clipboard functionality
+ * Notes: Provides standardized error display with user-friendly copy buttons for debugging
+ */
+
 import { toast } from "@/hooks/use-toast";
 
 export function showErrorToast(title: string, error: Error | string) {
