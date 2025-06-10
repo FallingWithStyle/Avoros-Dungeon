@@ -82,13 +82,25 @@ export function useKeyboardMovement({
       ];
       if (!valid.includes(key)) return;
       event.preventDefault();
-      const before = keysPressed.current.size;
+      
+      // Prevent key repeat
+      if (keysPressed.current.has(key)) return;
+      
+      const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
-      if (before === 0 && keysPressed.current.size > 0) {
+      
+      // Start movement if this is the first key, or send immediate movement if already moving
+      if (wasEmpty) {
         startMovement();
+      } else {
+        // Send immediate movement update for key combinations
+        const vector = calculateMovementVector();
+        if (vector.x !== 0 || vector.y !== 0) {
+          onMovement(vector);
+        }
       }
     },
-    [isEnabled, startMovement],
+    [isEnabled, startMovement, calculateMovementVector, onMovement],
   );
 
   // Keyup: stop movement loop if this was the last key released
