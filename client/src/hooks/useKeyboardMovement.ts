@@ -43,15 +43,19 @@ export function useKeyboardMovement({
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
     
+    console.log('🎮 Starting keyboard movement interval');
+    
     // Send immediate movement
     const initialVector = calculateMovementVector();
     if (initialVector.x !== 0 || initialVector.y !== 0) {
+      console.log('🎮 Initial movement:', initialVector);
       onMovement(initialVector);
     }
     
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
       if (vector.x !== 0 || vector.y !== 0) {
+        console.log('🎮 Interval movement:', vector, 'Keys:', Array.from(keysPressed.current));
         onMovement(vector);
       }
     }, 50);
@@ -89,6 +93,8 @@ export function useKeyboardMovement({
       const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
       
+      console.log('🎮 Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+      
       // Start movement if this is the first key, or send immediate movement if already moving
       if (wasEmpty) {
         startMovement();
@@ -96,6 +102,7 @@ export function useKeyboardMovement({
         // Send immediate movement update for key combinations
         const vector = calculateMovementVector();
         if (vector.x !== 0 || vector.y !== 0) {
+          console.log('🎮 Combination movement:', vector);
           onMovement(vector);
         }
       }
@@ -122,10 +129,9 @@ export function useKeyboardMovement({
       keysPressed.current.delete(key);
       if (keysPressed.current.size === 0) {
         stopMovement();
-        onMovement({ x: 0, y: 0 }); // Ensure stop
       }
     },
-    [isEnabled, stopMovement, onMovement],
+    [isEnabled, stopMovement],
   );
 
   // Proper effect setup (no stale closures)
