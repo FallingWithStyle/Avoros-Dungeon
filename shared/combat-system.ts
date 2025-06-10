@@ -356,11 +356,12 @@ export class CombatSystem {
   }
 
   getEntryPosition(direction: string): Position {
+    // When you move in a direction, you enter the new room from the OPPOSITE side
     switch (direction) {
-      case 'north': return { x: 50, y: 10 };
-      case 'south': return { x: 50, y: 90 };
-      case 'east': return { x: 90, y: 50 };
-      case 'west': return { x: 10, y: 50 };
+      case 'north': return { x: 50, y: 90 }; // Enter from south when you moved north
+      case 'south': return { x: 50, y: 10 }; // Enter from north when you moved south
+      case 'east': return { x: 10, y: 50 }; // Enter from west when you moved east
+      case 'west': return { x: 90, y: 50 }; // Enter from east when you moved west
       default: return { x: 50, y: 50 };
     }
   }

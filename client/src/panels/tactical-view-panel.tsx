@@ -18,6 +18,7 @@ import TacticalHotbar from "./tactical-view/tactical-hotbar";
 import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
 import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
+import { queryClient } from "@/lib/queryClient";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -88,6 +89,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
           refetchTacticalData();
           refetchExploredRooms();
+          
+          // Invalidate minimap queries to update dungeon map
+          queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
 
           // Clear entities for room transition
           const currentEntities = combatSystem.getState().entities;
@@ -153,7 +158,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const existingPlayer = combatSystem.getState().entities.find(e => e.id === "player");
     if (!existingPlayer) {
       const lastDirection = sessionStorage.getItem("lastMovementDirection") as 'north' | 'south' | 'east' | 'west' | null;
-      const entryPosition = lastDirection ? combatSystem.getEntryPosition(lastDirection) : { x: 50, y: 50 };
+      let entryPosition;
+
+      // When you move in a direction, you enter the new room from the OPPOSITE side
+      if (lastDirection === 'north') {
+        entryPosition = { x: 50, y: 90 }; // Enter from south when you moved north
+      } else if (lastDirection === 'south') {
+        entryPosition = { x: 50, y: 10 }; // Enter from north when you moved south
+      } else if (lastDirection === 'east') {
+        entryPosition = { x: 10, y: 50 }; // Enter from west when you moved east
+      } else if (lastDirection === 'west') {
+        entryPosition = { x: 90, y: 50 }; // Enter from east when you moved west
+      } else {
+        entryPosition = { x: 50, y: 50 }; // Default center position
+      }
 
       const playerEntity: CombatEntity = {
         id: "player",
