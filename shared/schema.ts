@@ -1,3 +1,8 @@
+/**
+ * File: schema.ts
+ * Responsibility: Defines complete database schema, types, and relations for the dungeon crawler game
+ * Notes: Contains all table definitions, Zod validation schemas, and TypeScript types for database entities
+ */
 import {
   pgTable,
   text,

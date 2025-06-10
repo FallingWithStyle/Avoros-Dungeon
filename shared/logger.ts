@@ -1,3 +1,8 @@
+/**
+ * File: logger.ts
+ * Responsibility: Provides centralized error logging functionality to dungeon-error.log file
+ * Notes: Handles string, Error objects, and general error formatting with fallback to console
+ */
 import { appendFile } from "fs/promises";
 
 /**
