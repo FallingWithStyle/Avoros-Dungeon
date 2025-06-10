@@ -41,12 +41,18 @@ export function useKeyboardMovement({
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
 
+    // Immediately send first movement
+    const initialVector = calculateMovementVector();
+    if (initialVector.x !== 0 || initialVector.y !== 0) {
+      onMovement(initialVector);
+    }
+
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
       if (vector.x !== 0 || vector.y !== 0) {
         onMovement(vector);
       }
-    }, 50); // 20 FPS movement updates
+    }, 50); // 20 FPS continuous movement updates
   }, [calculateMovementVector, onMovement]);
 
   const stopMovement = useCallback(() => {

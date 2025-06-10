@@ -35,7 +35,7 @@ export function useTacticalMovement({
     // Skip if no movement
     if (direction.x === 0 && direction.y === 0) return;
 
-    const speed = 3; // Reduced speed for smoother continuous movement
+    const speed = isMobile ? 2 : 4; // Faster speed for desktop, slower for mobile  
     const newX = playerEntity.position.x + direction.x * speed;
     const newY = playerEntity.position.y + direction.y * speed;
 
@@ -91,3 +91,4 @@ export function useTacticalMovement({
     handleMovement, // Export the movement handler for other hooks to use
   };
 }
+```
