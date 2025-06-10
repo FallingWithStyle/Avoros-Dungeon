@@ -122,6 +122,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { containerRef } = useSwipeMovement({
     onRoomMovement: handleRoomMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
+    combatState,
     isEnabled: true
   });
 
