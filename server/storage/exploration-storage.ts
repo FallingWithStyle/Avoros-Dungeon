@@ -629,32 +629,12 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async clearExplorationData(crawlerId: number): Promise<void> {
-    await this.redis.del(`crawler:${crawlerId}:exploration`);
-    await this.redis.del(`crawler:${crawlerId}:scanned_rooms`);
-    await this.redis.del(`crawler:${crawlerId}:visited_rooms`);
-  }
-
-  async getScannedRooms(crawlerId: number): Promise<any[]> {
     try {
-      // Use redisService instead of this.redis which may be undefined
-      const { redisService } = await import('../lib/redis-service');
-      const data = await redisService.get(`crawler:${crawlerId}:scanned_rooms`);
-      return data ? JSON.parse(data) : [];
+      await redisService.del(`crawler:${crawlerId}:exploration`);
+      await redisService.del(`crawler:${crawlerId}:scanned_rooms`);
+      await redisService.del(`crawler:${crawlerId}:visited_rooms`);
     } catch (error) {
-      console.error('Error getting scanned rooms:', error);
-      return [];
-    }
-  }
-
-  async getExploredRooms(crawlerId: number): Promise<any[]> {
-    try {
-      // Use redisService instead of this.redis which may be undefined
-      const { redisService } = await import('../lib/redis-service');
-      const data = await redisService.get(`crawler:${crawlerId}:visited_rooms`);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Error getting explored rooms:', error);
-      return [];
+      console.log('Failed to clear exploration data from cache');
     }
   }
 }
