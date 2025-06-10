@@ -1,3 +1,10 @@
+/**
+ * File: factionsData.ts
+ * Responsibility: Static faction data definitions for database seeding
+ * Notes: Contains faction names, territories, colors, and characteristics for dungeon areas
+ */
+
+// Faction data for seeding the database
 export const factionsData = [
   {
     name: "Iron Legion",
