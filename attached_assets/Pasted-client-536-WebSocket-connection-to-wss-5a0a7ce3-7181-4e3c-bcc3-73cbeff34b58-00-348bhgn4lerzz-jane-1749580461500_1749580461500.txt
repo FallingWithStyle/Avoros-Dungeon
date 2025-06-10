@@ -1,0 +1,117 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=AtgQf_OdMvDb' failed: Error during WebSocket handshake: Unexpected response code: 400
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=AtgQf_OdMvDb' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=d5cda211:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+tactical-view-panel.tsx:289 No effective tactical data available
+tactical-view-panel.tsx:289 No effective tactical data available
+combat-system.ts:447 Combat system room data updated: Unknown
+combat-system.ts:447 Combat system room data updated: Unknown
+useSwipeMovement.ts:81 🎯 Touch start - virtual thumbstick active
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.069999847412106, y: 10.88000030517578} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.110000152587894, y: 12.260000305175781} facing: south
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.19330146977218, y: 15.258843563926622} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.19122027498884, y: 15.258900652255885} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.212571961260835, y: 18.258824668875864} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.20163695833412, y: 18.258882567652723} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.20668737916336, y: 21.25887831652462} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.20163695833412, y: 21.258882567652723} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.18255951727656, y: 24.25882190891326} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.16897956183877, y: 24.258704811462202} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.114689811064665, y: 27.258213541731358} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 50.07960041784803, y: 27.25737307731281} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.98315912830132, y: 30.255822522888067} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.975916019179344, y: 30.255580799514977} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.866744615459034, y: 33.25359374221715} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.86029955778901, y: 33.253352110648564} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.74250422744293, y: 36.251038595281116} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.74392129953366, y: 36.251093944263566} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.62697516463907, y: 39.248813677916665} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.64000424603048, y: 39.24929361172923} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.53740270699585, y: 42.24753858574115} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.52673495063781, y: 42.24715452690212} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.41114925203384, y: 45.24492702432053} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.40801609802484, y: 45.2448045788652} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.28448465058487, y: 48.24226016343912} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.271303488509204, y: 48.24168790365437} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.12676561952461, y: 51.23820401481236} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 49.12844244844099, y: 51.23828442691716} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.98770405060162, y: 54.23498139247334} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.9896082528669, y: 54.23507021608183} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.86402930084236, y: 57.23244071817336} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.866734051684595, y: 57.232552814977744} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.74911517978821, y: 60.230246228416455} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.75325066423737, y: 60.23040563337519} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.64187239424736, y: 63.2283374006064} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.642895954325994, y: 63.228375252634265} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.52528022638072, y: 66.22606878942884} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.526217833650946, y: 66.22610542997774} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.41693087402756, y: 69.22411416252945} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.42393810200405, y: 69.2243613991195} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.32563032139369, y: 72.22275022985367} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.32703057502025, y: 72.22279581247822} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.22065489195556, y: 75.22090925497044} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.221344795039485, y: 75.22093365385741} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.13072682269482, y: 78.21956473871732} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.14249621258692, y: 78.21989729169053} facing: east
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.08869316999995, y: 81.21941479165754} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 48.07578677701396, y: 81.21915550851774} facing: west
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:225 Queued action move for entity player
+combat-system.ts:368 moveEntityToPosition: player -> {x: 47.993806861577056, y: 84.21803518157316} facing: south
+combat-system.ts:368 moveEntityToPosition: player -> {x: 47.99727964100159, y: 84.21812810419033} facing: east
+useSwipeMovement.ts:101 🎯 Touch end - stopping virtual thumbstick

@@ -1,10 +1,20 @@
-
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.9.0] - 2025-01-10
+### Added
+- 360-degree movement system supporting all directions, not just cardinal
+- Continuous movement input handling with reduced cooldowns
+- Virtual thumbstick behavior for mobile touch controls  
+- Multi-key combination support for keyboard (diagonal movement)
+- Normalized diagonal movement to prevent speed advantages
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Changed
+- Movement execution time reduced from 50ms to 10ms for smoother gameplay
+- Keyboard movement now supports WASD combinations for diagonal movement
+- Mobile swipe converted to thumbstick-style continuous directional input
+- Movement speed reduced to 3 for smoother continuous movement
+
+## [Unreleased]
 
 ## [0.8.3] - 2025-06-10
 

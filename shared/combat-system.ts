@@ -70,7 +70,7 @@ const DEFAULT_ACTIONS: CombatAction[] = [
     name: "Move",
     type: "move",
     cooldown: 0,
-    executionTime: 50,
+    executionTime: 10,
     description: "Move to a target location",
   },
   {
