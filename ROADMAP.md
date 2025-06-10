@@ -166,13 +166,25 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 - [ ] **Special Rituals** - Member-only ceremonies and events
 - [ ] **Competing Organizations** - Mutually exclusive faction membership
 
-#### v1.2.1 - PvP Systems (Week 59-60)
+#### v1.2.1 - Fan Following System (Week 59-60)
+- [ ] **Crawler Fan Base** - Players can become fans and follow specific crawlers
+- [ ] **Fan Dashboard** - Track followed crawlers' progress and achievements
+- [ ] **Loot Box Voting** - Fans vote on loot box contents for their followed crawlers
+- [ ] **Fan Leaderboards** - Rankings for most influential and active fans
+
+#### v1.2.2 - Betting & Predictions (Week 61-62)
+- [ ] **Crawler Performance Betting** - Wager on crawler survival and success
+- [ ] **Dungeon Outcome Predictions** - Bet on specific room outcomes and discoveries
+- [ ] **Fan Boon System** - Send beneficial items and buffs to followed crawlers
+- [ ] **Betting Marketplace** - P2P betting with odds and payouts
+
+#### v1.2.3 - PvP Systems (Week 63-64)
 - [ ] **Structured Dueling** - Formal PvP combat with rankings
 - [ ] **Territory Control PvP** - Competitive area control mechanics
 - [ ] **Seasonal Tournaments** - Regular competitive events
 - [ ] **PvP Rewards** - Exclusive items and titles for competitors
 
-#### v1.2.2 - Advanced Progression (Week 61-62)
+#### v1.2.4 - Advanced Progression (Week 65-66)
 - [ ] **Prestige Systems** - Post-max-level progression options
 - [ ] **Cross-Character Legacy** - Account-wide benefits and unlocks
 - [ ] **Mastery Paths** - Specialized advancement tracks
@@ -180,19 +192,19 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 
 ### Phase 8: Platform & Community (Q4 2026)
 
-#### v2.0.0 - Platform Expansion (Week 63-66)
+#### v2.0.0 - Platform Expansion (Week 67-70)
 - [ ] **Mobile App Development** - Native mobile applications
 - [ ] **Cross-Platform Progression** - Shared progress across devices
 - [ ] **Mobile-Specific Features** - Touch-optimized controls and UI
 - [ ] **Cloud Save System** - Secure progress synchronization
 
-#### v2.0.1 - API & Integrations (Week 67-68)
+#### v2.0.1 - API & Integrations (Week 71-72)
 - [ ] **Public API** - Third-party tool development support
 - [ ] **Community Mod Support** - Player-created content system
 - [ ] **Streaming Platform Integration** - Twitch/YouTube connectivity
 - [ ] **Developer Documentation** - Comprehensive API guides
 
-#### v2.0.2 - Community Features (Week 69-70)
+#### v2.0.2 - Community Features (Week 73-74)
 - [ ] **Seasonal Events** - Major story-driven events
 - [ ] **Limited-Time Content** - Exclusive temporary dungeons
 - [ ] **Community Challenges** - Server-wide cooperative goals
@@ -260,6 +272,10 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 - **Quest Variety**: All quest types attempted by 40%+ of players
 
 ### Phase 7 (Advanced Features)
+- **Fan Engagement**: 70% of players follow at least one crawler
+- **Voting Participation**: 500+ loot box votes cast weekly
+- **Betting Activity**: 1000+ active bets placed per week
+- **Fan Boon Usage**: 80% of active crawlers receive fan support
 - **PvP Participation**: 100+ active PvP participants weekly
 - **Exclusive Organization Membership**: 200+ players in elite groups
 - **Advanced Progression**: 50+ players reach prestige levels
