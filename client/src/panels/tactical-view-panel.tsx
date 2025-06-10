@@ -29,6 +29,9 @@ interface ContextMenu {
 }
 
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
+  // ALL HOOKS MUST BE CALLED FIRST - NO CONDITIONAL CALLING
+  const { toast } = useToast();
+
   // Use the extracted tactical data hooks
   const {
     roomData,
@@ -40,41 +43,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchExploredRooms
   } = useTacticalData(crawler);
 
-  // Use fallback data when tactical data is unavailable
-  const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
-
-  // Early return if no data - MUST be after all hooks
-  if (!effectiveTacticalData || !effectiveTacticalData.room) {
-    console.log("No effective tactical data available");
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Tactical View - No Data
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-red-400">No room data available</span>
-              <br />
-              <button 
-                onClick={() => window.location.reload()} 
-                className="text-blue-400 underline text-xs mt-2"
-              >
-                Reload page
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const { toast } = useToast();
-
-  // Local state
+  // Local state - ALL HOOKS BEFORE ANY CONDITIONAL LOGIC
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
   const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
@@ -88,18 +57,21 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
+  // Use fallback data when tactical data is unavailable
+  const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
+
   // Room movement handler
   const handleRoomMovement = useCallback(async (direction: string) => {
     if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
-      console.log(`Cannot move ${direction} - not available or no crawler`);
+      console.log("Cannot move " + direction + " - not available or no crawler");
       return;
     }
 
     try {
-      console.log(`Moving crawler ${crawler.id} ${direction} to new room`);
+      console.log("Moving crawler " + crawler.id + " " + direction + " to new room");
       sessionStorage.setItem('lastMovementDirection', direction);
 
-      const response = await fetch(`/api/crawlers/${crawler.id}/move`, {
+      const response = await fetch("/api/crawlers/" + crawler.id + "/move", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction, debugEnergyDisabled: false }),
@@ -108,7 +80,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          console.log(`Successfully moved ${direction} to ${result.newRoom?.name}`);
+          console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
           refetchTactical();
           refetchExploredRooms();
 
@@ -120,7 +92,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       }
     } catch (error) {
-      console.error(`Failed to move ${direction}:`, error);
+      console.error("Failed to move " + direction + ":", error);
       toast({
         title: "Movement failed",
         description: "Could not move in that direction.",
@@ -208,7 +180,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (selectedEntity?.id === "player") {
       const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
       if (success) {
-        console.log(`Player moving to ${x.toFixed(1)}, ${y.toFixed(1)}`);
+        console.log("Player moving to " + x.toFixed(1) + ", " + y.toFixed(1));
       }
     }
   }, [effectiveTacticalData?.room]);
@@ -260,7 +232,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.stopPropagation();
     toast({
       title: "Loot Interaction",
-      description: `Interacting with ${item.name}`,
+      description: "Interacting with " + item.name,
     });
   }, [toast]);
 
@@ -284,7 +256,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const success = combatSystem.queueAction(selectedEntity.id, action, targetEntityId);
     if (success) {
-      console.log(`Queued ${action.name} from ${selectedEntity.name} to ${targetEntityId}`);
+      console.log("Queued " + action.name + " from " + selectedEntity.name + " to " + targetEntityId);
     }
     setContextMenu(null);
   }, []);
@@ -297,7 +269,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     const success = combatSystem.queueMoveAction(selectedEntity.id, position);
     if (success) {
-      console.log(`${selectedEntity.name} moving to ${position.x.toFixed(1)}, ${position.y.toFixed(1)}`);
+      console.log(selectedEntity.name + " moving to " + position.x.toFixed(1) + ", " + position.y.toFixed(1));
     }
     setContextMenu(null);
   }, []);
@@ -326,6 +298,36 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [contextMenu]);
+
+  // CONDITIONAL RENDERING ONLY AFTER ALL HOOKS HAVE BEEN CALLED
+  // Early return if no data - MUST be after all hooks
+  if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.log("No effective tactical data available");
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - No Data
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">No room data available</span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-xs mt-2"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Process tactical data for grid
   const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};

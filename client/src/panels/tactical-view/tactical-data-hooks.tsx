@@ -15,15 +15,18 @@ interface TacticalDataHooks {
 export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks {
   const { toast } = useToast();
 
+  // Ensure crawler.id is consistent to prevent hook ordering issues
+  const crawlerId = crawler.id;
+
   // Fetch current room data for navigation
   const { data: roomData, isLoading } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    queryKey: ["/api/crawlers/" + crawlerId + "/current-room"],
     refetchInterval: 5000, // Reduced from 2000ms to 5000ms
   });
 
   // Fetch explored rooms for map refresh - only on demand, not polling
   const { refetch: refetchExploredRooms } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
+    queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"],
     enabled: false, // Only fetch when manually called
     staleTime: 300000, // 5 minutes
     retry: false,
@@ -36,7 +39,7 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
     error: tacticalError, 
     refetch: refetchTactical 
   } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
+    queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"],
     refetchInterval: (data, error) => {
       if (error) return false;
       return 3000; // Reduced from 2000ms to 3000ms
@@ -58,15 +61,15 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
     onError: (error) => {
       console.error("=== TACTICAL DATA FETCH ERROR ===");
       console.error("Error details:", error);
-      if (!sessionStorage.getItem(`tactical-error-${crawler.id}`)) {
-        sessionStorage.setItem(`tactical-error-${crawler.id}`, 'true');
+      if (!sessionStorage.getItem("tactical-error-" + crawlerId)) {
+        sessionStorage.setItem("tactical-error-" + crawlerId, 'true');
         toast({
           title: "Tactical Data Error",
           description: "Using fallback tactical data. Some features may be limited.",
           variant: "destructive",
         });
         setTimeout(() => {
-          sessionStorage.removeItem(`tactical-error-${crawler.id}`);
+          sessionStorage.removeItem("tactical-error-" + crawlerId);
         }, 30000);
       }
     },
@@ -74,7 +77,7 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
       console.log("=== TACTICAL DATA FETCH SUCCESS ===");
       console.log("Room:", data.room?.name);
       console.log("Entities:", data.tacticalEntities?.length || 0);
-      sessionStorage.removeItem(`tactical-error-${crawler.id}`);
+      sessionStorage.removeItem("tactical-error-" + crawlerId);
     },
   });
 
