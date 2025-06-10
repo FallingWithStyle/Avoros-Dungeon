@@ -136,7 +136,6 @@ export class ExplorationStorage extends BaseStorage {
   async moveToRoom(
     crawlerId: number,
     direction: string,
-    debugEnergyDisabled?: boolean,
   ): Promise<{ success: boolean; newRoom?: Room; error?: string }> {
     console.log(`=== MOVE TO ROOM ===`);
     console.log(`Crawler ID: ${crawlerId}, Direction: ${direction}`);
@@ -206,25 +205,6 @@ export class ExplorationStorage extends BaseStorage {
     }
 
     console.log(`Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`);
-
-    const previousVisit = await db
-      .select()
-      .from(crawlerPositions)
-      .where(
-        and(
-          eq(crawlerPositions.crawlerId, crawlerId),
-          eq(crawlerPositions.roomId, connection.toRoomId),
-        ),
-      )
-      .limit(1);
-
-    let energyCost = 10;
-    if (previousVisit.length > 0) {
-      energyCost = 5;
-      console.log(`Revisiting room - reduced energy cost: ${energyCost}`);
-    } else {
-      console.log(`First visit to room - standard energy cost: ${energyCost}`);
-    }
 
     console.log(`Inserting new crawler position...`);
     await db.insert(crawlerPositions).values({
@@ -629,32 +609,12 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async clearExplorationData(crawlerId: number): Promise<void> {
-    await this.redis.del(`crawler:${crawlerId}:exploration`);
-    await this.redis.del(`crawler:${crawlerId}:scanned_rooms`);
-    await this.redis.del(`crawler:${crawlerId}:visited_rooms`);
-  }
-
-  async getScannedRooms(crawlerId: number): Promise<any[]> {
     try {
-      // Use redisService instead of this.redis which may be undefined
-      const { redisService } = await import('../lib/redis-service');
-      const data = await redisService.get(`crawler:${crawlerId}:scanned_rooms`);
-      return data ? JSON.parse(data) : [];
+      await redisService.del(`crawler:${crawlerId}:exploration`);
+      await redisService.del(`crawler:${crawlerId}:scanned_rooms`);
+      await redisService.del(`crawler:${crawlerId}:visited_rooms`);
     } catch (error) {
-      console.error('Error getting scanned rooms:', error);
-      return [];
-    }
-  }
-
-  async getExploredRooms(crawlerId: number): Promise<any[]> {
-    try {
-      // Use redisService instead of this.redis which may be undefined
-      const { redisService } = await import('../lib/redis-service');
-      const data = await redisService.get(`crawler:${crawlerId}:visited_rooms`);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Error getting explored rooms:', error);
-      return [];
+      console.log('Failed to clear exploration data from cache');
     }
   }
 }

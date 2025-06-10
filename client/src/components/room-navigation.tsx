@@ -85,7 +85,7 @@ function FactionBadge({
   if (!factionId || !faction) {
     return <Badge color="#6B7280">Neutral</Badge>;
   }
-  return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
+  return <Badge color={faction.color || "#6B7280"]}>{faction.name}</Badge>;
 }
 
 function EnvironmentBadge({ environment }: { environment: string }) {
@@ -243,6 +243,10 @@ export default function RoomNavigation({
 
   const { room, availableDirections, playersInRoom } = roomData;
 
+    const canMove = (direction: string): boolean => {
+    return roomData?.availableDirections.includes(direction) || false;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -304,7 +308,7 @@ export default function RoomNavigation({
                   variant="outline"
                   size="sm"
                   onClick={() => handleMove(direction)}
-                  disabled={moveMutation.isPending || crawler.energy < 10}
+                  disabled={!canMove(direction) || isMoving}
                   className="justify-start"
                 >
                   {getDirectionIcon(direction)}
@@ -320,11 +324,6 @@ export default function RoomNavigation({
             </div>
           )}
 
-          {crawler.energy < 10 && (
-            <p className="text-xs text-red-600">
-              Need at least 10 energy to move
-            </p>
-          )}
         </div>
 
         {playersInRoom.length > 1 && (

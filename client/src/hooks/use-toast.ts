@@ -4,7 +4,7 @@
  * Notes: Provides toast queue management with automatic dismissal and action support
  */
 
-import * * React from "react"
+import * as React from "react"
 
 import type {
   ToastActionElement,
