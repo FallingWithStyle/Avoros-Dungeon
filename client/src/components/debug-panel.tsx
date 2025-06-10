@@ -152,7 +152,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
       });
       toast({
         title: "Crawler Healed",
-        description: "Health and energy restored to maximum.",
+        description: "Health, energy, and power restored to maximum.",
       });
     },
     onError: (error) => {
