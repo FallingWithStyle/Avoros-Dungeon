@@ -91,4 +91,3 @@ export function useTacticalMovement({
     handleMovement, // Export the movement handler for other hooks to use
   };
 }
-```
