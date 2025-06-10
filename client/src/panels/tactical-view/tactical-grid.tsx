@@ -7,6 +7,7 @@
 import React from 'react';
 import { CombatEntity } from '@shared/combat-system';
 import { Skull, Users, Gem, Sword, Shield } from 'lucide-react';
+import { getAvatarUrl } from '@/lib/avatarUtils';
 
 interface TacticalGridProps {
   roomBackground: string;
@@ -253,8 +254,8 @@ function TacticalEntity({
   return (
     <div
       className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
-        entity.isSelected ? "ring-2 ring-yellow-400 ring-offset-1" : ""
-      } ${isHovered ? "scale-110 z-30" : ""} transition-all duration-200`}
+        isHovered ? "scale-110 z-30" : ""
+      } transition-all duration-200`}
       style={{ left: `${entity.position.x}%`, top: `${entity.position.y}%` }}
       onClick={(e) => onClick(entity.id, e)}
       onContextMenu={(e) => onRightClick(entity.id, e)}
@@ -265,7 +266,7 @@ function TacticalEntity({
       <div
         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative ${
           entity.type === "player"
-            ? "bg-blue-500 border-blue-300 animate-pulse shadow-blue-400/50"
+            ? "border-blue-300 animate-pulse shadow-blue-400/50"
             : entity.type === "hostile"
               ? "bg-red-600 border-red-400 shadow-red-400/30"
               : entity.type === "neutral"
@@ -274,7 +275,11 @@ function TacticalEntity({
         } ${isHovered ? "shadow-xl" : ""}`}
       >
         {entity.type === "player" && (
-          <div className="absolute inset-1 bg-blue-300 rounded-full"></div>
+          <img 
+            src={getAvatarUrl(entity.name, entity.id)} 
+            alt={entity.name}
+            className="w-full h-full rounded-full object-cover"
+          />
         )}
         {entity.type === "hostile" && (
           <Skull className="w-3 h-3 text-white" />
