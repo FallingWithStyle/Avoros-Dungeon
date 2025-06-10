@@ -214,26 +214,43 @@ class RedisService {
   }
 
   async getContentData(key: string): Promise<any> {
-    if (!this.redis || !this.isConnected) {
-      return null;
-    }
-
     try {
       const data = await this.redis.get(key);
-      return data ? JSON.parse(data as string) : null;
+      if (!data) return null;
+
+      // Check if data is already an object (shouldn't happen, but handle it)
+      if (typeof data === 'object') {
+        console.warn('Redis returned object instead of string, clearing key:', key);
+        await this.redis.del(key);
+        return null;
+      }
+
+      // Check if data starts with "[object" which indicates corrupted data
+      if (typeof data === 'string' && data.startsWith('[object')) {
+        console.warn('Corrupted data in Redis, clearing key:', key);
+        await this.redis.del(key);
+        return null;
+      }
+
+      return JSON.parse(data);
     } catch (error) {
       console.error('Redis get error:', error);
+      // Clear the corrupted key
+      try {
+        await this.redis.del(key);
+        console.log('Cleared corrupted Redis key:', key);
+      } catch (deleteError) {
+        console.error('Failed to clear corrupted key:', deleteError);
+      }
       return null;
     }
   }
 
-  async setContentData(key: string, data: any, ttl: number = 3600): Promise<void> {
-    if (!this.redis || !this.isConnected) {
-      return;
-    }
-
+  async setContentData(key: string, value: any, ttl: number = 3600): Promise<void> {
     try {
-      await this.redis.setex(key, ttl, JSON.stringify(data));
+      // Ensure value is properly serialized
+      const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
+      await this.redis.setex(key, ttl, serializedValue);
     } catch (error) {
       console.error('Redis set error:', error);
     }
