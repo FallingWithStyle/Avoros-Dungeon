@@ -1,178 +1,71 @@
 /**
  * File: useSwipeMovement.ts
- * Responsibility: Touch gesture detection for mobile tactical movement
- * Notes: Converts swipe gestures to tactical positioning movement like WASD, with room transitions only at boundaries
+ * Responsibility: Handle touch/swipe input for tactical movement on mobile devices
+ * Notes: Detects swipe direction from touch input and passes to movement handler
  */
 
-import { useEffect, useRef } from 'react';
-import { useIsMobile } from './use-mobile';
-import { combatSystem } from '@shared/combat-system';
+import { useCallback, useRef, useEffect } from 'react';
 
-interface SwipeMovementProps {
-  onRoomMovement: (direction: string) => void;
-  availableDirections: string[];
-  combatState: any;
-  isEnabled?: boolean;
-}
-
-interface TouchPosition {
-  x: number;
-  y: number;
+interface UseSwipeMovementProps {
+  onMovement: (direction: string) => void;
+  isEnabled: boolean;
 }
 
 export function useSwipeMovement({
-  onRoomMovement,
-  availableDirections,
-  combatState,
-  isEnabled = true
-}: SwipeMovementProps) {
-  const isMobile = useIsMobile();
-  const touchStartRef = useRef<TouchPosition | null>(null);
-  const touchEndRef = useRef<TouchPosition | null>(null);
+  onMovement,
+  isEnabled
+}: UseSwipeMovementProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    if (!isMobile || !isEnabled || !containerRef.current) {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (!isEnabled || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, [isEnabled]);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!isEnabled || !touchStartRef.current || e.changedTouches.length !== 1) return;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    const minSwipeDistance = 30;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (absX < minSwipeDistance && absY < minSwipeDistance) {
+      touchStartRef.current = null;
       return;
     }
 
+    let direction = '';
+    if (absX > absY) {
+      direction = deltaX > 0 ? 'east' : 'west';
+    } else {
+      direction = deltaY > 0 ? 'south' : 'north';
+    }
+
+    onMovement(direction);
+    touchStartRef.current = null;
+  }, [isEnabled, onMovement]);
+
+  useEffect(() => {
+    if (!isEnabled) return;
+
     const container = containerRef.current;
+    if (!container) return;
 
-    const handleTouchStart = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      touchStartRef.current = {
-        x: touch.clientX,
-        y: touch.clientY
-      };
-      touchEndRef.current = null;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      // Prevent scrolling while swiping
-      event.preventDefault();
-
-      const touch = event.touches[0];
-      touchEndRef.current = {
-        x: touch.clientX,
-        y: touch.clientY
-      };
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      event.preventDefault();
-
-      if (!touchStartRef.current || !touchEndRef.current) {
-        return;
-      }
-
-      const deltaX = touchEndRef.current.x - touchStartRef.current.x;
-      const deltaY = touchEndRef.current.y - touchStartRef.current.y;
-
-      // Minimum swipe distance (in pixels)
-      const minSwipeDistance = 30;
-
-      // Check if the swipe is long enough
-      const swipeDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      if (swipeDistance < minSwipeDistance) {
-        return;
-      }
-
-      // Find player entity
-      const playerEntity = combatState.entities.find(e => e.id === "player");
-      if (!playerEntity) {
-        console.log("No player entity found for mobile movement");
-        return;
-      }
-
-      // Determine the primary direction
-      const absDeltaX = Math.abs(deltaX);
-      const absDeltaY = Math.abs(deltaY);
-
-      let direction = { x: 0, y: 0 };
-      let directionName = "";
-
-      if (absDeltaX > absDeltaY) {
-        // Horizontal swipe
-        if (deltaX > 0) {
-          direction.x = 1;
-          directionName = "east";
-        } else {
-          direction.x = -1;
-          directionName = "west";
-        }
-      } else {
-        // Vertical swipe - swipe up (negative deltaY) = north, swipe down (positive deltaY) = south
-        if (deltaY < 0) {
-          direction.y = -1;
-          directionName = "north";
-        } else {
-          direction.y = 1;
-          directionName = "south";
-        }
-      }
-
-      const speed = 12; // Slightly faster for mobile swipe responsiveness
-      const newX = playerEntity.position.x + direction.x * speed;
-      const newY = playerEntity.position.y + direction.y * speed;
-
-      // Check if we can move to the new position for room transitions
-      const canMoveInDirection = availableDirections.includes(directionName);
-
-      // Simple boundary checks
-      let finalX = newX;
-      let finalY = newY;
-
-      // Check for room transitions (when hitting boundaries with available exits)
-      if (newX < 5 && canMoveInDirection && directionName === "west") {
-        console.log("🎯 Mobile swipe: Moving to new room via west");
-        onRoomMovement("west");
-        return;
-      }
-      if (newX > 95 && canMoveInDirection && directionName === "east") {
-        console.log("🎯 Mobile swipe: Moving to new room via east");
-        onRoomMovement("east");
-        return;
-      }
-      if (newY < 5 && canMoveInDirection && directionName === "north") {
-        console.log("🎯 Mobile swipe: Moving to new room via north");
-        onRoomMovement("north");
-        return;
-      }
-      if (newY > 95 && canMoveInDirection && directionName === "south") {
-        console.log("🎯 Mobile swipe: Moving to new room via south");
-        onRoomMovement("south");
-        return;
-      }
-
-      // Normal boundary clamping (keep player in room)
-      finalX = Math.max(5, Math.min(95, newX));
-      finalY = Math.max(5, Math.min(95, newY));
-
-      // Only move if position actually changed
-      if (Math.abs(finalX - playerEntity.position.x) > 0.1 || Math.abs(finalY - playerEntity.position.y) > 0.1) {
-        console.log(`🎯 Mobile swipe: Moving within room ${directionName} to (${finalX.toFixed(1)}, ${finalY.toFixed(1)})`);
-        combatSystem.queueMoveAction(playerEntity.id, { x: finalX, y: finalY });
-      }
-
-      // Reset touch positions
-      touchStartRef.current = null;
-      touchEndRef.current = null;
-    };
-
-    // Add touch event listeners
     container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
     container.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobile, isEnabled, availableDirections, onRoomMovement, combatState.entities]);
+  }, [handleTouchStart, handleTouchEnd, isEnabled]);
 
-  return {
-    containerRef,
-    isMobile
-  };
+  return { containerRef };
 }
