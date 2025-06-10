@@ -63,6 +63,9 @@ export function useKeyboardMovement({
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
       event.preventDefault();
       
+      // Prevent key repeat events from restarting movement
+      if (event.repeat) return;
+      
       const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
       
