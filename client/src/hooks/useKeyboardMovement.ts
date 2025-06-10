@@ -42,9 +42,18 @@ export function useKeyboardMovement({
   // Start the interval to send movement
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
+    
+    // Send immediate movement
+    const initialVector = calculateMovementVector();
+    if (initialVector.x !== 0 || initialVector.y !== 0) {
+      onMovement(initialVector);
+    }
+    
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
-      onMovement(vector);
+      if (vector.x !== 0 || vector.y !== 0) {
+        onMovement(vector);
+      }
     }, 50);
   }, [calculateMovementVector, onMovement]);
 
