@@ -1,4 +1,11 @@
-
+/**
+ * File: redis-status-indicator.tsx
+ * Responsibility: Displays the current Redis connection status with visual indicators
+ */
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { useRedisStatus } from "@/hooks/useRedisStatus";
+import { Database, AlertTriangle, CheckCircle } from "lucide-react";
 import { useState } from 'react';
 import { useRedisStatus } from '@/hooks/useRedisStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';

@@ -1,3 +1,8 @@
+/**
+ * File: dungeon-map.tsx
+ * Responsibility: Renders an interactive dungeon floor map showing explored rooms and crawler movement
+ * Notes: Handles map navigation, room display, and crawler positioning
+ */
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

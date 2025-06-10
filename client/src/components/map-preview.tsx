@@ -1,3 +1,7 @@
+/**
+ * File: map-preview.tsx
+ * Responsibility: Shows a small preview of the dungeon floor with basic room information
+ */
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Gem, Home, Skull } from "lucide-react";

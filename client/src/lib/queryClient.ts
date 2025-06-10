@@ -1,3 +1,7 @@
+/**
+ * File: queryClient.ts
+ * Responsibility: Configures and exports the React Query client for API data management
+ */
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {

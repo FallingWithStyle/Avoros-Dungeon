@@ -1,4 +1,7 @@
-
+/**
+ * File: user-storage.ts
+ * Responsibility: Storage operations for user accounts and authentication data
+ */
 import { db } from "../db";
 import { users, type UpsertUser, type User } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";

@@ -1,5 +1,13 @@
+/**
+ * File: generate-dungeon.ts
+ * Responsibility: Script for generating complete dungeon floor layouts with rooms and connections
+ * Notes: Creates procedural dungeon structures and saves them to the database
+ */
+import { db } from "../server/db";
+import { eq, and, sql } from "drizzle-orm";
+import { rooms, connections, floors } from "@shared/schema";
+import * as fs from 'fs';
 import { generateFullDungeon } from "../client/src/features/dungeon/generation/dungeon-generator.js";
-import { db } from "../server/db.js";
 import { factions as factionsTable } from "../shared/schema.js";
 
 // Define the Faction type directly to avoid import issues

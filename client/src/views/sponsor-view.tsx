@@ -1,3 +1,8 @@
+/**
+ * File: sponsor-view.tsx
+ * Responsibility: Corporation sponsor overview showing all sponsored crawlers and statistics
+ * Notes: Displays sponsor dashboard with crawler management and corporation metrics
+ */
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";

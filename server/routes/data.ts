@@ -1,5 +1,8 @@
-
-import type { Express } from "express";
+/**
+ * File: data.ts
+ * Responsibility: General data API routes for game content, factions, and static information
+ */
+import express from "express";
 import { storage } from "../storage";
 
 export function registerDataRoutes(app: Express) {

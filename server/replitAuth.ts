@@ -1,3 +1,7 @@
+/**
+ * File: replitAuth.ts
+ * Responsibility: Replit authentication integration and user session management
+ */
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 

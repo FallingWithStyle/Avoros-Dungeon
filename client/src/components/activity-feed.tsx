@@ -1,3 +1,7 @@
+/**
+ * File: activity-feed.tsx
+ * Responsibility: Displays recent system-wide activity and events in a scrollable feed
+ */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ActivityWithDetails } from "@shared/schema";

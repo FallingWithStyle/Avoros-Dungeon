@@ -1,4 +1,7 @@
-
+/**
+ * File: useRedisStatus.ts
+ * Responsibility: Monitors Redis server connection status and provides status information
+ */
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 

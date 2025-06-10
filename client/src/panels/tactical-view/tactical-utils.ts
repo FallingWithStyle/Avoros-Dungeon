@@ -1,3 +1,9 @@
+/**
+ * File: tactical-utils.ts
+ * Responsibility: Utility functions for tactical view data processing and fallback generation
+ * Notes: Handles room background determination and tactical data transformation
+ */
+import type { CombatEntity } from "@shared/combat-system";
 
 // Helper function to convert grid coordinates to percentage
 export const gridToPercentage = (

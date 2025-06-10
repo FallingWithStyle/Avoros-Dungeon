@@ -1,3 +1,8 @@
+/**
+ * File: exploration-panel.tsx
+ * Responsibility: Provides room exploration interface and movement controls for crawlers
+ * Notes: Handles room navigation, displays current location, and manages exploration actions
+ */
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +45,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   const { data: crawlers } = useQuery({
     queryKey: ["/api/crawlers"],
   });
-  
+
   // Use the live crawler data if available, otherwise fall back to the prop
   const crawler = crawlers?.find((c: CrawlerWithDetails) => c.id === initialCrawler.id) || initialCrawler;
 
@@ -77,7 +82,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       queryClient.refetchQueries({ queryKey: ["/api/crawlers"] });
-      
+
       // Show result with gain/loss summary
       const summaryText = result.results?.summary ? ` (${result.results.summary})` : '';
       toast({
@@ -85,7 +90,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
         description: result.message + summaryText,
         variant: result.success ? "default" : "destructive",
       });
-      
+
       setCurrentEncounter(null);
     },
     onError: (error) => {
@@ -104,7 +109,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
       });
       return;
     }
-    
+
     setIsExploring(true);
     exploreMutation.mutate();
   };
@@ -132,7 +137,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
   return (
     <div className="space-y-4">
       <RoomNavigation crawler={crawler} />
-      
+
       <Card className="bg-game-surface border-game-border">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -150,7 +155,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
             </Badge>
           </div>
         </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Status Bars */}
         <div className="space-y-3">
@@ -170,7 +175,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               }}
             />
           </div>
-          
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -237,7 +242,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               </div>
               <span className="text-sm font-mono text-cyan-400">{crawler.memory}</span>
             </div>
-            
+
             {/* Debug: Show hidden luck stat */}
             <div className="flex items-center justify-between p-2 bg-red-900/20 border border-red-600/30 rounded">
               <div className="flex items-center gap-2">
@@ -312,14 +317,14 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               )}
             </Button>
           )}
-          
+
           {crawler.energy < 10 && (
             <p className="text-sm text-amber-400 text-center">
               <Clock className="w-3 h-3 inline mr-1" />
               Energy regenerates over time
             </p>
           )}
-          
+
           {!crawler.isAlive && (
             <p className="text-sm text-red-400 text-center">
               This crawler has died and cannot explore
@@ -336,13 +341,13 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-slate-200 mb-3">{currentEncounter.title}</h2>
                 <p className="text-slate-400 leading-relaxed mb-6 text-base">{currentEncounter.description}</p>
-                
+
                 <div className="space-y-3">
                   {currentEncounter.choices?.map((choice: any) => {
                     const meetsRequirements = Object.entries(choice.requirements || {}).every(
                       ([stat, required]) => crawler[stat] >= required
                     );
-                    
+
                     const getRiskColor = (risk: string) => {
                       switch (risk) {
                         case 'high': return 'text-red-400';
@@ -360,7 +365,7 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
                         default: return 'Safe choice';
                       }
                     };
-                    
+
                     return (
                       <Button
                         key={choice.id}
@@ -379,11 +384,11 @@ export default function ExplorationPanel({ crawler: initialCrawler }: Exploratio
                             {choice.riskLevel === 'none' ? 'Safe' : `${choice.riskLevel} risk`}
                           </span>
                         </div>
-                        
+
                         <div className="text-xs text-slate-500 mb-2">
                           {getRiskDescription(choice.riskLevel)}
                         </div>
-                        
+
                         {Object.keys(choice.requirements || {}).length > 0 && (
                           <div className="w-full">
                             <div className="text-xs text-slate-400 mb-1">Requirements:</div>

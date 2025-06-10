@@ -1,5 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+/**
+ * File: not-found.tsx
+ * Responsibility: 404 error page for handling invalid routes
+ */
+import React from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, MapPin } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -19,3 +26,4 @@ export default function NotFound() {
     </div>
   );
 }
+`

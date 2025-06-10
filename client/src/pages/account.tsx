@@ -1,3 +1,7 @@
+/**
+ * File: account.tsx
+ * Responsibility: User account management page showing profile information and settings
+ */
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -42,7 +46,7 @@ export default function Account() {
   return (
     <div className="bg-gradient-to-b from-gray-900 via-amber-950/20 to-orange-900/30 p-4">
       <div className="container mx-auto max-w-4xl space-y-6">
-        
+
         {/* Account Overview */}
         <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
           <CardHeader>
@@ -55,7 +59,7 @@ export default function Account() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            
+
             {/* Profile Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -64,7 +68,7 @@ export default function Account() {
                   <span className="text-amber-200/70">Email:</span>
                   <span className="text-amber-200">{user?.email || "Not provided"}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-amber-400" />
                   <span className="text-amber-200/70">Member since:</span>
@@ -73,7 +77,7 @@ export default function Account() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <CreditCard className="w-4 h-4 text-amber-400" />
@@ -82,7 +86,7 @@ export default function Account() {
                     {user?.credits || 0}
                   </Badge>
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-sm">
                   <Settings className="w-4 h-4 text-amber-400" />
                   <span className="text-amber-200/70">Active Crawler:</span>
@@ -104,7 +108,7 @@ export default function Account() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            
+
             <Button 
               variant="outline" 
               className="w-full border-amber-600/30 text-amber-300 hover:bg-amber-600/10"
@@ -113,7 +117,7 @@ export default function Account() {
               <Settings className="w-4 h-4 mr-2" />
               Profile Settings (Coming Soon)
             </Button>
-            
+
             <Button 
               variant="outline" 
               className="w-full border-amber-600/30 text-amber-300 hover:bg-amber-600/10"
@@ -122,7 +126,7 @@ export default function Account() {
               <CreditCard className="w-4 h-4 mr-2" />
               Purchase Credits (Coming Soon)
             </Button>
-            
+
             <Button 
               variant="outline" 
               className="w-full border-red-600/30 text-red-300 hover:bg-red-600/10"
@@ -130,7 +134,7 @@ export default function Account() {
             >
               Logout
             </Button>
-            
+
           </CardContent>
         </Card>
 

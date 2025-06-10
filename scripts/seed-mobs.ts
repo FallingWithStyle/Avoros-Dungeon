@@ -1,3 +1,7 @@
+/**
+ * File: seed-mobs.ts
+ * Responsibility: Seeds the database with mob definitions for dungeon encounters
+ */
 import { db } from "../server/db";
 import { mobTypes } from "../shared/schema";
 

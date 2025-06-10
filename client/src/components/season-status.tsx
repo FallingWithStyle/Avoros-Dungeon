@@ -1,3 +1,7 @@
+/**
+ * File: season-status.tsx
+ * Responsibility: Displays current season information and competition status
+ */
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -77,7 +81,7 @@ export default function SeasonStatus() {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <h4 className="font-semibold text-slate-200">Secondary Sponsorships</h4>
             <div className="flex items-center gap-2">

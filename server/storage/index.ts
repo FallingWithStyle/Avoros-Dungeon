@@ -1,3 +1,7 @@
+/**
+ * File: index.ts
+ * Responsibility: Exports all storage classes for centralized import access
+ */
 import { BaseStorage } from "./base-storage";
 import { CrawlerStorage } from "./crawler-storage";
 import { UserStorage } from "./user-storage";

@@ -1,3 +1,8 @@
+/**
+ * File: exploration-storage.ts
+ * Responsibility: Storage operations for dungeon exploration including rooms, connections, and floor data
+ * Notes: Manages room generation, exploration tracking, and spatial relationships
+ */
 import { db } from "../db";
 import {
   rooms,

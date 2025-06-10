@@ -1,3 +1,7 @@
+/**
+ * File: vite.ts
+ * Responsibility: Vite development server integration and static file serving configuration
+ */
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";

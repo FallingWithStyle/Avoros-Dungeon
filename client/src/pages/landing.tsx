@@ -1,5 +1,14 @@
+/**
+ * File: landing.tsx
+ * Responsibility: Landing page for unauthenticated users with game introduction and login
+ */
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { login } from "@/lib/authUtils";
+import { Zap, Shield, Users, Trophy, Map, Brain, LogIn } from "lucide-react";
 
 export default function Landing() {
   return (
@@ -74,7 +83,7 @@ export default function Landing() {
             <i className="fas fa-building mr-2"></i>
             Establish Your Corporation
           </Button>
-          
+
           <p className="text-sm text-slate-400">
             Register your corporation and begin crawler operations
           </p>
@@ -102,7 +111,7 @@ export default function Landing() {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-xl font-semibold text-white mb-4">Crawler Classes</h3>
             <ul className="space-y-2 text-slate-300">

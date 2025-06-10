@@ -1,3 +1,8 @@
+/**
+ * File: room-navigation.tsx
+ * Responsibility: Provides directional movement controls for crawler room navigation
+ * Notes: Shows available exits and handles movement between rooms
+ */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -79,7 +84,7 @@ function FactionBadge({
   if (!factionId || !faction) {
     return <Badge color="#6B7280">Neutral</Badge>;
   }
-  return <Badge color={faction.color || "#6B7280"}>{faction.name}</Badge>;
+  return <Badge color={faction.color || "#6B7280"]}>{faction.name}</Badge>;
 }
 
 function EnvironmentBadge({ environment }: { environment: string }) {

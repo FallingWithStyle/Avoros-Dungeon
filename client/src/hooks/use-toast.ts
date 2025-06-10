@@ -1,3 +1,7 @@
+/**
+ * File: use-toast.ts
+ * Responsibility: Provides toast notification functionality throughout the application
+ */
 import * as React from "react"
 
 import type {

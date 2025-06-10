@@ -1,3 +1,8 @@
+/**
+ * File: useSwipeMovement.ts
+ * Responsibility: Handles touch/swipe gestures for mobile navigation between rooms
+ * Notes: Provides mobile-friendly movement controls for the tactical view
+ */
 import { useEffect, useRef } from 'react';
 import { useIsMobile } from './use-mobile';
 

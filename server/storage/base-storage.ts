@@ -1,3 +1,12 @@
+/**
+ * File: base-storage.ts
+ * Responsibility: Base storage class with common database operations and Redis caching
+ * Notes: Provides shared functionality for all storage service classes
+ */
+import { desc, eq, and, sql } from "drizzle-orm";
+import { redisService } from "../lib/redis-service";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import * as schema from "@shared/schema";
 
 export interface IBaseStorage {
   // Common database operations that all storage modules might need
@@ -19,7 +28,7 @@ export abstract class BaseStorage {
   setRedisService(redisService: any) {
     this.redisService = redisService;
   }
-  
+
   // Dependency injection methods
   setUserStorage(storage: any) {
     this.userStorage = storage;
@@ -36,7 +45,7 @@ export abstract class BaseStorage {
   setCorporationStorage(storage: any) {
     this.corporationStorage = storage;
   }
-  
+
   // Shared utility methods can go here
   protected shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];

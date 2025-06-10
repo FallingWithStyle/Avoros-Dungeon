@@ -1,4 +1,9 @@
-import { useState } from "react";
+/**
+ * File: crawler-selection.tsx
+ * Responsibility: Handles crawler selection and creation interface for new users
+ * Notes: Shows available crawlers and allows users to create or select their first crawler
+ */
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

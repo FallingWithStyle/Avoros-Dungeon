@@ -1,3 +1,7 @@
+/**
+ * File: header-navigation.tsx
+ * Responsibility: Provides main navigation controls and user account management in the header
+ */
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,14 +76,14 @@ export default function HeaderNavigation() {
             <div className="text-xl font-bold text-amber-300">
               Avavor
             </div>
-            
+
             {/* Desktop Navigation - Hidden on mobile */}
             <nav className="hidden md:flex items-center space-x-1 ml-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
                 const disabled = item.disabled;
-                
+
                 if (disabled) {
                   return (
                     <Button
@@ -95,7 +99,7 @@ export default function HeaderNavigation() {
                     </Button>
                   );
                 }
-                
+
                 return (
                   <Link key={item.href} href={item.href}>
                     <Button
@@ -125,14 +129,14 @@ export default function HeaderNavigation() {
                 {user.credits || 0}
               </Badge>
             )}
-            
+
             {/* Desktop User Info */}
             {user && (
               <div className="hidden lg:flex items-center space-x-2 text-sm text-amber-200/70">
                 <span>{user.email || "Anonymous"}</span>
               </div>
             )}
-            
+
             {/* Mobile Menu Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -155,7 +159,7 @@ export default function HeaderNavigation() {
                     const Icon = item.icon;
                     const active = isActive(item.href);
                     const disabled = item.disabled;
-                    
+
                     if (disabled) {
                       return (
                         <DropdownMenuItem key={item.label} disabled>
@@ -164,7 +168,7 @@ export default function HeaderNavigation() {
                         </DropdownMenuItem>
                       );
                     }
-                    
+
                     return (
                       <Link key={item.href} href={item.href}>
                         <DropdownMenuItem className={active ? "bg-amber-600/10" : ""}>
@@ -176,7 +180,7 @@ export default function HeaderNavigation() {
                   })}
                   <DropdownMenuSeparator />
                 </div>
-                
+
                 {/* User Info for Mobile */}
                 {user && (
                   <div className="md:hidden">
@@ -187,7 +191,7 @@ export default function HeaderNavigation() {
                     <DropdownMenuSeparator />
                   </div>
                 )}
-                
+
                 {/* Logout */}
                 <Link href="/api/logout">
                   <DropdownMenuItem>

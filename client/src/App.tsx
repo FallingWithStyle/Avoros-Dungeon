@@ -1,3 +1,8 @@
+/**
+ * File: App.tsx
+ * Responsibility: Main application root component that sets up routing, query client, and global providers
+ * Notes: Entry point for the React application with all route definitions
+ */
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";

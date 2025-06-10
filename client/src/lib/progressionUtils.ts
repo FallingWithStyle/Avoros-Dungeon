@@ -1,4 +1,8 @@
 /**
+ * File: progressionUtils.ts
+ * Responsibility: Calculates experience points, level progression, and advancement mechanics
+ */
+/**
  * Returns the experience required to reach the next level.
  * @param level - The current level of the crawler (integer).
  * @param baseExp - The base EXP factor for scaling (default: 100).
@@ -7,4 +11,3 @@
 export function expRequired(level: number, baseExp: number = 100): number {
   return Math.round(baseExp * Math.log(level + 1));
 }
-
