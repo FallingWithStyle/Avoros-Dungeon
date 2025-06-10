@@ -1,3 +1,8 @@
+/**
+ * File: seed-mobs.ts
+ * Responsibility: Seeds database with basic mob type data for dungeon encounters
+ * Notes: Populates mob types table with creature stats and descriptions for combat system
+ */
 import { db } from "../server/db";
 import { mobTypes } from "../shared/schema";
 

@@ -1,3 +1,8 @@
+/**
+ * File: generate-dungeon.ts
+ * Responsibility: Script to generate complete 10-floor dungeon layout with faction territories
+ * Notes: Fetches factions from database and creates all dungeon rooms, connections, and faction assignments
+ */
 import { generateFullDungeon } from "../client/src/features/dungeon/generation/dungeon-generator.js";
 import { db } from "../server/db.js";
 import { factions as factionsTable } from "../shared/schema.js";
