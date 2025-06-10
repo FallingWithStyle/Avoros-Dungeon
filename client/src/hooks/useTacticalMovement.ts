@@ -94,12 +94,6 @@ export function useTacticalMovement({
     isEnabled: !isMobile // Disable on mobile to prevent conflicts
   });
 
-  // Set up swipe movement for mobile
-  const { containerRef } = useSwipeMovement({
-    onMovement: handleMovement,
-    isEnabled: isMobile
-  });
-
   // TODO: Add controller movement hook here when implemented
   // useControllerMovement({
   //   onMovement: handleMovement,
@@ -107,8 +101,8 @@ export function useTacticalMovement({
   // });
 
   return {
-    containerRef, // For mobile swipe detection
     isMobile,
+    handleMovement, // Export the movement handler for other hooks to use
     // TODO: Add controller connection status when implemented
     // isControllerConnected: false
   };

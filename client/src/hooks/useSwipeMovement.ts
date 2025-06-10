@@ -7,12 +7,16 @@
 import { useCallback, useRef, useEffect } from 'react';
 
 interface UseSwipeMovementProps {
-  onMovement: (direction: string) => void;
+  onRoomMovement: (direction: string) => void;
+  availableDirections: string[];
+  combatState: any;
   isEnabled: boolean;
 }
 
 export function useSwipeMovement({
-  onMovement,
+  onRoomMovement,
+  availableDirections,
+  combatState,
   isEnabled
 }: UseSwipeMovementProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +24,8 @@ export function useSwipeMovement({
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (!isEnabled || e.touches.length !== 1) return;
-
+    
+    console.log('🎯 Touch start detected');
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
   }, [isEnabled]);
@@ -48,10 +53,18 @@ export function useSwipeMovement({
       direction = deltaY > 0 ? 'south' : 'north';
     }
 
-    console.log(`🎯 Swipe detected: ${direction}`);
-    onMovement(direction);
+    console.log(`🎯 Swipe detected: ${direction}, available: ${availableDirections.join(',')}`);
+    
+    // Check if this direction is available for room movement
+    if (availableDirections.includes(direction)) {
+      console.log(`🎯 Calling room movement for direction: ${direction}`);
+      onRoomMovement(direction);
+    } else {
+      console.log(`🎯 Direction ${direction} not available for room movement`);
+    }
+    
     touchStartRef.current = null;
-  }, [isEnabled, onMovement]);
+  }, [isEnabled, onRoomMovement, availableDirections]);
 
   useEffect(() => {
     if (!isEnabled) return;

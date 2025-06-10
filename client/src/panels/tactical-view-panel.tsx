@@ -112,7 +112,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
   // Use tactical movement hook
-  useTacticalMovement({
+  const { isMobile, handleMovement } = useTacticalMovement({
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement
@@ -123,7 +123,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     onRoomMovement: handleRoomMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
     combatState,
-    isEnabled: true
+    isEnabled: isMobile
   });
 
   // Subscribe to combat system updates
