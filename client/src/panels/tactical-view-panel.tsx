@@ -1,17 +1,18 @@
+
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
-import { useEffect, useState, useRef, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useTacticalMovement } from "@/hooks/useTacticalMovement";
-import { useSwipeMovement } from '../hooks/useSwipeMovement';
+import { useSwipeMovement } from "@/hooks/useSwipeMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
 import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
-import { generateFallbackTacticalData } from "./tactical-view/tactical-utils";
+import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -60,6 +61,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Early return if no data
   if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.log("No effective tactical data available");
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -410,21 +412,4 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       </CardContent>
     </Card>
   );
-}
-
-// Helper function to get room background type
-function getRoomBackgroundType(environment: string, type: string): string {
-  if (type === "entrance" || type === "exit") return "stone_chamber";
-  if (type === "treasure") return "golden_chamber";
-  if (type === "safe") return "peaceful_chamber";
-  if (type === "boss") return "dark_chamber";
-
-  switch (environment) {
-    case "outdoor":
-      return "forest_clearing";
-    case "underground":
-      return "dungeon_corridor";
-    default:
-      return "stone_chamber";
-  }
 }

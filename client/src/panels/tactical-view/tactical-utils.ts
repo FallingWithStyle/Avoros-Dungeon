@@ -48,6 +48,23 @@ export const getRoomBackgroundType = (environment: string, type: string): string
   }
 };
 
+// Helper function to get room background type
+export const getRoomBackgroundType = (environment: string, type: string): string => {
+  if (type === "entrance" || type === "exit") return "stone_chamber";
+  if (type === "treasure") return "golden_chamber";
+  if (type === "safe") return "peaceful_chamber";
+  if (type === "boss") return "dark_chamber";
+
+  switch (environment) {
+    case "outdoor":
+      return "forest_clearing";
+    case "underground":
+      return "dungeon_corridor";
+    default:
+      return "stone_chamber";
+  }
+};
+
 // Generate client-side fallback tactical data when server data is unavailable
 export const generateFallbackTacticalData = (roomData: any) => {
   if (!roomData?.room) return null;
