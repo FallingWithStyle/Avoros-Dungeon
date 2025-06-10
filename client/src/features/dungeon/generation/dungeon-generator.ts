@@ -1,3 +1,9 @@
+/**
+ * File: dungeon-generator.ts
+ * Responsibility: Generates complete dungeon floors with rooms, connections, and faction territories
+ * Notes: Creates 10-floor dungeons with themed rooms, procedural generation, and faction assignment based on influence
+ */
+
 import { db } from "../../../../../server/db.js";
 import {
   rooms,

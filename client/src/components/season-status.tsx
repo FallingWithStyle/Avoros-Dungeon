@@ -1,3 +1,9 @@
+/**
+ * File: season-status.tsx
+ * Responsibility: Displays current game season information and status
+ * Notes: Shows season name, description, and any seasonal events or modifiers
+ */
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

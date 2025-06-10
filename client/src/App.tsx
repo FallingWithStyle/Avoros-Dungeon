@@ -1,3 +1,9 @@
+/**
+ * File: App.tsx
+ * Responsibility: Main application component handling routing, authentication, and global providers
+ * Notes: Sets up React Query, tooltips, toasts, and conditional routing based on auth state
+ */
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";

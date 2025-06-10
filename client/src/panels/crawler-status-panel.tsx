@@ -1,3 +1,9 @@
+/**
+ * File: crawler-status-panel.tsx
+ * Responsibility: Displays crawler vitals, stats, and equipment in a comprehensive status overview
+ * Notes: Shows health, energy, power, experience bars, combat stats, and equipment slots
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";

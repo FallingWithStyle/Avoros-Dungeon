@@ -2,6 +2,12 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import { factions } from '../../../../shared/schema';
+/**
+ * File: seedFactions.ts
+ * Responsibility: Database seeding utility for populating faction data
+ * Notes: Inserts faction information into the database from factionsData definitions
+ */
+
 import { factionsData } from './factionsData';
 
 // Configure WebSocket for Node.js environment

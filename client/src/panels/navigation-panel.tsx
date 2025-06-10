@@ -1,4 +1,10 @@
 
+/**
+ * File: navigation-panel.tsx
+ * Responsibility: Wrapper component for room navigation controls
+ * Notes: Passes crawler data and energy settings to the RoomNavigation component
+ */
+
 import RoomNavigation from "@/components/room-navigation";
 import type { CrawlerWithDetails } from "@shared/schema";
 

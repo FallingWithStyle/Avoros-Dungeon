@@ -1,4 +1,9 @@
 
+/**
+ * File: data.ts
+ * Responsibility: Game data and reference information API routes
+ * Notes: Provides access to crawler classes, equipment, factions, and candidate generation
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 

@@ -1,3 +1,8 @@
+/**
+ * File: replitAuth.ts
+ * Responsibility: Replit authentication middleware and user management
+ * Notes: Handles JWT token verification, user creation/updates, and authentication middleware
+ */
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 

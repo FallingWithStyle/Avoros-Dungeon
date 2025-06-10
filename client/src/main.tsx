@@ -1,3 +1,9 @@
+/**
+ * File: main.tsx
+ * Responsibility: Application entry point with global error handlers and React DOM rendering
+ * Notes: Includes WebSocket error suppression and unhandled rejection handling for development
+ */
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'

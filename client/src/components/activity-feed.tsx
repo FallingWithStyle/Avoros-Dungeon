@@ -1,3 +1,9 @@
+/**
+ * File: activity-feed.tsx
+ * Responsibility: Displays a real-time feed of recent game activities across all crawlers
+ * Notes: Shows exploration, combat, and other significant events from all players
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ActivityWithDetails } from "@shared/schema";

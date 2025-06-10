@@ -1,3 +1,9 @@
+/**
+ * File: account.tsx
+ * Responsibility: User account management page displaying profile information, credits, and account settings
+ * Notes: Redirects to login if user is not authenticated, shows corporation status and account actions
+ */
+
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";

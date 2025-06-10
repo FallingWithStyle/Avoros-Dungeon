@@ -1,3 +1,9 @@
+/**
+ * File: debug-panel.tsx
+ * Responsibility: Development and testing tools for debugging game systems and data
+ * Notes: Provides Redis controls, system status, and other debugging utilities
+ */
+
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {

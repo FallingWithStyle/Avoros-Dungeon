@@ -1,3 +1,9 @@
+/**
+ * File: room-navigation.tsx
+ * Responsibility: Room-to-room movement controls and available direction display
+ * Notes: Handles directional movement between connected dungeon rooms
+ */
+
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";

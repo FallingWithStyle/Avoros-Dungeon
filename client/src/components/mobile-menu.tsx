@@ -1,3 +1,8 @@
+/**
+ * File: mobile-menu.tsx
+ * Responsibility: Mobile-optimized navigation menu with touch-friendly interface
+ * Notes: Provides collapsible navigation for smaller screens and mobile devices
+ */
 
 export default function MobileMenu() {
   const handleNavigation = (section: string) => {
@@ -18,7 +23,7 @@ export default function MobileMenu() {
           <i className="fas fa-crosshairs text-lg"></i>
           <span className="text-xs mt-1 truncate">Combat</span>
         </button>
-        
+
         <button
           onClick={() => handleNavigation('status')}
           className="flex flex-col items-center p-2 min-w-0 flex-1 text-green-400 hover:text-green-300 active:bg-green-400/10 rounded transition-colors"
@@ -26,7 +31,7 @@ export default function MobileMenu() {
           <i className="fas fa-heart text-lg"></i>
           <span className="text-xs mt-1 truncate">Status</span>
         </button>
-        
+
         <button
           onClick={() => {
             const mapDetails = document.querySelector('details:has([data-section="map"])');
@@ -37,7 +42,7 @@ export default function MobileMenu() {
           <i className="fas fa-map text-lg"></i>
           <span className="text-xs mt-1 truncate">Map</span>
         </button>
-        
+
         <button
           onClick={() => {
             const eventsDetails = document.querySelector('details:has([data-section="events"])');

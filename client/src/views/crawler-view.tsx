@@ -1,4 +1,10 @@
 
+/**
+ * File: crawler-view.tsx
+ * Responsibility: Main view for individual crawler management and real-time monitoring interface
+ * Notes: Displays tactical view, status panels, dungeon map, and events in a responsive layout for active crawler operations
+ */
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";

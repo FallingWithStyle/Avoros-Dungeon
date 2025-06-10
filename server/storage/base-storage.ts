@@ -1,3 +1,8 @@
+/**
+ * File: base-storage.ts
+ * Responsibility: Base storage class with common database operations and Redis integration
+ * Notes: Provides shared functionality for all storage modules including caching and error handling
+ */
 
 export interface IBaseStorage {
   // Common database operations that all storage modules might need
@@ -19,7 +24,7 @@ export abstract class BaseStorage {
   setRedisService(redisService: any) {
     this.redisService = redisService;
   }
-  
+
   // Dependency injection methods
   setUserStorage(storage: any) {
     this.userStorage = storage;
@@ -36,7 +41,7 @@ export abstract class BaseStorage {
   setCorporationStorage(storage: any) {
     this.corporationStorage = storage;
   }
-  
+
   // Shared utility methods can go here
   protected shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];

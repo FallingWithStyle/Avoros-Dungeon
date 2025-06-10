@@ -1,3 +1,8 @@
+/**
+ * File: events-system.ts
+ * Responsibility: Manages real-time room event tracking and broadcasting system
+ * Notes: Handles movement, combat, discovery, and death events with subscriber pattern for UI updates
+ */
 export type RoomEventType = 
   | "movement" 
   | "combat" 

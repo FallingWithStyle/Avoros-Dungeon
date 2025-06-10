@@ -3,6 +3,11 @@ import {
   tacticalPositions,
 } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
+/**
+ * File: tactical-storage.ts
+ * Responsibility: Tactical positioning and room entity management storage operations
+ * Notes: Manages tactical grid positions, entity placement, and room-based tactical data generation
+ */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 

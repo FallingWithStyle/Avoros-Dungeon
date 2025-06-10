@@ -1,4 +1,10 @@
 
+/**
+ * File: effects.ts
+ * Responsibility: Manages spell and equipment effects system with stat bonuses and duration tracking
+ * Notes: Defines effect types, calculates stat modifications, and handles effect lifecycle management
+ */
+
 export interface Effect {
   id: string;
   name: string;

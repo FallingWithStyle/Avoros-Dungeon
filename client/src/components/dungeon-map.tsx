@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+/**
+ * File: dungeon-map.tsx
+ * Responsibility: Renders the interactive dungeon floor map with room navigation
+ * Notes: Displays explored rooms, current position, and handles map-based movement
+ */
+
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -13,6 +13,11 @@ import {
   startingEquipment,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
+/**
+ * File: content-storage.ts
+ * Responsibility: Game content and reference data storage operations
+ * Notes: Manages crawler classes, equipment, factions, and other static game content
+ */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 

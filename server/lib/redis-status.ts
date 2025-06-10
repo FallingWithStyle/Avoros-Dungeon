@@ -1,5 +1,10 @@
 
-export class RedisStatus {
+export /**
+ * File: redis-status.ts
+ * Responsibility: Redis connection health monitoring and status tracking
+ * Notes: Provides singleton service to check Redis availability and connection status
+ */
+class RedisStatus {
   private static instance: RedisStatus;
   private isRedisAvailable = false;
   private lastCheckTime = 0;

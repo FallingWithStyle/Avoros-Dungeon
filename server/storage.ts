@@ -1,3 +1,8 @@
+/**
+ * File: storage.ts
+ * Responsibility: Main storage interface and legacy compatibility layer
+ * Notes: Re-exports the modular storage system and maintains backward compatibility
+ */
 import {
   users,
   crawlers,

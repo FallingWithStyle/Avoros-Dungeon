@@ -1,4 +1,9 @@
 
+/**
+ * File: seed-generation-content.ts
+ * Responsibility: Seeds database with name generation data and starting equipment for crawler creation
+ * Notes: Populates corporation names, human names, competencies, and contextual starting equipment tables
+ */
 import { db } from "../server/db";
 import {
   corporationPrefixes,

@@ -1,4 +1,9 @@
 
+/**
+ * File: season.ts
+ * Responsibility: Season management, activities, and leaderboard API routes
+ * Notes: Handles season information, player activities, crawler leaderboards, and marketplace data
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

@@ -1,3 +1,9 @@
+/**
+ * File: map-panel.tsx
+ * Responsibility: Wrapper component that renders the dungeon map for a given crawler
+ * Notes: Simple container that passes crawler data to the DungeonMap component
+ */
+
 import React from "react";
 import DungeonMap from "@/components/dungeon-map";
 import { CrawlerWithDetails } from "@shared/schema";

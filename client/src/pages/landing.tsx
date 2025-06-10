@@ -1,3 +1,9 @@
+/**
+ * File: landing.tsx
+ * Responsibility: Landing page for unauthenticated users showcasing game features and encouraging registration
+ * Notes: Displays game overview, features, crawler classes, and call-to-action for establishing a corporation
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 

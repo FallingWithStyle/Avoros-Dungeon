@@ -1,3 +1,8 @@
+/**
+ * File: db.ts
+ * Responsibility: Database connection setup and Drizzle ORM configuration
+ * Notes: Configures Neon PostgreSQL connection with WebSocket support and exports the database client
+ */
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";

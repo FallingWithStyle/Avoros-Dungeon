@@ -1,4 +1,9 @@
 
+/**
+ * File: auth.ts
+ * Responsibility: User authentication and profile management API routes
+ * Notes: Handles user profile retrieval and authentication-related endpoints
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

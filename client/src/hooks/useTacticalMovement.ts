@@ -1,3 +1,9 @@
+/**
+ * File: useTacticalMovement.ts
+ * Responsibility: WASD keyboard movement controls for tactical view navigation
+ * Notes: Handles player entity movement and room transitions via keyboard input
+ */
+
 import { useEffect, useCallback } from 'react';
 import { combatSystem } from '@shared/combat-system';
 

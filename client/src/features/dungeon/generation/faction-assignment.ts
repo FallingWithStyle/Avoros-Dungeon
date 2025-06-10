@@ -1,3 +1,9 @@
+/**
+ * File: faction-assignment.ts
+ * Responsibility: Assigns rooms to factions based on influence and provides faction territory distribution logic
+ * Notes: Handles proportional room allocation, territory mapping, and unclaimed room management for dungeon generation
+ */
+
 // Faction and Room object types, adjust as needed for schema
 export type Faction = {
   id: number;

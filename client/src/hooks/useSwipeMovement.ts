@@ -1,3 +1,9 @@
+/**
+ * File: useSwipeMovement.ts
+ * Responsibility: Touch gesture detection for mobile crawler movement
+ * Notes: Converts swipe gestures to directional movement commands on mobile devices
+ */
+
 import { useEffect, useRef } from 'react';
 import { useIsMobile } from './use-mobile';
 

@@ -1,4 +1,9 @@
 
+/**
+ * File: seed-dynamic-content.ts
+ * Responsibility: Seeds database with floor themes, room types, crawler backgrounds, and combat flavor text
+ * Notes: Populates content tables used for procedural generation and storytelling elements
+ */
 import { db } from "../server/db";
 import { 
   floorThemes, 

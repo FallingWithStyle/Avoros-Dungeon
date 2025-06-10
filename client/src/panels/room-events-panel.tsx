@@ -1,3 +1,9 @@
+/**
+ * File: room-events-panel.tsx
+ * Responsibility: Displays real-time room activity feed including movement, combat, and interaction events
+ * Notes: Shows timestamped events with type-specific icons and colors, auto-scrolls to latest events
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";

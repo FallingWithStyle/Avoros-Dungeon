@@ -1,3 +1,8 @@
+/**
+ * File: redis-status-indicator.tsx
+ * Responsibility: Visual indicator showing Redis connection status and fallback mode
+ * Notes: Displays real-time Redis availability and system performance status
+ */
 
 import { useState } from 'react';
 import { useRedisStatus } from '@/hooks/useRedisStatus';

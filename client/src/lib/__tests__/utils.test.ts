@@ -1,4 +1,10 @@
 
+/**
+ * File: utils.test.ts
+ * Responsibility: Unit tests for utility functions, specifically testing the cn class name merging function
+ * Notes: Uses Jest for testing the tailwind class merging behavior
+ */
+
 import { cn } from '../utils';
 
 describe('Utils', () => {

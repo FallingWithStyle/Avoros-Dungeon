@@ -1,3 +1,8 @@
+/**
+ * File: exploration.ts
+ * Responsibility: Dungeon exploration and room navigation API routes
+ * Notes: Handles room movement, exploration, tactical data, and floor/room information retrieval
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

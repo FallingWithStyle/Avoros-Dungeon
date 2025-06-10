@@ -1,4 +1,10 @@
 
+/**
+ * File: tactical-context-menu.tsx
+ * Responsibility: Renders a context menu for tactical grid interactions with actions for entities, loot, and movement
+ * Notes: Displays different action options based on entity type (hostile, npc, loot) and handles right-click interactions
+ */
+
 import React from 'react';
 import { Eye, MessageCircle, Package, Footprints, Sword, Target, Users, Skull } from 'lucide-react';
 import { combatSystem } from '@shared/combat-system';
