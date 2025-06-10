@@ -3,6 +3,12 @@ import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+/**
+ * File: crawler-card.tsx
+ * Responsibility: Displays individual crawler information in a card format with stats and status
+ * Notes: Shows avatar, name, level, location, and key statistics for a single crawler
+ */
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 import type { CrawlerWithDetails } from "@shared/schema";

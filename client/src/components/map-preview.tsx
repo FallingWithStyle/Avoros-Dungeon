@@ -1,3 +1,8 @@
+/**
+ * File: map-preview.tsx
+ * Responsibility: Compact dungeon map preview showing nearby rooms and current position
+ * Notes: Provides minimap functionality for quick spatial awareness
+ */
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Gem, Home, Skull } from "lucide-react";

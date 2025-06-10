@@ -1,3 +1,9 @@
+/**
+ * File: exploration-panel.tsx
+ * Responsibility: Manages room exploration actions and displays exploration results
+ * Notes: Handles room scanning, exploration attempts, and shows discovered information
+ */
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

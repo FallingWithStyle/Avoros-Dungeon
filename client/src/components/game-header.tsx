@@ -1,5 +1,11 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+/**
+ * File: game-header.tsx
+ * Responsibility: Main game interface header with crawler info and navigation controls
+ * Notes: Shows current crawler avatar, name, stats, and primary game navigation
+ */
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function GameHeader() {

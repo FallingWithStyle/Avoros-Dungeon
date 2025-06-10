@@ -1,6 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+/**
+ * File: header-navigation.tsx
+ * Responsibility: Application header navigation with authentication and page links
+ * Notes: Provides main site navigation, user authentication status, and account access
+ */
+
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Bot, User, Settings, Menu, ChevronDown } from "lucide-react";

@@ -1,3 +1,9 @@
+/**
+ * File: leaderboard.tsx
+ * Responsibility: Displays top crawlers ranked by credits and progression
+ * Notes: Shows rankings with avatars, levels, floors, and credit totals
+ */
+
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
