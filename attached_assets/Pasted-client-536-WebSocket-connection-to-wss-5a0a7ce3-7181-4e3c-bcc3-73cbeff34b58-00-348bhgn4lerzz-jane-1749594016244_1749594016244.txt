@@ -1,0 +1,248 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=A3_x89aDLdj9' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=A3_x89aDLdj9' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=d5cda211:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+tactical-view-panel.tsx:266 No effective tactical data available
+tactical-view-panel.tsx:266 No effective tactical data available
+tactical-view-panel.tsx:143 Room changed from null to 53119, reinitializing player
+tactical-view-panel.tsx:160 Entry position for direction east: {x: 10, y: 50}
+combat-system.ts:560 Created new player entity at position (10, 50)
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 13, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 16, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 19, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 22, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 25, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 28, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 31, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 34, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 37, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 40, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 43, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 46, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 1, y: 0}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 50} facing: east
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 47} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 44} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 41} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 38} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 35} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 32} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 29} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 26} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 23} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 20} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 17} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 14} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 11} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 8} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+combat-system.ts:226 Queued action move for entity player
+combat-system.ts:369 moveEntityToPosition: player -> {x: 49, y: 5} facing: north
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:96 🎮 Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:46 🎮 Starting keyboard movement interval
+useKeyboardMovement.ts:51 🎮 Initial movement: {x: 0, y: -1}
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
+useKeyboardMovement.ts:58 🎮 Interval movement: {x: 0, y: -1} Keys: ['w']
