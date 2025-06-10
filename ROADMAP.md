@@ -5,7 +5,7 @@
 
 Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory. Our roadmap focuses on delivering a polished, scalable, and engaging experience through incremental, testable releases.
 
-## Current Status: v0.8.4 (January 2025)
+## Current Status: v0.8.4 (June 2025)
 
 ✅ **Core Systems Implemented:**
 - Basic dungeon exploration with movement system
@@ -18,7 +18,7 @@ Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 
 ## Development Timeline
 
-### Phase 1: Technical Stability (Q1 2025)
+### Phase 1: Technical Stability (Q2 2025)
 
 #### v0.8.5 - Critical Bug Fixes (Week 1-2)
 - [ ] **Fix Redis Connection Issues** - Resolve ECONNREFUSED errors and enable proper caching
@@ -61,7 +61,7 @@ Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 - [ ] **Equipment Upgrading** - Enhancement system for existing gear
 - [ ] **Weapon Special Abilities** - Unique weapon skills and effects
 
-### Phase 3: Character Progression & Magic (Q3 2025)
+### Phase 3: Character Progression & Magic (Q4 2025)
 
 #### v0.10.0 - Class System (Week 17-20)
 - [ ] **Basic Class Implementation** - Warrior, Mage, Rogue classes
