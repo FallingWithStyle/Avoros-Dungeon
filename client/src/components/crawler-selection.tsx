@@ -126,30 +126,30 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Zap className="w-4 h-4 text-red-400" />
-                      <span className="text-sm">Attack</span>
+                      <span className="text-sm">Might</span>
                     </div>
-                    <span className="text-sm font-mono">{candidate.stats.attack}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm">Defense</span>
-                    </div>
-                    <span className="text-sm font-mono">{candidate.stats.defense}</span>
+                    <span className="text-sm font-mono">{candidate.stats.might}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Gauge className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm">Speed</span>
+                      <span className="text-sm">Agility</span>
                     </div>
-                    <span className="text-sm font-mono">{candidate.stats.speed}</span>
+                    <span className="text-sm font-mono">{candidate.stats.agility}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm">Endurance</span>
+                    </div>
+                    <span className="text-sm font-mono">{candidate.stats.endurance}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Brain className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm">Wit</span>
+                      <span className="text-sm">Intellect</span>
                     </div>
-                    <span className="text-sm font-mono">{candidate.stats.wit}</span>
+                    <span className="text-sm font-mono">{candidate.stats.intellect}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -161,9 +161,9 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Archive className="w-4 h-4 text-cyan-400" />
-                      <span className="text-sm">Memory</span>
+                      <span className="text-sm">Wisdom</span>
                     </div>
-                    <span className="text-sm font-mono">{candidate.stats.memory}</span>
+                    <span className="text-sm font-mono">{candidate.stats.wisdom}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -254,30 +254,30 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Zap className="w-3 h-3 text-red-400" />
-                      <span className="text-xs">Attack</span>
+                      <span className="text-xs">Might</span>
                     </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.attack}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <Shield className="w-3 h-3 text-blue-400" />
-                      <span className="text-xs">Defense</span>
-                    </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.defense}</span>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.might}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Gauge className="w-3 h-3 text-yellow-400" />
-                      <span className="text-xs">Speed</span>
+                      <span className="text-xs">Agility</span>
                     </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.speed}</span>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.agility}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Shield className="w-3 h-3 text-blue-400" />
+                      <span className="text-xs">Endurance</span>
+                    </div>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.endurance}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Brain className="w-3 h-3 text-purple-400" />
-                      <span className="text-xs">Wit</span>
+                      <span className="text-xs">Intellect</span>
                     </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.wit}</span>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.intellect}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
@@ -289,9 +289,9 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Archive className="w-3 h-3 text-cyan-400" />
-                      <span className="text-xs">Memory</span>
+                      <span className="text-xs">Wisdom</span>
                     </div>
-                    <span className="text-xs font-mono">{selectedCandidate.stats.memory}</span>
+                    <span className="text-xs font-mono">{selectedCandidate.stats.wisdom}</span>
                   </div>
                 </div>
               </div>
