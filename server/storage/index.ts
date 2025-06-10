@@ -1,3 +1,9 @@
+/**
+ * File: index.ts
+ * Responsibility: Modular storage system initialization and interface definition
+ * Notes: Combines all storage modules into a unified interface and creates the main storage instance
+ */
+// Modular Storage System
 import { BaseStorage } from "./base-storage";
 import { CrawlerStorage } from "./crawler-storage";
 import { UserStorage } from "./user-storage";

@@ -1,6 +1,11 @@
 
 import { db } from "../db";
 import { corporationPrefixes, corporationSuffixes } from "@shared/schema";
+/**
+ * File: corporation-storage.ts
+ * Responsibility: Corporation name generation and management storage operations
+ * Notes: Handles generation of random corporation names using prefixes and suffixes
+ */
 import { BaseStorage } from "./base-storage";
 
 export class CorporationStorage extends BaseStorage {

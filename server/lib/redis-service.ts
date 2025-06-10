@@ -1,3 +1,8 @@
+/**
+ * File: redis-service.ts
+ * Responsibility: Redis caching service with automatic database fallback
+ * Notes: Provides caching for crawler data, room data, and tactical positions with graceful degradation
+ */
 import { Redis } from "@upstash/redis";
 
 class RedisService {
@@ -408,7 +413,7 @@ class RedisService {
     if (this.forceFallbackMode) {
       return false; // Force fallback when debug mode is enabled
     }
-    
+
     if (!this.redis || !this.isConnected) {
       return false;
     }

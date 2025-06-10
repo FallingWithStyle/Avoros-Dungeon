@@ -1,3 +1,8 @@
+/**
+ * File: init-db.ts
+ * Responsibility: Database initialization and seeding with default game data
+ * Notes: Creates crawler classes, equipment, factions, floors, and dungeon layout on startup
+ */
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 

@@ -13,6 +13,11 @@ import {
   type CrawlerClass,
 } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
+/**
+ * File: crawler-storage.ts
+ * Responsibility: Crawler entity management and generation storage operations
+ * Notes: Handles crawler CRUD operations, stat generation, candidate creation, and progression tracking
+ */
 import { BaseStorage } from "./base-storage";
 
 export class CrawlerStorage extends BaseStorage {

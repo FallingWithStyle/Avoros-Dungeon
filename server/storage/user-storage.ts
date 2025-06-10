@@ -2,6 +2,11 @@
 import { db } from "../db";
 import { users, type UpsertUser, type User } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
+/**
+ * File: user-storage.ts
+ * Responsibility: User account and sponsorship management storage operations
+ * Notes: Handles user CRUD operations, active crawler tracking, and seasonal sponsorship eligibility
+ */
 import { BaseStorage } from "./base-storage";
 
 export class UserStorage extends BaseStorage {

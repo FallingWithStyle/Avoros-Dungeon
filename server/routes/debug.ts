@@ -1,4 +1,9 @@
 
+/**
+ * File: debug.ts
+ * Responsibility: Development and debugging utility API routes
+ * Notes: Provides crawler healing, reset, deletion, cache clearing, and mob spawning for testing
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

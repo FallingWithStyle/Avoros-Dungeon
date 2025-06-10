@@ -1,4 +1,9 @@
 
+/**
+ * File: combat.ts
+ * Responsibility: Combat system and encounter choice processing API routes
+ * Notes: Handles combat encounters, choice processing, and effect application
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

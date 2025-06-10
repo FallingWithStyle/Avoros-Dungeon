@@ -1,3 +1,8 @@
+/**
+ * File: index.ts
+ * Responsibility: Main route registration and WebSocket server setup
+ * Notes: Orchestrates all route modules, WebSocket connections, and system status endpoints
+ */
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";

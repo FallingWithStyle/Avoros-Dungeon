@@ -10,6 +10,11 @@ import {
   type CrawlerWithDetails,
 } from "@shared/schema";
 import { eq, desc, and, inArray, not, sql } from "drizzle-orm";
+/**
+ * File: exploration-storage.ts
+ * Responsibility: Dungeon exploration and room navigation storage operations
+ * Notes: Manages room movement, position tracking, exploration history, and encounter processing
+ */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 

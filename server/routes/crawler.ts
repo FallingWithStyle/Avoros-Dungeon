@@ -1,3 +1,8 @@
+/**
+ * File: crawler.ts
+ * Responsibility: Crawler management and tactical data API routes
+ * Notes: Handles crawler CRUD operations, advancement, tactical data, and scanned room information
+ */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

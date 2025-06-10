@@ -2,6 +2,11 @@
 import { db } from "../db";
 import { mobs, mobTypes, rooms, factions } from "@shared/schema";
 import { eq, and, lt, isNull, or } from "drizzle-orm";
+/**
+ * File: mob-storage.ts
+ * Responsibility: Mob entity management and spawning storage operations
+ * Notes: Handles mob creation, respawning, room assignment, and hostile/neutral mob tracking
+ */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
 

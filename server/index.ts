@@ -1,3 +1,8 @@
+/**
+ * File: index.ts
+ * Responsibility: Main server entry point and application initialization
+ * Notes: Sets up Express server, middleware, routes, database initialization, and background processes
+ */
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";

@@ -1,3 +1,8 @@
+/**
+ * File: vite.ts
+ * Responsibility: Vite development server integration and static file serving
+ * Notes: Configures Vite middleware for development and static asset serving for production
+ */
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
