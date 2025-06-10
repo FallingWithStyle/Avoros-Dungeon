@@ -496,7 +496,7 @@ export class CombatSystem {
     }
   }
 
-  initializePlayer(startPosition?: { x: number; y: number }) {
+  initializePlayer(startPosition?: { x: number; y: number }, crawlerData?: { name?: string; serial?: number }) {
     const existingPlayer = this.state.entities.find((e) => e.id === "player");
 
     // Get entry direction to determine starting position
@@ -533,6 +533,11 @@ export class CombatSystem {
           `Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
         );
       }
+      // Update crawler data if provided
+      if (crawlerData) {
+        if (crawlerData.name) existingPlayer.name = crawlerData.name;
+        if (crawlerData.serial) existingPlayer.serial = crawlerData.serial;
+      }
       return;
     }
 
@@ -541,20 +546,25 @@ export class CombatSystem {
 
     const playerEntity: CombatEntity = {
       id: "player",
-      name: "Player",
+      name: crawlerData?.name || "Player",
       type: "player",
       position: defaultPosition,
       hp: 100,
       maxHp: 100,
       isSelected: false,
       facing: "north",
+      serial: crawlerData?.serial,
     };
 
     this.state.entities.push(playerEntity);
     console.log(
       `Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
     );
-    this.emitStateChange();
+    this.notifySubscribers();
+  }
+
+  private emitStateChange(): void {
+    this.notifySubscribers();
   }
 }
 
