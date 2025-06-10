@@ -319,12 +319,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <div 
-        className="flex-1 relative" 
-        ref={containerRef}
-        style={{ touchAction: 'none' }}
-      >
+          className="flex-1 relative" 
+          ref={containerRef}
+          style={{ touchAction: 'none' }}
+        >
           <TacticalGrid
             roomBackground={gridData.background}
             exits={gridData.exits}
@@ -347,11 +347,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           />
         </div>
 
-        <TacticalHotbar
-          activeActionMode={activeActionMode}
-          onHotbarClick={handleHotbarClick}
-          getCooldownPercentage={getCooldownPercentage}
-        />
+        <div className="pt-2">
+          <TacticalHotbar
+            activeActionMode={activeActionMode}
+            onHotbarClick={handleHotbarClick}
+            getCooldownPercentage={getCooldownPercentage}
+          />
+        </div>
 
         {contextMenu && (
           <TacticalContextMenu
@@ -363,7 +365,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           />
         )}
 
-        <ActionQueuePanel />
+        <div className="pt-2">
+          <ActionQueuePanel />
+        </div>
 
         {activeActionMode && (
           <div className="mt-2 p-2 bg-blue-900/30 border border-blue-500 rounded text-center">
