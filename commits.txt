@@ -1,0 +1,810 @@
+20084ce 2025-06-10 Checkpoint before assistant change: Update project changelog to reflect actual modification dates
+94b0c60 2025-06-10 Assistant checkpoint: Disable tactical grid click functionality to prevent errors
+00b4ded 2025-06-10 Checkpoint before assistant change: Update app to reflect the latest changes and fix click-related errors
+3b578c8 2025-06-10 Assistant checkpoint: Fix scan range NaN error and update version to 1.4.1
+e80d72e 2025-06-10 Checkpoint before assistant change: Improve the application's reliability by fixing connection and data issues
+59ee2f5 2025-06-10 Assistant checkpoint: Fix SQL syntax error in getScannedRooms method
+470e9ee 2025-06-10 Checkpoint before assistant change: Improve error handling and fix issues retrieving information about rooms
+6462e46 2025-06-10 Assistant checkpoint: Fix SQL syntax error in exploration storage
+6de16ce 2025-06-10 Checkpoint before assistant change: Improve dungeon exploration by fixing database connection issues
+8f8dd2d 2025-06-10 Checkpoint before assistant change: Address issues that prevent the game from properly connecting to the server
+c3106a9 2025-06-10 Assistant checkpoint: Fix syntax error in crawler-view.tsx
+3fb24ab 2025-06-10 Assistant checkpoint: Remove energy costs from room movement and debug tools
+795cdf2 2025-06-10 Assistant checkpoint: Fix minimap updates and crawler positioning logic
+0b5edb0 2025-06-10 Assistant checkpoint: Fix mini-map by removing duplicate methods
+cf86617 2025-06-10 Assistant checkpoint: Fix TypeScript import syntax error
+0dd736c 2025-06-10 Checkpoint before assistant change: Update the application version number and provide detailed file descriptions
+4d7896f 2025-06-10 Assistant checkpoint: Update version to 0.0.1 and add changelog entry
+bf50288 2025-06-10 Assistant checkpoint: Add file responsibility comments to scripts
+c1d7e82 2025-06-10 Assistant checkpoint: Added file responsibility comments to shared files
+89e82b3 2025-06-10 Assistant checkpoint: Added responsibility comments to server files
+fae7702 2025-06-10 Assistant checkpoint: Added file responsibility comments to all client/src files
+b6a121e 2025-06-10 Assistant checkpoint: Added responsibility comments to components
+40d6e0c 2025-06-10 Assistant checkpoint: Add file responsibility comments to hooks directory
+bc193a8 2025-06-10 Assistant checkpoint: Add file responsibility comments to lib directory
+dcf7c76 2025-06-10 Assistant checkpoint: Added file responsibility comments to all pages
+986fd5c 2025-06-10 Assistant checkpoint: Added file responsibility comments to 11 panel files
+785960f 2025-06-10 Assistant checkpoint: Add file responsibility comments to views
+7d4988e 2025-06-10 Assistant checkpoint: Add file responsibility comments to dungeon feature files
+c7853a3 2025-06-10 Assistant checkpoint: Added file responsibility comments to tactical-view files
+d600f70 2025-06-10 Checkpoint before assistant change: Add introductory comments explaining purpose to each file in tactical view
+98b14bb 2025-06-10 Restored to '84fe24da32b7d289252f1be92c7ea11482a6603d'
+f262c2d 2025-06-10 Assistant checkpoint: Added file responsibility comments to all TS/TSX files
+d701085 2025-06-10 Checkpoint before assistant change: Address critical issues impacting game stability and combat features
+84fe24d 2025-06-10 Assistant checkpoint: Fix refetchTactical function name mismatch
+7981cea 2025-06-10 Checkpoint before assistant change: Fix error preventing tactical information from loading correctly
+d1663c7 2025-06-10 Assistant checkpoint: Fix DungeonMap hooks violations and data fetching
+352d9d3 2025-06-10 Assistant checkpoint: Fix mini-map display and React hooks violations
+b95aa53 2025-06-10 Assistant checkpoint: Fixed React hooks order violations in tactical view
+97da367 2025-06-10 Assistant checkpoint: Fix React hooks order violation in TacticalViewPanel
+1dfc9a8 2025-06-10 Checkpoint before assistant change: Improve application stability by resolving multiple connection and rendering issues
+52f2691 2025-06-10 Assistant checkpoint: Remove duplicate function export
+c0bd62a 2025-06-10 Assistant checkpoint: Fix WebSocket URLs, recreate tactical panel, add missing components
+3b6a174 2025-06-10 Checkpoint before assistant change: Resolve errors preventing the application from properly connecting to services
+55b5fce 2025-06-10 Assistant checkpoint: Refactored tactical view panel to use modular components
+768b4fe 2025-06-09 Assistant checkpoint: Fix React hooks violation by moving defensive check
+c40a0d8 2025-06-09 Checkpoint before assistant change: Address issues preventing users from connecting to the application server
+3c5ddf3 2025-06-09 Assistant checkpoint: Add missing function definitions to fix crashes
+3a24f7e 2025-06-09 Checkpoint before assistant change: Address connection errors that prevent tactical data from loading correctly
+0f7a03d 2025-06-09 Assistant checkpoint: Fix React hooks order violation in TacticalViewPanel
+e275b2c 2025-06-09 Checkpoint before assistant change: Address errors preventing the application from connecting to the server
+e55126b 2025-06-09 Assistant checkpoint: Fix all template literal syntax and JSX issues in tactical-view-panel.tsx
+9fbd5eb 2025-06-09 Assistant checkpoint: Fix syntax error in tactical view panel
+b59bf3e 2025-06-09 Assistant checkpoint: Fix React hooks order violation in TacticalViewPanel
+e92ee11 2025-06-09 Checkpoint before assistant change: Address errors that prevent the application from working correctly
+fcad18b 2025-06-09 Assistant checkpoint: Fix template literal syntax errors in tactical view
+6046bce 2025-06-09 Assistant checkpoint: Fix all template literal syntax errors
+719cbfa 2025-06-09 Assistant checkpoint: Fix template literal syntax error
+951f52a 2025-06-09 Assistant checkpoint: Fix template literal syntax error
+c5b9163 2025-06-09 Assistant checkpoint: Fix syntax error in tactical view panel
+c23c6f9 2025-06-09 Assistant checkpoint: Fix swipe directions and add crash protection
+ce94229 2025-06-09 Assistant checkpoint: Add swipe-to-move functionality for mobile tactical view
+aa1289e 2025-06-09 Assistant checkpoint: Convert header to mobile-friendly dropdown menu
+7477c68 2025-06-09 Assistant checkpoint: Fix JSX syntax errors in crawler view
+0341d76 2025-06-09 Assistant checkpoint: Fix mobile layout spacing
+cb5d384 2025-06-09 Assistant checkpoint: Reorganized crawler view for mobile with collapsible sections and contextual navigation
+f1c1397 2025-06-09 Assistant checkpoint: Refactor movement system: remove dungeon WASD, simplify tactical movement, fix queue processing, reduce API polling
+5f0c050 2025-06-09 Checkpoint before assistant change: Improve player movement and exit detection to create a smoother experience
+0ef72c1 2025-06-09 Restored to 'acc7d3f576ef1218e200041e676fae7d88573dd1'
+b831d3f 2025-06-09 Assistant checkpoint: Make gate crossing detection more lenient
+acc7d3f 2025-06-09 Assistant checkpoint: Fix action queue processing and server errors
+7870d14 2025-06-09 Checkpoint before assistant change: Improve connection reliability and fix errors when exploring the environment
+6ab3df3 2025-06-09 Assistant checkpoint: Fix combat system missing methods and server errors
+6aaa140 2025-06-09 Checkpoint before assistant change: Improve the reliability of data transmission and server communication
+63712d1 2025-06-09 Assistant checkpoint: Define CombatSystem class before singleton export
+553ec3a 2025-06-09 Assistant checkpoint: Export combatSystem singleton instance
+5c6ae80 2025-06-09 Assistant checkpoint: Fix door crossing movement boundaries
+4f1347f 2025-06-09 Checkpoint before assistant change: Investigate why players sometimes cannot move through certain doorways
+27d447e 2025-06-09 Assistant checkpoint: Fix player spawn positioning to prevent center flash
+5bba036 2025-06-09 Assistant checkpoint: Fix syntax error in combat-system.ts
+a90a7e3 2025-06-09 Assistant checkpoint: Fix crawler positioning to prevent center-room flash on entry
+0e9e734 2025-06-09 Assistant checkpoint: Fix authentication in mob summary endpoints
+24a9ded 2025-06-09 Assistant checkpoint: Add mob indicators to dungeon map display
+d4ea15a 2025-06-09 Assistant checkpoint: Made Redis fallback control mini button sized and inline
+0e1bea5 2025-06-09 Assistant checkpoint: Add Redis fallback control to debug panel
+bf13949 2025-06-09 Assistant checkpoint: Add Redis fallback mode controls and increment version
+82da335 2025-06-09 Assistant checkpoint: Remove duplicate power bar, update version to 0.4.0
+efffd8e 2025-06-09 Assistant checkpoint: Update crawler status panel to use new stat system
+9c9a53b 2025-06-09 Assistant checkpoint: Update crawler card to use new stat system
+27119d3 2025-06-09 Assistant checkpoint: Fix crawler creation with new stat system
+aa178de 2025-06-09 Checkpoint before assistant change: Improve reliability of crawler creation and address related error messages
+9cb0f1a 2025-06-09 Assistant checkpoint: Replace vitality/focus with power/max_power system
+54e689b 2025-06-09 Assistant checkpoint: Drop and recreate tables with new stat system
+28d6689 2025-06-09 Assistant checkpoint: Updated stat system to Avavor stats with 8 core stats
+65a6c3a 2025-06-09 Assistant checkpoint: Fix door teleportation to require directional movement
+4bcbf2e 2025-06-09 Assistant checkpoint: Created tactical and dungeon movement hooks, refactored panels
+a4b186a 2025-06-09 Restored to '90fb22388fa090289931b5a605896b06373997e7'
+a203e51 2025-06-09 Assistant checkpoint: Increase movement speed 10x and enable diagonal movement
+858b104 2025-06-09 Restored to '90fb22388fa090289931b5a605896b06373997e7'
+2333944 2025-06-09 Assistant checkpoint: Fixed movement to exactly 1 grid cell per keypress
+90fb223 2025-06-09 Assistant checkpoint: Fix movement speed and gate crossing detection
+55e0c15 2025-06-09 Checkpoint before assistant change: Improve player movement and fix connection errors in tactical combat
+746fe4b 2025-06-09 Assistant checkpoint: Fix gate detection with stricter edge and movement requirements
+8fa88eb 2025-06-09 Checkpoint before assistant change: Improve gate transition reliability when moving between rooms
+60ad460 2025-06-09 Assistant checkpoint: Loosened gate detection parameters for easier room exits
+6cbd129 2025-06-09 Checkpoint before assistant change: Adjust the rules for exiting rooms to allow users to leave more easily
+89e0279 2025-06-09 Assistant checkpoint: Add detailed gate check failure logging
+10ded38 2025-06-09 Assistant checkpoint: Fix room transitions to require directional movement
+1b3f736 2025-06-09 Assistant checkpoint: Update to grid-based movement and orange NPCs
+3c36973 2025-06-09 Assistant checkpoint: Fix tactical entity rendering and add debug logging
+2d34e11 2025-06-09 Checkpoint before assistant change: Address issues connecting to the game server and tactical combat data
+c7e1ca6 2025-06-09 Assistant checkpoint: Add debug logging to tactical view mob rendering
+5144210 2025-06-09 Assistant checkpoint: Fix syntax errors and refactor tactical view into smaller components
+1cae6c3 2025-06-09 Checkpoint before assistant change: Prevent characters from unintentionally leaving the playing area
+91410de 2025-06-09 Assistant checkpoint: Fix syntax error preventing server startup
+6b53ab0 2025-06-09 Assistant checkpoint: Fix syntax error and WebSocket URL construction
+c8bef05 2025-06-09 Assistant checkpoint: Add debug logging and z-index to fix mob rendering
+65d16c9 2025-06-09 Assistant checkpoint: Fix Redis cache key mismatch and clear cache
+fa74179 2025-06-09 Assistant checkpoint: Fix Redis mob serialization and add cache clearing
+26fe355 2025-06-09 Assistant checkpoint: Fix Redis JSON serialization for mob caching
+6ef348a 2025-06-09 Assistant checkpoint: Fix ES module syntax and run mob seeding
+d4a8dd8 2025-06-09 Assistant checkpoint: Fix mob spawning: add room configs, fix Redis cache, seed mob types
+8660ce5 2025-06-09 Assistant checkpoint: Fix Redis API compatibility and start Valkey service
+bc3ba74 2025-06-09 Assistant checkpoint: Fix Redis serialization and enhance debug logging
+aa1cb97 2025-06-09 Assistant checkpoint: Fix Redis JSON parsing and add mob spawning debug
+a590bcd 2025-06-09 Assistant checkpoint: Add directional combat system with facing and cone attacks
+93e14ca 2025-06-09 Assistant checkpoint: Remove floating text about WASD compass
+ba27d71 2025-06-08 Assistant checkpoint: Update version to 0.3.0 and add map refresh on door transitions
+72bccb7 2025-06-08 Assistant checkpoint: Add door boundary exceptions and improve gate detection
+4764750 2025-06-08 Assistant checkpoint: Modified room transition to require gate crossing
+14126b8 2025-06-08 Assistant checkpoint: Replace page reload with tactical data refetch
+e97d3ea 2025-06-08 Assistant checkpoint: Connect tactical view exits to room movement API
+592bbf6 2025-06-08 Assistant checkpoint: Made WASD movement much smoother
+4c03735 2025-06-08 Assistant checkpoint: Fix player entity initialization for WASD movement
+bb31059 2025-06-08 Assistant checkpoint: Fix tactical data initialization order
+c5dfd75 2025-06-08 Checkpoint before assistant change: Address problems related to establishing connection and data display
+df00b6d 2025-06-08 Assistant checkpoint: Fix syntax error in tactical view panel
+70d399e 2025-06-08 Assistant checkpoint: Fix effectiveTacticalData reference error
+4690a4c 2025-06-08 Checkpoint before assistant change: Improve error handling and fix issues with connecting to the game server
+ce2aa8d 2025-06-08 Assistant checkpoint: Fix React hook structure in tactical view panel
+2728c5e 2025-06-08 Checkpoint before assistant change: Identify and report errors related to WebSocket connections and React hooks
+3f8f881 2025-06-08 Assistant checkpoint: Implement WASD movement with speed-based timing
+c9cedb9 2025-06-08 Assistant checkpoint: Add proximity-based exit movement to tactical view
+2b8882a 2025-06-08 Assistant checkpoint: Add localStorage persistence for debug panel state
+bae8bd3 2025-06-08 Assistant checkpoint: Filter out Vite client WebSocket errors
+b244311 2025-06-08 Restored to 'dd8a260f9493b4f4c4d167b59ae8e0c9a0b37e97'
+e8058ee 2025-06-08 Restored to 'a40755e64269a89300e29e5d9299aa949617fd0a'
+d80c6a0 2025-06-08 Restored to 'b8198fdec8809a40e80ba1331571381393ae80ea'
+dd8a260 2025-06-08 Assistant checkpoint: Fix syntax error in tactical view panel
+b8198fd 2025-06-08 Assistant checkpoint: Hide WASD compass while keeping movement functionality
+8d19f0a 2025-06-08 Checkpoint before assistant change: Hide WASD compass from display, but keep movement functionality
+a40755e 2025-06-08 Assistant checkpoint: Fix routing logic for authenticated states
+dcf00c7 2025-06-08 Assistant checkpoint: Fix crawler route parameter extraction
+d31a7ac 2025-06-08 Assistant checkpoint: Fix crawler loading authentication and error handling
+cdee135 2025-06-08 Assistant checkpoint: Fix crawler ID parsing in CrawlerMode
+a32a1ea 2025-06-08 Assistant checkpoint: Fix navigation URL issues and prevent unwanted route redirects
+e7488f1 2025-06-08 Assistant checkpoint: Fix syntax error in dungeon-map.tsx
+1cf979b 2025-06-08 Assistant checkpoint: Fix WebSocket URL port handling
+8bce756 2025-06-08 Assistant checkpoint: Fix missing DialogTrigger import
+bf413a1 2025-06-08 Checkpoint before assistant change: Address multiple errors, improving application stability and reliability
+574dc73 2025-06-08 Assistant checkpoint: Remove duplicate handleMove function
+84e509b 2025-06-08 Assistant checkpoint: Fix syntax error in tactical view panel
+d886326 2025-06-08 Assistant checkpoint: Remove duplicate handleMove function declaration
+f11743e 2025-06-08 Assistant checkpoint: Fix handleMove hoisting error in tactical panel
+312b05d 2025-06-08 Checkpoint before assistant change: Improve game by fixing bugs that prevent players from properly moving
+d891b5b 2025-06-08 Assistant checkpoint: Fix function hoisting error in tactical view panel
+d2d0230 2025-06-08 Checkpoint before assistant change: Improve the game by resolving errors and fixing connection issues
+f3fcf13 2025-06-08 Assistant checkpoint: Fix zoomOut function syntax error
+2c91a0c 2025-06-08 Assistant checkpoint: Implement Zelda-style keyboard movement and remove mouse targeting
+d38f421 2025-06-08 Assistant checkpoint: Added dungeon map back to right column
+44d47e9 2025-06-08 Assistant checkpoint: Reorganize crawler interface with integrated panels and compass navigation
+be6189d 2025-06-08 Assistant checkpoint: Update combat icons to be blue for friendly attacks
+417450a 2025-06-08 Assistant checkpoint: Color combat icons: blue for friendly, red for enemy
+5a8448d 2025-06-08 Assistant checkpoint: Fix attack targeting and add movement+attack queuing
+5c65e6c 2025-06-08 Assistant checkpoint: Fix tooltip and context menu positioning to escape tactical map bounds
+2105e6c 2025-06-08 Assistant checkpoint: Prevent debug mobs from respawning in processRespawns
+e432591 2025-06-08 Assistant checkpoint: Make debug spawned mobs temporary (no respawn)
+590a8b7 2025-06-08 Assistant checkpoint: Add death events for mobs and crawlers to room events
+8709290 2025-06-08 Assistant checkpoint: Immediate tactical data refresh on room change
+997c652 2025-06-08 Assistant checkpoint: Fix effectiveTacticalData variable scoping issues
+9f3cc0e 2025-06-08 Checkpoint before assistant change: Address a few issues, including connection problems and data loading errors
+0ecf96f 2025-06-08 Assistant checkpoint: Fix tactical view initialization and storage access
+0153a35 2025-06-08 Checkpoint before assistant change: Address errors preventing the crawler page from loading correctly
+d4d7228 2025-06-08 Assistant checkpoint: Fix storage initialization bug
+d255c77 2025-06-08 Assistant checkpoint: Fix server startup and create new workflow
+970325c 2025-06-08 Assistant checkpoint: Improved tactical view fallback handling
+9a82b11 2025-06-08 Assistant checkpoint: Fixed tactical data server errors and reduced retry loops
+a11b393 2025-06-08 Checkpoint before assistant change: Address errors preventing proper data retrieval and website functionality
+6853a99 2025-06-08 Assistant checkpoint: Fix tactical data 500 errors and WebSocket issues
+6ae2c99 2025-06-08 Checkpoint before assistant change: Address various issues with data fetching and WebSocket connections
+c766eae 2025-06-08 Assistant checkpoint: Enhanced error handling for tactical data endpoint
+d2924fc 2025-06-08 Assistant checkpoint
+3cbae3f 2025-06-08 Assistant checkpoint: Fix storage imports and start server
+be212ed 2025-06-08 Assistant checkpoint: Add MobStorage to ModularStorage class
+74b3fd4 2025-06-08 Assistant checkpoint: Enhanced debug mob spawning with detailed error logging
+2493c99 2025-06-08 Assistant checkpoint: Add debug spawn mob button and endpoint
+d48e71e 2025-06-08 Assistant checkpoint: Add detailed console logging to mob generation
+00f1435 2025-06-08 Assistant checkpoint: Fix mob column references and schema alignment
+11a26ea 2025-06-08 Assistant checkpoint: Fix mob naming and type filtering issues
+4bb0379 2025-06-08 Assistant checkpoint: Added comprehensive version history to changelog
+77307d4 2025-06-08 Assistant checkpoint: Updated version to 0.2.0
+7ada33d 2025-06-08 Checkpoint before assistant change: Introduce a variety of enemies with unique stats and behaviors
+323e8f7 2025-06-08 Assistant checkpoint: Unified terminology to 'mobs', added version tracking and timestamps
+a892b72 2025-06-08 Assistant checkpoint: Refactor enemy system to disposition-based creatures
+7f83cbc 2025-06-08 Assistant checkpoint: Implement contextual mob generation system
+142c548 2025-06-08 Assistant checkpoint: Add unified entity system with rarity and display names
+1950753 2025-06-08 Assistant checkpoint: Fix tactical view data loading and error handling
+8179759 2025-06-08 Checkpoint before assistant change: Add new data storage modules to manage different aspects of the game
+7ea31bc 2025-06-08 Assistant checkpoint: Fix missing exports and TypeScript config
+20acbf1 2025-06-08 Assistant checkpoint: Investigate startup issue and increment version
+004b31e 2025-06-08 Assistant checkpoint: Add persistent mob system with respawn mechanics
+ee24bd5 2025-06-08 Assistant checkpoint: Fix tactical entity cleanup between rooms
+8c686c9 2025-06-08 Assistant checkpoint: Fix player entry position logic to be opposite of movement direction
+41ceefa 2025-06-08 Checkpoint before assistant change: Place player at opposite end of room based on movement direction
+0981484 2025-06-08 Assistant checkpoint: Add debugging for player movement and positioning
+3286c1a 2025-06-08 Assistant checkpoint: Fix player spawn position logic
+55269f0 2025-06-08 Assistant checkpoint: Fix player entity rendering in tactical view
+93017b0 2025-06-08 Assistant checkpoint: Prevent hostile spawns and combat in safe rooms
+1fd8d2b 2025-06-08 Assistant checkpoint: Add hotbar deselect and combat end cleanup
+21798e7 2025-06-08 Assistant checkpoint: Fix entity cleanup artifacts between rooms
+d2fd833 2025-06-08 Checkpoint before assistant change: Improve debugging tools and fix visual artifacts in tactical view
+2cf6e5b 2025-06-08 Assistant checkpoint: Update debug panel with wrench icon and simplified layout
+0dc10d4 2025-06-08 Assistant checkpoint: Minimize debug panel padding and move version number
+fb828e7 2025-06-08 Assistant checkpoint: Changed game name to Avavor Dungeon throughout codebase
+5267778 2025-06-08 Assistant checkpoint: Add version tracking to debug panel
+59cd372 2025-06-08 Assistant checkpoint: Fix tactical view crashes and WebSocket URL errors
+6a32207 2025-06-08 Checkpoint before assistant change: Address errors preventing users from properly viewing tactical information
+7773074 2025-06-08 Assistant checkpoint: Fix Redis connection test syntax for Upstash
+76ce8ba 2025-06-08 Assistant checkpoint: Fix Redis JSON parsing and improve error handling
+f2b4d3a 2025-06-08 Assistant checkpoint: Fix duplicate entity React keys in tactical view
+a23d4dc 2025-06-08 Checkpoint before assistant change: Prevent the game from adding the same character multiple times to combat
+a07d2b2 2025-06-08 Assistant checkpoint: Fix tactical view entity clearing on room change
+a003540 2025-06-08 Assistant checkpoint: Fix React Hook Rules violation in TacticalViewPanel
+4dc0b71 2025-06-08 Checkpoint before assistant change: Improve application stability and user experience by fixing errors
+2d0496b 2025-06-08 Assistant checkpoint: Fix missing React imports in tactical view panel
+d477bae 2025-06-08 Checkpoint before assistant change: Address various errors that prevent the application from running correctly
+a51352d 2025-06-08 Assistant checkpoint: Fix syntax error in tactical view panel
+31eb8f2 2025-06-08 Assistant checkpoint: Add detailed logging to movement system for debugging
+1f7c85b 2025-06-08 Assistant checkpoint: Fix north/south movement direction logic
+96c7f14 2025-06-08 Assistant checkpoint: Add extensive debugging to current-room API endpoint
+2ca4280 2025-06-08 Checkpoint before assistant change: Remove debugging script for checking crawler positions in the database
+a76e160 2025-06-08 Assistant checkpoint: Add debugging to ensureCrawlerHasPosition method
+d83feec 2025-06-08 Assistant checkpoint: Fix debug script to use tsx runner
+cd04c07 2025-06-08 Assistant checkpoint: Create debug script to investigate crawler positions
+6d1e5b2 2025-06-08 Assistant checkpoint: Fix room data by ensuring crawler position
+da131fb 2025-06-08 Assistant checkpoint: Fix room data access and Redis configuration
+bef514b 2025-06-08 Assistant checkpoint: Update Redis service to use Upstash REST API
+f33d9ba 2025-06-08 Assistant checkpoint: Fix syntax error in exploration storage
+3099980 2025-06-08 Assistant checkpoint: Fix room data query structure
+55942d0 2025-06-08 Checkpoint before assistant change: Update core tools that transform modern code into older versions
+8cef7c4 2025-06-08 Assistant checkpoint: Fix tactical storage dependencies and method access
+af9d68a 2025-06-08 Assistant checkpoint: Fix TooltipProvider import and WebSocket URL
+3ac6771 2025-06-08 Checkpoint before assistant change: Address console errors related to WebSocket connections and missing components
+b4ee69c 2025-06-08 Assistant checkpoint: Fix Redis to use Upstash connection
+df70f25 2025-06-08 Assistant checkpoint: Fix ES module imports in storage classes
+e160493 2025-06-08 Assistant checkpoint: Fix missing storage dependency injection methods
+e0081f3 2025-06-08 Assistant checkpoint: Fix Redis service duplicates and start server
+2c017f1 2025-06-08 Assistant checkpoint: Fix storage module circular dependencies and server startup
+9308ce5 2025-06-08 Assistant checkpoint: Fix tactical storage methods and start dev server
+0e02ae5 2025-06-08 Assistant checkpoint: Add Redis bypass system with user alerts
+f3e191e 2025-06-08 Assistant checkpoint: Fix tactical storage and API integration
+3ad1820 2025-06-08 Assistant checkpoint: Fix tactical data 500 error and improve error handling
+be4e015 2025-06-08 Checkpoint before assistant change: Address problems preventing the game from connecting to the server
+4d1e752 2025-06-08 Assistant checkpoint: Fix infinite loop in tactical view useEffect
+3d68c76 2025-06-08 Checkpoint before assistant change: Address issue where the application gets stuck in an infinite update loop
+eb488af 2025-06-08 Assistant checkpoint: Fix tactical data API and add debug logging
+273e8c3 2025-06-08 Checkpoint before assistant change: Improve stability and reliability of application package dependencies
+c80ca33 2025-06-08 Assistant checkpoint: Update drizzle-kit command format and version
+d5b43a9 2025-06-08 Assistant checkpoint: Update drizzle-kit command to remove deprecation warning
+6f74e01 2025-06-08 Assistant checkpoint: Add persistent tactical positions with DB & Redis caching
+b063e2c 2025-06-08 Checkpoint before assistant change: Save the positions of objects in the game so they don't randomly move
+dda7e60 2025-06-08 Assistant checkpoint: Add Redis caching for tactical view data
+53ae46a 2025-06-08 Assistant checkpoint: Add Redis caching to exploration/room methods
+f9c48f3 2025-06-08 Assistant checkpoint: Fix crawler caching and unreachable code issues
+5327e99 2025-06-08 Assistant checkpoint: Set up Redis caching with graceful fallbacks
+e75ff94 2025-06-08 Checkpoint before assistant change: Equip the application with the ability to store and quickly retrieve data
+c8b24df 2025-06-07 Assistant checkpoint: Fix TypeScript errors by adding explicit types to reduce callbacks
+029d829 2025-06-07 Assistant checkpoint: Fix CrawlerStorage type errors and remove duplicate method
+6cb8385 2025-06-07 Assistant checkpoint: Fix BaseStorage constructor access modifier
+8d887ad 2025-06-07 Assistant checkpoint: Fix circular import issue with IStorage interface
+695ba82 2025-06-07 Assistant checkpoint: Export missing IStorage interface
+f765af6 2025-06-07 Assistant checkpoint: Add missing abilities field to test data
+1fecce0 2025-06-07 Checkpoint before assistant change: Fix error preventing the system performance tests from running correctly
+6b6c116 2025-06-07 Assistant checkpoint: Fix performance test instantiation and field errors
+d9f3077 2025-06-07 Checkpoint before assistant change: Correct module path resolution during testing and fix associated errors
+f27dbe1 2025-06-07 Assistant checkpoint: Fix TypeScript errors in performance test
+6bd1bea 2025-06-07 Checkpoint before assistant change: Address issues preventing performance tests from running successfully
+041dd01 2025-06-07 Assistant checkpoint: Add missing test scripts and Jest config
+e6b8e42 2025-06-07 Assistant checkpoint: Add cache integration and performance tests
+daf4ae3 2025-06-07 Assistant checkpoint: Optimize combat system test performance
+d6a20b5 2025-06-07 Assistant checkpoint: Mock timers to speed up combat system tests
+786faee 2025-06-07 Assistant checkpoint: Add comprehensive effects.ts test coverage
+b1e1e1a 2025-06-07 Checkpoint before assistant change: Add an image asset
+7ce39bc 2025-06-07 Assistant checkpoint: Fix Jest moduleNameMapper property name
+3f0c477 2025-06-07 Assistant checkpoint: Fix combat system test timing and coordinate logic
+fe65fe0 2025-06-07 Checkpoint before assistant change: Improve reliability and accuracy of combat calculations and actions
+fb43b5c 2025-06-07 Assistant checkpoint: Add comprehensive CombatSystem tests
+97c36ef 2025-06-07 Assistant checkpoint: Fix TypeScript import and type errors
+7d54a4b 2025-06-07 Checkpoint before assistant change: Fix errors preventing combat situations from working as expected
+aa0149e 2025-06-07 Assistant checkpoint: Fix Jest config and add missing test functions
+41dac34 2025-06-07 Assistant checkpoint: Fix Jest setup and export combat functions
+ddcbcc3 2025-06-07 Checkpoint before assistant change: Set up testing framework so that it works correctly in the project
+2ff2920 2025-06-07 Assistant checkpoint: Add Jest testing info to tech stack
+b91163a 2025-06-07 Assistant checkpoint: Set up Jest testing framework with TypeScript support
+c19161c 2025-06-07 Finally got things working again after last night's FUBAR. Map is working currently. Next steps are unit testing, then redis implementation.
+1459397 2025-06-07 Assistant checkpoint: Add enhanced scan effect endpoint
+5567644 2025-06-07 Checkpoint before assistant change: Improve map display by ensuring connections between displayed rooms
+414ffcd 2025-06-07 Assistant checkpoint: Update crawler generation text and add navigation after deletion
+1a63371 2025-06-07 Assistant checkpoint: Fix expanded map centering and unexplored room connections
+0813be7 2025-06-07 Assistant checkpoint: Fix actualCurrentRoomId declaration order in map
+aaf0db5 2025-06-07 Checkpoint before assistant change: Improve real-time gameplay by fixing issues with room and map updates
+111c207 2025-06-07 Assistant checkpoint: Filter map to show only revealed rooms
+626333c 2025-06-07 Assistant checkpoint: Add all rooms endpoint and update map logic
+9ed7c0a 2025-06-07 Checkpoint before assistant change: Ensure the dungeon map displays all rooms, regardless of exploration status
+9228c36 2025-06-07 Assistant checkpoint: Renamed Map component to DungeonMap to avoid React conflicts
+ace4c8b 2025-06-07 Checkpoint before assistant change: Rename map object to DungeonMap to prevent conflicts with React Map
+e9a9dcf 2025-06-07 Assistant checkpoint: Fix Map component variable scoping and null checks
+384f9fa 2025-06-07 Checkpoint before assistant change: Address the crashing issue when users try to view the map
+421e8dd 2025-06-07 Assistant checkpoint: Fix map crashes and WebSocket connection errors
+9c2eaeb 2025-06-07 Checkpoint before assistant change: Improve connection stability and fix errors during application runtime
+e689325 2025-06-07 Assistant checkpoint: Fix WebSocket connection and error handling
+2024cb7 2025-06-07 Assistant checkpoint: Fix WebSocket connection and add server support
+cef5243 2025-06-07 Assistant checkpoint: Fixed main.tsx imports and added detailed error logging
+c421d1f 2025-06-07 Assistant checkpoint: Add unhandled rejection debugging
+3e4e61b 2025-06-07 Assistant checkpoint: Fix map variable reference and WebSocket URL
+e9c2e1a 2025-06-07 Checkpoint before assistant change: Improve reliability of game by fixing connection and combat issues
+be026c5 2025-06-07 Assistant checkpoint: Fix roomMap variable conflict and WebSocket URL
+907e9ee 2025-06-07 Checkpoint before assistant change: Improve platform stability through more detailed error reporting
+5feedd0 2025-06-07 Assistant checkpoint: Fix map roomMap initialization and combat interval guard
+7225955 2025-06-07 Checkpoint before assistant change: Improve error handling and fix issues in combat and map systems
+0e8509e 2025-06-07 Assistant checkpoint: Fix Map constructor, WebSocket URL, and combat system
+9d4a25a 2025-06-07 Checkpoint before assistant change: Improve app loading and fix connection issues for a smoother experience
+a8d229b 2025-06-07 Checkpoint before assistant change: Diagnose and address errors preventing the game from properly connecting
+ec9c4d3 2025-06-07 Assistant checkpoint: Fix undefined crawler props in Map component
+a548ef9 2025-06-07 Assistant checkpoint: Add null checks for crawler prop
+b1ebda6 2025-06-07 Checkpoint before assistant change: Show loading state on map and map panel when crawler data is unavailable
+7aa6da7 2025-06-07 Checkpoint before assistant change: Improve map display by showing scanned, unexplored, and neighbor rooms
+acf21a4 2025-06-07 Assistant checkpoint: Fix map exit display logic to show proper connections
+21d6e16 2025-06-07 Checkpoint before assistant change: Fix display issues causing incorrect room connections on the maps
+ee293cb 2025-06-07 Assistant checkpoint: Fix expanded map by moving shared functions outside component scope
+f541690 2025-06-07 Assistant checkpoint: Unified mini-map and expanded map logic
+8808de5 2025-06-07 Checkpoint before assistant change: Ensure the expanded map uses identical logic as the mini-map
+965cdb0 2025-06-07 Assistant checkpoint: Fix syntax error in map.tsx getRoomColor function
+ccbab77 2025-06-07 Checkpoint before assistant change: Improve the development server launch process for better game loading
+6a883f2 2025-06-07 Assistant checkpoint: Fix syntax error in map component
+9fcc1a2 2025-06-07 Assistant checkpoint: Add adjacent room detection to show unexplored rooms
+c40afe3 2025-06-07 Assistant checkpoint: Fix player position dot consistency in map
+b7bb5a1 2025-06-07 Assistant checkpoint: Implement passive scanning system for map
+b49217c 2025-06-07 Checkpoint before assistant change: Diagnose connection failures and address mapping and scanning issues
+5c5eebe 2025-06-07 Assistant checkpoint: Create TODO.md for tracking tasks and features
+e2eee7b 2025-06-07 Checkpoint before assistant change: Add a file to track tasks like enabling logging and implementing features
+03c17b0 2025-06-07 Assistant checkpoint: Reduced API polling and disabled debug logging
+22fcfd7 2025-06-07 Assistant checkpoint: Fix map rendering with debugging and error handling
+3b5ebbc 2025-06-07 Assistant checkpoint: Fix crawler deletion by removing activities first
+29b649e 2025-06-07 Assistant checkpoint: Fix delete endpoint authentication and data deletion logic
+9335b4b 2025-06-07 Assistant checkpoint: Update reset crawlers to delete and refresh UI
+59b1aab 2025-06-07 Assistant checkpoint: Add missing content methods to ModularStorage
+ae0276f 2025-06-07 Checkpoint before assistant change: Improve crawler candidate generation and handle redis connection errors
+e545f31 2025-06-07 Assistant checkpoint: Fix storage system circular dependency
+c72066d 2025-06-07 Checkpoint before assistant change: Address errors during website loading and improve communication reliability
+92f3f39 2025-06-07 Assistant checkpoint: Fix Storage reference errors and add missing methods
+305338a 2025-06-07 Assistant checkpoint: Fix crawler candidates generation method calls
+a2010c9 2025-06-07 Checkpoint before assistant change: Improve crawler loading and generation by fixing Redis connection issues
+ff5f7ba 2025-06-07 Assistant checkpoint: Fix crawler creation by implementing missing methods and Redis fallbacks
+e3133e7 2025-06-07 Assistant checkpoint: Fix ModularStorage import path
+4538a6b 2025-06-07 Assistant checkpoint: Clean up storage.ts to use modular system
+cec06f3 2025-06-07 Assistant checkpoint: Implement Redis caching across storage classes
+18207a0 2025-06-07 Assistant checkpoint: Organized hardcoded text into specialized storage classes
+a1992ee 2025-06-07 Checkpoint before assistant change: Generate names and skills dynamically using database content
+9e02c86 2025-06-07 Assistant checkpoint: Remove unused encounter generation code
+0b9f5f3 2025-06-07 Assistant checkpoint: Fix syntax error with malformed backticks
+30b9aac 2025-06-07 Assistant checkpoint: Fix syntax error in storage.ts
+b6956f1 2025-06-07 Assistant checkpoint: Move hard-coded content to database and update generators
+14bb68e 2025-06-07 Assistant checkpoint: Create comprehensive README.md with project documentation
+e1a0e6a 2025-06-07 Checkpoint before assistant change: Expand tech stack with cloud-based data caching for enhanced performance
+f03c311 2025-06-07 Added support for Redis + Upstash
+53cc8b4 2025-06-07 Assistant checkpoint: Add spacing above bottom button
+fe9190f 2025-06-07 Assistant checkpoint: Re-add health display with numbers only
+1222e42 2025-06-07 Assistant checkpoint: Remove health bar from crawler card
+f0764cb 2025-06-07 Assistant checkpoint: Fix button styling and update Floor/Credits colors
+2fbbe7c 2025-06-07 Assistant checkpoint: Fix crawler card spacing and move Season Status to right column
+462bc9f 2025-06-07 Assistant checkpoint: Remove Select button, fix stats spacing, move Season Status
+76e08b7 2025-06-07 Assistant checkpoint: Split routes.ts into modular feature-based files
+882995c 2025-06-06 Assistant checkpoint: Split storage into focused modules
+26bb1ca 2025-06-06 Checkpoint before assistant change: Centralize combat and event logic to facilitate code sharing between systems
+38622dd 2025-06-06 Introduce combat and event systems to enhance gameplay experience
+916a54c 2025-06-06 Assistant checkpoint: Added missing combat system methods and fixed interface issues
+03c90b1 2025-06-06 Checkpoint before assistant change: Address issue preventing display of enemy units during combat
+176236b 2025-06-06 Assistant checkpoint: Refactor combat and events systems to shared directory
+805b5c5 2025-06-06 Checkpoint before assistant change: Improve user experience by showing relevant game environment information
+810715e 2025-06-06 Assistant checkpoint: Refactored tactical view: moved hooks to top, extracted pure helpers
+ae5c530 2025-06-06 Assistant checkpoint: Fix React hooks order violation in TacticalViewPanel
+a0c4b9a 2025-06-06 Checkpoint before assistant change: Improve application stability by addressing connection and rendering issues
+4dc90da 2025-06-06 Assistant checkpoint: Fix React hooks order in TacticalViewPanel
+3798d02 2025-06-06 Checkpoint before assistant change: Address various errors that impact user experience and overall stability
+27489f8 2025-06-06 Assistant checkpoint: Fix hotbarActions initialization order
+32f7985 2025-06-06 Checkpoint before assistant change: Address multiple errors impacting the application's stability and functionality
+4e3aaab 2025-06-06 Restored to 'e687ce6283fca40d84c243302b03528e9424d009'
+15efb46 2025-06-06 Assistant checkpoint: Fix HP display and damage handling in tactical view
+f8f30cd 2025-06-06 Assistant checkpoint: Fix HP display and damage synchronization
+cfa287a 2025-06-06 Checkpoint before assistant change: Address errors related to crawler HP display and damage processing
+e687ce6 2025-06-06 Assistant checkpoint: Add keyboard hotkeys 1-0 for hotbar actions
+0e7c23d 2025-06-06 Assistant checkpoint: Reduced hotbar to 10 actions with cooldown indicators
+9afe46f 2025-06-06 Assistant checkpoint: Added normal, heavy, and ranged attacks to hotkeys 7-9
+a361695 2025-06-06 Assistant checkpoint: Enhanced targeting with auto-selection and movement
+8730a15 2025-06-06 Assistant checkpoint: Fix Target component syntax error
+2e568a7 2025-06-06 Assistant checkpoint: Fix events order and empty space selection UI
+b4f3202 2025-06-06 Checkpoint before assistant change: Improve how the tactical display works and correct icon display errors
+13a4f95 2025-06-06 Checkpoint before assistant change: Add more detailed logs to combat system and fix various reactivity issues
+8d71106 2025-06-06 Assistant checkpoint: Fix grid click to respect and auto-set action modes
+bff3da2 2025-06-06 Assistant checkpoint: Fix movement click detection and remove delays
+32543fa 2025-06-06 Latest (buggy) version of the tactical view. WIP
+c704b1c 2025-06-06 Checkpoint before assistant change: Update the game's visual elements to improve user experience
+cf9c13c 2025-06-06 Restored to '2e7ee5b832b6456ef790111612d313e749c3686f'
+ad3895f 2025-06-06 Assistant checkpoint: Fix UI refresh after move actions and restart server
+e612166 2025-06-06 Checkpoint before assistant change: Improve combat system by only processing when needed for better performance
+a50223e 2025-06-06 Assistant checkpoint: Fix combat processing and map click handling
+2e7ee5b 2025-06-06 Assistant checkpoint: Add auto-select player on hotbar click and grace period
+727f957 2025-06-06 Assistant checkpoint: Fix selection indicator and auto-execute actions
+21f7a1f 2025-06-06 Assistant checkpoint: Fix entity deselection and action queue execution
+ca51c95 2025-06-06 Assistant checkpoint: Modified player selection to only occur on hotbar clicks
+15004b7 2025-06-06 Assistant checkpoint: Fix move action and add custom cursor
+e1ca0db 2025-06-06 Assistant checkpoint: Fix hotbar move action functionality
+a6b4d4c 2025-06-06 Assistant checkpoint: Implement functional hotbar with move and attack targeting
+c6a0990 2025-06-06 Assistant checkpoint: Fix move action handling in combat system
+a733cca 2025-06-06 Assistant checkpoint: Add favicon and restart server
+a42f607 2025-06-06 Assistant checkpoint: Fix syntax error in tactical view panel
+6b0a72d 2025-06-06 Assistant checkpoint: Add hotbar with numbered action buttons and keyboard shortcuts
+4786462 2025-06-06 Assistant checkpoint: Fix action queue execution by auto-starting processing
+b3b9ce6 2025-06-06 Assistant checkpoint: Fix action queue processing to remove executed actions
+1f2f311 2025-06-06 Assistant checkpoint: Add action queue visualization panel
+dff64a4 2025-06-06 Assistant checkpoint: Add right-click movement options for empty grid space
+97ae73b 2025-06-06 Assistant checkpoint: Add movement system to combat
+586ecd3 2025-06-06 Checkpoint before assistant change: Add image demonstrating the problem that players are unable to move
+f20232a 2025-06-06 Restored to '0f8da9d0bf71902243a654675b3a810f1bff5b76'
+6a34c02 2025-06-06 Assistant checkpoint: Improved combat flow with movement and auto-start
+0f8da9d 2025-06-06 Assistant checkpoint: Refactored room events to separate UI from game logic
+819105c 2025-06-06 Checkpoint before assistant change: Improve display of room activity with new event types and information
+224c068 2025-06-06 Assistant checkpoint: Fix syntax error in tactical view panel
+ae1f1e4 2025-06-06 Assistant checkpoint: Enhanced combat system with AI, range, and movement
+8f71c67 2025-06-06 Assistant checkpoint: Remove event counter, change hostile discovery icon to red, revert to relative timestamps
+2066fc4 2025-06-06 Restored to 'b04eb9294c4d4f11fd8e4704dff4366ea361699f'
+d5f9c5e 2025-06-06 Assistant checkpoint: Update timestamps, remove counter, change hostile icon color
+b04eb92 2025-06-06 Assistant checkpoint: Add timestamps and crawler ID to room events
+a8d11ef 2025-06-06 Assistant checkpoint: Fix health bar display condition
+81c8d23 2025-06-06 Assistant checkpoint: Mobs spawn with full health, hide health bars for undamaged entities
+348d886 2025-06-06 Assistant checkpoint: Update movement icon to Zap (winged boot)
+99d7e9f 2025-06-06 Assistant checkpoint: Made event lines more compact, added legend
+29d56c3 2025-06-06 Assistant checkpoint: Fix syntax and CSS import errors
+82eebbd 2025-06-06 Assistant checkpoint: Fix room events panel to show real game events with proper styling
+e87c12a 2025-06-06 Assistant checkpoint: Add Room Events panel with real-time activity tracking
+d7e1b9d 2025-06-06 Assistant checkpoint: Fixed duplicate function declaration error
+a0559b2 2025-06-06 Assistant checkpoint: Enhanced entry positioning and party support
+a363dd7 2025-06-06 Assistant checkpoint: Update entity positioning to use discrete grid cells
+3cbbcc1 2025-06-06 Assistant checkpoint: Make tactical grid responsive to container size
+f13879c 2025-06-06 Checkpoint before assistant change: Repair connection issues that prevent the grid from displaying correctly
+df9cb8f 2025-06-06 Assistant checkpoint: Change tactical grid from 17x17 to 15x15
+cf13326 2025-06-06 Assistant checkpoint: Changed tactical view to 15x15 grid with smaller icons
+a8323f6 2025-06-06 Restored to 'dcf0913e05a00fab4f2e319b4f5482e6887e75dc'
+94676d2 2025-06-06 Assistant checkpoint: Fix room state database conflict resolution
+f46a234 2025-06-06 Checkpoint before assistant change: Improve the reliability of the website by fixing communication errors
+97d90f5 2025-06-06 Assistant checkpoint: Fix database constraints and tactical data errors
+779c281 2025-06-06 Checkpoint before assistant change: Remove initial database setup and resolve WebSocket connection issues
+6810231 2025-06-06 Assistant checkpoint: Run migration and fix room state errors
+c789924 2025-06-06 Checkpoint before assistant change: Improve application stability by resolving multiple console error messages
+184778a 2025-06-06 Assistant checkpoint: Fix undefined property access errors in tactical data
+f79d5c7 2025-06-06 Checkpoint before assistant change: Investigate and document client-side console errors for debugging purposes
+2f211ab 2025-06-06 Assistant checkpoint: Add missing room state management methods
+a87f6c3 2025-06-06 Checkpoint before assistant change: Improve readability in storage functions by adjusting line wrapping
+c44d20e 2025-06-06 Assistant checkpoint: Add persistent room states and dynamic mob spawning system
+dcf0913 2025-06-06 Assistant checkpoint: Fix player entry positioning
+9e48f4b 2025-06-06 Assistant checkpoint: Add context menus and enhanced mouse interactions
+97da832 2025-06-06 Assistant checkpoint: Fixed duplicate function declaration
+8787638 2025-06-06 Assistant checkpoint: Add directional entry positioning for players
+bd8e995 2025-06-06 Assistant checkpoint: Create combat system class and integrate with tactical view
+92a5686 2025-06-06 Assistant checkpoint: Fix tactical view loading and make it square
+b3d90a8 2025-06-06 Assistant checkpoint: Updated tactical view to use real room data
+06a0460 2025-06-06 Assistant checkpoint: Created tactical view panel for room visualization
+50052d6 2025-06-06 Checkpoint before assistant change: Investigate and resolve several websocket connection and rendering issues
+b5d52ce 2025-06-05 Assistant checkpoint: Fix faction borders on scanned rooms
+7ebac50 2025-06-05 Assistant checkpoint: Add starting coordinates to faction logging
+533d2be 2025-06-05 Assistant checkpoint: Fix import paths in dungeon generator
+8d1ff72 2025-06-05 Assistant checkpoint: Fix dungeon generator import paths
+4cc31a3 2025-06-05 Assistant checkpoint: Preserve room type colors for scanned rooms
+a61878f 2025-06-05 Assistant checkpoint: Add faction borders for scanned rooms with faint styling
+61b01af 2025-06-05 Assistant checkpoint: Fix debug panel crawler data in sponsor view
+a4a2063 2025-06-05 Assistant checkpoint: Update header avatar and remove redundant one
+1aa8040 2025-06-05 Assistant checkpoint: Fix missing imports and property access errors
+042065d 2025-06-05 Checkpoint before assistant change: Improve the website by resolving errors and accessibility issues
+44ae458 2025-06-05 Assistant checkpoint: Fix leaderboard error, add getFloorBounds, update avatars
+2eceabd 2025-06-05 Assistant checkpoint: Fix crawler creation by including serial field
+3c1fada 2025-06-05 Assistant checkpoint: Fix crawler creation null health constraint error
+24b9d10 2025-06-05 Checkpoint before assistant change: Improve the way crawlers are created and displayed in the user interface
+a62073d 2025-06-05 Assistant checkpoint: Add migration SQL command and db:migrate script
+384b1ef 2025-06-05 Assistant checkpoint: Add serial column and update avatar generation
+22c70d3 2025-06-05 Restored to '5bfa7a69c6c813b7941e9b66ac86e59bae457333'
+0c184e2 2025-06-05 Checkpoint before assistant change: Address multiple console warnings and errors to improve user experience
+07f0d73 2025-06-05 Assistant checkpoint: Fix API query for next crawler ID
+1bd089f 2025-06-05 Assistant checkpoint: Fix syntax errors in storage.ts
+47bfc45 2025-06-05 Assistant checkpoint: Fix syntax errors in init-db.ts
+d6f4076 2025-06-05 Assistant checkpoint: Replace DB call with in-memory crawler ID counter
+f659065 2025-06-05 Assistant checkpoint: Use predicted crawler ID for consistent avatars
+5bfa7a6 2025-06-05 Assistant checkpoint: Fix leaderboard crawler name access
+2814309 2025-06-05 Checkpoint before assistant change: Use a utility function to generate user avatar URLs for the leaderboard
+d53305e 2025-06-05 Assistant checkpoint: Fix avatar icons in crawler selection and leaderboard
+d059d92 2025-06-05 Assistant checkpoint: Remove auto-margin from Starting Equipment section
+e4b9009 2025-06-05 Assistant checkpoint: Align crawler card sections horizontally
+efacbad 2025-06-05 Assistant checkpoint: Fix crawler selection modal header
+2212e99 2025-06-05 Assistant checkpoint: Fix JSX syntax error in sponsor view
+b96a57a 2025-06-05 Assistant checkpoint: Fix duplicate function and add debug panel
+6f5dbef 2025-06-05 Assistant checkpoint: Updated sponsor view with debug panel and text changes
+da30189 2025-06-05 Assistant checkpoint: Add crawler creation dialog to sponsor view
+5b619e5 2025-06-05 Assistant checkpoint: Fix crawler management on sponsor page
+190339c 2025-06-05 Checkpoint before assistant change: Relocate dungeon and faction generation logic into the features directory
+6c9faf9 2025-06-05 Assistant checkpoint: Reorganized files into views, panels, and features structure
+58b08f2 2025-06-05 Assistant checkpoint: Replace threat/difficulty with dynamic encounter lists
+b418650 2025-06-05 Assistant checkpoint: Fix dungeon generation: add treasure rooms, environments, improve factions
+6b472fc 2025-06-05 Assistant checkpoint: Add spacing to prevent button overlap
+90f20e7 2025-06-05 Assistant checkpoint: Remove MapPreview from crawler mode
+adf9cb2 2025-06-05 Assistant checkpoint: Add orange neutral mob indicators to map
+2f8f7bd 2025-06-05 Assistant checkpoint: Add map preview to crawler mode
+d40585f 2025-06-05 Assistant checkpoint: Add enemy/player indicators to map with preview
+493eb9d 2025-06-05 Assistant checkpoint: Fix scroll wheel preventDefault errors
+3e796f9 2025-06-05 Assistant checkpoint: Fix scroll wheel error, reorder zoom buttons, remove center button
+5a0fce7 2025-06-05 Assistant checkpoint: Add center on player button, reorder controls, add WASD and wheel support
+586e7a1 2025-06-05 Assistant checkpoint: Fix faction scope error and add floor bounds API
+fef370d 2025-06-05 Checkpoint before assistant change: Improve the map feature by addressing connection and data loading issues
+827efb5 2025-06-05 Assistant checkpoint: Add faction-colored borders to map rooms
+5edd200 2025-06-05 Checkpoint before assistant change: Improve map room appearance and make scanned rooms more visible
+fc31dc2 2025-06-05 Adjusted crawler icon on mini-map to be consistent with map icon.
+2eb5a42 2025-06-05 renamed mini-map-new to just map.tsx
+00a1fde 2025-06-05 Assistant checkpoint: Renamed mini-map-new.tsx to map.tsx and updated imports
+a7657cc 2025-06-05 Assistant checkpoint: Remove success toast for movement
+5a74b9b 2025-06-05 Assistant checkpoint: Optimize database queries and reduce API polling
+bbc9691 2025-06-05 Fixed a bug with the expanded map header where it took up half of the pop-up.
+4ff55b8 2025-06-05 Assistant checkpoint: Fix expanded map layout to use full dialog space
+f2932fb 2025-06-05 Assistant checkpoint: Redesigned expanded map with header controls and larger view
+f78ff01 2025-06-05 Assistant checkpoint: Add map bounds API and update boundary calculations
+27a8f13 2025-06-05 Assistant checkpoint: Add 10% border and scroll constraints to mini-map
+c47f5c0 2025-06-05 Added debug option to reveal 100 rooms around crawler
+b053ef4 2025-06-05 Assistant checkpoint: Add Eyes of D'Bug debug spell with 100 scan range
+42b933c 2025-06-05 Assistant checkpoint: Add scan range to debug panel
+96d601d 2025-06-05 Assistant checkpoint: Fix server reference error in routes
+7f04ed4 2025-06-05 Assistant checkpoint: Implement spell effect system for scan boost
+1e7fcc0 2025-06-05 Assistant checkpoint: Add scan ability with room type color coding on mini-map
+d730ed2 2025-06-05 Assistant checkpoint: Remove emoji icons from environment badges
+028988b 2025-06-05 Assistant checkpoint: Add environment badge to room display
+353a656 2025-06-05 Assistant checkpoint: Create manual migration to fix encounters type column
+23d859f 2025-06-05 Assistant checkpoint: Add environment field to rooms with indoor/outdoor/underground options
+9a51bbd 2025-06-05 Checkpoint before assistant change: Silence verbose debug logging related to the current room and floor
+f9d14b2 2025-06-05 Assistant checkpoint: Add error logging and run migration
+ab37c4c 2025-06-05 Restored to '1324f5cbd334fd4c1ee886b2c1919cfe21d73d82'
+d26b326 2025-06-05 Checkpoint before assistant change: Add more information to the game map and adjust how crawlers work
+b519d25 2025-06-05 Assistant checkpoint: Add scanning system for rooms
+77da064 2025-06-05 Fixed map to ensure that it shows rooms on current floor only, including discovered and adjacent rooms.
+1324f5c 2025-06-05 Assistant checkpoint: Add floorId to adjacent rooms in getExploredRooms
+efa47ad 2025-06-05 Checkpoint before assistant change: Show nearby, unvisited rooms on the mini-map along with the current room
+575f7cf 2025-06-05 Restored to '5facceaca24c8585dd5f416cb67afcd3ca4f3e01'
+f38c0b1 2025-06-05 Assistant checkpoint: Add missing floorId to explored rooms data
+5faccea 2025-06-05 Checkpoint before assistant change: Improve mini-map by displaying rooms on the correct floor
+05962e7 2025-06-05 Added faction territory in dungeon
+d9ae4b8 2025-06-04 Restored to '510604ad4906deca3628914f6a1c677b350e00c0'
+507a76e 2025-06-04 Assistant checkpoint: Fix factions endpoint database query
+510604a 2025-06-04 Checkpoint before assistant change: Provide faction information to the website for users to view
+eb3f191 2025-06-04 Assistant checkpoint: Add missing /api/factions endpoint
+21e3450 2025-06-04 Assistant checkpoint: Add factions API endpoint and debugging
+c64f8cf 2025-06-04 Checkpoint before assistant change: Display which group controls rooms throughout the dungeon floors
+4b7e3be 2025-06-04 Fix dungeon generation so that rooms will actually generate. Factions assigned to rooms, but currently random (will fix later)
+767bd38 2025-06-04 Assistant checkpoint: Fix TypeScript import paths and update script runner
+a71438f 2025-06-04 Assistant checkpoint: Fix dungeon generator imports and missing functions
+bdbed6b 2025-06-04 Checkpoint before assistant change: Focus database initialization on core components for game setup
+9f564ab 2025-06-04 Assistant checkpoint: Fix import paths in dungeon-generator.ts
+5344e49 2025-06-04 Checkpoint before assistant change: Add error logging to track down issues within the dungeon generator
+5b9510a 2025-06-04 Assistant checkpoint
+7297e46 2025-06-04 Assistant checkpoint: Fix import paths in dungeon generation script
+a563d59 2025-06-04 Assistant checkpoint: Fix module imports and re-run dungeon generation
+87f940e 2025-06-04 Assistant checkpoint: Add error handling and fix Room type
+97e9c83 2025-06-04 Assistant checkpoint: Add missing floor themes definition
+3709fd3 2025-06-04 Checkpoint before assistant change: Rebuild the dungeon by generating and clearing rooms for each floor
+d8c770a 2025-06-04 Checkpoint before assistant change: Create new dungeons each game by retrieving floor data from the database
+80db1d4 2025-06-04 Assistant checkpoint: Fix missing floors import in init-db.ts
+0f22562 2025-06-04 Checkpoint before assistant change: Make sure all rooms in the dungeon are accessible from the entrance
+c0d32f6 2025-06-04 Checkpoint before assistant change: Automate the creation of a dungeon environment with faction assignments
+71d4152 2025-06-03 Cleaned up the file structure a bit, deleting some mistakenly duplicated files and starting a dungeon folder in src
+d5d8fd7 2025-06-03 Checkpoint before assistant change: Relocate dungeon generator files to a more suitable directory
+b1b5b91 2025-06-03 Restored to 'e0e93311517df36f9218acec52966610e8c7e0e5'
+0c3c68c 2025-06-03 Assistant checkpoint: Reverted server files to working state
+a471633 2025-06-03 Assistant checkpoint: Fix storage export and function names
+a0b2c82 2025-06-03 Assistant checkpoint: Implement proper Express server setup
+4d2dc6c 2025-06-03 Assistant checkpoint: Fix script paths in package.json
+fe67843 2025-06-03 Checkpoint before assistant change: Rebuild entire game from scratch with updated features and components
+e0e9331 2025-06-03 Assistant checkpoint: Reorganize project structure with better separation
+d863154 2025-06-03 Checkpoint before assistant change: Refine faction details and configuration for improved game balance
+7e2a786 2025-06-03 Checkpoint before assistant change: Improve database connection and add script to fill the faction table
+b0f547f 2025-06-03 Made some small changes to factions
+c968ceb 2025-06-03 Mostly Faction Preparation. Honestly there's too much stuff here as I've been struggling with Replit to get git to work. Going to try to do smaller commits moving forward.
+5b40490 2025-06-03 Checkpoint before assistant change: Introduce a system for categorizing NPCs and theming game levels
+c0667a6 2025-06-03 Checkpoint before assistant change: Enhance progress bars with color options and document the tech stack
+09d9608 2025-06-03 Assistant checkpoint: Fix missing CardContent closing tag
+48b9245 2025-06-03 Checkpoint before assistant change: Fix application startup errors by correcting avatar image loading
+76c5412 2025-06-02 Assistant checkpoint: Fix room name display in mini-map
+c507f66 2025-06-02 Checkpoint before assistant change: Enhance crawler details, mini-map, and debug panel for better gameplay
+f83a8d6 2025-06-01 Restored to '6b546055c5147b2d71fcfdc0d5e858b50fde0916'
+d583aa0 2025-06-01 Saved your changes before rolling back
+45aab3f 2025-06-01 Improve mini-map focus on player movement and initial map load
+4a10c1d 2025-06-01 Ensure mini-map focuses on the crawler's location on initial render
+ce3ae5d 2025-06-01 Improve mini-map centering, especially when exploring distant areas
+50b6d00 2025-06-01 Use the old mini-map to avoid breaking the game after recent changes
+b5d811a 2025-06-01 Remove obsolete map components and simplify map display logic
+050198d 2025-06-01 Keep the explorer's location within the map's visible area
+27f05b8 2025-06-01 Improve map display by centering the player's location in the interface
+f4b555c 2025-06-01 Investigate why crawler icon is missing from the mini-map display
+0696154 2025-06-01 Improve the mini-map to accurately display the crawler's current location
+28892d5 2025-06-01 Improve mini-map display logic to handle different data sources correctly
+1f34db2 2025-06-01 Improve mini-map to center on current location and update location icon
+2e4bdad 2025-06-01 Add button to quickly focus the mini-map view on the crawler's location
+9b9ad8b 2025-06-01 Improve mini-map navigation by automatically focusing on the player's location
+36a4ec5 2025-06-01 Make the mini-map focus on the player as they move between different rooms
+047a955 2025-06-01 Ensure mini-map stays centered on the player's location at all times
+468abc3 2025-06-01 Restored to '9bbbb637bafd255d4ad4119909eb8879d5ea8fa9'
+5bb659d 2025-06-01 Saved your changes before rolling back
+02ed729 2025-06-01 Saved your changes before rolling back
+1e4a860 2025-06-01 Improve the mini-map by ensuring it accurately displays player location
+13adeae 2025-06-01 Provide room discovery data to help players navigate the dungeon world
+50b996d 2025-06-01 Improve mini-map functionality by logging explored and current room data
+be88b27 2025-06-01 Improve mini-map display and provide better feedback when rooms aren't shown
+d55eb55 2025-06-01 Improve mini-map display and messaging for a clearer user experience
+8bbbfe7 2025-06-01 Improve map display and fix issues with hook rendering in crawler mode
+686ed6c 2025-06-01 Keep the player's location centered within the mini-map display area
+9bbbb63 2025-06-01 Only highlight the current room and center the mini-map on the player
+c33322f 2025-06-01 Improve mini-map display and ensure unique connections between rooms
+61814cf 2025-06-01 Ensure the game always knows where you are in the dungeon after refresh
+7265d05 2025-06-01 Improve user experience by ensuring the map loads correctly upon refreshing
+a5ad3de 2025-06-01 Improve the way the mini-map shows current location and explored areas
+09474bc 2025-06-01 Improve map display and add a message when the current room is unknown
+c2a5939 2025-06-01 Show a complete view of the map in the crawler exploration interface
+a0a2b59 2025-06-01 Add full map feature to mini-map, showing all rooms on the current floor
+097e880 2025-06-01 Show all discovered rooms on the mini-map display for better navigation
+cbade93 2025-06-01 Initialize core game loop and basic room generation functionality
+a189dae 2025-06-01 Provide players with an understanding of their crawler's map exploration
+38e1cd7 2025-06-01 Improve crawler's map system with enhanced room information display
+184905d 2025-06-01 Improve mini-map by enabling real-time debug mode and displaying status
+1449db6 2025-06-01 Improve full map display and add detailed logging for debugging purposes
+ec7cace 2025-06-01 Show debug information to help diagnose why map tiles are not loading
+3895b7e 2025-06-01 Acknowledge bug report about missing debug badge and map reveal issue
+34b5fe1 2025-06-01 Allow developers to view the entire map and toggle debug information
+4b047bc 2025-06-01 Show debug indicator on mini-map when full map is enabled
+2884415 2025-06-01 Improve map display and add debugging endpoint for room data
+bf8578d 2025-06-01 Add debug option to view the entire map for troubleshooting purposes
+15d6254 2025-06-01 Add debug option to toggle between showing the full map or explored areas
+6b54605 2025-06-01 Improve level design for more organic and interconnected environments
+6763ffc 2025-06-01 Created a checkpoint
+d48033c 2025-06-01 Inform player when they cannot move to a different location
+d761c6f 2025-06-01 Remake initial dungeon levels to provide varied and expansive exploration
+c4e8fc8 2025-06-01 Generate larger and more varied early-game dungeon floors for players
+fccf892 2025-06-01 Rebuild the initial levels with varied themed rooms and expanded layouts
+cf99f32 2025-06-01 Resolve issue preventing movement to the lower levels of the game
+668940d 2025-06-01 Direct the crawler menu option to the user's currently active crawler
+b3ab3cc 2025-06-01 Improve room tracking and fix issues with displaying map exploration
+dee5346 2025-06-01 Fix dungeon descent so crawler moves between floors as expected
+1ca8e6d 2025-06-01 Fix issue where new floors have no exits and incorrectly track player location
+61e0100 2025-06-01 Ensure new crawlers appear in the correct starting location when created
+9a286a0 2025-06-01 Set up initial game world, with procedurally generated floors and dungeons
+245b184 2025-06-01 Allow crawlers to descend to deeper levels of the dungeon using staircases
+3f3d760 2025-06-01 Add a new exit type for the staircase, allowing crawlers to descend floors
+84f0766 2025-06-01 Improve performance of the leaderboard and make it more responsive
+e1ecb88 2025-06-01 Remove the in-game chat feature from the sponsor page
+13037b5 2025-06-01 Remove unnecessary screen height constraint to improve layout flexibility
+5d3e4c6 2025-06-01 Remove minimum height constraints from main content areas on web pages
+23d56d0 2025-06-01 Improve screen layout and limit crawler controls to crawler pages
+655b75d 2025-06-01 Route player to their active crawler and disable link when inactive
+08200e3 2025-06-01 Add navigation for easier movement between sections of the game
+1dc2ace 2025-06-01 Improve core game mechanics and underlying systems for enhanced stability
+c6db92d 2025-06-01 Improve room display and crawler movement by enabling debug features
+4ce1917 2025-06-01 Enhance debug panel with coordinate display and energy usage control
+853222f 2025-06-01 Enhance debugging tools and displays to aid game development and testing
+da51fae 2025-06-01 Remove on-screen debug elements and consolidate into a hidden panel
+9aed6df 2025-06-01 Add developer tools to easily test and adjust game states and crawler settings
+0adb0e7 2025-06-01 Show safe rooms as green shields on the map, improving player awareness
+8ec61d8 2025-06-01 Highlight the player's current location with a clear visual cue
+5a7f7c0 2025-06-01 Improve the visibility of the player's location on the mini-map
+960f078 2025-06-01 Make the current room indicator less obtrusive on the mini-map display
+f2f3018 2025-06-01 Improve how the mini-map displays current location in the game world
+b8215a3 2025-06-01 Show the player's current location more clearly on the in-game mini-map
+c839824 2025-06-01 Restore missing icon, fixing a critical error preventing the application from loading
+ec296a0 2025-06-01 Add ability to reset crawler position to the dungeon entrance
+9dfc0de 2025-06-01 Show crawler location with map coordinates and reset crawler position
+03176af 2025-05-31 Resets the dungeon and generates a new layout when requested by a user
+529f46b 2025-05-31 Add ability to rebuild the entire dungeon with a new layout and rooms
+09614a8 2025-05-31 Improve the look and feel of the mini-map room indicators for clarity
+798bf2d 2025-05-31 Display safe rooms on the mini-map with a clear shield icon
+530697d 2025-05-31 Created a checkpoint
+b2b2e7a 2025-05-31 Improve map and dungeon generation for a more intuitive experience
+a8bbef4 2025-05-31 Conditionally show debug panel only during development for easier testing
+52e36c4 2025-05-31 Allow crawler movement even when energy is insufficient for debugging
+bfdcf81 2025-05-31 Allow crawler movement without energy cost for debug purposes
+d4a2b89 2025-05-31 Display energy changes and add debugging options to crawler status bar
+078bfe1 2025-05-31 Improve crawler status display and add option to disable energy usage
+fcdf352 2025-05-31 Improve crawler status display and add debugging options for the game
+1754581 2025-05-31 Refactor crawler page for enhanced layout and simplified data handling
+8247685 2025-05-31 Rearrange the crawler page layout and navigation to improve user experience
+6a2b61b 2025-05-31 Rearrange the crawler mode screen to show equipment and map information
+6963abb 2025-05-31 Improve crawler mode and adjust the main interface for better usability
+63ddb67 2025-05-31 Fix issue preventing users from properly entering crawler mode in game
+508a858 2025-05-31 Improve crawler selection by removing redundant information from card
+038dcda 2025-05-31 Improve the character selection screen to show key stats more clearly
+9e572c2 2025-05-31 Ensure crawlers meet the necessary requirements to make informed choices
+bfbf65e 2025-05-31 Improve the game by allowing for more dynamic and varied encounters
+7e33465 2025-05-31 Improve the appearance of crawler information cards on the user interface
+b0b6be7 2025-05-31 Adjust the crawler cards to ensure consistent heights across columns
+777d40a 2025-05-31 Improve how crawler names and background text display on crawler cards
+37f3719 2025-05-31 Improve the display of active crawlers on the home page interface
+9d4a9d8 2025-05-31 Improve the layout of crawler cards to ensure consistent alignment
+1217156 2025-05-31 Show the crawler's most important stat on their profile card
+50e3399 2025-05-31 Improve crawler summary pages by reorganizing information and improving style
+ec3ddbb 2025-05-31 Refine character backgrounds to better fit the game's narrative
+c5f9897 2025-05-31 Give crawlers jobs from before the dungeon, ranging from mundane to weird
+695044c 2025-05-31 Set the default planet and species for new characters in the game
+118f83c 2025-05-31 Generate crawlers based on planet and species for a more varied world
+d4d1b0d 2025-05-31 Ensure crawlers have sufficient energy before entering new rooms
+5913518 2025-05-31 Refine crawler movement logic to adjust energy cost for explored areas
+447121d 2025-05-31 Reduce energy consumption for crawler movement and simplify energy deduction
+c0a74fd 2025-05-31 Fix energy cost calculation and improve how the map is displayed to users
+cb86056 2025-05-31 Improve map interface and fix energy consumption when moving crawlers
+47f5066 2025-05-31 Improve mini-map so users can drag it correctly inside the map window
+3990492 2025-05-31 Enhance mini-map with panning, zoom, and expanded view for better navigation
+2db5def 2025-05-31 Improve mini-map with drag-to-pan and a zoomable, scrollable full map
+f961143 2025-05-31 Reduce energy when moving crawlers through previously explored safe rooms
+76dfdb3 2025-05-31 Keep track of nearby unknown rooms even after the player moves away
+e833ee4 2025-05-31 Ensure mini-map display remains centered on the player's current location
+9909f6d 2025-05-31 Improve crawler movement tracking and the way visited rooms are stored
+b3f4cbb 2025-05-31 Improve mini-map visuals to better represent different room types
+fe510ae 2025-05-31 Show explored rooms on the mini-map as users navigate the dungeon
+e48210e 2025-05-31 Update mini-map to display only explored rooms and adjacent unexplored rooms
+e4f854a 2025-05-31 Improve mini-map to display only discovered areas and adjacent rooms
+7640097 2025-05-31 Improve the feel of map navigation by making room transitions appear smoother
+25b8749 2025-05-31 Improve the feel of movement across the map as you travel rooms
+bd026c5 2025-05-31 Update the mini-map only when player changes location for better experience
+8bccfee 2025-05-31 Update the mini-map in real-time as players explore new areas
+872fa45 2025-05-31 Add arrow graphics to the mini-map to visually indicate upwards direction
+3e22516 2025-05-31 Improve mini-map display to reflect the crawler's location accurately
+d334e63 2025-05-31 Enhance mini-map with player location and expand initial game floor
+62a7e9c 2025-05-31 Improve mini-map appearance and correct its orientation for better readability
+4cb42b9 2025-05-31 Display a compact, informative grid-based map showing nearby explored areas
+a48e5b1 2025-05-31 Improve mini-map rendering to offer a clearer view of explored locations
+dbdfdd5 2025-05-31 Improve crawler display and interaction on the main user interface
+d57106f 2025-05-31 Improve the layout and functionality of the crawler management page
+85ac736 2025-05-31 Improve mini-map display with correct orientation and connection indicators
+a4f3f38 2025-05-31 Add visual representation of explored areas to help players navigate
+8cacfcd 2025-05-31 Show players a map of rooms they've already visited and mark current room
+a985a61 2025-05-31 Make sure crawlers always move correctly between rooms when exploring
+ebb3f72 2025-05-31 Fixes crawler movement errors and ensures proper data cleanup after deletion
+afe2e6d 2025-05-31 Allow crawlers to explore rooms and move around the dangerous dungeon
+ad93c56 2025-05-31 Improve crawler navigation and dungeon exploration user interface
+932b69c 2025-05-31 Enable keyboard controls and create initial dungeon map for exploration
+17c9f0b 2025-05-31 Enable crawlers to move between rooms and see who else is there
+5c6e1fc 2025-05-31 Establish dungeon layout for crawler navigation and strategic exploration
+63da574 2025-05-31 Ensure players lose items when trading and only gain credits for actions
+8923ba6 2025-05-31 Show players what they gained or lost after making a decision
+0a96c40 2025-05-31 Improve encounter outcomes based on choices and display gains/losses
+007f64f 2025-05-31 Ensure new characters begin their journey at the appropriate level
+9ad7b93 2025-05-31 Start new crawlers at level one, granting immediate access to base stats
+15db4f2 2025-05-31 Show a memorial when a crawler dies and fix the related rendering errors
+0fa531b 2025-05-31 Enhance crawler experience with death messages and debug energy recovery
+978427e 2025-05-31 Add debug option to restore crawler energy and new exploration events
+1c32405 2025-05-31 Show the crawler's hidden luck stat during debugging on crawler pages
+5121bf3 2025-05-31 Refine crawler interactions and add hidden luck factor to influence rolls
+e350646 2025-05-31 Add hidden luck stat to crawlers and show when debugging for game balance
+5b8187c 2025-05-31 Reflect crawler stat changes throughout character selection and itemization
+d5056d1 2025-05-31 Show updated crawler stats on selection screens and exploration panel
+947bb13 2025-05-31 Revamp crawler stats to improve strategic character customization choices
+7f72c8c 2025-05-31 Clarify the potential risks and requirements of choices during exploration
+3e4180d 2025-05-31 Move the exploration action outside of the encounter choices
+7df8bb0 2025-05-31 Improve data handling from the server, fix WebSocket connection issues
+9b6aa1c 2025-05-31 Ensure that exploration events trigger correctly after dungeon crawling
+2847908 2025-05-31 Stop automatic encounter processing to display choices to users
+9fa2f7c 2025-05-31 Introduce interactive encounters with choices during exploration
+731affd 2025-05-31 Improve crawler selection by displaying details in a clear confirmation overlay
+ab1355d 2025-05-31 Ensure displayed crawler information stays current during exploration
+efc59f5 2025-05-31 Update exploration panel to immediately reflect crawler data changes
+b6afb4e 2025-05-31 Make crawler health and energy update during dungeon exploration
+37c3cd3 2025-05-31 Improve crawler names and starter class summaries to enhance the game
+4210060 2025-05-31 Increase number of crawler candidates to provide more options
+7e154fa 2025-05-31 Show all available crawler candidates and improve window spacing
+f0c5848 2025-05-31 Improve crawler selection screen and add more varied crawler origins
+7c69523 2025-05-31 Improve the process of resetting user crawlers to prevent errors
+d121285 2025-05-31 Improve error handling and add a tool to reset crawler progress
+9e075f5 2025-05-31 Add a temporary debug tool to wipe out all of a user's crawlers
+a1ed030 2025-05-31 Improve error messages and add copy functionality to all alerts
+e2e3564 2025-05-31 Improve error messaging when dungeon exploration fails for any reason
+67b8075 2025-05-31 Fix error that prevents players from creating new crawler characters
+35173c3 2025-05-31 Enable error message copying and fix crawler sponsorship process
+478528c 2025-05-31 Show users the exact reason their sponsorship of a crawler has failed
+3fbde91 2025-05-31 Enable crawler creation and ensure crawler data is properly saved
+ce8bb41 2025-05-31 Streamline crawler creation and properly save new crawler data
+303d34b 2025-05-31 Improve crawler generation by adjusting stats and backgrounds
+b6805bc 2025-05-31 Provide players with a selection of characters to choose from before each game
+b1efea9 2025-05-31 Improve game initialization and fix issues preventing users from accessing the game
+7ec91be 2025-05-31 Allow sponsored crawlers to explore dangerous dungeon floors
+2f51346 2025-05-31 Introduce dungeon exploration mechanics and expand crawler stats
+4fc4a34 2025-05-31 Let players choose their unique crawler to begin their dungeon journey
+5a70998 2025-05-31 Provide players with a selection of unique crawlers to choose from
+ecfc281 2025-05-31 Show corporations the current season status and available sponsorships
+04a1dda 2025-05-31 Show players the current game season and their sponsorship availability
+44973d6 2025-05-31 Add game seasons, limit crawler primary sponsorships, and manage availability
+d1f3944 2025-05-31 Update the game to be centered around corporate sponsors instead of individuals
+1d6723e 2025-05-31 Refocus game on corporate sponsors and add initial game data setup
+978e546 2025-05-31 Enhance the game's corporate sponsor theme with generated company names
+117225f 2025-05-31 Build basic structure and interface for the text-based crawler MMO
+5fd8365 2025-05-31 Started building your app
+6b20f1e 2025-05-31 Initial commit

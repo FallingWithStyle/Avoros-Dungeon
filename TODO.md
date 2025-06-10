@@ -109,6 +109,11 @@
   - Unique mechanics per dungeon type
   - Cross-dungeon progression system
 
+- [ ] **Unique Social Clubs**
+  - Exclusive clubs/guilds/temples
+  - Access varies by crawler accomplishments, class, skills, quests, affiliations
+  - Joining one might bar you from others
+
 - [ ] **NPC System**
   - Friendly NPCs with quests
   - Merchants with unique inventories
@@ -141,4 +146,4 @@
 
 ---
 
-*Last updated: January 2025*
+*Last updated: June 10 2025*

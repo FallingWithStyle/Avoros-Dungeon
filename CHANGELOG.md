@@ -146,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replit Auth integration
 - Database migrations system
 
-## [0.0.1] - 2025-01-15
+## [0.0.1] - 2025-05-31
 
 ### Added
 - Initial project setup
