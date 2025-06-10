@@ -5,7 +5,7 @@
 
 Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory. Our roadmap focuses on delivering a polished, scalable, and engaging experience.
 
-## Current Status: v0.8.3 (June 2025)
+## Current Status: v0.8.4 (January 2025)
 
 ✅ **Core Systems Implemented:**
 - Basic dungeon exploration with movement system
@@ -28,19 +28,52 @@ Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 - [ ] **Performance Optimization** - Reduce API polling frequency and optimize database queries
 
 #### Core Feature Completion
+- [ ] **Functional Movement System**
+  - Dynamic movement options (jetpacks, grapple hooks)
+  - Magical movement abilities (puddle jump spell, charge spell)
+  - Physics-based movement mechanics
+  - Movement speed variations and restrictions
 - [ ] **Enhanced Combat System**
-  - Implement meaningful stat calculations for damage/defense
-  - Add different weapon types with unique mechanics
-  - Create status effects (poison, burn, stun, paralysis)
-  - Design boss encounters with special mechanics
-- [ ] **Advanced Equipment System**
-  - Equipment crafting and upgrading
+  - Functional, engaging combat mechanics
+  - Melee weapon system with varied attack patterns
+  - Ranged weapon system (bows, crossbows, throwing weapons)
+  - Shield mechanics with blocking and parrying
+  - Meaningful stat calculations for damage/defense
+  - Status effects (poison, burn, stun, paralysis, bleeding, etc.)
+  - Boss fights with unique mechanics and phases
+- [ ] **Comprehensive Equipment System**
+  - Armor system with different protection types
+  - Equipment picking up from dungeon floors
+  - Looting items from defeated mobs
+  - Equipment crafting and upgrading system
   - Rare/legendary equipment tiers
   - Equipment sets with synergy bonuses
+- [ ] **Magic and Consumables**
+  - Spell casting system with various schools of magic
+  - Wand mechanics for spell channeling
+  - Potion system (healing, buffs, temporary abilities)
+  - Consumable items with strategic uses
+- [ ] **Character Progression**
+  - Class system with distinct playstyles and abilities
+  - Basic skill system for character development
+  - Expansive skill trees with branching paths
+  - Crawler growth and advancement mechanics
+  - Multi-tier progression systems
+- [ ] **Economy and Trading**
+  - Gold currency system
+  - NPC shops with dynamic inventories
+  - Player-to-player item marketplace
+  - Economic balance and item value systems
+- [ ] **Quest and Mission System**
+  - Basic quest implementation
+  - Multi-step quest chains
+  - Multi-layered, branching quests spanning dungeon levels
+  - Dynamic quest generation based on player actions
 - [ ] **Improved Map Navigation**
   - Fog of war for unexplored areas
   - Room bookmarking and waypoints
   - Enhanced minimap overlay
+  - Enormous dungeon levels (100x current size)
 
 #### User Experience Improvements
 - [ ] **Login Screen Redesign** - Update with current classes and theming
@@ -55,10 +88,17 @@ Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
   - Allow players to form and manage corporations
   - Corporation-wide benefits and resource sharing
   - Corporate representative roles and permissions
+  - Advanced corporation options and customization
 - [ ] **Corporation Competition**
   - Corporation vs corporation battles
   - Guild leaderboards and achievements
   - Exclusive corporate contracts and missions
+  - Corporate territory control and influence
+- [ ] **Player-Driven World Changes**
+  - Room and level destruction mechanics
+  - Environmental modification abilities
+  - Persistent world changes based on player actions
+  - Collaborative building and destruction projects
 
 #### Advanced Economy
 - [ ] **Enhanced Marketplace**
