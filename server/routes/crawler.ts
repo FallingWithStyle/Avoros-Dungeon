@@ -335,13 +335,14 @@ export function registerCrawlerRoutes(app: Express) {
         ...scannedRooms.map(r => r.id)
       ]);
 
-      const mobSummary: Record<number, { hostileCount: number; neutralCount: number; playerCount: number }> = {};
+      const mobSummary: Record<number, { hostileCount: number; neutralCount: number; friendlyCount: number; playerCount: number }> = {};
 
       // Get mob data for each room
       for (const roomId of allRoomIds) {
         try {
           const hostileMobs = await storage.mobStorage.getHostileMobs(roomId);
           const neutralMobs = await storage.mobStorage.getNeutralMobs(roomId);
+          const friendlyMobs = await storage.mobStorage.getFriendlyMobs(roomId);
 
           // Get player count for this room (you may need to implement this)
           // For now, we'll set it to 0 as player tracking might be in a different system
@@ -350,6 +351,7 @@ export function registerCrawlerRoutes(app: Express) {
           mobSummary[roomId] = {
             hostileCount: hostileMobs.length,
             neutralCount: neutralMobs.length,
+            friendlyCount: friendlyMobs.length,
             playerCount: playerCount
           };
         } catch (error) {
@@ -358,6 +360,7 @@ export function registerCrawlerRoutes(app: Express) {
           mobSummary[roomId] = {
             hostileCount: 0,
             neutralCount: 0,
+            friendlyCount: 0,
             playerCount: 0
           };
         }
