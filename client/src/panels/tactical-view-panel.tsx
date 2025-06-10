@@ -89,7 +89,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
           refetchTacticalData();
           refetchExploredRooms();
-          
+
           // Invalidate minimap queries to update dungeon map
           queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
           queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
@@ -343,7 +343,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef}>
+        <div 
+        className="flex-1 relative" 
+        ref={containerRef}
+        style={{ touchAction: 'none' }}
+      >
           <TacticalGrid
             roomBackground={gridData.background}
             exits={gridData.exits}

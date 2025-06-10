@@ -26,6 +26,7 @@ export function useTacticalMovement({
 
   // Central movement handler - this is where all the movement logic lives
   const handleMovement = useCallback((direction: string) => {
+    console.log(`🎯 HandleMovement called with direction: ${direction}, isMobile: ${isMobile}`);
     const playerEntity = combatState.entities?.find((e: any) => e.id === "player");
     if (!playerEntity) {
       console.log("No player entity found for movement");

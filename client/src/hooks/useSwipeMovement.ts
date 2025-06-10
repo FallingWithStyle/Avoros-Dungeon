@@ -48,6 +48,7 @@ export function useSwipeMovement({
       direction = deltaY > 0 ? 'south' : 'north';
     }
 
+    console.log(`🎯 Swipe detected: ${direction}`);
     onMovement(direction);
     touchStartRef.current = null;
   }, [isEnabled, onMovement]);
