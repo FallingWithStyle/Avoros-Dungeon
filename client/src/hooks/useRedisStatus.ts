@@ -1,4 +1,10 @@
 
+/**
+ * File: useRedisStatus.ts
+ * Responsibility: Redis connection monitoring and fallback status alerting
+ * Notes: Polls Redis status and manages user notifications for connection issues
+ */
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 

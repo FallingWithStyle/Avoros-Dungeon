@@ -1,3 +1,9 @@
+/**
+ * File: use-mobile.tsx
+ * Responsibility: Mobile device detection hook using window width breakpoints
+ * Notes: Uses 768px breakpoint to determine mobile vs desktop layouts
+ */
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

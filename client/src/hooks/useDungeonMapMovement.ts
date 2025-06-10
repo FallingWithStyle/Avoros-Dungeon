@@ -1,3 +1,9 @@
+/**
+ * File: useDungeonMapMovement.ts
+ * Responsibility: Crawler movement logic for dungeon navigation with optimistic updates
+ * Notes: Handles energy checks, movement validation, and tactical view positioning
+ */
+
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
