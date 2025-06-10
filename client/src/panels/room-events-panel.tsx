@@ -1,16 +1,3 @@
-/**
- * File: room-events-panel.tsx
- * Responsibility: Displays recent events and activities that occurred in the current room
- * Notes: Shows combat logs, item discoveries, and other room-specific events
- */
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Activity, AlertTriangle, CheckCircle, Info } from "lucide-react";
-import type { CrawlerWithDetails } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";

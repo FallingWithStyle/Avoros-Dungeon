@@ -1,14 +1,5 @@
-/**
- * File: floor-info-panel.tsx
- * Responsibility: Displays current dungeon floor information and statistics
- * Notes: Shows floor number, explored rooms count, and other floor-specific data
- */
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Building, MapPin, Users, Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import {
   Building,

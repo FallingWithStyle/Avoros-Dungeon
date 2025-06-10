@@ -1,9 +1,4 @@
 /**
- * File: avatarUtils.ts
- * Responsibility: Generates consistent avatar URLs for crawlers using DiceBear API
- * Notes: Creates unique avatars based on crawler name and serial number
- */
-/**
  * Utility function to generate a deterministic avatar URL for a crawler.
  * Accepts a string or number for the id parameter.
  *

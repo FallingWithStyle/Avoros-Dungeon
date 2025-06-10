@@ -1,7 +1,4 @@
-/**
- * File: seed-generation-content.ts
- * Responsibility: Seeds the database with crawler generation content including backgrounds and competencies
- */
+
 import { db } from "../server/db";
 import {
   corporationPrefixes,
@@ -23,7 +20,7 @@ async function seedGenerationContent() {
       "Prime", "Omega", "Alpha", "Beta", "Gamma", "Delta", "Nexus", "Core",
       "Apex", "Matrix", "Vector", "Phoenix", "Titan", "Nova", "Orbital", "Galactic"
     ];
-
+    
     await db.insert(corporationPrefixes).values(
       prefixes.map(name => ({ name, weight: 1 }))
     );
@@ -36,7 +33,7 @@ async function seedGenerationContent() {
       "Alliance", "Collective", "Federation", "Empire", "Conglomerate",
       "Group", "Labs", "Works"
     ];
-
+    
     await db.insert(corporationSuffixes).values(
       suffixes.map(name => ({ name, weight: 1 }))
     );
@@ -64,7 +61,7 @@ async function seedGenerationContent() {
       "Stephanie", "Susan", "Teresa", "Virginia", "Wanda", "Gloria", "Rose",
       "Evelyn", "Mildred", "Florence", "Irene", "Grace", "Carolyn"
     ];
-
+    
     await db.insert(humanFirstNames).values(
       firstNames.map(name => ({ name, weight: 1 }))
     );
@@ -90,7 +87,7 @@ async function seedGenerationContent() {
       "Sinclair", "Whitmore", "Worthington", "Ashford", "Bradford", "Donovan",
       "Grayson", "Hartwell"
     ];
-
+    
     await db.insert(humanLastNames).values(
       lastNames.map(name => ({ name, weight: 1 }))
     );
@@ -119,7 +116,7 @@ async function seedGenerationContent() {
       { name: "Linguistics", description: "Communication across language barriers" },
       { name: "Navigation", description: "Finding your way in unknown territory" }
     ];
-
+    
     await db.insert(competencies).values(competenciesList);
 
     // Starting equipment
@@ -200,7 +197,7 @@ async function seedGenerationContent() {
       { category: "contextual", name: "Apple", description: "For the teacher you'll never see again", contextualTrigger: "education" },
       { category: "contextual", name: "Report Card", description: "All A's, fat lot of good it did", contextualTrigger: "education" }
     ];
-
+    
     await db.insert(startingEquipment).values(equipmentData);
 
     console.log("Generation content seeding complete!");

@@ -1,7 +1,3 @@
-/**
- * File: dungeon-generator.ts
- * Responsibility: Generates dungeon floor layouts with rooms, connections, and structural elements
- */
 import { db } from "../../../../../server/db.js";
 import {
   rooms,
@@ -37,7 +33,7 @@ async function getFloorThemeData(floorNumber: number): Promise<FloorTheme | null
       .select()
       .from(floorThemes)
       .where(eq(floorThemes.floorNumber, floorNumber));
-
+    
     if (!theme) return null;
 
     const themeRoomTypes = await db
@@ -285,7 +281,7 @@ export async function generateFullDungeon(factions: Faction[]) {
       try {
         await logErrorToFile(`Generating Floor ${floorNum}...`, "info");
         const theme = await getFloorThemeData(floorNum);
-
+        
         if (!theme) {
           await logErrorToFile(`No theme found for floor ${floorNum}! Skipping...`, "warn");
           continue;

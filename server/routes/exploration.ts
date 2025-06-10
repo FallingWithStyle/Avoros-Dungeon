@@ -1,9 +1,3 @@
-/**
- * File: exploration.ts
- * Responsibility: Dungeon exploration API routes for room navigation and tactical data
- * Notes: Handles room movement, tactical entity generation, and exploration mechanics
- */
-import express from "express";
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
@@ -231,7 +225,7 @@ export function registerExplorationRoutes(app: Express) {
           .where(eq(crawlerPositions.crawlerId, crawlerId))
           .orderBy(desc(crawlerPositions.enteredAt))
           .limit(2); // Get current and previous
-
+        
         // Also invalidate tactical data for both old and new rooms
         if (currentPos) {
           await storage.redisService.del(`tactical:${currentPos.roomId}`);
@@ -355,7 +349,7 @@ export function registerExplorationRoutes(app: Express) {
       // Generate or get tactical entities for this room with comprehensive error handling
       console.log(`Generating tactical data for room ${currentRoom.id}...`);
       let tacticalEntities = [];
-
+      
       if (storage.tacticalStorage && storage.tacticalStorage.generateAndSaveTacticalData) {
         try {
           const roomData = {
@@ -365,9 +359,9 @@ export function registerExplorationRoutes(app: Express) {
             factionId: currentRoom.factionId || null,
             environment: currentRoom.environment || 'indoor'
           };
-
+          
           console.log(`Room data for tactical generation:`, roomData);
-
+          
           tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(
             currentRoom.id, 
             roomData
@@ -377,7 +371,7 @@ export function registerExplorationRoutes(app: Express) {
         } catch (tacticalError) {
           console.error(`ERROR generating tactical data for room ${currentRoom.id}:`, tacticalError);
           console.error(`Tactical error stack:`, tacticalError.stack);
-
+          
           // Try to get existing tactical data instead
           try {
             if (storage.tacticalStorage.getTacticalPositions) {
@@ -414,7 +408,7 @@ export function registerExplorationRoutes(app: Express) {
       console.error("Stack trace:", error.stack);
       console.error("Crawler ID:", crawlerId);
       console.error("Request params:", req.params);
-
+      
       res.status(500).json({ 
         error: "Failed to fetch tactical data",
         details: error instanceof Error ? error.message : "Unknown error",

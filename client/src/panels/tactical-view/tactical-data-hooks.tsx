@@ -1,8 +1,3 @@
-/**
- * File: tactical-data-hooks.tsx
- * Responsibility: Custom hooks for fetching and managing tactical combat data
- * Notes: Handles room data, tactical entities, and exploration state management
- */
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";

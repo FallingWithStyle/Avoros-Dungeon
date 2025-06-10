@@ -1,8 +1,3 @@
-/**
- * File: redis-service.ts
- * Responsibility: Redis service for caching and session management with fallback support
- * Notes: Provides high-level Redis operations with automatic fallback to memory storage
- */
 import { Redis } from "@upstash/redis";
 
 class RedisService {
@@ -413,7 +408,7 @@ class RedisService {
     if (this.forceFallbackMode) {
       return false; // Force fallback when debug mode is enabled
     }
-
+    
     if (!this.redis || !this.isConnected) {
       return false;
     }

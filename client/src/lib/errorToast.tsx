@@ -1,7 +1,3 @@
-/**
- * File: errorToast.tsx
- * Responsibility: Provides standardized error toast notification functionality
- */
 import { toast } from "@/hooks/use-toast";
 
 export function showErrorToast(title: string, error: Error | string) {

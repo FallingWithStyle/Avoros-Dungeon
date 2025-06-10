@@ -1,7 +1,4 @@
-/**
- * File: seed-dynamic-content.ts
- * Responsibility: Seeds the database with dynamic content for room generation and flavor text
- */
+
 import { db } from "../server/db";
 import { 
   floorThemes, 
@@ -70,55 +67,55 @@ const roomTypeData = [
   { floorNumber: 1, name: "Overgrown Courtyard", description: "Weeds grow through cracked flagstones" },
   { floorNumber: 1, name: "Ruined Barracks", description: "Rotting wooden bunks and rusted weapons" },
   { floorNumber: 1, name: "Old Armory", description: "Empty weapon racks and broken shields" },
-
+  
   // Floor 2 - Ancient Crypts
   { floorNumber: 2, name: "Burial Chamber", description: "Ancient sarcophagi line the walls" },
   { floorNumber: 2, name: "Ossuary", description: "Bones arranged in intricate patterns" },
   { floorNumber: 2, name: "Tomb Antechamber", description: "Carved reliefs tell forgotten stories" },
   { floorNumber: 2, name: "Catacombs", description: "Narrow passages between burial niches" },
-
+  
   // Floor 3 - Alchemical Laboratories
   { floorNumber: 3, name: "Distillation Chamber", description: "Complex glassware covers every surface" },
   { floorNumber: 3, name: "Reagent Storage", description: "Shelves of mysterious bottles and powders" },
   { floorNumber: 3, name: "Experimentation Lab", description: "Tables scarred by acid and fire" },
   { floorNumber: 3, name: "Transmutation Circle", description: "Arcane symbols etched into the floor" },
-
+  
   // Floor 4 - Prison Complex
   { floorNumber: 4, name: "Prison Cell", description: "Iron bars and moldy straw" },
   { floorNumber: 4, name: "Guard Station", description: "Keys hang from hooks on the wall" },
   { floorNumber: 4, name: "Interrogation Room", description: "Ominous stains mark the floor" },
   { floorNumber: 4, name: "Solitary Confinement", description: "A small, windowless chamber" },
-
+  
   // Floor 5 - Flooded Caverns
   { floorNumber: 5, name: "Underground Pool", description: "Dark water reflects the ceiling" },
   { floorNumber: 5, name: "Dripping Grotto", description: "Constant water droplets echo endlessly" },
   { floorNumber: 5, name: "Flooded Passage", description: "Ankle-deep water covers the floor" },
   { floorNumber: 5, name: "Underground River", description: "Fast-moving water blocks the way" },
-
+  
   // Floor 6 - Mechanical Workshop
   { floorNumber: 6, name: "Gear Chamber", description: "Massive clockwork mechanisms fill the space" },
   { floorNumber: 6, name: "Steam Engine Room", description: "Pipes release jets of hot vapor" },
   { floorNumber: 6, name: "Assembly Line", description: "Conveyor belts and robotic arms" },
   { floorNumber: 6, name: "Control Room", description: "Dozens of levers and gauges" },
-
+  
   // Floor 7 - Crystal Mines
   { floorNumber: 7, name: "Crystal Cavern", description: "Brilliant gems illuminate the walls" },
   { floorNumber: 7, name: "Mining Shaft", description: "Pick marks score the tunnel walls" },
   { floorNumber: 7, name: "Gem Processing", description: "Cutting tools and polishing stations" },
   { floorNumber: 7, name: "Crystal Formation", description: "Natural crystals grow in impossible shapes" },
-
+  
   // Floor 8 - Ancient Temple
   { floorNumber: 8, name: "Prayer Hall", description: "Rows of stone pews face an altar" },
   { floorNumber: 8, name: "Shrine Room", description: "Offerings lie before weathered statues" },
   { floorNumber: 8, name: "Ceremonial Chamber", description: "Ritual circles mark the floor" },
   { floorNumber: 8, name: "Sanctum", description: "The most sacred space, radiating power" },
-
+  
   // Floor 9 - Dragon's Lair
   { floorNumber: 9, name: "Treasure Hoard", description: "Piles of gold and precious objects" },
   { floorNumber: 9, name: "Sleeping Chamber", description: "Massive indentations in the stone floor" },
   { floorNumber: 9, name: "Scorched Hall", description: "Walls blackened by dragonfire" },
   { floorNumber: 9, name: "Bone Yard", description: "Remains of unfortunate adventurers" },
-
+  
   // Floor 10 - Cosmic Observatory
   { floorNumber: 10, name: "Star Chart Room", description: "Constellation maps cover the ceiling" },
   { floorNumber: 10, name: "Telescope Chamber", description: "Massive brass instruments point skyward" },
@@ -211,7 +208,7 @@ async function seedDynamicContent() {
       weight: 1,
     }).onConflictDoNothing();
   }
-
+  
   for (const story of wackyBackgrounds) {
     await db.insert(crawlerBackgrounds).values({
       category: "wacky", 

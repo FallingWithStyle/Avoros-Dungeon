@@ -1,8 +1,3 @@
-/**
- * File: crawler-storage.ts
- * Responsibility: Storage operations for crawler entities including creation, stats, and state management
- * Notes: Handles crawler lifecycle, movement, and persistent data storage
- */
 import { db } from "../db";
 import {
   crawlers,
@@ -137,7 +132,7 @@ export class CrawlerStorage extends BaseStorage {
       .set({ ...updates, lastAction: new Date() })
       .where(eq(crawlers.id, id))
       .returning();
-
+    
     // Invalidate cache when crawler is updated
     try {
       await this.redisService.invalidateCrawler(id);
@@ -145,7 +140,7 @@ export class CrawlerStorage extends BaseStorage {
       // Redis error, but don't fail the request
       console.log('Failed to invalidate crawler cache');
     }
-
+    
     return crawler;
   }
 

@@ -1,7 +1,3 @@
-/**
- * File: content-storage.ts
- * Responsibility: Storage operations for game content including competencies, backgrounds, and dynamic content
- */
 import { db } from "../db";
 import { 
   crawlerBackgrounds, 

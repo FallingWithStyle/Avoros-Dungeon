@@ -1,8 +1,3 @@
-/**
- * File: useTacticalMovement.ts
- * Responsibility: Handles WASD keyboard movement and room transitions in the tactical view
- * Notes: Manages player movement within rooms and between rooms via keyboard input
- */
 import { useEffect, useCallback } from 'react';
 import { combatSystem } from '@shared/combat-system';
 

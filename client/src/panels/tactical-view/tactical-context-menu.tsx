@@ -1,8 +1,4 @@
-/**
- * File: tactical-context-menu.tsx
- * Responsibility: Right-click context menu for tactical view interactions
- * Notes: Provides action selection for entities and grid positions in combat
- */
+
 import React from 'react';
 import { Eye, MessageCircle, Package, Footprints, Sword, Target, Users, Skull } from 'lucide-react';
 import { combatSystem } from '@shared/combat-system';

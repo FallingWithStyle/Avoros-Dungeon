@@ -1,7 +1,3 @@
-/**
- * File: leaderboard.tsx
- * Responsibility: Displays the top crawlers leaderboard with rankings and statistics
- */
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

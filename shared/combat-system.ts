@@ -1,8 +1,3 @@
-/**
- * File: combat-system.ts
- * Responsibility: Core combat system managing entities, actions, and tactical combat mechanics
- * Notes: Shared between client and server for consistent combat behavior
- */
 // Position interface
 export interface Position {
   x: number;

@@ -1,7 +1,4 @@
-/**
- * File: auth.ts
- * Responsibility: Authentication API routes for user login, logout, and session management
- */
+
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

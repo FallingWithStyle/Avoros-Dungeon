@@ -1,7 +1,4 @@
-/**
- * File: version.ts
- * Responsibility: Defines application version and build information
- */
+// App version - update this when making releases or significant changes
 export const APP_VERSION = "0.4.1";
 
 // Build timestamp for development tracking

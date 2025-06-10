@@ -1,0 +1,18 @@
+ FAIL  server/__tests__/crawler-performance.test.ts
+  ● Test suite failed to run
+
+    server/__tests__/crawler-performance.test.ts:16:53 - error TS2769: No overload matches this call.
+      Overload 1 of 2, '(value: { name: string | SQL<unknown> | Placeholder<string, any>; competencies: string[] | SQL<unknown> | Placeholder<string, any>; sponsorId: string | SQL<unknown> | Placeholder<...>; ... 28 more ...; lastEnergyRegen?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+        Argument of type '{ sponsorId: string; name: string; serial: number; classId: number; background: string; health: number; maxHealth: number; attack: number; defense: number; speed: number; wit: number; charisma: number; ... 9 more ...; competencies: never[]; }' is not assignable to parameter of type '{ name: string | SQL<unknown> | Placeholder<string, any>; competencies: string[] | SQL<unknown> | Placeholder<string, any>; sponsorId: string | SQL<unknown> | Placeholder<...>; ... 28 more ...; lastEnergyRegen?: Date | ... 3 more ... | undefined; }'.
+          Property 'abilities' is missing in type '{ sponsorId: string; name: string; serial: number; classId: number; background: string; health: number; maxHealth: number; attack: number; defense: number; speed: number; wit: number; charisma: number; ... 9 more ...; competencies: never[]; }' but required in type '{ name: string | SQL<unknown> | Placeholder<string, any>; competencies: string[] | SQL<unknown> | Placeholder<string, any>; sponsorId: string | SQL<unknown> | Placeholder<...>; ... 28 more ...; lastEnergyRegen?: Date | ... 3 more ... | undefined; }'.
+      Overload 2 of 2, '(values: { name: string | SQL<unknown> | Placeholder<string, any>; competencies: string[] | SQL<unknown> | Placeholder<string, any>; sponsorId: string | SQL<unknown> | Placeholder<...>; ... 28 more ...; lastEnergyRegen?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+        Object literal may only specify known properties, and 'sponsorId' does not exist in type '{ name: string | SQL<unknown> | Placeholder<string, any>; competencies: string[] | SQL<unknown> | Placeholder<string, any>; sponsorId: string | SQL<unknown> | Placeholder<...>; ... 28 more ...; lastEnergyRegen?: Date | ... 3 more ... | undefined; }[]'.
+
+    16     const [testCrawler] = await db.insert(crawlers).values({
+                                                           ~~~~~~
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        16.59 s
+Ran all test suites matching /performance/i.

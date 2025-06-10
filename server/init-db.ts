@@ -1,12 +1,5 @@
-/**
- * File: init-db.ts
- * Responsibility: Database initialization and seeding with default game data
- * Notes: Sets up factions and performs initial database setup tasks
- */
-import { eq } from "drizzle-orm";
 import { db } from "./db";
-import { factions } from "@shared/schema";
-import { redisService } from "./lib/redis-service";
+import { eq } from "drizzle-orm";
 
 export async function initializeDatabase() {
   console.log("Initializing database with game data...");

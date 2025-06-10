@@ -1,8 +1,3 @@
-/**
- * File: schema.ts
- * Responsibility: Database schema definitions and type exports for the entire application
- * Notes: Defines all tables, relationships, and TypeScript types for database entities
- */
 import {
   pgTable,
   text,

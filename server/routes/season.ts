@@ -1,8 +1,4 @@
-/**
- * File: season.ts
- * Responsibility: Season and competition API routes for leaderboards and seasonal content
- */
-import express from "express";
+
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

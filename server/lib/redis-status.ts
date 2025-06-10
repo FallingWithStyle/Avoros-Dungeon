@@ -1,8 +1,3 @@
-/**
- * File: redis-status.ts
- * Responsibility: Redis connection monitoring and status reporting utilities
- */
-import { redisService } from './redis-service';
 
 export class RedisStatus {
   private static instance: RedisStatus;
@@ -30,11 +25,12 @@ export class RedisStatus {
 
     try {
       // Try a simple Redis operation
+      const { redisService } = await import('./redis-service');
       const testKey = `health-check-${Date.now()}`;
       await redisService.set(testKey, 'ok', 10);
       const result = await redisService.get(testKey);
       await redisService.del(testKey);
-
+      
       const newStatus = result === 'ok';
       if (newStatus !== this.isRedisAvailable) {
         this.isRedisAvailable = newStatus;

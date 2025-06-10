@@ -1,7 +1,3 @@
-/**
- * File: faction-assignment.ts
- * Responsibility: Assigns factions to dungeon rooms based on generation rules and distribution
- */
 // Faction and Room object types, adjust as needed for schema
 export type Faction = {
   id: number;
@@ -83,7 +79,7 @@ export function assignRoomsByFactionInfluence({
   const assignments: FactionRoomAssignment = {};
   let remainingRooms = [...toAssign];
   const minRoomsPerFaction = Math.max(5, Math.floor(toAssign.length / (pickedFactions.length * 3)));
-
+  
   // First pass: ensure minimum rooms per faction
   pickedFactions.forEach((faction) => {
     const minRooms = Math.min(minRoomsPerFaction, remainingRooms.length);
@@ -91,19 +87,19 @@ export function assignRoomsByFactionInfluence({
       .splice(0, minRooms)
       .map((r) => r.placementId);
   });
-
+  
   // Second pass: distribute remaining rooms by influence
   pickedFactions.forEach((faction, i) => {
     if (remainingRooms.length === 0) return;
-
+    
     const additionalRooms = i === pickedFactions.length - 1
       ? remainingRooms.length // Last faction gets remainder
       : Math.floor((faction.influence / totalInfluence) * remainingRooms.length);
-
+    
     const additionalAssignment = remainingRooms
       .splice(0, additionalRooms)
       .map((r) => r.placementId);
-
+    
     assignments[faction.id] = [...(assignments[faction.id] || []), ...additionalAssignment];
   });
 

@@ -1,14 +1,3 @@
-/**
- * File: sidebar.tsx
- * Responsibility: Main application sidebar with navigation links and user controls
- */
-import React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/useAuth";
-import { ChevronLeft, Home, User, Map, Trophy, Activity, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +14,7 @@ export default function Sidebar() {
           <i className="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
           Overview
         </Button>
-
+        
         <Button
           variant="ghost"
           className="w-full justify-start text-slate-300 hover:bg-game-bg hover:text-white"
@@ -33,7 +22,7 @@ export default function Sidebar() {
           <i className="fas fa-users w-5 h-5 mr-3"></i>
           My Crawlers
         </Button>
-
+        
         <Button
           variant="ghost"
           className="w-full justify-start text-slate-300 hover:bg-game-bg hover:text-white"
@@ -41,7 +30,7 @@ export default function Sidebar() {
           <i className="fas fa-store w-5 h-5 mr-3"></i>
           Marketplace
         </Button>
-
+        
         <Button
           variant="ghost"
           className="w-full justify-start text-slate-300 hover:bg-game-bg hover:text-white"
@@ -49,7 +38,7 @@ export default function Sidebar() {
           <i className="fas fa-trophy w-5 h-5 mr-3"></i>
           Leaderboards
         </Button>
-
+        
         <Button
           variant="ghost"
           className="w-full justify-start text-slate-300 hover:bg-game-bg hover:text-white"

@@ -1,23 +1,18 @@
-/**
- * File: crawler-view.tsx
- * Responsibility: Main game view layout for active crawler gameplay
- * Notes: Organizes all game panels and provides responsive layout for different screen sizes
- */
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useMobile } from "@/hooks/use-mobile";
-import GameHeader from "@/components/game-header";
-import MobileMenu from "@/components/mobile-menu";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import CrawlerStatusPanel from "@/panels/crawler-status-panel";
-import TacticalViewPanel from "@/panels/tactical-view-panel";
-import MapPanel from "@/panels/map-panel";
-import NavigationPanel from "@/panels/navigation-panel";
 import FloorInfoPanel from "@/panels/floor-info-panel";
+import TacticalViewPanel from "@/panels/tactical-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
+import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
-import { ArrowLeft, Menu, Settings } from "lucide-react";
+import MobileMenu from "@/components/mobile-menu";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 
 interface CrawlerViewProps {
   crawlerId: string;
@@ -110,7 +105,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       <div className="w-full px-2 py-4 lg:max-w-7xl lg:mx-auto lg:p-6 pb-20 lg:pb-6">
         {/* Mobile: Single column stack, Desktop: 3 columns */}
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-2 lg:gap-6">
-
+          
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
             <TacticalViewPanel crawler={crawler} />
@@ -119,7 +114,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           {/* Secondary: Status & Quick Info - Condensed on mobile */}
           <div className="order-2 lg:order-1 space-y-4 lg:space-y-6" data-section="status">
             <CrawlerStatusPanel crawler={crawler} />
-
+            
             {/* Mobile: Compact Floor Info */}
             <div className="lg:hidden">
               <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
@@ -132,11 +127,11 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             <div className="hidden lg:block">
               <FloorInfoPanel crawlerId={crawlerId} crawler={crawler} />
             </div>
-
+            
             <div className="hidden lg:block">
               <DungeonMap crawler={crawler} />
             </div>
-
+            
             <div className="hidden lg:block">
               <RoomEventsPanel crawler={crawler} />
             </div>

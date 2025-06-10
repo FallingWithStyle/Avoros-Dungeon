@@ -1,8 +1,3 @@
-/**
- * File: useDungeonMapMovement.ts
- * Responsibility: Handles interactive movement and navigation on the dungeon map component
- * Notes: Manages click-to-move functionality and map interaction
- */
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';

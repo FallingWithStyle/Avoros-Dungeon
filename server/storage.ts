@@ -1,8 +1,3 @@
-/**
- * File: storage.ts
- * Responsibility: Storage system initialization and dependency injection container
- * Notes: Creates and configures all storage service instances
- */
 import {
   users,
   crawlers,

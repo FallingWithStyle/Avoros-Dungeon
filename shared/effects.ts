@@ -1,8 +1,3 @@
-/**
- * File: effects.ts
- * Responsibility: Status effects system for managing temporary modifiers on game entities
- * Notes: Handles buffs, debuffs, and time-based effect management
- */
 
 export interface Effect {
   id: string;
@@ -118,19 +113,19 @@ export function isEffectActive(effect: Effect): boolean {
   const now = new Date();
   const appliedAt = new Date(effect.appliedAt);
   const elapsed = now.getTime() - appliedAt.getTime();
-
+  
   return elapsed < effect.duration;
 }
 
 export function calculateEffectiveStats(baseStats: any, effects: Effect[]): any {
   const activeEffects = effects.filter(isEffectActive);
-
+  
   const result = { ...baseStats };
-
+  
   // Apply all active effects
   for (const effect of activeEffects) {
     const props = effect.properties;
-
+    
     if (props.scanRangeBonus) {
       result.scanRange = (result.scanRange || 0) + props.scanRangeBonus;
     }
@@ -165,7 +160,7 @@ export function calculateEffectiveStats(baseStats: any, effects: Effect[]): any 
       result.luck = (result.luck || 0) + props.luckBonus;
     }
   }
-
+  
   return result;
 }
 

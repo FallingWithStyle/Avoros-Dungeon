@@ -1,9 +1,4 @@
-/**
- * File: debug-panel.tsx
- * Responsibility: Provides debugging tools and system status information for development
- * Notes: Shows Redis status, database operations, and debugging controls
- */
-import React, { useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Card,

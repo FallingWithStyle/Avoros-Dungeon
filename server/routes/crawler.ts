@@ -1,7 +1,3 @@
-/**
- * File: crawler.ts
- * Responsibility: Crawler management API routes for character creation, stats, and operations
- */
 import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";

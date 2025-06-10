@@ -1,8 +1,5 @@
-/**
- * File: combat.ts
- * Responsibility: Combat system API routes for battle mechanics and combat actions
- */
-import express from "express";
+
+import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
 

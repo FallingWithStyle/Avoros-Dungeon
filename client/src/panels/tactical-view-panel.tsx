@@ -1,8 +1,3 @@
-/**
- * File: tactical-view-panel.tsx
- * Responsibility: Main tactical combat view with grid-based positioning and combat management
- * Notes: Integrates combat system, movement controls, and tactical data display
- */
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";

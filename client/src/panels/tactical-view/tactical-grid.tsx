@@ -1,8 +1,3 @@
-/**
- * File: tactical-grid.tsx
- * Responsibility: Renders the tactical combat grid with entities, loot, and interactive elements
- * Notes: Main visual component for the tactical combat system
- */
 import React from 'react';
 import { CombatEntity } from '@shared/combat-system';
 import { Skull, Users, Gem, Sword, Shield } from 'lucide-react';

@@ -1,8 +1,3 @@
-/**
- * File: events-system.ts
- * Responsibility: Event management system for game notifications and activity tracking
- * Notes: Handles event publishing, subscription, and activity feed generation
- */
 export type RoomEventType = 
   | "movement" 
   | "combat" 
