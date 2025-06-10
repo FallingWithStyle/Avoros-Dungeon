@@ -21,6 +21,7 @@ export interface CombatEntity {
   evasion?: number;
   isSelected?: boolean;
   cooldowns?: Record<string, number>;
+  serial?: number;
 }
 
 // Combat action interface

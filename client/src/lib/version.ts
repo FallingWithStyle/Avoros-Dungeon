@@ -19,9 +19,3 @@ export const getVersionInfo = () => {
     fullVersion: `v${APP_VERSION} (${BUILD_TIMESTAMP.split("T")[0]})`,
   };
 };
-
-// Example dungeon (This part is added to demonstrate renaming)
-const dungeon = { name: "Avavor" };
-console.log(`Original dungeon name: ${dungeon.name}`);
-dungeon.name = "Avoros";
-console.log(`New dungeon name: ${dungeon.name}`);
