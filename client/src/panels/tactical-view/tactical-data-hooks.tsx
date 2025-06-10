@@ -12,80 +12,52 @@ interface TacticalDataHooks {
   refetchExploredRooms: () => void;
 }
 
-export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks {
-  const { toast } = useToast();
-
-  // Fetch current room data for navigation
-  const { data: roomData, isLoading } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000, // Reduced from 2000ms to 5000ms
-  });
-
-  // Fetch explored rooms for map refresh - only on demand, not polling
-  const { refetch: refetchExploredRooms } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    enabled: false, // Only fetch when manually called
-    staleTime: 300000, // 5 minutes
+export function useTacticalData(crawler: CrawlerWithDetails | null) {
+  // Fetch current room data
+  const { data: roomData, refetch: refetchRoomData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler?.id}/current-room`],
+    enabled: !!crawler?.id,
+    refetchInterval: 5000,
+    staleTime: 30000,
     retry: false,
   });
 
-  // Fetch tactical data separately for better caching with improved error handling
-  const { 
-    data: tacticalData, 
-    isLoading: tacticalLoading, 
-    error: tacticalError, 
-    refetch: refetchTactical 
-  } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-    refetchInterval: (data, error) => {
-      if (error) return false;
-      return 3000; // Reduced from 2000ms to 3000ms
-    },
-    retry: (failureCount, error) => {
-      if (error?.message?.includes('500')) {
-        return failureCount < 1;
-      }
-      if (error?.message?.includes('4')) {
-        const status = parseInt(error.message.split(':')[0]);
-        if (status >= 400 && status < 500 && status !== 408) {
-          return false;
-        }
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-    staleTime: 10000,
-    onError: (error) => {
-      console.error("=== TACTICAL DATA FETCH ERROR ===");
-      console.error("Error details:", error);
-      if (!sessionStorage.getItem(`tactical-error-${crawler.id}`)) {
-        sessionStorage.setItem(`tactical-error-${crawler.id}`, 'true');
-        toast({
-          title: "Tactical Data Error",
-          description: "Using fallback tactical data. Some features may be limited.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          sessionStorage.removeItem(`tactical-error-${crawler.id}`);
-        }, 30000);
-      }
-    },
-    onSuccess: (data) => {
-      console.log("=== TACTICAL DATA FETCH SUCCESS ===");
-      console.log("Room:", data.room?.name);
-      console.log("Entities:", data.tacticalEntities?.length || 0);
-      sessionStorage.removeItem(`tactical-error-${crawler.id}`);
-    },
+  // Fetch explored rooms for map display
+  const { data: exploredRooms, refetch: refetchExploredRooms } = useQuery({
+    queryKey: [`/api/crawlers/${crawler?.id}/explored-rooms`],
+    enabled: !!crawler?.id,
+    refetchInterval: 30000,
+    staleTime: 120000,
+    retry: false,
   });
+
+  // Fetch tactical data - this includes all the combat entities and positioning
+  const { data: tacticalData, refetch: refetchTacticalData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler?.id}/tactical-data`],
+    enabled: !!crawler?.id,
+    refetchInterval: 3000,
+    staleTime: 10000,
+    retry: false,
+  });
+
+  // Early return if no crawler - AFTER all hooks are called
+  if (!crawler) {
+    return {
+      roomData: null,
+      exploredRooms: [],
+      tacticalData: null,
+      refetchRoomData: () => {},
+      refetchExploredRooms: () => {},
+      refetchTacticalData: () => {},
+    };
+  }
 
   return {
     roomData,
+    exploredRooms: exploredRooms || [],
     tacticalData,
-    isLoading,
-    tacticalLoading,
-    tacticalError,
-    refetchTactical,
-    refetchExploredRooms
+    refetchRoomData,
+    refetchExploredRooms,
+    refetchTacticalData,
   };
 }
-
