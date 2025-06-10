@@ -193,61 +193,33 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Grid event handlers
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (!effectiveTacticalData?.room) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-    const selectedEntity = combatSystem.getSelectedEntity();
-    if (selectedEntity?.id === "player") {
-      const success = combatSystem.queueMoveAction(selectedEntity.id, { x, y });
-      if (success) {
-        console.log("Player moving to " + x.toFixed(1) + ", " + y.toFixed(1));
-      }
-    }
-  }, [effectiveTacticalData?.room]);
+    // Disabled for now - clicking on screen should not do anything
+    console.log("Grid clicked - functionality disabled");
+    return;
+  }, []);
 
   const handleGridRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      entityId: "grid",
-      entity: { id: "grid", name: "Grid", type: "grid", hp: 0, maxHp: 0, attack: 0, defense: 0, speed: 0, position: { x, y } } as CombatEntity,
-      actions: [],
-      clickPosition: { x, y }
-    });
+    // Disabled for now - right-clicking on screen should not do anything
+    console.log("Grid right-clicked - functionality disabled");
+    return;
   }, []);
 
   // Entity event handlers
   const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    combatSystem.selectEntity(entityId);
+    // Disabled for now - clicking on entities should not do anything
+    console.log("Entity clicked: " + entityId + " - functionality disabled");
+    return;
   }, []);
 
   const handleEntityRightClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-
-    const entity = combatState.entities.find(e => e.id === entityId);
-    if (!entity) return;
-
-    const actions = combatSystem.getAvailableActions(entityId);
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      entityId,
-      entity,
-      actions,
-    });
-  }, [combatState.entities]);
+    // Disabled for now - right-clicking on entities should not do anything
+    console.log("Entity right-clicked: " + entityId + " - functionality disabled");
+    return;
+  }, []);
 
   // Loot event handlers
   const handleLootClick = useCallback((index: number, item: any, event: React.MouseEvent) => {
@@ -274,26 +246,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Context menu handlers
   const handleActionClick = useCallback((action: any, targetEntityId: string) => {
-    const selectedEntity = combatSystem.getSelectedEntity();
-    if (!selectedEntity) return;
-
-    const success = combatSystem.queueAction(selectedEntity.id, action, targetEntityId);
-    if (success) {
-      console.log("Queued " + action.name + " from " + selectedEntity.name + " to " + targetEntityId);
-    }
+    // Disabled for now - action clicks should not do anything
+    console.log("Action clicked - functionality disabled");
     setContextMenu(null);
   }, []);
 
   const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
-    if (!position) return;
-
-    const selectedEntity = combatSystem.getSelectedEntity();
-    if (!selectedEntity) return;
-
-    const success = combatSystem.queueMoveAction(selectedEntity.id, position);
-    if (success) {
-      console.log(selectedEntity.name + " moving to " + position.x.toFixed(1) + ", " + position.y.toFixed(1));
-    }
+    // Disabled for now - move to position should not do anything
+    console.log("Move to position clicked - functionality disabled");
     setContextMenu(null);
   }, []);
 
