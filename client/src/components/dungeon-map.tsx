@@ -621,12 +621,15 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     return !!room1 && !!room2;
   };
 
+  // Find display current room, if currentRoom exists use it, otherwise use floorRooms.find((r) => r.isCurrentRoom)
+  const displayCurrentRoom = currentRoom ? currentRoom : floorRooms.find((r) => r.isCurrentRoom);
+
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
-          {currentRoom?.name || "Mini-Map"}
+          {displayCurrentRoom?.name || "Mini-Map"}
           <Badge variant="outline" className="ml-auto text-xs">
             Floor {crawler.currentFloor}
           </Badge>
@@ -831,7 +834,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
                 <span>Enemies</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-orange-400 rounded-full" />
+<div className="w-2 h-2 bg-orange-400 rounded-full" />
                 <span>Neutral Mobs</span>
               </div>
               <div className="flex items-center gap-1">
