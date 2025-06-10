@@ -1,3 +1,9 @@
+/**
+ * File: not-found.tsx
+ * Responsibility: 404 error page displayed when users navigate to non-existent routes
+ * Notes: Simple error page with developer-friendly message about missing routes
+ */
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
