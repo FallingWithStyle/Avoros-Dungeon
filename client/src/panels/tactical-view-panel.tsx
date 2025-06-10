@@ -1,3 +1,9 @@
+/**
+ * File: tactical-view-panel.tsx
+ * Responsibility: Main tactical combat interface with grid-based positioning, entity management, and action controls
+ * Notes: Integrates tactical grid, hotbar, context menu, and action queue for real-time combat gameplay
+ */
+
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";

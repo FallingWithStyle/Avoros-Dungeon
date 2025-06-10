@@ -1,4 +1,10 @@
 
+/**
+ * File: action-queue-panel.tsx
+ * Responsibility: Displays a real-time queue of combat actions with execution timers and progress indicators
+ * Notes: Shows queued player and enemy actions with cooldowns, execution order, and visual feedback
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";

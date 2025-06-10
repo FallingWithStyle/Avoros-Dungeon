@@ -1,3 +1,9 @@
+/**
+ * File: floor-info-panel.tsx
+ * Responsibility: Displays current floor overview including factions and creatures encountered
+ * Notes: Shows floor number, discovered factions with colors, and creature types found during exploration
+ */
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CrawlerWithDetails } from "@shared/schema";
