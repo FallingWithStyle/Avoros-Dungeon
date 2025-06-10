@@ -1,6 +1,11 @@
 # Changelog
 
-## [0.9.0] - 2025-01-10
+## [0.8.5] - 2025-01-26
+
+### Changed
+- Renamed dungeon from "Avavor" to "Avoros" throughout the application
+
+## [0.8.4] - 2025-01-26
 ### Added
 - 360-degree movement system supporting all directions, not just cardinal
 - Continuous movement input handling with reduced cooldowns
@@ -13,8 +18,6 @@
 - Keyboard movement now supports WASD combinations for diagonal movement
 - Mobile swipe converted to thumbstick-style continuous directional input
 - Movement speed reduced to 3 for smoother continuous movement
-
-## [Unreleased]
 
 ## [0.8.3] - 2025-06-10
 
@@ -268,9 +271,3 @@
 - Crawler movement errors and data cleanup after deletion
 - Error handling for dungeon exploration failures
 - Crawler selection and generation improvements
-## [0.8.5] - 2025-01-26
-
-### Changed
-- Renamed dungeon from "Avavor" to "Avoros" throughout the application
-
-## [0.8.4] - 2025-01-26
