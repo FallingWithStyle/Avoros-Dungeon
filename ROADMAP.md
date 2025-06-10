@@ -1,9 +1,9 @@
 
-# Avavor Dungeon - Development Roadmap
+# Avoros Dungeon - Development Roadmap
 
 ## Project Vision
 
-Avavor Dungeon aims to be a premier real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory. Our roadmap focuses on delivering a polished, scalable, and engaging experience through incremental, testable releases.
+Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory. Our roadmap focuses on delivering a polished, scalable, and engaging experience through incremental, testable releases.
 
 ## Current Status: v0.8.4 (June 2025)
 

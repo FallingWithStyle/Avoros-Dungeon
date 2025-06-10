@@ -1,13 +1,13 @@
 
-# Avavor Dungeon
+# Avoros Dungeon
 
 A real-time multiplayer dungeon exploration game where corporations sponsor crawlers to explore dangerous dungeons and compete for resources and glory.
 
-![Game Screenshot](https://via.placeholder.com/800x400?text=Avavor+Dungeon)
+![Game Screenshot](https://via.placeholder.com/800x400?text=Avoros+Dungeon)
 
 ## 🎮 Game Overview
 
-**Avavor Dungeon** is a turn-based exploration game where players take on the role of corporate sponsors managing individual crawlers. Each corporation gets one shot - sponsor a single crawler through deadly encounters and exploration. Death means starting over completely.
+**Avoros Dungeon** is a turn-based exploration game where players take on the role of corporate sponsors managing individual crawlers. Each corporation gets one shot - sponsor a single crawler through deadly encounters and exploration. Death means starting over completely.
 
 ### Key Features
 

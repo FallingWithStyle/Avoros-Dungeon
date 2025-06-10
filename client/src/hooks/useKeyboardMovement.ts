@@ -42,9 +42,22 @@ export function useKeyboardMovement({
   // Start the interval to send movement
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
+    
+    console.log('🎮 Starting keyboard movement interval');
+    
+    // Send immediate movement
+    const initialVector = calculateMovementVector();
+    if (initialVector.x !== 0 || initialVector.y !== 0) {
+      console.log('🎮 Initial movement:', initialVector);
+      onMovement(initialVector);
+    }
+    
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
-      onMovement(vector);
+      if (vector.x !== 0 || vector.y !== 0) {
+        console.log('🎮 Interval movement:', vector, 'Keys:', Array.from(keysPressed.current));
+        onMovement(vector);
+      }
     }, 50);
   }, [calculateMovementVector, onMovement]);
 
@@ -73,13 +86,28 @@ export function useKeyboardMovement({
       ];
       if (!valid.includes(key)) return;
       event.preventDefault();
-      const before = keysPressed.current.size;
+      
+      // Prevent key repeat
+      if (keysPressed.current.has(key)) return;
+      
+      const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
-      if (before === 0 && keysPressed.current.size > 0) {
+      
+      console.log('🎮 Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+      
+      // Start movement if this is the first key, or send immediate movement if already moving
+      if (wasEmpty) {
         startMovement();
+      } else {
+        // Send immediate movement update for key combinations
+        const vector = calculateMovementVector();
+        if (vector.x !== 0 || vector.y !== 0) {
+          console.log('🎮 Combination movement:', vector);
+          onMovement(vector);
+        }
       }
     },
-    [isEnabled, startMovement],
+    [isEnabled, startMovement, calculateMovementVector, onMovement],
   );
 
   // Keyup: stop movement loop if this was the last key released
@@ -101,10 +129,9 @@ export function useKeyboardMovement({
       keysPressed.current.delete(key);
       if (keysPressed.current.size === 0) {
         stopMovement();
-        onMovement({ x: 0, y: 0 }); // Ensure stop
       }
     },
-    [isEnabled, stopMovement, onMovement],
+    [isEnabled, stopMovement],
   );
 
   // Proper effect setup (no stale closures)

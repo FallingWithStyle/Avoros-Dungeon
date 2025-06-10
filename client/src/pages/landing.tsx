@@ -14,7 +14,7 @@ export default function Landing() {
         <div className="mb-8">
           <h1 className="text-6xl font-bold text-blue-400 mb-4">
             <i className="fas fa-dungeon mr-4"></i>
-            Avavor Dungeon
+            Avoros Dungeon
           </h1>
           <p className="text-xl text-slate-300 mb-2">
             Corporate Crawler Consortium
@@ -80,7 +80,7 @@ export default function Landing() {
             <i className="fas fa-building mr-2"></i>
             Establish Your Corporation
           </Button>
-          
+
           <p className="text-sm text-slate-400">
             Register your corporation and begin crawler operations
           </p>
@@ -108,7 +108,7 @@ export default function Landing() {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-xl font-semibold text-white mb-4">Crawler Classes</h3>
             <ul className="space-y-2 text-slate-300">
