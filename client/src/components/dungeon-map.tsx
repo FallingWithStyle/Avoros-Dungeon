@@ -144,7 +144,7 @@ const getRoomIndicators = (room: ExploredRoom, isExpanded: boolean = false) => {
       indicators.push(
         <div
           key="neutral"
-          className="absolute -top-1 -left-1 w-4 h-3 bg-orange-400 rounded-full border border-orange-200 flex items-center justify-center text-xs font-bold text-white"
+          className="absolute -top-1 -left-1 w-4 h-3 bg-cyan-400 rounded-full border border-cyan-200 flex items-center justify-center text-xs font-bold text-white"
           title={`${room.neutralCount} neutral creatures`}
         >
           {room.neutralCount}
@@ -155,7 +155,7 @@ const getRoomIndicators = (room: ExploredRoom, isExpanded: boolean = false) => {
       indicators.push(
         <div
           key="players"
-          className="absolute -bottom-1 -right-1 w-4 h-3 bg-cyan-400 rounded-full border border-cyan-200 flex items-center justify-center text-xs font-bold text-white"
+          className="absolute -bottom-1 -right-1 w-4 h-3 bg-fuchsia-400 rounded-full border border-fuchsia-200 flex items-center justify-center text-xs font-bold text-white"
           title={`${room.playerCount} players here`}
         >
           {room.playerCount}
@@ -176,7 +176,7 @@ const getRoomIndicators = (room: ExploredRoom, isExpanded: boolean = false) => {
       indicators.push(
         <div
           key="neutral"
-          className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full border border-orange-200"
+          className="absolute -top-1 -left-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200"
           title={`${room.neutralCount} neutral creatures`}
         />,
       );
@@ -185,7 +185,7 @@ const getRoomIndicators = (room: ExploredRoom, isExpanded: boolean = false) => {
       indicators.push(
         <div
           key="players"
-          className="absolute -bottom-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full border border-cyan-200"
+          className="absolute -bottom-1 -right-1 w-2 h-2 bg-fuchsia-400 rounded-full border border-fuchsia-200"
           title={`${room.playerCount} players here`}
         />,
       );
@@ -830,14 +830,18 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span>Enemies</span>
-              </div>
-              <div className="flex items-center gap-1">
-<div className="w-2 h-2 bg-orange-400 rounded-full" />
-                <span>Neutral Mobs</span>
+                <span>Hostile Mobs</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full" />
+                <span>Neutral Mobs</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span>Friendly Mobs</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-fuchsia-400 rounded-full" />
                 <span>Players</span>
               </div>
             </div>
