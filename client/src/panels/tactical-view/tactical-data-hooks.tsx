@@ -89,23 +89,3 @@ export function useTacticalData(crawler: CrawlerWithDetails): TacticalDataHooks 
   };
 }
 
-export function useTacticalData(crawlerId: number) {
-  return useQuery({
-    queryKey: ['tacticalData', crawlerId],
-    queryFn: async () => {
-      console.log('📡 Fetching tactical data for crawler:', crawlerId);
-      const response = await fetch(`/api/crawlers/${crawlerId}/tactical-data`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tactical data');
-      }
-      const data = await response.json();
-      console.log('📊 Received tactical data:', {
-        entities: data.entities?.length || 0,
-        entityTypes: data.entities?.map((e: any) => `${e.type}: ${e.name}`) || []
-      });
-      return data;
-    },
-    refetchInterval: 2000, // Refetch every 2 seconds
-    staleTime: 1000, // Consider data stale after 1 second
-  });
-}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { CombatEntity } from '@shared/combat-system';
+import { Skull, Users, Gem, Sword, Shield } from 'lucide-react';
 
 interface TacticalGridProps {
   roomBackground: string;
@@ -23,6 +24,8 @@ interface TacticalGridProps {
   onLootHover: (lootIndex: number | null) => void;
   isInCombat: boolean;
   activeActionMode: any;
+  tacticalMobs: any[];
+  tacticalNpcs: any[];
 }
 
 // Helper function to get room background CSS class
@@ -71,7 +74,9 @@ export default function TacticalGrid({
   onEntityHover,
   onLootHover,
   isInCombat,
-  activeActionMode
+  activeActionMode,
+  tacticalMobs,
+  tacticalNpcs
 }: TacticalGridProps) {
   return (
     <div
@@ -120,6 +125,60 @@ export default function TacticalGrid({
       {exits.west && (
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
       )}
+
+      {/* Tactical Mobs from Server */}
+      {tacticalMobs.map((mob, index) => (
+        <div
+          key={`tactical-mob-${index}`}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+          style={{
+            left: `${mob.position.x}%`,
+            top: `${mob.position.y}%`,
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`Clicked on tactical mob: ${mob.name}`);
+          }}
+          title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || 'Unknown'}`}
+        >
+          <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
+            <Skull className="w-3 h-3 text-white" />
+          </div>
+
+          {/* HP bar for tactical mobs */}
+          {mob.data?.hp !== undefined && mob.data?.maxHp !== undefined && mob.data.hp < mob.data.maxHp && (
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+              <div
+                className="h-full rounded transition-all duration-300 bg-red-400"
+                style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
+              ></div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Tactical NPCs from Server */}
+      {tacticalNpcs.map((npc, index) => (
+        <div
+          key={`tactical-npc-${index}`}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+          style={{
+            left: `${npc.position.x}%`,
+            top: `${npc.position.y}%`,
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`Clicked on tactical NPC: ${npc.name}`);
+          }}
+          title={`${npc.name} (NPC)`}
+        >
+          <div className="w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg">
+            <Users className="w-3 h-3 text-white" />
+          </div>
+        </div>
+      ))}
 
       {/* Combat Entities */}
       {entities.map((entity) => (
