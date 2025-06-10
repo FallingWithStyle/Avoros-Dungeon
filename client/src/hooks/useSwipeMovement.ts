@@ -1,120 +1,80 @@
 /**
  * File: useSwipeMovement.ts
- * Responsibility: Touch gesture detection for mobile crawler movement
- * Notes: Converts swipe gestures to directional movement commands on mobile devices
+ * Responsibility: Handle touch/swipe input for tactical movement on mobile devices
+ * Notes: Detects swipe direction from touch input and passes to movement handler
  */
 
-import { useEffect, useRef } from 'react';
-import { useIsMobile } from './use-mobile';
+import { useCallback, useRef, useEffect } from 'react';
 
-interface SwipeMovementProps {
-  onRoomMovement: (direction: string) => void;
+interface UseSwipeMovementProps {
+  onMovement: (direction: string) => void;
   availableDirections: string[];
-  isEnabled?: boolean;
-}
-
-interface TouchPosition {
-  x: number;
-  y: number;
+  combatState: any;
+  isEnabled: boolean;
 }
 
 export function useSwipeMovement({
-  onRoomMovement,
+  onMovement,
   availableDirections,
-  isEnabled = true
-}: SwipeMovementProps) {
-  const isMobile = useIsMobile();
-  const touchStartRef = useRef<TouchPosition | null>(null);
-  const touchEndRef = useRef<TouchPosition | null>(null);
+  combatState,
+  isEnabled
+}: UseSwipeMovementProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    if (!isMobile || !isEnabled || !containerRef.current) {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (!isEnabled || e.touches.length !== 1) return;
+    
+    console.log('🎯 Touch start detected');
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, [isEnabled]);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!isEnabled || !touchStartRef.current || e.changedTouches.length !== 1) return;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    const minSwipeDistance = 30;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (absX < minSwipeDistance && absY < minSwipeDistance) {
+      touchStartRef.current = null;
       return;
     }
 
+    let direction = '';
+    if (absX > absY) {
+      direction = deltaX > 0 ? 'east' : 'west';
+    } else {
+      direction = deltaY > 0 ? 'south' : 'north';
+    }
+
+    console.log(`🎯 Swipe detected: ${direction} - moving within room`);
+    
+    // Always call internal movement, let the movement handler decide room transitions
+    onMovement(direction);
+    
+    touchStartRef.current = null;
+  }, [isEnabled, onMovement]);
+
+  useEffect(() => {
+    if (!isEnabled) return;
+
     const container = containerRef.current;
+    if (!container) return;
 
-    const handleTouchStart = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      touchStartRef.current = {
-        x: touch.clientX,
-        y: touch.clientY
-      };
-      touchEndRef.current = null;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      // Prevent scrolling while swiping
-      event.preventDefault();
-
-      const touch = event.touches[0];
-      touchEndRef.current = {
-        x: touch.clientX,
-        y: touch.clientY
-      };
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      event.preventDefault();
-
-      if (!touchStartRef.current || !touchEndRef.current) {
-        return;
-      }
-
-      const deltaX = touchEndRef.current.x - touchStartRef.current.x;
-      const deltaY = touchEndRef.current.y - touchStartRef.current.y;
-
-      // Minimum swipe distance (in pixels)
-      const minSwipeDistance = 50;
-
-      // Check if the swipe is long enough
-      const swipeDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      if (swipeDistance < minSwipeDistance) {
-        return;
-      }
-
-      // Determine the primary direction
-      const absDeltaX = Math.abs(deltaX);
-      const absDeltaY = Math.abs(deltaY);
-
-      let direction = "";
-
-      if (absDeltaX > absDeltaY) {
-        // Horizontal swipe
-        direction = deltaX > 0 ? "east" : "west";
-      } else {
-        // Vertical swipe - swipe up (negative deltaY) = north, swipe down (positive deltaY) = south
-        direction = deltaY < 0 ? "north" : "south";
-      }
-
-      // Only move if the direction is available
-      if (availableDirections.includes(direction)) {
-        console.log(`🎯 Swipe detected: ${direction} (${deltaX.toFixed(1)}, ${deltaY.toFixed(1)})`);
-        onRoomMovement(direction);
-      } else {
-        console.log(`❌ Swipe ${direction} blocked - not an available direction`);
-      }
-
-      // Reset touch positions
-      touchStartRef.current = null;
-      touchEndRef.current = null;
-    };
-
-    // Add touch event listeners
     container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
     container.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobile, isEnabled, availableDirections, onRoomMovement]);
+  }, [handleTouchStart, handleTouchEnd, isEnabled]);
 
-  return {
-    containerRef,
-    isMobile
-  };
+  return { containerRef };
 }

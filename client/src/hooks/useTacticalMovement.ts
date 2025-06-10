@@ -1,10 +1,13 @@
 /**
  * File: useTacticalMovement.ts
- * Responsibility: WASD keyboard movement controls for tactical view navigation
- * Notes: Handles player entity movement and room transitions via keyboard input
+ * Responsibility: Coordinate movement inputs from different devices and handle movement logic
+ * Notes: Acts as a central hub for all movement input types, containing the actual movement mechanics
  */
 
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useIsMobile } from './use-mobile';
+import { useKeyboardMovement } from './useKeyboardMovement';
+import { useSwipeMovement } from './useSwipeMovement';
 import { combatSystem } from '@shared/combat-system';
 
 interface UseTacticalMovementProps {
@@ -18,101 +21,89 @@ export function useTacticalMovement({
   combatState,
   onRoomMovement
 }: UseTacticalMovementProps) {
+  const isMobile = useIsMobile();
+  const availableDirections = effectiveTacticalData?.availableDirections || [];
 
-  // Simple WASD Movement with room transition detection
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
-        return;
-      }
+  // Central movement handler - this is where all the movement logic lives
+  const handleMovement = useCallback((direction: string) => {
+    console.log(`🎯 HandleMovement called with direction: ${direction}, isMobile: ${isMobile}`);
+    const playerEntity = combatState.entities?.find((e: any) => e.id === "player");
+    if (!playerEntity) {
+      console.log("No player entity found for movement");
+      return;
+    }
 
-      const key = event.key.toLowerCase();
-      if (!['w', 'a', 's', 'd'].includes(key)) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const playerEntity = combatState.entities.find(e => e.id === "player");
-      if (!playerEntity) {
-        console.log("No player entity found for movement");
-        return;
-      }
-
-      // Calculate direction based on key
-      let direction = { x: 0, y: 0 };
-      let directionName = "";
-
-      switch (key) {
-        case 'w':
-          direction.y = -1;
-          directionName = "north";
-          break;
-        case 's':
-          direction.y = 1;
-          directionName = "south";
-          break;
-        case 'a':
-          direction.x = -1;
-          directionName = "west";
-          break;
-        case 'd':
-          direction.x = 1;
-          directionName = "east";
-          break;
-      }
-
-      const speed = 8; // Reasonable movement speed
-      const newX = playerEntity.position.x + direction.x * speed;
-      const newY = playerEntity.position.y + direction.y * speed;
-
-      // Check if we can move to the new position
-      const availableDirections = effectiveTacticalData?.availableDirections || [];
-      const canMoveInDirection = availableDirections.includes(directionName);
-
-      // Simple boundary checks
-      let finalX = newX;
-      let finalY = newY;
-
-      // Check for room transitions (when hitting boundaries with available exits)
-      if (newX < 5 && canMoveInDirection && directionName === "west") {
-        console.log("Moving to new room via west");
-        onRoomMovement("west");
-        return;
-      }
-      if (newX > 95 && canMoveInDirection && directionName === "east") {
-        console.log("Moving to new room via east");
-        onRoomMovement("east");
-        return;
-      }
-      if (newY < 5 && canMoveInDirection && directionName === "north") {
-        console.log("Moving to new room via north");
-        onRoomMovement("north");
-        return;
-      }
-      if (newY > 95 && canMoveInDirection && directionName === "south") {
-        console.log("Moving to new room via south");
-        onRoomMovement("south");
-        return;
-      }
-
-      // Normal boundary clamping (keep player in room)
-      finalX = Math.max(5, Math.min(95, newX));
-      finalY = Math.max(5, Math.min(95, newY));
-
-      // Only move if position actually changed
-      if (Math.abs(finalX - playerEntity.position.x) > 0.1 || Math.abs(finalY - playerEntity.position.y) > 0.1) {
-        combatSystem.queueMoveAction(playerEntity.id, { x: finalX, y: finalY });
-      }
+    // Calculate movement vector based on direction
+    const directionVectors = {
+      north: { x: 0, y: -1 },
+      south: { x: 0, y: 1 },
+      east: { x: 1, y: 0 },
+      west: { x: -1, y: 0 },
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [combatState.entities, effectiveTacticalData?.availableDirections, onRoomMovement]);
+    const dir = directionVectors[direction as keyof typeof directionVectors];
+    if (!dir) {
+      console.log(`Invalid direction: ${direction}`);
+      return;
+    }
+
+    // Check if this direction leads to a room transition
+    if (availableDirections.includes(direction)) {
+      // Convert current position to grid coordinates for boundary checks
+      const gridSize = 100 / 15; // Each grid cell is ~6.67% of the total area
+      const currentGridX = Math.round(playerEntity.position.x / gridSize);
+      const currentGridY = Math.round(playerEntity.position.y / gridSize);
+
+      // Calculate target grid position
+      const targetGridX = currentGridX + dir.x;
+      const targetGridY = currentGridY + dir.y;
+
+      // Check if we're at a boundary that should trigger room movement
+      const shouldMoveToNewRoom = 
+        (direction === "north" && targetGridY < 0) ||
+        (direction === "south" && targetGridY > 14) ||
+        (direction === "east" && targetGridX > 14) ||
+        (direction === "west" && targetGridX < 0);
+
+      if (shouldMoveToNewRoom) {
+        console.log(`🎯 Movement: Moving to new room via ${direction}`);
+        onRoomMovement(direction);
+        return;
+      }
+    }
+
+    // Normal movement within the room
+    const speed = 5; // Increased movement speed for better visibility
+    const newX = playerEntity.position.x + dir.x * speed;
+    const newY = playerEntity.position.y + dir.y * speed;
+
+    // Clamp to room boundaries for normal movement
+    const finalX = Math.max(5, Math.min(95, newX));
+    const finalY = Math.max(5, Math.min(95, newY));
+
+    // Only move if position actually changed
+    if (Math.abs(finalX - playerEntity.position.x) > 0.1 || Math.abs(finalY - playerEntity.position.y) > 0.1) {
+      console.log(`🎯 Movement: Moving within room ${direction} to (${finalX}, ${finalY})`);
+      combatSystem.queueMoveAction(playerEntity.id, { x: finalX, y: finalY });
+    }
+  }, [availableDirections, combatState, onRoomMovement]);
+
+  // Set up keyboard movement (always enabled for desktop)
+  useKeyboardMovement({
+    onMovement: handleMovement,
+    isEnabled: !isMobile // Disable on mobile to prevent conflicts
+  });
+
+  // TODO: Add controller movement hook here when implemented
+  // useControllerMovement({
+  //   onMovement: handleMovement,
+  //   isEnabled: true
+  // });
 
   return {
-    // Return any utility functions that might be needed
+    isMobile,
+    handleMovement, // Export the movement handler for other hooks to use
+    // TODO: Add controller connection status when implemented
+    // isControllerConnected: false
   };
 }

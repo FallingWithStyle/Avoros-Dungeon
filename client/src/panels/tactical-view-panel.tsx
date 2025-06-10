@@ -89,7 +89,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
           refetchTacticalData();
           refetchExploredRooms();
-          
+
           // Invalidate minimap queries to update dungeon map
           queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
           queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
@@ -112,7 +112,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
   // Use tactical movement hook
-  useTacticalMovement({
+  const { isMobile, handleMovement } = useTacticalMovement({
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement
@@ -120,9 +120,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Use swipe movement for mobile
   const { containerRef } = useSwipeMovement({
-    onRoomMovement: handleRoomMovement,
+    onMovement: handleMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
-    isEnabled: true
+    combatState,
+    isEnabled: isMobile
   });
 
   // Subscribe to combat system updates
@@ -342,7 +343,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef}>
+        <div 
+        className="flex-1 relative" 
+        ref={containerRef}
+        style={{ touchAction: 'none' }}
+      >
           <TacticalGrid
             roomBackground={gridData.background}
             exits={gridData.exits}
