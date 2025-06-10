@@ -73,8 +73,8 @@ export default function Leaderboard() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono text-green-400">
-                  {crawler.credits.toLocaleString()} cr
+                <p className="text-sm font-mono text-yellow-400">
+                  {crawler.gold.toLocaleString()} gp
                 </p>
               </div>
             </div>
