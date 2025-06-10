@@ -302,7 +302,7 @@ function TacticalEntity({
       >
         {entity.type === "player" && (
           <img
-            src={getAvatarUrl(entity.name, entity.serial)}
+            src={getAvatarUrl(entity.name, entity.serial || entity.id)}
             alt={entity.name}
             className="w-full h-full rounded-full object-cover"
           />
