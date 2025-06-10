@@ -13,18 +13,6 @@ interface TacticalDataHooks {
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails | null) {
-  // Early return if no crawler - MUST be before all hooks
-  if (!crawler) {
-    return {
-      roomData: null,
-      exploredRooms: [],
-      tacticalData: null,
-      refetchRoomData: () => {},
-      refetchExploredRooms: () => {},
-      refetchTacticalData: () => {},
-    };
-  }
-
   // Fetch current room data
   const { data: roomData, refetch: refetchRoomData } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/current-room`],
@@ -52,9 +40,21 @@ export function useTacticalData(crawler: CrawlerWithDetails | null) {
     retry: false,
   });
 
+  // Early return if no crawler - AFTER all hooks are called
+  if (!crawler) {
+    return {
+      roomData: null,
+      exploredRooms: [],
+      tacticalData: null,
+      refetchRoomData: () => {},
+      refetchExploredRooms: () => {},
+      refetchTacticalData: () => {},
+    };
+  }
+
   return {
     roomData,
-    exploredRooms,
+    exploredRooms: exploredRooms || [],
     tacticalData,
     refetchRoomData,
     refetchExploredRooms,

@@ -23,6 +23,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { CrawlerWithDetails } from "@shared/schema";
+import { useTacticalData } from "@/panels/tactical-view/tactical-data-hooks";
 
 interface DungeonMapProps {
   crawler: CrawlerWithDetails;
@@ -300,13 +301,8 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   const [resetPanOnNextMove, setResetPanOnNextMove] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  // Fetch explored rooms
-  const { data: exploredRooms = [], isLoading: isLoadingRooms } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-    refetchInterval: 30000,
-    staleTime: 120000,
-    retry: false,
-  });
+  // Use tactical data hooks for consistent data
+  const { roomData, exploredRooms: tacticalExploredRooms, tacticalData } = useTacticalData(crawler);
 
   // Fetch scanned rooms
   const { data: scannedRooms = [] } = useQuery({
@@ -333,14 +329,6 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     retry: false,
   });
 
-  // Fetch current room
-  const { data: currentRoomData } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000,
-    staleTime: 30000,
-    retry: false,
-  });
-
   // Fetch mob data for all explored rooms
   const { data: roomMobsData = {} } = useQuery<Record<number, { hostileCount: number; neutralCount: number; playerCount: number }>>({
     queryKey: [`/api/crawlers/${crawler.id}/room-mobs-summary`],
@@ -348,6 +336,11 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     staleTime: 60000,
     retry: false,
   });
+
+  // Use explored rooms from tactical data hooks, fallback to empty array
+  const exploredRooms = tacticalExploredRooms || [];
+  const currentRoomData = roomData;
+  const isLoadingRooms = !exploredRooms;
 
   // Current room ID - declare this early so it can be used throughout
   const actualCurrentRoomId = currentRoomData?.room?.id;
