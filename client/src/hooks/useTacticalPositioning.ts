@@ -1,5 +1,6 @@
+
 /**
- * File: useTacticalMovement.ts
+ * File: useTacticalPositioning.ts
  * Responsibility: Handle tactical positioning, gate detection, and room transitions
  * Notes: Focuses on movement validation and positioning logic, relies on other hooks for input handling
  */
@@ -7,7 +8,7 @@
 import { useCallback } from "react";
 import { combatSystem } from "@shared/combat-system";
 
-interface UseTacticalMovementProps {
+interface UseTacticalPositioningProps {
   effectiveTacticalData: any;
   combatState: any;
   onRoomMovement: (direction: string) => void;
@@ -22,7 +23,7 @@ export function useTacticalPositioning({
   effectiveTacticalData,
   combatState,
   onRoomMovement
-}: UseTacticalMovementProps) {
+}: UseTacticalPositioningProps) {
   const speed = 2.5; // Movement speed per frame
 
   const handleMovement = useCallback(

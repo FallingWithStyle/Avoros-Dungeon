@@ -10,7 +10,7 @@ import { Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import { useTacticalMovement } from "@/hooks/useTacticalMovement";
+import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useSwipeMovement } from "@/hooks/useSwipeMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
@@ -112,8 +112,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
-  // Use tactical movement hook for positioning logic
-  const { handleMovement: handleTacticalMovement } = useTacticalMovement({
+  // Use tactical positioning hook for movement validation logic
+  const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement
