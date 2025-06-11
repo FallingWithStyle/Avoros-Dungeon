@@ -1,7 +1,6 @@
-
 import { db } from "../db";
 import { mobs, mobTypes, rooms, factions } from "@shared/schema";
-import { eq, and, lt, isNull, or } from "drizzle-orm";
+import { eq, and, lt, isNull, or, inArray } from "drizzle-orm";
 /**
  * File: mob-storage.ts
  * Responsibility: Mob entity management and spawning storage operations
@@ -35,6 +34,12 @@ export interface DispositionModifier {
 }
 
 export class MobStorage extends BaseStorage {
+  private requestCache?: RequestCache;
+
+  setRequestCache(cache: RequestCache): void {
+    this.requestCache = cache;
+  }
+
   private baseMobSpawnConfigs: MobSpawnConfig[] = [
     {
       roomType: "normal",
@@ -111,6 +116,16 @@ export class MobStorage extends BaseStorage {
   };
 
   async getRoomMobs(roomId: number): Promise<any[]> {
+    // Check request cache first
+    const cacheKey = RequestCache.createKey('room_mobs', roomId);
+    if (this.requestCache) {
+      const cached = this.requestCache.get<any[]>(cacheKey);
+      if (cached) {
+        console.log(`Request cache hit for room ${roomId} mobs`);
+        return cached;
+      }
+    }
+
     try {
       const cached = await redisService.getRoomMobs(roomId);
       if (cached) {
@@ -141,6 +156,11 @@ export class MobStorage extends BaseStorage {
       })));
     }
 
+    // Cache in request cache
+    if (this.requestCache) {
+      this.requestCache.set(cacheKey, roomMobs);
+    }
+
     // Cache for 10 minutes
     try {
       await redisService.setRoomMobs(roomId, roomMobs, 600);
@@ -168,7 +188,7 @@ export class MobStorage extends BaseStorage {
 
   async processRespawns(): Promise<void> {
     const now = new Date();
-    
+
     // Find dead mobs that should respawn
     const mobsToRespawn = await db
       .select()
@@ -182,14 +202,14 @@ export class MobStorage extends BaseStorage {
 
     if (mobsToRespawn.length > 0) {
       console.log(`Found ${mobsToRespawn.length} potential mobs to respawn`);
-      
+
       // Filter out debug mobs from respawning
       const normalMobsToRespawn = mobsToRespawn.filter(mob => 
         !mob.displayName.startsWith('[Debug]')
       );
-      
+
       console.log(`Respawning ${normalMobsToRespawn.length} normal mobs (filtered out ${mobsToRespawn.length - normalMobsToRespawn.length} debug mobs)`);
-      
+
       for (const mob of normalMobsToRespawn) {
         await db
           .update(mobs)
@@ -211,12 +231,12 @@ export class MobStorage extends BaseStorage {
           console.log('Failed to invalidate room mobs cache');
         }
       }
-      
+
       // Clean up any debug mobs that somehow got respawn times set
       const debugMobsWithRespawn = mobsToRespawn.filter(mob => 
         mob.displayName.startsWith('[Debug]')
       );
-      
+
       if (debugMobsWithRespawn.length > 0) {
         console.log(`Cleaning up ${debugMobsWithRespawn.length} debug mobs with respawn times`);
         for (const debugMob of debugMobsWithRespawn) {
@@ -227,7 +247,7 @@ export class MobStorage extends BaseStorage {
               updatedAt: new Date()
             })
             .where(eq(mobs.id, debugMob.id));
-          
+
           console.log(`Cleaned up debug mob respawn time: ${debugMob.displayName}`);
         }
       }
@@ -239,20 +259,20 @@ export class MobStorage extends BaseStorage {
     if (mob.length === 0) return;
 
     const mobData = mob[0];
-    
+
     // Check if this is a debug spawned mob (identified by [Debug] prefix in displayName)
     const isDebugMob = mobData.displayName.startsWith('[Debug]');
-    
+
     let respawnAt = null;
-    
+
     if (!isDebugMob) {
       // Only set respawn time for normal spawned mobs
       const config = this.getMobSpawnConfig(mobData.roomId);
       const respawnHours = config?.respawnHours || 4;
-      
+
       respawnAt = new Date();
       respawnAt.setHours(respawnAt.getHours() + respawnHours);
-      
+
       console.log(`Normal mob ${mobData.displayName} killed - will respawn in ${respawnHours} hours`);
     } else {
       console.log(`Debug mob ${mobData.displayName} killed - will NOT respawn`);
@@ -319,13 +339,13 @@ export class MobStorage extends BaseStorage {
     // Check if room already has mobs
     const existingMobs = await this.getRoomMobs(roomId);
     const aliveMobs = existingMobs.filter(m => m.mob.isAlive);
-    
+
     console.log('📊 Room mob status:', {
       existingMobs: existingMobs.length,
       aliveMobs: aliveMobs.length,
       maxMobs: spawnConfig.maxMobs
     });
-    
+
     if (aliveMobs.length >= spawnConfig.maxMobs) {
       console.log('✋ Room already has maximum mobs, skipping spawn');
       return;
@@ -334,11 +354,11 @@ export class MobStorage extends BaseStorage {
     // Spawn missing mobs
     const mobsToSpawn = spawnConfig.maxMobs - aliveMobs.length;
     console.log('🎲 Will attempt to spawn', mobsToSpawn, 'mobs with chance', spawnConfig.spawnChance);
-    
+
     for (let i = 0; i < mobsToSpawn; i++) {
       const spawnRoll = Math.random();
       console.log(`🎯 Spawn attempt ${i + 1}/${mobsToSpawn}: rolled ${spawnRoll} vs chance ${spawnConfig.spawnChance}`);
-      
+
       if (spawnRoll > spawnConfig.spawnChance) {
         console.log('❌ Spawn roll failed, skipping this mob');
         continue;
@@ -407,7 +427,7 @@ export class MobStorage extends BaseStorage {
     console.log('⚙️ Base config found:', baseConfig);
 
     let mobTypes: string[] = [];
-    
+
     // If room is controlled by a faction, use faction mob types
     if (roomData.factionId) {
       console.log('🏛️ Room controlled by faction:', roomData.factionId);
@@ -418,7 +438,7 @@ export class MobStorage extends BaseStorage {
         console.log('🎭 Using faction mob types:', mobTypes);
       }
     }
-    
+
     // Fallback to neutral mobs based on room type and environment
     if (mobTypes.length === 0) {
       const roomTypeMobs = this.neutralMobTypesByRoomType[roomData.type] || [];
@@ -430,7 +450,7 @@ export class MobStorage extends BaseStorage {
         combined: mobTypes
       });
     }
-    
+
     // Further fallback to basic types
     if (mobTypes.length === 0) {
       mobTypes = baseConfig.creatureCategories;
@@ -462,7 +482,7 @@ export class MobStorage extends BaseStorage {
     // Get appropriate enemies based on mob types
     const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
     console.log('🎯 Selected mob category:', selectedMobCategory);
-    
+
     // Try to find mob types that match the selected category in their name or description
     let availableMobTypes;
     try {
@@ -492,21 +512,21 @@ export class MobStorage extends BaseStorage {
       mobTypeRecord.name.toLowerCase().includes(selectedMobCategory.toLowerCase()) ||
       (mobTypeRecord.description && mobTypeRecord.description.toLowerCase().includes(selectedMobCategory.toLowerCase()))
     );
-    
+
     console.log('🔍 Filtered mob types:', filteredMobTypes.map(mt => ({
       id: mt.id,
       name: mt.name,
       matchedCategory: selectedMobCategory
     })));
-    
+
     // Use filtered mob types if found, otherwise fall back to all available
     const mobTypesToChoose = filteredMobTypes.length > 0 ? filteredMobTypes : availableMobTypes;
-    
+
     console.log('⚔️ Final mob types to choose from:', mobTypesToChoose.map(mt => ({
       id: mt.id,
       name: mt.name
     })));
-    
+
     if (mobTypesToChoose.length === 0) {
       console.log('❌ No mob types available to choose from!');
       console.error('This should not happen since we have mob types in the database');
@@ -520,11 +540,11 @@ export class MobStorage extends BaseStorage {
       rarity: selectedMobType.rarity,
       health: selectedMobType.health
     });
-    
+
     // Generate contextual display name
     const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, selectedMobCategory);
     console.log('📝 Generated display name:', displayName);
-    
+
     return {
       mobTypeId: selectedMobType.id,
       displayName,
@@ -548,10 +568,10 @@ export class MobStorage extends BaseStorage {
       epic: "Champion ",
       legendary: "Legendary "
     };
-    
+
     let prefix = rarityModifiers[selectedMobType.rarity as keyof typeof rarityModifiers] || "";
     console.log('💎 Rarity prefix:', prefix);
-    
+
     // Add faction-specific prefixes
     if (spawnConfig.factionId) {
       const factionPrefixes: Record<string, string> = {
@@ -561,27 +581,27 @@ export class MobStorage extends BaseStorage {
         "4": "Azure ", // Azure Order
         "5": "Crimson " // Crimson Banner
       };
-      
+
       const factionPrefix = factionPrefixes[spawnConfig.factionId.toString()];
       if (factionPrefix) {
         prefix = factionPrefix + prefix;
         console.log('🏛️ Added faction prefix:', factionPrefix, 'Total prefix:', prefix);
       }
     }
-    
+
     // Use mob type as the base name if mob name is generic
     const isGenericName = selectedMobType.name === "Unknown" || selectedMobType.name === "Generic Mob";
     console.log('🤔 Is generic name?', isGenericName, 'Original name:', selectedMobType.name);
-    
+
     const baseName = isGenericName
       ? mobType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
       : selectedMobType.name;
-    
+
     console.log('🎯 Base name determined:', baseName);
-    
+
     const finalName = `${prefix}${baseName}`;
     console.log('✨ Final display name:', finalName);
-    
+
     return finalName;
   }
 
@@ -592,7 +612,7 @@ export class MobStorage extends BaseStorage {
         .from(factions)
         .where(eq(factions.id, factionId))
         .limit(1);
-      
+
       return faction || null;
     } catch (error) {
       console.log('Failed to fetch faction data:', error);
@@ -605,7 +625,7 @@ export class MobStorage extends BaseStorage {
     if (mob.length === 0) return;
 
     const newDisposition = Math.max(-100, Math.min(100, mob[0].disposition + dispositionChange));
-    
+
     await db
       .update(mobs)
       .set({
@@ -735,10 +755,89 @@ export class MobStorage extends BaseStorage {
     const cellHeight = 100 / 15;
     const gridX = Math.floor(Math.random() * 15);
     const gridY = Math.floor(Math.random() * 15);
-    
+
     return {
       x: (gridX + 0.5) * cellWidth,
       y: (gridY + 0.5) * cellHeight,
     };
   }
+
+  async getBatchedRoomMobs(roomIds: number[]): Promise<Map<number, any[]>> {
+    if (roomIds.length === 0) return new Map();
+
+    // Check request cache for all rooms
+    const results = new Map<number, any[]>();
+    const uncachedRoomIds: number[] = [];
+
+    if (this.requestCache) {
+      for (const roomId of roomIds) {
+        const cacheKey = RequestCache.createKey('room_mobs', roomId);
+        const cached = this.requestCache.get<any[]>(cacheKey);
+        if (cached) {
+          results.set(roomId, cached);
+        } else {
+          uncachedRoomIds.push(roomId);
+        }
+      }
+    } else {
+      uncachedRoomIds.push(...roomIds);
+    }
+
+    // Fetch uncached rooms in a single query
+    if (uncachedRoomIds.length > 0) {
+      const mobs = await db
+        .select({
+          mob: mobs,
+          mobType: mobTypes
+        })
+        .from(mobs)
+        .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
+        .where(
+          and(
+            inArray(mobs.roomId, uncachedRoomIds),
+            eq(mobs.isAlive, true),
+            eq(mobs.isActive, true)
+          )
+        );
+
+      // Group by room ID
+      const mobsByRoom = new Map<number, any[]>();
+      for (const mob of mobs) {
+        const roomId = mob.mob.roomId;
+        if (!mobsByRoom.has(roomId)) {
+          mobsByRoom.set(roomId, []);
+        }
+        mobsByRoom.get(roomId)!.push({
+          mob: mob.mob,
+          mobType: mob.mobType
+        });
+      }
+
+      // Cache results and add to final results
+      for (const roomId of uncachedRoomIds) {
+        const roomMobs = mobsByRoom.get(roomId) || [];
+        results.set(roomId, roomMobs);
+
+        if (this.requestCache) {
+          const cacheKey = RequestCache.createKey('room_mobs', roomId);
+          this.requestCache.set(cacheKey, roomMobs);
+        }
+      }
+    }
+
+    return results;
+  }
+
+  async getRoomMobsByDisposition(roomId: number, disposition: 'hostile' | 'neutral' | 'friendly'): Promise<any[]> {
+    const roomMobs = await this.getRoomMobs(roomId);
+    if (disposition === 'hostile') {
+      return roomMobs.filter(mobData => mobData.mob.disposition < 0 && mobData.mob.isAlive);
+    } else if (disposition === 'neutral') {
+      return roomMobs.filter(mobData => mobData.mob.disposition === 0 && mobData.mob.isAlive);
+    } else {
+      return roomMobs.filter(mobData => mobData.mob.disposition > 0 && mobData.mob.isAlive);
+    }
+  }
 }
+
+import { RequestCache } from '../lib/request-cache';

@@ -10,6 +10,7 @@ import { eq, and } from "drizzle-orm";
  */
 import { BaseStorage } from "./base-storage";
 import { redisService } from "../lib/redis-service";
+import { RequestCache } from "../lib/request-cache";
 
 export interface TacticalEntity {
   type: 'loot' | 'mob' | 'npc';
@@ -20,6 +21,7 @@ export interface TacticalEntity {
 
 export class TacticalStorage extends BaseStorage {
   private tacticalCache = new Map<string, { data: any; timestamp: number }>();
+  private requestCache?: RequestCache;
   private roomDataCache = new Map<number, { data: any; timestamp: number }>();
   private readonly CACHE_TTL = 60000; // Increased to 60 seconds
   private readonly ROOM_CACHE_TTL = 120000; // 2 minutes for room data
@@ -39,6 +41,10 @@ export class TacticalStorage extends BaseStorage {
     this.mobStorage = storage;
   }
 
+  setRequestCache(cache: RequestCache): void {
+    this.requestCache = cache;
+  }
+
   private getCachedRoomData(roomId: number): any | null {
     const cached = this.roomDataCache.get(roomId);
     if (cached && Date.now() - cached.timestamp < this.ROOM_CACHE_TTL) {
@@ -55,10 +61,23 @@ export class TacticalStorage extends BaseStorage {
   }
 
   async getTacticalPositions(roomId: number): Promise<TacticalEntity[]> {
+    // Check request cache first
+    const cacheKey = RequestCache.createKey('tactical_positions', roomId);
+    if (this.requestCache) {
+      const cached = this.requestCache.get<TacticalEntity[]>(cacheKey);
+      if (cached) {
+        console.log(`Request cache hit for tactical positions room ${roomId}`);
+        return cached;
+      }
+    }
+
     // Try to get from cache first
     try {
       const cached = await redisService.getTacticalPositions(roomId);
       if (cached) {
+        if (this.requestCache) {
+          this.requestCache.set(cacheKey, cached);
+        }
         return cached;
       }
     } catch (error) {
@@ -84,6 +103,11 @@ export class TacticalStorage extends BaseStorage {
         y: parseFloat(pos.positionY),
       },
     }));
+
+    // Cache in request cache
+    if (this.requestCache) {
+      this.requestCache.set(cacheKey, entities);
+    }
 
     // Cache the result
     try {
