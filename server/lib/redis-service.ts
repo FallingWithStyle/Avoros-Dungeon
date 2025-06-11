@@ -118,7 +118,7 @@ class RedisService {
 
   // Pattern-based deletion
   async deletePattern(pattern: string): Promise<void> {
-    if (!this.redis || !this.isConnected) return;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return;
 
     try {
       const keys = await this.redis.keys(pattern);
@@ -163,7 +163,7 @@ class RedisService {
   }
 
   async invalidateCrawler(crawlerId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`crawler:${crawlerId}`);
@@ -283,7 +283,7 @@ class RedisService {
   }
 
   async invalidateFloor(floorId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`floor:${floorId}:bounds`);
@@ -321,7 +321,7 @@ class RedisService {
   }
 
   async invalidateTacticalPositions(roomId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`tactical:room:${roomId}`);
@@ -416,7 +416,7 @@ class RedisService {
   }
 
   async invalidateRoomMobs(roomId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`room:${roomId}:mobs`);
@@ -501,6 +501,7 @@ class RedisService {
   }
 
   async invalidateUser(userId: string) {
+    if (this.forceFallbackMode || !this.isConnected) return;
     await this.deletePattern(`user:${userId}*`);
   }
 
@@ -538,7 +539,7 @@ class RedisService {
   }
 
   async invalidateRoomData(roomId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`room:${roomId}:players`);
@@ -549,7 +550,7 @@ class RedisService {
   }
 
   async invalidateCrawlerRoomData(crawlerId: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.isConnected) return;
 
     try {
       await this.redis?.del(`crawler:${crawlerId}:room-data`);
