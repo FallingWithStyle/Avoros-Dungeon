@@ -67,6 +67,8 @@ export function useTacticalPositioning({
       console.log("🎯 Movement attempt:", {
         currentPos: { x: playerEntity.position.x, y: playerEntity.position.y },
         newPos: { x: newX, y: newY },
+        movementSpeed: speed,
+        direction: { x: direction.x, y: direction.y },
         availableDirections,
         gateZone: { start: gateStart, end: gateEnd }
       });

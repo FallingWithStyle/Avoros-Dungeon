@@ -87,10 +87,12 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
 
   const updateMovementSpeed = (newSpeed: number) => {
     setMovementSpeed(newSpeed);
+    (window as any).debugMovementSpeed = newSpeed;
   };
 
   const resetMovementSpeed = () => {
     setMovementSpeed(2.5);
+    (window as any).debugMovementSpeed = 2.5;
   };
 
   // Debug crawler deletion
