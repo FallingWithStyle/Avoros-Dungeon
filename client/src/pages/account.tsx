@@ -14,7 +14,7 @@ import { User, Mail, Calendar, CreditCard, Settings } from "lucide-react";
 
 export default function Account() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -132,10 +132,7 @@ export default function Account() {
             <Button 
               variant="outline" 
               className="w-full border-red-600/30 text-red-300 hover:bg-red-600/10"
-              onClick={() => {
-                // Let the server handle the logout redirect directly
-                window.location.href = "/api/logout";
-              }}
+              onClick={logout}
             >
               Logout
             </Button>
