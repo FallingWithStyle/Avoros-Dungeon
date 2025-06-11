@@ -26,7 +26,7 @@ export function RedisStatusIndicator() {
           <AlertDescription className="pr-8">
             <div className="font-medium mb-1">Performance Notice</div>
             <div className="text-sm">
-              Our caching system is temporarily unavailable. The app is working normally but may be a bit slower than usual.
+              Currently running in "DB Only" mode. The app is working normally but may be slower than usual since caching is disabled.
             </div>
             <Button
               variant="ghost"

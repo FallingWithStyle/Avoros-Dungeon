@@ -75,33 +75,53 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
 
     try {
-      console.log("Moving crawler " + crawler.id + " " + direction + " to new room");
+      console.log("⚡ Ultra-fast room transition " + direction + " starting...");
       sessionStorage.setItem('lastMovementDirection', direction);
 
-      const response = await fetch("/api/crawlers/" + crawler.id + "/move", {
+      // Immediately clear entities for instant visual feedback
+      const currentEntities = combatSystem.getState().entities;
+      currentEntities.forEach((entity) => {
+        combatSystem.removeEntity(entity.id);
+      });
+
+      // Immediately update dungeon map queries to show transition
+      queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
+
+      // Fire all requests simultaneously - no waiting
+      const movePromise = fetch("/api/crawlers/" + crawler.id + "/move", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          console.log("Successfully moved " + direction + " to " + (result.newRoom?.name || 'unknown room'));
-          refetchTacticalData();
-          refetchExploredRooms();
+      // Start tactical data fetch immediately (don't await)
+      refetchTacticalData();
+      refetchExploredRooms();
 
-          // Invalidate minimap queries to update dungeon map
-          queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
-
-          // Clear entities for room transition
-          const currentEntities = combatSystem.getState().entities;
-          currentEntities.forEach((entity) => {
-            combatSystem.removeEntity(entity.id);
-          });
+      // Handle move result in background - don't block UI
+      movePromise.then(async (response) => {
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log("✅ Background transition complete: " + (result.newRoom?.name || 'unknown room'));
+            
+            // Final update to ensure everything is in sync
+            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
+          }
         }
-      }
+      }).catch((error) => {
+        console.error("Failed to move " + direction + ":", error);
+        toast({
+          title: "Movement failed",
+          description: "Could not move in that direction.",
+          variant: "destructive",
+        });
+      });
+
+      console.log("⚡ Ultra-fast transition initiated - UI responsive immediately");
+
     } catch (error) {
       console.error("Failed to move " + direction + ":", error);
       toast({

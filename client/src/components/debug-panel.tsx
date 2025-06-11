@@ -440,11 +440,14 @@ function RedisFallbackControl() {
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       refetch();
+      const newMode = data.fallbackMode ? "DB Only" : "Cache + DB";
       toast({
-        title: "Redis Fallback Mode Updated",
-        description: "Cache behavior has been changed",
+        title: `Switched to ${newMode} Mode`,
+        description: data.fallbackMode 
+          ? "Now using database only - Redis cache disabled" 
+          : "Now using Redis cache + database for optimal performance",
       });
     },
     onError: (error) => {
@@ -484,8 +487,8 @@ function RedisFallbackControl() {
       {toggleFallbackMutation.isPending 
         ? "Updating..." 
         : fallbackStatus?.fallbackMode 
-          ? "Fallback On" 
-          : "Fallback Off"
+          ? "DB Only" 
+          : "Cache + DB"
       }
     </Button>
   );

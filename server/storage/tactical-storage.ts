@@ -19,6 +19,10 @@ export interface TacticalEntity {
 }
 
 export class TacticalStorage extends BaseStorage {
+  private tacticalCache = new Map<string, { data: any; timestamp: number }>();
+  private roomDataCache = new Map<number, { data: any; timestamp: number }>();
+  private readonly CACHE_TTL = 60000; // Increased to 60 seconds
+  private readonly ROOM_CACHE_TTL = 120000; // 2 minutes for room data
   private crawlerStorage: any;
   private explorationStorage: any;
   private mobStorage: any;
@@ -34,6 +38,22 @@ export class TacticalStorage extends BaseStorage {
   setMobStorage(storage: any) {
     this.mobStorage = storage;
   }
+
+  private getCachedRoomData(roomId: number): any | null {
+    const cached = this.roomDataCache.get(roomId);
+    if (cached && Date.now() - cached.timestamp < this.ROOM_CACHE_TTL) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setCachedRoomData(roomId: number, data: any): void {
+    this.roomDataCache.set(roomId, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+
   async getTacticalPositions(roomId: number): Promise<TacticalEntity[]> {
     // Try to get from cache first
     try {
@@ -122,11 +142,11 @@ export class TacticalStorage extends BaseStorage {
       const existingPositions = await this.getTacticalPositions(roomId);
       // Keep only loot and NPC entities from existing data
       existingNonMobEntities = existingPositions.filter(entity => entity.type !== 'mob');
-      
+
       if (existingNonMobEntities.length > 0) {
         console.log(`Using existing non-mob tactical data for room ${roomId}`);
         entities.push(...existingNonMobEntities);
-        
+
         // Mark cells as occupied by existing entities
         existingNonMobEntities.forEach(entity => {
           const gridX = Math.floor((entity.position.x / 100) * 15);
@@ -165,7 +185,7 @@ export class TacticalStorage extends BaseStorage {
     // ALWAYS get fresh mob data - never use cached mob positions
     if (this.mobStorage && typeof this.mobStorage.getRoomMobs === 'function' && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
       console.log(`Getting fresh mob data for room ${roomId} (type: ${roomData.type}, isSafe: ${roomData.isSafe})`);
-      
+
       try {
         // Clear any corrupted mob cache first
         try {
@@ -178,7 +198,7 @@ export class TacticalStorage extends BaseStorage {
         // First check if we need to spawn mobs for this room
         const roomMobs = await this.mobStorage.getRoomMobs(roomId);
         console.log(`Found ${roomMobs.length} existing mobs in room ${roomId}`);
-        
+
         // If no mobs exist and this isn't a safe room, try to spawn some
         if (roomMobs.length === 0 && !roomData.isSafe) {
           console.log(`No mobs found in room ${roomId}, attempting to spawn mobs`);
@@ -192,7 +212,7 @@ export class TacticalStorage extends BaseStorage {
             console.error(`Failed to spawn mobs for room ${roomId}:`, spawnError);
           }
         }
-        
+
         for (const mobData of roomMobs) {
           if (mobData.mob.isAlive && mobData.mob.isActive) {
             console.log(`Adding mob to tactical data: ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
@@ -268,6 +288,11 @@ export class TacticalStorage extends BaseStorage {
     console.log(`Saved ${entities.length} tactical entities for room ${roomId}`);
 
     return entities;
+  }
+
+  async clearTacticalEntities(roomId: number): Promise<void> {
+    await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
+    console.log(`Cleared tactical entities for room ${roomId}`);
   }
 
   private getRandomEmptyCell(excludeCells: Set<string> = new Set()): { gridX: number; gridY: number } {
