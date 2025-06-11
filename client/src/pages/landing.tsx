@@ -43,7 +43,9 @@ export default function Landing() {
               </p>
               <p className="text-slate-400 text-lg">
                 Your corporation's survival depends on one elite crawler. They
-                die, you start over. Welcome to <span className="text-red-400 font-semibold">debt-defying</span> corporate natural selection.
+                die, you start over. Welcome to{" "}
+                <span className="text-red-400 font-semibold">debt-defying</span>{" "}
+                corporate natural selection.
               </p>
             </div>
           </div>
@@ -79,8 +81,10 @@ export default function Landing() {
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
                   Your crawler is your{" "}
-                  <span className="text-orange-400 font-bold">only asset</span>.
-                  Death means bankruptcy. Failure means starting over. No
+                  <span className="text-orange-400 font-bold">
+                    life-or-death line
+                  </span>
+                  . Death means bankruptcy. Failure means starting over. No
                   respawns, no second chances.
                 </p>
               </CardContent>
@@ -96,8 +100,11 @@ export default function Landing() {
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
                   Crush competing corporations and{" "}
-                  <span className="text-cyan-400 font-bold">kick their assets</span>.
-                  Corner the death market. Build your empire on the bones of failed crawlers.
+                  <span className="text-cyan-400 font-bold">
+                    kick their assets
+                  </span>
+                  . Corner the death market. Build your empire on the bones of
+                  failed crawlers.
                 </p>
               </CardContent>
             </Card>
@@ -138,12 +145,12 @@ export default function Landing() {
                     <span className="font-semibold text-red-300">
                       Tactical Combat Matrix
                     </span>{" "}
-                    - Turn-based liquidation protocols
+                    - Real-time competition liquidation
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-shopping-cart text-orange-400 mr-3 w-5"></i>
                     <span className="font-semibold text-orange-300">
-                      Equipment Monopoly
+                      Equipment Supply Chain
                     </span>{" "}
                     - Corner the death-dealing market
                   </div>
@@ -152,7 +159,7 @@ export default function Landing() {
                     <span className="font-semibold text-cyan-300">
                       Corporate Communications
                     </span>{" "}
-                    - Real-time command protocols
+                    - Downline collaboration protocols
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-chart-line text-green-400 mr-3 w-5"></i>
