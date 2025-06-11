@@ -15,7 +15,6 @@ import TacticalViewPanel from "@/panels/tactical-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
 import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
-import MobileMenu from "@/components/mobile-menu";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 
@@ -172,9 +171,6 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      <MobileMenu />
 
       {/* Global Debug Panel */}
       <DebugPanel activeCrawler={crawler} />

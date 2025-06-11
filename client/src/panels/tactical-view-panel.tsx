@@ -106,7 +106,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           const result = await response.json();
           if (result.success) {
             console.log("✅ Background transition complete: " + (result.newRoom?.name || 'unknown room'));
-            
+
             // Final update to ensure everything is in sync
             queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
             queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
@@ -140,11 +140,15 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     onRoomMovement: handleRoomMovement
   });
 
-  // Detect mobile device
+  // Detect mobile device with more comprehensive detection
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      const isMobileDevice = hasTouch && isSmallScreen;
+      console.log('🔍 Mobile detection:', { hasTouch, isSmallScreen, isMobileDevice, innerWidth: window.innerWidth });
+      setIsMobile(isMobileDevice);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -362,7 +366,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         <div 
           className="flex-1 relative" 
           ref={containerRef}
-          style={{ touchAction: 'none' }}
+          style={{ 
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
+          }}
+          onTouchStart={(e) => console.log('📱 Container touch start detected')}
+          onTouchMove={(e) => console.log('📱 Container touch move detected')}
         >
           <TacticalGrid
             roomBackground={gridData.background}
