@@ -133,28 +133,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
-  // Get movement speed from global state (will be set by debug panel)
-  const [movementSpeed, setMovementSpeed] = useState((window as any).debugMovementSpeed || 2.5);
-
-  // Listen for changes to the global movement speed
-  useEffect(() => {
-    const checkSpeedChange = () => {
-      const globalSpeed = (window as any).debugMovementSpeed || 2.5;
-      if (globalSpeed !== movementSpeed) {
-        setMovementSpeed(globalSpeed);
-      }
-    };
-
-    const interval = setInterval(checkSpeedChange, 100);
-    return () => clearInterval(interval);
-  }, [movementSpeed]);
-
-  // Tactical positioning and movement
+  // Use tactical positioning hook for movement validation logic
   const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
     effectiveTacticalData,
     combatState,
-    onRoomMovement: handleRoomMovement,
-    movementSpeed,
+    onRoomMovement: handleRoomMovement
   });
 
   // Detect mobile device with more comprehensive detection
