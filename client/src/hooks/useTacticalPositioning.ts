@@ -6,6 +6,7 @@
 
 import { useCallback, useRef } from "react";
 import { handleRoomChangeWithRefetch } from '@/lib/roomChangeUtils';
+import { combatSystem } from '../../../shared/combat-system';
 
 interface MovementVector {
   x: number;
