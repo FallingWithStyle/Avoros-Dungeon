@@ -10,7 +10,8 @@ import { Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import { useTacticalMovement } from "@/hooks/useTacticalMovement";
+import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
+import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useSwipeMovement } from "@/hooks/useSwipeMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
@@ -111,19 +112,36 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
-  // Use tactical movement hook
-  const { isMobile, handleMovement } = useTacticalMovement({
+  // Use tactical positioning hook for movement validation logic
+  const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement
   });
 
-  // Use swipe movement for mobile
+  // Detect mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use existing keyboard movement hook
+  useKeyboardMovement({
+    onMovement: handleTacticalMovement,
+    isEnabled: !combatState.isInCombat && !isMobile
+  });
+
+  // Use existing swipe movement hook for mobile
   const { containerRef } = useSwipeMovement({
-    onMovement: handleMovement,
+    onMovement: handleTacticalMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
     combatState,
-    isEnabled: isMobile
+    isEnabled: isMobile && !combatState.isInCombat
   });
 
   // Subscribe to combat system updates
@@ -169,10 +187,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData?.room, lastRoomId, crawler]);
 
-  // Grid event handlers
+  // Grid event handlers - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    // Disabled for now - clicking on screen should not do anything
-    console.log("Grid clicked - functionality disabled");
+    // Grid clicking disabled - use keyboard/swipe movement instead
+    console.log("Grid click disabled - use WASD keys or swipe to move");
     return;
   }, []);
 
