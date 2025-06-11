@@ -11,21 +11,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function GameHeader() {
   const { user } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      // Use fetch to call logout endpoint
-      const response = await fetch("/api/logout", {
-        method: "GET",
-        credentials: "include"
-      });
-      
-      // Redirect to login page after logout
-      window.location.replace("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Fallback to direct navigation if fetch fails
-      window.location.replace("/api/logout");
-    }
+  const handleLogout = () => {
+    // Let the server handle the logout redirect directly
+    window.location.href = "/api/logout";
   };
 
   const getDisplayName = () => {
