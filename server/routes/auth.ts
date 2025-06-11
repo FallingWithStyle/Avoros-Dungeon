@@ -21,34 +21,5 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  // Logout route
-  app.get("/api/logout", (req: any, res) => {
-    try {
-      // Clear any session data
-      if (req.session) {
-        req.session.destroy((err: any) => {
-          if (err) {
-            console.error("Error destroying session:", err);
-          }
-        });
-      }
-      
-      // Clear all authentication cookies
-      res.clearCookie("connect.sid");
-      res.clearCookie("session");
-      res.clearCookie("replit_authed");
-      res.clearCookie("__replauthuser");
-      
-      // Set cache control headers to prevent caching
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      
-      // Redirect to landing page with a timestamp to force refresh
-      res.redirect("/?t=" + Date.now());
-    } catch (error) {
-      console.error("Error during logout:", error);
-      res.redirect("/?t=" + Date.now());
-    }
-  });
+  
 }
