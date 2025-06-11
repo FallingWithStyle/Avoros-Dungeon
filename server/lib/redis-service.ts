@@ -132,7 +132,7 @@ class RedisService {
 
   // Crawler-specific cache methods
   async getCrawler(crawlerId: number): Promise<any | null> {
-    if (!this.isConnected) return null;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return null;
 
     try {
       const data = await this.redis?.get(`crawler:${crawlerId}`);
@@ -149,7 +149,7 @@ class RedisService {
   }
 
   async setCrawler(crawlerId: number, data: any, ttlSeconds = 300): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return;
 
     try {
       await this.redis?.setex(
@@ -295,7 +295,7 @@ class RedisService {
 
   // Tactical positions cache methods
   async getTacticalPositions(roomId: number): Promise<any[] | null> {
-    if (!this.isConnected) return null;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return null;
 
     try {
       const data = await this.redis?.get(`tactical:room:${roomId}`);
@@ -307,7 +307,7 @@ class RedisService {
   }
 
   async setTacticalPositions(roomId: number, positions: any[], ttlSeconds = 1800): Promise<void> {
-    if (!this.isConnected) return;
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) return;
 
     try {
       await this.redis?.setex(
@@ -331,6 +331,11 @@ class RedisService {
   }
 
   async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) {
+      console.log(`Redis fallback mode enabled - skipping mob cache for room ${roomId}`);
+      return;
+    }
+
     try {
       // Create a clean, serializable version of the mob data
       const cleanMobs = mobs.map(mobData => {
@@ -377,6 +382,11 @@ class RedisService {
   }
 
   async getRoomMobs(roomId: number): Promise<any[] | null> {
+    if (this.forceFallbackMode || !this.redis || !this.isConnected) {
+      console.log(`Redis fallback mode enabled - skipping mob cache lookup for room ${roomId}`);
+      return null;
+    }
+
     try {
       const cached = await this.redis.get(`room:${roomId}:mobs`);
       if (!cached) return null;
@@ -417,8 +427,13 @@ class RedisService {
 
   // Debug methods for fallback mode control
   setForceFallbackMode(enabled: boolean): void {
+    const oldMode = this.forceFallbackMode;
     this.forceFallbackMode = enabled;
-    console.log(`Redis fallback mode ${enabled ? 'enabled' : 'disabled'} via debug override`);
+    console.log(`🔧 Redis fallback mode ${enabled ? 'ENABLED' : 'DISABLED'} via debug override`);
+    
+    if (oldMode !== enabled) {
+      console.log(`📊 Cache operations will now ${enabled ? 'SKIP Redis and use database only' : 'USE Redis normally'}`);
+    }
   }
 
   isForceFallbackMode(): boolean {
