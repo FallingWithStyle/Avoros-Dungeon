@@ -9,12 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function GameHeader() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    // Let the server handle the logout redirect directly
-    window.location.href = "/api/logout";
-  };
+  const handleLogout = logout;
 
   const getDisplayName = () => {
     if (user?.firstName || user?.lastName) {
