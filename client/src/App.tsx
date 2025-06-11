@@ -1,3 +1,4 @@
+
 /**
  * File: App.tsx
  * Responsibility: Main application component handling routing, authentication, and global providers
@@ -21,6 +22,14 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-game-bg flex items-center justify-center">
+        <div className="text-slate-100">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {!isLoading && isAuthenticated && <HeaderNavigation />}
@@ -43,21 +52,14 @@ function Router() {
 }
 
 function App() {
-  const { user, isLoading, isAuthenticated } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-game-bg flex items-center justify-center">
-        <div className="text-slate-100">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      {isAuthenticated ? <Home /> : <Landing />}
-      <Toaster />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+        <RedisStatusIndicator />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
