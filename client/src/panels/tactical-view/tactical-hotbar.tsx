@@ -50,7 +50,7 @@ export default function TacticalHotbar({
                         position === "left" ? "justify-start" : "justify-end";
 
   return (
-    <div className={`flex gap-2 ${flexDirection} ${justifyContent}`}
+    <div className={`flex gap-2 ${flexDirection} ${justifyContent}`}>
       {actions.map((action) => {
         const isActive = activeActionMode?.actionId === action.id;
         const cooldownPercentage = getCooldownPercentage(action.id);
