@@ -73,6 +73,14 @@ export function useKeyboardMovement({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
+      
+      // Check if layout settings dialog is open specifically
+      const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
+      if (layoutDialog) {
+        console.log('🚫 Keyboard movement disabled - layout settings dialog is open');
+        return;
+      }
+      
       const key = event.key.toLowerCase();
       const valid = [
         "w",
@@ -114,6 +122,16 @@ export function useKeyboardMovement({
   const handleKeyUp = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
+      
+      // Check if layout settings dialog is open specifically
+      const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
+      if (layoutDialog) {
+        // Clear any pressed keys when dialog is open to prevent stuck movement
+        keysPressed.current.clear();
+        stopMovement();
+        return;
+      }
+      
       const key = event.key.toLowerCase();
       const valid = [
         "w",
