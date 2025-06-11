@@ -1,0 +1,29 @@
+Looking at your logs, I can see the issue - there are excessive database calls happening, especially for room mob data that's being fetched repeatedly. Let me implement several optimizations to reduce database transactions:
+
+1. Implement Request-Level Caching
+First, let's add a simple in-memory cache per request to avoid duplicate database calls:
+
+server/lib/request-cache.ts
+Add request-level caching to prevent duplicate database calls within the same request
+2. Optimize Mob Storage with Request Caching
+server/storage/mob-storage.ts
+Add request-level caching to prevent duplicate mob queries Add request-level caching to prevent duplicate mob queries Add request-level caching to mob queries Add request-level caching to prevent duplicate mob queries Add request-level caching to mob queries Update convenience methods to use the optimized getMobsInRoom
+3. Optimize Tactical Storage with Batching
+server/storage/tactical-storage.ts
+Add request caching and reduce duplicate database calls
+4. Update Crawler Routes to Use Request Caching
+server/routes/crawler.ts
+Add request caching to reduce duplicate database calls, Optimize room mobs summary to use batched queries
+5. Optimize Room Mobs Summary with Batching
+6. Update Mob Storage Interface
+7. Add Database Connection Pooling Configuration
+server/db.ts
+Add connection pooling configuration to reduce database connection overhead
+These optimizations will significantly reduce the number of database transactions by:
+
+Request-level caching: Prevents duplicate queries within the same HTTP request
+Batched processing: Groups multiple room queries together instead of processing them one by one
+Single mob queries: Gets all mobs in one query instead of separate queries by disposition
+Promise.all: Runs independent queries in parallel
+Connection pooling: Reuses database connections to reduce overhead
+The key improvement is that instead of making 3 separate database calls per room for hostile/neutral/friendly mobs, we now make 1 call and filter the results. Combined with request-level caching, this should dramatically reduce the database load you're seeing in the logs.
