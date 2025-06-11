@@ -31,7 +31,7 @@ export default function TacticalHotbar({
   ];
 
   return (
-    <div className="mt-3 flex gap-2 justify-center">
+    <div className="flex gap-2 justify-center">
       {actions.map((action) => {
         const isActive = activeActionMode?.actionId === action.id;
         const cooldownPercentage = getCooldownPercentage(action.id);
