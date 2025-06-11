@@ -47,7 +47,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     tacticalLoading,
     tacticalError,
     refetchTacticalData,
-    refetchExploredRooms
+    refetchExploredRooms,
+    handleRoomChange
   } = useTacticalData(crawler);
 
   // Local state - ALL HOOKS BEFORE ANY CONDITIONAL LOGIC
