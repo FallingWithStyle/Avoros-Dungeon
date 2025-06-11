@@ -132,7 +132,11 @@ export default function Account() {
             <Button 
               variant="outline" 
               className="w-full border-red-600/30 text-red-300 hover:bg-red-600/10"
-              onClick={() => window.location.href = "/api/logout"}
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = "/api/logout";
+              }}
             >
               Logout
             </Button>
