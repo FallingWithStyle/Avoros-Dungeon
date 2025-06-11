@@ -21,27 +21,5 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  // Logout route
-  app.get("/api/logout", (req: any, res) => {
-    try {
-      // Clear any session data
-      if (req.session) {
-        req.session.destroy((err: any) => {
-          if (err) {
-            console.error("Error destroying session:", err);
-          }
-        });
-      }
-      
-      // Clear cookies
-      res.clearCookie("connect.sid");
-      res.clearCookie("session");
-      
-      // Redirect to landing page
-      res.redirect("/");
-    } catch (error) {
-      console.error("Error during logout:", error);
-      res.redirect("/");
-    }
-  });
+  
 }

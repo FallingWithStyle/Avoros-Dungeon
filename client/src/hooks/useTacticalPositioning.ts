@@ -5,7 +5,12 @@
  */
 
 import { useCallback, useRef } from "react";
-import { combatSystem } from "@shared/combat-system";
+import { handleRoomChangeWithRefetch } from '@/lib/roomChangeUtils';
+
+interface MovementVector {
+  x: number;
+  y: number;
+}
 
 interface UseTacticalPositioningProps {
   effectiveTacticalData: any;

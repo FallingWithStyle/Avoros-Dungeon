@@ -1,0 +1,71 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=5GAWbDoPs8rq' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=5GAWbDoPs8rq' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=d5cda211:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/debug/redis-fallback 401 (Unauthorized)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=d5cda211:840
+run @ @tanstack_react-query.js?v=d5cda211:494
+start @ @tanstack_react-query.js?v=d5cda211:536
+fetch @ @tanstack_react-query.js?v=d5cda211:926
+executeFetch_fn @ @tanstack_react-query.js?v=d5cda211:2211
+onSubscribe @ @tanstack_react-query.js?v=d5cda211:1898
+subscribe @ @tanstack_react-query.js?v=d5cda211:24
+(anonymous) @ @tanstack_react-query.js?v=d5cda211:3022
+subscribeToStore @ chunk-WERSD76P.js?v=d5cda211:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=d5cda211:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=d5cda211:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=d5cda211:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=d5cda211:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=d5cda211:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=d5cda211:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=d5cda211:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=d5cda211:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=d5cda211:9119
+commitRootImpl @ chunk-WERSD76P.js?v=d5cda211:19432
+commitRoot @ chunk-WERSD76P.js?v=d5cda211:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=d5cda211:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=d5cda211:18718
+workLoop @ chunk-WERSD76P.js?v=d5cda211:197
+flushWork @ chunk-WERSD76P.js?v=d5cda211:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=d5cda211:384
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/auth/user 401 (Unauthorized)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=d5cda211:840
+run @ @tanstack_react-query.js?v=d5cda211:494
+start @ @tanstack_react-query.js?v=d5cda211:536
+fetch @ @tanstack_react-query.js?v=d5cda211:926
+executeFetch_fn @ @tanstack_react-query.js?v=d5cda211:2211
+onSubscribe @ @tanstack_react-query.js?v=d5cda211:1898
+subscribe @ @tanstack_react-query.js?v=d5cda211:24
+(anonymous) @ @tanstack_react-query.js?v=d5cda211:3022
+subscribeToStore @ chunk-WERSD76P.js?v=d5cda211:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=d5cda211:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=d5cda211:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=d5cda211:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=d5cda211:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=d5cda211:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=d5cda211:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=d5cda211:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=d5cda211:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=d5cda211:9119
+commitRootImpl @ chunk-WERSD76P.js?v=d5cda211:19432
+commitRoot @ chunk-WERSD76P.js?v=d5cda211:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=d5cda211:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=d5cda211:18718
+workLoop @ chunk-WERSD76P.js?v=d5cda211:197
+flushWork @ chunk-WERSD76P.js?v=d5cda211:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=d5cda211:384

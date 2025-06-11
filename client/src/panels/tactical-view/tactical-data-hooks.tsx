@@ -4,9 +4,11 @@
  * Notes: Handles data fetching with proper refetch intervals and error handling for tactical view components
  */
 
+import React, { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
 interface TacticalDataHooks {
   roomData: any;
@@ -15,6 +17,7 @@ interface TacticalDataHooks {
   refetchRoomData: () => void;
   refetchExploredRooms: () => void;
   refetchTacticalData: () => void;
+  handleRoomChange: () => void;
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails | null) {
@@ -45,6 +48,12 @@ export function useTacticalData(crawler: CrawlerWithDetails | null) {
     retry: false,
   });
 
+  const handleRoomChange = useCallback(() => {
+    if (crawler?.id) {
+      handleRoomChangeWithRefetch(refetchRoomData, refetchExploredRooms, refetchTacticalData);
+    }
+  }, [crawler?.id, refetchRoomData, refetchExploredRooms, refetchTacticalData]);
+
   // Early return if no crawler - AFTER all hooks are called
   if (!crawler) {
     return {
@@ -54,6 +63,7 @@ export function useTacticalData(crawler: CrawlerWithDetails | null) {
       refetchRoomData: () => {},
       refetchExploredRooms: () => {},
       refetchTacticalData: () => {},
+      handleRoomChange: () => {},
     };
   }
 
@@ -64,5 +74,6 @@ export function useTacticalData(crawler: CrawlerWithDetails | null) {
     refetchRoomData,
     refetchExploredRooms,
     refetchTacticalData,
+    handleRoomChange,
   };
 }

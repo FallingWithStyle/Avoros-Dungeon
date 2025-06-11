@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import { useToast } from '@/hooks/use-toast';
+import { handleRoomChangeWithRefetch } from '@/lib/roomChangeUtils';
 import type { CrawlerWithDetails } from '@shared/schema';
 
 interface UseDungeonMapMovementProps {
@@ -35,17 +36,8 @@ export function useDungeonMapMovement({
       setPendingDirection(direction);
     },
     onSuccess: (data) => {
-      // Batch invalidations with shorter delay
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [`/api/crawlers/${crawler.id}/explored-rooms`],
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/crawlers"] });
-      }, 100); // Small delay to batch updates
-
+      // Use immediate refetch for responsive UI updates
+      handleRoomChangeWithRefetch(crawler.id);
       setPendingDirection(null);
     },
     onError: (error) => {
