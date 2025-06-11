@@ -1,3 +1,4 @@
+
 /**
  * File: App.tsx
  * Responsibility: Main application component handling routing, authentication, and global providers
@@ -17,7 +18,6 @@ import Home from "@/pages/home";
 import CrawlerMode from "@/pages/crawler-mode";
 import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
-import { LayoutSettingsProvider } from "@/hooks/useLayoutSettings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,13 +54,11 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <LayoutSettingsProvider>
-        <TooltipProvider>
-          <Router />
-          <RedisStatusIndicator />
-          <Toaster />
-        </TooltipProvider>
-      </LayoutSettingsProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+        <RedisStatusIndicator />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

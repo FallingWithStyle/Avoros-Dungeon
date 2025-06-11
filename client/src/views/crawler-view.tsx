@@ -17,17 +17,12 @@ import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
-import { useLayoutSettings } from "@/hooks/useLayoutSettings";
-import { getLayoutClasses, shouldShowPanel } from "@/lib/layoutUtils";
 
 interface CrawlerViewProps {
   crawlerId: string;
 }
 
 export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
-  const { settings } = useLayoutSettings();
-  const layoutClasses = getLayoutClasses(settings);
-
   const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(false);
