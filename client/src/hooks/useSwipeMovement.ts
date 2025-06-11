@@ -21,6 +21,7 @@ export function useSwipeMovement({
   combatState,
   isEnabled
 }: UseSwipeMovementProps) {
+  console.log('🎯 useSwipeMovement hook initialized - enabled:', isEnabled);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const movementInterval = useRef<NodeJS.Timeout | null>(null);
@@ -80,14 +81,23 @@ export function useSwipeMovement({
   }, []);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (!isEnabled || e.touches.length !== 1) return;
+    console.log('🎯 Touch start event fired - enabled:', isEnabled, 'touches:', e.touches.length);
+    
+    if (!isEnabled || e.touches.length !== 1) {
+      console.log('🎯 Touch start ignored - enabled:', isEnabled, 'touches:', e.touches.length);
+      return;
+    }
     
     // Don't prevent default on touchstart to allow scrolling if needed
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     currentTouchRef.current = { x: touch.clientX, y: touch.clientY };
     
-    console.log('🎯 Touch start - virtual thumbstick active at:', { x: touch.clientX, y: touch.clientY });
+    console.log('🎯 Touch start - virtual thumbstick active at:', { 
+      x: touch.clientX, 
+      y: touch.clientY,
+      target: e.target?.constructor?.name 
+    });
   }, [isEnabled]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
@@ -119,24 +129,49 @@ export function useSwipeMovement({
   }, [isEnabled, stopMovement]);
 
   useEffect(() => {
+    console.log('🎯 Setting up touch events - enabled:', isEnabled);
+    
     if (!isEnabled) {
+      console.log('🎯 Touch events disabled, stopping movement');
       stopMovement();
       return;
     }
 
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      console.log('🎯 No container ref available for touch events');
+      return;
+    }
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd, { passive: false });
-    container.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+    console.log('🎯 Adding touch event listeners to container:', container.className);
+    
+    // Add event listeners with debugging
+    const wrappedTouchStart = (e: TouchEvent) => {
+      console.log('🎯 Container touchstart wrapper called');
+      handleTouchStart(e);
+    };
+    
+    const wrappedTouchMove = (e: TouchEvent) => {
+      console.log('🎯 Container touchmove wrapper called');
+      handleTouchMove(e);
+    };
+    
+    const wrappedTouchEnd = (e: TouchEvent) => {
+      console.log('🎯 Container touchend wrapper called');
+      handleTouchEnd(e);
+    };
+
+    container.addEventListener('touchstart', wrappedTouchStart, { passive: false });
+    container.addEventListener('touchmove', wrappedTouchMove, { passive: false });
+    container.addEventListener('touchend', wrappedTouchEnd, { passive: false });
+    container.addEventListener('touchcancel', wrappedTouchEnd, { passive: false });
 
     return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-      container.removeEventListener('touchcancel', handleTouchEnd);
+      console.log('🎯 Removing touch event listeners');
+      container.removeEventListener('touchstart', wrappedTouchStart);
+      container.removeEventListener('touchmove', wrappedTouchMove);
+      container.removeEventListener('touchend', wrappedTouchEnd);
+      container.removeEventListener('touchcancel', wrappedTouchEnd);
       stopMovement();
     };
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, isEnabled, stopMovement]);
