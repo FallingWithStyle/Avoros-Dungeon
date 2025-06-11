@@ -136,6 +136,19 @@
 
 ---
 
+## Bug Fixes Needed
+
+- [ ] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view
+
+## Next Priority Features
+
+- [ ] **Combat System Expansion**
+  - [ ] Add special abilities and spells
+  - [ ] Implement status effects (poison, stun, etc.)
+  - [ ] Add weapon types and damage modifiers
+
+---
+
 ## How to Use This File
 
 1. **Check off completed items** with `[x]`
@@ -147,3 +160,4 @@
 ---
 
 *Last updated: June 10 2025*
+```
