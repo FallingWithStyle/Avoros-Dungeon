@@ -1,4 +1,3 @@
-
 /**
  * File: useRedisStatus.ts
  * Responsibility: Redis connection monitoring and fallback status alerting
@@ -23,24 +22,24 @@ export function useRedisStatus() {
   const [showAlert, setShowAlert] = useState(false);
 
   const { data: redisStatus } = useQuery<RedisStatusData>({
-    queryKey: ['/api/system/redis-status'],
-    refetchInterval: 30000, // Check every 30 seconds
+    queryKey: ['/api/debug/redis-status'],
+    refetchInterval: 60000, // Reduced frequency to 60 seconds
     retry: false,
-    staleTime: 25000, // Consider data stale after 25 seconds
+    staleTime: 50000, // Consider data stale after 50 seconds
   });
 
   const { data: fallbackStatus } = useQuery<FallbackStatusData>({
     queryKey: ['/api/debug/redis-fallback'],
-    refetchInterval: 30000, // Check every 30 seconds
+    refetchInterval: 60000, // Reduced frequency to 60 seconds
     retry: false,
-    staleTime: 25000, // Consider data stale after 25 seconds
+    staleTime: 50000, // Consider data stale after 50 seconds
   });
 
   useEffect(() => {
     // Only show the performance alert when in "DB Only" mode (fallback enabled)
     // AND when Redis is actually unavailable
     const shouldShowAlert = fallbackStatus?.fallbackMode && redisStatus && !redisStatus.available;
-    
+
     setShowAlert(shouldShowAlert || false);
   }, [redisStatus, fallbackStatus]);
 
