@@ -256,7 +256,7 @@ export default function Landing() {
           <div className="text-center text-slate-500 text-sm">
             <p>Avoros Dungeon Corporate Crawler Consortium™</p>
             <p className="mt-1">
-              "Maximizing Shareholder Value Through Strategic Mortality"
+              "Maximizing Shareholder Value Through Strategic Elimination"
             </p>
           </div>
         </div>
