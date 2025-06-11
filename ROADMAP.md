@@ -348,6 +348,5 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 
 ---
 
-*Last Updated: January 2025*
-*Next Review: February 2025*
-*Current Target: v0.8.5 - Critical Bug Fixes*
+*Last Updated: June 10, 2025*
+*Current Version: 0.8.7*
