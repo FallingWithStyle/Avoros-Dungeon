@@ -8,7 +8,7 @@ import { Redis } from "@upstash/redis";
 class RedisService {
   private redis: Redis | null = null;
   private isConnected = false;
-  private forceFallbackMode = false; // Debug option to force fallback mode
+  private forceFallbackMode = this.isDebugMode(); // Default to DB Only in debug mode
 
   constructor() {
     try {
@@ -23,6 +23,12 @@ class RedisService {
 
         this.isConnected = true;
         console.log('Upstash Redis initialized successfully');
+        
+        // Auto-enable fallback mode in debug environment
+        if (this.forceFallbackMode) {
+          console.log('🔧 Debug mode detected - Redis fallback mode ENABLED by default');
+          console.log('📊 Cache operations will use database only for consistent debugging');
+        }
       } else {
         console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set');
         console.log('Redis will be disabled - falling back to database storage');
@@ -38,6 +44,14 @@ class RedisService {
       this.redis = null;
       this.isConnected = false;
     }
+  }
+
+  private isDebugMode(): boolean {
+    // Check various indicators that we're in debug/development mode
+    return process.env.NODE_ENV === 'development' || 
+           process.env.NODE_ENV === 'test' ||
+           process.env.DEBUG === 'true' ||
+           !!process.env.REPL_ID; // Replit environment indicator
   }
 
   private async testConnection(): Promise<void> {
