@@ -43,14 +43,21 @@ function Router() {
 }
 
 function App() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-game-bg flex items-center justify-center">
+        <div className="text-slate-100">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-        <RedisStatusIndicator />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <>
+      {isAuthenticated ? <Home /> : <Landing />}
+      <Toaster />
+    </>
   );
 }
 
