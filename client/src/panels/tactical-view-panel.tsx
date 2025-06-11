@@ -106,7 +106,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           const result = await response.json();
           if (result.success) {
             console.log("✅ Background transition complete: " + (result.newRoom?.name || 'unknown room'));
-            
+
             // Final update to ensure everything is in sync
             queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
             queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
