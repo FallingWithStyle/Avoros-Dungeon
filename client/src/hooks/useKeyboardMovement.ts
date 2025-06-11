@@ -73,6 +73,14 @@ export function useKeyboardMovement({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
+      
+      // Check if any dialog/modal is open by looking for dialog overlay
+      const dialogOverlay = document.querySelector('[data-state="open"]');
+      if (dialogOverlay) {
+        console.log('🚫 Keyboard movement disabled - dialog is open');
+        return;
+      }
+      
       const key = event.key.toLowerCase();
       const valid = [
         "w",
@@ -114,6 +122,16 @@ export function useKeyboardMovement({
   const handleKeyUp = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
+      
+      // Check if any dialog/modal is open by looking for dialog overlay
+      const dialogOverlay = document.querySelector('[data-state="open"]');
+      if (dialogOverlay) {
+        // Clear any pressed keys when dialog is open to prevent stuck movement
+        keysPressed.current.clear();
+        stopMovement();
+        return;
+      }
+      
       const key = event.key.toLowerCase();
       const valid = [
         "w",
