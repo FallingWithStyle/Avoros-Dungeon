@@ -20,9 +20,12 @@ Avoros Dungeon aims to be a premier real-time multiplayer dungeon exploration ga
 ### Phase 1: Technical Stability (Q2 2025)
 
 #### v0.8.5 - Critical Bug Fixes (Week 1-2)
-- [ ] **Fix Redis Connection Issues** - Resolve ECONNREFUSED errors and enable proper caching
-- [ ] **Resolve WebSocket Connection Problems** - Fix invalid URL construction
+- [ ] **Resolve WebSocket Connection Problems** - Fix invalid URL construction with undefined ports
 - [ ] **Handle Unhandled Promise Rejections** - Implement comprehensive error handling
+- [ ] **Fix Logout 404 Flash Issue** - Eliminate brief 404 page display during logout
+- [ ] **Optimize Database Query Performance** - Reduce excessive polling and redundant queries
+- [ ] **Fix React Hook Violations** - Audit components for conditional hook usage
+- [ ] **Resolve WebSocket Resource Leaks** - Properly cleanup failed connection attempts
 
 #### v0.8.6 - Performance Optimization (Week 3-4)
 - [ ] **Reduce API Polling Frequency** - Implement smart polling with backoff
