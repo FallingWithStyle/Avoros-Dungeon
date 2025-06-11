@@ -11,6 +11,7 @@ import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
 import { useTacticalMovement } from "@/hooks/useTacticalMovement";
+import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useSwipeMovement } from "@/hooks/useSwipeMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
@@ -111,19 +112,36 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
 
-  // Use tactical movement hook
-  const { isMobile, handleMovement } = useTacticalMovement({
+  // Use tactical movement hook for positioning logic
+  const { handleMovement: handleTacticalMovement } = useTacticalMovement({
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement
   });
 
-  // Use swipe movement for mobile
+  // Detect mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use existing keyboard movement hook
+  useKeyboardMovement({
+    onMovement: handleTacticalMovement,
+    isEnabled: !combatState.isInCombat && !isMobile
+  });
+
+  // Use existing swipe movement hook for mobile
   const { containerRef } = useSwipeMovement({
-    onMovement: handleMovement,
+    onMovement: handleTacticalMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
     combatState,
-    isEnabled: isMobile
+    isEnabled: isMobile && !combatState.isInCombat
   });
 
   // Subscribe to combat system updates

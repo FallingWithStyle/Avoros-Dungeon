@@ -1,11 +1,10 @@
-
 /**
  * File: useTacticalMovement.ts
- * Responsibility: Handle tactical movement with gate detection and room transitions
- * Notes: Provides movement logic for the tactical grid with boundary and gate collision detection
+ * Responsibility: Handle tactical positioning, gate detection, and room transitions
+ * Notes: Focuses on movement validation and positioning logic, relies on other hooks for input handling
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { combatSystem } from "@shared/combat-system";
 
 interface UseTacticalMovementProps {
@@ -24,19 +23,7 @@ export function useTacticalMovement({
   combatState,
   onRoomMovement
 }: UseTacticalMovementProps) {
-  const [isMobile, setIsMobile] = useState(false);
   const speed = 2.5; // Movement speed per frame
-
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleMovement = useCallback(
     (direction: MovementVector) => {
@@ -52,7 +39,7 @@ export function useTacticalMovement({
       }
 
       const availableDirections = effectiveTacticalData.availableDirections || [];
-      
+
       // Calculate new position
       let newX = playerEntity.position.x + (direction.x * speed);
       let newY = playerEntity.position.y + (direction.y * speed);
@@ -69,11 +56,10 @@ export function useTacticalMovement({
 
       // Check for room transition through gates
       let roomTransitionDirection = "";
-      
+
       if (newY < 0 && availableDirections.includes("north")) {
         console.log("🚪 Attempting north exit - checking gate bounds");
         console.log("Player X position:", playerEntity.position.x, "Gate bounds:", gateStart, "-", gateEnd);
-        // Check if player is within north gate bounds (horizontally centered)
         if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
           console.log("✅ Player is within north gate bounds - allowing transition");
           roomTransitionDirection = "north";
@@ -83,7 +69,6 @@ export function useTacticalMovement({
       } else if (newY > 100 && availableDirections.includes("south")) {
         console.log("🚪 Attempting south exit - checking gate bounds");
         console.log("Player X position:", playerEntity.position.x, "Gate bounds:", gateStart, "-", gateEnd);
-        // Check if player is within south gate bounds (horizontally centered)
         if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
           console.log("✅ Player is within south gate bounds - allowing transition");
           roomTransitionDirection = "south";
@@ -93,7 +78,6 @@ export function useTacticalMovement({
       } else if (newX > 100 && availableDirections.includes("east")) {
         console.log("🚪 Attempting east exit - checking gate bounds");
         console.log("Player Y position:", playerEntity.position.y, "Gate bounds:", gateStart, "-", gateEnd);
-        // Check if player is within east gate bounds (vertically centered)
         if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
           console.log("✅ Player is within east gate bounds - allowing transition");
           roomTransitionDirection = "east";
@@ -103,7 +87,6 @@ export function useTacticalMovement({
       } else if (newX < 0 && availableDirections.includes("west")) {
         console.log("🚪 Attempting west exit - checking gate bounds");
         console.log("Player Y position:", playerEntity.position.y, "Gate bounds:", gateStart, "-", gateEnd);
-        // Check if player is within west gate bounds (vertically centered)
         if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
           console.log("✅ Player is within west gate bounds - allowing transition");
           roomTransitionDirection = "west";
@@ -146,48 +129,10 @@ export function useTacticalMovement({
         console.log("🚫 Movement blocked - no significant position change");
       }
     },
-    [availableDirections, combatState, onRoomMovement, speed],
+    [effectiveTacticalData, combatState, onRoomMovement, speed],
   );
 
-  // Keyboard movement handler
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (combatState.isInCombat) return;
-
-      const key = event.key.toLowerCase();
-      let direction: MovementVector | null = null;
-
-      switch (key) {
-        case 'w':
-        case 'arrowup':
-          direction = { x: 0, y: -1 };
-          break;
-        case 's':
-        case 'arrowdown':
-          direction = { x: 0, y: 1 };
-          break;
-        case 'a':
-        case 'arrowleft':
-          direction = { x: -1, y: 0 };
-          break;
-        case 'd':
-        case 'arrowright':
-          direction = { x: 1, y: 0 };
-          break;
-      }
-
-      if (direction) {
-        event.preventDefault();
-        handleMovement(direction);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleMovement, combatState.isInCombat]);
-
   return {
-    isMobile,
     handleMovement
   };
 }
