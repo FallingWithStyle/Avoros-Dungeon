@@ -1,4 +1,3 @@
-
 /**
  * File: landing.tsx
  * Responsibility: Landing page for unauthenticated users showcasing game features and encouraging registration
@@ -43,8 +42,8 @@ export default function Landing() {
                 "PROFIT THROUGH PERIL. EXPAND THROUGH EXTINCTION."
               </p>
               <p className="text-slate-400 text-lg">
-                Your corporation's survival depends on one elite crawler. 
-                They die, you start over. Welcome to corporate natural selection.
+                Your corporation's survival depends on one elite crawler. They
+                die, you start over. Welcome to corporate natural selection.
               </p>
             </div>
           </div>
@@ -60,8 +59,12 @@ export default function Landing() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
-                  Lead a ruthless mega-corporation. Sponsor ONE elite crawler for the most 
-                  profitable venture in human history: <span className="text-red-400 font-bold">monetized death sport</span>.
+                  Lead a ruthless mega-corporation. Sponsor ONE elite crawler
+                  for the most profitable venture in human history:{" "}
+                  <span className="text-red-400 font-bold">
+                    monetized death sport
+                  </span>
+                  .
                 </p>
               </CardContent>
             </Card>
@@ -75,8 +78,10 @@ export default function Landing() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
-                  Your crawler is your <span className="text-orange-400 font-bold">only asset</span>. 
-                  Death means bankruptcy. Failure means starting over. No respawns, no second chances.
+                  Your crawler is your{" "}
+                  <span className="text-orange-400 font-bold">only asset</span>.
+                  Death means bankruptcy. Failure means starting over. No
+                  respawns, no second chances.
                 </p>
               </CardContent>
             </Card>
@@ -90,7 +95,8 @@ export default function Landing() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
-                  Crush competing corporations. Corner the <span className="text-cyan-400 font-bold">death market</span>. 
+                  Crush competing corporations. Corner the{" "}
+                  <span className="text-cyan-400 font-bold">death market</span>.
                   Build your empire on the bones of failed crawlers.
                 </p>
               </CardContent>
@@ -99,17 +105,20 @@ export default function Landing() {
 
           {/* Call to Action */}
           <div className="text-center mb-12">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-12 py-6 text-xl font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300 hover:scale-105"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => (window.location.href = "/api/login")}
             >
               <i className="fas fa-briefcase mr-3"></i>
-              ESTABLISH YOUR DEATH EMPIRE
+              ESTABLISH YOUR EMPIRE
             </Button>
 
             <p className="text-slate-400 mt-4 text-lg">
-              Register your corporation and begin <span className="text-red-400 font-semibold">profitable elimination operations</span>
+              Register your corporation and begin{" "}
+              <span className="text-red-400 font-semibold">
+                profitable elimination operations
+              </span>
             </p>
           </div>
 
@@ -126,19 +135,31 @@ export default function Landing() {
                 <div className="space-y-4">
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-sword text-red-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-red-300">Tactical Combat Matrix</span> - Turn-based liquidation protocols
+                    <span className="font-semibold text-red-300">
+                      Tactical Combat Matrix
+                    </span>{" "}
+                    - Turn-based liquidation protocols
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-shopping-cart text-orange-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-orange-300">Equipment Monopoly</span> - Corner the death-dealing market
+                    <span className="font-semibold text-orange-300">
+                      Equipment Monopoly
+                    </span>{" "}
+                    - Corner the death-dealing market
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-satellite-dish text-cyan-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-cyan-300">Corporate Communications</span> - Real-time command protocols
+                    <span className="font-semibold text-cyan-300">
+                      Corporate Communications
+                    </span>{" "}
+                    - Real-time command protocols
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-chart-line text-green-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-green-300">Profit Optimization</span> - Persistent wealth accumulation
+                    <span className="font-semibold text-green-300">
+                      Profit Optimization
+                    </span>{" "}
+                    - Persistent wealth accumulation
                   </div>
                 </div>
               </CardContent>
@@ -155,15 +176,24 @@ export default function Landing() {
                 <div className="space-y-4">
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-fist-raised text-red-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-red-300">Combat Veteran</span> - Engineered for maximum violence
+                    <span className="font-semibold text-red-300">
+                      Combat Veteran
+                    </span>{" "}
+                    - Engineered for maximum violence
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-microchip text-blue-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-blue-300">Tech Specialist</span> - Corporate espionage & digital warfare
+                    <span className="font-semibold text-blue-300">
+                      Tech Specialist
+                    </span>{" "}
+                    - Corporate espionage & digital warfare
                   </div>
                   <div className="flex items-center text-slate-300">
                     <i className="fas fa-user-ninja text-purple-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-purple-300">Stealth Operative</span> - Silent elimination protocols
+                    <span className="font-semibold text-purple-300">
+                      Stealth Operative
+                    </span>{" "}
+                    - Silent elimination protocols
                   </div>
                 </div>
               </CardContent>
@@ -174,12 +204,15 @@ export default function Landing() {
           <div className="bg-gradient-to-r from-red-900/30 via-red-800/20 to-red-900/30 border-2 border-red-500/50 rounded-lg p-6 mb-8">
             <div className="text-center">
               <i className="fas fa-exclamation-triangle text-red-400 text-3xl mb-3"></i>
-              <h3 className="text-xl font-bold text-red-300 mb-2">CORPORATE LIABILITY WAIVER</h3>
+              <h3 className="text-xl font-bold text-red-300 mb-2">
+                CORPORATE LIABILITY WAIVER
+              </h3>
               <p className="text-slate-300 text-sm leading-relaxed max-w-4xl mx-auto">
-                By establishing your corporation, you acknowledge that crawler death is permanent, 
-                corporate bankruptcy is final, and the Avoros Dungeon Consortium is not liable 
-                for emotional trauma, financial ruin, or existential crisis resulting from 
-                repeated crawler liquidation events.
+                By establishing your corporation, you acknowledge that crawler
+                death is permanent, corporate bankruptcy is final, and the
+                Avoros Dungeon Consortium is not liable for emotional trauma,
+                financial ruin, or existential crisis resulting from repeated
+                crawler liquidation events.
               </p>
             </div>
           </div>
@@ -187,7 +220,9 @@ export default function Landing() {
           {/* Footer */}
           <div className="text-center text-slate-500 text-sm">
             <p>Avoros Dungeon Corporate Crawler Consortium™</p>
-            <p className="mt-1">"Maximizing Shareholder Value Through Strategic Mortality"</p>
+            <p className="mt-1">
+              "Maximizing Shareholder Value Through Strategic Mortality"
+            </p>
           </div>
         </div>
       </div>
