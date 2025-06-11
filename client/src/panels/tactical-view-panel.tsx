@@ -67,8 +67,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     actionName: string;
   } | null>(null);
 
-  const contextMenuRef = useRef<HTMLDivElement>(null);
-
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
 
