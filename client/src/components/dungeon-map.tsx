@@ -313,8 +313,8 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // Fetch scanned rooms
   const { data: scannedRooms = [] } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/scanned-rooms`],
-    refetchInterval: 30000,
-    staleTime: 120000,
+    refetchInterval: 15000, // Faster updates
+    staleTime: 60000, // Shorter stale time
     retry: false,
   });
 
@@ -338,8 +338,8 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // Fetch mob data for all explored rooms
   const { data: roomMobsData = {} } = useQuery<Record<number, { hostileCount: number; neutralCount: number; playerCount: number }>>({
     queryKey: [`/api/crawlers/${crawler.id}/room-mobs-summary`],
-    refetchInterval: 30000,
-    staleTime: 60000,
+    refetchInterval: 15000, // Faster updates
+    staleTime: 30000, // Shorter stale time
     retry: false,
   });
 
