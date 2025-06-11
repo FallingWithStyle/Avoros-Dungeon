@@ -484,8 +484,8 @@ function RedisFallbackControl() {
       {toggleFallbackMutation.isPending 
         ? "Updating..." 
         : fallbackStatus?.fallbackMode 
-          ? "Fallback On" 
-          : "Fallback Off"
+          ? "DB Only" 
+          : "Cache + DB"
       }
     </Button>
   );
