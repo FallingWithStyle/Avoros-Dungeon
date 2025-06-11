@@ -7,6 +7,7 @@ import type { Express } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
 import { redisService } from "../lib/redis-service";
+import { getRequestCache } from "../lib/request-cache";
 
 export function registerCrawlerRoutes(app: Express) {
   // Crawler routes
@@ -252,6 +253,11 @@ export function registerCrawlerRoutes(app: Express) {
       const crawlerId = parseInt(req.params.crawlerId);
       console.log(`=== TACTICAL DATA REQUEST for crawler ${crawlerId} ===`);
 
+      // Initialize request cache for this request
+      const requestCache = getRequestCache(req);
+      storage.tacticalStorage?.setRequestCache(requestCache);
+      storage.mobStorage?.setRequestCache(requestCache);
+
       // Get current room using the main storage interface
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
@@ -315,10 +321,18 @@ export function registerCrawlerRoutes(app: Express) {
     }
   });
 
-  // Get mob summary for all rooms that the crawler has explored or scanned
   app.get("/api/crawlers/:id/room-mobs-summary", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
+
+      if (!storage) {
+        return res.status(500).json({ error: "Storage not properly initialized" });
+      }
+
+      // Initialize request cache for this request
+      const requestCache = getRequestCache(req);
+      storage.mobStorage?.setRequestCache(requestCache);
+
       const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {

@@ -352,13 +352,38 @@ export function registerDebugRoutes(app: Express) {
       res.json({
         success: true,
         fallbackMode: isFallbackMode,
-        message: `Redis fallback mode is currently ${isFallbackMode ? 'enabled' : 'disabled'}`
+        message: `Redis fallback mode is currently ${isFallbackMode ? 'enabled' : 'disabled'}`,
+        debugModeDefault: true // Indicates debug mode defaults to DB Only
       });
     } catch (error) {
       console.error("Error getting Redis fallback mode status:", error);
       res.status(500).json({ 
         success: false, 
         error: "Failed to get Redis fallback mode status" 
+      });
+    }
+  });
+
+  // DEBUG: Get debug environment status
+  app.get("/api/debug/environment", isAuthenticated, async (req: any, res) => {
+    try {
+      const isDebugMode = process.env.NODE_ENV === 'development' || 
+                         process.env.NODE_ENV === 'test' ||
+                         process.env.DEBUG === 'true' ||
+                         !!process.env.REPL_ID;
+      
+      res.json({
+        success: true,
+        isDebugMode,
+        nodeEnv: process.env.NODE_ENV || 'unknown',
+        isReplit: !!process.env.REPL_ID,
+        redisDefaultMode: isDebugMode ? 'DB Only' : 'Cache + DB'
+      });
+    } catch (error) {
+      console.error("Error getting debug environment status:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to get debug environment status" 
       });
     }
   });
