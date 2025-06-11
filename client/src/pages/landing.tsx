@@ -130,43 +130,59 @@ export default function Landing() {
           </div>
 
           {/* Game Systems */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 mb-12">
             <Card className="bg-gradient-to-br from-gray-900/70 to-black/70 border-gray-500/30 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white mb-4 flex items-center">
+                <CardTitle className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center">
                   <i className="fas fa-cogs mr-3 text-red-400"></i>
                   CORPORATE SYSTEMS
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-sword text-red-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-red-300">
-                      Tactical Combat Matrix
-                    </span>{" "}
-                    - Real-time competition liquidation
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-sword text-red-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-red-300 block sm:inline">
+                        Tactical Combat Matrix
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Real-time competition liquidation
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-shopping-cart text-orange-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-orange-300">
-                      Equipment Supply Chain
-                    </span>{" "}
-                    - Corner the death-dealing market
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-shopping-cart text-orange-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-orange-300 block sm:inline">
+                        Equipment Supply Chain
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Corner the death-dealing market
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-satellite-dish text-cyan-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-cyan-300">
-                      Corporate Communications
-                    </span>{" "}
-                    - Downline collaboration protocols
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-satellite-dish text-cyan-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-cyan-300 block sm:inline">
+                        Corporate Communications
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Downline collaboration protocols
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-chart-line text-green-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-green-300">
-                      Profit Optimization
-                    </span>{" "}
-                    - Persistent wealth accumulation
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-chart-line text-green-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-green-300 block sm:inline">
+                        Profit Optimization
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Persistent wealth accumulation
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -174,33 +190,45 @@ export default function Landing() {
 
             <Card className="bg-gradient-to-br from-gray-900/70 to-black/70 border-gray-500/30 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white mb-4 flex items-center">
+                <CardTitle className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center">
                   <i className="fas fa-users mr-3 text-red-400"></i>
                   CRAWLER CLASSIFICATIONS
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-fist-raised text-red-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-red-300">
-                      Combat Veteran
-                    </span>{" "}
-                    - Engineered for maximum violence
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-fist-raised text-red-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-red-300 block sm:inline">
+                        Combat Veteran
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Engineered for maximum violence
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-microchip text-blue-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-blue-300">
-                      Tech Specialist
-                    </span>{" "}
-                    - Corporate espionage & digital warfare
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-microchip text-blue-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-blue-300 block sm:inline">
+                        Tech Specialist
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Corporate espionage & digital warfare
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <i className="fas fa-user-ninja text-purple-400 mr-3 w-5"></i>
-                    <span className="font-semibold text-purple-300">
-                      Stealth Operative
-                    </span>{" "}
-                    - Silent elimination protocols
+                  <div className="flex items-start text-slate-300">
+                    <i className="fas fa-user-ninja text-purple-400 mr-3 w-5 mt-1 flex-shrink-0"></i>
+                    <div>
+                      <span className="font-semibold text-purple-300 block sm:inline">
+                        Stealth Operative
+                      </span>
+                      <span className="block sm:inline sm:ml-1 text-sm">
+                        - Silent elimination protocols
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -228,7 +256,7 @@ export default function Landing() {
           <div className="text-center text-slate-500 text-sm">
             <p>Avoros Dungeon Corporate Crawler Consortium™</p>
             <p className="mt-1">
-              "Maximizing Shareholder Value Through Strategic Mortality"
+              "Maximizing Shareholder Value Through Strategic Elimination"
             </p>
           </div>
         </div>
