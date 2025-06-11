@@ -5,7 +5,7 @@
  * Notes: Focuses on movement validation and positioning logic, relies on other hooks for input handling
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { combatSystem } from "@shared/combat-system";
 
 interface UseTacticalPositioningProps {
@@ -25,6 +25,8 @@ export function useTacticalPositioning({
   onRoomMovement
 }: UseTacticalPositioningProps) {
   const speed = 2.5; // Movement speed per frame
+  const lastRoomTransitionTime = useRef<number>(0);
+  const ROOM_TRANSITION_COOLDOWN = 1000; // 1 second cooldown between room transitions
 
   const handleMovement = useCallback(
     (direction: MovementVector) => {
@@ -36,6 +38,13 @@ export function useTacticalPositioning({
       const playerEntity = combatState.entities.find((e: any) => e.id === "player");
       if (!playerEntity) {
         console.log("No player entity found for movement");
+        return;
+      }
+
+      // Check for room transition cooldown to prevent spam
+      const now = Date.now();
+      if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
+        console.log("🚫 Room transition on cooldown - ignoring movement");
         return;
       }
 
@@ -99,6 +108,7 @@ export function useTacticalPositioning({
       // Handle room transition
       if (roomTransitionDirection) {
         console.log("🏃 Transitioning to new room:", roomTransitionDirection);
+        lastRoomTransitionTime.current = Date.now();
         onRoomMovement(roomTransitionDirection);
         return; // Exit early - don't process movement locally
       }
@@ -131,7 +141,7 @@ export function useTacticalPositioning({
         console.log("🚫 Movement blocked - no significant position change");
       }
     },
-    [effectiveTacticalData, combatState, onRoomMovement, speed],
+    [effectiveTacticalData, combatState, onRoomMovement, speed, ROOM_TRANSITION_COOLDOWN],
   );
 
   return {
