@@ -164,7 +164,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   });
 
   // Use existing swipe movement hook for mobile
-  const { containerRef } = useSwipeMovement({
+  const { containerRef: swipeContainerRef } = useSwipeMovement({
     onMovement: handleTacticalMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
     combatState,
