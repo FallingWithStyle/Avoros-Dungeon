@@ -132,8 +132,21 @@ export default function Account() {
             <Button 
               variant="outline" 
               className="w-full border-red-600/30 text-red-300 hover:bg-red-600/10"
-              onClick={() => {
-                window.location.replace("/api/logout");
+              onClick={async () => {
+                try {
+                  // Use fetch to call logout endpoint
+                  const response = await fetch("/api/logout", {
+                    method: "GET",
+                    credentials: "include"
+                  });
+                  
+                  // Redirect to login page after logout
+                  window.location.replace("/");
+                } catch (error) {
+                  console.error("Logout error:", error);
+                  // Fallback to direct navigation if fetch fails
+                  window.location.replace("/api/logout");
+                }
               }}
             >
               Logout
