@@ -33,15 +33,22 @@ export function registerAuthRoutes(app: Express) {
         });
       }
       
-      // Clear cookies
+      // Clear all authentication cookies
       res.clearCookie("connect.sid");
       res.clearCookie("session");
+      res.clearCookie("replit_authed");
+      res.clearCookie("__replauthuser");
       
-      // Redirect to landing page
-      res.redirect("/");
+      // Set cache control headers to prevent caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      // Redirect to landing page with a timestamp to force refresh
+      res.redirect("/?t=" + Date.now());
     } catch (error) {
       console.error("Error during logout:", error);
-      res.redirect("/");
+      res.redirect("/?t=" + Date.now());
     }
   });
 }
