@@ -23,13 +23,22 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
+  Trash2, RotateCcw, Bug, Zap, Database, Settings, Layout
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { LayoutSettingsPanel } from "./layout-settings-panel";
 import { showErrorToast } from "@/lib/errorToast";
 import { getVersionInfo } from "@/lib/version";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 
 interface DebugPanelProps {
   activeCrawler?: CrawlerWithDetails;
@@ -127,10 +136,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
     onSuccess: () => {
       if (!activeCrawler) return;
-      
+
       // Use centralized room change handler for consistent updates
       handleRoomChangeWithRefetch(activeCrawler.id);
-      
+
       toast({
         title: "Position Reset",
         description: "Crawler has been moved to the entrance. Map and tactical view updated.",
@@ -310,108 +319,167 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
         </CardHeader>
         {!minimized && (
           <CardContent className="p-2 pt-0">
-            {/* Button Row */}
-            <div className="flex gap-1 flex-wrap mb-1">
-              <Button
-                onClick={() => resetCrawlersMutation.mutate()}
-                disabled={resetCrawlersMutation.isPending}
-                variant="destructive"
-                className={
-                  miniButtonClasses +
-                  " bg-red-600 hover:bg-red-700 border-red-600"
-                }
-              >
-                {resetCrawlersMutation.isPending ? (
-                  <RefreshCw className={miniIconClasses + " animate-spin"} />
-                ) : (
-                  <RefreshCw className={miniIconClasses} />
-                )}
-                Delete All Crawlers
-              </Button>
+            <Tabs defaultValue="movement" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="movement" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Movement
+                </TabsTrigger>
+                <TabsTrigger value="crawler" className="flex items-center gap-2">
+                  <Bug className="h-4 w-4" />
+                  Crawler
+                </TabsTrigger>
+                <TabsTrigger value="system" className="flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  System
+                </TabsTrigger>
+                <TabsTrigger value="layout" className="flex items-center gap-2">
+                  <Layout className="h-4 w-4" />
+                  Layout
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="movement" className="space-y-4">
+                {/* Button Row */}
+                <div className="flex gap-1 flex-wrap mb-1">
+                  <Button
+                    onClick={() => resetCrawlersMutation.mutate()}
+                    disabled={resetCrawlersMutation.isPending}
+                    variant="destructive"
+                    className={
+                      miniButtonClasses +
+                      " bg-red-600 hover:bg-red-700 border-red-600"
+                    }
+                  >
+                    {resetCrawlersMutation.isPending ? (
+                      <RefreshCw className={miniIconClasses + " animate-spin"} />
+                    ) : (
+                      <RefreshCw className={miniIconClasses} />
+                    )}
+                    Delete All Crawlers
+                  </Button>
 
 
-              {/* Redis Fallback Control - now inline */}
-              <RedisFallbackControl />
+                  {/* Redis Fallback Control - now inline */}
+                  <RedisFallbackControl />
 
-              {/* Eyes of D'Bug Spell */}
-              <Button
-                onClick={() => applyEyesOfDebug()}
-                disabled={!activeCrawler}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " border-purple-600 text-purple-400 hover:bg-purple-600/10"
-                }
-              >
-                <Zap className={miniIconClasses} />
-                Enhanced Scan
-              </Button>
+                  {/* Eyes of D'Bug Spell */}
+                  <Button
+                    onClick={() => applyEyesOfDebug()}
+                    disabled={!activeCrawler}
+                    variant="outline"
+                    className={
+                      miniButtonClasses +
+                      " border-purple-600 text-purple-400 hover:bg-purple-600/10"
+                    }
+                  >
+                    <Zap className={miniIconClasses} />
+                    Enhanced Scan
+                  </Button>
 
-              {/* Spawn Hostile Mob */}
-              <Button
-                onClick={() => spawnHostileMob()}
-                disabled={!activeCrawler}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " border-red-600 text-red-400 hover:bg-red-600/10"
-                }
-              >
-                <Wrench className={miniIconClasses} />
-                Spawn Mob
-              </Button>
+                  {/* Spawn Hostile Mob */}
+                  <Button
+                    onClick={() => spawnHostileMob()}
+                    disabled={!activeCrawler}
+                    variant="outline"
+                    className={
+                      miniButtonClasses +
+                      " border-red-600 text-red-400 hover:bg-red-600/10"
+                    }
+                  >
+                    <Wrench className={miniIconClasses} />
+                    Spawn Mob
+                  </Button>
 
-              {/* Move Reset Position here, next to Energy */}
-              <Button
-                onClick={() => resetPositionMutation.mutate()}
-                disabled={resetPositionMutation.isPending || !activeCrawler}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " border-blue-600 text-blue-400 hover:bg-blue-600/10"
-                }
-              >
-                {resetPositionMutation.isPending ? (
-                  <Wrench className={miniIconClasses + " animate-spin"} />
-                ) : (
-                  <RotateCcw className={miniIconClasses} />
-                )}
-                Reset Position
-              </Button>
+                  {/* Move Reset Position here, next to Energy */}
+                  <Button
+                    onClick={() => resetPositionMutation.mutate()}
+                    disabled={resetPositionMutation.isPending || !activeCrawler}
+                    variant="outline"
+                    className={
+                      miniButtonClasses +
+                      " border-blue-600 text-blue-400 hover:bg-blue-600/10"
+                    }
+                  >
+                    {resetPositionMutation.isPending ? (
+                      <Wrench className={miniIconClasses + " animate-spin"} />
+                    ) : (
+                      <RotateCcw className={miniIconClasses} />
+                    )}
+                    Reset Position
+                  </Button>
 
-              {/* Now Heal and Restore are together */}
-              <Button
-                onClick={() => healMutation.mutate()}
-                disabled={healMutation.isPending || !activeCrawler}
-                variant="outline"
-                className={
-                  miniButtonClasses +
-                  " border-green-600 text-green-400 hover:bg-green-600/10"
-                }
-              >
-                {healMutation.isPending ? (
-                  <Wrench className={miniIconClasses + " animate-spin"} />
-                ) : (
-                  <Heart className={miniIconClasses} />
-                )}
-                Heal Crawler
-              </Button>
-            </div>
+                  {/* Now Heal and Restore are together */}
+                  <Button
+                    onClick={() => healMutation.mutate()}
+                    disabled={healMutation.isPending || !activeCrawler}
+                    variant="outline"
+                    className={
+                      miniButtonClasses +
+                      " border-green-600 text-green-400 hover:bg-green-600/10"
+                    }
+                  >
+                    {healMutation.isPending ? (
+                      <Wrench className={miniIconClasses + " animate-spin"} />
+                    ) : (
+                      <Heart className={miniIconClasses} />
+                    )}
+                    Heal Crawler
+                  </Button>
+                </div>
+              </TabsContent>
 
-            {/* Debug Info - all on one line, pipe-separated */}
-            <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
-              <span>
-                Coordinates: Floor{" "}
-                {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
-                Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
-              </span>
-              <span className="text-red-400">|</span>
-              <span>Crawler ID: {activeCrawler?.id ?? "N/A"}</span>
-              <span className="text-red-400">|</span>
-              <span>Luck: {activeCrawler?.luck ?? 0}</span>
-              <span className="text-red-400">|</span>
-              <span>Scan: {activeCrawler?.scanRange ?? 0}</span>
-            </div>
+              <TabsContent value="crawler" className="space-y-4">
+                {/* Debug Info - all on one line, pipe-separated */}
+                <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
+                  <span>
+                    Coordinates: Floor{" "}
+                    {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
+                    Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
+                  </span>
+                  <span className="text-red-400">|</span>
+                  <span>Crawler ID: {activeCrawler?.id ?? "N/A"}</span>
+                  <span className="text-red-400">|</span>
+                  <span>Luck: {activeCrawler?.luck ?? 0}</span>
+                  <span className="text-red-400">|</span>
+                  <span>Scan: {activeCrawler?.scanRange ?? 0}</span>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="system" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      System Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Version:</span>
+                        <span className="ml-2 text-muted-foreground">v0.8.6</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Environment:</span>
+                        <span className="ml-2 text-muted-foreground">Development</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Build:</span>
+                        <span className="ml-2 text-muted-foreground">Debug</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Platform:</span>
+                        <span className="ml-2 text-muted-foreground">Web</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="layout" className="space-y-4">
+                <LayoutSettingsPanel />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         )}
       </Card>
