@@ -43,7 +43,7 @@ export default function Landing() {
               </p>
               <p className="text-slate-400 text-lg">
                 Your corporation's survival depends on one elite crawler. They
-                die, you start over. Welcome to corporate natural selection.
+                die, you start over. Welcome to <span className="text-red-400 font-semibold">debt-defying</span> corporate natural selection.
               </p>
             </div>
           </div>
@@ -95,9 +95,9 @@ export default function Landing() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-300 leading-relaxed">
-                  Crush competing corporations. Corner the{" "}
-                  <span className="text-cyan-400 font-bold">death market</span>.
-                  Build your empire on the bones of failed crawlers.
+                  Crush competing corporations and{" "}
+                  <span className="text-cyan-400 font-bold">kick their assets</span>.
+                  Corner the death market. Build your empire on the bones of failed crawlers.
                 </p>
               </CardContent>
             </Card>
