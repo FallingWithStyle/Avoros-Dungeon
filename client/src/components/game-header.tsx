@@ -12,8 +12,8 @@ export default function GameHeader() {
   const { user } = useAuth();
 
   const handleLogout = () => {
-    // Redirect to logout endpoint which will handle cleanup and redirect
-    window.location.href = "/api/logout";
+    // Use replace to avoid adding to browser history
+    window.location.replace("/api/logout");
   };
 
   const getDisplayName = () => {
