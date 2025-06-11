@@ -17,6 +17,7 @@ interface UseTacticalPositioningProps {
   effectiveTacticalData: any;
   combatState: any;
   onRoomMovement: (direction: string) => void;
+  movementSpeed?: number;
 }
 
 interface MovementVector {
@@ -27,9 +28,10 @@ interface MovementVector {
 export function useTacticalPositioning({
   effectiveTacticalData,
   combatState,
-  onRoomMovement
+  onRoomMovement,
+  movementSpeed = 2.5
 }: UseTacticalPositioningProps) {
-  const speed = 2.5; // Movement speed per frame
+  const speed = movementSpeed; // Movement speed per frame
   const lastRoomTransitionTime = useRef<number>(0);
   const ROOM_TRANSITION_COOLDOWN = 100; // Ultra-fast 100ms cooldown
 
@@ -153,7 +155,7 @@ export function useTacticalPositioning({
         console.log("🚫 Movement blocked - no significant position change");
       }
     },
-    [effectiveTacticalData, combatState, onRoomMovement, speed, ROOM_TRANSITION_COOLDOWN],
+    [effectiveTacticalData, combatState, onRoomMovement, movementSpeed, ROOM_TRANSITION_COOLDOWN],
   );
 
   return {

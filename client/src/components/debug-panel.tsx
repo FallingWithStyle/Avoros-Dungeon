@@ -58,6 +58,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     const saved = localStorage.getItem('debug-panel-minimized');
     return saved ? JSON.parse(saved) : false;
   });
+  const [movementSpeed, setMovementSpeed] = useState(2.5);
 
   // Get current room data to show coordinates
   const { data: roomData } = useQuery({
@@ -82,6 +83,14 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
         ? "Movement will not consume energy"
         : "Movement will consume energy normally",
     });
+  };
+
+  const updateMovementSpeed = (newSpeed: number) => {
+    setMovementSpeed(newSpeed);
+  };
+
+  const resetMovementSpeed = () => {
+    setMovementSpeed(2.5);
   };
 
   // Debug crawler deletion
@@ -127,10 +136,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
     onSuccess: () => {
       if (!activeCrawler) return;
-      
+
       // Use centralized room change handler for consistent updates
       handleRoomChangeWithRefetch(activeCrawler.id);
-      
+
       toast({
         title: "Position Reset",
         description: "Crawler has been moved to the entrance. Map and tactical view updated.",
@@ -396,6 +405,35 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                 )}
                 Heal Crawler
               </Button>
+
+              <Button
+                onClick={toggleEnergyUsage}
+                className={miniButtonClasses + " " + (energyDisabled ? "bg-red-900/30 text-red-300 border-red-600" : "bg-green-900/30 text-green-300 border-green-600")}
+              >
+                <Zap className={miniIconClasses} />
+                Energy: {energyDisabled ? "OFF" : "ON"}
+              </Button>
+
+              {/* Movement Speed Controls */}
+              <div className="flex items-center gap-2 p-2 bg-blue-900/20 border border-blue-600/30 rounded">
+                <span className="text-blue-300 text-xs font-medium">Speed:</span>
+                <span className="text-blue-200 text-xs min-w-[3ch] text-center">{movementSpeed}</span>
+                <input
+                  type="range"
+                  min="2.5"
+                  max="100"
+                  step="2.5"
+                  value={movementSpeed}
+                  onChange={(e) => updateMovementSpeed(parseFloat(e.target.value))}
+                  className="flex-1 h-1 bg-blue-800 rounded-lg appearance-none cursor-pointer slider:bg-blue-400"
+                />
+                <Button
+                  onClick={resetMovementSpeed}
+                  className="h-6 px-2 text-[0.6rem] bg-blue-900/40 text-blue-300 border border-blue-600/40 hover:bg-blue-800/40"
+                >
+                  Reset
+                </Button>
+              </div>
             </div>
 
             {/* Debug Info - all on one line, pipe-separated */}
