@@ -82,7 +82,7 @@ export default function Landing() {
                 <p className="text-slate-300 leading-relaxed">
                   Your crawler is your{" "}
                   <span className="text-orange-400 font-bold">
-                    life-or-death line
+                    life- (or death-) line
                   </span>
                   . Death means bankruptcy. Failure means starting over. No
                   respawns, no second chances.
