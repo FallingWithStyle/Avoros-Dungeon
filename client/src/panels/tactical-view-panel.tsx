@@ -20,6 +20,7 @@ import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
 import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
 import { queryClient } from "@/lib/queryClient";
+import { useLayoutSettings } from "@/hooks/useLayoutSettings";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -38,6 +39,9 @@ interface ContextMenu {
 export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS MUST BE CALLED FIRST - NO CONDITIONAL CALLING
   const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const { currentSettings } = useLayoutSettings();
 
   // Use the extracted tactical data hooks
   const {

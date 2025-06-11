@@ -16,22 +16,41 @@ interface TacticalHotbarProps {
   } | null;
   onHotbarClick: (actionId: string, actionType: string, actionName: string) => void;
   getCooldownPercentage: (actionId: string) => number;
+  position?: "top" | "bottom" | "left" | "right";
+  maxActions?: number;
 }
 
 export default function TacticalHotbar({
   activeActionMode,
   onHotbarClick,
-  getCooldownPercentage
+  getCooldownPercentage,
+  position = "bottom",
+  maxActions = 4
 }: TacticalHotbarProps) {
-  const actions = [
+  const allActions = [
     { id: "move", type: "move", name: "Move", icon: Move, shortcut: "M" },
     { id: "attack", type: "attack", name: "Attack", icon: Sword, shortcut: "A" },
     { id: "defend", type: "ability", name: "Defend", icon: Shield, shortcut: "D" },
     { id: "ability1", type: "ability", name: "Ability", icon: Zap, shortcut: "1" },
+    { id: "ability2", type: "ability", name: "Spell", icon: Zap, shortcut: "2" },
+    { id: "ability3", type: "ability", name: "Skill", icon: Zap, shortcut: "3" },
+    { id: "ability4", type: "ability", name: "Power", icon: Zap, shortcut: "4" },
+    { id: "ability5", type: "ability", name: "Magic", icon: Zap, shortcut: "5" },
+    { id: "ability6", type: "ability", name: "Special", icon: Zap, shortcut: "6" },
+    { id: "ability7", type: "ability", name: "Ultimate", icon: Zap, shortcut: "7" },
   ];
 
+  // Limit actions to the specified maximum
+  const actions = allActions.slice(0, maxActions);
+
+  // Determine layout based on position
+  const isVertical = position === "left" || position === "right";
+  const flexDirection = isVertical ? "flex-col" : "flex-row";
+  const justifyContent = position === "top" || position === "bottom" ? "justify-center" : 
+                        position === "left" ? "justify-start" : "justify-end";
+
   return (
-    <div className="flex gap-2 justify-center">
+    <div className={`flex gap-2 ${flexDirection} ${justifyContent}`}
       {actions.map((action) => {
         const isActive = activeActionMode?.actionId === action.id;
         const cooldownPercentage = getCooldownPercentage(action.id);
