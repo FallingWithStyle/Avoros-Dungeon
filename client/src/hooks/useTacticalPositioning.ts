@@ -64,11 +64,12 @@ export function useTacticalPositioning({
         gateZone: { start: gateStart, end: gateEnd }
       });
 
-      // Check for room transition through gates - use current position + slight buffer for gate detection
+      // Check for room transition through gates - only allow transition when moving toward the exit
       let roomTransitionDirection = "";
 
-      if (newY <= 5 && availableDirections.includes("north")) {
-        console.log("🚪 Attempting north exit - checking gate bounds");
+      // North exit: only trigger when moving north (negative Y direction) AND hitting boundary
+      if (newY <= 5 && direction.y < 0 && availableDirections.includes("north")) {
+        console.log("🚪 Moving north toward north exit - checking gate bounds");
         console.log("Player X position:", playerEntity.position.x, "Gate bounds:", gateStart, "-", gateEnd);
         if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
           console.log("✅ Player is within north gate bounds - allowing transition");
@@ -76,8 +77,10 @@ export function useTacticalPositioning({
         } else {
           console.log("❌ Player is outside north gate bounds - blocking movement");
         }
-      } else if (newY >= 95 && availableDirections.includes("south")) {
-        console.log("🚪 Attempting south exit - checking gate bounds");
+      }
+      // South exit: only trigger when moving south (positive Y direction) AND hitting boundary
+      else if (newY >= 95 && direction.y > 0 && availableDirections.includes("south")) {
+        console.log("🚪 Moving south toward south exit - checking gate bounds");
         console.log("Player X position:", playerEntity.position.x, "Gate bounds:", gateStart, "-", gateEnd);
         if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
           console.log("✅ Player is within south gate bounds - allowing transition");
@@ -85,8 +88,10 @@ export function useTacticalPositioning({
         } else {
           console.log("❌ Player is outside south gate bounds - blocking movement");
         }
-      } else if (newX >= 95 && availableDirections.includes("east")) {
-        console.log("🚪 Attempting east exit - checking gate bounds");
+      }
+      // East exit: only trigger when moving east (positive X direction) AND hitting boundary
+      else if (newX >= 95 && direction.x > 0 && availableDirections.includes("east")) {
+        console.log("🚪 Moving east toward east exit - checking gate bounds");
         console.log("Player Y position:", playerEntity.position.y, "Gate bounds:", gateStart, "-", gateEnd);
         if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
           console.log("✅ Player is within east gate bounds - allowing transition");
@@ -94,8 +99,10 @@ export function useTacticalPositioning({
         } else {
           console.log("❌ Player is outside east gate bounds - blocking movement");
         }
-      } else if (newX <= 5 && availableDirections.includes("west")) {
-        console.log("🚪 Attempting west exit - checking gate bounds");
+      }
+      // West exit: only trigger when moving west (negative X direction) AND hitting boundary
+      else if (newX <= 5 && direction.x < 0 && availableDirections.includes("west")) {
+        console.log("🚪 Moving west toward west exit - checking gate bounds");
         console.log("Player Y position:", playerEntity.position.y, "Gate bounds:", gateStart, "-", gateEnd);
         if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
           console.log("✅ Player is within west gate bounds - allowing transition");
