@@ -103,7 +103,7 @@ export default function TacticalGrid({
       } rounded-lg cursor-pointer hover:border-blue-400 transition-colors`}
       onClick={onGridClick}
       onContextMenu={onGridRightClick}
-      title="Click to move your character"
+      title="Use WASD keys or swipe to move your character"
     >
       {/* Room Background */}
       <div

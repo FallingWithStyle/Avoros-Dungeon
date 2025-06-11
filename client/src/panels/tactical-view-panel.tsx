@@ -169,10 +169,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData?.room, lastRoomId, crawler]);
 
-  // Grid event handlers
+  // Grid event handlers - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    // Disabled for now - clicking on screen should not do anything
-    console.log("Grid clicked - functionality disabled");
+    // Grid clicking disabled - use keyboard/swipe movement instead
+    console.log("Grid click disabled - use WASD keys or swipe to move");
     return;
   }, []);
 

@@ -39,29 +39,43 @@ export function useTacticalMovement({
       const newX = playerEntity.position.x + direction.x * speed;
       const newY = playerEntity.position.y + direction.y * speed;
 
-      // Room transitions
-      const gridSize = 100 / 15;
-      const currentGridX = Math.round(playerEntity.position.x / gridSize);
-      const currentGridY = Math.round(playerEntity.position.y / gridSize);
-      const targetGridX = Math.round(newX / gridSize);
-      const targetGridY = Math.round(newY / gridSize);
+      // Check if player is trying to exit through a gate
+      const gateWidth = 20; // Gate covers 20% of wall (centered)
+      const gateStart = 40; // Gate starts at 40% 
+      const gateEnd = 60;   // Gate ends at 60%
 
+      // Check for room transition through gates
       let roomTransitionDirection = "";
-      if (targetGridY < 0 && availableDirections.includes("north"))
-        roomTransitionDirection = "north";
-      else if (targetGridY > 14 && availableDirections.includes("south"))
-        roomTransitionDirection = "south";
-      else if (targetGridX > 14 && availableDirections.includes("east"))
-        roomTransitionDirection = "east";
-      else if (targetGridX < 0 && availableDirections.includes("west"))
-        roomTransitionDirection = "west";
+      
+      if (newY < 0 && availableDirections.includes("north")) {
+        // Check if player is within north gate bounds (horizontally centered)
+        if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
+          roomTransitionDirection = "north";
+        }
+      } else if (newY > 100 && availableDirections.includes("south")) {
+        // Check if player is within south gate bounds (horizontally centered)
+        if (playerEntity.position.x >= gateStart && playerEntity.position.x <= gateEnd) {
+          roomTransitionDirection = "south";
+        }
+      } else if (newX > 100 && availableDirections.includes("east")) {
+        // Check if player is within east gate bounds (vertically centered)
+        if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
+          roomTransitionDirection = "east";
+        }
+      } else if (newX < 0 && availableDirections.includes("west")) {
+        // Check if player is within west gate bounds (vertically centered)
+        if (playerEntity.position.y >= gateStart && playerEntity.position.y <= gateEnd) {
+          roomTransitionDirection = "west";
+        }
+      }
 
       if (roomTransitionDirection) {
+        console.log("🚪 Room transition through gate: " + roomTransitionDirection);
         onRoomMovement(roomTransitionDirection);
         return;
       }
 
-      // Clamp to boundaries
+      // Clamp to boundaries - prevent walking through walls outside of gates
       const finalX = Math.max(5, Math.min(95, newX));
       const finalY = Math.max(5, Math.min(95, newY));
 
