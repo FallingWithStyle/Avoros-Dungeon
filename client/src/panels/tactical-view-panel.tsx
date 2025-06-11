@@ -1,4 +1,3 @@
-
 /**
  * File: tactical-view-panel.tsx
  * Responsibility: Main tactical view interface combining grid, hotbar, and tactical controls
@@ -19,7 +18,7 @@ interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
 }
 
-export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
+function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { currentSettings } = useLayoutSettings();
   const { hotbarPosition } = currentSettings;
 
@@ -56,10 +55,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleGridClick = useCallback((event: React.MouseEvent) => {
     if (!activeActionMode) return;
-    
+
     // Handle tactical action based on active mode
     console.log("Grid clicked with action mode:", activeActionMode);
-    
+
     // Clear action mode after use
     setActiveActionMode(null);
   }, [activeActionMode]);
@@ -129,32 +128,19 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   return (
     <Card className="bg-game-surface border-game-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center justify-between">
-          <div className="flex items-center">
-            <Sword className="w-5 h-5 mr-2 text-red-400" />
-            Tactical View
-          </div>
+        <CardTitle className="text-white flex items-center">
+          <Sword className="w-5 h-5 mr-2 text-red-400" />
+          Tactical View
           {isInCombat && (
-            <Badge variant="destructive" className="bg-red-600">
+            <Badge variant="destructive" className="ml-2">
               In Combat
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <div className={mainLayoutClass}>
-          {/* Hotbar - positioned based on settings */}
-          {hotbarPosition === "top" && (
-            <div className={hotbarContainerClass}>
-              <TacticalHotbar
-                actions={availableActions}
-                activeActionMode={activeActionMode}
-                onActionClick={handleActionClick}
-                getCooldownPercentage={getCooldownPercentage}
-              />
-            </div>
-          )}
-          
+          {/* Left hotbar */}
           {hotbarPosition === "left" && (
             <div className={hotbarContainerClass}>
               <TacticalHotbar
@@ -166,43 +152,46 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             </div>
           )}
 
-          {/* Tactical Grid */}
+          {/* Main content area */}
           <div className="flex-1">
-            <TacticalGrid
-              roomBackground={tacticalData?.room?.environment || "indoor"}
-              exits={tacticalData?.availableDirections || []}
-              entities={tacticalData?.tacticalEntities || []}
-              lootItems={[]}
-              otherPlayers={tacticalData?.playersInRoom || []}
-              hoveredEntity={null}
-              hoveredLoot={null}
-              onGridClick={handleGridClick}
-              onGridRightClick={handleGridRightClick}
-              onEntityClick={() => {}}
-              onEntityRightClick={() => {}}
-              onLootClick={() => {}}
-              onEntityHover={() => {}}
-              onLootHover={() => {}}
-              isInCombat={isInCombat}
+            {/* Top hotbar */}
+            {hotbarPosition === "top" && (
+              <div className={hotbarContainerClass}>
+                <TacticalHotbar
+                  actions={availableActions}
+                  activeActionMode={activeActionMode}
+                  onActionClick={handleActionClick}
+                  getCooldownPercentage={getCooldownPercentage}
+                />
+              </div>
+            )}
+
+            {/* Tactical Grid */}
+            <TacticalGrid 
+              tacticalData={tacticalData}
               activeActionMode={activeActionMode}
-              tacticalMobs={tacticalData?.tacticalEntities?.filter(e => e.type === "mob") || []}
-              tacticalNpcs={tacticalData?.tacticalEntities?.filter(e => e.type === "npc") || []}
+              onActionModeCancel={() => setActiveActionMode(null)}
+              onRoomMovement={(direction) => {
+                console.log("🚪 Room movement triggered:", direction);
+                refetch();
+              }}
             />
+
+            {/* Bottom hotbar */}
+            {hotbarPosition === "bottom" && (
+              <div className={hotbarContainerClass}>
+                <TacticalHotbar
+                  actions={availableActions}
+                  activeActionMode={activeActionMode}
+                  onActionClick={handleActionClick}
+                  getCooldownPercentage={getCooldownPercentage}
+                />
+              </div>
+            )}
           </div>
 
+          {/* Right hotbar */}
           {hotbarPosition === "right" && (
-            <div className={hotbarContainerClass}>
-              <TacticalHotbar
-                actions={availableActions}
-                activeActionMode={activeActionMode}
-                onActionClick={handleActionClick}
-                getCooldownPercentage={getCooldownPercentage}
-              />
-            </div>
-          )}
-
-          {/* Bottom hotbar */}
-          {hotbarPosition === "bottom" && (
             <div className={hotbarContainerClass}>
               <TacticalHotbar
                 actions={availableActions}
@@ -225,3 +214,5 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     </Card>
   );
 }
+
+export default TacticalViewPanel;

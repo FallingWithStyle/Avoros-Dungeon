@@ -74,10 +74,10 @@ export function useKeyboardMovement({
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
       
-      // Check if any dialog/modal is open by looking for dialog overlay
-      const dialogOverlay = document.querySelector('[data-state="open"]');
-      if (dialogOverlay) {
-        console.log('🚫 Keyboard movement disabled - dialog is open');
+      // Check if layout settings dialog is open specifically
+      const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
+      if (layoutDialog) {
+        console.log('🚫 Keyboard movement disabled - layout settings dialog is open');
         return;
       }
       
@@ -123,9 +123,9 @@ export function useKeyboardMovement({
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
       
-      // Check if any dialog/modal is open by looking for dialog overlay
-      const dialogOverlay = document.querySelector('[data-state="open"]');
-      if (dialogOverlay) {
+      // Check if layout settings dialog is open specifically
+      const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
+      if (layoutDialog) {
         // Clear any pressed keys when dialog is open to prevent stuck movement
         keysPressed.current.clear();
         stopMovement();

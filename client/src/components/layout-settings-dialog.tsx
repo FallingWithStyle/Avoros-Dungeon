@@ -1,4 +1,3 @@
-
 /**
  * File: layout-settings-dialog.tsx
  * Responsibility: Provides UI for configuring layout settings and managing templates
@@ -38,7 +37,7 @@ export default function LayoutSettingsDialog({ children }: LayoutSettingsDialogP
     resetToDefaults,
     canSaveMore
   } = useLayoutSettings();
-  
+
   const { toast } = useToast();
   const [templateName, setTemplateName] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -121,11 +120,11 @@ export default function LayoutSettingsDialog({ children }: LayoutSettingsDialogP
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="layout-settings-dialog">
         <DialogHeader>
           <DialogTitle>Layout Settings</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Current Settings */}
           <Card>
