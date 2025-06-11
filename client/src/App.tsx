@@ -17,7 +17,7 @@ import Home from "@/pages/home";
 import CrawlerMode from "@/pages/crawler-mode";
 import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
-import { LayoutSettingsProvider } from "@/context/layout-settings-context";
+import { LayoutSettingsProvider } from "@/hooks/useLayoutSettings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
