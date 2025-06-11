@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Bot, User, Settings, Menu, ChevronDown } from "lucide-react";
+import { Building2, Bot, User, Settings, Menu, ChevronDown, Layout } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import LayoutSettingsDialog from "@/components/layout-settings-dialog";
 
 export default function HeaderNavigation() {
   const { user } = useAuth();
@@ -193,6 +194,16 @@ export default function HeaderNavigation() {
                     <DropdownMenuSeparator />
                   </div>
                 )}
+
+                {/* Layout Settings */}
+                <LayoutSettingsDialog>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Layout className="w-4 h-4 mr-2" />
+                    Layout Settings
+                  </DropdownMenuItem>
+                </LayoutSettingsDialog>
+
+                <DropdownMenuSeparator />
 
                 {/* Logout */}
                 <Link href="/api/logout">
