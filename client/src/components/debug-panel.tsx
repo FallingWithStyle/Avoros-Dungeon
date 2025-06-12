@@ -205,10 +205,11 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
         });
       }
       
-      // Reload the page to refresh authentication state
+      // Force re-fetch auth data without page reload
       setTimeout(() => {
-        window.location.reload();
-      }, 500);
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      }, 100);
     },
     onError: (error) => {
       showErrorToast("Debug Auth Failed", error);

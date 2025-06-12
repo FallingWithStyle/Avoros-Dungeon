@@ -27,25 +27,50 @@ export function registerDebugRoutes(app: Express) {
         });
       }
       
-      // Create a mock user session
+      const userId = email === "patrickandrewregan+test1@gmail.com" ? "debug_user_1" : "debug_user_2";
+      const userName = email === "patrickandrewregan+test1@gmail.com" ? "Debug User 1" : "Debug User 2";
+      
+      // Create a mock user session that mimics the real auth structure
       const mockUser = {
         claims: {
-          sub: email === "patrickandrewregan+test1@gmail.com" ? "debug_user_1" : "debug_user_2",
+          sub: userId,
           email: email,
-          name: email === "patrickandrewregan+test1@gmail.com" ? "Debug User 1" : "Debug User 2",
-          picture: "",
-          bio: "",
-          url: ""
-        }
+          name: userName,
+          first_name: userName.split(' ')[0],
+          last_name: userName.split(' ')[1] + " " + userName.split(' ')[2],
+          profile_image_url: "",
+        },
+        access_token: "debug_token",
+        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
       };
       
       // Store in session
       req.session.user = mockUser;
       
-      res.json({ 
-        success: true, 
-        user: mockUser.claims,
-        message: `Logged in as ${mockUser.claims.name}`
+      // Ensure the debug user exists in database
+      await storage.upsertUser({
+        id: userId,
+        email: email,
+        firstName: mockUser.claims.first_name,
+        lastName: mockUser.claims.last_name,
+        profileImageUrl: "",
+      });
+      
+      // Save session explicitly
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ 
+            success: false, 
+            error: "Failed to save session" 
+          });
+        }
+        
+        res.json({ 
+          success: true, 
+          user: mockUser.claims,
+          message: `Logged in as ${mockUser.claims.name}`
+        });
       });
     } catch (error) {
       console.error("Debug auth error:", error);
@@ -59,19 +84,28 @@ export function registerDebugRoutes(app: Express) {
   // Debug logout endpoint
   app.post("/api/debug/logout", async (req: any, res) => {
     try {
-      req.session.destroy((err: any) => {
-        if (err) {
-          console.error("Session destroy error:", err);
-          return res.status(500).json({ 
-            success: false, 
-            error: "Failed to logout" 
+      // Clear the user from session but don't destroy the entire session
+      if (req.session) {
+        req.session.user = null;
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("Session save error during logout:", err);
+            return res.status(500).json({ 
+              success: false, 
+              error: "Failed to logout" 
+            });
+          }
+          res.json({ 
+            success: true, 
+            message: "Logged out successfully" 
           });
-        }
+        });
+      } else {
         res.json({ 
           success: true, 
-          message: "Logged out successfully" 
+          message: "Already logged out" 
         });
-      });
+      }
     } catch (error) {
       console.error("Debug logout error:", error);
       res.status(500).json({ 
