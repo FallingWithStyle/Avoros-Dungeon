@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
-import { combatSystem } from "../../../shared/combat-system";
+import { combatSystem } from "../../../../shared/combat-system";
 
 interface TacticalGridProps {
   tacticalData: any;

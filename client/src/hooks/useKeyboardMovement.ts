@@ -42,16 +42,16 @@ export function useKeyboardMovement({
   // Start the interval to send movement
   const startMovement = useCallback(() => {
     if (movementInterval.current) return;
-    
+
     console.log('🎮 Starting keyboard movement interval');
-    
+
     // Send immediate movement
     const initialVector = calculateMovementVector();
     if (initialVector.x !== 0 || initialVector.y !== 0) {
       console.log('🎮 Initial movement:', initialVector);
       onMovement(initialVector);
     }
-    
+
     movementInterval.current = setInterval(() => {
       const vector = calculateMovementVector();
       if (vector.x !== 0 || vector.y !== 0) {
@@ -73,14 +73,14 @@ export function useKeyboardMovement({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
-      
+
       // Check if layout settings dialog is open specifically
       const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
       if (layoutDialog) {
         console.log('🚫 Keyboard movement disabled - layout settings dialog is open');
         return;
       }
-      
+
       const key = event.key.toLowerCase();
       const valid = [
         "w",
@@ -94,15 +94,15 @@ export function useKeyboardMovement({
       ];
       if (!valid.includes(key)) return;
       event.preventDefault();
-      
+
       // Prevent key repeat
       if (keysPressed.current.has(key)) return;
-      
+
       const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
-      
+
       console.log('🎮 Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
-      
+
       // Start movement if this is the first key, or send immediate movement if already moving
       if (wasEmpty) {
         startMovement();
@@ -122,7 +122,7 @@ export function useKeyboardMovement({
   const handleKeyUp = useCallback(
     (event: KeyboardEvent) => {
       if (!isEnabled) return;
-      
+
       // Check if layout settings dialog is open specifically
       const layoutDialog = document.querySelector('[data-testid="layout-settings-dialog"][data-state="open"]');
       if (layoutDialog) {
@@ -131,7 +131,7 @@ export function useKeyboardMovement({
         stopMovement();
         return;
       }
-      
+
       const key = event.key.toLowerCase();
       const valid = [
         "w",

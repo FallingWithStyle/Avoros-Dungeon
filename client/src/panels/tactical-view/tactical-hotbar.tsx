@@ -1,4 +1,3 @@
-
 /**
  * File: tactical-hotbar.tsx
  * Responsibility: Renders hotbar with action buttons for tactical combat
@@ -74,7 +73,7 @@ function TacticalHotbar({
             >
               {/* Action Icon */}
               <IconComponent className="w-4 h-4 mb-1" />
-              
+
               {/* Action Name (shortened for small buttons) */}
               <span className="text-xs leading-none">
                 {hotbarPosition === "left" || hotbarPosition === "right" 
@@ -120,4 +119,5 @@ function TacticalHotbar({
   );
 }
 
+export { TacticalHotbar };
 export default TacticalHotbar;
