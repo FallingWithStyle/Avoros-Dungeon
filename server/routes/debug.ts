@@ -9,6 +9,78 @@ import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
 
 export function registerDebugRoutes(app: Express) {
+  // Debug authentication endpoint
+  app.post("/api/debug/auth", async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      // Only allow specific debug emails
+      const debugEmails = [
+        "patrickandrewregan+test1@gmail.com",
+        "patrickandrewregan+test2@gmail.com"
+      ];
+      
+      if (!debugEmails.includes(email)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid debug email" 
+        });
+      }
+      
+      // Create a mock user session
+      const mockUser = {
+        claims: {
+          sub: email === "patrickandrewregan+test1@gmail.com" ? "debug_user_1" : "debug_user_2",
+          email: email,
+          name: email === "patrickandrewregan+test1@gmail.com" ? "Debug User 1" : "Debug User 2",
+          picture: "",
+          bio: "",
+          url: ""
+        }
+      };
+      
+      // Store in session
+      req.session.user = mockUser;
+      
+      res.json({ 
+        success: true, 
+        user: mockUser.claims,
+        message: `Logged in as ${mockUser.claims.name}`
+      });
+    } catch (error) {
+      console.error("Debug auth error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to authenticate debug user" 
+      });
+    }
+  });
+
+  // Debug logout endpoint
+  app.post("/api/debug/logout", async (req: any, res) => {
+    try {
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Session destroy error:", err);
+          return res.status(500).json({ 
+            success: false, 
+            error: "Failed to logout" 
+          });
+        }
+        res.json({ 
+          success: true, 
+          message: "Logged out successfully" 
+        });
+      });
+    } catch (error) {
+      console.error("Debug logout error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to logout" 
+      });
+    }
+  });
+
   // Debug endpoints
   app.post("/api/crawlers/:id/debug/heal", isAuthenticated, async (req: any, res) => {
     try {

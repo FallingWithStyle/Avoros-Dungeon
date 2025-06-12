@@ -59,6 +59,21 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     return saved ? JSON.parse(saved) : false;
   });
 
+  // Debug account states: 0 = no debug, 1 = test1, 2 = test2
+  const [debugAccountState, setDebugAccountState] = useState(0);
+
+  const debugAccountEmails = [
+    null, // No debug account
+    "patrickandrewregan+test1@gmail.com",
+    "patrickandrewregan+test2@gmail.com"
+  ];
+
+  const debugAccountNames = [
+    "No Debug Acct",
+    "Debug Acct #1", 
+    "Debug Acct #2"
+  ];
+
   // Get current room data to show coordinates
   const { data: roomData } = useQuery({
     queryKey: [`/api/crawlers/${activeCrawler?.id}/current-room`],
@@ -165,6 +180,41 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
   });
 
+  // Debug account switching mutation
+  const debugAuthMutation = useMutation({
+    mutationFn: async (email: string | null) => {
+      if (email) {
+        return await apiRequest("POST", "/api/debug/auth", { email });
+      } else {
+        return await apiRequest("POST", "/api/debug/logout");
+      }
+    },
+    onSuccess: (data, email) => {
+      // Clear all cached data
+      queryClient.clear();
+      
+      if (email) {
+        toast({
+          title: "Debug Login",
+          description: data.message || `Logged in as debug user`,
+        });
+      } else {
+        toast({
+          title: "Debug Logout",
+          description: "Logged out of debug account",
+        });
+      }
+      
+      // Reload the page to refresh authentication state
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    },
+    onError: (error) => {
+      showErrorToast("Debug Auth Failed", error);
+    },
+  });
+
   // Apply Eyes of D'Bug spell
   const applyEyesOfDebug = async () => {
     if (!activeCrawler) return;
@@ -233,6 +283,15 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     } catch (error) {
       showErrorToast("Spawn Mob Failed", error);
     }
+  };
+
+  // Debug account cycling handler
+  const handleDebugAccountCycle = () => {
+    const nextState = (debugAccountState + 1) % 3;
+    setDebugAccountState(nextState);
+    
+    const email = debugAccountEmails[nextState];
+    debugAuthMutation.mutate(email);
   };
 
   // Don't render debug panel if not in debug mode
@@ -395,6 +454,25 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                   <Heart className={miniIconClasses} />
                 )}
                 Heal Crawler
+              </Button>
+
+              {/* Debug Account Switcher */}
+              <Button
+                onClick={handleDebugAccountCycle}
+                disabled={debugAuthMutation.isPending}
+                variant="outline"
+                className={
+                  miniButtonClasses +
+                  " border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
+                }
+                title="Switch between debug test accounts"
+              >
+                {debugAuthMutation.isPending ? (
+                  <RefreshCw className={miniIconClasses + " animate-spin"} />
+                ) : (
+                  <Shield className={miniIconClasses} />
+                )}
+                {debugAccountNames[debugAccountState]}
               </Button>
             </div>
 
