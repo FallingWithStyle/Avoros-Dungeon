@@ -112,16 +112,29 @@ export default function Landing() {
 
           {/* Call to Action */}
           <div className="text-center mb-12">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-12 py-6 text-xl font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300 hover:scale-105"
-              onClick={() => (window.location.href = "/api/login")}
-            >
-              <i className="fas fa-briefcase mr-3"></i>
-              ESTABLISH YOUR EMPIRE
-            </Button>
+            <div className="space-y-4">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-12 py-6 text-xl font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300 hover:scale-105 block mx-auto"
+                onClick={() => (window.location.href = "/api/login")}
+              >
+                <i className="fas fa-briefcase mr-3"></i>
+                LOGIN WITH REPLIT
+              </Button>
 
-            <p className="text-slate-400 mt-4 text-lg">
+              <div className="text-slate-500">or</div>
+
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-12 py-6 text-xl font-bold border-2 border-blue-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-400/40 transition-all duration-300 hover:scale-105 block mx-auto"
+                onClick={() => (window.location.href = "/api/auth/google")}
+              >
+                <i className="fab fa-google mr-3"></i>
+                LOGIN WITH GOOGLE
+              </Button>
+            </div>
+
+            <p className="text-slate-400 mt-6 text-lg">
               Register your corporation and begin{" "}
               <span className="text-red-400 font-semibold">
                 profitable elimination operations

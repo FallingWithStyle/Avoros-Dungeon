@@ -5,6 +5,7 @@
  */
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import passport from "passport";
 import session from "express-session";
@@ -103,6 +104,35 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
+  // Add Google OAuth strategy if credentials are provided
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/auth/google/callback"
+    }, async (accessToken, refreshToken, profile, done) => {
+      try {
+        const user = {
+          claims: {
+            sub: "google_" + profile.id,
+            email: profile.emails?.[0]?.value || "",
+            first_name: profile.name?.givenName || "",
+            last_name: profile.name?.familyName || "",
+            profile_image_url: profile.photos?.[0]?.value || "",
+          },
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: Math.floor(Date.now() / 1000) + 3600
+        };
+
+        await upsertUser(user.claims);
+        done(null, user);
+      } catch (error) {
+        done(error, null);
+      }
+    }));
+  }
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
@@ -119,6 +149,20 @@ export async function setupAuth(app: Express) {
       failureRedirect: "/api/login",
     })(req, res, next);
   });
+
+  // Google OAuth routes (only if Google credentials are configured)
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    app.get("/api/auth/google", 
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
+
+    app.get("/api/auth/google/callback",
+      passport.authenticate("google", { failureRedirect: "/api/login" }),
+      (req, res) => {
+        res.redirect("/");
+      }
+    );
+  }
 
   app.get("/api/logout", (req, res) => {
     req.logout((err) => {
