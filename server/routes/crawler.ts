@@ -267,6 +267,21 @@ export function registerCrawlerRoutes(app: Express) {
 
       console.log(`Current room: ${currentRoom.name} (ID: ${currentRoom.id})`);
 
+      // Check for cached tactical data first
+      const cacheKey = `tactical_data_${currentRoom.id}`;
+      let cachedData = await redisService.get(cacheKey);
+
+      if (cachedData) {
+        console.log(`Using cached tactical data for room ${currentRoom.id}`);
+        cachedData = JSON.parse(cachedData);
+        return res.json({
+          room: currentRoom,
+          availableDirections: cachedData.availableDirections,
+          playersInRoom: cachedData.playersInRoom,
+          tacticalEntities: cachedData.tacticalEntities,
+        });
+      }
+
       // Get all players in the current room
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
       console.log(`Players in room: ${playersInRoom.length}`);
@@ -282,6 +297,15 @@ export function registerCrawlerRoutes(app: Express) {
         currentRoom
       );
       console.log(`Generated ${tacticalEntities.length} tactical entities:`, tacticalEntities.map(e => `${e.type}: ${e.name}`));
+
+      // Cache the result for 30 seconds
+      const resultData = {
+        availableDirections,
+        playersInRoom,
+        tacticalEntities,
+      };
+
+      await redisService.set(cacheKey, JSON.stringify(resultData), 30);
 
       const response = {
         room: currentRoom,
