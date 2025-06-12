@@ -44,7 +44,7 @@
 - Redesigned equipment display in crawler status panel
 - Enhanced equipment seeding with realistic weapon and armor progression
 
-## [0.4.6] - 2025-06-11
+## [0.8.6] - 2025-06-11
 
 ### Fixed
 - Fixed import/export issues with TacticalViewPanel and TacticalHotbar components
