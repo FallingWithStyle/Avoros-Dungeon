@@ -11,7 +11,7 @@ import CrawlerSelection from "@/components/crawler-selection";
 import SeasonStatus from "@/components/season-status";
 import Leaderboard from "@/components/leaderboard";
 import ActivityFeed from "@/components/activity-feed";
-import RedisStatusIndicator from "@/components/redis-status-indicator";
+import { RedisStatusIndicator } from "@/components/redis-status-indicator";
 
 function SponsorView() {
   return (
