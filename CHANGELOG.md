@@ -4,6 +4,15 @@
 
 ### Added
 
+## [0.8.9] - 2025-01-26
+
+### Changed
+- Completely unified input system to use @use-gesture/react for both keyboard and touch input
+- Cleaned up remaining references to deprecated swipe movement system
+
+### Removed
+- Removed useSwipeMovement.ts hook completely in favor of unified gesture system
+
 ## [0.8.8] - 2025-01-26
 
 ### Changed
@@ -35,7 +44,7 @@
 - Redesigned equipment display in crawler status panel
 - Enhanced equipment seeding with realistic weapon and armor progression
 
-## [0.4.6] - 2025-06-11
+## [0.8.6] - 2025-06-11
 
 ### Fixed
 - Fixed import/export issues with TacticalViewPanel and TacticalHotbar components

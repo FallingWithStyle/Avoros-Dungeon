@@ -139,7 +139,7 @@
 ## Bug Fixes Needed
 
 - [x] **Unified Gesture Library** - Consolidated keyboard and touch movement to use @use-gesture/react
-- [ ] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view
+- [x] **Mobile Touch Movement** - Unified gesture system implemented using @use-gesture/react
 
 ## Next Priority Features
 

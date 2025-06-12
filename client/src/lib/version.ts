@@ -5,7 +5,7 @@
  */
 
 // App version - update this when making releases or significant changes
-export const APP_VERSION = "0.8.8";
+export const APP_VERSION = "0.8.9";
 
 // Build timestamp for development tracking
 export const BUILD_TIMESTAMP = new Date().toISOString();
