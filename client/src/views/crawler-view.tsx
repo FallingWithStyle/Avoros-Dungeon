@@ -85,7 +85,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
               />
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  {crawler.name}
+                  {crawler.name} {crawler.serial && `[${crawler.serial}]`}
                 </h1>
                 <p className="text-slate-400">
                   Level {crawler.level} {crawler.class?.name || "Crawler"} •
