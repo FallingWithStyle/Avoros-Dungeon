@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
+import ActionQueuePanel from "./action-queue-panel";
 import { useLayoutSettings } from "@/hooks/useLayoutSettings";
 import { Sword, Shield, Zap, Move, Eye, Users, Heart } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -203,8 +204,13 @@ function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           )}
         </div>
 
+        {/* Action Queue Panel */}
+        <div className="mt-4">
+          <ActionQueuePanel />
+        </div>
+
         {/* Status Info */}
-        <div className="flex justify-between text-sm text-slate-400">
+        <div className="flex justify-between text-sm text-slate-400 mt-4">
           <span>Room: {tacticalData?.room?.name || "Unknown"}</span>
           <span>
             Entities: {tacticalData?.tacticalEntities?.length || 0}

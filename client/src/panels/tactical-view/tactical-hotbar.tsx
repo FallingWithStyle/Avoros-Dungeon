@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLayoutSettings } from "@/hooks/useLayoutSettings";
 
-interface ActionData {
+interface TacticalAction {
   id: string;
   type: string;
   name: string;
@@ -18,7 +18,7 @@ interface ActionData {
 }
 
 interface TacticalHotbarProps {
-  actions: ActionData[];
+  actions: TacticalAction[];
   activeActionMode: {
     type: "move" | "attack" | "ability";
     actionId: string;
@@ -42,14 +42,14 @@ function TacticalHotbar({
 
   // Determine layout classes based on position
   const containerClass = 
-    hotbarPosition === "left" || hotbarPosition === "right" 
-      ? "flex flex-col gap-2" 
-      : "flex flex-row gap-2 justify-center";
+    hotbarPosition === "top" || hotbarPosition === "bottom"
+      ? "flex flex-row gap-2 justify-center flex-wrap"
+      : "flex flex-col gap-2";
 
   const buttonClass = 
-    hotbarPosition === "left" || hotbarPosition === "right"
-      ? "w-12 h-12 p-0 flex flex-col items-center justify-center text-xs"
-      : "w-16 h-12 p-1 flex flex-col items-center justify-center text-xs";
+    hotbarPosition === "top" || hotbarPosition === "bottom"
+      ? "flex-shrink-0 w-12 h-12"
+      : "w-full h-12";
 
   return (
     <div className={containerClass}>
@@ -57,50 +57,62 @@ function TacticalHotbar({
         const cooldownPercentage = getCooldownPercentage(action.id);
         const isOnCooldown = cooldownPercentage > 0;
         const isActive = activeActionMode?.actionId === action.id;
-        const isDisabled = isOnCooldown && !isActive;
+        const isDisabled = isOnCooldown || (activeActionMode !== null && !isActive);
 
         const IconComponent = action.icon;
-        const hotkey = (index + 1).toString();
 
         return (
           <div key={action.id} className="relative">
             <Button
               onClick={() => onActionClick(action.id, action.type, action.name)}
               disabled={isDisabled}
-              variant={isActive ? "default" : "secondary"}
-              className={`${buttonClass} ${
-                isActive 
-                  ? "bg-blue-600 border-blue-400 text-white" 
-                  : "bg-game-surface border-game-border text-slate-300 hover:bg-slate-700"
-              } relative overflow-hidden`}
+              variant={isActive ? "default" : "outline"}
+              className={`${buttonClass} relative overflow-hidden flex flex-col items-center justify-center p-1 ${
+                isActive ? "bg-blue-600 border-blue-400" : ""
+              }`}
+              title={action.name + " (" + (index + 1) + ")"}
             >
-              {/* Icon */}
+              {/* Action Icon */}
               <IconComponent className="w-4 h-4 mb-1" />
               
-              {/* Action name (truncated) */}
-              <span className="text-[10px] leading-none truncate max-w-full">
-                {action.name}
+              {/* Action Name (shortened for small buttons) */}
+              <span className="text-xs leading-none">
+                {hotbarPosition === "left" || hotbarPosition === "right" 
+                  ? action.name 
+                  : action.name.slice(0, 4)
+                }
               </span>
 
-              {/* Hotkey indicator */}
-              <span className="absolute top-0 right-0 text-[8px] bg-slate-900 text-slate-400 px-1 rounded-bl">
-                {hotkey}
-              </span>
+              {/* Keyboard shortcut indicator */}
+              <div className="absolute top-0 right-0 bg-slate-600 text-white text-xs px-1 rounded-bl opacity-75">
+                {index + 1}
+              </div>
 
               {/* Cooldown overlay */}
               {isOnCooldown && (
                 <div 
-                  className="absolute inset-0 bg-red-900/50 flex items-center justify-center"
+                  className="absolute inset-0 bg-red-600 opacity-50 transition-all duration-100"
                   style={{
-                    background: `linear-gradient(to top, rgba(153, 27, 27, 0.8) ${cooldownPercentage * 100}%, transparent ${cooldownPercentage * 100}%)`
+                    clipPath: `polygon(0 0, 100% 0, 100% ${100 - cooldownPercentage}%, 0 ${100 - cooldownPercentage}%)`
                   }}
-                >
-                  <Badge variant="destructive" className="text-[8px] px-1 py-0">
-                    {Math.ceil(cooldownPercentage * 10)}
-                  </Badge>
-                </div>
+                />
               )}
             </Button>
+
+            {/* Cooldown percentage badge */}
+            {isOnCooldown && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 text-xs px-1 py-0 min-w-0 h-5"
+              >
+                {Math.ceil(cooldownPercentage)}%
+              </Badge>
+            )}
+
+            {/* Active indicator */}
+            {isActive && (
+              <div className="absolute inset-0 border-2 border-blue-400 rounded pointer-events-none animate-pulse" />
+            )}
           </div>
         );
       })}
