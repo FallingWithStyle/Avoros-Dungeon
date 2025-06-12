@@ -1,12 +1,11 @@
 
 /**
  * File: useKeyboardMovement.ts
- * Responsibility: Handle keyboard input for 360-degree tactical movement using @use-gesture/react
- * Notes: Unified with gesture movement system for consistency across input methods
+ * Responsibility: Handle keyboard input for 360-degree tactical movement using standard event listeners
+ * Notes: Uses traditional event listeners instead of @use-gesture/react for better compatibility
  */
 
 import { useEffect, useRef } from "react";
-import { useGesture } from "@use-gesture/react";
 
 interface UseKeyboardMovementProps {
   onMovement: (direction: { x: number; y: number }) => void;
@@ -61,63 +60,56 @@ export function useKeyboardMovement({
     console.log('⌨️ Stopped keyboard movement');
   };
 
-  // Use @use-gesture/react for keyboard handling
-  const bind = useGesture(
-    {
-      onKeyDown: ({ event, first }) => {
-        if (!isEnabled) return;
-        
-        const key = event.key.toLowerCase();
-        const validKeys = [
-          "w", "a", "s", "d",
-          "arrowup", "arrowdown", "arrowleft", "arrowright",
-        ];
-        
-        if (!validKeys.includes(key)) return;
-        event.preventDefault();
+  // Keyboard event handlers
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!isEnabled) return;
+    
+    const key = event.key.toLowerCase();
+    const validKeys = [
+      "w", "a", "s", "d",
+      "arrowup", "arrowdown", "arrowleft", "arrowright",
+    ];
+    
+    if (!validKeys.includes(key)) return;
+    event.preventDefault();
 
-        // Prevent key repeat
-        if (keysPressed.current.has(key)) return;
+    // Prevent key repeat
+    if (keysPressed.current.has(key)) return;
 
-        const wasEmpty = keysPressed.current.size === 0;
-        keysPressed.current.add(key);
-        
-        console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+    const wasEmpty = keysPressed.current.size === 0;
+    keysPressed.current.add(key);
+    
+    console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
 
-        // Update current direction
-        currentDirection.current = calculateMovementVector();
+    // Update current direction
+    currentDirection.current = calculateMovementVector();
 
-        // Start movement if this is the first key
-        if (wasEmpty && (currentDirection.current.x !== 0 || currentDirection.current.y !== 0)) {
-          startMovement();
-        }
-      },
-      onKeyUp: ({ event }) => {
-        if (!isEnabled) return;
-        
-        const key = event.key.toLowerCase();
-        const validKeys = [
-          "w", "a", "s", "d",
-          "arrowup", "arrowdown", "arrowleft", "arrowright",
-        ];
-        
-        if (!validKeys.includes(key)) return;
-        
-        keysPressed.current.delete(key);
-        currentDirection.current = calculateMovementVector();
-        
-        console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
-
-        if (keysPressed.current.size === 0) {
-          stopMovement();
-        }
-      }
-    },
-    {
-      eventOptions: { passive: false },
-      target: typeof window !== 'undefined' ? window : undefined
+    // Start movement if this is the first key
+    if (wasEmpty && (currentDirection.current.x !== 0 || currentDirection.current.y !== 0)) {
+      startMovement();
     }
-  );
+  };
+
+  const handleKeyUp = (event: KeyboardEvent) => {
+    if (!isEnabled) return;
+    
+    const key = event.key.toLowerCase();
+    const validKeys = [
+      "w", "a", "s", "d",
+      "arrowup", "arrowdown", "arrowleft", "arrowright",
+    ];
+    
+    if (!validKeys.includes(key)) return;
+    
+    keysPressed.current.delete(key);
+    currentDirection.current = calculateMovementVector();
+    
+    console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
+
+    if (keysPressed.current.size === 0) {
+      stopMovement();
+    }
+  };
 
   // Handle window blur to stop movement
   const handleBlur = () => {
@@ -135,21 +127,18 @@ export function useKeyboardMovement({
       return;
     }
 
-    // Apply gesture bindings to window
-    const bindResult = bind();
-    
-    // Add blur handler
+    // Add event listeners
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
 
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
       stopMovement();
-      // Clean up gesture bindings
-      if (bindResult && typeof bindResult === 'function') {
-        bindResult();
-      }
     };
-  }, [isEnabled, bind]);
+  }, [isEnabled, onMovement]);
 
   // Stop if disabled
   useEffect(() => {
