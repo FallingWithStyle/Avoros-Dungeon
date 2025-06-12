@@ -1,4 +1,3 @@
-
 -- First, add the new equipment columns to the equipment table
 ALTER TABLE equipment ADD COLUMN weapon_type VARCHAR(30);
 ALTER TABLE equipment ADD COLUMN damage_attribute VARCHAR(20);
@@ -25,8 +24,14 @@ ALTER TABLE equipment_types ALTER COLUMN category SET NOT NULL;
 -- Add description column
 ALTER TABLE equipment_types ADD COLUMN description TEXT;
 
--- Now safely drop the slot column
-ALTER TABLE equipment_types DROP COLUMN slot;
+-- First, update any existing equipment_types to have a default slot value
+UPDATE "equipment_types" SET "slot" = 'general' WHERE "slot" IS NULL;
+
+-- Drop the old slot column from equipment_types
+ALTER TABLE "equipment_types" DROP COLUMN IF EXISTS "slot";
+
+-- Add armor_slot column to equipment table for armor-specific slot information
+ALTER TABLE "equipment" ADD COLUMN "armor_slot" varchar(20);
 
 -- Add shield type
 INSERT INTO equipment_types (name, category, description) 
