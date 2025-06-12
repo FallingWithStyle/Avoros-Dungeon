@@ -15,7 +15,7 @@ export interface CombatEntity {
   defense: number;
   speed: number;
   position: Position;
-  facing?: "north" | "south" | "east" | "west";
+  facing?: number; // Changed to number for degrees
   level?: number;
   accuracy?: number;
   evasion?: number;
@@ -355,11 +355,17 @@ export class CombatSystem {
     const dx = targetPosition.x - entity.position.x;
     const dy = targetPosition.y - entity.position.y;
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-      entity.facing = dx > 0 ? "east" : "west";
-    } else if (dy !== 0) {
-      entity.facing = dy > 0 ? "south" : "north";
+    // Calculate angle in degrees from movement vector
+    // Convert from mathematical angle (0° = East) to game angle (0° = North)
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    angle = angle - 90;
+
+    // Normalize angle to be between 0 and 360
+    if (angle < 0) {
+      angle += 360;
     }
+
+    entity.facing = Math.round(angle);
 
     // Allow extended boundaries for door crossings, but clamp to reasonable limits
     // This allows movement beyond normal room boundaries for door transitions
@@ -552,7 +558,7 @@ export class CombatSystem {
       hp: 100,
       maxHp: 100,
       isSelected: false,
-      facing: "north",
+      facing: 0, // Set initial facing to 0 degrees (north)
       serial: crawlerData?.serial,
     };
 

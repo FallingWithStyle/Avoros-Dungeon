@@ -43,6 +43,28 @@ export function useTacticalPositioning({
         return;
       }
 
+      // Determine facing direction based on movement (360-degree rotation)
+      let newFacing = playerEntity.facing || 0; // Keep current facing if no movement, default to 0 degrees (north)
+      if (direction.x !== 0 || direction.y !== 0) {
+        // Calculate angle in degrees from movement vector
+        // atan2(y, x) returns angle from positive x-axis in radians
+        // For our coordinate system: 0° = North (up), 90° = East (right), 180° = South (down), 270° = West (left)
+        const angleRadians = Math.atan2(direction.y, direction.x);
+        let angleDegrees = (angleRadians * 180) / Math.PI;
+        
+        // Convert from mathematical angle (0° = East) to game angle (0° = North)
+        // Rotate by -90 degrees and normalize
+        angleDegrees = angleDegrees - 90;
+        
+        // Normalize to 0-360 degrees
+        if (angleDegrees < 0) {
+          angleDegrees += 360;
+        }
+        
+        newFacing = Math.round(angleDegrees);
+        console.log("🧭 Updating facing direction to:", newFacing, "degrees (from vector:", direction, ")");
+      }
+
       // Check for room transition cooldown to prevent spam
       const now = Date.now();
       if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
@@ -221,15 +243,24 @@ export function useTacticalPositioning({
 
       if (
         Math.abs(finalX - playerEntity.position.x) > 0.1 ||
-        Math.abs(finalY - playerEntity.position.y) > 0.1
+        Math.abs(finalY - playerEntity.position.y) > 0.1 ||
+        newFacing !== playerEntity.facing
       ) {
-        console.log("🏃 Moving player to:", { x: finalX, y: finalY });
-        // Update player position directly
+        console.log("🏃 Moving player to:", { x: finalX, y: finalY, facing: newFacing });
+        // Update player position and facing directly
         playerEntity.position.x = finalX;
         playerEntity.position.y = finalY;
-        console.log("✅ Player position updated to:", playerEntity.position);
+        playerEntity.facing = newFacing;
+        
+        // Notify combat system of state change to trigger UI updates
+        combatSystem.updateEntity(playerEntity.id, { 
+          position: { x: finalX, y: finalY },
+          facing: newFacing
+        });
+        
+        console.log("✅ Player updated to:", { position: playerEntity.position, facing: playerEntity.facing });
       } else {
-        console.log("🚫 Movement blocked - no significant position change");
+        console.log("🚫 Movement blocked - no significant position or facing change");
       }
     },
     [

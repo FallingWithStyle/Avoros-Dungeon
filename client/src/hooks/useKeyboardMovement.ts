@@ -18,6 +18,12 @@ export function useKeyboardMovement({
 }: UseKeyboardMovementProps) {
   const keysPressed = useRef<Set<string>>(new Set());
   const movementInterval = useRef<NodeJS.Timeout | null>(null);
+  const onMovementRef = useRef(onMovement);
+
+  // Keep the ref updated
+  useEffect(() => {
+    onMovementRef.current = onMovement;
+  }, [onMovement]);
 
   console.log('⌨️ useKeyboardMovement hook initialized - enabled:', isEnabled);
 
@@ -46,7 +52,7 @@ export function useKeyboardMovement({
       const direction = calculateMovementVector();
       if (direction.x !== 0 || direction.y !== 0) {
         console.log('⌨️ Sending continuous movement:', direction);
-        onMovement(direction);
+        onMovementRef.current(direction);
       }
     }, 50); // 20 FPS movement updates, consistent with gesture movement
   };
@@ -57,7 +63,7 @@ export function useKeyboardMovement({
       movementInterval.current = null;
     }
     console.log('⌨️ Stopped keyboard movement - sending stop signal');
-    onMovement({ x: 0, y: 0 });
+    onMovementRef.current({ x: 0, y: 0 });
   };
 
   // Keyboard event handlers
@@ -102,10 +108,11 @@ export function useKeyboardMovement({
     
     console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
-    // Stop movement immediately when any key is released
+    // Only stop movement when no keys are pressed
     if (keysPressed.current.size === 0) {
       stopMovement();
     }
+    // If keys are still pressed, the movement interval will continue automatically
   };
 
   // Handle window blur to stop movement
@@ -140,7 +147,7 @@ export function useKeyboardMovement({
         movementInterval.current = null;
       }
     };
-  }, [isEnabled, onMovement]);
+  }, [isEnabled]); // Removed onMovement from dependency array to prevent effect restarts
 
   // Stop if disabled
   useEffect(() => {
@@ -150,7 +157,7 @@ export function useKeyboardMovement({
         clearInterval(movementInterval.current);
         movementInterval.current = null;
       }
-      onMovement({ x: 0, y: 0 });
+      onMovementRef.current({ x: 0, y: 0 });
     }
-  }, [isEnabled, onMovement]);
+  }, [isEnabled]);
 }
