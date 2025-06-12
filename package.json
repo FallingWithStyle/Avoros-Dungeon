@@ -14,12 +14,12 @@
     "test:ci": "jest --ci --coverage --watchAll=false",
     "test:cache": "jest --testPathPattern=cache",
     "test:performance": "jest --testPathPattern=performance",
-    "db:push": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "seed:factions": "tsx client/src/db/seed/seedFactions.ts",
     "seed:content": "tsx scripts/seed-dynamic-content.ts",
     "seed:generation": "tsx scripts/seed-generation-content.ts",
     "generate-dungeon": "tsx scripts/generate-dungeon.ts",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit push"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
