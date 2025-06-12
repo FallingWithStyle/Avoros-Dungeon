@@ -1,0 +1,367 @@
+error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    4 describe('Combat System', () => {
+      ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:8:3 - error TS2304: Cannot find name 'beforeAll'.
+
+    8   beforeAll(() => {
+        ~~~~~~~~~
+    shared/__tests__/combat-system.test.ts:9:5 - error TS2304: Cannot find name 'jest'.
+
+    9     jest.spyOn(console, 'log').mockImplementation(() => {});
+          ~~~~
+    shared/__tests__/combat-system.test.ts:12:3 - error TS2304: Cannot find name 'afterAll'.
+
+    12   afterAll(() => {
+         ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:13:5 - error TS2304: Cannot find name 'jest'.
+
+    13     jest.restoreAllMocks();
+           ~~~~
+    shared/__tests__/combat-system.test.ts:16:3 - error TS2304: Cannot find name 'beforeEach'.
+
+    16   beforeEach(() => {
+         ~~~~~~~~~~
+    shared/__tests__/combat-system.test.ts:18:5 - error TS2304: Cannot find name 'jest'.
+
+    18     jest.useFakeTimers();
+           ~~~~
+    shared/__tests__/combat-system.test.ts:20:5 - error TS2304: Cannot find name 'jest'.
+
+    20     jest.spyOn(global, 'setTimeout');
+           ~~~~
+    shared/__tests__/combat-system.test.ts:21:5 - error TS2304: Cannot find name 'jest'.
+
+    21     jest.spyOn(global, 'setInterval');
+           ~~~~
+    shared/__tests__/combat-system.test.ts:22:5 - error TS2304: Cannot find name 'jest'.
+
+    22     jest.spyOn(global, 'clearInterval');
+           ~~~~
+    shared/__tests__/combat-system.test.ts:29:3 - error TS2304: Cannot find name 'afterEach'.
+
+    29   afterEach(() => {
+         ~~~~~~~~~
+    shared/__tests__/combat-system.test.ts:45:5 - error TS2304: Cannot find name 'jest'.
+
+    45     jest.clearAllTimers();
+           ~~~~
+    shared/__tests__/combat-system.test.ts:46:5 - error TS2304: Cannot find name 'jest'.
+
+    46     jest.restoreAllMocks();
+           ~~~~
+    shared/__tests__/combat-system.test.ts:47:5 - error TS2304: Cannot find name 'jest'.
+
+    47     jest.useRealTimers();
+           ~~~~
+    shared/__tests__/combat-system.test.ts:50:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    50   describe('Entity Management', () => {
+         ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:51:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    51     it('should add entities correctly', () => {
+           ~~
+    shared/__tests__/combat-system.test.ts:67:7 - error TS2304: Cannot find name 'expect'.
+
+    67       expect(state.entities).toHaveLength(1);
+             ~~~~~~
+    shared/__tests__/combat-system.test.ts:68:7 - error TS2304: Cannot find name 'expect'.
+
+    68       expect(state.entities[0].id).toBe('test-entity');
+             ~~~~~~
+    shared/__tests__/combat-system.test.ts:69:7 - error TS2304: Cannot find name 'expect'.
+
+    69       expect(state.entities[0].cooldowns).toBeDefined();
+             ~~~~~~
+    shared/__tests__/combat-system.test.ts:72:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    72     it('should remove entities correctly', () => {
+           ~~
+    shared/__tests__/combat-system.test.ts:89:7 - error TS2304: Cannot find name 'expect'.
+
+    89       expect(state.entities).toHaveLength(0);
+             ~~~~~~
+    shared/__tests__/combat-system.test.ts:92:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    92     it('should update entities correctly', () => {
+           ~~
+    shared/__tests__/combat-system.test.ts:111:7 - error TS2304: Cannot find name 'expect'.
+
+    111       expect(updatedEntity.hp).toBe(50);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:112:7 - error TS2304: Cannot find name 'expect'.
+
+    112       expect(updatedEntity.position.x).toBe(60);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:113:7 - error TS2304: Cannot find name 'expect'.
+
+    113       expect(updatedEntity.position.y).toBe(60);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:116:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    116     it('should select entities correctly', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:133:7 - error TS2304: Cannot find name 'expect'.
+
+    133       expect(state.selectedEntityId).toBe('test-entity');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:134:7 - error TS2304: Cannot find name 'expect'.
+
+    134       expect(state.entities[0].isSelected).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:138:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    138   describe('Action System', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:139:5 - error TS2304: Cannot find name 'beforeEach'.
+
+    139     beforeEach(() => {
+            ~~~~~~~~~~
+    shared/__tests__/combat-system.test.ts:168:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    168     it('should queue actions successfully', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:172:7 - error TS2304: Cannot find name 'expect'.
+
+    172       expect(success).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:173:7 - error TS2304: Cannot find name 'expect'.
+
+    173       expect(state.actionQueue).toHaveLength(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:174:7 - error TS2304: Cannot find name 'expect'.
+
+    174       expect(state.actionQueue[0].entityId).toBe('player');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:175:7 - error TS2304: Cannot find name 'expect'.
+
+    175       expect(state.actionQueue[0].action.id).toBe('basic_attack');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:176:7 - error TS2304: Cannot find name 'expect'.
+
+    176       expect(state.actionQueue[0].targetId).toBe('enemy');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:179:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    179     it('should prevent queuing actions when on cooldown', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:186:7 - error TS2304: Cannot find name 'expect'.
+
+    186       expect(success).toBe(false);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:189:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    189     it('should queue move actions to specific positions', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:194:7 - error TS2304: Cannot find name 'expect'.
+
+    194       expect(success).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:195:7 - error TS2304: Cannot find name 'expect'.
+
+    195       expect(state.actionQueue).toHaveLength(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:196:7 - error TS2304: Cannot find name 'expect'.
+
+    196       expect(state.actionQueue[0].action.type).toBe('move');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:197:7 - error TS2304: Cannot find name 'expect'.
+
+    197       expect(state.actionQueue[0].targetPosition).toEqual(targetPosition);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:200:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    200     it('should get available actions for entities', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:203:7 - error TS2304: Cannot find name 'expect'.
+
+    203       expect(actions.length).toBeGreaterThan(0);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:204:7 - error TS2304: Cannot find name 'expect'.
+
+    204       expect(actions.some(a => a.id === 'basic_attack')).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:205:7 - error TS2304: Cannot find name 'expect'.
+
+    205       expect(actions.some(a => a.id === 'move')).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:209:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    209   describe('Combat Processing', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:210:5 - error TS2304: Cannot find name 'beforeEach'.
+
+    210     beforeEach(() => {
+            ~~~~~~~~~~
+    shared/__tests__/combat-system.test.ts:239:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    239     it('should process combat ticks and execute ready actions', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:247:7 - error TS2304: Cannot find name 'expect'.
+
+    247       expect(initialState.actionQueue).toHaveLength(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:250:7 - error TS2304: Cannot find name 'jest'.
+
+    250       jest.advanceTimersByTime(1100);
+              ~~~~
+    shared/__tests__/combat-system.test.ts:257:7 - error TS2304: Cannot find name 'expect'.
+
+    257       expect(finalState.actionQueue).toHaveLength(0);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:261:7 - error TS2304: Cannot find name 'expect'.
+
+    261       expect(enemy?.hp).toBeLessThan(80);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:264:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    264     it('should start combat when hostile entities are present and detected', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:269:7 - error TS2304: Cannot find name 'expect'.
+
+    269       expect(initialState.isInCombat).toBe(false);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:275:7 - error TS2304: Cannot find name 'jest'.
+
+    275       jest.advanceTimersByTime(1100);
+              ~~~~
+    shared/__tests__/combat-system.test.ts:280:7 - error TS2304: Cannot find name 'expect'.
+
+    280       expect(finalState.isInCombat).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:284:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    284   describe('Distance and Positioning', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:285:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    285     it('should calculate distance correctly', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:291:7 - error TS2304: Cannot find name 'expect'.
+
+    291       expect(distance).toBe(5); // 3-4-5 triangle
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:294:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    294     it('should get correct entry positions', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:300:7 - error TS2304: Cannot find name 'expect'.
+
+    300       expect(southEntry.y).toBeGreaterThan(northEntry.y); // South entry should be lower on screen (higher y value)
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:301:7 - error TS2304: Cannot find name 'expect'.
+
+    301       expect(eastEntry.x).toBeGreaterThan(westEntry.x); // East entry should be more to the right
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:304:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    304     it('should move entities to exact positions', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:323:7 - error TS2304: Cannot find name 'expect'.
+
+    323       expect(movedEntity.position.x).toBe(70);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:324:7 - error TS2304: Cannot find name 'expect'.
+
+    324       expect(movedEntity.position.y).toBe(80);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:328:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    328   describe('Combat State', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:329:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    329     it('should manage combat state correctly', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:331:7 - error TS2304: Cannot find name 'expect'.
+
+    331       expect(initialState.isInCombat).toBe(false);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:335:7 - error TS2304: Cannot find name 'expect'.
+
+    335       expect(combatState.isInCombat).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:336:7 - error TS2304: Cannot find name 'expect'.
+
+    336       expect(combatState.combatStartTime).toBeDefined();
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:340:7 - error TS2304: Cannot find name 'expect'.
+
+    340       expect(endState.isInCombat).toBe(false);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:341:7 - error TS2304: Cannot find name 'expect'.
+
+    341       expect(endState.combatStartTime).toBeUndefined();
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:344:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    344     it('should filter entities by type correctly', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:388:7 - error TS2304: Cannot find name 'expect'.
+
+    388       expect(hostiles).toHaveLength(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:389:7 - error TS2304: Cannot find name 'expect'.
+
+    389       expect(hostiles[0].id).toBe('enemy');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:390:7 - error TS2304: Cannot find name 'expect'.
+
+    390       expect(friendlies).toHaveLength(2);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:391:7 - error TS2304: Cannot find name 'expect'.
+
+    391       expect(friendlies.some(e => e.id === 'player')).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:392:7 - error TS2304: Cannot find name 'expect'.
+
+    392       expect(friendlies.some(e => e.id === 'npc')).toBe(true);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:396:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    396   describe('calculateDamage', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:397:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    397     it('should calculate basic damage correctly', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:403:7 - error TS2304: Cannot find name 'expect'.
+
+    403       expect(damage).toBeGreaterThan(0);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:404:7 - error TS2304: Cannot find name 'expect'.
+
+    404       expect(typeof damage).toBe('number');
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:407:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    407     it('should return minimum damage of 1', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:413:7 - error TS2304: Cannot find name 'expect'.
+
+    413       expect(damage).toBeGreaterThanOrEqual(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:417:3 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    417   describe('calculateHitChance', () => {
+          ~~~~~~~~
+    shared/__tests__/combat-system.test.ts:418:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    418     it('should return a value between 0 and 1', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:424:7 - error TS2304: Cannot find name 'expect'.
+
+    424       expect(hitChance).toBeGreaterThanOrEqual(0);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:425:7 - error TS2304: Cannot find name 'expect'.
+
+    425       expect(hitChance).toBeLessThanOrEqual(1);
+              ~~~~~~
+    shared/__tests__/combat-system.test.ts:428:5 - error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+    428     it('should have minimum hit chance', () => {
+            ~~
+    shared/__tests__/combat-system.test.ts:434:7 - error TS2304: Cannot find name 'expect'.
+
+    434       expect(hitChance).toBeGreaterThan(0);

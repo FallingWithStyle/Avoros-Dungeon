@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.5.0] - 2025-06-12
+
+### Added
+- Complete equipment system overhaul with weapons, armor, and shields
+- Weapon system with damage attributes (Might/Agility/Intellect), range, and special abilities
+- Armor system with defense values, body part protection, and set bonuses
+- Shield system with active blocking mechanics and damage reduction
+- Equipment stats calculations and utilities
+- Scavenger and Security armor sets with completion bonuses
+- Range-based weapon types from melee to sniper rifles
+
+### Changed
+- Updated database schema to support new equipment mechanics
+- Redesigned equipment display in crawler status panel
+- Enhanced equipment seeding with realistic weapon and armor progression
+
+## [0.4.6] - 2025-06-11
+
+### Fixed
+- Fixed import/export issues with TacticalViewPanel and TacticalHotbar components
+- Resolved module loading errors in tactical view components
+- Corrected Redis status indicator import syntax
+
 ## [0.8.5] - 2025-01-26
 
 ### Changed

@@ -74,6 +74,11 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
               <p className="text-sm text-slate-400 font-medium truncate">
                 {crawler.class.name}
               </p>
+              {crawler.serial && (
+                <p className="text-xs text-slate-500 font-mono truncate">
+                  [{crawler.serial}]
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
