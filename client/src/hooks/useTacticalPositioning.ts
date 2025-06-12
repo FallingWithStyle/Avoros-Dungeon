@@ -227,6 +227,10 @@ export function useTacticalPositioning({
         // Update player position directly
         playerEntity.position.x = finalX;
         playerEntity.position.y = finalY;
+        
+        // Notify combat system of state change to trigger UI updates
+        combatSystem.updateEntity(playerEntity.id, { position: { x: finalX, y: finalY } });
+        
         console.log("✅ Player position updated to:", playerEntity.position);
       } else {
         console.log("🚫 Movement blocked - no significant position change");
