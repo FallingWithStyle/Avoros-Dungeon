@@ -18,12 +18,12 @@ if (!process.env.DATABASE_URL) {
 // Configure WebSocket for Node.js environment
 neonConfig.webSocketConstructor = ws;
 
-// Create connection pool with limited connections
+// Create connection pool with minimal connections
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 3, // Limit concurrent connections
-  idleTimeoutMillis: 10000, // Close idle connections after 10 seconds
-  connectionTimeoutMillis: 5000 // Timeout connection attempts after 5 seconds
+  max: 1, // Single connection only
+  idleTimeoutMillis: 5000, // Close idle connections after 5 seconds
+  connectionTimeoutMillis: 3000 // Timeout connection attempts after 3 seconds
 });
 
 export const db = drizzle({ client: pool, schema,

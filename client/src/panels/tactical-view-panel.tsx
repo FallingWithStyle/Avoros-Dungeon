@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
