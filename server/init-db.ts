@@ -9,20 +9,27 @@ import { eq } from "drizzle-orm";
 export async function initializeDatabase() {
   console.log("Initializing database with game data...");
 
-  // Initialize floors only!
-  await initializeFloors();
+  try {
+    // Initialize floors only!
+    await initializeFloors();
 
-  // Initialize crawler classes
-  await initializeCrawlerClasses();
+    // Initialize crawler classes
+    await initializeCrawlerClasses();
 
-  // Initialize equipment system
-  const { initializeEquipmentSystem } = await import("../scripts/seed-equipment");
-  await initializeEquipmentSystem();
+    // Initialize equipment system
+    const { initializeEquipmentSystem } = await import("../scripts/seed-equipment");
+    await initializeEquipmentSystem();
 
-  // Initialize seasons
-  await initializeSeasons();
+    // Initialize seasons
+    await initializeSeasons();
 
-  console.log("Database initialized successfully!");
+    console.log("Database initialized successfully!");
+  } catch (error) {
+    console.error("Database initialization failed:", error);
+    // Wait a moment before retrying or failing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    throw error;
+  }
 }
 
 async function initializeFloors() {
