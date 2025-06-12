@@ -316,7 +316,7 @@ function TacticalEntity({
         {/* Facing direction indicator */}
         {entity.type === "player" && entity.facing !== undefined && (
           <div
-            className="absolute w-8 h-8 pointer-events-none z-30"
+            className="absolute w-8 h-8 pointer-events-none z-10"
             style={{
               transform: `rotate(${entity.facing}deg)`,
               transformOrigin: "center",
@@ -324,8 +324,11 @@ function TacticalEntity({
           >
             <div className="w-full h-full flex items-start justify-center">
               <div
-                className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent border-b-yellow-400"
-                style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}
+                className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-blue-300"
+                style={{
+                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                  marginTop: "-2px", // Position arrow to extend from behind the circle
+                }}
               />
             </div>
           </div>
