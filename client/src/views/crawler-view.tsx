@@ -27,6 +27,14 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(false);
 
+  // Debug logging
+  console.log("🔍 CrawlerView Debug:", {
+    crawlerId,
+    isAuthenticated,
+    isLoading,
+    authLoading: isLoading
+  });
+
   // Fetch crawler data with more frequent updates
   const { data: crawler, isLoading: crawlerLoading } =
     useQuery<CrawlerWithDetails>({
@@ -34,6 +42,12 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       enabled: !!crawlerId,
       refetchInterval: 3000, // Refresh every 3 seconds
     });
+
+  console.log("🔍 Crawler Query Debug:", {
+    crawler: crawler?.name,
+    crawlerLoading,
+    enabled: !!crawlerId
+  });
 
   if (isLoading || crawlerLoading) {
     return (
@@ -47,6 +61,12 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   }
 
   if (!isAuthenticated || !crawler) {
+    console.log("🚨 CrawlerView - Not authenticated or no crawler:", {
+      isAuthenticated,
+      crawler: crawler?.name || "No crawler data",
+      crawlerId
+    });
+    
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <Card className="bg-game-surface border-game-border">
@@ -54,13 +74,18 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             <div className="text-center">
               <i className="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
               <h2 className="text-xl font-bold text-white mb-2">
-                Crawler Not Found
+                {!isAuthenticated ? "Authentication Required" : "Crawler Not Found"}
               </h2>
               <p className="text-slate-400 mb-4">
-                The requested crawler could not be found or you don't have
-                access to it.
+                {!isAuthenticated ? 
+                  "Please log in to view crawler details." :
+                  "The requested crawler could not be found or you don't have access to it."
+                }
               </p>
               <div className="text-amber-300/70 text-sm">
+                Debug: crawlerId={crawlerId}, isAuthenticated={String(isAuthenticated)}, crawler={crawler?.name || "none"}
+              </div>
+              <div className="text-amber-300/70 text-sm mt-2">
                 Use the navigation above to return to your corporation overview.
               </div>
             </div>
