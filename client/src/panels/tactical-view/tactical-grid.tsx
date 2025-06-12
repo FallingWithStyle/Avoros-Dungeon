@@ -324,10 +324,10 @@ function TacticalEntity({
           >
             <div className="w-full h-full flex items-start justify-center">
               <div
-                className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent border-b-blue-300"
+                className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-blue-300"
                 style={{ 
                   filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
-                  marginTop: "-6px" // Position arrow to extend from behind the circle
+                  marginTop: "-4px" // Position arrow to extend from behind the circle
                 }}
               />
             </div>
