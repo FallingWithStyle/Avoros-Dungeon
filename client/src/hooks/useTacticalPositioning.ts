@@ -24,7 +24,7 @@ export function useTacticalPositioning({
   combatState,
   onRoomMovement,
 }: UseTacticalPositioningProps) {
-  const speed = 10; // Movement speed per frame
+  const speed = 2.5; // Movement speed per frame
   const lastRoomTransitionTime = useRef<number>(0);
   const ROOM_TRANSITION_COOLDOWN = 100; // Ultra-fast 100ms cooldown
 
