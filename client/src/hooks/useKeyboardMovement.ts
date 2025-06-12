@@ -1,12 +1,11 @@
 
 /**
  * File: useKeyboardMovement.ts
- * Responsibility: Handle keyboard input for 360-degree tactical movement using @use-gesture/react
- * Notes: Uses unified gesture library for consistency with touch/gesture input handling
+ * Responsibility: Handle keyboard input for 360-degree tactical movement using native keyboard events
+ * Notes: Uses native keyboard events for better reliability, consistent with gesture movement patterns
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import { useGesture } from '@use-gesture/react';
 
 interface UseKeyboardMovementProps {
   onMovement: (direction: { x: number; y: number }) => void;
@@ -71,70 +70,71 @@ export function useKeyboardMovement({
     }
   }, []);
 
-  // Use @use-gesture/react for keyboard handling
-  const bind = useGesture(
-    {
-      onKeyDown: ({ event }) => {
-        if (!isEnabled) return;
-        const key = event.key.toLowerCase();
-        const valid = [
-          "w",
-          "a",
-          "s",
-          "d",
-          "arrowup",
-          "arrowdown",
-          "arrowleft",
-          "arrowright",
-        ];
-        if (!valid.includes(key)) return;
-        event.preventDefault();
-        
-        // Prevent key repeat
-        if (keysPressed.current.has(key)) return;
-        
-        const wasEmpty = keysPressed.current.size === 0;
-        keysPressed.current.add(key);
-        
-        console.log('🎮 Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
-        
-        // Start movement if this is the first key, or send immediate movement if already moving
-        if (wasEmpty) {
-          startMovement();
-        } else {
-          // Send immediate movement update for key combinations
-          const vector = calculateMovementVector();
-          if (vector.x !== 0 || vector.y !== 0) {
-            console.log('🎮 Combination movement:', vector);
-            onMovement(vector);
-          }
-        }
-      },
-      onKeyUp: ({ event }) => {
-        if (!isEnabled) return;
-        const key = event.key.toLowerCase();
-        const valid = [
-          "w",
-          "a",
-          "s",
-          "d",
-          "arrowup",
-          "arrowdown",
-          "arrowleft",
-          "arrowright",
-        ];
-        if (!valid.includes(key)) return;
-        keysPressed.current.delete(key);
-        if (keysPressed.current.size === 0) {
-          stopMovement();
-        }
+  // Handle keydown events
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (!isEnabled) return;
+    const key = event.key.toLowerCase();
+    const valid = [
+      "w",
+      "a",
+      "s",
+      "d",
+      "arrowup",
+      "arrowdown",
+      "arrowleft",
+      "arrowright",
+    ];
+    if (!valid.includes(key)) return;
+    event.preventDefault();
+    
+    // Prevent key repeat
+    if (keysPressed.current.has(key)) return;
+    
+    const wasEmpty = keysPressed.current.size === 0;
+    keysPressed.current.add(key);
+    
+    console.log('🎮 Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+    
+    // Start movement if this is the first key, or send immediate movement if already moving
+    if (wasEmpty) {
+      startMovement();
+    } else {
+      // Send immediate movement update for key combinations
+      const vector = calculateMovementVector();
+      if (vector.x !== 0 || vector.y !== 0) {
+        console.log('🎮 Combination movement:', vector);
+        onMovement(vector);
       }
-    },
-    {
-      eventOptions: { passive: false },
-      target: typeof window !== 'undefined' ? window : undefined
     }
-  );
+  }, [isEnabled, calculateMovementVector, onMovement, startMovement]);
+
+  // Handle keyup events
+  const handleKeyUp = useCallback((event: KeyboardEvent) => {
+    if (!isEnabled) return;
+    const key = event.key.toLowerCase();
+    const valid = [
+      "w",
+      "a",
+      "s",
+      "d",
+      "arrowup",
+      "arrowdown",
+      "arrowleft",
+      "arrowright",
+    ];
+    if (!valid.includes(key)) return;
+    keysPressed.current.delete(key);
+    if (keysPressed.current.size === 0) {
+      stopMovement();
+    }
+  }, [isEnabled, stopMovement]);
+
+  // Handle window blur
+  const handleBlur = useCallback(() => {
+    keysPressed.current.clear();
+    stopMovement();
+    onMovement({ x: 0, y: 0 });
+  }, [stopMovement, onMovement]);
 
   // Setup and cleanup
   useEffect(() => {
@@ -144,23 +144,18 @@ export function useKeyboardMovement({
       return;
     }
 
-    // Bind gesture handlers to window
-    const cleanup = bind();
-
-    // On window blur, stop movement
-    const handleBlur = () => {
-      keysPressed.current.clear();
-      stopMovement();
-      onMovement({ x: 0, y: 0 });
-    };
+    // Add event listeners
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
 
     return () => {
-      if (cleanup) cleanup();
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
       stopMovement();
     };
-  }, [isEnabled, bind, stopMovement, onMovement]);
+  }, [isEnabled, handleKeyDown, handleKeyUp, handleBlur, stopMovement]);
 
   // Stop if disabled
   useEffect(() => {
