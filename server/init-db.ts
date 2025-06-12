@@ -229,15 +229,16 @@ async function initializeEquipmentTypes() {
   }
 
   const types = [
-    { name: "Weapon", description: "Items used for combat and defense" },
-    { name: "Armor", description: "Protective gear and clothing" },
-    { name: "Tool", description: "Utility items and equipment" },
-    { name: "Consumable", description: "Single-use items and supplies" },
+    { name: "Weapon", category: "weapon", description: "Items used for combat and defense" },
+    { name: "Armor", category: "armor", description: "Protective gear and clothing" },
+    { name: "Tool", category: "tool", description: "Utility items and equipment" },
+    { name: "Consumable", category: "consumable", description: "Single-use items and supplies" },
     {
       name: "Accessory",
+      category: "accessory",
       description: "Jewelry, trinkets, and enhancement items",
     },
-    { name: "Shield", description: "Protective shields used for blocking attacks" },
+    { name: "Shield", category: "shield", description: "Protective shields used for blocking attacks" },
   ];
 
   for (const type of types) {
