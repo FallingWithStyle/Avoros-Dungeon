@@ -17,7 +17,8 @@ import {
   Sword, 
   Shield, 
   HardHat,
-  Shirt as ShirtIcon
+  Shirt as ShirtIcon,
+  Gem // Added Gem import here
 } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 
