@@ -47,10 +47,25 @@ app.use((req, res, next) => {
   try {
     console.log('🚀 Starting server initialization...');
 
-    // Initialize database with game data
+    // Initialize database with game data - with timeout and fallback
     console.log('📊 Initializing database...');
-    await initializeDatabase();
-    console.log('✅ Database initialized');
+    let dbInitialized = false;
+    
+    try {
+      // Add timeout to database initialization
+      const initPromise = initializeDatabase();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database initialization timeout')), 30000)
+      );
+      
+      await Promise.race([initPromise, timeoutPromise]);
+      dbInitialized = true;
+      console.log('✅ Database initialized');
+    } catch (error) {
+      console.warn(`⚠️ Database initialization failed:`, error.message);
+      console.log('🔄 Continuing with server startup - database may need manual initialization');
+      // Don't throw - allow server to start anyway
+    }
 
     console.log('🛣️ Registering routes...');
     const server = await registerRoutes(app);
