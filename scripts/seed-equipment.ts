@@ -1,4 +1,3 @@
-
 /**
  * File: seed-equipment.ts
  * Responsibility: Database seeding for equipment items and equipment types
@@ -7,6 +6,8 @@
 
 import { db } from "../server/db";
 import { eq } from "drizzle-orm";
+import fs from 'fs';
+import path from 'path';
 
 export async function seedEquipmentTypes() {
   const { equipmentTypes } = await import("../shared/schema");
@@ -281,7 +282,7 @@ export async function initializeEquipmentSystem() {
 }
 
 // If run directly
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
   initializeEquipmentSystem()
     .then(() => {
       console.log("Equipment system initialization complete!");
