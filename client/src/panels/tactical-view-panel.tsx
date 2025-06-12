@@ -221,5 +221,4 @@ function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   );
 }
 
-export { TacticalViewPanel };
 export default TacticalViewPanel;
