@@ -47,27 +47,24 @@ app.use((req, res, next) => {
   try {
     console.log('🚀 Starting server initialization...');
 
-    // Initialize database with game data - with retry logic
+    // Initialize database with game data - with timeout and fallback
     console.log('📊 Initializing database...');
     let dbInitialized = false;
-    let retryCount = 0;
-    const maxRetries = 3;
-
-    while (!dbInitialized && retryCount < maxRetries) {
-      try {
-        await initializeDatabase();
-        dbInitialized = true;
-        console.log('✅ Database initialized');
-      } catch (error) {
-        retryCount++;
-        console.warn(`⚠️ Database initialization attempt ${retryCount} failed:`, error.message);
-        if (retryCount < maxRetries) {
-          console.log(`🔄 Retrying in ${retryCount * 2} seconds...`);
-          await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
-        } else {
-          throw error;
-        }
-      }
+    
+    try {
+      // Add timeout to database initialization
+      const initPromise = initializeDatabase();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database initialization timeout')), 30000)
+      );
+      
+      await Promise.race([initPromise, timeoutPromise]);
+      dbInitialized = true;
+      console.log('✅ Database initialized');
+    } catch (error) {
+      console.warn(`⚠️ Database initialization failed:`, error.message);
+      console.log('🔄 Continuing with server startup - database may need manual initialization');
+      // Don't throw - allow server to start anyway
     }
 
     console.log('🛣️ Registering routes...');

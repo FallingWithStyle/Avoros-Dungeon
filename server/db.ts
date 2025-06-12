@@ -21,9 +21,9 @@ neonConfig.webSocketConstructor = ws;
 // Create connection pool with limited connections
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 5, // Limit concurrent connections
-  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 10000 // Timeout connection attempts after 10 seconds
+  max: 3, // Limit concurrent connections
+  idleTimeoutMillis: 10000, // Close idle connections after 10 seconds
+  connectionTimeoutMillis: 5000 // Timeout connection attempts after 5 seconds
 });
 
 export const db = drizzle({ client: pool, schema,

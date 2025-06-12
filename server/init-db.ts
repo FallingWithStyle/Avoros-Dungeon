@@ -10,24 +10,22 @@ export async function initializeDatabase() {
   console.log("Initializing database with game data...");
 
   try {
-    // Initialize floors only!
+    console.log('🏗️ Initializing floors...');
     await initializeFloors();
 
-    // Initialize crawler classes
+    console.log('🏗️ Initializing crawler classes...');
     await initializeCrawlerClasses();
 
-    // Initialize equipment system
+    console.log('🏗️ Initializing equipment system...');
     const { initializeEquipmentSystem } = await import("../scripts/seed-equipment");
     await initializeEquipmentSystem();
 
-    // Initialize seasons
+    console.log('🏗️ Initializing seasons...');
     await initializeSeasons();
 
     console.log("Database initialized successfully!");
   } catch (error) {
     console.error("Database initialization failed:", error);
-    // Wait a moment before retrying or failing
-    await new Promise(resolve => setTimeout(resolve, 2000));
     throw error;
   }
 }
