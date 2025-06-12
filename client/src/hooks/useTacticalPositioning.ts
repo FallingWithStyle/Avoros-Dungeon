@@ -43,6 +43,18 @@ export function useTacticalPositioning({
         return;
       }
 
+      // Determine facing direction based on movement
+      let newFacing = playerEntity.facing || "north"; // Keep current facing if no movement
+      if (direction.x !== 0 || direction.y !== 0) {
+        // Prioritize the stronger movement direction
+        if (Math.abs(direction.x) > Math.abs(direction.y)) {
+          newFacing = direction.x > 0 ? "east" : "west";
+        } else {
+          newFacing = direction.y > 0 ? "south" : "north";
+        }
+        console.log("🧭 Updating facing direction to:", newFacing);
+      }
+
       // Check for room transition cooldown to prevent spam
       const now = Date.now();
       if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
@@ -221,19 +233,24 @@ export function useTacticalPositioning({
 
       if (
         Math.abs(finalX - playerEntity.position.x) > 0.1 ||
-        Math.abs(finalY - playerEntity.position.y) > 0.1
+        Math.abs(finalY - playerEntity.position.y) > 0.1 ||
+        newFacing !== playerEntity.facing
       ) {
-        console.log("🏃 Moving player to:", { x: finalX, y: finalY });
-        // Update player position directly
+        console.log("🏃 Moving player to:", { x: finalX, y: finalY, facing: newFacing });
+        // Update player position and facing directly
         playerEntity.position.x = finalX;
         playerEntity.position.y = finalY;
+        playerEntity.facing = newFacing;
         
         // Notify combat system of state change to trigger UI updates
-        combatSystem.updateEntity(playerEntity.id, { position: { x: finalX, y: finalY } });
+        combatSystem.updateEntity(playerEntity.id, { 
+          position: { x: finalX, y: finalY },
+          facing: newFacing
+        });
         
-        console.log("✅ Player position updated to:", playerEntity.position);
+        console.log("✅ Player updated to:", { position: playerEntity.position, facing: playerEntity.facing });
       } else {
-        console.log("🚫 Movement blocked - no significant position change");
+        console.log("🚫 Movement blocked - no significant position or facing change");
       }
     },
     [
