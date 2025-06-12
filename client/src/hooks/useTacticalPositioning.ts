@@ -43,16 +43,23 @@ export function useTacticalPositioning({
         return;
       }
 
-      // Determine facing direction based on movement
-      let newFacing = playerEntity.facing || "north"; // Keep current facing if no movement
+      // Determine facing direction based on movement (360-degree rotation)
+      let newFacing = playerEntity.facing || 0; // Keep current facing if no movement, default to 0 degrees (north)
       if (direction.x !== 0 || direction.y !== 0) {
-        // Prioritize the stronger movement direction
-        if (Math.abs(direction.x) > Math.abs(direction.y)) {
-          newFacing = direction.x > 0 ? "east" : "west";
-        } else {
-          newFacing = direction.y > 0 ? "south" : "north";
+        // Calculate angle in degrees from movement vector
+        // atan2 returns radians, convert to degrees
+        // Note: atan2(y, x) gives angle from positive x-axis
+        // We want 0 degrees to be north (negative y), so we adjust
+        const angleRadians = Math.atan2(direction.x, -direction.y);
+        let angleDegrees = (angleRadians * 180) / Math.PI;
+        
+        // Normalize to 0-360 degrees
+        if (angleDegrees < 0) {
+          angleDegrees += 360;
         }
-        console.log("🧭 Updating facing direction to:", newFacing);
+        
+        newFacing = Math.round(angleDegrees);
+        console.log("🧭 Updating facing direction to:", newFacing, "degrees (from vector:", direction, ")");
       }
 
       // Check for room transition cooldown to prevent spam
