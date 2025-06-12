@@ -1,8 +1,27 @@
 # Changelog
 
-## [0.5.0] - 2025-06-12
+## [Unreleased]
 
 ### Added
+
+## [0.8.8] - 2025-01-26
+
+### Changed
+- Updated keyboard movement to use @use-gesture/react library for consistency with touch input
+- Removed redundant useSwipeMovement hook in favor of unified gesture handling
+
+### Removed
+- Deprecated useSwipeMovement.ts hook
+
+## [0.8.7] - 2025-01-26
+
+### Added
+- Implemented react-use-gesture library for improved mobile touch movement
+- New gesture-based movement hook with better touch recognition and responsiveness
+
+### Fixed
+- Mobile touch movement now works properly in tactical view
+- Improved gesture recognition with proper dead zones and intensity scaling
 - Complete equipment system overhaul with weapons, armor, and shields
 - Weapon system with damage attributes (Might/Agility/Intellect), range, and special abilities
 - Armor system with defense values, body part protection, and set bonuses
