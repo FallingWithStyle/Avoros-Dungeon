@@ -161,11 +161,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     isEnabled: !combatState.isInCombat && !isMobile
   });
 
-  // Use existing swipe movement hook for mobile
+  // Use gesture movement hook for mobile
   const { bind } = useGestureMovement({
     onMovement: handleTacticalMovement,
-    availableDirections: effectiveTacticalData?.availableDirections || [],
-    combatState,
     isEnabled: isMobile && !combatState.isInCombat
   });
 

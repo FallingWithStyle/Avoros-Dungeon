@@ -138,7 +138,8 @@
 
 ## Bug Fixes Needed
 
-- [x] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view (Fixed with react-use-gesture)
+- [x] **Unified Gesture Library** - Consolidated keyboard and touch movement to use @use-gesture/react
+- [ ] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view
 
 ## Next Priority Features
 
@@ -160,4 +161,3 @@
 ---
 
 *Last updated: June 10 2025*
-```

@@ -6,6 +6,15 @@
 
 ## [0.8.8] - 2025-01-26
 
+### Changed
+- Updated keyboard movement to use @use-gesture/react library for consistency with touch input
+- Removed redundant useSwipeMovement hook in favor of unified gesture handling
+
+### Removed
+- Deprecated useSwipeMovement.ts hook
+
+## [0.8.7] - 2025-01-26
+
 ### Added
 - Implemented react-use-gesture library for improved mobile touch movement
 - New gesture-based movement hook with better touch recognition and responsiveness
