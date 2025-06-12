@@ -237,6 +237,7 @@ async function initializeEquipmentTypes() {
       name: "Accessory",
       description: "Jewelry, trinkets, and enhancement items",
     },
+    { name: "Shield", description: "Protective shields used for blocking attacks" },
   ];
 
   for (const type of types) {
@@ -260,6 +261,7 @@ async function initializeEquipment() {
   const toolType = types.find((t) => t.name === "Tool");
   const consumableType = types.find((t) => t.name === "Consumable");
   const accessoryType = types.find((t) => t.name === "Accessory");
+  const shieldType = types.find((t) => t.name === "Shield");
 
   const equipmentItems = [
     // Weapons
@@ -288,30 +290,104 @@ async function initializeEquipment() {
       marketValue: 12,
     },
 
-    // Armor
+    // Armor - Scavenger Set
     {
-      name: "Worn Jacket",
-      description: "A sturdy jacket with multiple pockets.",
+      name: "Scavenger Hood",
+      description: "Makeshift head protection from scrapped materials.",
       typeId: armorType?.id,
+      defenseValue: 2,
+      armorSlot: "head",
+      armorSet: "Scavenger",
       rarity: "common",
-      statModifiers: JSON.stringify({ defense: 1 }),
-      marketValue: 10,
+      price: 15,
     },
     {
-      name: "Work Boots",
-      description: "Heavy boots that protect your feet.",
+      name: "Scavenger Vest",
+      description: "Patched leather vest with metal plates.",
       typeId: armorType?.id,
+      defenseValue: 4,
+      armorSlot: "torso",
+      armorSet: "Scavenger",
       rarity: "common",
-      statModifiers: JSON.stringify({ defense: 1 }),
-      marketValue: 15,
+      price: 25,
     },
     {
-      name: "Hard Hat",
-      description: "Industrial safety equipment.",
+      name: "Scavenger Pants",
+      description: "Reinforced work pants with knee guards.",
       typeId: armorType?.id,
+      defenseValue: 3,
+      armorSlot: "legs",
+      armorSet: "Scavenger",
       rarity: "common",
-      statModifiers: JSON.stringify({ defense: 1 }),
-      marketValue: 8,
+      price: 20,
+    },
+    {
+      name: "Steel-Toed Boots",
+      description: "Heavy work boots with steel reinforcement.",
+      typeId: armorType?.id,
+      defenseValue: 2,
+      armorSlot: "feet",
+      armorSet: "Scavenger",
+      rarity: "common",
+      price: 18,
+    },
+
+    // Armor - Security Set
+    {
+      name: "Security Helmet",
+      description: "Tactical helmet with face protection.",
+      typeId: armorType?.id,
+      defenseValue: 4,
+      armorSlot: "head",
+      armorSet: "Security",
+      rarity: "uncommon",
+      price: 45,
+      minFloor: 2,
+    },
+    {
+      name: "Kevlar Vest",
+      description: "Ballistic protection vest used by security forces.",
+      typeId: armorType?.id,
+      defenseValue: 6,
+      armorSlot: "torso",
+      armorSet: "Security",
+      rarity: "uncommon",
+      price: 80,
+      minFloor: 2,
+    },
+
+    // Shields
+    {
+      name: "Makeshift Shield",
+      description: "Scrap metal welded into a crude but effective shield.",
+      typeId: shieldType?.id,
+      defenseValue: 3,
+      blockChance: 25,
+      rarity: "common",
+      price: 30,
+    },
+    {
+      name: "Riot Shield",
+      description: "Transparent polycarbonate shield used by security forces.",
+      typeId: shieldType?.id,
+      defenseValue: 5,
+      blockChance: 35,
+      specialAbility: "Bash: Can be used to stun enemies",
+      rarity: "uncommon",
+      price: 75,
+      minFloor: 2,
+    },
+    {
+      name: "Energy Shield",
+      description: "High-tech personal defense system with energy barriers.",
+      typeId: shieldType?.id,
+      defenseValue: 8,
+      blockChance: 45,
+      specialAbility: "Energy Absorption: Blocked energy attacks restore power",
+      rarity: "rare",
+      price: 250,
+      minFloor: 4,
+      powerBonus: 5,
     },
 
     // Tools

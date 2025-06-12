@@ -221,7 +221,8 @@ export const crawlers = pgTable("crawlers", {
 export const equipmentTypes = pgTable("equipment_types", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 50 }).notNull().unique(),
-  slot: varchar("slot", { length: 20 }).notNull(), // weapon, armor, accessory
+  category: varchar("category", { length: 20 }).notNull(), // weapon, armor, shield, tool, consumable, accessory
+  description: text("description"),
 });
 
 // Equipment items
@@ -232,6 +233,22 @@ export const equipment = pgTable("equipment", {
     .references(() => equipmentTypes.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
+  
+  // Weapon properties
+  weaponType: varchar("weapon_type", { length: 30 }), // melee, ranged, thrown, etc.
+  damageAttribute: varchar("damage_attribute", { length: 20 }), // might, agility, intellect, etc.
+  baseRange: integer("base_range").default(1), // Range in tactical grid units
+  specialAbility: text("special_ability"), // Description of special ability
+  
+  // Armor properties
+  defenseValue: integer("defense_value").default(0),
+  armorSlot: varchar("armor_slot", { length: 20 }), // head, torso, legs, feet, hands
+  armorSet: varchar("armor_set", { length: 50 }), // Set name for set bonuses
+  
+  // Shield properties
+  blockChance: integer("block_chance").default(0), // Percentage chance to block
+  
+  // Stat bonuses (rare)
   mightBonus: integer("might_bonus").default(0),
   agilityBonus: integer("agility_bonus").default(0),
   enduranceBonus: integer("endurance_bonus").default(0),
@@ -241,6 +258,7 @@ export const equipment = pgTable("equipment", {
   powerBonus: integer("power_bonus").default(0),
   maxPowerBonus: integer("max_power_bonus").default(0),
   healthBonus: integer("health_bonus").default(0),
+  
   rarity: varchar("rarity", { length: 20 }).default("common"), // common, uncommon, rare, epic, legendary
   price: integer("price").notNull(),
   minFloor: integer("min_floor").default(1),

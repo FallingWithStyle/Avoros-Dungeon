@@ -9,7 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getAvatarUrl } from "@/lib/avatarUtils";
 import { expRequired } from "@/lib/progressionUtils";
-import { Heart, Zap, Shield, Sword, Clock, Gauge, Package, Shirt, Gem } from "lucide-react";
+import { 
+  Heart, 
+  Zap, 
+  User, 
+  Package, 
+  Sword, 
+  Shield, 
+  HardHat,
+  Shirt as ShirtIcon
+} from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CrawlerStatusPanelProps {
