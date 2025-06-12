@@ -6,4 +6,10 @@ vite.config.ts.*
 *.tar.gz
 .env
 .env.*
-coverage
+# Test coverage
+coverage/
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*

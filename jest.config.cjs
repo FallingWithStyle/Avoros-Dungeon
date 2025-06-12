@@ -1,47 +1,33 @@
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/client/src/$1",
-    "^@shared/(.*)$": "<rootDir>/shared/$1"
-  },
-  transformIgnorePatterns: [
-    "node_modules/(?!(some-esm-package)/)"
-  ],
-  testTimeout: 10000, // 10 second timeout for individual tests
-  maxWorkers: 1, // Run tests serially to avoid timer conflicts
-  verbose: false // Reduce test output
-};
-module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  moduleNameMapper: {
-    '^@shared/(.*)$': '<rootDir>/shared/$1',
-    '^@/(.*)$': '<rootDir>/client/src/$1',
-  },
+  preset: 'ts-jest',
   testEnvironment: 'node',
+  roots: ['<rootDir>/shared', '<rootDir>/server'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testMatch: [
-    '<rootDir>/server/**/*.test.ts',
-    '<rootDir>/shared/**/*.test.ts',
-    '<rootDir>/client/src/**/*.test.ts'
-  ],
-  transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        module: 'ESNext'
-      }
-    }]
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/$1',
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
+  collectCoverage: true,
   collectCoverageFrom: [
-    'server/**/*.ts',
     'shared/**/*.ts',
-    'client/src/**/*.{ts,tsx}',
+    'server/**/*.ts',
+    '!**/__tests__/**',
+    '!**/node_modules/**',
     '!**/*.d.ts',
-    '!**/*.test.ts',
-    '!**/node_modules/**'
-  ]
+    '!server/index.ts',
+    '!server/vite.ts'
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageThreshold: {
+    global: {
+      branches: 50,
+      functions: 50,
+      lines: 50,
+      statements: 50
+    }
+  }
 };
