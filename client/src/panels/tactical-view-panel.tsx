@@ -162,7 +162,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   });
 
   // Use gesture movement hook for mobile
-  const { bind } = useGestureMovement({
+  const { containerRef, bind } = useGestureMovement({
     onMovement: handleTacticalMovement,
     isEnabled: isMobile && !combatState.isInCombat
   });
@@ -369,8 +369,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             WebkitUserSelect: 'none',
             userSelect: 'none'
           }}
-          onTouchStart={(e) => console.log('📱 Container touch start detected')}
-          onTouchMove={(e) => console.log('📱 Container touch move detected')}
+          {...bind()}
         >
           <TacticalGrid
             roomBackground={gridData.background}
