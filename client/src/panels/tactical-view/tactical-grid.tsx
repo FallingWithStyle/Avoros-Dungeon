@@ -8,6 +8,7 @@ import React from "react";
 import { CombatEntity } from "@shared/combat-system";
 import { Skull, Users, Gem, Sword, Shield } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatarUtils";
+import { getFacingDegreesFromMovement } from "@/lib/vector";
 
 interface TacticalGridProps {
   roomBackground: string;
@@ -313,28 +314,21 @@ function TacticalEntity({
         )}
 
         {/* Facing direction indicator */}
-        {entity.facing && (
+        {entity.type === "player" && entity.facing !== undefined && (
           <div
-            className={`absolute w-2 h-2 bg-yellow-400 rounded-sm transform ${
-              entity.facing === "north"
-                ? "-translate-y-4"
-                : entity.facing === "south"
-                  ? "translate-y-4"
-                  : entity.facing === "east"
-                    ? "translate-x-4"
-                    : "-translate-x-4"
-            }`}
+            className="absolute w-8 h-8 pointer-events-none z-30"
             style={{
-              clipPath:
-                entity.facing === "north"
-                  ? "polygon(50% 0%, 0% 100%, 100% 100%)"
-                  : entity.facing === "south"
-                    ? "polygon(50% 100%, 0% 0%, 100% 0%)"
-                    : entity.facing === "east"
-                      ? "polygon(100% 50%, 0% 0%, 0% 100%)"
-                      : "polygon(0% 50%, 100% 0%, 100% 100%)",
+              transform: `rotate(${entity.facing}deg)`,
+              transformOrigin: "center",
             }}
-          />
+          >
+            <div className="w-full h-full flex items-start justify-center">
+              <div
+                className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent border-b-yellow-400"
+                style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}
+              />
+            </div>
+          </div>
         )}
       </div>
 
