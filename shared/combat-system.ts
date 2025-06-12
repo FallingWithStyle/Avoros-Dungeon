@@ -574,4 +574,3 @@ export class CombatSystem {
 
 // Create and export singleton instance
 export const combatSystem = new CombatSystem();
-```
