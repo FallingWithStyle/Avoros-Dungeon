@@ -138,7 +138,7 @@
 
 ## Bug Fixes Needed
 
-- [ ] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view
+- [x] **Mobile Touch Movement** - Virtual thumbstick/swipe movement not working on mobile devices in tactical view (Fixed with react-use-gesture)
 
 ## Next Priority Features
 

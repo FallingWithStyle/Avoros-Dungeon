@@ -9,10 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
-import { useSwipeMovement } from "@/hooks/useSwipeMovement";
+import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
@@ -162,7 +162,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   });
 
   // Use existing swipe movement hook for mobile
-  const { containerRef } = useSwipeMovement({
+  const { bind } = useGestureMovement({
     onMovement: handleTacticalMovement,
     availableDirections: effectiveTacticalData?.availableDirections || [],
     combatState,
