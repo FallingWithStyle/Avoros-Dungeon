@@ -19,11 +19,6 @@ interface UseTacticalPositioningProps {
   onRoomMovement: (direction: string) => void;
 }
 
-interface MovementVector {
-  x: number;
-  y: number;
-}
-
 export function useTacticalPositioning({
   effectiveTacticalData,
   combatState,
@@ -229,7 +224,9 @@ export function useTacticalPositioning({
         Math.abs(finalY - playerEntity.position.y) > 0.1
       ) {
         console.log("🏃 Moving player to:", { x: finalX, y: finalY });
-        combatSystem.queueMoveAction(playerEntity.id, { x: finalX, y: finalY });
+        // Update player position directly without queueing
+        const updatedEntity = { ...playerEntity, position: { x: finalX, y: finalY } };
+        combatSystem.updateEntity(updatedEntity);
       } else {
         console.log("🚫 Movement blocked - no significant position change");
       }

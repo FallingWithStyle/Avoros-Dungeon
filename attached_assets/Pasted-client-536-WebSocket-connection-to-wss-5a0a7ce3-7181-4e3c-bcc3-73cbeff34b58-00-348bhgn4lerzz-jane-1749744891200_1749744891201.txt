@@ -1,0 +1,435 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=dlSd15nD-BUr' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=dlSd15nD-BUr' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=9bbd2515:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.tsx:25 🔍 Router Debug: {isAuthenticated: false, isLoading: true}
+App.tsx:25 🔍 Router Debug: {isAuthenticated: true, isLoading: false}
+crawler-view.tsx:31 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:46 🔍 Crawler Query Debug: {crawler: undefined, crawlerLoading: true, enabled: true}
+crawler-view.tsx:31 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:46 🔍 Crawler Query Debug: {crawler: 'Florence Peterson', crawlerLoading: false, enabled: true}
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:307 No effective tactical data available
+tactical-view-panel.tsx:150 🔍 Mobile detection: {hasTouch: false, isSmallScreen: false, isMobileDevice: false, innerWidth: 2026}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:307 No effective tactical data available
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:307 No effective tactical data available
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:184 Room changed from null to 53217, reinitializing player
+tactical-view-panel.tsx:201 Entry position for direction east: {x: 10, y: 50}
+combat-system.ts:560 Created new player entity at position (10, 50)
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:22 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:82 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: (2) ['s', 'd']
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:103 ⌨️ Key released: s Keys now: ['d']
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:103 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+tactical-view-panel.tsx:216 Grid click disabled - use WASD keys or swipe to move
+useKeyboardMovement.ts:82 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:103 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:103 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: 1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 60}
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: (2) ['s', 'd']
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0.7071067811865475, y: 0.7071067811865475}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 17.071067811865476, y: 57.071067811865476}
+useKeyboardMovement.ts:103 ⌨️ Key released: s Keys now: ['d']
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:103 ⌨️ Key released: w Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 10, y: 40}
+useKeyboardMovement.ts:103 ⌨️ Key released: w Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
+useKeyboardMovement.ts:82 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:44 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:48 ⌨️ Sending continuous movement: {x: 1, y: 0}
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:226 🏃 Moving player to: {x: 20, y: 50}
+useKeyboardMovement.ts:103 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:59 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:63 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(4), gateZone: {…}}
+useTacticalPositioning.ts:231 🚫 Movement blocked - no significant position change
