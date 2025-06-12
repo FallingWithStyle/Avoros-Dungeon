@@ -52,10 +52,10 @@ app.use((req, res, next) => {
     let dbInitialized = false;
     
     try {
-      // Add timeout to database initialization
+      // Add shorter timeout to database initialization
       const initPromise = initializeDatabase();
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database initialization timeout')), 30000)
+        setTimeout(() => reject(new Error('Database initialization timeout')), 15000)
       );
       
       await Promise.race([initPromise, timeoutPromise]);

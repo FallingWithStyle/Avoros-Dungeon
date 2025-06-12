@@ -9,16 +9,22 @@ import { eq } from "drizzle-orm";
 export async function initializeDatabase() {
   console.log("Initializing database with game data...");
 
+  // Wait a moment for any existing connections to settle
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
   try {
     console.log('🏗️ Initializing floors...');
     await initializeFloors();
+    await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause
 
     console.log('🏗️ Initializing crawler classes...');
     await initializeCrawlerClasses();
+    await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause
 
     console.log('🏗️ Initializing equipment system...');
     const { initializeEquipmentSystem } = await import("../scripts/seed-equipment");
     await initializeEquipmentSystem();
+    await new Promise(resolve => setTimeout(resolve, 500)); // Brief pause
 
     console.log('🏗️ Initializing seasons...');
     await initializeSeasons();
