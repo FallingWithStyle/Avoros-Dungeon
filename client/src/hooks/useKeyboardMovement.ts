@@ -102,10 +102,11 @@ export function useKeyboardMovement({
     
     console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
-    // Stop movement immediately when any key is released
+    // Only stop movement when no keys are pressed
     if (keysPressed.current.size === 0) {
       stopMovement();
     }
+    // If keys are still pressed, the movement interval will continue automatically
   };
 
   // Handle window blur to stop movement
