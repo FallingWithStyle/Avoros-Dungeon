@@ -47,11 +47,14 @@ export function useTacticalPositioning({
       let newFacing = playerEntity.facing || 0; // Keep current facing if no movement, default to 0 degrees (north)
       if (direction.x !== 0 || direction.y !== 0) {
         // Calculate angle in degrees from movement vector
-        // atan2 returns radians, convert to degrees
-        // Note: atan2(y, x) gives angle from positive x-axis
-        // We want 0 degrees to be north (negative y), so we adjust
-        const angleRadians = Math.atan2(direction.x, -direction.y);
+        // atan2(y, x) returns angle from positive x-axis in radians
+        // For our coordinate system: 0° = North (up), 90° = East (right), 180° = South (down), 270° = West (left)
+        const angleRadians = Math.atan2(direction.y, direction.x);
         let angleDegrees = (angleRadians * 180) / Math.PI;
+        
+        // Convert from mathematical angle (0° = East) to game angle (0° = North)
+        // Rotate by -90 degrees and normalize
+        angleDegrees = angleDegrees - 90;
         
         // Normalize to 0-360 degrees
         if (angleDegrees < 0) {
