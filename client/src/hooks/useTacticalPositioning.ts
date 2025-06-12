@@ -224,9 +224,10 @@ export function useTacticalPositioning({
         Math.abs(finalY - playerEntity.position.y) > 0.1
       ) {
         console.log("🏃 Moving player to:", { x: finalX, y: finalY });
-        // Update player position directly without queueing
-        const updatedEntity = { ...playerEntity, position: { x: finalX, y: finalY } };
-        combatSystem.updateEntity(updatedEntity);
+        // Update player position directly
+        playerEntity.position.x = finalX;
+        playerEntity.position.y = finalY;
+        console.log("✅ Player position updated to:", playerEntity.position);
       } else {
         console.log("🚫 Movement blocked - no significant position change");
       }
