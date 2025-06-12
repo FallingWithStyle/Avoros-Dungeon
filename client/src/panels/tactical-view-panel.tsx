@@ -155,10 +155,37 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Use existing keyboard movement hook
+  // Handle rotation
+  const handleRotation = useCallback((direction: 'clockwise' | 'counter-clockwise') => {
+    const playerEntity = combatState.entities.find((e: any) => e.id === "player");
+    if (!playerEntity) return;
+
+    const rotationAmount = direction === 'clockwise' ? 15 : -15; // 15 degrees per rotation
+    let newFacing = (playerEntity.facing || 0) + rotationAmount;
+
+    // Normalize angle to be between 0 and 360
+    if (newFacing < 0) newFacing += 360;
+    if (newFacing >= 360) newFacing -= 360;
+
+    console.log('🔄 Rotating player to:', newFacing, 'degrees');
+
+    // Update player facing
+    playerEntity.facing = newFacing;
+    combatSystem.updateEntity(playerEntity.id, { facing: newFacing });
+  }, [combatState]);
+
+  // Handle stairs/down action (placeholder - can be expanded based on game needs)
+  const handleStairs = useCallback(() => {
+    console.log('🏃 Stairs/down action - implement stairs logic here');
+    // TODO: Implement stairs functionality when stairwells are added to the game
+  }, []);
+
+  // Use keyboard movement hook
   useKeyboardMovement({
     onMovement: handleTacticalMovement,
-    isEnabled: !combatState.isInCombat && !isMobile
+    onRotation: handleRotation,
+    onStairs: handleStairs,
+    isEnabled: !isLoading && !combatState.isInCombat,
   });
 
   // Use gesture movement hook for mobile

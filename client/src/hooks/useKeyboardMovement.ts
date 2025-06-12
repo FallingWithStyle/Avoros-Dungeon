@@ -9,21 +9,29 @@ import { useEffect, useRef } from "react";
 
 interface UseKeyboardMovementProps {
   onMovement: (direction: { x: number; y: number }) => void;
+  onRotation?: (direction: 'clockwise' | 'counter-clockwise') => void;
+  onStairs?: () => void;
   isEnabled: boolean;
 }
 
 export function useKeyboardMovement({
   onMovement,
+  onRotation,
+  onStairs,
   isEnabled,
 }: UseKeyboardMovementProps) {
   const keysPressed = useRef<Set<string>>(new Set());
   const movementInterval = useRef<NodeJS.Timeout | null>(null);
   const onMovementRef = useRef(onMovement);
+  const onRotationRef = useRef(onRotation);
+  const onStairsRef = useRef(onStairs);
 
-  // Keep the ref updated
+  // Keep the refs updated
   useEffect(() => {
     onMovementRef.current = onMovement;
-  }, [onMovement]);
+    onRotationRef.current = onRotation;
+    onStairsRef.current = onStairs;
+  }, [onMovement, onRotation, onStairs]);
 
   console.log('⌨️ useKeyboardMovement hook initialized - enabled:', isEnabled);
 
@@ -74,12 +82,35 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
+      "q", "e", "z"
     ];
     
     if (!validKeys.includes(key)) return;
     event.preventDefault();
 
-    // Prevent key repeat
+    // Handle special keys immediately (non-movement keys)
+    if (key === 'q' && onRotationRef.current) {
+      event.preventDefault();
+      console.log('⌨️ Counter-clockwise rotation');
+      onRotationRef.current('counter-clockwise');
+      return;
+    }
+    
+    if (key === 'e' && onRotationRef.current) {
+      event.preventDefault();
+      console.log('⌨️ Clockwise rotation');
+      onRotationRef.current('clockwise');
+      return;
+    }
+    
+    if (key === 'z' && onStairsRef.current) {
+      event.preventDefault();
+      console.log('⌨️ Stairs/down action');
+      onStairsRef.current();
+      return;
+    }
+
+    // Prevent key repeat for movement keys
     if (keysPressed.current.has(key)) return;
 
     const wasEmpty = keysPressed.current.size === 0;
@@ -100,6 +131,7 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
+      "q", "e", "z"
     ];
     
     if (!validKeys.includes(key)) return;
