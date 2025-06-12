@@ -18,7 +18,6 @@ export function useKeyboardMovement({
 }: UseKeyboardMovementProps) {
   const keysPressed = useRef<Set<string>>(new Set());
   const movementInterval = useRef<NodeJS.Timeout | null>(null);
-  const currentDirection = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   console.log('⌨️ useKeyboardMovement hook initialized - enabled:', isEnabled);
 
@@ -42,11 +41,12 @@ export function useKeyboardMovement({
   const startMovement = () => {
     if (movementInterval.current) return;
     
-    console.log('⌨️ Starting keyboard movement interval');
+    console.log('⌨️ Starting continuous keyboard movement');
     movementInterval.current = setInterval(() => {
-      if (currentDirection.current.x !== 0 || currentDirection.current.y !== 0) {
-        console.log('⌨️ Sending movement:', currentDirection.current);
-        onMovement(currentDirection.current);
+      const direction = calculateMovementVector();
+      if (direction.x !== 0 || direction.y !== 0) {
+        console.log('⌨️ Sending continuous movement:', direction);
+        onMovement(direction);
       }
     }, 50); // 20 FPS movement updates, consistent with gesture movement
   };
@@ -56,8 +56,8 @@ export function useKeyboardMovement({
       clearInterval(movementInterval.current);
       movementInterval.current = null;
     }
-    currentDirection.current = { x: 0, y: 0 };
-    console.log('⌨️ Stopped keyboard movement');
+    console.log('⌨️ Stopped keyboard movement - sending stop signal');
+    onMovement({ x: 0, y: 0 });
   };
 
   // Keyboard event handlers
@@ -81,11 +81,8 @@ export function useKeyboardMovement({
     
     console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
 
-    // Update current direction
-    currentDirection.current = calculateMovementVector();
-
-    // Start movement if this is the first key
-    if (wasEmpty && (currentDirection.current.x !== 0 || currentDirection.current.y !== 0)) {
+    // Start continuous movement if this is the first key
+    if (wasEmpty) {
       startMovement();
     }
   };
@@ -102,10 +99,10 @@ export function useKeyboardMovement({
     if (!validKeys.includes(key)) return;
     
     keysPressed.current.delete(key);
-    currentDirection.current = calculateMovementVector();
     
     console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
+    // Stop movement immediately when any key is released
     if (keysPressed.current.size === 0) {
       stopMovement();
     }
@@ -115,15 +112,17 @@ export function useKeyboardMovement({
   const handleBlur = () => {
     keysPressed.current.clear();
     stopMovement();
-    onMovement({ x: 0, y: 0 });
     console.log('⌨️ Window blur - stopping movement');
   };
 
   // Setup and cleanup
   useEffect(() => {
     if (!isEnabled) {
-      stopMovement();
       keysPressed.current.clear();
+      if (movementInterval.current) {
+        clearInterval(movementInterval.current);
+        movementInterval.current = null;
+      }
       return;
     }
 
@@ -136,15 +135,21 @@ export function useKeyboardMovement({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
-      stopMovement();
+      if (movementInterval.current) {
+        clearInterval(movementInterval.current);
+        movementInterval.current = null;
+      }
     };
   }, [isEnabled, onMovement]);
 
   // Stop if disabled
   useEffect(() => {
     if (!isEnabled) {
-      stopMovement();
       keysPressed.current.clear();
+      if (movementInterval.current) {
+        clearInterval(movementInterval.current);
+        movementInterval.current = null;
+      }
       onMovement({ x: 0, y: 0 });
     }
   }, [isEnabled, onMovement]);
