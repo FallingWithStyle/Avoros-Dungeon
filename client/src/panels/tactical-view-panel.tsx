@@ -1,224 +1,435 @@
 /**
  * File: tactical-view-panel.tsx
- * Responsibility: Main tactical view interface combining grid, hotbar, and tactical controls
- * Notes: Integrates tactical grid display with action hotbar and handles tactical positioning
+ * Responsibility: Main tactical combat interface with grid-based positioning, entity management, and action controls
+ * Notes: Integrates tactical grid, hotbar, context menu, and action queue for real-time combat gameplay
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Eye } from "lucide-react";
+import type { CrawlerWithDetails } from "@shared/schema";
+import { combatSystem, type CombatEntity } from "@shared/combat-system";
+import { useToast } from "@/hooks/use-toast";
+import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
+import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
+import { useSwipeMovement } from "@/hooks/useSwipeMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
 import ActionQueuePanel from "./action-queue-panel";
-import { useLayoutSettings } from "@/hooks/useLayoutSettings";
-import { Sword, Shield, Zap, Move, Eye, Users, Heart } from "lucide-react";
-import type { CrawlerWithDetails } from "@shared/schema";
+import TacticalContextMenu from "./tactical-view/tactical-context-menu";
+import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
+import { queryClient } from "@/lib/queryClient";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
 }
 
-function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
-  const { currentSettings } = useLayoutSettings();
-  const { hotbarPosition } = currentSettings;
+interface ContextMenu {
+  visible: boolean;
+  x: number;
+  y: number;
+  entityId: string;
+  entity: CombatEntity;
+  actions: any[];
+  clickPosition?: { x: number; y: number };
+}
 
+export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
+  // ALL HOOKS MUST BE CALLED FIRST - NO CONDITIONAL CALLING
+  const { toast } = useToast();
+
+  // Use the extracted tactical data hooks
+  const {
+    roomData,
+    tacticalData,
+    isLoading,
+    tacticalLoading,
+    tacticalError,
+    refetchTacticalData,
+    refetchExploredRooms,
+    handleRoomChange
+  } = useTacticalData(crawler);
+
+  // Local state - ALL HOOKS BEFORE ANY CONDITIONAL LOGIC
+  const [combatState, setCombatState] = useState(combatSystem.getState());
+  const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
+  const [hoveredLoot, setHoveredLoot] = useState<number | null>(null);
+  const [lastRoomId, setLastRoomId] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const [activeActionMode, setActiveActionMode] = useState<{
     type: "move" | "attack" | "ability";
     actionId: string;
     actionName: string;
   } | null>(null);
 
-  const {
-    tacticalData,
-    isLoading,
-    error,
-    refetch
-  } = useTacticalData(crawler.id);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Mock actions for now - these would come from the crawler's abilities
-  const availableActions = [
-    { id: "move", type: "move", name: "Move", icon: Move },
-    { id: "attack", type: "attack", name: "Attack", icon: Sword },
-    { id: "defend", type: "ability", name: "Defend", icon: Shield },
-    { id: "scan", type: "ability", name: "Scan", icon: Eye },
-    { id: "ability1", type: "ability", name: "Ability 1", icon: Zap },
-    { id: "ability2", type: "ability", name: "Ability 2", icon: Zap },
-    { id: "ability3", type: "ability", name: "Ability 3", icon: Zap },
-    { id: "ability4", type: "ability", name: "Ability 4", icon: Zap },
-    { id: "heal", type: "ability", name: "Heal", icon: Heart },
-    { id: "group", type: "ability", name: "Group", icon: Users },
-  ];
+  // Use fallback data when tactical data is unavailable
+  const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
 
-  const handleActionClick = useCallback((actionId: string, actionType: string, actionName: string) => {
-    setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+  // Room movement handler
+  const handleRoomMovement = useCallback(async (direction: string) => {
+    if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
+      console.log("Cannot move " + direction + " - not available or no crawler");
+      return;
+    }
+
+    try {
+      console.log("⚡ Ultra-fast room transition " + direction + " starting...");
+      sessionStorage.setItem('lastMovementDirection', direction);
+
+      // Immediately clear entities for instant visual feedback
+      const currentEntities = combatSystem.getState().entities;
+      currentEntities.forEach((entity) => {
+        combatSystem.removeEntity(entity.id);
+      });
+
+      // Immediately update dungeon map queries to show transition
+      queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
+
+      // Fire all requests simultaneously - no waiting
+      const movePromise = fetch("/api/crawlers/" + crawler.id + "/move", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction }),
+      });
+
+      // Start tactical data fetch immediately (don't await)
+      refetchTacticalData();
+      refetchExploredRooms();
+
+      // Handle move result in background - don't block UI
+      movePromise.then(async (response) => {
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log("✅ Background transition complete: " + (result.newRoom?.name || 'unknown room'));
+
+            // Final update to ensure everything is in sync
+            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
+          }
+        }
+      }).catch((error) => {
+        console.error("Failed to move " + direction + ":", error);
+        toast({
+          title: "Movement failed",
+          description: "Could not move in that direction.",
+          variant: "destructive",
+        });
+      });
+
+      console.log("⚡ Ultra-fast transition initiated - UI responsive immediately");
+
+    } catch (error) {
+      console.error("Failed to move " + direction + ":", error);
+      toast({
+        title: "Movement failed",
+        description: "Could not move in that direction.",
+        variant: "destructive",
+      });
+    }
+  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
+
+  // Use tactical positioning hook for movement validation logic
+  const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
+    effectiveTacticalData,
+    combatState,
+    onRoomMovement: handleRoomMovement
+  });
+
+  // Detect mobile device with more comprehensive detection
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      const isMobileDevice = hasTouch && isSmallScreen;
+      console.log('🔍 Mobile detection:', { hasTouch, isSmallScreen, isMobileDevice, innerWidth: window.innerWidth });
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleGridClick = useCallback((event: React.MouseEvent) => {
-    if (!activeActionMode) return;
+  // Use existing keyboard movement hook
+  useKeyboardMovement({
+    onMovement: handleTacticalMovement,
+    isEnabled: !combatState.isInCombat && !isMobile
+  });
 
-    // Handle tactical action based on active mode
-    console.log("Grid clicked with action mode:", activeActionMode);
+  // Use existing swipe movement hook for mobile
+  const { containerRef } = useSwipeMovement({
+    onMovement: handleTacticalMovement,
+    availableDirections: effectiveTacticalData?.availableDirections || [],
+    combatState,
+    isEnabled: isMobile && !combatState.isInCombat
+  });
 
-    // Clear action mode after use
-    setActiveActionMode(null);
+  // Subscribe to combat system updates
+  useEffect(() => {
+    const unsubscribe = combatSystem.subscribe((state) => {
+      if (!state.isInCombat && combatState.isInCombat && activeActionMode) {
+        setActiveActionMode(null);
+      }
+      setCombatState(state);
+    });
+    return unsubscribe;
+  }, [combatState.isInCombat, activeActionMode]);
+
+  // Handle room changes and entity management
+  useEffect(() => {
+    if (roomData?.room && roomData.room.id !== lastRoomId) {
+      console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, reinitializing player`);
+      setLastRoomId(roomData.room.id);
+
+      // Clear existing entities except player
+      const currentState = combatSystem.getState();
+
+      // Clear all non-player entities
+      currentState.entities.forEach(entity => {
+        if (entity.id !== "player") {
+          combatSystem.removeEntity(entity.id);
+        }
+      });
+
+      // Determine entry position based on movement direction
+      const lastDirection = sessionStorage.getItem('lastMovementDirection') as any;
+      const entryPosition = combatSystem.getEntryPosition(lastDirection || 'south');
+
+      console.log(`Entry position for direction ${lastDirection}:`, entryPosition);
+
+      // Initialize player with crawler data
+      combatSystem.initializePlayer(entryPosition, {
+        name: crawler.name,
+        serial: crawler.serial
+      });
+
+      combatSystem.selectEntity("player");
+    }
+  }, [roomData?.room, lastRoomId, crawler]);
+
+  // Grid event handlers - disabled for now
+  const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    // Grid clicking disabled - use keyboard/swipe movement instead
+    console.log("Grid click disabled - use WASD keys or swipe to move");
+    return;
+  }, []);
+
+  const handleGridRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    // Disabled for now - right-clicking on screen should not do anything
+    console.log("Grid right-clicked - functionality disabled");
+    return;
+  }, []);
+
+  // Entity event handlers
+  const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    // Disabled for now - clicking on entities should not do anything
+    console.log("Entity clicked: " + entityId + " - functionality disabled");
+    return;
+  }, []);
+
+  const handleEntityRightClick = useCallback((entityId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    // Disabled for now - right-clicking on entities should not do anything
+    console.log("Entity right-clicked: " + entityId + " - functionality disabled");
+    return;
+  }, []);
+
+  // Loot event handlers
+  const handleLootClick = useCallback((index: number, item: any, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toast({
+      title: "Loot Interaction",
+      description: "Interacting with " + item.name,
+    });
+  }, [toast]);
+
+  // Hotbar handlers
+  const handleHotbarClick = useCallback((actionId: string, actionType: string, actionName: string) => {
+    if (activeActionMode?.actionId === actionId) {
+      setActiveActionMode(null);
+    } else {
+      setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+    }
   }, [activeActionMode]);
 
-  const handleGridRightClick = useCallback((event: React.MouseEvent) => {
-    event.preventDefault();
-    // Handle right-click context menu
-  }, []);
-
   const getCooldownPercentage = useCallback((actionId: string): number => {
-    // Mock cooldown system - replace with actual cooldown logic
-    return 0;
+    return 0; // Placeholder
   }, []);
 
-  if (isLoading) {
+  // Context menu handlers
+  const handleActionClick = useCallback((action: any, targetEntityId: string) => {
+    // Disabled for now - action clicks should not do anything
+    console.log("Action clicked - functionality disabled");
+    setContextMenu(null);
+  }, []);
+
+  const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
+    // Disabled for now - move to position should not do anything
+    console.log("Move to position clicked - functionality disabled");
+    setContextMenu(null);
+  }, []);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setContextMenu(null);
+      }
+    };
+
+    if (contextMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [contextMenu]);
+
+  // CONDITIONAL RENDERING ONLY AFTER ALL HOOKS HAVE BEEN CALLED
+  // Early return if no data - MUST be after all hooks
+  if (!effectiveTacticalData || !effectiveTacticalData.room) {
+    console.log("No effective tactical data available");
     return (
-      <Card className="bg-game-surface border-game-border">
+      <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center">
-            <Sword className="w-5 h-5 mr-2 text-red-400" />
-            Tactical View
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View - No Data
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64">
-            <div className="text-slate-400">Loading tactical data...</div>
+          <div className="w-full h-48 border-2 border-red-600 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-red-400">No room data available</span>
+              <br />
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-blue-400 underline text-xs mt-2"
+              >
+                Reload page
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
-    return (
-      <Card className="bg-game-surface border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center">
-            <Sword className="w-5 h-5 mr-2 text-red-400" />
-            Tactical View
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-red-400 text-center">
-            Error loading tactical data
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Process tactical data for grid
+  const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
+  const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
 
-  const isInCombat = tacticalData?.tacticalEntities?.some(entity => 
-    entity.type === "mob" && entity.data?.hostileType === "aggressive"
-  ) || false;
-
-  // Position hotbar based on layout settings
-  const hotbarContainerClass = 
-    hotbarPosition === "top" ? "mb-4" :
-    hotbarPosition === "bottom" ? "mt-4" :
-    hotbarPosition === "left" ? "mr-4 flex-row" :
-    "ml-4 flex-row";
-
-  const mainLayoutClass = 
-    hotbarPosition === "left" || hotbarPosition === "right" 
-      ? "flex items-start" 
-      : "block";
+  const gridData = {
+    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
+    loot: tacticalEntities.filter(e => e.type === 'loot'),
+    mobs: tacticalEntities.filter(e => e.type === 'mob'),
+    npcs: tacticalEntities.filter(e => e.type === 'npc'),
+    exits: {
+      north: availableDirections.includes("north"),
+      south: availableDirections.includes("south"),
+      east: availableDirections.includes("east"),
+      west: availableDirections.includes("west"),
+    },
+    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
+  };
 
   return (
-    <Card className="bg-game-surface border-game-border">
+    <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center">
-          <Sword className="w-5 h-5 mr-2 text-red-400" />
+        <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+          <Eye className="w-4 h-4" />
           Tactical View
-          {isInCombat && (
-            <Badge variant="destructive" className="ml-2">
-              In Combat
-            </Badge>
+          {!tacticalData && effectiveTacticalData && (
+            <span className="text-xs text-amber-400 ml-2">(Limited Data)</span>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className={mainLayoutClass}>
-          {/* Left hotbar */}
-          {hotbarPosition === "left" && (
-            <div className={hotbarContainerClass}>
-              <TacticalHotbar
-                actions={availableActions}
-                activeActionMode={activeActionMode}
-                onActionClick={handleActionClick}
-                getCooldownPercentage={getCooldownPercentage}
-              />
-            </div>
-          )}
-
-          {/* Main content area */}
-          <div className="flex-1">
-            {/* Top hotbar */}
-            {hotbarPosition === "top" && (
-              <div className={hotbarContainerClass}>
-                <TacticalHotbar
-                  actions={availableActions}
-                  activeActionMode={activeActionMode}
-                  onActionClick={handleActionClick}
-                  getCooldownPercentage={getCooldownPercentage}
-                />
-              </div>
-            )}
-
-            {/* Tactical Grid */}
-            <TacticalGrid 
-              tacticalData={tacticalData}
-              activeActionMode={activeActionMode}
-              onActionModeCancel={() => setActiveActionMode(null)}
-              onRoomMovement={(direction) => {
-                console.log("🚪 Room movement triggered:", direction);
-                refetch();
-              }}
-            />
-
-            {/* Bottom hotbar */}
-            {hotbarPosition === "bottom" && (
-              <div className={hotbarContainerClass}>
-                <TacticalHotbar
-                  actions={availableActions}
-                  activeActionMode={activeActionMode}
-                  onActionClick={handleActionClick}
-                  getCooldownPercentage={getCooldownPercentage}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Right hotbar */}
-          {hotbarPosition === "right" && (
-            <div className={hotbarContainerClass}>
-              <TacticalHotbar
-                actions={availableActions}
-                activeActionMode={activeActionMode}
-                onActionClick={handleActionClick}
-                getCooldownPercentage={getCooldownPercentage}
-              />
-            </div>
-          )}
+      <CardContent className="space-y-4">
+        <div 
+          className="flex-1 relative" 
+          ref={containerRef}
+          style={{ 
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
+          }}
+          onTouchStart={(e) => console.log('📱 Container touch start detected')}
+          onTouchMove={(e) => console.log('📱 Container touch move detected')}
+        >
+          <TacticalGrid
+            roomBackground={gridData.background}
+            exits={gridData.exits}
+            entities={combatState.entities}
+            lootItems={gridData.loot}
+            otherPlayers={gridData.otherPlayers}
+            hoveredEntity={hoveredEntity}
+            hoveredLoot={hoveredLoot}
+            onGridClick={handleGridClick}
+            onGridRightClick={handleGridRightClick}
+            onEntityClick={handleEntityClick}
+            onEntityRightClick={handleEntityRightClick}
+            onLootClick={handleLootClick}
+            onEntityHover={setHoveredEntity}
+            onLootHover={setHoveredLoot}
+            isInCombat={combatState.isInCombat}
+            activeActionMode={activeActionMode}
+            tacticalMobs={gridData.mobs}
+            tacticalNpcs={gridData.npcs}
+          />
         </div>
 
-        {/* Action Queue Panel */}
-        <div className="mt-4">
+        <div className="pt-2">
+          <TacticalHotbar
+            activeActionMode={activeActionMode}
+            onHotbarClick={handleHotbarClick}
+            getCooldownPercentage={getCooldownPercentage}
+          />
+        </div>
+
+        {contextMenu && (
+          <TacticalContextMenu
+            contextMenu={contextMenu}
+            contextMenuRef={contextMenuRef}
+            onActionClick={handleActionClick}
+            onMoveToPosition={handleMoveToPosition}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+
+        <div className="pt-2">
           <ActionQueuePanel />
         </div>
 
-        {/* Status Info */}
-        <div className="flex justify-between text-sm text-slate-400 mt-4">
-          <span>Room: {tacticalData?.room?.name || "Unknown"}</span>
-          <span>
-            Entities: {tacticalData?.tacticalEntities?.length || 0}
-          </span>
-        </div>
+        {activeActionMode && (
+          <div className="mt-2 p-2 bg-blue-900/30 border border-blue-500 rounded text-center">
+            <span className="text-blue-300 text-sm">
+              {activeActionMode.actionName} mode active - {
+                activeActionMode.type === "move" ? "Click to move" :
+                activeActionMode.type === "attack" ? "Click enemy to attack" :
+                "Click to use ability"
+              }
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
-
-export default TacticalViewPanel;

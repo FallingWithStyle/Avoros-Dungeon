@@ -1,122 +1,77 @@
 /**
  * File: tactical-hotbar.tsx
- * Responsibility: Renders hotbar with action buttons for tactical combat
- * Notes: Displays action buttons in configurable layout with cooldown indicators
+ * Responsibility: Renders the tactical action hotbar with move, attack, defend, and ability buttons
+ * Notes: Displays cooldown states, active action modes, and keyboard shortcuts for tactical combat actions
  */
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useLayoutSettings } from "@/hooks/useLayoutSettings";
-
-interface TacticalAction {
-  id: string;
-  type: string;
-  name: string;
-  icon: React.ComponentType<any>;
-}
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Sword, Shield, Zap, Move } from 'lucide-react';
 
 interface TacticalHotbarProps {
-  actions: TacticalAction[];
   activeActionMode: {
     type: "move" | "attack" | "ability";
     actionId: string;
     actionName: string;
   } | null;
-  onActionClick: (actionId: string, actionType: string, actionName: string) => void;
+  onHotbarClick: (actionId: string, actionType: string, actionName: string) => void;
   getCooldownPercentage: (actionId: string) => number;
 }
 
-function TacticalHotbar({
-  actions,
+export default function TacticalHotbar({
   activeActionMode,
-  onActionClick,
-  getCooldownPercentage,
+  onHotbarClick,
+  getCooldownPercentage
 }: TacticalHotbarProps) {
-  const { currentSettings } = useLayoutSettings();
-  const { hotbarCount, hotbarPosition } = currentSettings;
-
-  // Limit actions to the configured count
-  const displayedActions = actions.slice(0, hotbarCount);
-
-  // Determine layout classes based on position
-  const containerClass = 
-    hotbarPosition === "top" || hotbarPosition === "bottom"
-      ? "flex flex-row gap-2 justify-center flex-wrap"
-      : "flex flex-col gap-2";
-
-  const buttonClass = 
-    hotbarPosition === "top" || hotbarPosition === "bottom"
-      ? "flex-shrink-0 w-12 h-12"
-      : "w-full h-12";
+  const actions = [
+    { id: "move", type: "move", name: "Move", icon: Move, shortcut: "M" },
+    { id: "attack", type: "attack", name: "Attack", icon: Sword, shortcut: "A" },
+    { id: "defend", type: "ability", name: "Defend", icon: Shield, shortcut: "D" },
+    { id: "ability1", type: "ability", name: "Ability", icon: Zap, shortcut: "1" },
+  ];
 
   return (
-    <div className={containerClass}>
-      {displayedActions.map((action, index) => {
-        const cooldownPercentage = getCooldownPercentage(action.id);
-        const isOnCooldown = cooldownPercentage > 0;
+    <div className="flex gap-2 justify-center">
+      {actions.map((action) => {
         const isActive = activeActionMode?.actionId === action.id;
-        const isDisabled = isOnCooldown || (activeActionMode !== null && !isActive);
-
+        const cooldownPercentage = getCooldownPercentage(action.id);
         const IconComponent = action.icon;
 
         return (
-          <div key={action.id} className="relative">
-            <Button
-              onClick={() => onActionClick(action.id, action.type, action.name)}
-              disabled={isDisabled}
-              variant={isActive ? "default" : "outline"}
-              className={`${buttonClass} relative overflow-hidden flex flex-col items-center justify-center p-1 ${
-                isActive ? "bg-blue-600 border-blue-400" : ""
-              }`}
-              title={action.name + " (" + (index + 1) + ")"}
-            >
-              {/* Action Icon */}
-              <IconComponent className="w-4 h-4 mb-1" />
+          <Button
+            key={action.id}
+            variant={isActive ? "default" : "outline"}
+            size="sm"
+            className={`relative w-12 h-12 p-0 ${
+              isActive 
+                ? "bg-blue-600 border-blue-400 text-white" 
+                : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+            }`}
+            onClick={() => onHotbarClick(action.id, action.type, action.name)}
+            title={`${action.name} (${action.shortcut})`}
+            disabled={cooldownPercentage > 0}
+          >
+            <IconComponent className="w-4 h-4" />
 
-              {/* Action Name (shortened for small buttons) */}
-              <span className="text-xs leading-none">
-                {hotbarPosition === "left" || hotbarPosition === "right" 
-                  ? action.name 
-                  : action.name.slice(0, 4)
-                }
-              </span>
-
-              {/* Keyboard shortcut indicator */}
-              <div className="absolute top-0 right-0 bg-slate-600 text-white text-xs px-1 rounded-bl opacity-75">
-                {index + 1}
-              </div>
-
-              {/* Cooldown overlay */}
-              {isOnCooldown && (
-                <div 
-                  className="absolute inset-0 bg-red-600 opacity-50 transition-all duration-100"
-                  style={{
-                    clipPath: `polygon(0 0, 100% 0, 100% ${100 - cooldownPercentage}%, 0 ${100 - cooldownPercentage}%)`
-                  }}
-                />
-              )}
-            </Button>
-
-            {/* Cooldown percentage badge */}
-            {isOnCooldown && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 text-xs px-1 py-0 min-w-0 h-5"
+            {/* Cooldown overlay */}
+            {cooldownPercentage > 0 && (
+              <div 
+                className="absolute inset-0 bg-gray-900/70 flex items-center justify-center text-xs font-bold text-white"
+                style={{
+                  background: `conic-gradient(from 0deg, rgba(0,0,0,0.8) ${cooldownPercentage}%, transparent ${cooldownPercentage}%)`
+                }}
               >
-                {Math.ceil(cooldownPercentage)}%
-              </Badge>
+                {Math.ceil(cooldownPercentage / 100 * 10)}
+              </div>
             )}
 
-            {/* Active indicator */}
-            {isActive && (
-              <div className="absolute inset-0 border-2 border-blue-400 rounded pointer-events-none animate-pulse" />
-            )}
-          </div>
+            {/* Hotkey indicator */}
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-800 border border-gray-600 rounded text-xs flex items-center justify-center font-mono">
+              {action.shortcut}
+            </div>
+          </Button>
         );
       })}
     </div>
   );
 }
-
-export default TacticalHotbar;
