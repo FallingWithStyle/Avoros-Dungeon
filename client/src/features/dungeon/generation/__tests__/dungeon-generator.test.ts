@@ -104,21 +104,24 @@ describe('Dungeon Generator', () => {
     }
 
     function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
-    if (rooms.length === 0) {
-      return { unclaimed: [] };
-    }
-
-    if (!factions || factions.length === 0) {
-      return { unclaimed: rooms.map(r => r.id) };
-    }
-
     const assignments: Record<string | number, number[]> = {};
-    const assigned = new Set<number>();
-
-    // Initialize assignments for all factions (including zero influence ones)
+    
+    // Initialize assignments for all factions first
     factions.forEach(f => {
       assignments[f.id] = [];
     });
+
+    if (rooms.length === 0) {
+      assignments.unclaimed = [];
+      return assignments;
+    }
+
+    if (!factions || factions.length === 0) {
+      assignments.unclaimed = rooms.map(r => r.id);
+      return assignments;
+    }
+
+    const assigned = new Set<number>();
 
     // Filter out zero-influence factions for actual assignment
     const activeFactions = factions.filter(f => f.influence > 0);
