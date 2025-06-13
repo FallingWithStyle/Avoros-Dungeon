@@ -252,10 +252,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Entity event handlers
   const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    // Disabled for now - clicking on entities should not do anything
-    console.log("Entity clicked: " + entityId + " - functionality disabled");
-    return;
-  }, []);
+    
+    // If in attack mode, try to attack the clicked entity
+    if (activeActionMode?.type === "attack" && entityId !== "player") {
+      const targetEntity = combatState.entities.find(e => e.id === entityId);
+      if (targetEntity?.type === "hostile") {
+        const success = combatSystem.queueAction("player", activeActionMode.actionId, entityId);
+        if (success) {
+          toast({
+            title: "Attack Queued",
+            description: "Player will " + activeActionMode.actionName + " " + (targetEntity.name || entityId),
+          });
+          setActiveActionMode(null); // Clear attack mode after use
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - check cooldown or range",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Invalid Target",
+          description: "Can only attack hostile enemies",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+    
+    // Otherwise just select the entity
+    combatSystem.selectEntity(entityId);
+  }, [activeActionMode, combatState.entities, toast]);
 
   const handleEntityRightClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
@@ -285,15 +313,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }, [activeActionMode]);
 
   const getCooldownPercentage = useCallback((actionId: string): number => {
-    return 0; // Placeholder
-  }, []);
+    const playerEntity = combatState.entities.find(e => e.id === "player");
+    if (!playerEntity?.cooldowns) return 0;
+    
+    const lastUsed = playerEntity.cooldowns[actionId] || 0;
+    const now = Date.now();
+    
+    // Get action cooldown (punch = 800ms)
+    const actionCooldown = actionId === "basic_attack" ? 800 : 1000;
+    const timeRemaining = Math.max(0, (lastUsed + actionCooldown) - now);
+    
+    return (timeRemaining / actionCooldown) * 100;
+  }, [combatState.entities]);
 
   // Context menu handlers
   const handleActionClick = useCallback((action: any, targetEntityId: string) => {
-    // Disabled for now - action clicks should not do anything
-    console.log("Action clicked - functionality disabled");
+    if (action.type === "attack") {
+      const success = combatSystem.queueAction("player", action.id, targetEntityId);
+      if (success) {
+        toast({
+          title: "Attack Queued",
+          description: "Player will " + action.name + " " + targetEntityId,
+        });
+      } else {
+        toast({
+          title: "Attack Failed",
+          description: "Cannot attack right now - check cooldown or range",
+          variant: "destructive",
+        });
+      }
+    }
     setContextMenu(null);
-  }, []);
+  }, [toast]);
 
   const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
     // Disabled for now - move to position should not do anything

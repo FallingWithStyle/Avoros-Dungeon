@@ -22,6 +22,14 @@ export interface CombatEntity {
   isSelected?: boolean;
   cooldowns?: Record<string, number>;
   serial?: number;
+  might?: number; // Strength stat for punch damage
+  isAlive?: boolean;
+  attackAnimation?: {
+    type: 'punch' | 'punch_miss';
+    targetId: string;
+    timestamp: number;
+    duration: number;
+  };
 }
 
 // Combat action interface
@@ -59,12 +67,12 @@ export interface CombatState {
 const DEFAULT_ACTIONS: CombatAction[] = [
   {
     id: "basic_attack",
-    name: "Basic Attack",
+    name: "Punch",
     type: "attack",
-    cooldown: 1000,
-    executionTime: 1000,
-    range: 10,
-    description: "A basic melee attack",
+    cooldown: 800,
+    executionTime: 300,
+    range: 5,
+    description: "A quick jab punch using your might",
   },
   {
     id: "move",
@@ -86,11 +94,16 @@ const DEFAULT_ACTIONS: CombatAction[] = [
 
 // Combat calculation functions
 export function calculateDamage(attacker: any, defender: any): number {
-  const baseDamage = attacker.attack || 1;
+  // For unarmed attacks, use might stat; otherwise use attack stat
+  const might = attacker.might || 1;
+  const weaponAttack = attacker.attack || 0;
+  
+  // If no weapon equipped (attack = 0), use might for punch damage
+  const baseDamage = weaponAttack > 0 ? weaponAttack : Math.floor(might * 0.5) + 1;
   const defense = defender.defense || 0;
   const levelMod = (attacker.level || 1) * 0.1;
 
-  const damage = Math.max(1, Math.floor(baseDamage + levelMod - defense * 0.5));
+  const damage = Math.max(1, Math.floor(baseDamage + levelMod - defense * 0.3));
   return damage;
 }
 
@@ -332,9 +345,38 @@ export class CombatSystem {
     if (hits) {
       const damage = calculateDamage(attacker, target);
       target.hp = Math.max(0, target.hp - damage);
-      console.log(`${attacker.name} hits ${target.name} for ${damage} damage`);
+      
+      // Add attack animation data to the attacker
+      this.updateEntity(attackerId, {
+        ...attacker,
+        attackAnimation: {
+          type: 'punch',
+          targetId: targetId,
+          timestamp: Date.now(),
+          duration: 300 // 300ms animation
+        }
+      });
+
+      console.log(`${attacker.name} punches ${target.name} for ${damage} damage! (HP: ${target.hp}/${target.maxHp})`);
+      
+      // Check if target is defeated
+      if (target.hp <= 0) {
+        console.log(`${target.name} is defeated!`);
+        target.isAlive = false;
+      }
     } else {
-      console.log(`${attacker.name} misses ${target.name}`);
+      console.log(`${attacker.name} swings at ${target.name} but misses!`);
+      
+      // Add miss animation
+      this.updateEntity(attackerId, {
+        ...attacker,
+        attackAnimation: {
+          type: 'punch_miss',
+          targetId: targetId,
+          timestamp: Date.now(),
+          duration: 200
+        }
+      });
     }
   }
 
@@ -557,7 +599,15 @@ export class CombatSystem {
       position: defaultPosition,
       hp: 100,
       maxHp: 100,
+      attack: 0, // No weapon equipped
+      defense: 2,
+      speed: 10,
+      might: 8, // Base strength for punch damage
+      accuracy: 10,
+      evasion: 5,
+      level: 1,
       isSelected: false,
+      isAlive: true,
       facing: 0, // Set initial facing to 0 degrees (north)
       serial: crawlerData?.serial,
     };

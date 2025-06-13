@@ -9,6 +9,7 @@ import { CombatEntity } from "@shared/combat-system";
 import { Skull, Users, Gem, Sword, Shield } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatarUtils";
 import { getFacingDegreesFromMovement } from "@/lib/vector";
+import { cn } from "@/lib/utils";
 
 interface TacticalGridProps {
   roomBackground: string;
@@ -93,6 +94,7 @@ export default function TacticalGrid({
   tacticalMobs,
   tacticalNpcs,
 }: TacticalGridProps) {
+  const playerEntity = entities.find((e: any) => e.id === "player");
   return (
     <div
       className={`relative w-full aspect-square border-2 ${
@@ -260,6 +262,52 @@ export default function TacticalGrid({
           </div>
         );
       })}
+
+      
+        {/* Player */}
+        {playerEntity && (
+          <div
+            key={playerEntity.id}
+            className={cn(
+              "absolute w-6 h-6 rounded-full border-2 transition-all duration-200 flex items-center justify-center text-xs font-bold cursor-pointer z-20",
+              playerEntity.isSelected
+                ? "bg-blue-500 border-blue-300 shadow-lg shadow-blue-500/50"
+                : "bg-blue-600 border-blue-400",
+              hoveredEntity === playerEntity.id ? "scale-110 shadow-lg" : "",
+              // Attack animation
+              playerEntity.attackAnimation && Date.now() - playerEntity.attackAnimation.timestamp < playerEntity.attackAnimation.duration
+                ? (playerEntity.attackAnimation.type === 'punch' ? "animate-pulse bg-red-500" : "animate-bounce")
+                : ""
+            )}
+            style={{
+              left: playerEntity.position.x + "%",
+              top: playerEntity.position.y + "%",
+              transform: "translate(-50%, -50%)",
+            }}
+            onClick={(e) => onEntityClick?.(playerEntity.id, e)}
+            onContextMenu={(e) => onEntityRightClick?.(playerEntity.id, e)}
+            onMouseEnter={() => onEntityHover?.(playerEntity.id)}
+            onMouseLeave={() => onEntityHover?.(null)}
+          >
+            {playerEntity.serial || "P"}
+
+            {/* Facing indicator */}
+            {playerEntity.facing !== undefined && (
+              <div
+                className="absolute w-1 h-3 bg-white/70 rounded-full"
+                style={{
+                  transform: "rotate(" + playerEntity.facing + "deg) translateY(-12px)",
+                  transformOrigin: "center bottom",
+                }}
+              />
+            )}
+
+            {/* Attack animation effect */}
+            {playerEntity.attackAnimation && Date.now() - playerEntity.attackAnimation.timestamp < playerEntity.attackAnimation.duration && (
+              <div className="absolute inset-0 rounded-full border-2 border-red-400 animate-ping" />
+            )}
+          </div>
+        )}
     </div>
   );
 }
