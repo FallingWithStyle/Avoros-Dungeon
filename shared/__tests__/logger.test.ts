@@ -176,9 +176,10 @@ describe("logErrorToFile", () => {
 
     expect(mockAppendFile).toHaveBeenCalledTimes(1);
     const [, content] = mockAppendFile.mock.calls[0];
+    const contentStr = content as string;
     
     // Extract timestamp from log content
-    const timestampMatch = content.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]/);
+    const timestampMatch = contentStr.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]/);
     expect(timestampMatch).toBeTruthy();
     
     if (timestampMatch) {
@@ -193,8 +194,9 @@ describe("logErrorToFile", () => {
 
     expect(mockAppendFile).toHaveBeenCalledTimes(1);
     const [, content] = mockAppendFile.mock.calls[0];
+    const contentStr = content as string;
     
-    expect(content.endsWith("\n\n")).toBe(true);
+    expect(contentStr.endsWith("\n\n")).toBe(true);
   });
 
   it("should handle Error objects without stack trace", async () => {
