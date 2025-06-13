@@ -428,7 +428,7 @@ describe('Events System', () => {
       expect(entryTime).toBeLessThanOrEqual(afterTime);
     });
 
-    it('should update room entry time on room change', () => {
+    it('should update room entry time on room change', (done) => {
       eventsSystem.onRoomChange(123, 'Test Crawler', 456);
       const firstEntryTime = eventsSystem.getRoomEntryTime();
 
@@ -438,6 +438,7 @@ describe('Events System', () => {
         const secondEntryTime = eventsSystem.getRoomEntryTime();
 
         expect(secondEntryTime).toBeGreaterThan(firstEntryTime);
+        done();
       }, 10);
     });
   });
