@@ -62,27 +62,55 @@ export function assignRoomsByFactionInfluence({
   // 2. Shuffle the claimable rooms for randomness
   const shuffledRooms = [...claimableRooms].sort(() => Math.random() - 0.5);
 
-  // 3. Determine how many rooms should be unclaimed
-  const unclaimedCount = Math.floor(shuffledRooms.length * unclaimedPercent);
+  // 3. Filter out factions with zero influence
+  const activeFactions = factions.filter((f) => f.influence > 0);
+
+  // 4. Initialize assignments with unclaimed rooms first
+  const assignments: FactionRoomAssignment = {};
+  
+  // 5. Add all non-claimable room placementIds to "unclaimed"
+  const nonClaimable = rooms.filter((room) =>
+    ["entrance", "stairs", "safe"].includes(room.type),
+  );
+  assignments.unclaimed = nonClaimable.map((r) => r.placementId);
+
+  // 6. Handle case where no active factions exist
+  if (activeFactions.length === 0) {
+    // All claimable rooms go to unclaimed
+    assignments.unclaimed.push(...shuffledRooms.map((r) => r.placementId));
+    return assignments;
+  }
+
+  // 7. Determine how many rooms should be unclaimed (use Math.ceil for small numbers)
+  const unclaimedCount = shuffledRooms.length > 0 
+    ? Math.ceil(shuffledRooms.length * unclaimedPercent)
+    : 0;
   const unclaimedRooms = shuffledRooms.slice(0, unclaimedCount);
   const toAssign = shuffledRooms.slice(unclaimedCount);
 
-  // 4. Select factions for this floor
+  // 8. Add unclaimed claimable rooms to the unclaimed array
+  assignments.unclaimed.push(...unclaimedRooms.map((r) => r.placementId));
+
+  // 9. If no rooms to assign, return early
+  if (toAssign.length === 0) {
+    return assignments;
+  }
+
+  // 10. Select factions for this floor
   const numFactions = Math.max(
     minFactions,
-    Math.min(factions.length, Math.ceil(toAssign.length / roomsPerFaction)),
+    Math.min(activeFactions.length, Math.ceil(toAssign.length / roomsPerFaction)),
   );
   // Randomly pick unique factions
-  const pickedFactions = pickRandomFactions(factions, numFactions);
+  const pickedFactions = pickRandomFactions(activeFactions, numFactions);
 
-  // 5. Calculate total influence and room shares
+  // 11. Calculate total influence and room shares
   const totalInfluence = pickedFactions.reduce(
     (sum, f) => sum + f.influence,
     0,
   );
 
-  // 6. Assign rooms to factions proportionally to their influence with minimum guarantees
-  const assignments: FactionRoomAssignment = {};
+  // 12. Assign rooms to factions proportionally to their influence with minimum guarantees
   let remainingRooms = [...toAssign];
   const minRoomsPerFaction = Math.max(5, Math.floor(toAssign.length / (pickedFactions.length * 3)));
   
@@ -108,15 +136,6 @@ export function assignRoomsByFactionInfluence({
     
     assignments[faction.id] = [...(assignments[faction.id] || []), ...additionalAssignment];
   });
-
-  // 7. Add unclaimed rooms to the result under "unclaimed"
-  assignments.unclaimed = unclaimedRooms.map((r) => r.placementId);
-
-  // 8. Optionally, add all non-claimable room placementIds to "unclaimed" as well
-  const nonClaimable = rooms.filter((room) =>
-    ["entrance", "stairs", "safe"].includes(room.type),
-  );
-  assignments.unclaimed.push(...nonClaimable.map((r) => r.placementId));
 
   return assignments;
 }
