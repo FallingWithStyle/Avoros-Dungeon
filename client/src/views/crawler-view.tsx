@@ -35,13 +35,36 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     authLoading: isLoading
   });
 
-  // Fetch crawler data with more frequent updates
-  const { data: crawler, isLoading: crawlerLoading } =
-    useQuery<CrawlerWithDetails>({
-      queryKey: [`/api/crawlers/${crawlerId}`],
-      enabled: !!crawlerId,
-      refetchInterval: 3000, // Refresh every 3 seconds
-    });
+  // Fetch crawler data
+  const { data: crawler, isLoading: crawlerLoading, error: crawlerError } = useQuery({
+    queryKey: ["/api/crawlers/" + crawlerId],
+    queryFn: async () => {
+      const response = await fetch("/api/crawlers/" + crawlerId, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch crawler");
+      return response.json();
+    },
+    refetchInterval: 30000,
+  });
+
+  // Batch fetch all room data for faster loading
+  const { data: roomBatchData, isLoading: roomLoading } = useQuery({
+    queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"],
+    queryFn: async () => {
+      const response = await fetch(`/api/crawlers/${crawlerId}/room-data-batch`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch room data");
+      return response.json();
+    },
+    refetchInterval: 5000,
+  });
+
+  // Extract data from batch response
+  const currentRoomData = roomBatchData?.currentRoom;
+  const tacticalData = roomBatchData?.tacticalData;
+  const scannedRooms = roomBatchData?.scannedRooms;
 
   console.log("🔍 Crawler Query Debug:", {
     crawler: crawler?.name,
@@ -49,7 +72,9 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     enabled: !!crawlerId
   });
 
-  if (isLoading || crawlerLoading) {
+  const isLoading = crawlerLoading || roomLoading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <div className="text-center">
@@ -66,7 +91,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       crawler: crawler?.name || "No crawler data",
       crawlerId
     });
-    
+
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <Card className="bg-game-surface border-game-border">
@@ -137,7 +162,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
 
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
-            <TacticalViewPanel crawler={crawler} />
+            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} />
           </div>
 
           {/* Secondary: Status & Quick Info - Condensed on mobile */}
@@ -158,11 +183,11 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             </div>
 
             <div className="hidden lg:block">
-              <DungeonMap crawler={crawler} />
+              <DungeonMap crawler={crawler} scannedRooms={scannedRooms}/>
             </div>
 
             <div className="hidden lg:block">
-              <RoomEventsPanel crawler={crawler} />
+              <RoomEventsPanel crawler={crawler} currentRoomData={currentRoomData} />
             </div>
 
             {/* Mobile: Collapsible sections */}
@@ -176,7 +201,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
                   <i className="fas fa-chevron-down"></i>
                 </summary>
                 <div className="p-4 pt-0">
-                  <DungeonMap crawler={crawler} />
+                  <DungeonMap crawler={crawler} scannedRooms={scannedRooms}/>
                 </div>
               </details>
 
@@ -189,7 +214,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
                   <i className="fas fa-chevron-down"></i>
                 </summary>
                 <div className="p-4 pt-0">
-                  <RoomEventsPanel crawler={crawler} />
+                  <RoomEventsPanel crawler={crawler} currentRoomData={currentRoomData}/>
                 </div>
               </details>
             </div>

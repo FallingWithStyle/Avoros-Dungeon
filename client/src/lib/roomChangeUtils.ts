@@ -1,4 +1,3 @@
-
 /**
  * File: roomChangeUtils.ts
  * Responsibility: Utility functions for handling room changes, position resets, and teleports
@@ -13,7 +12,7 @@ import { queryClient } from "@/lib/queryClient";
  */
 export function handleRoomChange(crawlerId: number): void {
   console.log("Handling room change for crawler " + crawlerId + " - updating all map and tactical data");
-  
+
   // Invalidate all room-related queries concurrently
   queryClient.invalidateQueries({
     queryKey: ["/api/crawlers/" + crawlerId + "/current-room"],
@@ -28,7 +27,7 @@ export function handleRoomChange(crawlerId: number): void {
     queryKey: ["/api/crawlers/" + crawlerId + "/scanned-rooms"],
   });
   queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
-  
+
   // Also invalidate the main crawler query to ensure all data is fresh
   queryClient.invalidateQueries({ 
     queryKey: ["/api/crawlers/" + crawlerId] 
@@ -41,14 +40,11 @@ export function handleRoomChange(crawlerId: number): void {
 /**
  * Handles room change with immediate refetch for responsive UI
  */
-export function handleRoomChangeWithRefetch(crawlerId: number): void {
+export function handleRoomChangeWithRefetch(crawlerId: number) {
   handleRoomChange(crawlerId);
-  
-  // Force immediate refetch of critical data
+
+  // Refetch batch room data for faster loading
   queryClient.refetchQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/current-room"],
-  });
-  queryClient.refetchQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"],
+    queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
   });
 }

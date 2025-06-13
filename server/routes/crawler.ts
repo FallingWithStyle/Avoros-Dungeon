@@ -325,6 +325,65 @@ export function registerCrawlerRoutes(app: Express) {
     }
   });
 
+  // Batch endpoint for faster room loading - gets all room data in one call
+  app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const crawler = await storage.getCrawler(crawlerId);
+
+      if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      // Initialize request cache for this request
+      const requestCache = getRequestCache(req);
+      storage.tacticalStorage?.setRequestCache(requestCache);
+      storage.mobStorage?.setRequestCache(requestCache);
+
+      // Get all data in parallel instead of sequential
+      const [currentRoom, tacticalData, scannedRooms] = await Promise.all([
+        storage.getCrawlerCurrentRoom(crawlerId),
+        (async () => {
+          const room = await storage.getCrawlerCurrentRoom(crawlerId);
+          if (!room) return null;
+          
+          // Check cache first
+          const cacheKey = `tactical_data_${room.id}`;
+          let cachedData = await redisService.get(cacheKey);
+          if (cachedData) {
+            return JSON.parse(cachedData);
+          }
+
+          const [playersInRoom, availableDirections, tacticalEntities] = await Promise.all([
+            storage.getPlayersInRoom(room.id),
+            storage.getAvailableDirections(room.id),
+            storage.generateAndSaveTacticalData(room.id, room)
+          ]);
+
+          const data = { availableDirections, playersInRoom, tacticalEntities };
+          await redisService.set(cacheKey, JSON.stringify(data), 30);
+          return data;
+        })(),
+        (async () => {
+          const scanRange = crawler.scanRange || 2;
+          return await storage.getScannedRooms(crawlerId, scanRange);
+        })()
+      ]);
+
+      res.json({
+        currentRoom,
+        tacticalData: tacticalData ? {
+          room: currentRoom,
+          ...tacticalData
+        } : null,
+        scannedRooms
+      });
+    } catch (error) {
+      console.error("Error fetching batch room data:", error);
+      res.status(500).json({ error: "Failed to fetch room data" });
+    }
+  });
+
   // Get scanned rooms for a crawler
   app.get("/api/crawlers/:id/scanned-rooms", isAuthenticated, async (req: any, res) => {
     try {
