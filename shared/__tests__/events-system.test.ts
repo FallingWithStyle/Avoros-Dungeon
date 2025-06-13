@@ -74,6 +74,14 @@ describe('Events System', () => {
   let receivedEvents: RoomEvent[] = [];
   let unsubscribe: (() => void) | null = null;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     // Reset the events system
     eventsSystem.clearEvents();
@@ -94,6 +102,9 @@ describe('Events System', () => {
       unsubscribe();
       unsubscribe = null;
     }
+    // Clear any pending timers to prevent Jest from hanging
+    jest.clearAllTimers();
+    jest.runOnlyPendingTimers();
   });
 
   describe('Event Management', () => {
@@ -261,7 +272,7 @@ describe('Events System', () => {
       expect(receivedEvents).toHaveLength(1); // Should still be 1
     });
 
-    it('should generate discovery events after room entry delay', (done) => {
+    it('should generate discovery events after room entry delay', () => {
       const crawlerName = 'Test Crawler';
       const crawlerId = 123;
       const roomId = 459; // Different room ID
@@ -271,27 +282,25 @@ describe('Events System', () => {
       // Initial entry event
       expect(receivedEvents).toHaveLength(1);
 
-      // Wait for discovery events
-      setTimeout(() => {
-        // Should have entry event + discovery events for each non-player entity
-        expect(receivedEvents.length).toBeGreaterThan(1);
+      // Fast-forward past the discovery delay
+      jest.advanceTimersByTime(1600);
 
-        const discoveryEvents = receivedEvents.filter(e => e.type === 'discovery');
-        expect(discoveryEvents).toHaveLength(2); // goblin and merchant
+      // Should have entry event + discovery events for each non-player entity
+      expect(receivedEvents.length).toBeGreaterThan(1);
 
-        const goblinEvent = discoveryEvents.find(e => e.entityName === 'Angry Goblin');
-        const merchantEvent = discoveryEvents.find(e => e.entityName === 'Friendly Merchant');
+      const discoveryEvents = receivedEvents.filter(e => e.type === 'discovery');
+      expect(discoveryEvents).toHaveLength(2); // goblin and merchant
 
-        expect(goblinEvent).toBeDefined();
-        expect(goblinEvent?.priority).toBe('high'); // hostile = high priority
-        expect(goblinEvent?.message).toContain('notices a dangerous');
+      const goblinEvent = discoveryEvents.find(e => e.entityName === 'Angry Goblin');
+      const merchantEvent = discoveryEvents.find(e => e.entityName === 'Friendly Merchant');
 
-        expect(merchantEvent).toBeDefined();
-        expect(merchantEvent?.priority).toBe('low'); // neutral = low priority
-        expect(merchantEvent?.message).toContain('spots');
+      expect(goblinEvent).toBeDefined();
+      expect(goblinEvent?.priority).toBe('high'); // hostile = high priority
+      expect(goblinEvent?.message).toContain('notices a dangerous');
 
-        done();
-      }, 1600); // Slightly more than the 1500ms delay
+      expect(merchantEvent).toBeDefined();
+      expect(merchantEvent?.priority).toBe('low'); // neutral = low priority
+      expect(merchantEvent?.message).toContain('spots');
     });
   });
 
@@ -428,18 +437,16 @@ describe('Events System', () => {
       expect(entryTime).toBeLessThanOrEqual(afterTime);
     });
 
-    it('should update room entry time on room change', (done) => {
+    it('should update room entry time on room change', () => {
       eventsSystem.onRoomChange(123, 'Test Crawler', 456);
       const firstEntryTime = eventsSystem.getRoomEntryTime();
 
-      // Wait a bit
-      setTimeout(() => {
-        eventsSystem.onRoomChange(789, 'Test Crawler', 456);
-        const secondEntryTime = eventsSystem.getRoomEntryTime();
+      // Advance time and change rooms
+      jest.advanceTimersByTime(10);
+      eventsSystem.onRoomChange(789, 'Test Crawler', 456);
+      const secondEntryTime = eventsSystem.getRoomEntryTime();
 
-        expect(secondEntryTime).toBeGreaterThan(firstEntryTime);
-        done();
-      }, 10);
+      expect(secondEntryTime).toBeGreaterThan(firstEntryTime);
     });
   });
 
