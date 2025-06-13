@@ -72,9 +72,9 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     enabled: !!crawlerId
   });
 
-  const isLoading = crawlerLoading || roomLoading;
+  const isDataLoading = crawlerLoading || roomLoading;
 
-  if (isLoading) {
+  if (isDataLoading) {
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <div className="text-center">
