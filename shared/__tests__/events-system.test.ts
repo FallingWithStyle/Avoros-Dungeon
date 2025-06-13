@@ -1,4 +1,3 @@
-
 /**
  * File: events-system.test.ts
  * Responsibility: Unit tests for the room events tracking and broadcasting system
@@ -66,9 +65,27 @@ Object.defineProperty(global.window || window, 'sessionStorage', {
   value: mockSessionStorage
 });
 
+// Mock the dynamic import of combat-system
 jest.mock('../combat-system', () => ({
   combatSystem: mockCombatSystem
 }));
+
+// Mock dynamic import function for Jest environment
+const originalImport = (global as any).import;
+beforeAll(() => {
+  // Mock the dynamic import used in events-system.ts
+  (global as any).import = jest.fn().mockImplementation((modulePath: string) => {
+    if (modulePath === './combat-system') {
+      return Promise.resolve({ combatSystem: mockCombatSystem });
+    }
+    return originalImport ? originalImport(modulePath) : Promise.reject(new Error(`Module not found: ${modulePath}`));
+  });
+});
+
+afterAll(() => {
+  // Restore original import
+  (global as any).import = originalImport;
+});
 
 describe('Events System', () => {
   let receivedEvents: RoomEvent[] = [];
@@ -79,7 +96,7 @@ describe('Events System', () => {
     eventsSystem.clearEvents();
     mockSessionStorage.clear();
     receivedEvents = [];
-    
+
     // Subscribe to events
     unsubscribe = eventsSystem.subscribe((events) => {
       receivedEvents.splice(0, receivedEvents.length, ...events);
@@ -272,21 +289,21 @@ describe('Events System', () => {
       setTimeout(() => {
         // Should have entry event + discovery events for each non-player entity
         expect(receivedEvents.length).toBeGreaterThan(1);
-        
+
         const discoveryEvents = receivedEvents.filter(e => e.type === 'discovery');
         expect(discoveryEvents).toHaveLength(2); // goblin and merchant
-        
+
         const goblinEvent = discoveryEvents.find(e => e.entityName === 'Angry Goblin');
         const merchantEvent = discoveryEvents.find(e => e.entityName === 'Friendly Merchant');
-        
+
         expect(goblinEvent).toBeDefined();
         expect(goblinEvent?.priority).toBe('high'); // hostile = high priority
         expect(goblinEvent?.message).toContain('notices a dangerous');
-        
+
         expect(merchantEvent).toBeDefined();
         expect(merchantEvent?.priority).toBe('low'); // neutral = low priority
         expect(merchantEvent?.message).toContain('spots');
-        
+
         done();
       }, 1600); // Slightly more than the 1500ms delay
     });
@@ -415,9 +432,9 @@ describe('Events System', () => {
   describe('Room Entry Time Tracking', () => {
     it('should track room entry time', () => {
       const beforeTime = Date.now();
-      
+
       eventsSystem.onRoomChange(123, 'Test Crawler', 456);
-      
+
       const entryTime = eventsSystem.getRoomEntryTime();
       const afterTime = Date.now();
 
