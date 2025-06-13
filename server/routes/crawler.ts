@@ -329,9 +329,12 @@ export function registerCrawlerRoutes(app: Express) {
   app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
+      console.log(`=== ROOM DATA BATCH REQUEST for crawler ${crawlerId} ===`);
+      
       const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
+        console.log(`Access denied for crawler ${crawlerId}`);
         return res.status(403).json({ error: "Access denied" });
       }
 
@@ -343,45 +346,92 @@ export function registerCrawlerRoutes(app: Express) {
       // Get current room first (needed for cache key)
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
+        console.log(`No current room found for crawler ${crawlerId}`);
         return res.status(404).json({ error: "No current room found" });
       }
 
+      console.log(`Current room for crawler ${crawlerId}: ${currentRoom.name} (ID: ${currentRoom.id})`);
+
       // Check for complete batch cache first
       const batchCacheKey = `room_batch_${crawlerId}_${currentRoom.id}`;
-      let cachedBatch = await redisService.get(batchCacheKey);
-      if (cachedBatch) {
-        console.log(`Using cached batch data for crawler ${crawlerId} room ${currentRoom.id}`);
-        return res.json(JSON.parse(cachedBatch));
+      let cachedBatch = null;
+      
+      try {
+        cachedBatch = await redisService.get(batchCacheKey);
+        if (cachedBatch) {
+          console.log(`Using cached batch data for crawler ${crawlerId} room ${currentRoom.id}`);
+          return res.json(JSON.parse(cachedBatch));
+        }
+      } catch (cacheError) {
+        console.log(`Cache error for batch data, proceeding without cache:`, cacheError.message);
       }
 
-      // Get all data in parallel
-      const [tacticalData, scannedRooms] = await Promise.all([
-        (async () => {
-          // Check tactical cache first
+      // Get all data in parallel with proper error handling
+      let tacticalData = null;
+      let scannedRooms = [];
+
+      try {
+        // Get tactical data with fallback
+        try {
           const cacheKey = `tactical_data_${currentRoom.id}`;
-          let cachedData = await redisService.get(cacheKey);
+          let cachedData = null;
+          
+          try {
+            cachedData = await redisService.get(cacheKey);
+          } catch (cacheError) {
+            console.log(`Tactical cache error, proceeding without cache:`, cacheError.message);
+          }
+          
           if (cachedData) {
             console.log(`Using cached tactical data for room ${currentRoom.id}`);
-            return JSON.parse(cachedData);
+            tacticalData = JSON.parse(cachedData);
+          } else {
+            // Only regenerate if no cache exists
+            console.log(`Generating fresh tactical data for room ${currentRoom.id}`);
+            const [playersInRoom, availableDirections, tacticalEntities] = await Promise.all([
+              storage.getPlayersInRoom(currentRoom.id).catch(err => {
+                console.log(`Error getting players in room:`, err.message);
+                return [];
+              }),
+              storage.getAvailableDirections(currentRoom.id).catch(err => {
+                console.log(`Error getting available directions:`, err.message);
+                return [];
+              }),
+              storage.generateAndSaveTacticalData(currentRoom.id, currentRoom).catch(err => {
+                console.log(`Error generating tactical data:`, err.message);
+                return [];
+              })
+            ]);
+
+            tacticalData = { availableDirections, playersInRoom, tacticalEntities };
+            
+            // Try to cache, but don't fail if cache is unavailable
+            try {
+              await redisService.set(cacheKey, JSON.stringify(tacticalData), 60);
+            } catch (cacheError) {
+              console.log(`Failed to cache tactical data:`, cacheError.message);
+            }
           }
+        } catch (tacticalError) {
+          console.log(`Error with tactical data generation:`, tacticalError.message);
+          tacticalData = { availableDirections: [], playersInRoom: [], tacticalEntities: [] };
+        }
 
-          // Only regenerate if no cache exists
-          console.log(`Generating fresh tactical data for room ${currentRoom.id}`);
-          const [playersInRoom, availableDirections, tacticalEntities] = await Promise.all([
-            storage.getPlayersInRoom(currentRoom.id),
-            storage.getAvailableDirections(currentRoom.id),
-            storage.generateAndSaveTacticalData(currentRoom.id, currentRoom)
-          ]);
-
-          const data = { availableDirections, playersInRoom, tacticalEntities };
-          await redisService.set(cacheKey, JSON.stringify(data), 60); // Longer cache for tactical data
-          return data;
-        })(),
-        (async () => {
+        // Get scanned rooms with fallback
+        try {
           const scanRange = crawler.scanRange || 2;
-          return await storage.getScannedRooms(crawlerId, scanRange);
-        })()
-      ]);
+          scannedRooms = await storage.getScannedRooms(crawlerId, scanRange);
+        } catch (scannedError) {
+          console.log(`Error getting scanned rooms:`, scannedError.message);
+          scannedRooms = [];
+        }
+
+      } catch (parallelError) {
+        console.log(`Error in parallel data fetching:`, parallelError.message);
+        // Use fallback data
+        tacticalData = { availableDirections: [], playersInRoom: [], tacticalEntities: [] };
+        scannedRooms = [];
+      }
 
       const batchResult = {
         currentRoom,
@@ -392,13 +442,21 @@ export function registerCrawlerRoutes(app: Express) {
         scannedRooms
       };
 
-      // Cache the complete batch for faster subsequent requests
-      await redisService.set(batchCacheKey, JSON.stringify(batchResult), 30);
+      // Try to cache the complete batch, but don't fail if cache is unavailable
+      try {
+        await redisService.set(batchCacheKey, JSON.stringify(batchResult), 30);
+      } catch (cacheError) {
+        console.log(`Failed to cache batch result:`, cacheError.message);
+      }
+
+      console.log(`=== BATCH DATA RESPONSE for crawler ${crawlerId} ===`);
+      console.log(`Tactical entities: ${tacticalData?.tacticalEntities?.length || 0}`);
+      console.log(`Scanned rooms: ${scannedRooms.length}`);
 
       res.json(batchResult);
     } catch (error) {
       console.error("Error fetching batch room data:", error);
-      res.status(500).json({ error: "Failed to fetch room data" });
+      res.status(500).json({ error: "Failed to fetch room data", details: error.message });
     }
   });
 
