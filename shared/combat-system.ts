@@ -97,7 +97,7 @@ export function calculateDamage(attacker: any, defender: any): number {
   // For unarmed attacks, use might stat; otherwise use attack stat
   const might = attacker.might || 1;
   const weaponAttack = attacker.attack || 0;
-  
+
   // If no weapon equipped (attack = 0), use might for punch damage
   const baseDamage = weaponAttack > 0 ? weaponAttack : Math.floor(might * 0.5) + 1;
   const defense = defender.defense || 0;
@@ -345,7 +345,7 @@ export class CombatSystem {
     if (hits) {
       const damage = calculateDamage(attacker, target);
       target.hp = Math.max(0, target.hp - damage);
-      
+
       // Add attack animation data to the attacker
       this.updateEntity(attackerId, {
         ...attacker,
@@ -358,7 +358,7 @@ export class CombatSystem {
       });
 
       console.log(`${attacker.name} punches ${target.name} for ${damage} damage! (HP: ${target.hp}/${target.maxHp})`);
-      
+
       // Check if target is defeated
       if (target.hp <= 0) {
         console.log(`${target.name} is defeated!`);
@@ -366,7 +366,7 @@ export class CombatSystem {
       }
     } else {
       console.log(`${attacker.name} swings at ${target.name} but misses!`);
-      
+
       // Add miss animation
       this.updateEntity(attackerId, {
         ...attacker,

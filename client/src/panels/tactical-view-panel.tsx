@@ -319,8 +319,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     const lastUsed = playerEntity.cooldowns[actionId] || 0;
     const now = Date.now();
     
-    // Get action cooldown (punch = 800ms)
-    const actionCooldown = actionId === "basic_attack" ? 800 : 1000;
+    // Get action cooldown (punch = 1200ms)
+    const actionCooldown = actionId === "basic_attack" ? 1200 : 1000;
     const timeRemaining = Math.max(0, (lastUsed + actionCooldown) - now);
     
     return (timeRemaining / actionCooldown) * 100;
