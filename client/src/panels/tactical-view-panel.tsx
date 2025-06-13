@@ -252,7 +252,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Entity event handlers
   const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    
+
     // If in attack mode, try to attack the clicked entity
     if (activeActionMode?.type === "attack" && entityId !== "player") {
       const targetEntity = combatState.entities.find(e => e.id === entityId);
@@ -280,7 +280,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       }
       return;
     }
-    
+
     // Otherwise just select the entity
     combatSystem.selectEntity(entityId);
   }, [activeActionMode, combatState.entities, toast]);
@@ -305,24 +305,83 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Hotbar handlers
   const handleHotbarClick = useCallback((actionId: string, actionType: string, actionName: string) => {
-    if (activeActionMode?.actionId === actionId) {
-      setActiveActionMode(null);
+    if (actionType === "attack" && actionId === "basic_attack") {
+      // For punch attacks, always fire the attack
+      const playerEntity = combatState.entities.find(e => e.id === "player");
+      if (!playerEntity) {
+        toast({
+          title: "Attack Failed",
+          description: "Player not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Find nearby hostile entities within punch range
+      const hostileEntities = combatState.entities.filter(e => 
+        e.type === "hostile" && 
+        e.hp > 0 && 
+        combatSystem.calculateDistance(playerEntity.position, e.position) <= 8 // Punch range
+      );
+
+      if (hostileEntities.length === 0) {
+        // No targets - fire punch animation into empty air and start cooldown
+        const success = combatSystem.queueAction("player", actionId);
+        if (success) {
+          toast({
+            title: "Punch!",
+            description: "You swing at empty air",
+          });
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - still on cooldown",
+            variant: "destructive",
+          });
+        }
+      } else {
+        // Attack the closest hostile entity
+        const closestEnemy = hostileEntities.reduce((closest, current) => {
+          const closestDist = combatSystem.calculateDistance(playerEntity.position, closest.position);
+          const currentDist = combatSystem.calculateDistance(playerEntity.position, current.position);
+          return currentDist < closestDist ? current : closest;
+        });
+
+        const success = combatSystem.queueAction("player", actionId, closestEnemy.id);
+        if (success) {
+          toast({
+            title: "Attack!",
+            description: "Punching " + (closestEnemy.name || closestEnemy.id),
+          });
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - still on cooldown",
+            variant: "destructive",
+          });
+        }
+      }
     } else {
-      setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+      // For other actions, use toggle behavior
+      if (activeActionMode?.actionId === actionId) {
+        setActiveActionMode(null);
+      } else {
+        setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+      }
     }
-  }, [activeActionMode]);
+  }, [activeActionMode, combatState.entities, toast]);
 
   const getCooldownPercentage = useCallback((actionId: string): number => {
     const playerEntity = combatState.entities.find(e => e.id === "player");
     if (!playerEntity?.cooldowns) return 0;
-    
+
     const lastUsed = playerEntity.cooldowns[actionId] || 0;
     const now = Date.now();
-    
+
     // Get action cooldown (punch = 1200ms)
     const actionCooldown = actionId === "basic_attack" ? 1200 : 1000;
     const timeRemaining = Math.max(0, (lastUsed + actionCooldown) - now);
-    
+
     return (timeRemaining / actionCooldown) * 100;
   }, [combatState.entities]);
 

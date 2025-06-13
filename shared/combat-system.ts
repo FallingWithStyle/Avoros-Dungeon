@@ -328,11 +328,43 @@ export class CombatSystem {
     }
   }
 
-  private executeAttack(attackerId: string, targetId: string): void {
+  private executeAttack(attackerId: string, targetId?: string): void {
     const attacker = this.state.entities.find((e) => e.id === attackerId);
-    const target = this.state.entities.find((e) => e.id === targetId);
+    
+    if (!attacker) return;
 
-    if (!attacker || !target) return;
+    // If no target, just show punch animation into empty air
+    if (!targetId) {
+      console.log(`${attacker.name} swings at empty air!`);
+      
+      this.updateEntity(attackerId, {
+        ...attacker,
+        attackAnimation: {
+          type: 'punch_miss',
+          targetId: '',
+          timestamp: Date.now(),
+          duration: 200
+        }
+      });
+      return;
+    }
+
+    const target = this.state.entities.find((e) => e.id === targetId);
+    if (!target) {
+      // Target doesn't exist, show miss animation
+      console.log(`${attacker.name} swings at missing target!`);
+      
+      this.updateEntity(attackerId, {
+        ...attacker,
+        attackAnimation: {
+          type: 'punch_miss',
+          targetId: targetId,
+          timestamp: Date.now(),
+          duration: 200
+        }
+      });
+      return;
+    }
 
     // Start combat if not already in combat
     if (!this.state.isInCombat) {
