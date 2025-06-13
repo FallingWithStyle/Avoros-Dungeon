@@ -1,0 +1,89 @@
+~/workspace$ npm test -- --testPathPattern=dungeon-generator
+
+> rest-express@1.0.0 test
+> jest --testPathPattern=dungeon-generator
+
+ FAIL  client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts (18.052 s)
+  Dungeon Generator
+    Room Connectivity Algorithm
+      ✓ should identify single connected component (2 ms)
+      ✓ should identify multiple disconnected components (1 ms)
+      ✓ should handle single room as one component (1 ms)
+      ✓ should handle diagonal rooms as separate components
+    Faction Territory Assignment
+      ✕ should assign rooms proportionally to faction influence (3 ms)
+      ✓ should leave some rooms unclaimed based on unclaimedPercent (2 ms)
+      ✓ should handle single faction correctly (1 ms)
+      ✕ should ignore factions with zero influence (1 ms)
+      ✕ should handle empty rooms array
+      ✓ should handle empty factions array (1 ms)
+    Room Generation Logic
+      ✓ should calculate minimum rooms per floor correctly (1 ms)
+      ✓ should handle staircase placement constraints (1 ms)
+      ✓ should determine room types with correct probabilities (3 ms)
+    Connection Generation Logic
+      ✓ should generate bidirectional connections (1 ms)
+      ✓ should handle cross-shaped room layout (5 ms)
+      ✓ should not create connections to non-existent rooms
+    Batch Processing Logic
+      ✓ should calculate correct batch sizes (1 ms)
+    Faction Scaling Logic
+      ✓ should scale faction count with room count (1 ms)
+
+  ● Dungeon Generator › Faction Territory Assignment › should assign rooms proportionally to faction influence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 100
+    Received: 95
+
+      202 |       
+      203 |       const totalAssigned = assignments[1].length + assignments[2].length;
+    > 204 |       expect(totalAssigned).toBe(100);
+          |                             ^
+      205 |       
+      206 |       // Alpha should get roughly 60% of rooms, Beta should get 40%
+      207 |       const alphaRatio = assignments[1].length / totalAssigned;
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:204:29)
+
+  ● Dungeon Generator › Faction Territory Assignment › should ignore factions with zero influence
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: []
+    Received: undefined
+
+      261 |       
+      262 |       expect(assignments[1].length).toBe(9);
+    > 263 |       expect(assignments[2]).toEqual([]);
+          |                              ^
+      264 |       expect(assignments["unclaimed"].length).toBe(1);
+      265 |     });
+      266 |
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:263:30)
+
+  ● Dungeon Generator › Faction Territory Assignment › should handle empty rooms array
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+      144 |         const idx = Math.floor(Math.random() * remainingRooms.length);
+      145 |         const room = remainingRooms.splice(idx, 1)[0];
+    > 146 |         assignments[ft.id] = [room.id];
+          |                                    ^
+      147 |         assigned.add(room.id);
+      148 |         return { ...room, factionId: ft.id };
+      149 |       });
+
+      at client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:146:36
+          at Array.map (<anonymous>)
+      at assignFactionTerritories (client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:143:40)
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:271:27)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 15 passed, 18 total
+Snapshots:   0 total
+Time:        18.317 s
+Ran all test suites matching /dungeon-generator/i.
+~/workspace$ 
