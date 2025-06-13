@@ -7,8 +7,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export default function Landing() {
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-950 via-gray-900 to-black text-slate-100 overflow-x-hidden">
       {/* Background Effects */}
@@ -112,27 +116,57 @@ export default function Landing() {
 
           {/* Call to Action */}
           <div className="text-center mb-12">
-            <div className="space-y-4">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-12 py-6 text-xl font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300 hover:scale-105 block mx-auto"
-                onClick={() => (window.location.href = "/api/login")}
-              >
-                <i className="fas fa-briefcase mr-3"></i>
-                LOGIN WITH REPLIT
-              </Button>
+            <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-12 py-6 text-xl font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300 hover:scale-105"
+                >
+                  <i className="fas fa-briefcase mr-3"></i>
+                  ESTABLISH YOUR CORPORATION
+                </Button>
+              </DialogTrigger>
+              
+              <DialogContent className="bg-gradient-to-br from-gray-900 to-black border-red-500/30 text-white max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-red-400 text-center">
+                    <i className="fas fa-building mr-2"></i>
+                    Corporate Login
+                  </DialogTitle>
+                  <DialogDescription className="text-slate-300 text-center">
+                    Choose your authentication method to establish your corporation
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4 pt-4">
+                  <Button
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-4 text-lg font-bold border-2 border-red-500 shadow-lg shadow-red-500/25 hover:shadow-red-400/40 transition-all duration-300"
+                    onClick={() => {
+                      setLoginDialogOpen(false);
+                      window.location.href = "/api/login";
+                    }}
+                  >
+                    <i className="fas fa-code mr-3"></i>
+                    LOGIN WITH REPLIT
+                  </Button>
 
-              <div className="text-slate-500">or</div>
+                  <div className="text-center text-slate-500 text-sm">or</div>
 
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-12 py-6 text-xl font-bold border-2 border-blue-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-400/40 transition-all duration-300 hover:scale-105 block mx-auto"
-                onClick={() => (window.location.href = "/api/auth/google")}
-              >
-                <i className="fab fa-google mr-3"></i>
-                LOGIN WITH GOOGLE
-              </Button>
-            </div>
+                  <Button
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-4 text-lg font-bold border-2 border-blue-500 shadow-lg shadow-blue-500/25 hover:shadow-blue-400/40 transition-all duration-300"
+                    onClick={() => {
+                      setLoginDialogOpen(false);
+                      window.location.href = "/api/auth/google";
+                    }}
+                  >
+                    <i className="fab fa-google mr-3"></i>
+                    LOGIN WITH GOOGLE
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             <p className="text-slate-400 mt-6 text-lg">
               Register your corporation and begin{" "}
