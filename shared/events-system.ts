@@ -72,8 +72,8 @@ class EventsSystem {
 
     // Determine entry direction from stored movement direction
     let storedDirection = null;
-    if (typeof window !== 'undefined') {
-      storedDirection = sessionStorage.getItem("lastMovementDirection");
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      storedDirection = window.sessionStorage.getItem("lastMovementDirection");
     }
 
     let entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered the room`;
@@ -88,7 +88,9 @@ class EventsSystem {
       entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered from the ${oppositeDirection}`;
 
       // Store the entry position for immediate use in combat system
-      sessionStorage.setItem('entryDirection', storedDirection);
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem('entryDirection', storedDirection);
+      }
     }
 
     // Add entry event
