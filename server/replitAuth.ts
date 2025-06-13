@@ -170,17 +170,17 @@ export async function setupAuth(app: Express) {
         console.error("Logout error:", err);
         return res.status(500).json({ message: "Logout failed" });
       }
-      
+
       // Destroy the session completely
       req.session.destroy((err) => {
         if (err) {
           console.error("Session destruction error:", err);
           return res.status(500).json({ message: "Session cleanup failed" });
         }
-        
+
         // Clear the session cookie
         res.clearCookie("connect.sid");
-        
+
         // Redirect to home page
         res.redirect("/");
       });

@@ -17,6 +17,17 @@ import { registerDataRoutes } from "./data";
 import { redisStatus } from "../lib/redis-status";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      environment: process.env.NODE_ENV || "development"
+    });
+  });
+
   // Auth middleware
   await setupAuth(app);
 
@@ -97,14 +108,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { redisService } = await import('./lib/redis-service');
       const isAvailable = await redisStatus.getStatus();
       const isForcedFallback = redisService.isForceFallbackMode();
-      
+
       let message = 'Redis is operational';
       if (isForcedFallback) {
         message = 'Redis fallback mode enabled (debug override)';
       } else if (!isAvailable) {
         message = 'Redis is unavailable - using database fallback';
       }
-      
+
       res.json({ 
         available: isAvailable && !isForcedFallback,
         fallbackMode: isForcedFallback,
