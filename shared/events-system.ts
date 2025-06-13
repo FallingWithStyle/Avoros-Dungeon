@@ -114,9 +114,6 @@ class EventsSystem {
   }
 
   private generateDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
-    // Only generate events in client environment
-    if (typeof window === 'undefined') return;
-
     import('./combat-system').then(({ combatSystem }) => {
       const combatState = combatSystem.getState();
 
@@ -142,9 +139,6 @@ class EventsSystem {
   }
 
   onCombatAction(action: any, entityId: string, targetId?: string, damage?: number) {
-    // Only generate events in client environment
-    if (typeof window === 'undefined') return;
-
     import('./combat-system').then(({ combatSystem }) => {
       const combatState = combatSystem.getState();
       const entity = combatState.entities.find(e => e.id === entityId);

@@ -1,0 +1,161 @@
+ FAIL  shared/__tests__/events-system.test.ts (15.233 s)
+  Events System
+    Event Management
+      ✓ should add events and notify subscribers (4 ms)
+      ✓ should prevent duplicate events with same ID
+      ✓ should clear all events (1 ms)
+    Subscriber Pattern
+      ✓ should handle multiple subscribers (1 ms)
+      ✓ should stop notifying unsubscribed callbacks
+    Room Change Events
+      ✓ should handle room entry without stored direction (2 ms)
+      ✕ should handle room entry with stored direction (2 ms)
+      ✕ should not generate duplicate events for same room (1 ms)
+      ✕ should generate discovery events after room entry delay (1 ms)
+    Combat Events
+      ✕ should record combat actions with move type (2 ms)
+      ✕ should record combat actions with attack type (1 ms)
+      ✕ should record combat actions without target (1 ms)
+      ✓ should handle combat start events (1 ms)
+      ✓ should handle combat damage events
+      ✓ should handle combat end events
+    Death Events
+      ✓ should handle mob death events (1 ms)
+      ✓ should handle crawler death with killer (2 ms)
+      ✓ should handle crawler death without killer (5 ms)
+      ✓ should handle NPC death events (1 ms)
+    Room Entry Time Tracking
+      ✓ should track room entry time (1 ms)
+      ✓ should update room entry time on room change
+    Event Properties
+      ✓ should create events with all required properties (1 ms)
+      ✓ should handle events with minimal properties
+
+  ● Events System › Room Change Events › should handle room entry with stored direction
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      260 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+      261 |
+    > 262 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      263 |       expect(receivedEvents[0].message).toBe(`Crawler ${crawlerName} (#${crawlerId}) entered from the south`);
+      264 |       expect(receivedEvents[0].direction).toBe('north');
+      265 |       expect(mockSessionStorage.setItem).toHaveBeenCalledWith('entryDirection', 'north');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:262:30)
+
+  ● Events System › Room Change Events › should not generate duplicate events for same room
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      272 |
+      273 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+    > 274 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      275 |
+      276 |       // Try to enter same room again
+      277 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:274:30)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      287 |
+      288 |       // Initial entry event
+    > 289 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      290 |
+      291 |       // Wait for discovery events
+      292 |       setTimeout(() => {
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:289:30)
+
+  ● Events System › Combat Events › should record combat actions with move type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      320 |       eventsSystem.onCombatAction(action, entityId);
+      321 |
+    > 322 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      323 |       expect(receivedEvents[0].type).toBe('movement');
+      324 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler moved to a new position');
+      325 |       expect(receivedEvents[0].priority).toBe('low');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:322:30)
+
+  ● Events System › Combat Events › should record combat actions with attack type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      334 |       eventsSystem.onCombatAction(action, entityId, targetId, damage);
+      335 |
+    > 336 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      337 |       expect(receivedEvents[0].type).toBe('combat');
+      338 |       expect(receivedEvents[0].message).toBe('Angry Goblin used Sword Strike on Test Crawler');
+      339 |       expect(receivedEvents[0].priority).toBe('high');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:336:30)
+
+  ● Events System › Combat Events › should record combat actions without target
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      347 |       eventsSystem.onCombatAction(action, entityId);
+      348 |
+    > 349 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      350 |       expect(receivedEvents[0].type).toBe('combat');
+      351 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler used Heal');
+      352 |       expect(receivedEvents[0].priority).toBe('medium');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:349:30)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 17 passed, 23 total
+Snapshots:   0 total
+Time:        15.485 s, estimated 16 s
+Ran all test suites matching /shared\/__tests__\/events-system.test.ts/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+
+ReferenceError: You are trying to `import` a file after the Jest environment has been torn down. From shared/__tests__/events-system.test.ts.
+
+      100 |       type: "movement",
+      101 |       message: entryMessage,
+    > 102 |       entityId: "player",
+          |                                                   ^
+      103 |       entityName: crawlerName,
+      104 |       direction: (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) 
+      105 |         ? storedDirection as "north" | "south" | "east" | "west" 
+
+      at shared/events-system.ts:102:51
