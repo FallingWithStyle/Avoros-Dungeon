@@ -168,11 +168,11 @@ describe("logErrorToFile", () => {
   });
 
   it("should include proper timestamps", async () => {
-    const beforeTime = new Date().toISOString();
+    const beforeTime = Date.now();
     
     await logErrorToFile("Timestamp test");
     
-    const afterTime = new Date().toISOString();
+    const afterTime = Date.now();
 
     expect(mockAppendFile).toHaveBeenCalledTimes(1);
     const [, content] = mockAppendFile.mock.calls[0];
@@ -183,9 +183,9 @@ describe("logErrorToFile", () => {
     expect(timestampMatch).toBeTruthy();
     
     if (timestampMatch) {
-      const logTimestamp = timestampMatch[1];
-      expect(logTimestamp >= beforeTime.substring(0, 19)).toBe(true);
-      expect(logTimestamp <= afterTime.substring(0, 19)).toBe(true);
+      const logTimestamp = new Date(timestampMatch[1]).getTime();
+      expect(logTimestamp).toBeGreaterThanOrEqual(beforeTime);
+      expect(logTimestamp).toBeLessThanOrEqual(afterTime);
     }
   });
 
