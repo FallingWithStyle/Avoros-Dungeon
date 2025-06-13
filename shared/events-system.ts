@@ -121,7 +121,8 @@ class EventsSystem {
   }
 
   private generateDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
-    const discoveryKey = `${crawlerName}-${crawlerId}-${baseTime}`;
+    // Use room ID for deduplication instead of timestamp to prevent multiple calls for same room
+    const discoveryKey = `${crawlerName}-${crawlerId}-${this.lastRoomId}`;
     
     // Prevent duplicate discovery events for the same room entry
     if (this.discoveryEventsGenerated.has(discoveryKey)) {
