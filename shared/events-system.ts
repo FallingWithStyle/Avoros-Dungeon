@@ -138,7 +138,7 @@ class EventsSystem {
   private processDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
     const combatState = this.combatSystem.getState();
 
-    combatState.entities.forEach((entity) => {
+    combatState.entities.forEach((entity: any) => {
       if (entity.id !== "player") {
         this.addEvent({
           id: `discovery-${entity.id}-${baseTime}`,
@@ -175,8 +175,8 @@ class EventsSystem {
 
   private processCombatAction(action: any, entityId: string, targetId?: string, damage?: number) {
     const combatState = this.combatSystem.getState();
-    const entity = combatState.entities.find(e => e.id === entityId);
-    const target = targetId ? combatState.entities.find(e => e.id === targetId) : null;
+    const entity = combatState.entities.find((e: any) => e.id === entityId);
+    const target = targetId ? combatState.entities.find((e: any) => e.id === targetId) : null;
 
     if (!entity) return;
 
