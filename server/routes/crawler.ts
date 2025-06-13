@@ -340,28 +340,41 @@ export function registerCrawlerRoutes(app: Express) {
       storage.tacticalStorage?.setRequestCache(requestCache);
       storage.mobStorage?.setRequestCache(requestCache);
 
-      // Get all data in parallel instead of sequential
-      const [currentRoom, tacticalData, scannedRooms] = await Promise.all([
-        storage.getCrawlerCurrentRoom(crawlerId),
+      // Get current room first (needed for cache key)
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ error: "No current room found" });
+      }
+
+      // Check for complete batch cache first
+      const batchCacheKey = `room_batch_${crawlerId}_${currentRoom.id}`;
+      let cachedBatch = await redisService.get(batchCacheKey);
+      if (cachedBatch) {
+        console.log(`Using cached batch data for crawler ${crawlerId} room ${currentRoom.id}`);
+        return res.json(JSON.parse(cachedBatch));
+      }
+
+      // Get all data in parallel
+      const [tacticalData, scannedRooms] = await Promise.all([
         (async () => {
-          const room = await storage.getCrawlerCurrentRoom(crawlerId);
-          if (!room) return null;
-          
-          // Check cache first
-          const cacheKey = `tactical_data_${room.id}`;
+          // Check tactical cache first
+          const cacheKey = `tactical_data_${currentRoom.id}`;
           let cachedData = await redisService.get(cacheKey);
           if (cachedData) {
+            console.log(`Using cached tactical data for room ${currentRoom.id}`);
             return JSON.parse(cachedData);
           }
 
+          // Only regenerate if no cache exists
+          console.log(`Generating fresh tactical data for room ${currentRoom.id}`);
           const [playersInRoom, availableDirections, tacticalEntities] = await Promise.all([
-            storage.getPlayersInRoom(room.id),
-            storage.getAvailableDirections(room.id),
-            storage.generateAndSaveTacticalData(room.id, room)
+            storage.getPlayersInRoom(currentRoom.id),
+            storage.getAvailableDirections(currentRoom.id),
+            storage.generateAndSaveTacticalData(currentRoom.id, currentRoom)
           ]);
 
           const data = { availableDirections, playersInRoom, tacticalEntities };
-          await redisService.set(cacheKey, JSON.stringify(data), 30);
+          await redisService.set(cacheKey, JSON.stringify(data), 60); // Longer cache for tactical data
           return data;
         })(),
         (async () => {
@@ -370,14 +383,19 @@ export function registerCrawlerRoutes(app: Express) {
         })()
       ]);
 
-      res.json({
+      const batchResult = {
         currentRoom,
         tacticalData: tacticalData ? {
           room: currentRoom,
           ...tacticalData
         } : null,
         scannedRooms
-      });
+      };
+
+      // Cache the complete batch for faster subsequent requests
+      await redisService.set(batchCacheKey, JSON.stringify(batchResult), 30);
+
+      res.json(batchResult);
     } catch (error) {
       console.error("Error fetching batch room data:", error);
       res.status(500).json({ error: "Failed to fetch room data" });

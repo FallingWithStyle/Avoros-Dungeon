@@ -7,10 +7,12 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
+import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
+import type { CombatEntity } from "@shared/combat-system";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
@@ -106,15 +108,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         return;
       }
 
-      // Clear entities only after successful movement
+      // Handle successful room transition
+      console.log("✅ Room movement successful to " + direction);
+
+      // Clear entities immediately for instant UI update
       const currentEntities = combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
 
-      // Refetch tactical data to get new room information
-      refetchTacticalData();
-      refetchExploredRooms();
+      // Use fast room change for instant feel
+      handleRoomChangeWithRefetch(crawler.id);
 
       console.log("⚡ Room transition completed successfully");
 
@@ -126,7 +130,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         variant: "destructive",
       });
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
+  }, [crawler, effectiveTacticalData?.availableDirections, toast]);
 
   // Use tactical positioning hook for movement validation logic
   const { handleMovement: handleTacticalMovement } = useTacticalPositioning({

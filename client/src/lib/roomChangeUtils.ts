@@ -7,44 +7,37 @@
 import { queryClient } from "@/lib/queryClient";
 
 /**
- * Handles room change events by invalidating all related queries
+ * Handles room change events by invalidating only essential queries
  * Used for position resets, teleports, or any forced room transition
  */
 export function handleRoomChange(crawlerId: number): void {
-  console.log("Handling room change for crawler " + crawlerId + " - updating all map and tactical data");
+  console.log("Handling room change for crawler " + crawlerId + " - invalidating essential queries only");
 
-  // Invalidate all room-related queries concurrently
+  // Only invalidate the batch query - it contains all room data we need
   queryClient.invalidateQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/current-room"],
+    queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
   });
+
+  // Keep map queries cached since they don't change often
   queryClient.invalidateQueries({
     queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/scanned-rooms"],
-  });
-  queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
-
-  // Also invalidate the main crawler query to ensure all data is fresh
-  queryClient.invalidateQueries({ 
-    queryKey: ["/api/crawlers/" + crawlerId] 
-  });
-  queryClient.invalidateQueries({ 
-    queryKey: ["/api/crawlers"] 
   });
 }
 
 /**
  * Handles room change with immediate refetch for responsive UI
+ * Uses optimistic updates for instant feel
  */
 export function handleRoomChangeWithRefetch(crawlerId: number) {
-  handleRoomChange(crawlerId);
+  console.log("Fast room change for crawler " + crawlerId);
 
-  // Refetch batch room data for faster loading
+  // Immediately refetch the batch data without invalidating first
   queryClient.refetchQueries({
     queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+  });
+
+  // Update explored rooms in background
+  queryClient.refetchQueries({
+    queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
   });
 }
