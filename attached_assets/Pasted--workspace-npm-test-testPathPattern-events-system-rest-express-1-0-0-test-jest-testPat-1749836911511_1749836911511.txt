@@ -1,0 +1,82 @@
+~/workspace$ npm test -- --testPathPattern=events-system
+
+> rest-express@1.0.0 test
+> jest --testPathPattern=events-system
+
+ FAIL  shared/__tests__/events-system.test.ts (24.36 s)
+  Events System
+    Event Management
+      ✓ should add events and notify subscribers (6 ms)
+      ✓ should prevent duplicate events with same ID (1 ms)
+      ✓ should clear all events (1 ms)
+    Subscriber Pattern
+      ✓ should handle multiple subscribers (1 ms)
+      ✓ should stop notifying unsubscribed callbacks (1 ms)
+    Room Change Events
+      ✓ should handle room entry without stored direction (1 ms)
+      ✓ should handle room entry with stored direction (1 ms)
+      ✓ should not generate duplicate events for same room
+      ✕ should generate discovery events after room entry delay (5000 ms)
+    Combat Events
+      ✓ should record combat actions with move type (1 ms)
+      ✓ should record combat actions with attack type (1 ms)
+      ✓ should record combat actions without target (1 ms)
+      ✓ should handle combat start events
+      ✓ should handle combat damage events (1 ms)
+      ✓ should handle combat end events
+    Death Events
+      ✓ should handle mob death events
+      ✓ should handle crawler death with killer (1 ms)
+      ✓ should handle crawler death without killer (1 ms)
+      ✓ should handle NPC death events (1 ms)
+    Room Entry Time Tracking
+      ✓ should track room entry time (1 ms)
+      ✓ should update room entry time on room change (11 ms)
+    Event Properties
+      ✓ should create events with all required properties (1 ms)
+      ✓ should handle events with minimal properties (1 ms)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 8
+    Received array:  [{"entityId": "goblin-1", "entityName": "Angry Goblin", "id": "discovery-goblin-1-1749836746842", "message": "Crawler Test Crawler (#123) notices a dangerous Angry Goblin", "priority": "high", "timestamp": 1749836748342, "type": "discovery"}, {"entityId": "merchant-1", "entityName": "Friendly Merchant", "id": "discovery-merchant-1-1749836746842", "message": "Crawler Test Crawler (#123) spots Friendly Merchant in the room", "priority": "low", "timestamp": 1749836748342, "type": "discovery"}, {"entityId": "goblin-1", "entityName": "Angry Goblin", "id": "discovery-goblin-1-1749836746844", "message": "Crawler Test Crawler (#123) notices a dangerous Angry Goblin", "priority": "high", "timestamp": 1749836748344, "type": "discovery"}, {"entityId": "merchant-1", "entityName": "Friendly Merchant", "id": "discovery-merchant-1-1749836746844", "message": "Crawler Test Crawler (#123) spots Friendly Merchant in the room", "priority": "low", "timestamp": 1749836748344, "type": "discovery"}, {"entityId": "goblin-1", "entityName": "Angry Goblin", "id": "discovery-goblin-1-1749836746846", "message": "Crawler Test Crawler (#123) notices a dangerous Angry Goblin", "priority": "high", "timestamp": 1749836748346, "type": "discovery"}, {"entityId": "merchant-1", "entityName": "Friendly Merchant", "id": "discovery-merchant-1-1749836746846", "message": "Crawler Test Crawler (#123) spots Friendly Merchant in the room", "priority": "low", "timestamp": 1749836748346, "type": "discovery"}, {"entityId": "goblin-1", "entityName": "Angry Goblin", "id": "discovery-goblin-1-1749836746847", "message": "Crawler Test Crawler (#123) notices a dangerous Angry Goblin", "priority": "high", "timestamp": 1749836748347, "type": "discovery"}, {"entityId": "merchant-1", "entityName": "Friendly Merchant", "id": "discovery-merchant-1-1749836746847", "message": "Crawler Test Crawler (#123) spots Friendly Merchant in the room", "priority": "low", "timestamp": 1749836748347, "type": "discovery"}]
+
+      278 |
+      279 |         const discoveryEvents = receivedEvents.filter(e => e.type === 'discovery');
+    > 280 |         expect(discoveryEvents).toHaveLength(2); // goblin and merchant
+          |                                 ^
+      281 |
+      282 |         const goblinEvent = discoveryEvents.find(e => e.entityName === 'Angry Goblin');
+      283 |         const merchantEvent = discoveryEvents.find(e => e.entityName === 'Friendly Merchant');
+
+      at Timeout._onTimeout (shared/__tests__/events-system.test.ts:280:33)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    thrown: "Exceeded timeout of 5000 ms for a test while waiting for `done()` to be called.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      262 |     });
+      263 |
+    > 264 |     it('should generate discovery events after room entry delay', (done) => {
+          |     ^
+      265 |       const crawlerName = 'Test Crawler';
+      266 |       const crawlerId = 123;
+      267 |       const roomId = 459; // Different room ID
+
+      at shared/__tests__/events-system.test.ts:264:5
+      at shared/__tests__/events-system.test.ts:220:3
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:73:1)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 22 passed, 23 total
+Snapshots:   0 total
+Time:        24.65 s
+Ran all test suites matching /events-system/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+~/workspace$ 
