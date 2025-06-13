@@ -14,17 +14,13 @@ module.exports = {
     '!**/*.test.ts',
     '!**/*.test.tsx'
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/client/src/$1'
   },
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
-  },
-  // Enable ES modules support for dynamic imports
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
+    '^.+\\.tsx?$': ['ts-jest', {
       useESM: true
-    }
-  }
+    }]
+  },
+  extensionsToTreatAsEsm: ['.ts']
 };
