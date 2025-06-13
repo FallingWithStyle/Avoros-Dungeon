@@ -36,12 +36,20 @@ export function useTacticalPositioning({
         return;
       }
 
-      const playerEntity = combatState.entities.find(
+      let playerEntity = combatState.entities.find(
         (e: any) => e.id === "player",
       );
+      
+      // If no player entity exists, recreate it at default position
       if (!playerEntity) {
-        console.log("No player entity found for movement");
-        return;
+        console.log("No player entity found - recreating at center position");
+        combatSystem.initializePlayer({ x: 50, y: 50 });
+        playerEntity = combatState.entities.find((e: any) => e.id === "player");
+        
+        if (!playerEntity) {
+          console.log("Failed to create player entity - movement blocked");
+          return;
+        }
       }
 
       // Determine facing direction based on movement (360-degree rotation)
