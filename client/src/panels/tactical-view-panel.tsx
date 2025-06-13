@@ -10,7 +10,6 @@ import { Eye } from "lucide-react";
 import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
-import type { CombatEntity } from "@shared/combat-system";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
