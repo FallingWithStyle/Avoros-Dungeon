@@ -7,8 +7,8 @@
 
 import { jest } from '@jest/globals';
 
-// Mock the database and logger dependencies
-jest.mock('../../../../server/db.js', () => ({
+// Mock the database dependencies with correct path
+jest.mock('../../../../server/db', () => ({
   db: {
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
@@ -22,11 +22,13 @@ jest.mock('../../../../server/db.js', () => ({
   }
 }));
 
-jest.mock('../../../../../shared/logger.js', () => ({
+// Mock the logger
+jest.mock('../../../../shared/logger', () => ({
   logErrorToFile: jest.fn()
 }));
 
-jest.mock('../../../../../shared/schema.js', () => ({
+// Mock the schema
+jest.mock('../../../../shared/schema', () => ({
   rooms: {},
   roomConnections: {},
   floors: {},
