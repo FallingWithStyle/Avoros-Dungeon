@@ -4,22 +4,19 @@
  * Notes: Creates 10-floor dungeons with themed rooms, procedural generation, and faction assignment based on influence
  */
 
-import { db } from "../../../../../server/db.js";
+import { db } from "@server/db";
 import {
   rooms,
   roomConnections,
   floors,
   crawlerPositions,
-} from "../../../../../shared/schema.js";
-import { eq } from "drizzle-orm";
-import { Faction, Room } from "./faction-assignment.js";
-type RoomInsert = Omit<Room, "id">;
-import { logErrorToFile } from "../../../../../shared/logger.js";
-
-import {
   floorThemes,
   roomTypes,
-} from "../../../../../shared/schema.js";
+} from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { Faction, Room } from "./faction-assignment";
+type RoomInsert = Omit<Room, "id">;
+import { logErrorToFile } from "@shared/logger";
 
 // Floor theme definitions
 interface RoomType {
