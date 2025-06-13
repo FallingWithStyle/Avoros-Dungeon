@@ -57,8 +57,12 @@ const mockCombatSystem = {
   }))
 };
 
-// Mock window and dynamic import
-Object.defineProperty(window, 'sessionStorage', {
+// Mock window and sessionStorage for Node.js environment
+if (typeof window === 'undefined') {
+  (global as any).window = {};
+}
+
+Object.defineProperty(global.window || window, 'sessionStorage', {
   value: mockSessionStorage
 });
 

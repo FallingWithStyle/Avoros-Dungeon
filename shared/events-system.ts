@@ -99,7 +99,9 @@ class EventsSystem {
       message: entryMessage,
       entityId: "player",
       entityName: crawlerName,
-      direction: storedDirection || undefined,
+      direction: (storedDirection && ["north", "south", "east", "west"].includes(storedDirection)) 
+        ? storedDirection as "north" | "south" | "east" | "west" 
+        : undefined,
       priority: "medium",
     });
 
@@ -205,8 +207,10 @@ class EventsSystem {
 
   onCombatEnd(winnerName: string): void {
     this.addEvent({
+      id: `combat-end-${Date.now()}`,
       type: "combat",
       message: `Combat ends - ${winnerName} is victorious!`,
+      timestamp: Date.now(),
       priority: "high",
     });
   }
@@ -214,8 +218,10 @@ class EventsSystem {
   // Death events
   onMobDeath(mobName: string, killerName: string): void {
     this.addEvent({
+      id: `mob-death-${Date.now()}`,
       type: "death",
       message: `${mobName} has been slain by ${killerName}!`,
+      timestamp: Date.now(),
       priority: "high",
       entityName: mobName,
       killedBy: killerName,
@@ -229,8 +235,10 @@ class EventsSystem {
       : `${crawlerName} has died!`;
 
     this.addEvent({
+      id: `crawler-death-${Date.now()}`,
       type: "death",
       message,
+      timestamp: Date.now(),
       priority: "high",
       entityName: crawlerName,
       killedBy: killerName,
@@ -240,8 +248,10 @@ class EventsSystem {
 
   onNpcDeath(npcName: string, killerName: string): void {
     this.addEvent({
+      id: `npc-death-${Date.now()}`,
       type: "death",
       message: `${npcName} has been killed by ${killerName}!`,
+      timestamp: Date.now(),
       priority: "high",
       entityName: npcName,
       killedBy: killerName,

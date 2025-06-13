@@ -1,0 +1,180 @@
+ FAIL  shared/__tests__/events-system.test.ts (15.164 s)
+  Events System
+    Event Management
+      ✓ should add events and notify subscribers (5 ms)
+      ✓ should prevent duplicate events with same ID (1 ms)
+      ✓ should clear all events (1 ms)
+    Subscriber Pattern
+      ✓ should handle multiple subscribers (1 ms)
+      ✓ should stop notifying unsubscribed callbacks (1 ms)
+    Room Change Events
+      ✕ should handle room entry without stored direction (1 ms)
+      ✕ should handle room entry with stored direction (2 ms)
+      ✕ should not generate duplicate events for same room
+      ✕ should generate discovery events after room entry delay
+    Combat Events
+      ✕ should record combat actions with move type (1 ms)
+      ✕ should record combat actions with attack type (1 ms)
+      ✕ should record combat actions without target (1 ms)
+      ✓ should handle combat start events (1 ms)
+      ✓ should handle combat damage events (1 ms)
+      ✓ should handle combat end events (1 ms)
+    Death Events
+      ✓ should handle mob death events (1 ms)
+      ✓ should handle crawler death with killer (1 ms)
+      ✓ should handle crawler death without killer (1 ms)
+      ✓ should handle NPC death events (4 ms)
+    Room Entry Time Tracking
+      ✕ should track room entry time
+      ✓ should update room entry time on room change (1 ms)
+    Event Properties
+      ✓ should create events with all required properties (1 ms)
+      ✓ should handle events with minimal properties
+
+  ● Events System › Room Change Events › should handle room entry without stored direction
+
+    ReferenceError: sessionStorage is not defined
+
+      74 |     let storedDirection = null;
+      75 |     if (typeof window !== 'undefined') {
+    > 76 |       storedDirection = sessionStorage.getItem("lastMovementDirection");
+         |       ^
+      77 |     }
+      78 |
+      79 |     let entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered the room`;
+
+      at EventsSystem.storedDirection [as onRoomChange] (shared/events-system.ts:76:7)
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:223:20)
+
+  ● Events System › Room Change Events › should handle room entry with stored direction
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      240 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+      241 |
+    > 242 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      243 |       expect(receivedEvents[0].message).toBe(`Crawler ${crawlerName} (#${crawlerId}) entered from the south`);
+      244 |       expect(receivedEvents[0].direction).toBe('north');
+      245 |       expect(mockSessionStorage.setItem).toHaveBeenCalledWith('entryDirection', 'north');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:242:30)
+
+  ● Events System › Room Change Events › should not generate duplicate events for same room
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      252 |
+      253 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+    > 254 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      255 |
+      256 |       // Try to enter same room again
+      257 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:254:30)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      267 |
+      268 |       // Initial entry event
+    > 269 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      270 |
+      271 |       // Wait for discovery events
+      272 |       setTimeout(() => {
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:269:30)
+
+  ● Events System › Combat Events › should record combat actions with move type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      300 |       eventsSystem.onCombatAction(action, entityId);
+      301 |
+    > 302 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      303 |       expect(receivedEvents[0].type).toBe('movement');
+      304 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler moved to a new position');
+      305 |       expect(receivedEvents[0].priority).toBe('low');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:302:30)
+
+  ● Events System › Combat Events › should record combat actions with attack type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      314 |       eventsSystem.onCombatAction(action, entityId, targetId, damage);
+      315 |
+    > 316 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      317 |       expect(receivedEvents[0].type).toBe('combat');
+      318 |       expect(receivedEvents[0].message).toBe('Angry Goblin used Sword Strike on Test Crawler');
+      319 |       expect(receivedEvents[0].priority).toBe('high');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:316:30)
+
+  ● Events System › Combat Events › should record combat actions without target
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      327 |       eventsSystem.onCombatAction(action, entityId);
+      328 |
+    > 329 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      330 |       expect(receivedEvents[0].type).toBe('combat');
+      331 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler used Heal');
+      332 |       expect(receivedEvents[0].priority).toBe('medium');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:329:30)
+
+  ● Events System › Room Entry Time Tracking › should track room entry time
+
+    ReferenceError: sessionStorage is not defined
+
+      74 |     let storedDirection = null;
+      75 |     if (typeof window !== 'undefined') {
+    > 76 |       storedDirection = sessionStorage.getItem("lastMovementDirection");
+         |       ^
+      77 |     }
+      78 |
+      79 |     let entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered the room`;
+
+      at EventsSystem.storedDirection [as onRoomChange] (shared/events-system.ts:76:7)
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:419:20)
+
+Running coverage on untested files.../home/runner/workspace/shared/events-system.ts:3545
+      storedDirection = sessionStorage.getItem("lastMovementDirection");
+      ^
+
+ReferenceError: sessionStorage is not defined
+    at EventsSystem.storedDirection [as onRoomChange] (/home/runner/workspace/shared/events-system.ts:76:7)
+    at Timeout._onTimeout (/home/runner/workspace/shared/__tests__/events-system.test.ts:434:22)
+    at listOnTimeout (node:internal/timers:581:17)
+    at processTimers (node:internal/timers:519:7)
