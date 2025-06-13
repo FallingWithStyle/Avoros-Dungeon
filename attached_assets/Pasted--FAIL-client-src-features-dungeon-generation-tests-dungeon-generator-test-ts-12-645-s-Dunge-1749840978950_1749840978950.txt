@@ -1,0 +1,53 @@
+ FAIL  client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts (12.645 s)
+  Dungeon Generator
+    Room Connectivity Algorithm
+      ✓ should identify single connected component (3 ms)
+      ✓ should identify multiple disconnected components (1 ms)
+      ✓ should handle single room as one component (1 ms)
+      ✓ should handle diagonal rooms as separate components
+    Faction Territory Assignment
+      ✕ should assign rooms proportionally to faction influence (3 ms)
+      ✓ should leave some rooms unclaimed based on unclaimedPercent (1 ms)
+      ✓ should handle single faction correctly (1 ms)
+      ✓ should ignore factions with zero influence (1 ms)
+      ✓ should handle empty rooms array
+      ✓ should handle empty factions array (1 ms)
+    Room Generation Logic
+      ✓ should calculate minimum rooms per floor correctly (1 ms)
+      ✓ should handle staircase placement constraints (1 ms)
+      ✓ should determine room types with correct probabilities (6 ms)
+    Connection Generation Logic
+      ✓ should generate bidirectional connections (1 ms)
+      ✓ should handle cross-shaped room layout (1 ms)
+      ✓ should not create connections to non-existent rooms
+    Batch Processing Logic
+      ✓ should calculate correct batch sizes (1 ms)
+    Faction Scaling Logic
+      ✓ should scale faction count with room count
+
+  ● Dungeon Generator › Faction Territory Assignment › should assign rooms proportionally to faction influence
+
+    expect(received).toBeCloseTo(expected, precision)
+
+    Expected: 0.6
+    Received: 0.66
+
+    Expected precision:    1
+    Expected difference: < 0.05
+    Received difference:   0.06000000000000005
+
+      212 |       const betaRatio = assignments[2].length / totalAssigned;
+      213 |
+    > 214 |       expect(alphaRatio).toBeCloseTo(0.6, 1);
+          |                          ^
+      215 |       expect(betaRatio).toBeCloseTo(0.4, 1);
+      216 |     });
+      217 |
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:214:26)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 17 passed, 18 total
+Snapshots:   0 total
+Time:        12.862 s, estimated 15 s
+Ran all test suites matching /dungeon-generator/i.
