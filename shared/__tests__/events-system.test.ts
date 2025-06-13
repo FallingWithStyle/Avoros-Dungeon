@@ -82,7 +82,7 @@ describe('Events System', () => {
     
     // Subscribe to events
     unsubscribe = eventsSystem.subscribe((events) => {
-      receivedEvents = [...events];
+      receivedEvents.splice(0, receivedEvents.length, ...events);
     });
   });
 
