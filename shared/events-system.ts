@@ -33,6 +33,7 @@ class EventsSystem {
   private lastRoomId: number | null = null;
   private roomEntryTime: number = Date.now();
   private combatSystem: any = null;
+  private discoveryEventsGenerated: Set<string> = new Set();
 
   subscribe(callback: EventsSubscriber): () => void {
     this.subscribers.add(callback);
@@ -62,6 +63,7 @@ class EventsSystem {
 
   clearEvents() {
     this.events = [];
+    this.discoveryEventsGenerated.clear();
     this.notifySubscribers();
   }
 
@@ -119,6 +121,15 @@ class EventsSystem {
   }
 
   private generateDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
+    const discoveryKey = `${crawlerName}-${crawlerId}-${baseTime}`;
+    
+    // Prevent duplicate discovery events for the same room entry
+    if (this.discoveryEventsGenerated.has(discoveryKey)) {
+      return;
+    }
+    
+    this.discoveryEventsGenerated.add(discoveryKey);
+
     if (!this.combatSystem) {
       // Try to load combat system dynamically
       import('./combat-system').then(({ combatSystem }) => {
