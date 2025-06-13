@@ -269,7 +269,7 @@ describe('Dungeon Generator', () => {
       const rooms: Array<{ x: number; y: number; id: number }> = [];
       const factions = [{ id: 1, name: 'Test', influence: 100 }];
 
-      const assignments = assignFactionTerritories({ rooms, factions });
+      const assignments = assignFactionTerritories(rooms, factions);
 
       expect(assignments[1]).toEqual([]);
       expect(assignments["unclaimed"]).toEqual([]);
@@ -279,7 +279,7 @@ describe('Dungeon Generator', () => {
       const rooms = [{ x: 0, y: 0, id: 1 }];
       const factions: Array<Faction> = [];
 
-      const assignments = assignFactionTerritories({ rooms, factions });
+      const assignments = assignFactionTerritories(rooms, factions);
 
       expect(assignments["unclaimed"]).toEqual([1]);
     });
