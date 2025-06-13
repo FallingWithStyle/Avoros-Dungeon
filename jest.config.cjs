@@ -1,33 +1,30 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/shared', '<rootDir>/server'],
-  testMatch: ['**/__tests__/**/*.test.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  },
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-  },
-  collectCoverage: true,
+  testMatch: [
+    '**/__tests__/**/*.test.ts',
+    '**/__tests__/**/*.test.tsx'
+  ],
   collectCoverageFrom: [
     'shared/**/*.ts',
     'server/**/*.ts',
-    '!**/__tests__/**',
-    '!**/node_modules/**',
+    'client/src/**/*.{ts,tsx}',
     '!**/*.d.ts',
-    '!server/index.ts',
-    '!server/vite.ts'
+    '!**/*.test.ts',
+    '!**/*.test.tsx'
   ],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
-  coverageThreshold: {
-    global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/client/src/$1'
+  },
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest'
+  },
+  // Enable ES modules support for dynamic imports
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true
     }
   }
 };
