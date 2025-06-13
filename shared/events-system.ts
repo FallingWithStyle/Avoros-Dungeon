@@ -32,6 +32,7 @@ class EventsSystem {
   private subscribers: Set<EventsSubscriber> = new Set();
   private lastRoomId: number | null = null;
   private roomEntryTime: number = Date.now();
+  private combatSystem: any = null;
 
   subscribe(callback: EventsSubscriber): () => void {
     this.subscribers.add(callback);
@@ -41,6 +42,10 @@ class EventsSystem {
     return () => {
       this.subscribers.delete(callback);
     };
+  }
+
+  setCombatSystem(combatSystem: any): void {
+    this.combatSystem = combatSystem;
   }
 
   private notifySubscribers() {
@@ -114,68 +119,94 @@ class EventsSystem {
   }
 
   private generateDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
-    import('./combat-system').then(({ combatSystem }) => {
-      const combatState = combatSystem.getState();
-
-      combatState.entities.forEach((entity) => {
-        if (entity.id !== "player") {
-          this.addEvent({
-            id: `discovery-${entity.id}-${baseTime}`,
-            timestamp: baseTime + 1500,
-            type: "discovery",
-            message:
-              entity.type === "hostile"
-                ? `Crawler ${crawlerName} (#${crawlerId}) notices a dangerous ${entity.name}`
-                : `Crawler ${crawlerName} (#${crawlerId}) spots ${entity.name} in the room`,
-            entityId: entity.id,
-            entityName: entity.name,
-            priority: entity.type === "hostile" ? "high" : "low",
-          });
+    if (!this.combatSystem) {
+      // Try to load combat system dynamically
+      import('./combat-system').then(({ combatSystem }) => {
+        if (!this.combatSystem) {
+          this.combatSystem = combatSystem;
         }
+        this.processDiscoveryEvents(crawlerName, crawlerId, baseTime);
+      }).catch(() => {
+        // Combat system not available, skip
       });
-    }).catch(() => {
-      // Combat system not available, skip
+      return;
+    }
+
+    this.processDiscoveryEvents(crawlerName, crawlerId, baseTime);
+  }
+
+  private processDiscoveryEvents(crawlerName: string, crawlerId: number, baseTime: number) {
+    const combatState = this.combatSystem.getState();
+
+    combatState.entities.forEach((entity) => {
+      if (entity.id !== "player") {
+        this.addEvent({
+          id: `discovery-${entity.id}-${baseTime}`,
+          timestamp: baseTime + 1500,
+          type: "discovery",
+          message:
+            entity.type === "hostile"
+              ? `Crawler ${crawlerName} (#${crawlerId}) notices a dangerous ${entity.name}`
+              : `Crawler ${crawlerName} (#${crawlerId}) spots ${entity.name} in the room`,
+          entityId: entity.id,
+          entityName: entity.name,
+          priority: entity.type === "hostile" ? "high" : "low",
+        });
+      }
     });
   }
 
   onCombatAction(action: any, entityId: string, targetId?: string, damage?: number) {
-    import('./combat-system').then(({ combatSystem }) => {
-      const combatState = combatSystem.getState();
-      const entity = combatState.entities.find(e => e.id === entityId);
-      const target = targetId ? combatState.entities.find(e => e.id === targetId) : null;
-
-      if (!entity) return;
-
-      const eventId = `action-${entityId}-${Date.now()}`;
-
-      let message: string;
-      let eventType: "movement" | "combat" | "discovery" | "interaction" | "status";
-      let priority: "low" | "medium" | "high";
-
-      if (action.type === "move") {
-        message = `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} moved to a new position`;
-        eventType = "movement";
-        priority = "low";
-      } else {
-        message = target
-          ? `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name} on ${target.name}`
-          : `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name}`;
-        eventType = "combat";
-        priority = action.type === "attack" ? "high" : "medium";
-      }
-
-      this.addEvent({
-        id: eventId,
-        timestamp: Date.now(),
-        type: eventType,
-        message,
-        entityId: entity.id,
-        entityName: entity.name,
-        damage,
-        priority,
+    if (!this.combatSystem) {
+      // Try to load combat system dynamically
+      import('./combat-system').then(({ combatSystem }) => {
+        if (!this.combatSystem) {
+          this.combatSystem = combatSystem;
+        }
+        this.processCombatAction(action, entityId, targetId, damage);
+      }).catch(() => {
+        // Combat system not available, skip
       });
-    }).catch(() => {
-      // Combat system not available, skip
+      return;
+    }
+
+    this.processCombatAction(action, entityId, targetId, damage);
+  }
+
+  private processCombatAction(action: any, entityId: string, targetId?: string, damage?: number) {
+    const combatState = this.combatSystem.getState();
+    const entity = combatState.entities.find(e => e.id === entityId);
+    const target = targetId ? combatState.entities.find(e => e.id === targetId) : null;
+
+    if (!entity) return;
+
+    const eventId = `action-${entityId}-${Date.now()}`;
+
+    let message: string;
+    let eventType: "movement" | "combat" | "discovery" | "interaction" | "status";
+    let priority: "low" | "medium" | "high";
+
+    if (action.type === "move") {
+      message = `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} moved to a new position`;
+      eventType = "movement";
+      priority = "low";
+    } else {
+      message = target
+        ? `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name} on ${target.name}`
+        : `${entity.id === "player" ? `Crawler ${entity.name}` : entity.name} used ${action.name}`;
+      eventType = "combat";
+      priority = action.type === "attack" ? "high" : "medium";
+    }
+
+    this.addEvent({
+      id: eventId,
+      timestamp: Date.now(),
+      type: eventType,
+      message,
+      entityId: entity.id,
+      entityName: entity.name,
+      damage,
+      priority,
     });
   }
 
