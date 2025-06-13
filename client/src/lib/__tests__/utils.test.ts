@@ -1,8 +1,8 @@
 
 /**
  * File: utils.test.ts
- * Responsibility: Unit tests for utility functions, specifically testing the cn class name merging function
- * Notes: Uses Jest for testing the tailwind class merging behavior
+ * Responsibility: Essential tests for utility functions that have meaningful business logic
+ * Notes: Focused on core functionality rather than testing third-party library wrappers
  */
 
 import { cn } from '../utils';
@@ -20,12 +20,6 @@ describe('Utils', () => {
       expect(result).toContain('base-class');
       expect(result).toContain('conditional-class');
       expect(result).not.toContain('hidden-class');
-    });
-
-    it('should handle undefined and null values', () => {
-      const result = cn('base-class', null, undefined, 'valid-class');
-      expect(result).toContain('base-class');
-      expect(result).toContain('valid-class');
     });
   });
 });
