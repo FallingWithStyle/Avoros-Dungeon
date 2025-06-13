@@ -1,0 +1,569 @@
+ FAIL  shared/__tests__/events-system.test.ts (13.907 s)
+  Events System
+    Event Management
+      ✓ should add events and notify subscribers (3 ms)
+      ✓ should prevent duplicate events with same ID (1 ms)
+      ✓ should clear all events
+    Subscriber Pattern
+      ✓ should handle multiple subscribers
+      ✓ should stop notifying unsubscribed callbacks (1 ms)
+    Room Change Events
+      ✓ should handle room entry without stored direction (1 ms)
+      ✕ should handle room entry with stored direction (2 ms)
+      ✕ should not generate duplicate events for same room (5 ms)
+      ✕ should generate discovery events after room entry delay (1 ms)
+    Combat Events
+      ✕ should record combat actions with move type (2 ms)
+      ✕ should record combat actions with attack type (1 ms)
+      ✕ should record combat actions without target (1 ms)
+      ✓ should handle combat start events (1 ms)
+      ✓ should handle combat damage events (1 ms)
+      ✓ should handle combat end events (1 ms)
+    Death Events
+      ✓ should handle mob death events (1 ms)
+      ✓ should handle crawler death with killer (1 ms)
+      ✓ should handle crawler death without killer (1 ms)
+      ✓ should handle NPC death events
+    Room Entry Time Tracking
+      ✓ should track room entry time (1 ms)
+      ✓ should update room entry time on room change
+    Event Properties
+      ✓ should create events with all required properties (1 ms)
+      ✓ should handle events with minimal properties (1 ms)
+
+  ● Events System › Room Change Events › should handle room entry with stored direction
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      240 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+      241 |
+    > 242 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      243 |       expect(receivedEvents[0].message).toBe(`Crawler ${crawlerName} (#${crawlerId}) entered from the south`);
+      244 |       expect(receivedEvents[0].direction).toBe('north');
+      245 |       expect(mockSessionStorage.setItem).toHaveBeenCalledWith('entryDirection', 'north');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:242:30)
+
+  ● Events System › Room Change Events › should not generate duplicate events for same room
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      252 |
+      253 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+    > 254 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      255 |
+      256 |       // Try to enter same room again
+      257 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:254:30)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      267 |
+      268 |       // Initial entry event
+    > 269 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      270 |
+      271 |       // Wait for discovery events
+      272 |       setTimeout(() => {
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:269:30)
+
+  ● Events System › Combat Events › should record combat actions with move type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      300 |       eventsSystem.onCombatAction(action, entityId);
+      301 |
+    > 302 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      303 |       expect(receivedEvents[0].type).toBe('movement');
+      304 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler moved to a new position');
+      305 |       expect(receivedEvents[0].priority).toBe('low');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:302:30)
+
+  ● Events System › Combat Events › should record combat actions with attack type
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      314 |       eventsSystem.onCombatAction(action, entityId, targetId, damage);
+      315 |
+    > 316 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      317 |       expect(receivedEvents[0].type).toBe('combat');
+      318 |       expect(receivedEvents[0].message).toBe('Angry Goblin used Sword Strike on Test Crawler');
+      319 |       expect(receivedEvents[0].priority).toBe('high');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:316:30)
+
+  ● Events System › Combat Events › should record combat actions without target
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      327 |       eventsSystem.onCombatAction(action, entityId);
+      328 |
+    > 329 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      330 |       expect(receivedEvents[0].type).toBe('combat');
+      331 |       expect(receivedEvents[0].message).toBe('Crawler Test Crawler used Heal');
+      332 |       expect(receivedEvents[0].priority).toBe('medium');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:329:30)
+
+Running coverage on untested files...
+ReferenceError: You are trying to `import` a file after the Jest environment has been torn down. From shared/__tests__/events-system.test.ts.
+
+    
+
+      at shared/events-system.ts:3763:27
+Failed to collect coverage from /home/runner/workspace/shared/combat-system.ts
+ERROR: shared/combat-system.ts:482:18 - error TS2339: Property 'type' does not exist on type 'QueuedAction'.
+
+482       if (action.type === "move") {
+                     ~~~~
+shared/combat-system.ts:487:41 - error TS2339: Property 'position' does not exist on type 'QueuedAction'.
+
+487           entity.position = { ...action.position };
+                                            ~~~~~~~~
+shared/combat-system.ts:553:11 - error TS2739: Type '{ id: string; name: string; type: "player"; position: { x: number; y: number; }; hp: number; maxHp: number; isSelected: false; facing: number; serial: number | undefined; }' is missing the following properties from type 'CombatEntity': attack, defense, speed
+
+553     const playerEntity: CombatEntity = {
+              ~~~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/storage.ts
+ERROR: server/storage.ts:18:3 - error TS2305: Module '"@shared/schema"' has no exported member 'enemies'.
+
+18   enemies,
+     ~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/lib/redis-service.ts
+ERROR: server/lib/redis-service.ts:232:26 - error TS2531: Object is possibly 'null'.
+
+232       const data = await this.redis.get(key);
+                             ~~~~~~~~~~
+server/lib/redis-service.ts:238:15 - error TS2531: Object is possibly 'null'.
+
+238         await this.redis.del(key);
+                  ~~~~~~~~~~
+server/lib/redis-service.ts:245:15 - error TS2531: Object is possibly 'null'.
+
+245         await this.redis.del(key);
+                  ~~~~~~~~~~
+server/lib/redis-service.ts:249:25 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+
+249       return JSON.parse(data);
+                            ~~~~
+server/lib/redis-service.ts:254:15 - error TS2531: Object is possibly 'null'.
+
+254         await this.redis.del(key);
+                  ~~~~~~~~~~
+server/lib/redis-service.ts:267:13 - error TS2531: Object is possibly 'null'.
+
+267       await this.redis.setex(key, ttl, serializedValue);
+                ~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/replitAuth.ts
+ERROR: server/replitAuth.ts:131:21 - error TS2345: Argument of type 'null' is not assignable to parameter of type 'false | User | undefined'.
+
+131         done(error, null);
+                        ~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/combat.ts
+ERROR: server/routes/combat.ts:26:9 - error TS2554: Expected 2 arguments, but got 3.
+
+26         encounterData,
+           ~~~~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/index.ts
+ERROR: server/routes/index.ts:97:45 - error TS2307: Cannot find module './lib/redis-service' or its corresponding type declarations.
+
+97       const { redisService } = await import('./lib/redis-service');
+                                               ~~~~~~~~~~~~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/season.ts
+ERROR: server/routes/season.ts:17:68 - error TS2554: Expected 0-1 arguments, but got 2.
+
+17       const activities = await storage.getRecentActivities(userId, limit);
+                                                                      ~~~~~
+server/routes/season.ts:41:61 - error TS2554: Expected 0 arguments, but got 1.
+
+41       const listings = await storage.getMarketplaceListings(limit);
+                                                               ~~~~~
+server/routes/season.ts:65:32 - error TS2339: Property 'claims' does not exist on type 'User'.
+
+65       const userId = req.user?.claims?.sub;
+                                  ~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/crawler.ts
+ERROR: server/routes/crawler.ts:197:46 - error TS2339: Property 'find' does not exist on type '{}'.
+
+197         const existingEffect = activeEffects.find(effect => effect.effectId === effectId);
+                                                 ~~~~
+server/routes/crawler.ts:197:51 - error TS7006: Parameter 'effect' implicitly has an 'any' type.
+
+197         const existingEffect = activeEffects.find(effect => effect.effectId === effectId);
+                                                      ~~~~~~
+server/routes/crawler.ts:214:46 - error TS2339: Property 'filter' does not exist on type '{}'.
+
+214         const updatedEffects = activeEffects.filter(effect => effect.effectId !== effectId);
+                                                 ~~~~~~
+server/routes/crawler.ts:214:53 - error TS7006: Parameter 'effect' implicitly has an 'any' type.
+
+214         const updatedEffects = activeEffects.filter(effect => effect.effectId !== effectId);
+                                                        ~~~~~~
+server/routes/crawler.ts:276:33 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+
+276         cachedData = JSON.parse(cachedData);
+                                    ~~~~~~~~~~
+server/routes/crawler.ts:279:32 - error TS18046: 'cachedData' is of type 'unknown'.
+
+279           availableDirections: cachedData.availableDirections,
+                                   ~~~~~~~~~~
+server/routes/crawler.ts:280:26 - error TS18046: 'cachedData' is of type 'unknown'.
+
+280           playersInRoom: cachedData.playersInRoom,
+                             ~~~~~~~~~~
+server/routes/crawler.ts:281:29 - error TS18046: 'cachedData' is of type 'unknown'.
+
+281           tacticalEntities: cachedData.tacticalEntities,
+                                ~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/debug.ts
+ERROR: server/routes/debug.ts:225:13 - error TS2554: Expected 1 arguments, but got 0.
+
+225       await generateFullDungeon();
+                ~~~~~~~~~~~~~~~~~~~
+
+  client/src/features/dungeon/generation/dungeon-generator.ts:257:43
+    257 export async function generateFullDungeon(factions: Faction[]) {
+                                                  ~~~~~~~~~~~~~~~~~~~
+    An argument for 'factions' was not provided.
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/init-db.ts
+ERROR: server/init-db.ts:62:36 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ floorNumber: number; name: string; description: string; dangerLevel: number; isActive: boolean; }' is not assignable to parameter of type '{ floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | u...'.
+      Property 'difficulty' is missing in type '{ floorNumber: number; name: string; description: string; dangerLevel: number; isActive: boolean; }' but required in type '{ floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | u...'.
+  Overload 2 of 2, '(values: { floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ floorNumber: number; name: string; description: string; dangerLevel: number; isActive: boolean; }' is not assignable to parameter of type '{ floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | u...'.
+      Type '{ floorNumber: number; name: string; description: string; dangerLevel: number; isActive: boolean; }' is missing the following properties from type '{ floorNumber: number | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; difficulty: number | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; description?: string | ... 3 more ... | undefined; minRecommendedLevel?: number | ... 3 more ... | u...': length, pop, push, concat, and 35 more.
+
+62     await db.insert(floors).values(floor);
+                                      ~~~~~
+
+server/init-db.ts:243:28 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { name: string | SQL<unknown> | Placeholder<string, any>; seasonNumber: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 4 more ...; createdAt?: SQL<...> | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ name: string; description: string; startDate: Date; endDate: Date; isActive: true; }' is not assignable to parameter of type '{ name: string | SQL<unknown> | Placeholder<string, any>; seasonNumber: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 4 more ...; createdAt?: SQL<...> | ... 3 more ... | undefined; }'.
+      Property 'seasonNumber' is missing in type '{ name: string; description: string; startDate: Date; endDate: Date; isActive: true; }' but required in type '{ name: string | SQL<unknown> | Placeholder<string, any>; seasonNumber: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 4 more ...; createdAt?: SQL<...> | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { name: string | SQL<unknown> | Placeholder<string, any>; seasonNumber: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 4 more ...; createdAt?: SQL<...> | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'name' does not exist in type '{ name: string | SQL<unknown> | Placeholder<string, any>; seasonNumber: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...> | undefined; ... 4 more ...; createdAt?: SQL<...> | ... 3 more ... | undefined; }[]'.
+
+243   await db.insert(seasons).values({
+                               ~~~~~~
+
+server/init-db.ts:265:24 - error TS7006: Parameter 'code' implicitly has an 'any' type.
+
+265     child.on('close', (code) => {
+                           ~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/storage/index.ts
+ERROR: server/storage/index.ts:17:8 - error TS2305: Module '"@shared/schema"' has no exported member 'UserAccount'.
+
+17   type UserAccount,
+          ~~~~~~~~~~~
+server/storage/index.ts:20:8 - error TS2305: Module '"@shared/schema"' has no exported member 'Corporation'.
+
+20   type Corporation,
+          ~~~~~~~~~~~
+server/storage/index.ts:23:8 - error TS2305: Module '"@shared/schema"' has no exported member 'ExploredRoom'.
+
+23   type ExploredRoom,
+          ~~~~~~~~~~~~
+server/storage/index.ts:25:8 - error TS2305: Module '"@shared/schema"' has no exported member 'InsertActivity'.
+
+25   type InsertActivity,
+          ~~~~~~~~~~~~~~
+server/storage/index.ts:29:3 - error TS2305: Module '"@shared/schema"' has no exported member 'corporations'.
+
+29   corporations,
+     ~~~~~~~~~~~~
+server/storage/index.ts:32:3 - error TS2305: Module '"@shared/schema"' has no exported member 'exploredRooms'.
+
+32   exploredRooms,
+     ~~~~~~~~~~~~~
+server/storage/index.ts:34:3 - error TS2305: Module '"@shared/schema"' has no exported member 'classes'.
+
+34   classes,
+     ~~~~~~~
+server/storage/index.ts:35:3 - error TS2305: Module '"@shared/schema"' has no exported member 'spells'.
+
+35   spells,
+     ~~~~~~
+server/storage/index.ts:36:3 - error TS2305: Module '"@shared/schema"' has no exported member 'effects'.
+
+36   effects,
+     ~~~~~~~
+server/storage/index.ts:38:8 - error TS2305: Module '"@shared/schema"' has no exported member 'Class'.
+
+38   type Class,
+          ~~~~~
+server/storage/index.ts:40:8 - error TS2305: Module '"@shared/schema"' has no exported member 'Effect'.
+
+40   type Effect,
+          ~~~~~~
+server/storage/index.ts:41:8 - error TS2305: Module '"@shared/schema"' has no exported member 'Spell'.
+
+41   type Spell,
+          ~~~~~
+server/storage/index.ts:47:10 - error TS2305: Module '"drizzle-orm/pg-core"' has no exported member 'aliasedTable'.
+
+47 import { aliasedTable } from "drizzle-orm/pg-core";
+            ~~~~~~~~~~~~
+server/storage/index.ts:407:37 - error TS2445: Property 'redisService' is protected and only accessible within class 'BaseStorage' and its subclasses.
+
+407     return this._explorationStorage.redisService;
+                                        ~~~~~~~~~~~~
+server/storage/index.ts:420:24 - error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.
+
+420 export const storage = await ModularStorage.create();
+                           ~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/storage/mob-storage.ts
+ERROR: server/storage/mob-storage.ts:270:45 - error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+
+270       const config = this.getMobSpawnConfig(mobData.roomId);
+                                                ~~~~~~~~~~~~~~
+server/storage/mob-storage.ts:471:5 - error TS2741: Property 'creatureTypes' is missing in type '{ roomType: any; environment: any; factionId: any; maxMobs: number; spawnChance: number; mobTypes: string[]; respawnHours: number; }' but required in type 'ContextualSpawnConfig'.
+
+471     return finalConfig;
+        ~~~~~~
+
+  server/storage/mob-storage.ts:26:3
+    26   creatureTypes: string[];
+         ~~~~~~~~~~~~~
+    'creatureTypes' is declared here.
+server/storage/mob-storage.ts:479:29 - error TS2339: Property 'mobTypes' does not exist on type 'ContextualSpawnConfig'.
+
+479       mobTypes: spawnConfig.mobTypes
+                                ~~~~~~~~
+server/storage/mob-storage.ts:483:45 - error TS2339: Property 'mobTypes' does not exist on type 'ContextualSpawnConfig'.
+
+483     const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+                                                ~~~~~~~~
+server/storage/mob-storage.ts:483:93 - error TS2339: Property 'mobTypes' does not exist on type 'ContextualSpawnConfig'.
+
+483     const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
+                                                                                                ~~~~~~~~
+server/storage/mob-storage.ts:699:56 - error TS2345: Argument of type 'ContextualSpawnConfig | { roomType: any; environment: any; factionId: any; maxMobs: number; spawnChance: number; mobTypes: string[]; respawnHours: number; }' is not assignable to parameter of type 'ContextualSpawnConfig'.
+  Property 'creatureTypes' is missing in type '{ roomType: any; environment: any; factionId: any; maxMobs: number; spawnChance: number; mobTypes: string[]; respawnHours: number; }' but required in type 'ContextualSpawnConfig'.
+
+699       const mobData = await this.generateContextualMob(finalConfig, roomData);
+                                                           ~~~~~~~~~~~
+
+  server/storage/mob-storage.ts:26:3
+    26   creatureTypes: string[];
+         ~~~~~~~~~~~~~
+    'creatureTypes' is declared here.
+server/storage/mob-storage.ts:788:13 - error TS7022: 'mobs' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+
+788       const mobs = await db
+                ~~~~
+server/storage/mob-storage.ts:790:16 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+790           mob: mobs,
+                   ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+server/storage/mob-storage.ts:793:15 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+793         .from(mobs)
+                  ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+server/storage/mob-storage.ts:794:33 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+794         .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
+                                    ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+server/storage/mob-storage.ts:797:21 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+797             inArray(mobs.roomId, uncachedRoomIds),
+                        ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+server/storage/mob-storage.ts:798:16 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+798             eq(mobs.isAlive, true),
+                   ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+server/storage/mob-storage.ts:799:16 - error TS2448: Block-scoped variable 'mobs' used before its declaration.
+
+799             eq(mobs.isActive, true)
+                   ~~~~
+
+  server/storage/mob-storage.ts:788:13
+    788       const mobs = await db
+                    ~~~~
+    'mobs' is declared here.
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/routes/exploration.ts
+ERROR: server/routes/exploration.ts:32:39 - error TS18046: 'error' is of type 'unknown'.
+
+32       res.status(400).json({ message: error.message });
+                                         ~~~~~
+server/routes/exploration.ts:111:37 - error TS18046: 'error' is of type 'unknown'.
+
+111       console.error("Stack trace:", error.stack);
+                                        ~~~~~
+server/routes/exploration.ts:233:37 - error TS18046: 'error' is of type 'unknown'.
+
+233       console.error("Stack trace:", error.stack);
+                                        ~~~~~
+server/routes/exploration.ts:316:11 - error TS7034: Variable 'availableDirections' implicitly has type 'any[]' in some locations where its type cannot be determined.
+
+316       let availableDirections = [];
+              ~~~~~~~~~~~~~~~~~~~
+server/routes/exploration.ts:327:11 - error TS7034: Variable 'playersInRoom' implicitly has type 'any[]' in some locations where its type cannot be determined.
+
+327       let playersInRoom = [];
+              ~~~~~~~~~~~~~
+server/routes/exploration.ts:338:11 - error TS7034: Variable 'tacticalEntities' implicitly has type 'any[]' in some locations where its type cannot be determined.
+
+338       let tacticalEntities = [];
+              ~~~~~~~~~~~~~~~~
+server/routes/exploration.ts:360:50 - error TS18046: 'tacticalError' is of type 'unknown'.
+
+360           console.error(`Tactical error stack:`, tacticalError.stack);
+                                                     ~~~~~~~~~~~~~
+server/routes/exploration.ts:381:9 - error TS7005: Variable 'availableDirections' implicitly has an 'any[]' type.
+
+381         availableDirections,
+            ~~~~~~~~~~~~~~~~~~~
+server/routes/exploration.ts:382:9 - error TS7005: Variable 'playersInRoom' implicitly has an 'any[]' type.
+
+382         playersInRoom,
+            ~~~~~~~~~~~~~
+server/routes/exploration.ts:383:9 - error TS7005: Variable 'tacticalEntities' implicitly has an 'any[]' type.
+
+383         tacticalEntities
+            ~~~~~~~~~~~~~~~~
+server/routes/exploration.ts:389:36 - error TS7005: Variable 'tacticalEntities' implicitly has an 'any[]' type.
+
+389       console.log(`Mob entities: ${tacticalEntities.filter(e => e.type === 'mob').length}`);
+                                       ~~~~~~~~~~~~~~~~
+server/routes/exploration.ts:395:37 - error TS18046: 'error' is of type 'unknown'.
+
+395       console.error("Stack trace:", error.stack);
+                                        ~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/storage/tactical-storage.ts
+ERROR: server/storage/tactical-storage.ts:22:14 - error TS2415: Class 'TacticalStorage' incorrectly extends base class 'BaseStorage'.
+  Property 'crawlerStorage' is private in type 'TacticalStorage' but not in type 'BaseStorage'.
+
+22 export class TacticalStorage extends BaseStorage {
+                ~~~~~~~~~~~~~~~
+STACK: 
+Failed to collect coverage from /home/runner/workspace/server/storage/exploration-storage.ts
+ERROR: server/storage/exploration-storage.ts:53:9 - error TS2740: Type '{}' is missing the following properties from type '{ id: number; name: string; type: string; x: number; y: number; createdAt: Date | null; description: string; floorId: number; environment: string; isExplored: boolean; hasLoot: boolean; isSafe: boolean; factionId: number | null; placementId: number; }[]': length, pop, push, concat, and 35 more.
+
+53         return cached;
+           ~~~~~~
+server/storage/exploration-storage.ts:381:9 - error TS2740: Type '{}' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+
+381         return cached;
+            ~~~~~~
+server/storage/exploration-storage.ts:452:9 - error TS2740: Type '{}' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+
+452         return cached;
+            ~~~~~~
+server/storage/exploration-storage.ts:550:9 - error TS2739: Type '{}' is missing the following properties from type '{ minX: number; maxX: number; minY: number; maxY: number; }': minX, maxX, minY, maxY
+
+550         return cached;
+            ~~~~~~
+server/storage/exploration-storage.ts:636:26 - error TS2339: Property 'invalidateCurrentRoom' does not exist on type 'RedisService'.
+
+636       await redisService.invalidateCurrentRoom(crawlerId);
+                             ~~~~~~~~~~~~~~~~~~~~~
+STACK: 
+---------------------|---------|----------|---------|---------|-------------------
+File                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------------|---------|----------|---------|---------|-------------------
+All files            |    7.45 |      8.3 |   11.29 |    7.09 |                   
+ server              |       0 |        0 |       0 |       0 |                   
+  db.ts              |       0 |        0 |     100 |       0 | 7-29              
+  routes.ts          |       0 |      100 |       0 |       0 | 8                 
+ server/lib          |       0 |        0 |       0 |       0 |                   
+  redis-status.ts    |       0 |        0 |       0 |       0 | 2-77              
+  request-cache.ts   |       0 |        0 |       0 |       0 | 13-54             
+ server/routes       |       0 |        0 |       0 |       0 |                   
+  auth.ts            |       0 |      100 |       0 |       0 | 8-20              
+  data.ts            |       0 |        0 |       0 |       0 | 8-54              
+ server/storage      |       0 |        0 |       0 |       0 |                   
+  base-storage.ts    |       0 |        0 |       0 |       0 | 12-66             
+  content-storage.ts |       0 |        0 |       0 |       0 | 1-322             
+  ...tion-storage.ts |       0 |        0 |       0 |       0 | 2-55              
+  crawler-storage.ts |       0 |        0 |       0 |       0 | 1-342             
+  user-storage.ts    |       0 |        0 |       0 |       0 | 2-91              
+ shared              |   17.86 |     17.5 |   24.13 |   17.24 |                   
+  effects.ts         |       0 |        0 |       0 |       0 | 53-191            
+  ...pment-system.ts |       0 |        0 |       0 |       0 | 25-147            
+  events-system.ts   |   79.16 |    53.84 |      75 |   81.96 | 82-92,112-125     
+  logger.ts          |       0 |        0 |       0 |       0 | 6-45              
+  schema.ts          |       0 |      100 |       0 |       0 | 6-795             
+---------------------|---------|----------|---------|---------|-------------------
+Jest: "global" coverage threshold for statements (50%) not met: 7.45%
+Jest: "global" coverage threshold for branches (50%) not met: 8.3%
+Jest: "global" coverage threshold for lines (50%) not met: 7.09%
+Jest: "global" coverage threshold for functions (50%) not met: 11.29%
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 17 passed, 23 total
+Snapshots:   0 total
+Time:        54.21 s
+Ran all test suites matching /shared\/__tests__\/events-system.test.ts/i.
+~/workspace$  
