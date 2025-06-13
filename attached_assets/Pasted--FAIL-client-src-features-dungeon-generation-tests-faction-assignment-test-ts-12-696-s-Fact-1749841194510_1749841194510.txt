@@ -1,0 +1,78 @@
+ FAIL  client/src/features/dungeon/generation/__tests__/faction-assignment.test.ts (12.696 s)
+  Faction Assignment
+    assignRoomsByFactionInfluence
+      ✓ should filter out non-claimable room types (3 ms)
+      ✓ should respect unclaimedPercent parameter (1 ms)
+      ✓ should distribute rooms proportionally by influence (1 ms)
+      ✓ should ensure minimum rooms per faction (1 ms)
+      ✓ should handle single faction correctly (1 ms)
+      ✓ should handle empty rooms array (1 ms)
+      ✕ should handle empty factions array (2 ms)
+      ✓ should respect minFactions parameter (1 ms)
+      ✓ should respect roomsPerFaction parameter for faction count calculation
+      ✓ should randomize room assignment for unpredictable results
+      ✓ should handle mixed room types correctly (1 ms)
+      ✓ should handle faction selection when more factions than needed (1 ms)
+    Edge Cases
+      ✕ should handle zero influence factions gracefully (1 ms)
+      ✕ should handle very small room counts (2 ms)
+      ✓ should handle 100% unclaimed rooms (1 ms)
+
+  ● Faction Assignment › assignRoomsByFactionInfluence › should handle empty factions array
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: 1
+    Received array: []
+
+      183 |       });
+      184 |
+    > 185 |       expect(result.unclaimed).toContain(1);
+          |                                ^
+      186 |     });
+      187 |
+      188 |     it('should respect minFactions parameter', () => {
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/faction-assignment.test.ts:185:32)
+
+  ● Faction Assignment › Edge Cases › should handle zero influence factions gracefully
+
+    expect(received).toBeGreaterThan(expected)
+
+    Matcher error: received value must be a number or bigint
+
+    Received has value: undefined
+
+      337 |
+      338 |       // Only the active faction should get rooms
+    > 339 |       expect(result[1]?.length).toBeGreaterThan(0);
+          |                                 ^
+      340 |       expect(result[2]?.length || 0).toBe(0);
+      341 |     });
+      342 |
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/faction-assignment.test.ts:339:33)
+
+  ● Faction Assignment › Edge Cases › should handle very small room counts
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      352 |
+      353 |       // With only 1 room and 50% unclaimed, should be unclaimed
+    > 354 |       expect(result.unclaimed?.length).toBe(1);
+          |                                        ^
+      355 |       expect(result[1]?.length || 0).toBe(0);
+      356 |     });
+      357 |
+
+      at Object.<anonymous> (client/src/features/dungeon/generation/__tests__/faction-assignment.test.ts:354:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 12 passed, 15 total
+Snapshots:   0 total
+Time:        12.913 s
+Ran all test suites matching /faction-assignment/i.
+~/workspace$ 
