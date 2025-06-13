@@ -71,10 +71,10 @@ jest.mock('../combat-system', () => ({
 }));
 
 // Mock dynamic import function for Jest environment
-const originalImport = global.import;
+const originalImport = (global as any).import;
 beforeAll(() => {
   // Mock the dynamic import used in events-system.ts
-  global.import = jest.fn().mockImplementation((modulePath: string) => {
+  (global as any).import = jest.fn().mockImplementation((modulePath: string) => {
     if (modulePath === './combat-system') {
       return Promise.resolve({ combatSystem: mockCombatSystem });
     }
@@ -84,7 +84,7 @@ beforeAll(() => {
 
 afterAll(() => {
   // Restore original import
-  global.import = originalImport;
+  (global as any).import = originalImport;
 });
 
 describe('Events System', () => {
