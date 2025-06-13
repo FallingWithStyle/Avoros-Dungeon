@@ -1,4 +1,3 @@
-
 /**
  * File: dungeon-generator.test.ts
  * Responsibility: Unit tests for dungeon generation algorithms and utility functions
@@ -16,29 +15,29 @@ describe('Dungeon Generator', () => {
     function findComponents(allRooms: Array<{x: number, y: number, placementId: number}>): Array<Array<{x: number, y: number, placementId: number}>> {
       const posToRoom = new Map<string, {x: number, y: number, placementId: number}>();
       allRooms.forEach(r => posToRoom.set(`${r.x},${r.y}`, r));
-      
+
       const visited = new Set<string>();
       const components: Array<Array<{x: number, y: number, placementId: number}>> = [];
-      
+
       for (const room of allRooms) {
         const key = `${room.x},${room.y}`;
         if (visited.has(key)) continue;
-        
+
         const queue = [room];
         const component: Array<{x: number, y: number, placementId: number}> = [];
         visited.add(key);
-        
+
         while (queue.length) {
           const current = queue.shift()!;
           component.push(current);
-          
+
           const neighbors = [
             { x: current.x, y: current.y + 1 },
             { x: current.x, y: current.y - 1 },
             { x: current.x + 1, y: current.y },
             { x: current.x - 1, y: current.y }
           ];
-          
+
           for (const n of neighbors) {
             const nKey = `${n.x},${n.y}`;
             if (!visited.has(nKey) && posToRoom.has(nKey)) {
@@ -58,7 +57,7 @@ describe('Dungeon Generator', () => {
         { x: 1, y: 0, placementId: 2 },
         { x: 0, y: 1, placementId: 3 }
       ];
-      
+
       const components = findComponents(rooms);
       expect(components).toHaveLength(1);
       expect(components[0]).toHaveLength(3);
@@ -71,7 +70,7 @@ describe('Dungeon Generator', () => {
         { x: 5, y: 5, placementId: 3 },
         { x: 6, y: 5, placementId: 4 }
       ];
-      
+
       const components = findComponents(rooms);
       expect(components).toHaveLength(2);
       expect(components[0]).toHaveLength(2);
@@ -80,7 +79,7 @@ describe('Dungeon Generator', () => {
 
     it('should handle single room as one component', () => {
       const rooms = [{ x: 0, y: 0, placementId: 1 }];
-      
+
       const components = findComponents(rooms);
       expect(components).toHaveLength(1);
       expect(components[0]).toHaveLength(1);
@@ -91,7 +90,7 @@ describe('Dungeon Generator', () => {
         { x: 0, y: 0, placementId: 1 },
         { x: 1, y: 1, placementId: 2 }
       ];
-      
+
       const components = findComponents(rooms);
       expect(components).toHaveLength(2);
     });
@@ -104,87 +103,89 @@ describe('Dungeon Generator', () => {
       influence: number;
     }
 
-    function assignFactionTerritories({
-      rooms,
-      factions,
-      unclaimedPercent = 0.2
-    }: {
-      rooms: Array<{ x: number; y: number; id: number }>;
-      factions: Array<Faction>;
-      unclaimedPercent?: number;
-    }) {
-      const totalRooms = rooms.length;
-      const unclaimedCount = Math.floor(totalRooms * unclaimedPercent);
-      const toAssign = totalRooms - unclaimedCount;
+    function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
+    if (rooms.length === 0) {
+      return { unclaimed: [] };
+    }
 
-      const eligibleFactions = factions.filter(f => f.influence > 0);
-      const totalInfluence = eligibleFactions.reduce((sum, f) => sum + f.influence, 0);
+    if (!factions || factions.length === 0) {
+      return { unclaimed: rooms.map(r => r.id) };
+    }
 
-      // Assign number of rooms per faction, proportional to influence
-      const factionRoomTargets = eligibleFactions.map(f => ({
-        id: f.id,
-        count: Math.round((f.influence / totalInfluence) * toAssign)
-      }));
+    const assignments: Record<string | number, number[]> = {};
+    const assigned = new Set<number>();
 
-      let leftToAssign = toAssign - factionRoomTargets.reduce((acc, fr) => acc + fr.count, 0);
-      for (let i = 0; i < factionRoomTargets.length && leftToAssign !== 0; i++) {
-        factionRoomTargets[i].count += leftToAssign > 0 ? 1 : -1;
-        leftToAssign += leftToAssign > 0 ? -1 : 1;
-      }
+    // Initialize assignments for all factions (including zero influence ones)
+    factions.forEach(f => {
+      assignments[f.id] = [];
+    });
 
-      const roomMap = new Map<string, { x: number; y: number; id: number }>();
-      rooms.forEach(room => roomMap.set(`${room.x},${room.y}`, room));
+    // Filter out zero-influence factions for actual assignment
+    const activeFactions = factions.filter(f => f.influence > 0);
 
-      const assigned = new Set<number>();
-      const assignments: Record<number, number[]> = {};
-      const remainingRooms = rooms.filter(r => !assigned.has(r.id));
-      
-      // Seed expansion from random starting points
-      const seeds = factionRoomTargets.map((ft, i) => {
-        const idx = Math.floor(Math.random() * remainingRooms.length);
-        const room = remainingRooms.splice(idx, 1)[0];
+    if (activeFactions.length === 0) {
+      assignments.unclaimed = rooms.map(r => r.id);
+      return assignments;
+    }
+
+    // Calculate total influence
+    const totalInfluence = activeFactions.reduce((sum, f) => sum + f.influence, 0);
+
+    // Calculate unclaimed rooms count
+    const unclaimedCount = Math.floor(rooms.length * unclaimedPercent);
+    const claimableRooms = rooms.length - unclaimedCount;
+
+    // Copy rooms array for manipulation
+    const remainingRooms = [...rooms];
+
+    // Assign initial room to each faction randomly
+    const initialAssignments = activeFactions.map(ft => {
+      if (remainingRooms.length === 0) return null;
+
+      const idx = Math.floor(Math.random() * remainingRooms.length);
+      const room = remainingRooms.splice(idx, 1)[0];
+      if (room) {
         assignments[ft.id] = [room.id];
         assigned.add(room.id);
         return { ...room, factionId: ft.id };
-      });
+      }
+      return null;
+    }).filter(Boolean);
 
-      // Expand territories
-      let expanding = seeds;
-      const factionTargetMap = Object.fromEntries(factionRoomTargets.map(f => [f.id, f.count]));
-      
-      while (
-        Object.values(assignments).reduce((a, b) => a + b.length, 0) < toAssign &&
-        expanding.length
-      ) {
-        const nextExpanding: typeof expanding = [];
-        
-        for (const exp of expanding) {
-          const factionId = exp.factionId;
-          if (assignments[factionId].length >= factionTargetMap[factionId]) continue;
-          
-          for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) {
-            const nx = exp.x + dx, ny = exp.y + dy;
-            const key = `${nx},${ny}`;
-            const nextRoom = roomMap.get(key);
-            
-            if (nextRoom && !assigned.has(nextRoom.id)) {
-              assignments[factionId].push(nextRoom.id);
-              assigned.add(nextRoom.id);
-              nextExpanding.push({ ...nextRoom, factionId });
-              if (assignments[factionId].length >= factionTargetMap[factionId]) break;
-            }
-          }
+    // Calculate remaining rooms to assign after initial assignment
+    const roomsToAssign = claimableRooms - activeFactions.length;
+
+    // Distribute remaining rooms based on influence
+    for (let i = 0; i < roomsToAssign && remainingRooms.length > 0; i++) {
+      // Use weighted random selection based on influence
+      const totalWeight = activeFactions.reduce((sum, f) => sum + f.influence, 0);
+      let random = Math.random() * totalWeight;
+
+      let selectedFaction = activeFactions[0];
+      for (const faction of activeFactions) {
+        random -= faction.influence;
+        if (random <= 0) {
+          selectedFaction = faction;
+          break;
         }
-        expanding = nextExpanding;
       }
 
-      const unclaimed: number[] = rooms.filter(r => !assigned.has(r.id)).map(r => r.id);
-      const result: Record<string, number[]> = {};
-      eligibleFactions.forEach(f => result[f.id] = assignments[f.id] || []);
-      result["unclaimed"] = unclaimed;
-      
-      return result;
+      // Assign room to selected faction
+      if (remainingRooms.length > 0) {
+        const idx = Math.floor(Math.random() * remainingRooms.length);
+        const room = remainingRooms.splice(idx, 1)[0];
+        if (room) {
+          assignments[selectedFaction.id].push(room.id);
+          assigned.add(room.id);
+        }
+      }
     }
+
+    // Add unclaimed rooms
+    assignments.unclaimed = remainingRooms.map(r => r.id);
+
+    return assignments;
+  }
 
     it('should assign rooms proportionally to faction influence', () => {
       const rooms = Array.from({ length: 100 }, (_, i) => ({
@@ -192,21 +193,21 @@ describe('Dungeon Generator', () => {
         y: Math.floor(i / 10),
         id: i
       }));
-      
+
       const factions = [
         { id: 1, name: 'Alpha', influence: 60 },
         { id: 2, name: 'Beta', influence: 40 }
       ];
-      
-      const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0 });
-      
+
+      const assignments = assignFactionTerritories(rooms, factions, 0); // No unclaimed rooms
+
       const totalAssigned = assignments[1].length + assignments[2].length;
       expect(totalAssigned).toBe(100);
-      
+
       // Alpha should get roughly 60% of rooms, Beta should get 40%
       const alphaRatio = assignments[1].length / totalAssigned;
       const betaRatio = assignments[2].length / totalAssigned;
-      
+
       expect(alphaRatio).toBeCloseTo(0.6, 1);
       expect(betaRatio).toBeCloseTo(0.4, 1);
     });
@@ -217,13 +218,13 @@ describe('Dungeon Generator', () => {
         y: Math.floor(i / 10),
         id: i
       }));
-      
+
       const factions = [
         { id: 1, name: 'Alpha', influence: 100 }
       ];
-      
+
       const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0.2 });
-      
+
       expect(assignments["unclaimed"].length).toBe(20);
       expect(assignments[1].length).toBe(80);
     });
@@ -234,13 +235,13 @@ describe('Dungeon Generator', () => {
         y: 0,
         id: i
       }));
-      
+
       const factions = [
         { id: 1, name: 'Solo', influence: 100 }
       ];
-      
+
       const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0.1 });
-      
+
       expect(assignments[1].length).toBe(9);
       expect(assignments["unclaimed"].length).toBe(1);
     });
@@ -251,14 +252,14 @@ describe('Dungeon Generator', () => {
         y: 0,
         id: i
       }));
-      
+
       const factions = [
         { id: 1, name: 'Active', influence: 100 },
         { id: 2, name: 'Inactive', influence: 0 }
       ];
-      
-      const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0.1 });
-      
+
+      const assignments = assignFactionTerritories(rooms, factions, 0.1); // 10% unclaimed
+
       expect(assignments[1].length).toBe(9);
       expect(assignments[2]).toEqual([]);
       expect(assignments["unclaimed"].length).toBe(1);
@@ -267,9 +268,9 @@ describe('Dungeon Generator', () => {
     it('should handle empty rooms array', () => {
       const rooms: Array<{ x: number; y: number; id: number }> = [];
       const factions = [{ id: 1, name: 'Test', influence: 100 }];
-      
+
       const assignments = assignFactionTerritories({ rooms, factions });
-      
+
       expect(assignments[1]).toEqual([]);
       expect(assignments["unclaimed"]).toEqual([]);
     });
@@ -277,9 +278,9 @@ describe('Dungeon Generator', () => {
     it('should handle empty factions array', () => {
       const rooms = [{ x: 0, y: 0, id: 1 }];
       const factions: Array<Faction> = [];
-      
+
       const assignments = assignFactionTerritories({ rooms, factions });
-      
+
       expect(assignments["unclaimed"]).toEqual([1]);
     });
   });
@@ -288,7 +289,7 @@ describe('Dungeon Generator', () => {
     it('should calculate minimum rooms per floor correctly', () => {
       const MIN_ROOMS_PER_FLOOR = 200;
       const GRID_SIZE = 20;
-      
+
       // Test that grid can accommodate minimum rooms
       const maxGridRooms = GRID_SIZE * GRID_SIZE;
       expect(maxGridRooms).toBeGreaterThanOrEqual(MIN_ROOMS_PER_FLOOR);
@@ -303,15 +304,15 @@ describe('Dungeon Generator', () => {
         { x: 3, y: 0 },
         { x: 4, y: 0 }
       ];
-      
+
       // Simulate staircase placement logic
       const staircasePositions: Array<{ x: number; y: number }> = [];
       let placementAttempts = 0;
-      
+
       for (let i = 0; i < STAIRCASES_PER_FLOOR && placementAttempts < 1000; i++) {
         let staircasePos: { x: number; y: number };
         let attempts = 0;
-        
+
         do {
           staircasePos = roomPositions[Math.floor(Math.random() * roomPositions.length)];
           attempts++;
@@ -321,16 +322,16 @@ describe('Dungeon Generator', () => {
           staircasePositions.some(pos => pos.x === staircasePos.x && pos.y === staircasePos.y) ||
           (staircasePos.x === 0 && staircasePos.y === 0) // avoid entrance
         );
-        
+
         if (attempts <= 100) {
           staircasePositions.push(staircasePos);
         }
       }
-      
+
       // Should place some staircases (depends on randomness, but should work with enough room positions)
       expect(staircasePositions.length).toBeGreaterThan(0);
       expect(staircasePositions.length).toBeLessThanOrEqual(STAIRCASES_PER_FLOOR);
-      
+
       // No staircases should be at entrance
       staircasePositions.forEach(pos => {
         expect(pos.x === 0 && pos.y === 0).toBe(false);
@@ -342,10 +343,10 @@ describe('Dungeon Generator', () => {
       let treasureRooms = 0;
       let outdoorRooms = 0;
       let normalRooms = 0;
-      
+
       for (let i = 0; i < testCount; i++) {
         const rand = Math.random();
-        
+
         if (rand < 0.08) { // 8% treasure
           treasureRooms++;
         } else if (rand < 0.12) { // 4% outdoor (12% - 8%)
@@ -354,11 +355,11 @@ describe('Dungeon Generator', () => {
           normalRooms++;
         }
       }
-      
+
       const treasureRatio = treasureRooms / testCount;
       const outdoorRatio = outdoorRooms / testCount;
       const normalRatio = normalRooms / testCount;
-      
+
       expect(treasureRatio).toBeCloseTo(0.08, 1);
       expect(outdoorRatio).toBeCloseTo(0.04, 1);
       expect(normalRatio).toBeCloseTo(0.88, 1);
@@ -369,13 +370,13 @@ describe('Dungeon Generator', () => {
     function generateConnections(rooms: Array<{ id: number; x: number; y: number }>) {
       const roomMap = new Map<string, { id: number; x: number; y: number }>();
       rooms.forEach(r => roomMap.set(`${r.x},${r.y}`, r));
-      
+
       const connections: Array<{
         fromRoomId: number;
         toRoomId: number;
         direction: string;
       }> = [];
-      
+
       for (const room of rooms) {
         const directions = [
           { dx: 0, dy: 1, dir: 'north' },
@@ -383,7 +384,7 @@ describe('Dungeon Generator', () => {
           { dx: 1, dy: 0, dir: 'east' },
           { dx: -1, dy: 0, dir: 'west' }
         ];
-        
+
         for (const { dx, dy, dir } of directions) {
           const neighbor = roomMap.get(`${room.x + dx},${room.y + dy}`);
           if (neighbor) {
@@ -395,7 +396,7 @@ describe('Dungeon Generator', () => {
           }
         }
       }
-      
+
       return connections;
     }
 
@@ -404,9 +405,9 @@ describe('Dungeon Generator', () => {
         { id: 1, x: 0, y: 0 },
         { id: 2, x: 1, y: 0 }
       ];
-      
+
       const connections = generateConnections(rooms);
-      
+
       expect(connections).toHaveLength(2);
       expect(connections).toContainEqual({
         fromRoomId: 1,
@@ -428,13 +429,13 @@ describe('Dungeon Generator', () => {
         { id: 4, x: 1, y: 0 }, // east
         { id: 5, x: -1, y: 0 } // west
       ];
-      
+
       const connections = generateConnections(rooms);
-      
+
       // Center room should have 4 outgoing connections
       const centerConnections = connections.filter(c => c.fromRoomId === 1);
       expect(centerConnections).toHaveLength(4);
-      
+
       // Each outer room should have 1 connection back to center
       for (let i = 2; i <= 5; i++) {
         const outerConnections = connections.filter(c => c.fromRoomId === i);
@@ -447,9 +448,9 @@ describe('Dungeon Generator', () => {
       const rooms = [
         { id: 1, x: 0, y: 0 }
       ];
-      
+
       const connections = generateConnections(rooms);
-      
+
       expect(connections).toHaveLength(0);
     });
   });
@@ -458,20 +459,20 @@ describe('Dungeon Generator', () => {
     it('should calculate correct batch sizes', () => {
       const BATCH_SIZE = 50;
       const totalItems = 237;
-      
+
       const batches = [];
       for (let i = 0; i < totalItems; i += BATCH_SIZE) {
         const batchEnd = Math.min(i + BATCH_SIZE, totalItems);
         batches.push({ start: i, end: batchEnd, size: batchEnd - i });
       }
-      
+
       expect(batches).toHaveLength(5);
       expect(batches[0].size).toBe(50);
       expect(batches[1].size).toBe(50);
       expect(batches[2].size).toBe(50);
       expect(batches[3].size).toBe(50);
       expect(batches[4].size).toBe(37); // remainder
-      
+
       const totalProcessed = batches.reduce((sum, b) => sum + b.size, 0);
       expect(totalProcessed).toBe(totalItems);
     });
@@ -481,14 +482,14 @@ describe('Dungeon Generator', () => {
     it('should scale faction count with room count', () => {
       const MIN_FACTIONS = 3;
       const MAX_FACTIONS = 8;
-      
+
       function calculateFactionCount(claimableRoomCount: number): number {
         return Math.max(
           MIN_FACTIONS,
           Math.min(MAX_FACTIONS, Math.floor(claimableRoomCount / 80))
         );
       }
-      
+
       expect(calculateFactionCount(50)).toBe(3); // Below minimum threshold
       expect(calculateFactionCount(160)).toBe(3); // At minimum
       expect(calculateFactionCount(240)).toBe(3); // Still at minimum

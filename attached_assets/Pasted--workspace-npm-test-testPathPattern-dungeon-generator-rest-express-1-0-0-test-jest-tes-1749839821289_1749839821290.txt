@@ -1,0 +1,56 @@
+~/workspace$ npm test -- --testPathPattern=dungeon-generator
+
+> rest-express@1.0.0 test
+> jest --testPathPattern=dungeon-generator
+
+ FAIL  client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts
+  ● Test suite failed to run
+
+    client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:226:27 - error TS2554: Expected 2-3 arguments, but got 1.
+
+    226       const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0.2 });
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+      client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:106:67
+        106     function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
+                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        An argument for 'factions' was not provided.
+    client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:243:27 - error TS2554: Expected 2-3 arguments, but got 1.
+
+    243       const assignments = assignFactionTerritories({ rooms, factions, unclaimedPercent: 0.1 });
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+      client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:106:67
+        106     function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
+                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        An argument for 'factions' was not provided.
+    client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:272:27 - error TS2554: Expected 2-3 arguments, but got 1.
+
+    272       const assignments = assignFactionTerritories({ rooms, factions });
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+      client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:106:67
+        106     function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
+                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        An argument for 'factions' was not provided.
+    client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:282:27 - error TS2554: Expected 2-3 arguments, but got 1.
+
+    282       const assignments = assignFactionTerritories({ rooms, factions });
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+      client/src/features/dungeon/generation/__tests__/dungeon-generator.test.ts:106:67
+        106     function assignFactionTerritories(rooms: Array<{id: number}>, factions: Array<{id: number, influence: number}>, unclaimedPercent: number = 0.05) {
+                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        An argument for 'factions' was not provided.
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        18.465 s
+Ran all test suites matching /dungeon-generator/i.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.4.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+npm notice To update run: npm install -g npm@11.4.2
+npm notice
+~/workspace$ 
