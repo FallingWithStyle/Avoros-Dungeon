@@ -236,7 +236,7 @@ describe('Events System', () => {
     it('should handle room entry with stored direction', () => {
       const crawlerName = 'Test Crawler';
       const crawlerId = 123;
-      const roomId = 456;
+      const roomId = 457; // Different room ID
 
       mockSessionStorage.setItem('lastMovementDirection', 'north');
 
@@ -251,7 +251,7 @@ describe('Events System', () => {
     it('should not generate duplicate events for same room', () => {
       const crawlerName = 'Test Crawler';
       const crawlerId = 123;
-      const roomId = 456;
+      const roomId = 458; // Different room ID
 
       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
       expect(receivedEvents).toHaveLength(1);
@@ -264,7 +264,7 @@ describe('Events System', () => {
     it('should generate discovery events after room entry delay', (done) => {
       const crawlerName = 'Test Crawler';
       const crawlerId = 123;
-      const roomId = 456;
+      const roomId = 459; // Different room ID
 
       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
 
