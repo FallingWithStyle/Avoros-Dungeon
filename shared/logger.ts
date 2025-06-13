@@ -23,10 +23,17 @@ export async function logErrorToFile(error: unknown, context = "") {
     errMsg += ` ${error.name}: ${error.message}\n${error.stack}\n\n`;
   } else {
     // For objects, don't stringify with escaped \n, show as-is
-    let stringified =
-      typeof error === "object" && error !== null
-        ? (JSON.stringify(error, null, 2) ?? String(error))
-        : String(error);
+    let stringified: string;
+    if (typeof error === "object" && error !== null) {
+      try {
+        stringified = JSON.stringify(error, null, 2);
+      } catch (jsonError) {
+        // Handle circular references and other JSON.stringify errors
+        stringified = String(error);
+      }
+    } else {
+      stringified = String(error);
+    }
     errMsg += ` ${stringified}\n\n`;
   }
 
