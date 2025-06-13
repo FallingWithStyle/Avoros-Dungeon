@@ -79,49 +79,44 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log("⚡ Ultra-fast room transition " + direction + " starting...");
       sessionStorage.setItem('lastMovementDirection', direction);
 
-      // Immediately clear entities for instant visual feedback
-      const currentEntities = combatSystem.getState().entities;
-      currentEntities.forEach((entity) => {
-        combatSystem.removeEntity(entity.id);
-      });
+      // Store current player position before transition
+      const currentPlayer = combatSystem.getState().entities.find(e => e.id === "player");
+      const playerBackup = currentPlayer ? { ...currentPlayer } : null;
 
-      // Immediately update dungeon map queries to show transition
-      queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
-
-      // Fire all requests simultaneously - no waiting
+      // Fire movement request
       const movePromise = fetch("/api/crawlers/" + crawler.id + "/move", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction }),
       });
 
-      // Start tactical data fetch immediately (don't await)
-      refetchTacticalData();
-      refetchExploredRooms();
+      // Optimistically update queries
+      queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
 
-      // Handle move result in background - don't block UI
-      movePromise.then(async (response) => {
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            console.log("✅ Background transition complete: " + (result.newRoom?.name || 'unknown room'));
-
-            // Final update to ensure everything is in sync
-            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
-          }
-        }
-      }).catch((error) => {
-        console.error("Failed to move " + direction + ":", error);
+      // Wait for movement to complete before clearing entities
+      const moveResponse = await movePromise;
+      if (!moveResponse.ok) {
+        console.error("Movement failed with status:", moveResponse.status);
         toast({
           title: "Movement failed",
           description: "Could not move in that direction.",
           variant: "destructive",
         });
+        return;
+      }
+
+      // Clear entities only after successful movement
+      const currentEntities = combatSystem.getState().entities;
+      currentEntities.forEach((entity) => {
+        combatSystem.removeEntity(entity.id);
       });
 
-      console.log("⚡ Ultra-fast transition initiated - UI responsive immediately");
+      // Refetch tactical data to get new room information
+      refetchTacticalData();
+      refetchExploredRooms();
+
+      console.log("⚡ Room transition completed successfully");
 
     } catch (error) {
       console.error("Failed to move " + direction + ":", error);
