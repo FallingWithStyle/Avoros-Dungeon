@@ -74,6 +74,9 @@ class EventsSystem {
     let storedDirection = null;
     if (typeof window !== 'undefined' && window.sessionStorage) {
       storedDirection = window.sessionStorage.getItem("lastMovementDirection");
+    } else if (typeof global !== 'undefined' && global.window && global.window.sessionStorage) {
+      // Test environment fallback
+      storedDirection = global.window.sessionStorage.getItem("lastMovementDirection");
     }
 
     let entryMessage = `Crawler ${crawlerName} (#${crawlerId}) entered the room`;
@@ -90,6 +93,9 @@ class EventsSystem {
       // Store the entry position for immediate use in combat system
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.setItem('entryDirection', storedDirection);
+      } else if (typeof global !== 'undefined' && global.window && global.window.sessionStorage) {
+        // Test environment fallback
+        global.window.sessionStorage.setItem('entryDirection', storedDirection);
       }
     }
 
