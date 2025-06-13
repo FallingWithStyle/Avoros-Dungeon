@@ -1,0 +1,91 @@
+ FAIL  shared/__tests__/events-system.test.ts
+  ● Test suite failed to run
+
+    shared/events-system.ts:102:7 - error TS2322: Type 'string | undefined' is not assignable to type '"north" | "south" | "east" | "west" | undefined'.
+      Type 'string' is not assignable to type '"north" | "south" | "east" | "west" | undefined'.
+
+    102       direction: storedDirection || undefined,
+              ~~~~~~~~~
+
+      shared/events-system.ts:20:3
+        20   direction?: "north" | "south" | "east" | "west";
+             ~~~~~~~~~
+        The expected type comes from property 'direction' which is declared here on type 'RoomEvent'
+    shared/events-system.ts:176:9 - error TS2353: Object literal may only specify known properties, and 'targetId' does not exist in type 'RoomEvent'.
+
+    176         targetId: target?.id,
+                ~~~~~~~~
+    shared/events-system.ts:188:19 - error TS2345: Argument of type '{ type: "combat"; message: string; priority: "medium"; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "combat"; message: string; priority: "medium"; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    188     this.addEvent({
+                          ~
+    189       type: "combat",
+        ~~~~~~~~~~~~~~~~~~~~~
+    ... 
+    191       priority: "medium",
+        ~~~~~~~~~~~~~~~~~~~~~~~~~
+    192     });
+        ~~~~~
+    shared/events-system.ts:196:19 - error TS2345: Argument of type '{ type: "combat"; message: string; priority: "medium"; damage: number; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "combat"; message: string; priority: "medium"; damage: number; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    196     this.addEvent({
+                          ~
+    197       type: "combat",
+        ~~~~~~~~~~~~~~~~~~~~~
+    ... 
+    200       damage,
+        ~~~~~~~~~~~~~
+    201     });
+        ~~~~~
+    shared/events-system.ts:205:19 - error TS2345: Argument of type '{ type: "combat"; message: string; priority: "high"; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "combat"; message: string; priority: "high"; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    205     this.addEvent({
+                          ~
+    206       type: "combat",
+        ~~~~~~~~~~~~~~~~~~~~~
+    ... 
+    208       priority: "high",
+        ~~~~~~~~~~~~~~~~~~~~~~~
+    209     });
+        ~~~~~
+    shared/events-system.ts:214:19 - error TS2345: Argument of type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string; victimType: "mob"; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string; victimType: "mob"; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    214     this.addEvent({
+                          ~
+    215       type: "death",
+        ~~~~~~~~~~~~~~~~~~~~
+    ... 
+    220       victimType: "mob",
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+    221     });
+        ~~~~~
+    shared/events-system.ts:229:19 - error TS2345: Argument of type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string | undefined; victimType: "player"; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string | undefined; victimType: "player"; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    229     this.addEvent({
+                          ~
+    230       type: "death",
+        ~~~~~~~~~~~~~~~~~~~~
+    ... 
+    235       victimType: "player",
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    236     });
+        ~~~~~
+    shared/events-system.ts:240:19 - error TS2345: Argument of type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string; victimType: "npc"; }' is not assignable to parameter of type 'RoomEvent'.
+      Type '{ type: "death"; message: string; priority: "high"; entityName: string; killedBy: string; victimType: "npc"; }' is missing the following properties from type 'RoomEvent': id, timestamp
+
+    240     this.addEvent({
+                          ~
+    241       type: "death",
+        ~~~~~~~~~~~~~~~~~~~~
+    ... 
+    246       victimType: "npc",
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+    247     });
+        ~~~~~
+
+Running coverage on untested files...
