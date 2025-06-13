@@ -8,16 +8,22 @@
 import { eventsSystem, type RoomEvent } from '../events-system';
 
 // Mock sessionStorage for testing
-const mockSessionStorage = {
+const mockSessionStorage: {
+  store: Map<string, string>;
+  getItem: jest.Mock<string | null, [string]>;
+  setItem: jest.Mock<void, [string, string]>;
+  removeItem: jest.Mock<void, [string]>;
+  clear: jest.Mock<void, []>;
+} = {
   store: new Map<string, string>(),
-  getItem: jest.fn((key: string) => mockSessionStorage.store.get(key) || null),
-  setItem: jest.fn((key: string, value: string) => {
+  getItem: jest.fn((key: string): string | null => mockSessionStorage.store.get(key) || null),
+  setItem: jest.fn((key: string, value: string): void => {
     mockSessionStorage.store.set(key, value);
   }),
-  removeItem: jest.fn((key: string) => {
+  removeItem: jest.fn((key: string): void => {
     mockSessionStorage.store.delete(key);
   }),
-  clear: jest.fn(() => {
+  clear: jest.fn((): void => {
     mockSessionStorage.store.clear();
   })
 };
