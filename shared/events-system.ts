@@ -173,8 +173,6 @@ class EventsSystem {
         message,
         entityId: entity.id,
         entityName: entity.name,
-        targetId: target?.id,
-        targetName: target?.name,
         damage,
         priority,
       });
@@ -186,16 +184,20 @@ class EventsSystem {
   // Combat events
   onCombatStart(attackerName: string, defenderName: string): void {
     this.addEvent({
+      id: `combat-start-${Date.now()}`,
       type: "combat",
       message: `${attackerName} attacks ${defenderName}!`,
+      timestamp: Date.now(),
       priority: "medium",
     });
   }
 
   onCombatDamage(attackerName: string, defenderName: string, damage: number): void {
     this.addEvent({
+      id: `combat-damage-${Date.now()}`,
       type: "combat",
       message: `${attackerName} deals damage to ${defenderName}`,
+      timestamp: Date.now(),
       priority: "medium",
       damage,
     });
