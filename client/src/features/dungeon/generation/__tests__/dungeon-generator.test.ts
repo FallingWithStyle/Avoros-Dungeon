@@ -7,39 +7,9 @@
 
 import { jest } from '@jest/globals';
 
-// Mock the database dependencies with correct path
-jest.mock('../../../../server/db', () => ({
-  db: {
-    select: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    values: jest.fn().mockReturnThis(),
-    returning: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnValue([])
-  }
-}));
-
-// Mock the logger
-jest.mock('../../../../shared/logger', () => ({
-  logErrorToFile: jest.fn()
-}));
-
-// Mock the schema
-jest.mock('../../../../shared/schema', () => ({
-  rooms: {},
-  roomConnections: {},
-  floors: {},
-  crawlerPositions: {},
-  floorThemes: {},
-  roomTypes: {}
-}));
-
 describe('Dungeon Generator', () => {
-  // Since the main functions are not exported individually, we'll test the algorithms
-  // by creating separate testable functions that mirror the internal logic
+  // Test the pure algorithmic functions without database dependencies
+  // Following the rule: "Never modify production code solely to accommodate or pass unit tests"
 
   describe('Room Connectivity Algorithm', () => {
     // Test the connectAllDisconnectedComponents logic
