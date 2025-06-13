@@ -1,0 +1,96 @@
+FAIL  shared/__tests__/events-system.test.ts (19.001 s)
+  Events System
+    Event Management
+      ✓ should add events and notify subscribers (3 ms)
+      ✓ should prevent duplicate events with same ID
+      ✓ should clear all events (1 ms)
+    Subscriber Pattern
+      ✓ should handle multiple subscribers (1 ms)
+      ✓ should stop notifying unsubscribed callbacks (1 ms)
+    Room Change Events
+      ✓ should handle room entry without stored direction (1 ms)
+      ✕ should handle room entry with stored direction (2 ms)
+      ✕ should not generate duplicate events for same room (1 ms)
+      ✕ should generate discovery events after room entry delay (1 ms)
+    Combat Events
+      ✓ should record combat actions with move type (1 ms)
+      ✓ should record combat actions with attack type (1 ms)
+      ✓ should record combat actions without target (1 ms)
+      ✓ should handle combat start events
+      ✓ should handle combat damage events (1 ms)
+      ✓ should handle combat end events (1 ms)
+    Death Events
+      ✓ should handle mob death events (2 ms)
+      ✓ should handle crawler death with killer
+      ✓ should handle crawler death without killer
+      ✓ should handle NPC death events
+    Room Entry Time Tracking
+      ✓ should track room entry time (1 ms)
+      ✓ should update room entry time on room change (11 ms)
+    Event Properties
+      ✓ should create events with all required properties (1 ms)
+      ✓ should handle events with minimal properties
+
+  ● Events System › Room Change Events › should handle room entry with stored direction
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      243 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+      244 |
+    > 245 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      246 |       expect(receivedEvents[0].message).toBe(`Crawler ${crawlerName} (#${crawlerId}) entered from the south`);
+      247 |       expect(receivedEvents[0].direction).toBe('north');
+      248 |       expect(mockSessionStorage.setItem).toHaveBeenCalledWith('entryDirection', 'north');
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:245:30)
+
+  ● Events System › Room Change Events › should not generate duplicate events for same room
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      255 |
+      256 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+    > 257 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      258 |
+      259 |       // Try to enter same room again
+      260 |       eventsSystem.onRoomChange(roomId, crawlerName, crawlerId);
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:257:30)
+
+  ● Events System › Room Change Events › should generate discovery events after room entry delay
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      270 |
+      271 |       // Initial entry event
+    > 272 |       expect(receivedEvents).toHaveLength(1);
+          |                              ^
+      273 |
+      274 |       // Wait for discovery events
+      275 |       setTimeout(() => {
+
+      at Object.<anonymous> (shared/__tests__/events-system.test.ts:272:30)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 20 passed, 23 total
+Snapshots:   0 total
+Time:        19.371 s, estimated 38 s
+Ran all test suites matching /events-system/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+~/workspace$ 
