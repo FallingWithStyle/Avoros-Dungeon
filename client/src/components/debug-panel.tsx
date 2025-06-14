@@ -237,7 +237,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
 
   // Don't render debug panel if not in debug mode
   if (!IS_DEBUG_MODE) {
-    return null;
+    return <div style={{ display: 'none' }} />;
   }
 
   // Button and text styles for "mini" buttons

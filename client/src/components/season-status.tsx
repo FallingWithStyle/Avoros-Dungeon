@@ -1,49 +1,63 @@
 /**
  * File: season-status.tsx
- * Responsibility: Displays current season information and status indicators
- * Notes: Shows season number, active status, and time remaining for competitive seasons
+ * Responsibility: Display current season information and status
+ * Notes: Shows season progress, time remaining, and active season details
  */
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Trophy, Users } from 'lucide-react';
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Trophy, Users } from "lucide-react";
+
+interface Season {
+  id: number;
+  season_number: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+  start_date: string;
+  end_date: string;
+}
 
 export default function SeasonStatus() {
-  // Safe hook usage with error handling
-  let season: any = null;
-  try {
-    const queryResult = useQuery({
-      queryKey: ['/api/seasons/current'],
-      refetchInterval: 30000, // Refresh every 30 seconds
-    });
-    season = queryResult.data;
-  } catch (error) {
-    console.warn('Season query hook not available:', error);
-    return (
-      <Card className="bg-game-surface border-game-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-game-text-primary flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-game-accent" />
-            Season Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-game-text-secondary">
-            Loading season data...
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const { data: currentSeason, isLoading, error } = useQuery<Season>({
+    queryKey: ["/api/season/current"],
+    refetchInterval: 60000, // Refresh every minute
+  });
 
   const { data: user } = useQuery({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
 
-  if (!season) {
+
+  if (isLoading) {
+    return (
+      <Card className="bg-game-surface border-game-border">
+        <CardContent className="p-4">
+          <div className="animate-pulse flex space-x-4">
+            <div className="flex-1 space-y-2 py-1">
+              <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error || !currentSeason) {
+    return (
+      <Card className="bg-game-surface border-game-border">
+        <CardContent className="p-4">
+          <p className="text-gray-400 text-sm">No active season</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!currentSeason) {
     return (
       <Card className="bg-game-surface border-game-border">
         <CardHeader>
@@ -54,7 +68,7 @@ export default function SeasonStatus() {
     );
   }
 
-  const canCreatePrimary = user && (!user.primarySponsorshipUsed || user.lastPrimarySponsorshipSeason < season.seasonNumber);
+  const canCreatePrimary = user && (!user.primarySponsorshipUsed || user.lastPrimarySponsorshipSeason < currentSeason.season_number);
 
   return (
     <Card className="bg-game-surface border-game-border">
@@ -63,10 +77,10 @@ export default function SeasonStatus() {
           <div>
             <CardTitle className="text-blue-400 flex items-center gap-2">
               <Trophy className="w-5 h-5" />
-              Season {season.seasonNumber}: {season.name}
+              Season {currentSeason.season_number}: {currentSeason.name}
             </CardTitle>
             <CardDescription className="text-slate-400 mt-1">
-              {season.description}
+              {currentSeason.description}
             </CardDescription>
           </div>
           <Badge variant="secondary" className="bg-green-600/20 text-green-400 border-green-600/30">

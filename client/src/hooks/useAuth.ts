@@ -17,6 +17,21 @@ export function useAuth() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    queryFn: async () => {
+      const response = await fetch("/api/auth/user", {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Not authenticated, return null instead of throwing
+          return null;
+        }
+        throw new Error(`Authentication check failed: ${response.status}`);
+      }
+      
+      return response.json();
+    }
   });
 
   const logout = () => {
@@ -28,6 +43,14 @@ export function useAuth() {
 
   // Only consider user authenticated if we have valid user data
   const isAuthenticated = !!user && !error;
+
+  console.log('🔐 Auth State:', { 
+    hasUser: !!user, 
+    isLoading, 
+    hasError: !!error, 
+    isAuthenticated,
+    errorMessage: error?.message 
+  });
 
   return {
     user,
