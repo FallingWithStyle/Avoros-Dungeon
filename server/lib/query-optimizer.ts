@@ -6,18 +6,11 @@
  */
 
 
+import { crawlerClasses, roomConnections } from '@shared/schema';
+
 import { db } from '../db';
 import { eq, inArray, and } from 'drizzle-orm';
-import { 
-  rooms, 
-  crawlers, 
-  crawlerPositions, 
-  tacticalPositions, 
-  mobs, 
-  mobTypes as enemies,
-  crawlerClasses, 
-  roomConnections 
-} from '@shared/schema';
+import { rooms, crawlers, crawlerPositions, tacticalPositions, mobs, enemies } from '@shared/schema';
 
 interface QueryBatch {
   crawlerIds: Set<number>;
