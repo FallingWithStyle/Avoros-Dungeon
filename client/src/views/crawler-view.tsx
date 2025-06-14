@@ -84,6 +84,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       if (!response.ok) throw new Error("Failed to fetch room data");
       return response.json();
     },
+    enabled: !!crawlerId && isAuthenticated,
     refetchInterval: 5000,
   });
 
