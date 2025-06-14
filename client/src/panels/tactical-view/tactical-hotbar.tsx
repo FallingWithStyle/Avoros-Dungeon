@@ -27,18 +27,6 @@ export default function TacticalHotbar({
 
   return (
     <div className="flex gap-1 p-2 bg-game-surface rounded-lg border border-game-border">
-      {/* Move Action */}
-      <Button
-        variant={activeActionMode?.actionId === "move" ? "default" : "outline"}
-        size="sm"
-        className="w-10 h-10 p-0 flex flex-col items-center justify-center relative"
-        onClick={() => onHotbarClick("move", "move", "Move")}
-        title="Move [W]"
-      >
-        <Move className="w-4 h-4" />
-        <span className="text-xs text-muted-foreground">W</span>
-      </Button>
-
       {/* Attack Action */}
       <Button
         variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}

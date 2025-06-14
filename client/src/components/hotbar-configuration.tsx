@@ -26,23 +26,21 @@ interface HotbarConfigurationProps {
 }
 
 const AVAILABLE_ACTIONS = [
-  { id: 'move', name: 'Move', type: 'move', icon: <Move className="w-4 h-4" /> },
   { id: 'basic_attack', name: 'Attack', type: 'attack', icon: <Sword className="w-4 h-4" /> },
   { id: 'defend', name: 'Defend', type: 'ability', icon: <Shield className="w-4 h-4" /> },
   { id: 'special', name: 'Special', type: 'ability', icon: <Zap className="w-4 h-4" /> },
 ] as const;
 
-const DEFAULT_HOTKEYS = ['W', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const DEFAULT_HOTKEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 export default function HotbarConfiguration({ onConfigurationChange }: HotbarConfigurationProps) {
   const [hotbarSlots, setHotbarSlots] = useState<HotbarSlot[]>([
-    { id: '1', actionId: 'move', actionName: 'Move', actionType: 'move', icon: <Move className="w-4 h-4" />, hotkey: 'W' },
-    { id: '2', actionId: 'basic_attack', actionName: 'Attack', actionType: 'attack', icon: <Sword className="w-4 h-4" />, hotkey: '1' },
-    { id: '3', actionId: 'defend', actionName: 'Defend', actionType: 'ability', icon: <Shield className="w-4 h-4" />, hotkey: '2' },
-    { id: '4', actionId: 'special', actionName: 'Special', actionType: 'ability', icon: <Zap className="w-4 h-4" />, hotkey: '3' },
+    { id: '1', actionId: 'basic_attack', actionName: 'Attack', actionType: 'attack', icon: <Sword className="w-4 h-4" />, hotkey: '1' },
+    { id: '2', actionId: 'defend', actionName: 'Defend', actionType: 'ability', icon: <Shield className="w-4 h-4" />, hotkey: '2' },
+    { id: '3', actionId: 'special', actionName: 'Special', actionType: 'ability', icon: <Zap className="w-4 h-4" />, hotkey: '3' },
   ]);
 
-  const [maxSlots, setMaxSlots] = useState(4);
+  const [maxSlots, setMaxSlots] = useState(3);
 
   const updateSlotAction = (slotId: string, actionId: string) => {
     const action = AVAILABLE_ACTIONS.find(a => a.id === actionId);
@@ -60,10 +58,10 @@ export default function HotbarConfiguration({ onConfigurationChange }: HotbarCon
     
     const newSlot: HotbarSlot = {
       id: `${hotbarSlots.length + 1}`,
-      actionId: 'move',
-      actionName: 'Move',
-      actionType: 'move',
-      icon: <Move className="w-4 h-4" />,
+      actionId: 'basic_attack',
+      actionName: 'Attack',
+      actionType: 'attack',
+      icon: <Sword className="w-4 h-4" />,
       hotkey: DEFAULT_HOTKEYS[hotbarSlots.length] || `${hotbarSlots.length + 1}`,
     };
     
@@ -77,12 +75,11 @@ export default function HotbarConfiguration({ onConfigurationChange }: HotbarCon
 
   const resetToDefault = () => {
     setHotbarSlots([
-      { id: '1', actionId: 'move', actionName: 'Move', actionType: 'move', icon: <Move className="w-4 h-4" />, hotkey: 'W' },
-      { id: '2', actionId: 'basic_attack', actionName: 'Attack', actionType: 'attack', icon: <Sword className="w-4 h-4" />, hotkey: '1' },
-      { id: '3', actionId: 'defend', actionName: 'Defend', actionType: 'ability', icon: <Shield className="w-4 h-4" />, hotkey: '2' },
-      { id: '4', actionId: 'special', actionName: 'Special', actionType: 'ability', icon: <Zap className="w-4 h-4" />, hotkey: '3' },
+      { id: '1', actionId: 'basic_attack', actionName: 'Attack', actionType: 'attack', icon: <Sword className="w-4 h-4" />, hotkey: '1' },
+      { id: '2', actionId: 'defend', actionName: 'Defend', actionType: 'ability', icon: <Shield className="w-4 h-4" />, hotkey: '2' },
+      { id: '3', actionId: 'special', actionName: 'Special', actionType: 'ability', icon: <Zap className="w-4 h-4" />, hotkey: '3' },
     ]);
-    setMaxSlots(4);
+    setMaxSlots(3);
   };
 
   React.useEffect(() => {
@@ -210,9 +207,10 @@ export default function HotbarConfiguration({ onConfigurationChange }: HotbarCon
         </div>
 
         <div className="text-xs text-muted-foreground">
-          <p>• Drag slots to reorder them (coming soon)</p>
+          <p>• Use WASD keys or touch gestures to move around</p>
           <p>• Green slots are visible in the tactical view</p>
           <p>• Use the slider to control how many slots appear</p>
+          <p>• Drag slots to reorder them (coming soon)</p>
         </div>
       </CardContent>
     </Card>
