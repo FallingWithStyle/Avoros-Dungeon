@@ -99,9 +99,16 @@ class QueryOptimizer {
     return result;
   }
 
-  // Batch room connections
+  // Batch room connections with caching
   async getRoomConnectionsBatch(roomIds: number[]): Promise<Map<number, any[]>> {
     const uniqueIds = [...new Set(roomIds)];
+    
+    // Check cache first for frequently accessed connections
+    const cacheKey = `connections:${uniqueIds.sort().join(',')}`;
+    const cached = await redisService.get(cacheKey);
+    if (cached) {
+      return new Map(Object.entries(cached));
+    }
     
     const connections = await db
       .select()
@@ -117,7 +124,15 @@ class QueryOptimizer {
       result.get(roomId).push(conn);
     });
 
+    // Cache for 10 minutes since connections rarely change
+    await redisService.set(cacheKey, Object.fromEntries(result), 600);
+
     return result;
+  }
+
+  // Clear connection caches when rooms are modified
+  async invalidateConnectionCache(): Promise<void> {
+    await redisService.deletePattern('connections:*');
   }
 
   // Batch tactical positions

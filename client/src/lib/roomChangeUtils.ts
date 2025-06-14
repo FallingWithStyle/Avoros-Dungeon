@@ -32,6 +32,16 @@ export async function handleRoomChangeWithRefetch(crawlerId: number, direction: 
   console.log("Fast room change for crawler " + crawlerId + " direction " + direction);
 
   try {
+    // Optimistically invalidate cache immediately for responsive feel
+    queryClient.setQueryData(
+      ["/api/crawlers/" + crawlerId + "/room-data-batch"],
+      (oldData: any) => {
+        if (!oldData) return oldData;
+        // Mark as stale but keep displaying while loading
+        return { ...oldData, _isStale: true };
+      }
+    );
+
     // First, make the actual move API call
     const response = await fetch("/api/crawlers/" + crawlerId + "/move", {
       method: "POST",

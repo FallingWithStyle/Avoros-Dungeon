@@ -335,6 +335,14 @@ export function registerCrawlerRoutes(app: Express) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
+      // Check cache first for entire batch response
+      const batchCacheKey = `batch:${crawlerId}:room-data`;
+      const cached = await redisService.get(batchCacheKey);
+      if (cached) {
+        console.log(`Using cached batch data for crawler ${crawlerId}`);
+        return res.json(cached);
+      }
+
       const crawler = await storage.getCrawler(crawlerId);
       if (!crawler || crawler.sponsorId !== userId) {
         return res.status(404).json({ error: "Crawler not found" });
@@ -356,30 +364,39 @@ export function registerCrawlerRoutes(app: Express) {
       const currentRoomId = currentPosition.id;
       const scanRange = crawler.scanRange || 2;
 
-      // Get all room data we need
-      const [scannedRooms, exploredRooms, tacticalData, availableDirections] = await Promise.all([
+      // Get players in room quickly
+      const playersInRoomPromise = storage.getPlayersInRoom(currentRoomId);
+
+      // Get all room data in parallel with optimized queries
+      const [scannedRooms, exploredRooms, tacticalData, availableDirections, playersInRoom] = await Promise.all([
         storage.getScannedRooms(crawlerId, scanRange),
         storage.getExploredRooms(crawlerId),
         storage.generateAndSaveTacticalData(currentRoomId, currentPosition),
-        storage.getAvailableDirections(currentRoomId)
+        storage.getAvailableDirections(currentRoomId),
+        playersInRoomPromise
       ]);
+
+      const response = {
+        currentRoom: {
+          room: currentPosition,
+          availableDirections: availableDirections || [],
+          playersInRoom: playersInRoom || []
+        },
+        tacticalData: tacticalData || [],
+        scannedRooms: scannedRooms || [],
+        exploredRooms: exploredRooms || [],
+        crawlerHistory: [] // This can be expanded later if needed
+      };
+
+      // Cache the response for 60 seconds (shorter TTL for fresher data)
+      await redisService.set(batchCacheKey, response, 60);
 
       console.log("=== BATCH DATA RESPONSE for crawler", crawlerId, "===");
       console.log("Tactical entities:", tacticalData?.length || 0);
       console.log("Scanned rooms:", scannedRooms?.length || 0);
       console.log("Explored rooms:", exploredRooms?.length || 0);
 
-      res.json({
-        currentRoom: {
-          room: currentPosition,
-          availableDirections: availableDirections || [],
-          playersInRoom: [] // This can be expanded later if needed
-        },
-        tacticalData: tacticalData || [],
-        scannedRooms: scannedRooms || [],
-        exploredRooms: exploredRooms || [],
-        crawlerHistory: [] // This can be expanded later if needed
-      });
+      res.json(response);
 
     } catch (error) {
       console.error("Error fetching room data batch:", error);

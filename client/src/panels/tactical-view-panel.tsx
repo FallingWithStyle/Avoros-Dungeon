@@ -215,8 +215,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
 
       console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
+
+      // Preload adjacent rooms for faster transitions
+      if (effectiveTacticalData?.availableDirections) {
+        effectiveTacticalData.availableDirections.forEach((direction: string) => {
+          // Prefetch room data for adjacent rooms (low priority)
+          setTimeout(() => {
+            queryClient.prefetchQuery({
+              queryKey: [`/api/crawlers/${crawler.id}/adjacent-room/${direction}`],
+              queryFn: () => Promise.resolve(null), // Placeholder - implement if needed
+              staleTime: 2 * 60 * 1000, // 2 minutes
+            });
+          }, 1000); // Delay to not interfere with current loading
+        });
+      }
     }
-  }, [roomData?.room, lastRoomId, crawler]);
+  }, [roomData?.room, lastRoomId, crawler, effectiveTacticalData]);
 
   // Grid event handlers - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {

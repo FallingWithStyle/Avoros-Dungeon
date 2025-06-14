@@ -47,11 +47,10 @@ class RedisService {
   }
 
   private isDebugMode(): boolean {
-    // Check various indicators that we're in debug/development mode
+    // Only enable debug mode in actual development, not in Replit production
     return process.env.NODE_ENV === 'development' || 
            process.env.NODE_ENV === 'test' ||
-           process.env.DEBUG === 'true' ||
-           !!process.env.REPL_ID; // Replit environment indicator
+           process.env.DEBUG === 'true';
   }
 
   private async testConnection(): Promise<void> {
@@ -487,6 +486,20 @@ class RedisService {
     }
     await this.set(key, value, ttl);
     return true;
+  }
+
+  // Batch data caching for faster load times
+  async getBatchData(crawlerId: number): Promise<any | null> {
+    return this.get(`batch:${crawlerId}:room-data`);
+  }
+
+  async setBatchData(crawlerId: number, data: any, ttl: number = 60): Promise<void> {
+    await this.set(`batch:${crawlerId}:room-data`, data, ttl);
+  }
+
+  async invalidateBatchData(crawlerId: number): Promise<void> {
+    if (this.forceFallbackMode || !this.isConnected) return;
+    await this.del(`batch:${crawlerId}:room-data`);
   }
 
   async safeDel(key: string): Promise<boolean> {
