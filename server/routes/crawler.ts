@@ -472,4 +472,78 @@ export function registerCrawlerRoutes(app: Express) {
       res.status(500).json({ error: "Failed to fetch room mobs summary" });
     }
   });
+
+  app.post("/api/crawlers/:id/move", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const { direction } = req.body;
+      const userId = req.user.claims.sub;
+
+      // Validate input
+      if (!direction || typeof direction !== 'string') {
+        return res.status(400).json({ message: "Invalid direction specified" });
+      }
+
+      if (!['north', 'south', 'east', 'west'].includes(direction)) {
+        return res.status(400).json({ message: "Invalid direction. Must be north, south, east, or west." });
+      }
+
+      // Verify ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found or access denied" });
+      }
+
+      if (!crawler.isAlive) {
+        return res.status(400).json({ message: "Dead crawlers cannot move" });
+      }
+
+      // Check if crawler has enough energy (if energy system is implemented)
+      if (crawler.energy !== undefined && crawler.energy <= 0) {
+        return res.status(400).json({ message: "Not enough energy to move" });
+      }
+
+      // Attempt movement
+      const result = await storage.moveToRoom(crawlerId, direction);
+
+      if (result.success) {
+        await storage.createActivity({
+          userId,
+          crawlerId,
+          type: "room_movement",
+          message: `${crawler.name} moved ${direction}`,
+          details: { direction, newRoomId: result.newRoom?.id },
+        });
+
+        res.json({ success: true, newRoom: result.newRoom });
+      } else {
+        // Provide more specific error messages
+        let errorMessage = result.error || "Movement failed";
+
+        if (errorMessage.includes("not found")) {
+          errorMessage = "Current room not found. Try refreshing the page.";
+        } else if (errorMessage.includes("locked")) {
+          errorMessage = `The ${direction} exit is locked and requires a key.`;
+        } else if (errorMessage.includes("No exit")) {
+          errorMessage = `There is no exit to the ${direction} from this room.`;
+        }
+
+        res.status(400).json({ message: errorMessage });
+      }
+    } catch (error) {
+      console.error("Error moving crawler:", error);
+
+      // Provide different error messages based on error type
+      let errorMessage = "Failed to move crawler";
+      if (error instanceof Error) {
+        if (error.message.includes("database")) {
+          errorMessage = "Database error during movement. Please try again.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "Movement request timed out. Please try again.";
+        }
+      }
+
+      res.status(500).json({ message: errorMessage });
+    }
+  });
 }

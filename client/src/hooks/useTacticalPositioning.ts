@@ -26,8 +26,9 @@ export function useTacticalPositioning({
   onRoomMovement,
 }: UseTacticalPositioningProps) {
   const speed = 2.5; // Movement speed per frame
+  const ROOM_TRANSITION_COOLDOWN = 2000; // 2 second cooldown between room transitions
   const lastRoomTransitionTime = useRef<number>(0);
-  const ROOM_TRANSITION_COOLDOWN = 100; // Ultra-fast 100ms cooldown
+  const isTransitioning = useRef<boolean>(false);
 
   const handleMovement = useCallback(
     (direction: MovementVector) => {
@@ -39,14 +40,38 @@ export function useTacticalPositioning({
       let playerEntity = combatState.entities.find(
         (e: any) => e.id === "player",
       );
-      
+
       // If no player entity exists, recreate it at default position
       if (!playerEntity) {
-        console.log("No player entity found - recreating at center position");
-        combatSystem.initializePlayer({ x: 50, y: 50 });
-        playerEntity = combatState.entities.find((e: any) => e.id === "player");
-        
-        if (!playerEntity) {
+        console.log("No player entity found - attempting recovery");
+
+        // Try to get proper entry position from session storage first
+        const entryDirection = sessionStorage.getItem('entryDirection');
+        let recoveryPosition = { x: 50, y: 50 }; // Default fallback
+
+        if (entryDirection) {
+          // Use proper entry positioning based on last known entry direction
+          switch (entryDirection) {
+            case "north":
+              recoveryPosition = { x: 50, y: 85 };
+              break;
+            case "south":
+              recoveryPosition = { x: 50, y: 15 };
+              break;
+            case "east":
+              recoveryPosition = { x: 15, y: 50 };
+              break;
+            case "west":
+              recoveryPosition = { x: 85, y: 50 };
+              break;
+          }
+          console.log(`🔄 Recovering player position based on entry direction '${entryDirection}': (${recoveryPosition.x}, ${recoveryPosition.y})`);
+        } else {
+          console.log("🔄 No entry direction found, using center position for recovery");
+        }
+
+        combatSystem.createPlayerEntity(recoveryPosition, crawlerData);
+        if (!combatSystem.getState().entities.find((e) => e.id === "player")) {
           console.log("Failed to create player entity - movement blocked");
           return;
         }
@@ -204,11 +229,22 @@ export function useTacticalPositioning({
       }
 
       // Handle room transition
-      if (roomTransitionDirection) {
+      if (roomTransitionDirection && !isTransitioning.current) {
         console.log("🏃 Transitioning to new room:", roomTransitionDirection);
         lastRoomTransitionTime.current = Date.now();
+        isTransitioning.current = true;
+
+        // Clear transition flag after cooldown period
+        setTimeout(() => {
+          isTransitioning.current = false;
+          console.log("🔓 Room transition cooldown complete");
+        }, ROOM_TRANSITION_COOLDOWN);
+
         onRoomMovement(roomTransitionDirection);
-        return; // Exit early - don't process movement locally
+        return;
+      } else if (roomTransitionDirection && isTransitioning.current) {
+        console.log("🚫 Room transition already in progress - ignoring duplicate transition");
+        return;
       }
 
       // Only clamp and move if we're NOT transitioning rooms
@@ -245,13 +281,13 @@ export function useTacticalPositioning({
         playerEntity.position.x = finalX;
         playerEntity.position.y = finalY;
         playerEntity.facing = newFacing;
-        
+
         // Notify combat system of state change to trigger UI updates
         combatSystem.updateEntity(playerEntity.id, { 
           position: { x: finalX, y: finalY },
           facing: newFacing
         });
-        
+
         console.log("✅ Player updated to:", { position: playerEntity.position, facing: playerEntity.facing });
       } else {
         console.log("🚫 Movement blocked - no significant position or facing change");
