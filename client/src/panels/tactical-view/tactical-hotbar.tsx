@@ -26,30 +26,30 @@ export default function TacticalHotbar({
   const punchCooldown = getCooldownPercentage("basic_attack");
 
   return (
-    <div className="flex gap-2 p-3 bg-game-surface rounded-lg border border-game-border">
+    <div className="flex gap-1 p-2 bg-game-surface rounded-lg border border-game-border">
       {/* Move Action */}
       <Button
         variant={activeActionMode?.actionId === "move" ? "default" : "outline"}
         size="sm"
-        className="flex items-center gap-1 relative"
+        className="w-10 h-10 p-0 flex flex-col items-center justify-center relative"
         onClick={() => onHotbarClick("move", "move", "Move")}
+        title="Move [W]"
       >
         <Move className="w-4 h-4" />
-        <span className="hidden sm:inline">Move</span>
-        <span className="text-xs text-muted-foreground ml-1">[W]</span>
+        <span className="text-xs text-muted-foreground">W</span>
       </Button>
 
-      {/* Punch Attack */}
+      {/* Attack Action */}
       <Button
         variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}
         size="sm"
-        className="flex items-center gap-1 relative"
+        className="w-10 h-10 p-0 flex flex-col items-center justify-center relative"
         onClick={() => onHotbarClick("basic_attack", "attack", "Punch")}
         disabled={punchCooldown > 0}
+        title="Attack [1]"
       >
-        <span className="text-lg">👊</span>
-        <span className="hidden sm:inline">Punch</span>
-        <span className="text-xs text-muted-foreground ml-1">[A]</span>
+        <Sword className="w-4 h-4" />
+        <span className="text-xs text-muted-foreground">1</span>
 
         {/* Cooldown indicator */}
         {punchCooldown > 0 && (
@@ -66,24 +66,24 @@ export default function TacticalHotbar({
       <Button
         variant={activeActionMode?.actionId === "defend" ? "default" : "outline"}
         size="sm"
-        className="flex items-center gap-1 relative"
+        className="w-10 h-10 p-0 flex flex-col items-center justify-center relative"
         onClick={() => onHotbarClick("defend", "ability", "Defend")}
+        title="Defend [2]"
       >
         <Shield className="w-4 h-4" />
-        <span className="hidden sm:inline">Defend</span>
-        <span className="text-xs text-muted-foreground ml-1">[S]</span>
+        <span className="text-xs text-muted-foreground">2</span>
       </Button>
 
       {/* Special Ability */}
       <Button
         variant={activeActionMode?.actionId === "special" ? "default" : "outline"}
         size="sm"
-        className="flex items-center gap-1 relative"
+        className="w-10 h-10 p-0 flex flex-col items-center justify-center relative"
         onClick={() => onHotbarClick("special", "ability", "Special")}
+        title="Special [3]"
       >
         <Zap className="w-4 h-4" />
-        <span className="hidden sm:inline">Special</span>
-        <span className="text-xs text-muted-foreground ml-1">[D]</span>
+        <span className="text-xs text-muted-foreground">3</span>
       </Button>
     </div>
   );
