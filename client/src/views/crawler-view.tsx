@@ -161,8 +161,13 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
               <img
                 src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
                 alt={`${crawler.name} avatar`}
-                className="w-12 h-12 rounded-full border-2 border-game-border bg-gray-800"
+                className="w-12 h-12 rounded-full border-2 border-game-border bg-blue-600"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
               />
+              <div className="w-12 h-12 rounded-full border-2 border-game-border bg-blue-600 hidden"></div>
               <div>
                 <h1 className="text-2xl font-bold text-white">
                   {crawler.name} {crawler.serial && `[${crawler.serial}]`}
