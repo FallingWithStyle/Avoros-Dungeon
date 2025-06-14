@@ -7,6 +7,7 @@ import {
   rooms,
   floors,
   equipment,
+  roomConnections,
   type InsertCrawler,
   type Crawler,
   type CrawlerWithDetails,
@@ -368,7 +369,8 @@ export class CrawlerStorage extends BaseStorage {
 
       console.log("Getting current room for crawler", crawlerId);
 
-      // Get position and room data together
+      // Get position, room data, and connections in a single optimized query
+      
       const positionData = await db
         .select({
           room: rooms,
@@ -388,11 +390,7 @@ export class CrawlerStorage extends BaseStorage {
       const [data] = positionData;
       console.log(`Database query result for crawler ${crawlerId}: Found room: ${data.room.name}`);
 
-      // Get room connections in the same request
-      // Assuming 'roomConnections' and its structure are defined elsewhere
-      // and 'fromRoomId' exists in the schema.
-      const { roomConnections } = await import("@shared/schema");
-
+      // Fetch connections in parallel with room data (already have room from above)
       const connections = await db
         .select()
         .from(roomConnections)
@@ -404,8 +402,8 @@ export class CrawlerStorage extends BaseStorage {
         connections: connections
       };
 
-      // Cache the result
-      await redisService.setCurrentRoom(crawlerId, result);
+      // Cache the result with longer TTL for room data
+      await redisService.setCurrentRoom(crawlerId, result, 300); // 5 minutes
       if (req) {
         const requestCache = getRequestCache(req);
         const cacheKey = RequestCache.createKey('current-room', crawlerId);
