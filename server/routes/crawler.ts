@@ -326,16 +326,16 @@ export function registerCrawlerRoutes(app: Express) {
   });
 
   // Batch endpoint for faster room loading - gets all room data in one call
-  app.get("/api/crawlers/:id/room-data-batch", async (req, res) => {
+  app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
   try {
     const crawlerId = parseInt(req.params.id);
-    const userId = req.user?.id;
+    const userId = req.user?.claims?.sub;
 
     if (!userId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const crawler = await storage.getCrawler(crawlerId, req);
+    const crawler = await storage.getCrawler(crawlerId);
     if (!crawler || crawler.sponsorId !== userId) {
       return res.status(404).json({ error: "Crawler not found" });
     }

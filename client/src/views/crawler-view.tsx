@@ -78,14 +78,26 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
         cache: 'no-cache',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'Content-Type': 'application/json'
         }
       });
-      if (!response.ok) throw new Error("Failed to fetch room data");
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication required");
+        }
+        throw new Error("Failed to fetch room data");
+      }
       return response.json();
     },
-    enabled: !!crawlerId && isAuthenticated,
-    refetchInterval: 5000,
+    enabled: !!crawlerId && isAuthenticated && !isLoading,
+    refetchInterval: roomError ? false : 5000, // Stop refetching on error
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors
+      if (error.message === "Authentication required") return false;
+      return failureCount < 2;
+    },
+    retryDelay: 2000,
   });
 
   // Extract data from batch response
@@ -99,9 +111,10 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     enabled: !!crawlerId
   });
 
-  const isDataLoading = crawlerLoading || roomLoading;
+  // Only show loading on initial load, not on background refetches
+  const isInitialLoading = crawlerLoading && !crawler;
 
-  if (isDataLoading) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <div className="text-center">
