@@ -580,37 +580,38 @@ export class CombatSystem {
     const existingPlayer = this.state.entities.find((e) => e.id === "player");
 
     // Get entry direction to determine starting position
-    const entryDirection = sessionStorage.getItem("entryDirection");
+    const entryDirection = sessionStorage.getItem("lastMovementDirection");
     let calculatedPosition = startPosition;
 
     if (!calculatedPosition && entryDirection) {
-      // Position player near the appropriate entrance
+      // Position player near the appropriate entrance based on the direction they moved
+      // When you move north, you enter the new room from the south
       switch (entryDirection) {
         case "north":
-          calculatedPosition = { x: 50, y: 85 }; // Near south wall when entering from north
+          calculatedPosition = { x: 50, y: 85 }; // Near south wall when moved north
           break;
         case "south":
-          calculatedPosition = { x: 50, y: 15 }; // Near north wall when entering from south
+          calculatedPosition = { x: 50, y: 15 }; // Near north wall when moved south
           break;
         case "east":
-          calculatedPosition = { x: 15, y: 50 }; // Near west wall when entering from east
+          calculatedPosition = { x: 15, y: 50 }; // Near west wall when moved east
           break;
         case "west":
-          calculatedPosition = { x: 85, y: 50 }; // Near east wall when entering from west
+          calculatedPosition = { x: 85, y: 50 }; // Near east wall when moved west
           break;
         default:
           calculatedPosition = { x: 50, y: 50 }; // Center if no direction
       }
       console.log(
-        `Positioning player based on entry direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`,
+        `🎯 Positioning player based on movement direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`,
       );
     }
 
     if (existingPlayer) {
       if (calculatedPosition) {
-        existingPlayer.position = calculatedPosition;
+        existingPlayer.position = { ...calculatedPosition };
         console.log(
-          `Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
+          `🔄 Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
         );
       }
       // Update crawler data if provided
@@ -618,6 +619,8 @@ export class CombatSystem {
         if (crawlerData.name) existingPlayer.name = crawlerData.name;
         if (crawlerData.serial) existingPlayer.serial = crawlerData.serial;
       }
+      // Force immediate state update
+      this.notifySubscribers();
       return;
     }
 
@@ -628,7 +631,7 @@ export class CombatSystem {
       id: "player",
       name: crawlerData?.name || "Player",
       type: "player",
-      position: defaultPosition,
+      position: { ...defaultPosition },
       hp: 100,
       maxHp: 100,
       attack: 0, // No weapon equipped
@@ -646,7 +649,7 @@ export class CombatSystem {
 
     this.state.entities.push(playerEntity);
     console.log(
-      `Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
+      `✅ Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
     );
     this.notifySubscribers();
   }

@@ -144,6 +144,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       // Use immediate refetch for responsive UI updates
       handleRoomChangeWithRefetch(crawler.id);
 
+      // Clear the movement direction after successful transition
+      setTimeout(() => {
+        sessionStorage.removeItem('lastMovementDirection');
+        console.log("🧹 Cleared movement direction from session storage");
+      }, 1000);
+
       console.log("⚡ Room transition completed successfully");
     } catch (error) {
       console.error("Room movement error:", error);
@@ -243,7 +249,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
-      console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, reinitializing player`);
+      console.log(`🚪 Room changed from ${lastRoomId} to ${roomData.room.id}, repositioning player immediately`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player
@@ -260,15 +266,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastDirection = sessionStorage.getItem('lastMovementDirection') as any;
       const entryPosition = combatSystem.getEntryPosition(lastDirection || 'south');
 
-      console.log(`Entry position for direction ${lastDirection}:`, entryPosition);
+      console.log(`🎯 Entry position for direction ${lastDirection}:`, entryPosition);
 
-      // Initialize player with crawler data
+      // Initialize/update player with immediate positioning
       combatSystem.initializePlayer(entryPosition, {
         name: crawler.name,
         serial: crawler.serial
       });
 
+      // Ensure player is selected and force a state update
       combatSystem.selectEntity("player");
+      
+      console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
     }
   }, [roomData?.room, lastRoomId, crawler]);
 
