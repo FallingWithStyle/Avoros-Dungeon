@@ -36,12 +36,7 @@ export function registerCrawlerRoutes(app: Express) {
   app.get("/api/crawlers/:id", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      
-      // Initialize request cache for this request
-      const requestCache = getRequestCache(req);
-      
-      // Pass request context to storage methods
-      const crawler = await storage.getCrawler(crawlerId, req);
+      const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler) {
         return res.status(404).json({ message: "Crawler not found" });
@@ -331,20 +326,13 @@ export function registerCrawlerRoutes(app: Express) {
   });
 
   // Batch endpoint for faster room loading - gets all room data in one call
-  app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
+  app.get("/api/crawlers/:id/room-data-batch", async (req, res) => {
   try {
     const crawlerId = parseInt(req.params.id);
-    const userId = req.user.claims.sub;
+    const userId = req.user?.id;
 
-    // Initialize request cache for this request
-    const requestCache = getRequestCache(req);
-    
-    // Set request cache on storage instances that support it
-    if (storage.tacticalStorage?.setRequestCache) {
-      storage.tacticalStorage.setRequestCache(requestCache);
-    }
-    if (storage.mobStorage?.setRequestCache) {
-      storage.mobStorage.setRequestCache(requestCache);
+    if (!userId) {
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
     const crawler = await storage.getCrawler(crawlerId, req);
@@ -355,7 +343,7 @@ export function registerCrawlerRoutes(app: Express) {
     console.log("Fetching room data batch for crawler:", crawlerId);
 
     // Get current position first
-    const currentPosition = await storage.crawlerStorage.getCurrentRoom(crawlerId, req);
+    const currentPosition = await storage.getCurrentRoom(crawlerId, req);
     if (!currentPosition) {
       return res.status(404).json({ error: "Crawler position not found" });
     }

@@ -1,34 +1,24 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 /**
  * File: crawler-card.tsx
- * Responsibility: Display crawler information card with status, stats, and action buttons
- * Notes: Shows crawler details, health, location, and provides navigation to crawler mode
+ * Responsibility: Displays individual crawler information in a card format with stats and status
+ * Notes: Shows avatar, name, level, location, and key statistics for a single crawler
  */
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sword, MapPin, Heart, Zap } from "lucide-react";
-import { useLocation } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CrawlerCardProps {
   crawler: CrawlerWithDetails;
-  onSelect?: (crawlerId: string) => void;
 }
 
-export default function CrawlerCard({ crawler, onSelect }: CrawlerCardProps) {
+export default function CrawlerCard({ crawler }: CrawlerCardProps) {
   const [, setLocation] = useLocation();
-
-  if (!crawler) {
-    return (
-      <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
-        <CardContent className="p-6">
-          <p className="text-gray-400">No crawler data available</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {

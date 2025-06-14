@@ -1,29 +1,17 @@
 /**
  * File: season-status.tsx
- * Responsibility: Display current season information and status
- * Notes: Shows season progress, time remaining, and active season details
+ * Responsibility: Displays current game season information and status
+ * Notes: Shows season name, description, and any seasonal events or modifiers
  */
 
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Trophy, Users } from "lucide-react";
 
-interface Season {
-  id: number;
-  season_number: number;
-  name: string;
-  description: string;
-  is_active: boolean;
-  start_date: string;
-  end_date: string;
-}
-
 export default function SeasonStatus() {
-  const { data: currentSeason, isLoading, error } = useQuery<Season>({
+  const { data: season, isLoading } = useQuery({
     queryKey: ["/api/season/current"],
-    refetchInterval: 60000, // Refresh every minute
   });
 
   const { data: user } = useQuery({
@@ -31,33 +19,20 @@ export default function SeasonStatus() {
     retry: false,
   });
 
-
   if (isLoading) {
     return (
       <Card className="bg-game-surface border-game-border">
-        <CardContent className="p-4">
-          <div className="animate-pulse flex space-x-4">
-            <div className="flex-1 space-y-2 py-1">
-              <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-            </div>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-game-border rounded w-1/2"></div>
+            <div className="h-3 bg-game-border rounded w-3/4"></div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (error || !currentSeason) {
-    return (
-      <Card className="bg-game-surface border-game-border">
-        <CardContent className="p-4">
-          <p className="text-gray-400 text-sm">No active season</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!currentSeason) {
+  if (!season) {
     return (
       <Card className="bg-game-surface border-game-border">
         <CardHeader>
@@ -68,7 +43,7 @@ export default function SeasonStatus() {
     );
   }
 
-  const canCreatePrimary = user && (!user.primarySponsorshipUsed || user.lastPrimarySponsorshipSeason < currentSeason.season_number);
+  const canCreatePrimary = user && (!user.primarySponsorshipUsed || user.lastPrimarySponsorshipSeason < season.seasonNumber);
 
   return (
     <Card className="bg-game-surface border-game-border">
@@ -77,10 +52,10 @@ export default function SeasonStatus() {
           <div>
             <CardTitle className="text-blue-400 flex items-center gap-2">
               <Trophy className="w-5 h-5" />
-              Season {currentSeason.season_number}: {currentSeason.name}
+              Season {season.seasonNumber}: {season.name}
             </CardTitle>
             <CardDescription className="text-slate-400 mt-1">
-              {currentSeason.description}
+              {season.description}
             </CardDescription>
           </div>
           <Badge variant="secondary" className="bg-green-600/20 text-green-400 border-green-600/30">
@@ -108,7 +83,7 @@ export default function SeasonStatus() {
               </span>
             </div>
           </div>
-
+          
           <div className="space-y-2">
             <h4 className="font-semibold text-slate-200">Secondary Sponsorships</h4>
             <div className="flex items-center gap-2">
