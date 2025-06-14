@@ -4,6 +4,27 @@
 
 ### Added
 
+## [0.8.10] - 2025-01-26
+
+### Added
+- Status page infrastructure for monitoring application health
+- External dependency monitoring with real-time status indicators
+- Comprehensive file responsibility comments across entire codebase
+- Enhanced tactical view panel components with modular architecture
+- Improved error handling for tactical data loading and WebSocket connections
+
+### Fixed
+- React hooks order violations in tactical view components
+- Template literal syntax errors throughout codebase
+- WebSocket connection URLs and port handling
+- Mobile layout spacing and responsive design issues
+- Syntax errors preventing server startup and component rendering
+
+### Changed
+- Refactored tactical view into smaller, more maintainable components
+- Improved debugging and error logging for better troubleshooting
+- Enhanced mobile-friendly interface with collapsible sections
+
 ## [0.8.9] - 2025-01-26
 
 ### Changed
