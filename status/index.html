@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avoros Dungeon - Status Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #f59e0b, #eab308);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .status-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .service-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-online {
+            background-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-loading {
+            background-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .response-time {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            background: rgba(51, 65, 85, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .history {
+            display: flex;
+            gap: 2px;
+            margin-top: 12px;
+        }
+
+        .history-bar {
+            flex: 1;
+            height: 30px;
+            border-radius: 2px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Avoros Dungeon</h1>
+            <p class="subtitle">System Status & Health Monitoring</p>
+        </div>
+
+        <div class="status-card">
+            <div class="service-status">
+                <div class="service-name">Main Application</div>
+                <div class="status-indicator">
+                    <div class="status-dot status-loading" id="app-status"></div>
+                    <span id="app-status-text">Checking...</span>
+                </div>
+            </div>
+            <div class="response-time" id="app-response-time">Response time: --ms</div>
+            <div class="history" id="app-history"></div>
+        </div>
+
+        <div class="status-card">
+            <div class="service-status">
+                <div class="service-name">Database</div>
+                <div class="status-indicator">
+                    <div class="status-dot status-loading" id="db-status"></div>
+                    <span id="db-status-text">Checking...</span>
+                </div>
+            </div>
+            <div class="response-time" id="db-response-time">Response time: --ms</div>
+            <div class="history" id="db-history"></div>
+        </div>
+
+        <div class="status-card">
+            <div class="service-status">
+                <div class="service-name">Redis Cache</div>
+                <div class="status-indicator">
+                    <div class="status-dot status-loading" id="redis-status"></div>
+                    <span id="redis-status-text">Checking...</span>
+                </div>
+            </div>
+            <div class="response-time" id="redis-response-time">Response time: --ms</div>
+            <div class="history" id="redis-history"></div>
+        </div>
+
+        <div class="status-card">
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value" id="uptime">--</div>
+                    <div class="metric-label">Uptime (24h)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="avg-response">--ms</div>
+                    <div class="metric-label">Avg Response</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="incidents">--</div>
+                    <div class="metric-label">Incidents (24h)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            Last updated: <span id="last-updated">--</span>
+        </div>
+
+        <div class="footer">
+            <p>Monitored every 30 seconds • Built for Avoros Dungeon</p>
+        </div>
+    </div>
+
+    <script>
+        const STATUS_CONFIG = {
+            mainApp: window.location.origin.replace(':3001', ':5000'),
+            refreshInterval: 30000, // 30 seconds
+            historySize: 48 // 24 hours of 30-minute intervals
+        };
+
+        let statusHistory = {
+            app: [],
+            db: [],
+            redis: []
+        };
+
+        // Load history from localStorage
+        const savedHistory = localStorage.getItem('statusHistory');
+        if (savedHistory) {
+            try {
+                statusHistory = JSON.parse(savedHistory);
+            } catch (e) {
+                console.warn('Failed to load status history:', e);
+            }
+        }
+
+        async function checkStatus(url, timeout = 10000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const start = Date.now();
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+                clearTimeout(timeoutId);
+                
+                const responseTime = Date.now() - start;
+                return {
+                    online: response.ok,
+                    responseTime,
+                    status: response.status
+                };
+            } catch (error) {
+                clearTimeout(timeoutId);
+                return {
+                    online: false,
+                    responseTime: null,
+                    error: error.message
+                };
+            }
+        }
+
+        function updateStatusIndicator(elementId, isOnline, responseTime) {
+            const statusDot = document.getElementById(elementId);
+            const statusText = document.getElementById(elementId.replace('-status', '-status-text'));
+            const responseTimeEl = document.getElementById(elementId.replace('-status', '-response-time'));
+
+            if (isOnline) {
+                statusDot.className = 'status-dot status-online';
+                statusText.textContent = 'Online';
+                responseTimeEl.textContent = `Response time: ${responseTime}ms`;
+            } else {
+                statusDot.className = 'status-dot status-offline';
+                statusText.textContent = 'Offline';
+                responseTimeEl.textContent = 'Response time: --ms';
+            }
+        }
+
+        function updateHistory(service, isOnline) {
+            if (!statusHistory[service]) {
+                statusHistory[service] = [];
+            }
+            
+            statusHistory[service].push({
+                timestamp: Date.now(),
+                online: isOnline
+            });
+
+            // Keep only recent history
+            const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
+            statusHistory[service] = statusHistory[service].filter(
+                entry => entry.timestamp > cutoff
+            );
+
+            // Save to localStorage
+            localStorage.setItem('statusHistory', JSON.stringify(statusHistory));
+        }
+
+        function renderHistory(service, elementId) {
+            const container = document.getElementById(elementId);
+            const history = statusHistory[service] || [];
+            
+            container.innerHTML = '';
+            
+            // Create bars for the last 48 data points
+            for (let i = 0; i < STATUS_CONFIG.historySize; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'history-bar';
+                
+                if (i < history.length) {
+                    const entry = history[history.length - 1 - i];
+                    bar.style.backgroundColor = entry.online ? '#10b981' : '#ef4444';
+                    bar.title = `${new Date(entry.timestamp).toLocaleString()}: ${entry.online ? 'Online' : 'Offline'}`;
+                } else {
+                    bar.style.backgroundColor = '#374151';
+                    bar.title = 'No data';
+                }
+                
+                container.appendChild(bar);
+            }
+        }
+
+        function calculateUptime(service) {
+            const history = statusHistory[service] || [];
+            if (history.length === 0) return 0;
+            
+            const onlineCount = history.filter(entry => entry.online).length;
+            return Math.round((onlineCount / history.length) * 100);
+        }
+
+        function calculateAverageResponse(service) {
+            const history = statusHistory[service] || [];
+            const responseTimes = history
+                .filter(entry => entry.online && entry.responseTime)
+                .map(entry => entry.responseTime);
+            
+            if (responseTimes.length === 0) return 0;
+            
+            return Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length);
+        }
+
+        function calculateIncidents(service) {
+            const history = statusHistory[service] || [];
+            let incidents = 0;
+            let wasOnline = true;
+            
+            history.forEach(entry => {
+                if (wasOnline && !entry.online) {
+                    incidents++;
+                }
+                wasOnline = entry.online;
+            });
+            
+            return incidents;
+        }
+
+        async function runStatusCheck() {
+            // Check main application
+            const appResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/health`);
+            updateStatusIndicator('app-status', appResult.online, appResult.responseTime);
+            updateHistory('app', appResult.online);
+            renderHistory('app', 'app-history');
+
+            // Check database (via health endpoint)
+            const dbResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/health`);
+            updateStatusIndicator('db-status', dbResult.online, dbResult.responseTime);
+            updateHistory('db', dbResult.online);
+            renderHistory('db', 'db-history');
+
+            // Check Redis
+            const redisResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/system/redis-status`);
+            updateStatusIndicator('redis-status', redisResult.online, redisResult.responseTime);
+            updateHistory('redis', redisResult.online);
+            renderHistory('redis', 'redis-history');
+
+            // Update metrics
+            document.getElementById('uptime').textContent = `${calculateUptime('app')}%`;
+            document.getElementById('avg-response').textContent = `${calculateAverageResponse('app')}ms`;
+            document.getElementById('incidents').textContent = calculateIncidents('app');
+
+            // Update last updated time
+            document.getElementById('last-updated').textContent = new Date().toLocaleString();
+        }
+
+        // Initial render of history
+        renderHistory('app', 'app-history');
+        renderHistory('db', 'db-history');
+        renderHistory('redis', 'redis-history');
+
+        // Run initial check
+        runStatusCheck();
+
+        // Set up periodic checks
+        setInterval(runStatusCheck, STATUS_CONFIG.refreshInterval);
+    </script>
+</body>
+</html>
