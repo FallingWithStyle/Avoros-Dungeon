@@ -234,13 +234,21 @@ export function useTacticalPositioning({
         lastRoomTransitionTime.current = Date.now();
         isTransitioning.current = true;
 
+        // Execute the room movement immediately
+        try {
+          onRoomMovement(roomTransitionDirection);
+          console.log("✅ Room movement function called successfully");
+        } catch (error) {
+          console.error("❌ Room movement failed:", error);
+          isTransitioning.current = false; // Reset flag on error
+        }
+
         // Clear transition flag after cooldown period
         setTimeout(() => {
           isTransitioning.current = false;
           console.log("🔓 Room transition cooldown complete");
         }, ROOM_TRANSITION_COOLDOWN);
 
-        onRoomMovement(roomTransitionDirection);
         return;
       } else if (roomTransitionDirection && isTransitioning.current) {
         console.log("🚫 Room transition already in progress - ignoring duplicate transition");

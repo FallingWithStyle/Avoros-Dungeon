@@ -32,19 +32,47 @@ export async function handleRoomChangeWithRefetch(crawlerId: number, direction: 
   console.log("Fast room change for crawler " + crawlerId + " direction " + direction);
 
   try {
-    // Immediately refetch the batch data without invalidating first
+    // First, make the actual move API call
+    const response = await fetch("/api/crawlers/" + crawlerId + "/move", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ direction }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Move request failed");
+    }
+
+    const moveResult = await response.json();
+    console.log("Move API response:", moveResult);
+
+    if (!moveResult.success) {
+      throw new Error(moveResult.message || "Move was not successful");
+    }
+
+    // After successful move, refetch all relevant data
     await queryClient.refetchQueries({
       queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
     });
 
-    // Update explored rooms in background
+    await queryClient.refetchQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/current-room"]
+    });
+
+    await queryClient.refetchQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"]
+    });
+
     await queryClient.refetchQueries({
       queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
     });
 
-    return { success: true };
+    return { success: true, newRoom: moveResult.newRoom };
   } catch (error) {
-    console.error("Room change refetch failed:", error);
+    console.error("Room change failed:", error);
     return { success: false, error: error.message };
   }
 }

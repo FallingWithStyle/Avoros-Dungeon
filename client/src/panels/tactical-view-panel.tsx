@@ -83,14 +83,22 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         if (result && result.success) {
           console.log(`✅ Room movement successful to ${direction}`);
 
-          // Trigger data refetch immediately
+          // Force invalidate and refetch all room-related data
           await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/room-data-batch"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/current-room"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] }),
             queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] })
+            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] })
           ]);
 
-          console.log('⚡ Room transition completed successfully');
+          // Force refetch the data immediately
+          await Promise.all([
+            refetchTacticalData(),
+            refetchExploredRooms()
+          ]);
+
+          console.log('⚡ Room transition and data refresh completed successfully');
 
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
@@ -104,7 +112,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         console.error('❌ Room transition error:', error);
       }
     },
-    [crawler, queryClient]
+    [crawler, queryClient, refetchTacticalData, refetchExploredRooms]
   );
 
   // Use tactical positioning hook for movement validation logic
