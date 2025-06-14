@@ -156,6 +156,18 @@ export class TacticalStorage extends BaseStorage {
   }
 
   async generateAndSaveTacticalData(roomId: number, roomData: any, forceRegenerate: boolean = false): Promise<TacticalEntity[]> {
+    // Check if we have cached tactical data that's still fresh
+    const cacheKey = `tactical_entities_${roomId}`;
+    try {
+      const cached = await redisService.get(cacheKey);
+      if (cached) {
+        console.log(`Using cached tactical entities for room ${roomId}`);
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.log('Redis cache miss, generating fresh tactical data');
+    }
+
     // Always get fresh mob data from the database - don't rely on cached tactical positions for mobs
     const entities: TacticalEntity[] = [];
     const occupiedCells = new Set<string>();
@@ -309,6 +321,14 @@ export class TacticalStorage extends BaseStorage {
 
     // Save to database (this will overwrite with fresh data)
     await this.saveTacticalPositions(roomId, entities);
+
+    // Cache the result for 15 seconds to speed up subsequent requests
+    try {
+      await redisService.set(cacheKey, JSON.stringify(entities), 'EX', 15);
+    } catch (error) {
+      console.log('Failed to cache tactical entities');
+    }
+
     console.log(`Saved ${entities.length} tactical entities for room ${roomId}`);
 
     return entities;

@@ -50,14 +50,14 @@ app.use((req, res, next) => {
     // Initialize database with game data - with timeout and fallback
     console.log('📊 Initializing database...');
     let dbInitialized = false;
-    
+
     try {
       // Add shorter timeout to database initialization
       const initPromise = initializeDatabase();
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Database initialization timeout')), 15000)
       );
-      
+
       await Promise.race([initPromise, timeoutPromise]);
       dbInitialized = true;
       console.log('✅ Database initialized');
@@ -103,14 +103,32 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';
     }
   }, 5 * 60 * 1000); // Every 5 minutes
 
-  server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-  } catch (error) {
+  // Global error handlers to prevent crashes
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    // Don't exit, just log the error
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit, just log the error
+  });
+
+  // Start the server with error handling
+  const PORT = process.env.PORT || 5000;
+  const serverInstance = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📱 App URL: http://localhost:${PORT}`);
+  });
+
+  serverInstance.on('error', (error: any) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use`);
+    } else {
+      console.error('Server error:', error);
+    }
+  });
+    } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
   }

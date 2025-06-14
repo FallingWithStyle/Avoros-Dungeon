@@ -7,10 +7,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
+import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import { useTacticalPositioning } from "@/hooks/useTacticalPositioning";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
@@ -106,15 +107,17 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         return;
       }
 
-      // Clear entities only after successful movement
+      // Handle successful room transition
+      console.log("✅ Room movement successful to " + direction);
+
+      // Clear entities immediately for instant UI update
       const currentEntities = combatSystem.getState().entities;
       currentEntities.forEach((entity) => {
         combatSystem.removeEntity(entity.id);
       });
 
-      // Refetch tactical data to get new room information
-      refetchTacticalData();
-      refetchExploredRooms();
+      // Use fast room change for instant feel
+      handleRoomChangeWithRefetch(crawler.id);
 
       console.log("⚡ Room transition completed successfully");
 
@@ -126,7 +129,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         variant: "destructive",
       });
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast, refetchTacticalData, refetchExploredRooms]);
+  }, [crawler, effectiveTacticalData?.availableDirections, toast]);
 
   // Use tactical positioning hook for movement validation logic
   const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
@@ -249,10 +252,38 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Entity event handlers
   const handleEntityClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    // Disabled for now - clicking on entities should not do anything
-    console.log("Entity clicked: " + entityId + " - functionality disabled");
-    return;
-  }, []);
+
+    // If in attack mode, try to attack the clicked entity
+    if (activeActionMode?.type === "attack" && entityId !== "player") {
+      const targetEntity = combatState.entities.find(e => e.id === entityId);
+      if (targetEntity?.type === "hostile") {
+        const success = combatSystem.queueAction("player", activeActionMode.actionId, entityId);
+        if (success) {
+          toast({
+            title: "Attack Queued",
+            description: "Player will " + activeActionMode.actionName + " " + (targetEntity.name || entityId),
+          });
+          setActiveActionMode(null); // Clear attack mode after use
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - check cooldown or range",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Invalid Target",
+          description: "Can only attack hostile enemies",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    // Otherwise just select the entity
+    combatSystem.selectEntity(entityId);
+  }, [activeActionMode, combatState.entities, toast]);
 
   const handleEntityRightClick = useCallback((entityId: string, event: React.MouseEvent) => {
     event.preventDefault();
@@ -274,23 +305,105 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Hotbar handlers
   const handleHotbarClick = useCallback((actionId: string, actionType: string, actionName: string) => {
-    if (activeActionMode?.actionId === actionId) {
-      setActiveActionMode(null);
+    if (actionType === "attack" && actionId === "basic_attack") {
+      // For punch attacks, always fire the attack
+      const playerEntity = combatState.entities.find(e => e.id === "player");
+      if (!playerEntity) {
+        toast({
+          title: "Attack Failed",
+          description: "Player not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Find nearby hostile entities within punch range
+      const hostileEntities = combatState.entities.filter(e => 
+        e.type === "hostile" && 
+        e.hp > 0 && 
+        combatSystem.calculateDistance(playerEntity.position, e.position) <= 8 // Punch range
+      );
+
+      if (hostileEntities.length === 0) {
+        // No targets - fire punch animation into empty air and start cooldown
+        const success = combatSystem.queueAction("player", actionId);
+        if (success) {
+          toast({
+            title: "Punch!",
+            description: "You swing at empty air",
+          });
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - still on cooldown",
+            variant: "destructive",
+          });
+        }
+      } else {
+        // Attack the closest hostile entity
+        const closestEnemy = hostileEntities.reduce((closest, current) => {
+          const closestDist = combatSystem.calculateDistance(playerEntity.position, closest.position);
+          const currentDist = combatSystem.calculateDistance(playerEntity.position, current.position);
+          return currentDist < closestDist ? current : closest;
+        });
+
+        const success = combatSystem.queueAction("player", actionId, closestEnemy.id);
+        if (success) {
+          toast({
+            title: "Attack!",
+            description: "Punching " + (closestEnemy.name || closestEnemy.id),
+          });
+        } else {
+          toast({
+            title: "Attack Failed",
+            description: "Cannot attack - still on cooldown",
+            variant: "destructive",
+          });
+        }
+      }
     } else {
-      setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+      // For other actions, use toggle behavior
+      if (activeActionMode?.actionId === actionId) {
+        setActiveActionMode(null);
+      } else {
+        setActiveActionMode({ type: actionType as "move" | "attack" | "ability", actionId, actionName });
+      }
     }
-  }, [activeActionMode]);
+  }, [activeActionMode, combatState.entities, toast]);
 
   const getCooldownPercentage = useCallback((actionId: string): number => {
-    return 0; // Placeholder
-  }, []);
+    const playerEntity = combatState.entities.find(e => e.id === "player");
+    if (!playerEntity?.cooldowns) return 0;
+
+    const lastUsed = playerEntity.cooldowns[actionId] || 0;
+    const now = Date.now();
+
+    // Get action cooldown (punch = 1200ms)
+    const actionCooldown = actionId === "basic_attack" ? 1200 : 1000;
+    const timeRemaining = Math.max(0, (lastUsed + actionCooldown) - now);
+
+    return (timeRemaining / actionCooldown) * 100;
+  }, [combatState.entities]);
 
   // Context menu handlers
   const handleActionClick = useCallback((action: any, targetEntityId: string) => {
-    // Disabled for now - action clicks should not do anything
-    console.log("Action clicked - functionality disabled");
+    if (action.type === "attack") {
+      const success = combatSystem.queueAction("player", action.id, targetEntityId);
+      if (success) {
+        toast({
+          title: "Attack Queued",
+          description: "Player will " + action.name + " " + targetEntityId,
+        });
+      } else {
+        toast({
+          title: "Attack Failed",
+          description: "Cannot attack right now - check cooldown or range",
+          variant: "destructive",
+        });
+      }
+    }
     setContextMenu(null);
-  }, []);
+  }, [toast]);
 
   const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
     // Disabled for now - move to position should not do anything

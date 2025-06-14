@@ -21,57 +21,70 @@ interface TacticalHotbarProps {
 export default function TacticalHotbar({
   activeActionMode,
   onHotbarClick,
-  getCooldownPercentage
+  getCooldownPercentage,
 }: TacticalHotbarProps) {
-  const actions = [
-    { id: "move", type: "move", name: "Move", icon: Move, shortcut: "M" },
-    { id: "attack", type: "attack", name: "Attack", icon: Sword, shortcut: "A" },
-    { id: "defend", type: "ability", name: "Defend", icon: Shield, shortcut: "D" },
-    { id: "ability1", type: "ability", name: "Ability", icon: Zap, shortcut: "1" },
-  ];
+  const punchCooldown = getCooldownPercentage("basic_attack");
 
   return (
-    <div className="flex gap-2 justify-center">
-      {actions.map((action) => {
-        const isActive = activeActionMode?.actionId === action.id;
-        const cooldownPercentage = getCooldownPercentage(action.id);
-        const IconComponent = action.icon;
+    <div className="flex gap-2 p-3 bg-game-surface rounded-lg border border-game-border">
+      {/* Move Action */}
+      <Button
+        variant={activeActionMode?.actionId === "move" ? "default" : "outline"}
+        size="sm"
+        className="flex items-center gap-1 relative"
+        onClick={() => onHotbarClick("move", "move", "Move")}
+      >
+        <Move className="w-4 h-4" />
+        <span className="hidden sm:inline">Move</span>
+        <span className="text-xs text-muted-foreground ml-1">[W]</span>
+      </Button>
 
-        return (
-          <Button
-            key={action.id}
-            variant={isActive ? "default" : "outline"}
-            size="sm"
-            className={`relative w-12 h-12 p-0 ${
-              isActive 
-                ? "bg-blue-600 border-blue-400 text-white" 
-                : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-            }`}
-            onClick={() => onHotbarClick(action.id, action.type, action.name)}
-            title={`${action.name} (${action.shortcut})`}
-            disabled={cooldownPercentage > 0}
-          >
-            <IconComponent className="w-4 h-4" />
+      {/* Punch Attack */}
+      <Button
+        variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}
+        size="sm"
+        className="flex items-center gap-1 relative"
+        onClick={() => onHotbarClick("basic_attack", "attack", "Punch")}
+        disabled={punchCooldown > 0}
+      >
+        <span className="text-lg">👊</span>
+        <span className="hidden sm:inline">Punch</span>
+        <span className="text-xs text-muted-foreground ml-1">[A]</span>
 
-            {/* Cooldown overlay */}
-            {cooldownPercentage > 0 && (
-              <div 
-                className="absolute inset-0 bg-gray-900/70 flex items-center justify-center text-xs font-bold text-white"
-                style={{
-                  background: `conic-gradient(from 0deg, rgba(0,0,0,0.8) ${cooldownPercentage}%, transparent ${cooldownPercentage}%)`
-                }}
-              >
-                {Math.ceil(cooldownPercentage / 100 * 10)}
-              </div>
-            )}
+        {/* Cooldown indicator */}
+        {punchCooldown > 0 && (
+          <div 
+            className="absolute inset-0 bg-gray-600/50 rounded"
+            style={{ 
+              clipPath: `polygon(0 ${100 - punchCooldown}%, 100% ${100 - punchCooldown}%, 100% 100%, 0% 100%)` 
+            }}
+          />
+        )}
+      </Button>
 
-            {/* Hotkey indicator */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-800 border border-gray-600 rounded text-xs flex items-center justify-center font-mono">
-              {action.shortcut}
-            </div>
-          </Button>
-        );
-      })}
+      {/* Defend Action */}
+      <Button
+        variant={activeActionMode?.actionId === "defend" ? "default" : "outline"}
+        size="sm"
+        className="flex items-center gap-1 relative"
+        onClick={() => onHotbarClick("defend", "ability", "Defend")}
+      >
+        <Shield className="w-4 h-4" />
+        <span className="hidden sm:inline">Defend</span>
+        <span className="text-xs text-muted-foreground ml-1">[S]</span>
+      </Button>
+
+      {/* Special Ability */}
+      <Button
+        variant={activeActionMode?.actionId === "special" ? "default" : "outline"}
+        size="sm"
+        className="flex items-center gap-1 relative"
+        onClick={() => onHotbarClick("special", "ability", "Special")}
+      >
+        <Zap className="w-4 h-4" />
+        <span className="hidden sm:inline">Special</span>
+        <span className="text-xs text-muted-foreground ml-1">[D]</span>
+      </Button>
     </div>
   );
 }

@@ -68,7 +68,7 @@ export function useGestureMovement({
 
   const bind = useGesture(
     {
-      onDrag: ({ movement: [x, y], velocity, active }) => {
+      onDrag: ({ movement: [x, y], velocity, active, first, last }) => {
         if (!isEnabled) return;
 
         console.log('👆 Gesture drag:', { x, y, velocity, active });
