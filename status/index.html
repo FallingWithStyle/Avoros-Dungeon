@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,6 +153,78 @@
             color: #64748b;
             font-size: 0.9rem;
         }
+
+         /* Status Grid Styles */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .service-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+
+        .status-dot.degraded {
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-text {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator.online .status-text {
+            color: #22c55e;
+        }
+
+        .status-indicator.degraded .status-text {
+            color: #f59e0b;
+        }
+
+        .status-indicator.offline .status-text {
+            color: #ef4444;
+        }
+
+        .response-time {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -164,39 +235,61 @@
         </div>
 
         <div class="status-card">
-            <div class="service-status">
-                <div class="service-name">Main Application</div>
-                <div class="status-indicator">
-                    <div class="status-dot status-loading" id="app-status"></div>
-                    <span id="app-status-text">Checking...</span>
-                </div>
-            </div>
-            <div class="response-time" id="app-response-time">Response time: --ms</div>
-            <div class="history" id="app-history"></div>
+             <div class="status-grid">
+      <div class="service-card">
+        <div class="service-name">Main Application</div>
+        <div class="status-indicator" id="main-app-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
         </div>
+        <div class="response-time" id="main-app-time"></div>
+      </div>
 
-        <div class="status-card">
-            <div class="service-status">
-                <div class="service-name">Database</div>
-                <div class="status-indicator">
-                    <div class="status-dot status-loading" id="db-status"></div>
-                    <span id="db-status-text">Checking...</span>
-                </div>
-            </div>
-            <div class="response-time" id="db-response-time">Response time: --ms</div>
-            <div class="history" id="db-history"></div>
+      <div class="service-card">
+        <div class="service-name">PostgreSQL Database</div>
+        <div class="status-indicator" id="postgres-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
         </div>
+        <div class="response-time" id="postgres-time"></div>
+      </div>
 
-        <div class="status-card">
-            <div class="service-status">
-                <div class="service-name">Redis Cache</div>
-                <div class="status-indicator">
-                    <div class="status-dot status-loading" id="redis-status"></div>
-                    <span id="redis-status-text">Checking...</span>
-                </div>
-            </div>
-            <div class="response-time" id="redis-response-time">Response time: --ms</div>
-            <div class="history" id="redis-history"></div>
+      <div class="service-card">
+        <div class="service-name">Redis Cache</div>
+        <div class="status-indicator" id="redis-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="redis-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">Neon Database</div>
+        <div class="status-indicator" id="neon-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="neon-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">Upstash Redis</div>
+        <div class="status-indicator" id="upstash-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="upstash-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">NPM Registry</div>
+        <div class="status-indicator" id="npm-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="npm-time"></div>
+      </div>
+    </div>
         </div>
 
         <div class="status-card">
@@ -226,188 +319,166 @@
     </div>
 
     <script>
-        const STATUS_CONFIG = {
-            mainApp: window.location.origin.replace(':3001', ':5000'),
-            refreshInterval: 30000, // 30 seconds
-            historySize: 48 // 24 hours of 30-minute intervals
-        };
+        // Function to update the status of a service
+    function updateStatus(service, status, responseTime) {
+      const statusElement = document.getElementById(`${service}-status`);
+      const timeElement = document.getElementById(`${service}-time`);
 
-        let statusHistory = {
-            app: [],
-            db: [],
-            redis: []
-        };
+      statusElement.className = `status-indicator ${status}`;
 
-        // Load history from localStorage
-        const savedHistory = localStorage.getItem('statusHistory');
-        if (savedHistory) {
-            try {
-                statusHistory = JSON.parse(savedHistory);
-            } catch (e) {
-                console.warn('Failed to load status history:', e);
-            }
+      let statusText = status;
+      if (status === 'degraded') {
+        statusText = 'degraded';
+      }
+
+      statusElement.querySelector('.status-text').textContent = statusText;
+
+      if (timeElement) {
+        timeElement.textContent = `${responseTime}ms`;
+      }
+    }
+
+    async function checkMainApp() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          updateStatus('main-app', 'online', responseTime);
+        } else {
+          updateStatus('main-app', 'offline', responseTime);
         }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('main-app', 'offline', responseTime);
+      }
+    }
 
-        async function checkStatus(url, timeout = 10000) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
-            
-            try {
-                const start = Date.now();
-                const response = await fetch(url, {
-                    signal: controller.signal,
-                    cache: 'no-cache'
-                });
-                clearTimeout(timeoutId);
-                
-                const responseTime = Date.now() - start;
-                return {
-                    online: response.ok,
-                    responseTime,
-                    status: response.status
-                };
-            } catch (error) {
-                clearTimeout(timeoutId);
-                return {
-                    online: false,
-                    responseTime: null,
-                    error: error.message
-                };
-            }
+    async function checkPostgres() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/crawlers/5');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          updateStatus('postgres', 'online', responseTime);
+        } else {
+          updateStatus('postgres', 'degraded', responseTime);
         }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('postgres', 'offline', responseTime);
+      }
+    }
 
-        function updateStatusIndicator(elementId, isOnline, responseTime) {
-            const statusDot = document.getElementById(elementId);
-            const statusText = document.getElementById(elementId.replace('-status', '-status-text'));
-            const responseTimeEl = document.getElementById(elementId.replace('-status', '-response-time'));
+    async function checkRedis() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
 
-            if (isOnline) {
-                statusDot.className = 'status-dot status-online';
-                statusText.textContent = 'Online';
-                responseTimeEl.textContent = `Response time: ${responseTime}ms`;
-            } else {
-                statusDot.className = 'status-dot status-offline';
-                statusText.textContent = 'Offline';
-                responseTimeEl.textContent = 'Response time: --ms';
-            }
+        if (response.ok) {
+          const data = await response.json();
+          if (data.fallbackMode) {
+            updateStatus('redis', 'degraded', responseTime);
+          } else {
+            updateStatus('redis', 'online', responseTime);
+          }
+        } else {
+          updateStatus('redis', 'offline', responseTime);
         }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('redis', 'offline', responseTime);
+      }
+    }
 
-        function updateHistory(service, isOnline) {
-            if (!statusHistory[service]) {
-                statusHistory[service] = [];
-            }
-            
-            statusHistory[service].push({
-                timestamp: Date.now(),
-                online: isOnline
-            });
+    async function checkNeon() {
+      const startTime = performance.now();
+      try {
+        // Check if we can connect to Neon via our app
+        const response = await fetch('http://localhost:5000/api/crawlers/5');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
 
-            // Keep only recent history
-            const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
-            statusHistory[service] = statusHistory[service].filter(
-                entry => entry.timestamp > cutoff
-            );
-
-            // Save to localStorage
-            localStorage.setItem('statusHistory', JSON.stringify(statusHistory));
+        if (response.ok) {
+          updateStatus('neon', 'online', responseTime);
+        } else {
+          updateStatus('neon', 'degraded', responseTime);
         }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('neon', 'offline', responseTime);
+      }
+    }
 
-        function renderHistory(service, elementId) {
-            const container = document.getElementById(elementId);
-            const history = statusHistory[service] || [];
-            
-            container.innerHTML = '';
-            
-            // Create bars for the last 48 data points
-            for (let i = 0; i < STATUS_CONFIG.historySize; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'history-bar';
-                
-                if (i < history.length) {
-                    const entry = history[history.length - 1 - i];
-                    bar.style.backgroundColor = entry.online ? '#10b981' : '#ef4444';
-                    bar.title = `${new Date(entry.timestamp).toLocaleString()}: ${entry.online ? 'Online' : 'Offline'}`;
-                } else {
-                    bar.style.backgroundColor = '#374151';
-                    bar.title = 'No data';
-                }
-                
-                container.appendChild(bar);
-            }
+    async function checkUpstash() {
+      const startTime = performance.now();
+      try {
+        // Check Redis status via our app
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.fallbackMode) {
+            updateStatus('upstash', 'offline', responseTime);
+          } else {
+            updateStatus('upstash', 'online', responseTime);
+          }
+        } else {
+          updateStatus('upstash', 'degraded', responseTime);
         }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('upstash', 'offline', responseTime);
+      }
+    }
 
-        function calculateUptime(service) {
-            const history = statusHistory[service] || [];
-            if (history.length === 0) return 0;
-            
-            const onlineCount = history.filter(entry => entry.online).length;
-            return Math.round((onlineCount / history.length) * 100);
-        }
+    async function checkNPM() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('https://registry.npmjs.org/react', { 
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
 
-        function calculateAverageResponse(service) {
-            const history = statusHistory[service] || [];
-            const responseTimes = history
-                .filter(entry => entry.online && entry.responseTime)
-                .map(entry => entry.responseTime);
-            
-            if (responseTimes.length === 0) return 0;
-            
-            return Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length);
-        }
+        // Since we're using no-cors, we can't check the response status
+        // If the request completes without error, assume it's working
+        updateStatus('npm', 'online', responseTime);
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('npm', 'offline', responseTime);
+      }
+    }
 
-        function calculateIncidents(service) {
-            const history = statusHistory[service] || [];
-            let incidents = 0;
-            let wasOnline = true;
-            
-            history.forEach(entry => {
-                if (wasOnline && !entry.online) {
-                    incidents++;
-                }
-                wasOnline = entry.online;
-            });
-            
-            return incidents;
-        }
+    function checkAllServices() {
+      checkMainApp();
+      checkPostgres();
+      checkRedis();
+      checkNeon();
+      checkUpstash();
+      checkNPM();
+    }
 
-        async function runStatusCheck() {
-            // Check main application
-            const appResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/health`);
-            updateStatusIndicator('app-status', appResult.online, appResult.responseTime);
-            updateHistory('app', appResult.online);
-            renderHistory('app', 'app-history');
+    // Initial service check
+    checkAllServices();
 
-            // Check database (via health endpoint)
-            const dbResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/health`);
-            updateStatusIndicator('db-status', dbResult.online, dbResult.responseTime);
-            updateHistory('db', dbResult.online);
-            renderHistory('db', 'db-history');
-
-            // Check Redis
-            const redisResult = await checkStatus(`${STATUS_CONFIG.mainApp}/api/system/redis-status`);
-            updateStatusIndicator('redis-status', redisResult.online, redisResult.responseTime);
-            updateHistory('redis', redisResult.online);
-            renderHistory('redis', 'redis-history');
-
-            // Update metrics
-            document.getElementById('uptime').textContent = `${calculateUptime('app')}%`;
-            document.getElementById('avg-response').textContent = `${calculateAverageResponse('app')}ms`;
-            document.getElementById('incidents').textContent = calculateIncidents('app');
-
-            // Update last updated time
-            document.getElementById('last-updated').textContent = new Date().toLocaleString();
-        }
-
-        // Initial render of history
-        renderHistory('app', 'app-history');
-        renderHistory('db', 'db-history');
-        renderHistory('redis', 'redis-history');
-
-        // Run initial check
-        runStatusCheck();
-
-        // Set up periodic checks
-        setInterval(runStatusCheck, STATUS_CONFIG.refreshInterval);
+    // Run service check every 5 seconds
+    setInterval(checkAllServices, 5000);
     </script>
 </body>
 </html>
