@@ -688,4 +688,76 @@ export class ExplorationStorage extends BaseStorage {
       console.log("Failed to clear exploration data from cache");
     }
   }
+
+  async getRoomsWithinRadius(startRoomId: number, radius: number) {
+    try {
+      // Get the starting room to know its position and floor
+      const startRoom = await db
+        .select()
+        .from(rooms)
+        .where(eq(rooms.id, startRoomId))
+        .limit(1);
+
+      if (!startRoom.length) {
+        return [];
+      }
+
+      const { x: startX, y: startY, floorId } = startRoom[0];
+
+      // Use BFS to find all rooms within the specified radius
+      const visited = new Set<number>();
+      const queue: Array<{ roomId: number; distance: number }> = [{ roomId: startRoomId, distance: 0 }];
+      const results: Array<any> = [];
+
+      visited.add(startRoomId);
+
+      while (queue.length > 0) {
+        const { roomId, distance } = queue.shift()!;
+
+        // Skip if we've exceeded the radius
+        if (distance > radius) continue;
+
+        // Get the current room
+        const currentRoom = await db
+          .select()
+          .from(rooms)
+          .where(eq(rooms.id, roomId))
+          .limit(1);
+
+        if (currentRoom.length === 0) continue;
+
+        // Add to results (excluding the starting room itself)
+        if (distance > 0) {
+          results.push({
+            ...currentRoom[0],
+            distance
+          });
+        }
+
+        // If we haven't reached the radius limit, get connected rooms
+        if (distance < radius) {
+          const connections = await db
+            .select()
+            .from(roomConnections)
+            .where(eq(roomConnections.fromRoomId, roomId));
+
+          for (const connection of connections) {
+            if (!visited.has(connection.toRoomId)) {
+              visited.add(connection.toRoomId);
+              queue.push({
+                roomId: connection.toRoomId,
+                distance: distance + 1
+              });
+            }
+          }
+        }
+      }
+
+      console.log(`Found ${results.length} rooms within radius ${radius} of room ${startRoomId}`);
+      return results;
+    } catch (error) {
+      console.error("Error getting rooms within radius:", error);
+      return [];
+    }
+  }
 }

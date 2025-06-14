@@ -277,6 +277,68 @@ export function registerExplorationRoutes(app: Express) {
     }
   });
 
+  // Get adjacent room data for prefetching
+  app.get("/api/crawlers/:id/adjacent-rooms/:radius", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const radius = parseInt(req.params.radius) || 2;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      // Verify crawler ownership
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      console.log(`Prefetching adjacent rooms for crawler ${crawlerId} with radius ${radius}`);
+
+      // Get current room
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ message: "Crawler not in any room" });
+      }
+
+      // Get rooms within the specified radius
+      const adjacentRooms = await storage.getRoomsWithinRadius(currentRoom.id, radius);
+      console.log(`Found ${adjacentRooms.length} rooms within radius ${radius} of room ${currentRoom.id}`);
+
+      // For each room, get basic room data and directions
+      const roomDataPromises = adjacentRooms.map(async (room) => {
+        const [availableDirections, playersInRoom] = await Promise.all([
+          storage.getAvailableDirections(room.id),
+          storage.getPlayersInRoom(room.id)
+        ]);
+
+        return {
+          room,
+          availableDirections,
+          playersInRoom: playersInRoom.length, // Just send count for prefetch
+          distance: room.distance // Distance from current room
+        };
+      });
+
+      const roomsData = await Promise.all(roomDataPromises);
+
+      // Sort by distance for better caching priority
+      roomsData.sort((a, b) => a.distance - b.distance);
+
+      console.log(`Returning ${roomsData.length} adjacent rooms for prefetching`);
+      res.json({
+        currentRoomId: currentRoom.id,
+        adjacentRooms: roomsData,
+        radius
+      });
+
+    } catch (error) {
+      console.error("Error fetching adjacent rooms:", error);
+      res.status(500).json({ message: "Failed to fetch adjacent rooms" });
+    }
+  });
+
   // Get tactical data for current room
   app.get("/api/crawlers/:crawlerId/tactical-data", async (req, res) => {
     const crawlerId = parseInt(req.params.crawlerId);

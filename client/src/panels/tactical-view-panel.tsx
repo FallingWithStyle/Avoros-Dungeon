@@ -14,6 +14,7 @@ import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
+import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
@@ -52,6 +53,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     refetchExploredRooms,
     handleRoomChange
   } = useTacticalData(crawler);
+
+  // Use adjacent room prefetching for faster transitions
+  const { prefetchAdjacentRooms } = useAdjacentRoomPrefetch({
+    crawler,
+    currentRoomId: roomData?.room?.id,
+    enabled: !isLoading && !!roomData?.room,
+    radius: 2
+  });
 
   // Local state - ALL HOOKS BEFORE ANY CONDITIONAL LOGIC
   const [combatState, setCombatState] = useState(combatSystem.getState());
@@ -216,18 +225,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
 
-      // Preload adjacent rooms for faster transitions
-      if (effectiveTacticalData?.availableDirections) {
-        effectiveTacticalData.availableDirections.forEach((direction: string) => {
-          // Prefetch room data for adjacent rooms (low priority)
-          setTimeout(() => {
-            queryClient.prefetchQuery({
-              queryKey: [`/api/crawlers/${crawler.id}/adjacent-room/${direction}`],
-              queryFn: () => Promise.resolve(null), // Placeholder - implement if needed
-              staleTime: 2 * 60 * 1000, // 2 minutes
-            });
-          }, 1000); // Delay to not interfere with current loading
-        });
+      // Trigger adjacent room prefetching when room changes
+      if (roomData?.room && prefetchAdjacentRooms) {
+        console.log(`🔮 Room changed to ${roomData.room.id}, triggering adjacent room prefetch`);
+        prefetchAdjacentRooms();
       }
     }
   }, [roomData?.room, lastRoomId, crawler, effectiveTacticalData]);

@@ -25,23 +25,21 @@ export function handleRoomChange(crawlerId: number): void {
 }
 
 /**
+ * Check if room data is already cached for instant transitions
+ */
+export function getCachedRoomData(roomId: number) {
+  const cachedData = queryClient.getQueryData([`/api/room/${roomId}/basic-data`]);
+  return cachedData || null;
+}
+
+/**
  * Handles room change with immediate refetch for responsive UI
- * Uses optimistic updates for instant feel
+ * Uses optimistic updates and cached data for instant feel
  */
 export async function handleRoomChangeWithRefetch(crawlerId: number, direction: string) {
-  console.log("Fast room change for crawler " + crawlerId + " direction " + direction);
+  console.log("🚀 Ultra-fast room change for crawler " + crawlerId + " direction " + direction);
 
   try {
-    // Optimistically invalidate cache immediately for responsive feel
-    queryClient.setQueryData(
-      ["/api/crawlers/" + crawlerId + "/room-data-batch"],
-      (oldData: any) => {
-        if (!oldData) return oldData;
-        // Mark as stale but keep displaying while loading
-        return { ...oldData, _isStale: true };
-      }
-    );
-
     // First, make the actual move API call
     const response = await fetch("/api/crawlers/" + crawlerId + "/move", {
       method: "POST",
@@ -57,32 +55,64 @@ export async function handleRoomChangeWithRefetch(crawlerId: number, direction: 
     }
 
     const moveResult = await response.json();
-    console.log("Move API response:", moveResult);
+    console.log("✅ Move API response:", moveResult);
 
     if (!moveResult.success) {
       throw new Error(moveResult.message || "Move was not successful");
     }
 
-    // After successful move, refetch all relevant data
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
-    });
+    // Check if we have cached data for the new room
+    const newRoomId = moveResult.newRoom?.id;
+    if (newRoomId) {
+      const cachedRoomData = getCachedRoomData(newRoomId);
+      if (cachedRoomData) {
+        console.log(`⚡ Using cached data for room ${newRoomId} - instant transition!`);
+        
+        // Optimistically update with cached data
+        queryClient.setQueryData(
+          ["/api/crawlers/" + crawlerId + "/room-data-batch"],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              currentRoom: {
+                room: cachedRoomData.room,
+                availableDirections: cachedRoomData.availableDirections,
+                playersInRoom: []
+              },
+              _isCached: true
+            };
+          }
+        );
+      }
+    }
 
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/current-room"]
-    });
+    // After successful move, refetch all relevant data in background
+    const refetchPromises = [
+      queryClient.refetchQueries({
+        queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+      }),
+      queryClient.refetchQueries({
+        queryKey: ["/api/crawlers/" + crawlerId + "/current-room"]
+      }),
+      queryClient.refetchQueries({
+        queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"]
+      }),
+      queryClient.refetchQueries({
+        queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
+      })
+    ];
 
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/tactical-data"]
-    });
-
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
+    // Don't await these - let them run in background
+    Promise.all(refetchPromises).then(() => {
+      console.log("🔄 Background data refresh completed");
+    }).catch((error) => {
+      console.error("❌ Background refresh failed:", error);
     });
 
     return { success: true, newRoom: moveResult.newRoom };
   } catch (error) {
-    console.error("Room change failed:", error);
+    console.error("❌ Room change failed:", error);
     return { success: false, error: error.message };
   }
 }
