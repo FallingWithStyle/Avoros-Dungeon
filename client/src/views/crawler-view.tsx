@@ -46,6 +46,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       console.log("🔍 Crawler Query Debug:", { crawlerId });
       try {
         const response = await fetch(`/api/crawlers/${crawlerId}`, {
+          credentials: "include",
           cache: 'no-cache',
           headers: {
             'Cache-Control': 'no-cache',
@@ -61,7 +62,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
         throw err;
       }
     },
-    enabled: !!crawlerId,
+    enabled: !!crawlerId && isAuthenticated,
     staleTime: 0,
     gcTime: 0,
     retry: 3,
