@@ -19,7 +19,7 @@ import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 import { ArrowLeft, Map, Target, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 
 interface CrawlerViewProps {
