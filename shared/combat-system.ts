@@ -463,16 +463,16 @@ export class CombatSystem {
   }
 
   getEntryPosition(direction: string): Position {
-    // When you move in a direction, you enter the new room from the OPPOSITE side
+    // When you move in a direction, you should be placed at the door you came FROM
     switch (direction) {
       case "north":
-        return { x: 50, y: 90 }; // Enter from south when you moved north
+        return { x: 50, y: 10 }; // At north door when you moved north
       case "south":
-        return { x: 50, y: 10 }; // Enter from north when you moved south
+        return { x: 50, y: 90 }; // At south door when you moved south
       case "east":
-        return { x: 10, y: 50 }; // Enter from west when you moved east
+        return { x: 90, y: 50 }; // At east door when you moved east
       case "west":
-        return { x: 90, y: 50 }; // Enter from east when you moved west
+        return { x: 10, y: 50 }; // At west door when you moved west
       default:
         return { x: 50, y: 50 };
     }
@@ -584,20 +584,19 @@ export class CombatSystem {
     let calculatedPosition = startPosition;
 
     if (!calculatedPosition && entryDirection) {
-      // Position player near the appropriate entrance based on the direction they moved
-      // When you move north, you enter the new room from the south
+      // Position player at the door they came from in the new room
       switch (entryDirection) {
         case "north":
-          calculatedPosition = { x: 50, y: 85 }; // Near south wall when moved north
+          calculatedPosition = { x: 50, y: 15 }; // At north door when moved north
           break;
         case "south":
-          calculatedPosition = { x: 50, y: 15 }; // Near north wall when moved south
+          calculatedPosition = { x: 50, y: 85 }; // At south door when moved south
           break;
         case "east":
-          calculatedPosition = { x: 15, y: 50 }; // Near west wall when moved east
+          calculatedPosition = { x: 85, y: 50 }; // At east door when moved east
           break;
         case "west":
-          calculatedPosition = { x: 85, y: 50 }; // Near east wall when moved west
+          calculatedPosition = { x: 15, y: 50 }; // At west door when moved west
           break;
         default:
           calculatedPosition = { x: 50, y: 50 }; // Center if no direction

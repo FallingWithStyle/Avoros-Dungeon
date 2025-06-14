@@ -53,16 +53,16 @@ export function useTacticalPositioning({
           // Use proper entry positioning based on last known entry direction
           switch (entryDirection) {
             case "north":
-              recoveryPosition = { x: 50, y: 85 };
-              break;
-            case "south":
               recoveryPosition = { x: 50, y: 15 };
               break;
+            case "south":
+              recoveryPosition = { x: 50, y: 85 };
+              break;
             case "east":
-              recoveryPosition = { x: 15, y: 50 };
+              recoveryPosition = { x: 85, y: 50 };
               break;
             case "west":
-              recoveryPosition = { x: 85, y: 50 };
+              recoveryPosition = { x: 15, y: 50 };
               break;
           }
           console.log(`🔄 Recovering player position based on entry direction '${entryDirection}': (${recoveryPosition.x}, ${recoveryPosition.y})`);
