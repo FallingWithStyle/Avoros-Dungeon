@@ -61,7 +61,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
         throw err;
       }
     },
-    enabled: !!crawlerId,
+    enabled: !!crawlerId && !!isAuthenticated,
     staleTime: 0,
     gcTime: 0,
     retry: 3,
@@ -78,6 +78,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       if (!response.ok) throw new Error("Failed to fetch room data");
       return response.json();
     },
+    enabled: !!crawlerId && !!isAuthenticated && !!crawler,
     refetchInterval: 5000,
   });
 
@@ -91,6 +92,32 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     crawlerLoading,
     enabled: !!crawlerId
   });
+
+  // Early return for authentication loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <i className="fas fa-spinner fa-spin text-4xl text-crawler mb-4"></i>
+          <p className="text-slate-300">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Early return for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Authentication required</p>
+          <Button onClick={() => window.location.href = "/api/login"}>
+            Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const isDataLoading = crawlerLoading || roomLoading;
 
