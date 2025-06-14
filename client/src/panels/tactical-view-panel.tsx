@@ -69,7 +69,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Use fallback data when tactical data is unavailable
   const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
 
-  // Room movement handler
+  // Room movement handler with better fallback functionality
   const handleRoomMovement = useCallback(async (direction: string) => {
     if (!crawler || !effectiveTacticalData?.availableDirections.includes(direction)) {
       console.log("Cannot move " + direction + " - not available or no crawler");
@@ -80,56 +80,99 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log("⚡ Ultra-fast room transition " + direction + " starting...");
       sessionStorage.setItem('lastMovementDirection', direction);
 
-      // Store current player position before transition
+      // Store current player position before transition for recovery
       const currentPlayer = combatSystem.getState().entities.find(e => e.id === "player");
-      const playerBackup = currentPlayer ? { ...currentPlayer } : null;
+      const playerBackup = currentPlayer ? { 
+        position: { ...currentPlayer.position }, 
+        facing: currentPlayer.facing 
+      } : null;
 
-      // Fire movement request
+      // Fire movement request with timeout
+      const moveController = new AbortController();
+      const timeoutId = setTimeout(() => moveController.abort(), 10000); // 10 second timeout
+
       const movePromise = fetch("/api/crawlers/" + crawler.id + "/move", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction }),
+        signal: moveController.signal
       });
 
       // Optimistically update queries
       queryClient.invalidateQueries({ queryKey: ["dungeonMap"] });
       queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] });
 
-      // Wait for movement to complete before clearing entities
+      // Wait for movement to complete
       const moveResponse = await movePromise;
+      clearTimeout(timeoutId);
+
       if (!moveResponse.ok) {
         console.error("Movement failed with status:", moveResponse.status);
+
+        // Try to get error details
+        let errorMessage = "Could not move in that direction.";
+        try {
+          const errorData = await moveResponse.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          console.log("Could not parse error response");
+        }
+
+        // Restore player position if we have a backup
+        if (playerBackup && currentPlayer) {
+          console.log("🔄 Restoring player position after failed movement");
+          currentPlayer.position = playerBackup.position;
+          currentPlayer.facing = playerBackup.facing;
+          combatSystem.updateEntity(currentPlayer.id, {
+            position: playerBackup.position,
+            facing: playerBackup.facing
+          });
+        }
+
         toast({
           title: "Movement failed",
-          description: "Could not move in that direction.",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
       }
 
-      // Handle successful room transition
       console.log("✅ Room movement successful to " + direction);
 
-      // Clear entities immediately for instant UI update
-      const currentEntities = combatSystem.getState().entities;
-      currentEntities.forEach((entity) => {
-        combatSystem.removeEntity(entity.id);
-      });
-
-      // Use fast room change for instant feel
+      // Use immediate refetch for responsive UI updates
       handleRoomChangeWithRefetch(crawler.id);
 
-      console.log("⚡ Room transition completed successfully");
+      // Clear the movement direction after successful transition
+      setTimeout(() => {
+        sessionStorage.removeItem('lastMovementDirection');
+        console.log("🧹 Cleared movement direction from session storage");
+      }, 1000);
 
+      console.log("⚡ Room transition completed successfully");
     } catch (error) {
-      console.error("Failed to move " + direction + ":", error);
+      console.error("Room movement error:", error);
+
+      // Check if it's an abort error (timeout)
+      const isTimeout = error instanceof Error && error.name === 'AbortError';
+      const errorMessage = isTimeout 
+        ? "Room transition timed out. Please try again."
+        : "An error occurred during room transition.";
+
       toast({
-        title: "Movement failed",
-        description: "Could not move in that direction.",
+        title: "Movement failed", 
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Force refresh room data in case of network issues
+      if (crawler) {
+        console.log("🔄 Force refreshing room data due to movement error");
+        handleRoomChangeWithRefetch(crawler.id);
+      }
     }
-  }, [crawler, effectiveTacticalData?.availableDirections, toast]);
+  }, [crawler, effectiveTacticalData, combatSystem, queryClient, toast]);
 
   // Use tactical positioning hook for movement validation logic
   const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
@@ -206,7 +249,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
-      console.log(`Room changed from ${lastRoomId} to ${roomData.room.id}, reinitializing player`);
+      console.log(`🚪 Room changed from ${lastRoomId} to ${roomData.room.id}, repositioning player immediately`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player
@@ -223,15 +266,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const lastDirection = sessionStorage.getItem('lastMovementDirection') as any;
       const entryPosition = combatSystem.getEntryPosition(lastDirection || 'south');
 
-      console.log(`Entry position for direction ${lastDirection}:`, entryPosition);
+      console.log(`🎯 Entry position for direction ${lastDirection}:`, entryPosition);
 
-      // Initialize player with crawler data
+      // Initialize/update player with immediate positioning
       combatSystem.initializePlayer(entryPosition, {
         name: crawler.name,
         serial: crawler.serial
       });
 
+      // Ensure player is selected and force a state update
       combatSystem.selectEntity("player");
+      
+      console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
     }
   }, [roomData?.room, lastRoomId, crawler]);
 

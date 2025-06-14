@@ -463,16 +463,16 @@ export class CombatSystem {
   }
 
   getEntryPosition(direction: string): Position {
-    // When you move in a direction, you enter the new room from the OPPOSITE side
+    // When you move in a direction, you should be placed at the door you came FROM
     switch (direction) {
       case "north":
-        return { x: 50, y: 90 }; // Enter from south when you moved north
+        return { x: 50, y: 10 }; // At north door when you moved north
       case "south":
-        return { x: 50, y: 10 }; // Enter from north when you moved south
+        return { x: 50, y: 90 }; // At south door when you moved south
       case "east":
-        return { x: 10, y: 50 }; // Enter from west when you moved east
+        return { x: 90, y: 50 }; // At east door when you moved east
       case "west":
-        return { x: 90, y: 50 }; // Enter from east when you moved west
+        return { x: 10, y: 50 }; // At west door when you moved west
       default:
         return { x: 50, y: 50 };
     }
@@ -580,37 +580,37 @@ export class CombatSystem {
     const existingPlayer = this.state.entities.find((e) => e.id === "player");
 
     // Get entry direction to determine starting position
-    const entryDirection = sessionStorage.getItem("entryDirection");
+    const entryDirection = sessionStorage.getItem("lastMovementDirection");
     let calculatedPosition = startPosition;
 
     if (!calculatedPosition && entryDirection) {
-      // Position player near the appropriate entrance
+      // Position player at the door they came from in the new room
       switch (entryDirection) {
         case "north":
-          calculatedPosition = { x: 50, y: 85 }; // Near south wall when entering from north
+          calculatedPosition = { x: 50, y: 15 }; // At north door when moved north
           break;
         case "south":
-          calculatedPosition = { x: 50, y: 15 }; // Near north wall when entering from south
+          calculatedPosition = { x: 50, y: 85 }; // At south door when moved south
           break;
         case "east":
-          calculatedPosition = { x: 15, y: 50 }; // Near west wall when entering from east
+          calculatedPosition = { x: 85, y: 50 }; // At east door when moved east
           break;
         case "west":
-          calculatedPosition = { x: 85, y: 50 }; // Near east wall when entering from west
+          calculatedPosition = { x: 15, y: 50 }; // At west door when moved west
           break;
         default:
           calculatedPosition = { x: 50, y: 50 }; // Center if no direction
       }
       console.log(
-        `Positioning player based on entry direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`,
+        `🎯 Positioning player based on movement direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`,
       );
     }
 
     if (existingPlayer) {
       if (calculatedPosition) {
-        existingPlayer.position = calculatedPosition;
+        existingPlayer.position = { ...calculatedPosition };
         console.log(
-          `Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
+          `🔄 Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
         );
       }
       // Update crawler data if provided
@@ -618,6 +618,8 @@ export class CombatSystem {
         if (crawlerData.name) existingPlayer.name = crawlerData.name;
         if (crawlerData.serial) existingPlayer.serial = crawlerData.serial;
       }
+      // Force immediate state update
+      this.notifySubscribers();
       return;
     }
 
@@ -628,7 +630,7 @@ export class CombatSystem {
       id: "player",
       name: crawlerData?.name || "Player",
       type: "player",
-      position: defaultPosition,
+      position: { ...defaultPosition },
       hp: 100,
       maxHp: 100,
       attack: 0, // No weapon equipped
@@ -646,7 +648,7 @@ export class CombatSystem {
 
     this.state.entities.push(playerEntity);
     console.log(
-      `Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
+      `✅ Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
     );
     this.notifySubscribers();
   }
