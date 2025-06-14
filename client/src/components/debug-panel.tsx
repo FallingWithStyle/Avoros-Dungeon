@@ -127,10 +127,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
     onSuccess: () => {
       if (!activeCrawler) return;
-      
+
       // Use centralized room change handler for consistent updates
       handleRoomChangeWithRefetch(activeCrawler.id);
-      
+
       toast({
         title: "Position Reset",
         description: "Crawler has been moved to the entrance. Map and tactical view updated.",

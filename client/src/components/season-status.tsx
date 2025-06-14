@@ -1,36 +1,47 @@
 /**
  * File: season-status.tsx
- * Responsibility: Displays current game season information and status
- * Notes: Shows season name, description, and any seasonal events or modifiers
+ * Responsibility: Displays current season information and status indicators
+ * Notes: Shows season number, active status, and time remaining for competitive seasons
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Clock, Trophy, Users } from "lucide-react";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock, Trophy, Users } from 'lucide-react';
 
 export default function SeasonStatus() {
-  const { data: season, isLoading } = useQuery({
-    queryKey: ["/api/season/current"],
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
-
-  if (isLoading) {
+  // Safe hook usage with error handling
+  let season: any = null;
+  try {
+    const queryResult = useQuery({
+      queryKey: ['/api/seasons/current'],
+      refetchInterval: 30000, // Refresh every 30 seconds
+    });
+    season = queryResult.data;
+  } catch (error) {
+    console.warn('Season query hook not available:', error);
     return (
       <Card className="bg-game-surface border-game-border">
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-game-border rounded w-1/2"></div>
-            <div className="h-3 bg-game-border rounded w-3/4"></div>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-game-text-primary flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-game-accent" />
+            Season Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-game-text-secondary">
+            Loading season data...
           </div>
         </CardContent>
       </Card>
     );
   }
+
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
 
   if (!season) {
     return (
@@ -83,7 +94,7 @@ export default function SeasonStatus() {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <h4 className="font-semibold text-slate-200">Secondary Sponsorships</h4>
             <div className="flex items-center gap-2">

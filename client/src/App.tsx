@@ -52,6 +52,7 @@ function AppRouter() {
 
   console.log('🔍 Router Debug:', { isAuthenticated, isLoading });
 
+  // Show loading state during authentication check
   if (isLoading) {
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
@@ -63,24 +64,31 @@ function AppRouter() {
     );
   }
 
+  // Once loading is complete, render based on authentication status
+  if (!isAuthenticated) {
+    return (
+      <div>
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route component={Landing} />
+        </Switch>
+      </div>
+    );
+  }
+
+  // User is authenticated, show full app
   return (
     <div>
-      {!isLoading && isAuthenticated && <HeaderNavigation />}
+      <HeaderNavigation />
       <Switch>
-        {isLoading || !isAuthenticated ? (
-          <Route path="/" component={Landing} />
-        ) : (
-          <>
-            <Route path="/" component={Home} />
-            <Route path="/crawler/:id" component={({ params }: { params: { id: string } }) => (
-              <CrawlerMode crawlerId={params.id} />
-            )} />
-            <Route path="/crawler/:id/loadout" component={({ params }: { params: { id: string } }) => (
-              <CrawlerLoadout crawlerId={params.id} />
-            )} />
-            <Route path="/account" component={Account} />
-          </>
-        )}
+        <Route path="/" component={Home} />
+        <Route path="/crawler/:id" component={({ params }: { params: { id: string } }) => (
+          <CrawlerMode crawlerId={params.id} />
+        )} />
+        <Route path="/crawler/:id/loadout" component={({ params }: { params: { id: string } }) => (
+          <CrawlerLoadout crawlerId={params.id} />
+        )} />
+        <Route path="/account" component={Account} />
         <Route component={NotFound} />
       </Switch>
     </div>
