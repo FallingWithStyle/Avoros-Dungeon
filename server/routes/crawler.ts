@@ -343,7 +343,7 @@ export function registerCrawlerRoutes(app: Express) {
     console.log("Fetching room data batch for crawler:", crawlerId);
 
     // Get current position first
-    const currentPosition = await storage.getCurrentRoom(crawlerId, req);
+    const currentPosition = await storage.crawlerStorage.getCurrentRoom(crawlerId, req);
     if (!currentPosition) {
       return res.status(404).json({ error: "Crawler position not found" });
     }

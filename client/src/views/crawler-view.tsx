@@ -70,7 +70,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   });
 
   // Batch fetch all room data for faster loading
-  const { data: roomBatchData, isLoading: roomLoading, error: roomError } = useQuery({
+  const roomQuery = useQuery({
     queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"],
     queryFn: async () => {
       const response = await fetch(`/api/crawlers/${crawlerId}/room-data-batch`, {
@@ -91,7 +91,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       return response.json();
     },
     enabled: !!crawlerId && isAuthenticated && !isLoading,
-    refetchInterval: roomError ? false : 5000, // Stop refetching on error
+    refetchInterval: 5000,
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error.message === "Authentication required") return false;
@@ -99,6 +99,8 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     },
     retryDelay: 2000,
   });
+
+  const { data: roomBatchData, isLoading: roomLoading, error: roomError } = roomQuery;
 
   // Extract data from batch response
   const currentRoomData = roomBatchData?.currentRoom;
