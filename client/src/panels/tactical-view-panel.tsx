@@ -80,7 +80,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
-        if (result.success) {
+        if (result && result.success) {
           console.log(`✅ Room movement successful to ${direction}`);
 
           // Trigger data refetch immediately
@@ -98,7 +98,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             console.log('🧹 Cleared movement direction from session storage');
           }, 500);
         } else {
-          console.error('❌ Room movement failed:', result.error);
+          console.error('❌ Room movement failed:', result?.error || 'Unknown error');
         }
       } catch (error) {
         console.error('❌ Room transition error:', error);

@@ -28,16 +28,23 @@ export function handleRoomChange(crawlerId: number): void {
  * Handles room change with immediate refetch for responsive UI
  * Uses optimistic updates for instant feel
  */
-export function handleRoomChangeWithRefetch(crawlerId: number) {
-  console.log("Fast room change for crawler " + crawlerId);
+export async function handleRoomChangeWithRefetch(crawlerId: number, direction: string) {
+  console.log("Fast room change for crawler " + crawlerId + " direction " + direction);
 
-  // Immediately refetch the batch data without invalidating first
-  queryClient.refetchQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
-  });
+  try {
+    // Immediately refetch the batch data without invalidating first
+    await queryClient.refetchQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+    });
 
-  // Update explored rooms in background
-  queryClient.refetchQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
-  });
+    // Update explored rooms in background
+    await queryClient.refetchQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Room change refetch failed:", error);
+    return { success: false, error: error.message };
+  }
 }
