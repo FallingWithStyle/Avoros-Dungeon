@@ -1,4 +1,3 @@
-
 /**
  * File: App.tsx
  * Responsibility: Main application component handling routing, authentication, and global providers
@@ -18,6 +17,7 @@ import Home from "@/pages/home";
 import CrawlerMode from "@/pages/crawler-mode";
 import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
+import CrawlerLoadout from "@/pages/crawler-loadout";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,9 +41,12 @@ function Router() {
         ) : (
           <>
             <Route path="/" component={Home} />
-            <Route path="/crawler/:crawlerId">
-              {(params) => <CrawlerMode crawlerId={params.crawlerId} />}
-            </Route>
+            <Route path="/crawler/:id" component={({ params }: { params: { id: string } }) => (
+              <CrawlerMode crawlerId={params.id} />
+            )} />
+            <Route path="/crawler/:id/loadout" component={({ params }: { params: { id: string } }) => (
+              <CrawlerLoadout crawlerId={params.id} />
+            )} />
             <Route path="/account" component={Account} />
           </>
         )}
