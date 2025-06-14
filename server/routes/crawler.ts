@@ -36,7 +36,12 @@ export function registerCrawlerRoutes(app: Express) {
   app.get("/api/crawlers/:id", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
-      const crawler = await storage.getCrawler(crawlerId);
+      
+      // Initialize request cache for this request
+      const requestCache = getRequestCache(req);
+      
+      // Pass request context to storage methods
+      const crawler = await storage.getCrawler(crawlerId, req);
 
       if (!crawler) {
         return res.status(404).json({ message: "Crawler not found" });
@@ -326,13 +331,20 @@ export function registerCrawlerRoutes(app: Express) {
   });
 
   // Batch endpoint for faster room loading - gets all room data in one call
-  app.get("/api/crawlers/:id/room-data-batch", async (req, res) => {
+  app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
   try {
     const crawlerId = parseInt(req.params.id);
-    const userId = req.user?.id;
+    const userId = req.user.claims.sub;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Not authenticated" });
+    // Initialize request cache for this request
+    const requestCache = getRequestCache(req);
+    
+    // Set request cache on storage instances that support it
+    if (storage.tacticalStorage?.setRequestCache) {
+      storage.tacticalStorage.setRequestCache(requestCache);
+    }
+    if (storage.mobStorage?.setRequestCache) {
+      storage.mobStorage.setRequestCache(requestCache);
     }
 
     const crawler = await storage.getCrawler(crawlerId, req);
