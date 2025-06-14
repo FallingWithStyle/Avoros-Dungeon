@@ -19,6 +19,9 @@ import { eq, desc, and } from "drizzle-orm";
  * Notes: Handles crawler CRUD operations, stat generation, candidate creation, and progression tracking
  */
 import { BaseStorage } from "./base-storage";
+import { redisService } from "../lib/redis-service";
+import { getRequestCache, RequestCache } from "../lib/request-cache";
+import { queryOptimizer } from "../lib/query-optimizer";
 
 export class CrawlerStorage extends BaseStorage {
   async createCrawler(crawlerData: any): Promise<Crawler> {
@@ -77,11 +80,25 @@ export class CrawlerStorage extends BaseStorage {
     }));
   }
 
-  async getCrawler(id: number): Promise<CrawlerWithDetails | undefined> {
+  async getCrawler(id: number, req?: any): Promise<CrawlerWithDetails | undefined> {
     // Try to get from cache first
+    if (req) {
+      const requestCache = getRequestCache(req);
+      const cacheKey = RequestCache.createKey('crawler', id);
+      const cached = requestCache.get<CrawlerWithDetails>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+
     try {
       const cached = await this.redisService.getCrawler(id);
       if (cached) {
+          if (req) {
+            const requestCache = getRequestCache(req);
+            const cacheKey = RequestCache.createKey('crawler', id);
+            requestCache.set(cacheKey, cached);
+          }
         return cached;
       }
     } catch (error) {
@@ -123,6 +140,11 @@ export class CrawlerStorage extends BaseStorage {
     // Cache the result for future requests
     try {
       await this.redisService.setCrawler(id, crawlerData, 300); // 5 minutes TTL
+      if (req) {
+        const requestCache = getRequestCache(req);
+        const cacheKey = RequestCache.createKey('crawler', id);
+        requestCache.set(cacheKey, crawlerData);
+      }
     } catch (error) {
       // Redis error, but don't fail the request
       console.log('Failed to cache crawler data');
@@ -137,7 +159,7 @@ export class CrawlerStorage extends BaseStorage {
       .set({ ...updates, lastAction: new Date() })
       .where(eq(crawlers.id, id))
       .returning();
-    
+
     // Invalidate cache when crawler is updated
     try {
       await this.redisService.invalidateCrawler(id);
@@ -145,7 +167,7 @@ export class CrawlerStorage extends BaseStorage {
       // Redis error, but don't fail the request
       console.log('Failed to invalidate crawler cache');
     }
-    
+
     return crawler;
   }
 
@@ -321,7 +343,81 @@ export class CrawlerStorage extends BaseStorage {
     return `Former ${job}. ${backgroundStory}`;
   }
 
+  async getCurrentRoom(crawlerId: number, req?: any): Promise<any | null> {
+    try {
+      // Check request-level cache
+      if (req) {
+        const requestCache = getRequestCache(req);
+        const cacheKey = RequestCache.createKey('current-room', crawlerId);
+        const cached = requestCache.get<any>(cacheKey);
+        if (cached) {
+          return cached;
+        }
+      }
 
+      // Check Redis cache
+      const cached = await redisService.getCurrentRoom(crawlerId);
+      if (cached) {
+        if (req) {
+          const requestCache = getRequestCache(req);
+          const cacheKey = RequestCache.createKey('current-room', crawlerId);
+          requestCache.set(cacheKey, cached);
+        }
+        return cached;
+      }
+
+      console.log("Getting current room for crawler", crawlerId);
+
+      // Get position and room data together
+      const positionData = await db
+        .select({
+          room: rooms,
+          position: crawlerPositions
+        })
+        .from(crawlerPositions)
+        .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
+        .where(eq(crawlerPositions.crawlerId, crawlerId))
+        .orderBy(desc(crawlerPositions.enteredAt))
+        .limit(1);
+
+      if (!positionData.length) {
+        console.log(`No position found for crawler ${crawlerId}`);
+        return null;
+      }
+
+      const [data] = positionData;
+      console.log(`Database query result for crawler ${crawlerId}: Found room: ${data.room.name}`);
+
+      // Get room connections in the same request
+      // Assuming 'roomConnections' and its structure are defined elsewhere
+      // and 'fromRoomId' exists in the schema.
+      const { roomConnections } = await import("@shared/schema");
+
+      const connections = await db
+        .select()
+        .from(roomConnections)
+        .where(eq(roomConnections.fromRoomId, data.room.id));
+
+      const result = {
+        room: data.room,
+        position: data.position,
+        connections: connections
+      };
+
+      // Cache the result
+      await redisService.setCurrentRoom(crawlerId, result);
+      if (req) {
+        const requestCache = getRequestCache(req);
+        const cacheKey = RequestCache.createKey('current-room', crawlerId);
+        requestCache.set(cacheKey, result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Failed to get current room:", error);
+      return null;
+    }
+  }
 
   private async generateStartingEquipment(background: string): Promise<any[]> {
     const survivalGear = [
