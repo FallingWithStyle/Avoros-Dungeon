@@ -70,7 +70,7 @@ export function useTacticalPositioning({
           console.log("🔄 No entry direction found, using center position for recovery");
         }
 
-        combatSystem.createPlayerEntity(recoveryPosition, crawlerData);
+        combatSystem.initializePlayer(recoveryPosition);
         if (!combatSystem.getState().entities.find((e) => e.id === "player")) {
           console.log("Failed to create player entity - movement blocked");
           return;
