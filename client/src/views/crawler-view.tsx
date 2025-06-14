@@ -74,6 +74,11 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     queryFn: async () => {
       const response = await fetch(`/api/crawlers/${crawlerId}/room-data-batch`, {
         credentials: "include",
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       });
       if (!response.ok) throw new Error("Failed to fetch room data");
       return response.json();
