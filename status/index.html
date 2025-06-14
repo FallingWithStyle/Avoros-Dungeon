@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avoros Dungeon - Status Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #f59e0b, #eab308);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .status-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .service-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-online {
+            background-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-loading {
+            background-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .response-time {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            background: rgba(51, 65, 85, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .history {
+            display: flex;
+            gap: 2px;
+            margin-top: 12px;
+        }
+
+        .history-bar {
+            flex: 1;
+            height: 30px;
+            border-radius: 2px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+         /* Status Grid Styles */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .service-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+
+        .status-dot.degraded {
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .status-text {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator.online .status-text {
+            color: #22c55e;
+        }
+
+        .status-indicator.degraded .status-text {
+            color: #f59e0b;
+        }
+
+        .status-indicator.offline .status-text {
+            color: #ef4444;
+        }
+
+        .response-time {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Avoros Dungeon</h1>
+            <p class="subtitle">System Status & Health Monitoring</p>
+        </div>
+
+        <div class="status-card">
+             <div class="status-grid">
+      <div class="service-card">
+        <div class="service-name">Main Application</div>
+        <div class="status-indicator" id="main-app-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="main-app-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">PostgreSQL Database</div>
+        <div class="status-indicator" id="postgres-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="postgres-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">Redis Cache</div>
+        <div class="status-indicator" id="redis-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="redis-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">Neon Database</div>
+        <div class="status-indicator" id="neon-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="neon-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">Upstash Redis</div>
+        <div class="status-indicator" id="upstash-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="upstash-time"></div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-name">NPM Registry</div>
+        <div class="status-indicator" id="npm-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Checking...</span>
+        </div>
+        <div class="response-time" id="npm-time"></div>
+      </div>
+    </div>
+        </div>
+
+        <div class="status-card">
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value" id="uptime">--</div>
+                    <div class="metric-label">Uptime (24h)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="avg-response">--ms</div>
+                    <div class="metric-label">Avg Response</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="incidents">--</div>
+                    <div class="metric-label">Incidents (24h)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            Last updated: <span id="last-updated">--</span>
+        </div>
+
+        <div class="footer">
+            <p>Monitored every 30 seconds • Built for Avoros Dungeon</p>
+        </div>
+    </div>
+
+    <script>
+        // Function to update the status of a service
+    function updateStatus(service, status, responseTime) {
+      const statusElement = document.getElementById(`${service}-status`);
+      const timeElement = document.getElementById(`${service}-time`);
+
+      statusElement.className = `status-indicator ${status}`;
+
+      let statusText = status;
+      if (status === 'degraded') {
+        statusText = 'degraded';
+      }
+
+      statusElement.querySelector('.status-text').textContent = statusText;
+
+      if (timeElement) {
+        timeElement.textContent = `${responseTime}ms`;
+      }
+    }
+
+    async function checkMainApp() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          updateStatus('main-app', 'online', responseTime);
+        } else {
+          updateStatus('main-app', 'offline', responseTime);
+        }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('main-app', 'offline', responseTime);
+      }
+    }
+
+    async function checkPostgres() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/crawlers/5');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          updateStatus('postgres', 'online', responseTime);
+        } else {
+          updateStatus('postgres', 'degraded', responseTime);
+        }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('postgres', 'offline', responseTime);
+      }
+    }
+
+    async function checkRedis() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.fallbackMode) {
+            updateStatus('redis', 'degraded', responseTime);
+          } else {
+            updateStatus('redis', 'online', responseTime);
+          }
+        } else {
+          updateStatus('redis', 'offline', responseTime);
+        }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('redis', 'offline', responseTime);
+      }
+    }
+
+    async function checkNeon() {
+      const startTime = performance.now();
+      try {
+        // Check if we can connect to Neon via our app
+        const response = await fetch('http://localhost:5000/api/crawlers/5');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          updateStatus('neon', 'online', responseTime);
+        } else {
+          updateStatus('neon', 'degraded', responseTime);
+        }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('neon', 'offline', responseTime);
+      }
+    }
+
+    async function checkUpstash() {
+      const startTime = performance.now();
+      try {
+        // Check Redis status via our app
+        const response = await fetch('http://localhost:5000/api/debug/redis-fallback');
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.fallbackMode) {
+            updateStatus('upstash', 'offline', responseTime);
+          } else {
+            updateStatus('upstash', 'online', responseTime);
+          }
+        } else {
+          updateStatus('upstash', 'degraded', responseTime);
+        }
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('upstash', 'offline', responseTime);
+      }
+    }
+
+    async function checkNPM() {
+      const startTime = performance.now();
+      try {
+        const response = await fetch('https://registry.npmjs.org/react', { 
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+
+        // Since we're using no-cors, we can't check the response status
+        // If the request completes without error, assume it's working
+        updateStatus('npm', 'online', responseTime);
+      } catch (error) {
+        const endTime = performance.now();
+        const responseTime = Math.round(endTime - startTime);
+        updateStatus('npm', 'offline', responseTime);
+      }
+    }
+
+    function checkAllServices() {
+      checkMainApp();
+      checkPostgres();
+      checkRedis();
+      checkNeon();
+      checkUpstash();
+      checkNPM();
+    }
+
+    // Initial service check
+    checkAllServices();
+
+    // Run service check every 5 seconds
+    setInterval(checkAllServices, 5000);
+    </script>
+</body>
+</html>

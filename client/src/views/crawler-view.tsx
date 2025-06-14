@@ -152,6 +152,12 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link to={`/crawler/${crawlerId}/loadout`}>
+                <Button variant="outline" size="sm">
+                  <Package className="h-4 w-4 mr-2" />
+                  Loadout
+                </Button>
+              </Link>
               <div className="text-right">
                 <p className="text-sm text-slate-400">Status</p>
                 <p className="text-white font-medium capitalize">
@@ -229,44 +235,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           </div>
         </div>
       </div>
-       {/* Header */}
-       <header className="bg-game-surface border-b border-game-border">
-        <div className="w-full px-4 py-4 lg:max-w-7xl lg:mx-auto lg:px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {/* Avatar image */}
-              <img
-                src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
-                alt={`${crawler.name} avatar`}
-                className="w-12 h-12 rounded-full border-2 border-game-border bg-gray-800"
-              />
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  {crawler.name} {crawler.serial && `[${crawler.serial}]`}
-                </h1>
-                <p className="text-slate-400">
-                  Level {crawler.level} {crawler.class?.name || "Crawler"} •
-                  Floor {crawler.currentFloor}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link to={`/crawler/${crawlerId}/loadout`}>
-                <Button variant="outline" size="sm">
-                  <Package className="h-4 w-4 mr-2" />
-                  Loadout
-                </Button>
-              </Link>
-              <div className="text-right">
-                <p className="text-sm text-slate-400">Status</p>
-                <p className="text-white font-medium capitalize">
-                  {crawler.status}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+
       {/* Global Debug Panel */}
       <DebugPanel activeCrawler={crawler} />
     </div>

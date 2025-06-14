@@ -1,10 +1,10 @@
-
 /**
  * File: crawler-loadout-view.tsx
  * Responsibility: Main view for crawler equipment management and customization
  * Notes: Handles equipment slots, inventory management, stat optimization, and loadout presets
  */
 
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,14 @@ import { ArrowLeft, Sword, Shield, Gem, Package, TrendingUp, Settings } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { CrawlerWithDetails } from "@shared/schema";
+import HotbarConfiguration from "@/components/hotbar-configuration";
 
 interface CrawlerLoadoutViewProps {
   crawlerId: string;
 }
 
 export default function CrawlerLoadoutView({ crawlerId }: CrawlerLoadoutViewProps) {
+  const [hotbarConfig, setHotbarConfig] = useState([]);
   const { toast } = useToast();
 
   const { data: crawler, isLoading, error } = useQuery<CrawlerWithDetails>({
@@ -34,6 +36,12 @@ export default function CrawlerLoadoutView({ crawlerId }: CrawlerLoadoutViewProp
       return response.json();
     },
   });
+
+  const handleHotbarConfigChange = (config: any[]) => {
+    setHotbarConfig(config);
+    // TODO: Save configuration to backend or localStorage
+    console.log("Hotbar configuration updated:", config);
+  };
 
   if (isLoading) {
     return (
@@ -121,6 +129,10 @@ export default function CrawlerLoadoutView({ crawlerId }: CrawlerLoadoutViewProp
             <TabsTrigger value="inventory" className="flex items-center space-x-2">
               <Package className="h-4 w-4" />
               <span>Inventory</span>
+            </TabsTrigger>
+            <TabsTrigger value="hotbar" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Hotbar</span>
             </TabsTrigger>
           </TabsList>
 
@@ -292,6 +304,10 @@ export default function CrawlerLoadoutView({ crawlerId }: CrawlerLoadoutViewProp
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          {/* Hotbar Tab */}
+          <TabsContent value="hotbar" className="space-y-6">
+            <HotbarConfiguration onConfigurationChange={handleHotbarConfigChange} />
           </TabsContent>
         </Tabs>
       </div>
