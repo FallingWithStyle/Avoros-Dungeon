@@ -39,21 +39,37 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     authLoading: isLoading
   });
 
-  // Fetch crawler data
-  const { data: crawler, isLoading: crawlerLoading, error: crawlerError } = useQuery({
-    queryKey: ["/api/crawlers/" + crawlerId],
+  // Fetch crawler data with cache control
+  const { data: crawler, isLoading: crawlerLoading, error: crawlerError, refetch } = useQuery<CrawlerWithDetails>({
+    queryKey: ["crawler", crawlerId],
     queryFn: async () => {
-      const response = await fetch("/api/crawlers/" + crawlerId, {
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to fetch crawler");
-      return response.json();
+      console.log("🔍 Crawler Query Debug:", { crawlerId });
+      try {
+        const response = await fetch(`/api/crawlers/${crawlerId}`, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch crawler: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      } catch (err) {
+        console.error("Error fetching crawler:", err);
+        throw err;
+      }
     },
-    refetchInterval: 30000,
+    enabled: !!crawlerId,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Batch fetch all room data for faster loading
-  const { data: roomBatchData, isLoading: roomLoading } = useQuery({
+  const { data: roomBatchData, isLoading: roomLoading, error: roomError } = useQuery({
     queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"],
     queryFn: async () => {
       const response = await fetch(`/api/crawlers/${crawlerId}/room-data-batch`, {
@@ -89,37 +105,25 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     );
   }
 
-  if (!isAuthenticated || !crawler) {
-    console.log("🚨 CrawlerView - Not authenticated or no crawler:", {
-      isAuthenticated,
-      crawler: crawler?.name || "No crawler data",
-      crawlerId
-    });
-
+  if (crawlerError) {
+    console.error("Crawler loading error:", crawlerError);
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
-        <Card className="bg-game-surface border-game-border">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <i className="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-              <h2 className="text-xl font-bold text-white mb-2">
-                {!isAuthenticated ? "Authentication Required" : "Crawler Not Found"}
-              </h2>
-              <p className="text-slate-400 mb-4">
-                {!isAuthenticated ? 
-                  "Please log in to view crawler details." :
-                  "The requested crawler could not be found or you don't have access to it."
-                }
-              </p>
-              <div className="text-amber-300/70 text-sm">
-                Debug: crawlerId={crawlerId}, isAuthenticated={String(isAuthenticated)}, crawler={crawler?.name || "none"}
-              </div>
-              <div className="text-amber-300/70 text-sm mt-2">
-                Use the navigation above to return to your corporation overview.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Failed to load crawler: {crawlerError instanceof Error ? crawlerError.message : 'Unknown error'}</p>
+          <Button onClick={() => refetch()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!crawler) {
+    return (
+      <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">Crawler not found</p>
+          <Button onClick={() => refetch()}>Try Again</Button>
+        </div>
       </div>
     );
   }

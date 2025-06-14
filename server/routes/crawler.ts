@@ -328,9 +328,21 @@ export function registerCrawlerRoutes(app: Express) {
   // Batch endpoint for faster room loading - gets all room data in one call
   app.get("/api/crawlers/:id/room-data-batch", isAuthenticated, async (req: any, res) => {
     try {
+      // Set cache control headers to disable caching
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
       const crawlerId = parseInt(req.params.id);
-      console.log(`=== ROOM DATA BATCH REQUEST for crawler ${crawlerId} ===`);
-      
+      if (isNaN(crawlerId)) {
+        console.error("Invalid crawler ID provided:", req.params.id);
+        return res.status(400).json({ error: "Invalid crawler ID" });
+      }
+
+      console.log("Fetching room data batch for crawler:", crawlerId);
+
       const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
@@ -355,7 +367,7 @@ export function registerCrawlerRoutes(app: Express) {
       // Check for complete batch cache first
       const batchCacheKey = `room_batch_${crawlerId}_${currentRoom.id}`;
       let cachedBatch = null;
-      
+
       try {
         cachedBatch = await redisService.get(batchCacheKey);
         if (cachedBatch) {
@@ -375,13 +387,13 @@ export function registerCrawlerRoutes(app: Express) {
         try {
           const cacheKey = `tactical_data_${currentRoom.id}`;
           let cachedData = null;
-          
+
           try {
             cachedData = await redisService.get(cacheKey);
           } catch (cacheError) {
             console.log(`Tactical cache error, proceeding without cache:`, cacheError.message);
           }
-          
+
           if (cachedData) {
             console.log(`Using cached tactical data for room ${currentRoom.id}`);
             tacticalData = JSON.parse(cachedData);
@@ -404,7 +416,7 @@ export function registerCrawlerRoutes(app: Express) {
             ]);
 
             tacticalData = { availableDirections, playersInRoom, tacticalEntities };
-            
+
             // Try to cache, but don't fail if cache is unavailable
             try {
               await redisService.set(cacheKey, JSON.stringify(tacticalData), 60);
