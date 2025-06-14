@@ -330,13 +330,13 @@ export class CombatSystem {
 
   private executeAttack(attackerId: string, targetId?: string): void {
     const attacker = this.state.entities.find((e) => e.id === attackerId);
-    
+
     if (!attacker) return;
 
     // If no target, just show punch animation into empty air
     if (!targetId) {
       console.log(`${attacker.name} swings at empty air!`);
-      
+
       this.updateEntity(attackerId, {
         ...attacker,
         attackAnimation: {
@@ -353,7 +353,7 @@ export class CombatSystem {
     if (!target) {
       // Target doesn't exist, show miss animation
       console.log(`${attacker.name} swings at missing target!`);
-      
+
       this.updateEntity(attackerId, {
         ...attacker,
         attackAnimation: {
@@ -462,20 +462,10 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  getEntryPosition(direction: string): Position {
-    // When you move in a direction, you should be placed at the door you came FROM
-    switch (direction) {
-      case "north":
-        return { x: 50, y: 10 }; // At north door when you moved north
-      case "south":
-        return { x: 50, y: 90 }; // At south door when you moved south
-      case "east":
-        return { x: 90, y: 50 }; // At east door when you moved east
-      case "west":
-        return { x: 10, y: 50 }; // At west door when you moved west
-      default:
-        return { x: 50, y: 50 };
-    }
+  getEntryPosition(direction: string | null): { x: number; y: number } {
+    // Import the centralized entry positioning function
+    const { getEntryPosition } = require('../client/src/lib/entryPositioning');
+    return getEntryPosition(direction);
   }
 
   // Combat state management

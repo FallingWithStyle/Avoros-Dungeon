@@ -21,6 +21,7 @@ import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
 import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
 import { queryClient } from "@/lib/queryClient";
+import { getEntryPosition, storeMovementDirection, clearStoredMovementDirection, getStoredEntryDirection } from "@/lib/entryPositioning";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -75,8 +76,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
 
       // Store the movement direction for proper entry positioning
-      sessionStorage.setItem('lastMovementDirection', direction);
-      sessionStorage.setItem('entryDirection', direction);
+      storeMovementDirection(direction);
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
@@ -102,8 +102,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
-            sessionStorage.removeItem('lastMovementDirection');
-            console.log('🧹 Cleared movement direction from session storage');
+            clearStoredMovementDirection();
           }, 500);
         } else {
           console.error('❌ Room movement failed:', result?.error || 'Unknown error');
@@ -203,9 +202,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
 
-      // Get the entry direction to position player correctly
-      const storedDirection = sessionStorage.getItem('entryDirection') || sessionStorage.getItem('lastMovementDirection');
-      const entryPosition = combatSystem.getEntryPosition(storedDirection);
+      // Get the entry direction and position player correctly using centralized logic
+      const storedDirection = getStoredEntryDirection();
+      const entryPosition = getEntryPosition(storedDirection);
 
       console.log(`🎯 Entry position for direction ${storedDirection}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
