@@ -8,7 +8,7 @@ import { Redis } from "@upstash/redis";
 class RedisService {
   private redis: Redis | null = null;
   private isConnected = false;
-  private forceFallbackMode = this.isDebugMode(); // Default to DB Only in debug mode
+  private forceFallbackMode = false; // Enable Redis by default
 
   constructor() {
     try {
@@ -47,11 +47,8 @@ class RedisService {
   }
 
   private isDebugMode(): boolean {
-    // Check various indicators that we're in debug/development mode
-    return process.env.NODE_ENV === 'development' || 
-           process.env.NODE_ENV === 'test' ||
-           process.env.DEBUG === 'true' ||
-           !!process.env.REPL_ID; // Replit environment indicator
+    // Only enable debug mode when explicitly requested
+    return process.env.DEBUG === 'true' || process.env.FORCE_DB_FALLBACK === 'true';
   }
 
   private async testConnection(): Promise<void> {
@@ -489,6 +486,20 @@ class RedisService {
     return true;
   }
 
+  // Batch data caching for faster load times
+  async getBatchData(crawlerId: number): Promise<any | null> {
+    return this.get(`batch:${crawlerId}:room-data`);
+  }
+
+  async setBatchData(crawlerId: number, data: any, ttl: number = 60): Promise<void> {
+    await this.set(`batch:${crawlerId}:room-data`, data, ttl);
+  }
+
+  async invalidateBatchData(crawlerId: number): Promise<void> {
+    if (this.forceFallbackMode || !this.isConnected) return;
+    await this.del(`batch:${crawlerId}:room-data`);
+  }
+
   async safeDel(key: string): Promise<boolean> {
     if (!(await this.isRedisOperational())) {
       return false;
@@ -571,6 +582,19 @@ class RedisService {
       await this.redis?.del(`crawler:${crawlerId}:current-room`);
     } catch (error) {
       console.error('Redis invalidateCrawlerRoomData error:', error);
+    }
+  }
+
+  // Invalidate adjacent room cache for a specific crawler
+  async invalidateAdjacentRooms(crawlerId: number): Promise<void> {
+    if (this.forceFallbackMode || !this.isConnected) return;
+
+    try {
+      await this.redis?.del(`adjacent-rooms:${crawlerId}:1`);
+      await this.redis?.del(`adjacent-rooms:${crawlerId}:2`);
+      await this.redis?.del(`adjacent-rooms:${crawlerId}:3`);
+    } catch (error) {
+      console.error('Redis invalidateAdjacentRooms error:', error);
     }
   }
 }

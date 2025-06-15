@@ -14,6 +14,7 @@ import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
+import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import TacticalGrid from "./tactical-view/tactical-grid";
 import TacticalHotbar from "./tactical-view/tactical-hotbar";
@@ -21,6 +22,7 @@ import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
 import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
 import { queryClient } from "@/lib/queryClient";
+import { getEntryPosition, storeMovementDirection, clearStoredMovementDirection, getStoredEntryDirection } from "@/lib/entryPositioning";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -52,6 +54,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     handleRoomChange
   } = useTacticalData(crawler);
 
+  // Use adjacent room prefetching for faster transitions
+  const { prefetchAdjacentRooms } = useAdjacentRoomPrefetch({
+    crawler,
+    currentRoomId: roomData?.room?.id,
+    enabled: !isLoading && !!roomData?.room,
+    radius: 2
+  });
+
   // Local state - ALL HOOKS BEFORE ANY CONDITIONAL LOGIC
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
@@ -75,27 +85,33 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
 
       // Store the movement direction for proper entry positioning
-      sessionStorage.setItem('lastMovementDirection', direction);
-      sessionStorage.setItem('entryDirection', direction);
+      storeMovementDirection(direction);
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
         if (result && result.success) {
           console.log(`✅ Room movement successful to ${direction}`);
 
-          // Trigger data refetch immediately
+          // Force invalidate and refetch all room-related data
           await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/room-data-batch"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/current-room"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] }),
             queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] })
+            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] })
           ]);
 
-          console.log('⚡ Room transition completed successfully');
+          // Force refetch the data immediately
+          await Promise.all([
+            refetchTacticalData(),
+            refetchExploredRooms()
+          ]);
+
+          console.log('⚡ Room transition and data refresh completed successfully');
 
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
-            sessionStorage.removeItem('lastMovementDirection');
-            console.log('🧹 Cleared movement direction from session storage');
+            clearStoredMovementDirection();
           }, 500);
         } else {
           console.error('❌ Room movement failed:', result?.error || 'Unknown error');
@@ -104,7 +120,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         console.error('❌ Room transition error:', error);
       }
     },
-    [crawler, queryClient]
+    [crawler, queryClient, refetchTacticalData, refetchExploredRooms]
   );
 
   // Use tactical positioning hook for movement validation logic
@@ -195,9 +211,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
 
-      // Get the entry direction to position player correctly
-      const storedDirection = sessionStorage.getItem('entryDirection') || sessionStorage.getItem('lastMovementDirection');
-      const entryPosition = combatSystem.getEntryPosition(storedDirection);
+      // Get the entry direction and position player correctly using centralized logic
+      const storedDirection = getStoredEntryDirection();
+      const entryPosition = getEntryPosition(storedDirection);
 
       console.log(`🎯 Entry position for direction ${storedDirection}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
@@ -208,8 +224,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
 
       console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
+
+      // Trigger adjacent room prefetching when room changes
+      if (roomData?.room && prefetchAdjacentRooms) {
+        console.log(`🔮 Room changed to ${roomData.room.id}, triggering adjacent room prefetch`);
+        prefetchAdjacentRooms();
+      }
     }
-  }, [roomData?.room, lastRoomId, crawler]);
+  }, [roomData?.room, lastRoomId, crawler, effectiveTacticalData]);
 
   // Grid event handlers - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {

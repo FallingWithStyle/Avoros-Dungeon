@@ -25,26 +25,80 @@ export function handleRoomChange(crawlerId: number): void {
 }
 
 /**
- * Handles room change with immediate refetch for responsive UI
- * Uses optimistic updates for instant feel
+ * Check if room data is already cached for instant transitions
  */
-export async function handleRoomChangeWithRefetch(crawlerId: number, direction: string) {
-  console.log("Fast room change for crawler " + crawlerId + " direction " + direction);
+export function getCachedRoomData(roomId: number) {
+  const cachedData = queryClient.getQueryData([`/api/room/${roomId}/basic-data`]);
+  return cachedData || null;
+}
+
+/**
+ * Handles room change with immediate refetch for responsive UI
+ * Uses optimistic updates and cached data for instant feel
+ */
+export async function handleRoomChangeWithRefetch(
+  crawler: CrawlerWithDetails,
+  direction: string
+): Promise<boolean> {
+  console.log("🔄 Starting room change with refetch for direction:", direction);
 
   try {
-    // Immediately refetch the batch data without invalidating first
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+    // Clear entry direction since we're moving
+    clearStoredEntryDirection();
+
+    // Store the opposite direction for entry positioning
+    const entryDirection = getOppositeDirection(direction);
+    storeEntryDirection(entryDirection);
+
+    console.log(`📍 Stored entry direction: ${entryDirection} (opposite of movement ${direction})`);
+
+    const response = await fetch(`/api/crawlers/${crawler.id}/move`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ direction }),
     });
 
-    // Update explored rooms in background
-    await queryClient.refetchQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"]
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Room change failed:", response.status, errorText);
+      clearStoredEntryDirection(); // Clear on failure
+      return false;
+    }
+
+    const result = await response.json();
+    if (!result.success) {
+      console.error("❌ Room change unsuccessful:", result.error);
+      clearStoredEntryDirection(); // Clear on failure
+      return false;
+    }
+
+    console.log("✅ Room change successful, invalidating relevant queries");
+
+    // Invalidate crawler data
+    queryClient.invalidateQueries({
+      queryKey: [`/api/crawlers/${crawler.id}`],
     });
 
-    return { success: true };
+    // Invalidate room-specific queries
+    if (result.newRoomId) {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+      });
+    }
+
+    // Invalidate adjacent room prefetch data since we moved
+    queryClient.invalidateQueries({
+      queryKey: [`/api/crawlers/${crawler.id}/adjacent-rooms`],
+    });
+
+    // Small delay to allow server state to update
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    console.log("🔄 Room change with refetch completed successfully");
+    return true;
   } catch (error) {
-    console.error("Room change refetch failed:", error);
-    return { success: false, error: error.message };
+    console.error("💥 Error during room change with refetch:", error);
+    clearStoredEntryDirection(); // Clear on error
+    return false;
   }
-}
+};

@@ -75,10 +75,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     queryFn: async () => {
       const response = await fetch(`/api/crawlers/${crawlerId}/room-data-batch`, {
         credentials: "include",
-        cache: 'no-cache',
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
           'Content-Type': 'application/json'
         }
       });
@@ -91,13 +88,16 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       return response.json();
     },
     enabled: !!crawlerId && isAuthenticated && !isLoading,
+    staleTime: 30000, // Data is fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchInterval: 5000,
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error.message === "Authentication required") return false;
       return failureCount < 2;
     },
-    retryDelay: 2000,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   const { data: roomBatchData, isLoading: roomLoading, error: roomError } = roomQuery;

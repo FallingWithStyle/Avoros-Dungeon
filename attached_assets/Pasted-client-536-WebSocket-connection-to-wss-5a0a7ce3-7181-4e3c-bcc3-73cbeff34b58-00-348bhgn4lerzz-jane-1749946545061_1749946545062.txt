@@ -1,0 +1,914 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=svkPndYZQR2f' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=svkPndYZQR2f' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.tsx:25 🔍 Router Debug: {isAuthenticated: false, isLoading: true}
+App.tsx:25 🔍 Router Debug: {isAuthenticated: true, isLoading: false}
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: undefined, crawlerLoading: true, enabled: true}
+crawler-view.tsx:46 🔍 Crawler Query Debug: {crawlerId: '5'}
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: undefined, crawlerLoading: true, enabled: true}
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: 'Florence Peterson', crawlerLoading: false, enabled: true}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:440 No effective tactical data available
+tactical-view-panel.tsx:140 🔍 Mobile detection: {hasTouch: false, isSmallScreen: false, isMobileDevice: false, innerWidth: 1078}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+tactical-view-panel.tsx:201 🚪 Room changed from null to 53054, repositioning player immediately
+tactical-view-panel.tsx:218 🎯 Entry position for direction north: {x: 50, y: 85}
+combat-system.ts:640 ✅ Created new player entity at position (50, 85)
+tactical-view-panel.tsx:226 ✅ Player repositioned immediately to (50, 85)
+tactical-view-panel.tsx:230 🔮 Room changed to 53054, triggering adjacent room prefetch
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:31 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/adjacent-rooms/2 500 (Internal Server Error)
+(anonymous) @ useAdjacentRoomPrefetch.ts:31
+fetchFn @ @tanstack_react-query.js?v=c64965cc:840
+run @ @tanstack_react-query.js?v=c64965cc:494
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+setOptions @ @tanstack_react-query.js?v=c64965cc:1955
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+useAdjacentRoomPrefetch.ts:70 🔮 Adjacent room prefetch failed: Error: HTTP 500
+    at useAdjacentRoomPrefetch.ts:33:15
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:31 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/adjacent-rooms/2 500 (Internal Server Error)
+(anonymous) @ useAdjacentRoomPrefetch.ts:31
+(anonymous) @ tactical-view-panel.tsx:231
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+useAdjacentRoomPrefetch.ts:70 🔮 Adjacent room prefetch failed: Error: HTTP 500
+    at useAdjacentRoomPrefetch.ts:33:15
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+useAdjacentRoomPrefetch.ts:31 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/adjacent-rooms/2 500 (Internal Server Error)
+(anonymous) @ useAdjacentRoomPrefetch.ts:31
+(anonymous) @ useAdjacentRoomPrefetch.ts:99
+setTimeout
+(anonymous) @ useAdjacentRoomPrefetch.ts:98
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+useAdjacentRoomPrefetch.ts:70 🔮 Adjacent room prefetch failed: Error: HTTP 500
+    at useAdjacentRoomPrefetch.ts:33:15
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/tactical-data 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=c64965cc:840
+run @ @tanstack_react-query.js?v=c64965cc:494
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+useKeyboardMovement.ts:73 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:90 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(2), gateZone: {…}}
+useTacticalPositioning.ts:287 🚫 Movement blocked - no significant position or facing change
+useKeyboardMovement.ts:154 ⌨️ Window blur - stopping movement
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/tactical-data 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=c64965cc:840
+run @ @tanstack_react-query.js?v=c64965cc:494
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+useKeyboardMovement.ts:73 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:90 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(2), gateZone: {…}}
+useTacticalPositioning.ts:287 🚫 Movement blocked - no significant position or facing change
+useKeyboardMovement.ts:154 ⌨️ Window blur - stopping movement
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/tactical-data 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=c64965cc:840
+run @ @tanstack_react-query.js?v=c64965cc:494
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
+queryClient.ts:38 
+            
+            
+           GET https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/tactical-data 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:38
+fetchFn @ @tanstack_react-query.js?v=c64965cc:840
+run @ @tanstack_react-query.js?v=c64965cc:494
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+onError @ @tanstack_react-query.js?v=c64965cc:861
+reject @ @tanstack_react-query.js?v=c64965cc:465
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:508
+Promise.catch
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=c64965cc:2243
+updateTimers_fn @ @tanstack_react-query.js?v=c64965cc:2250
+onQueryUpdate @ @tanstack_react-query.js?v=c64965cc:2206
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:998
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:997
+batch @ @tanstack_react-query.js?v=c64965cc:583
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19416
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c64965cc:555
+flush @ @tanstack_react-query.js?v=c64965cc:569
+batch @ @tanstack_react-query.js?v=c64965cc:587
+dispatch_fn @ @tanstack_react-query.js?v=c64965cc:996
+setData @ @tanstack_react-query.js?v=c64965cc:696
+onSuccess @ @tanstack_react-query.js?v=c64965cc:897
+resolve @ @tanstack_react-query.js?v=c64965cc:456
+Promise.then
+run @ @tanstack_react-query.js?v=c64965cc:498
+start @ @tanstack_react-query.js?v=c64965cc:536
+fetch @ @tanstack_react-query.js?v=c64965cc:926
+executeFetch_fn @ @tanstack_react-query.js?v=c64965cc:2211
+onSubscribe @ @tanstack_react-query.js?v=c64965cc:1898
+subscribe @ @tanstack_react-query.js?v=c64965cc:24
+(anonymous) @ @tanstack_react-query.js?v=c64965cc:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c64965cc:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c64965cc:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c64965cc:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c64965cc:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c64965cc:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c64965cc:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c64965cc:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c64965cc:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c64965cc:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c64965cc:19432
+commitRoot @ chunk-WERSD76P.js?v=c64965cc:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c64965cc:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c64965cc:18718
+workLoop @ chunk-WERSD76P.js?v=c64965cc:197
+flushWork @ chunk-WERSD76P.js?v=c64965cc:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c64965cc:384
