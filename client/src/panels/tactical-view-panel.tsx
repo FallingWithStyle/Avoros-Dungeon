@@ -89,7 +89,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       RoomChangeManager.storeMovementDirection(direction);
 
       // Verify it was stored
-      const storedDirection = RoomChangeManager.getStoredEntryDirection();
+      const storedDirection = RoomChangeManager.getStoredMovementDirection();
       console.log(`✅ Verified stored direction: ${storedDirection}`);
 
       try {
@@ -228,7 +228,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
 
       // Get the entry direction and position player correctly using centralized logic
-      const storedDirection = RoomChangeManager.getStoredEntryDirection();
+      const storedDirection = RoomChangeManager.getStoredMovementDirection();
       console.log(`🔍 Stored entry direction from session storage: '${storedDirection}'`);
 
       const entryPosition = RoomChangeManager.getEntryPosition(storedDirection);
