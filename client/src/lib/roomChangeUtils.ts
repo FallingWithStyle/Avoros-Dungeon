@@ -93,23 +93,17 @@ export class RoomChangeManager {
     combatSystem: any,
     crawler: { name: string; serial?: string }
   ): void {
-    console.log(`🚪 handleRoomEntryPositioning called with direction: ${direction}`);
-    
     // Store the movement direction
     this.storeMovementDirection(direction);
     
     // Get the correct entry position
     const entryPosition = this.getEntryPosition(direction);
     
-    console.log(`🎯 Entry position for direction ${direction}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
-    
     // Position player at the correct entry point
     combatSystem.initializePlayer(entryPosition, {
       name: crawler.name,
       serial: crawler.serial
     });
-    
-    console.log(`✅ Player positioned at entry point (${entryPosition.x}, ${entryPosition.y})`);
   }
 
   /**
@@ -148,14 +142,11 @@ export async function handleRoomChangeWithRefetch(
   direction: string
 ): Promise<boolean> {
   try {
-    console.log(`🚪 handleRoomChangeWithRefetch starting: crawler ${crawlerId} moving ${direction.toUpperCase()}`);
-    
     // Clear any existing entry direction since we're moving
     RoomChangeManager.clearStoredMovementDirection();
 
     // Store the movement direction for entry positioning
     RoomChangeManager.storeMovementDirection(direction);
-    console.log(`🚪 Stored movement direction: ${direction}`);
 
     const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
@@ -176,9 +167,6 @@ export async function handleRoomChangeWithRefetch(
       RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
       return false;
     }
-
-    console.log(`✅ Room change successful for direction ${direction}`);
-    console.log(`🚪 Room change result:`, result);
 
     // Invalidate crawler data
     queryClient.invalidateQueries({

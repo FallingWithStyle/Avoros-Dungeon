@@ -25,10 +25,9 @@ export function useGestureMovement({
   const startMovement = () => {
     if (movementInterval.current) return;
 
-    console.log('🎯 Starting gesture movement interval');
     movementInterval.current = setInterval(() => {
       if (currentDirection.current.x !== 0 || currentDirection.current.y !== 0) {
-        console.log('🎯 Sending movement:', currentDirection.current);
+        console.log('movementDirection =', currentDirection.current);
         onMovement(currentDirection.current);
       }
     }, 50); // 20 FPS movement updates
@@ -40,7 +39,6 @@ export function useGestureMovement({
       movementInterval.current = null;
     }
     currentDirection.current = { x: 0, y: 0 };
-    console.log('🎯 Stopped gesture movement');
   };
 
   const calculateDirection = (deltaX: number, deltaY: number) => {
@@ -71,10 +69,7 @@ export function useGestureMovement({
       onDrag: ({ movement: [x, y], velocity, active, first, last }) => {
         if (!isEnabled) return;
 
-        console.log('👆 Gesture drag:', { x, y, velocity, active });
-
         if (first) {
-          console.log('🎯 Drag started');
           currentDirection.current = { x: 0, y: 0 };
         }
 
@@ -88,14 +83,12 @@ export function useGestureMovement({
         }
 
         if (last) {
-          console.log('🎯 Drag ended');
           stopMovement();
         }
       },
       onPinch: ({ active }) => {
         // Disable pinch to prevent zoom interference
         if (active) {
-          console.log('🎯 Pinch detected - preventing default');
         }
       }
     },
