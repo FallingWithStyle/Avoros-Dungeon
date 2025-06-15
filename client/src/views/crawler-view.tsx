@@ -21,6 +21,7 @@ import { ArrowLeft, Map, Target, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
 interface CrawlerViewProps {
   crawlerId: string;
@@ -159,11 +160,16 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       return;
     }
 
-    // Call the function to handle room change and refetch data
-    // Assuming handleRoomChangeWithRefetch is defined elsewhere and handles API calls and state updates
-    //  await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
-
-    // console.log("Room movement triggered for crawler:", tacticalData.crawler.id, "in direction:", direction);
+    try {
+      const result = await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
+      if (result) {
+        console.log("✅ Room movement successful");
+      } else {
+        console.log("❌ Room movement failed");
+      }
+    } catch (error) {
+      console.error("❌ Room movement error:", error);
+    }
   };
 
   return (
