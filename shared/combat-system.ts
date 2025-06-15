@@ -462,11 +462,7 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  getEntryPosition(direction: string | null): { x: number; y: number } {
-    // Import the centralized entry positioning function
-    const { getEntryPosition } = require('../client/src/lib/entryPositioning');
-    return getEntryPosition(direction);
-  }
+  
 
   // Combat state management
   startCombat(): void {
@@ -569,38 +565,11 @@ export class CombatSystem {
   initializePlayer(startPosition?: { x: number; y: number }, crawlerData?: { name?: string; serial?: number }) {
     const existingPlayer = this.state.entities.find((e) => e.id === "player");
 
-    // Get entry direction to determine starting position
-    const entryDirection = sessionStorage.getItem("lastMovementDirection");
-    let calculatedPosition = startPosition;
-
-    if (!calculatedPosition && entryDirection) {
-      // Position player at the door they came from in the new room
-      switch (entryDirection) {
-        case "north":
-          calculatedPosition = { x: 50, y: 15 }; // At north door when moved north
-          break;
-        case "south":
-          calculatedPosition = { x: 50, y: 85 }; // At south door when moved south
-          break;
-        case "east":
-          calculatedPosition = { x: 85, y: 50 }; // At east door when moved east
-          break;
-        case "west":
-          calculatedPosition = { x: 15, y: 50 }; // At west door when moved west
-          break;
-        default:
-          calculatedPosition = { x: 50, y: 50 }; // Center if no direction
-      }
-      console.log(
-        `🎯 Positioning player based on movement direction '${entryDirection}': (${calculatedPosition.x}, ${calculatedPosition.y})`,
-      );
-    }
-
     if (existingPlayer) {
-      if (calculatedPosition) {
-        existingPlayer.position = { ...calculatedPosition };
+      if (startPosition) {
+        existingPlayer.position = { ...startPosition };
         console.log(
-          `🔄 Updated existing player position to (${calculatedPosition.x}, ${calculatedPosition.y})`,
+          `🔄 Updated existing player position to (${startPosition.x}, ${startPosition.y})`,
         );
       }
       // Update crawler data if provided
@@ -614,7 +583,7 @@ export class CombatSystem {
     }
 
     // Default starting position if none provided
-    const defaultPosition = calculatedPosition || { x: 50, y: 50 };
+    const defaultPosition = startPosition || { x: 50, y: 50 };
 
     const playerEntity: CombatEntity = {
       id: "player",
