@@ -48,6 +48,10 @@ export function useTacticalPositioning({
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
         const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
+        if (entryDirection) {
+          console.log(`placementDirection: ${entryDirection.toUpperCase()}`);
+        }
+        
         combatSystem.initializePlayer(recoveryPosition, {
           name: effectiveTacticalData?.crawler?.name || "Unknown",
           serial: effectiveTacticalData?.crawler?.serial || ""
