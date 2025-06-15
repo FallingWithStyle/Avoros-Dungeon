@@ -89,7 +89,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
-        if (result && result.success) {
+        if (result === true) {
           console.log(`✅ Room movement successful to ${direction}`);
 
           // Force invalidate and refetch all room-related data
@@ -114,12 +114,20 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             clearStoredMovementDirection();
           }, 500);
         } else {
-          console.error('❌ Room movement failed:', result?.error || 'Unknown error');
+          console.error('❌ Room movement failed: API returned false');
+          toast({
+            title: "Room Movement Failed",
+            description: "Could not move to the " + direction + " room. Try again.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("❌ Room movement API call failed:", error instanceof Error ? error.message : 'Unknown error');
-        // Don't return here - the room change might have succeeded anyway
-        // Let the positioning logic continue to handle the new room
+        toast({
+          title: "Room Movement Failed",
+          description: "Network error during room transition. Try again.",
+          variant: "destructive",
+        });
       }
     },
     [crawler, queryClient, refetchTacticalData, refetchExploredRooms]
