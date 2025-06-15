@@ -16,7 +16,7 @@ export function useGestureMovement({
   onMovement,
   isEnabled
 }: UseGestureMovementProps) {
-  console.log('🎯 useGestureMovement hook initialized - enabled:', isEnabled);
+  // console.log(`🎯 useGestureMovement hook initialized - enabled: ${enabled}`);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const movementInterval = useRef<NodeJS.Timeout | null>(null);

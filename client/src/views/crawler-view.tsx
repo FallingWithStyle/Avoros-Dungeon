@@ -32,12 +32,12 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const [energyDisabled, setEnergyDisabled] = useState(false);
 
   // Debug logging
-  console.log("🔍 CrawlerView Debug:", {
-    crawlerId,
-    isAuthenticated,
-    isLoading,
-    authLoading: isLoading
-  });
+  // console.log("🔍 CrawlerView Debug:", {
+  //   crawlerId,
+  //   isAuthenticated,
+  //   isLoading,
+  //   authLoading: isLoading
+  // });
 
   // Fetch crawler data with cache control
   const { data: crawler, isLoading: crawlerLoading, error: crawlerError, refetch } = useQuery<CrawlerWithDetails>({
@@ -107,11 +107,11 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const tacticalData = roomBatchData?.tacticalData;
   const scannedRooms = roomBatchData?.scannedRooms;
 
-  console.log("🔍 Crawler Query Debug:", {
-    crawler: crawler?.name,
-    crawlerLoading,
-    enabled: !!crawlerId
-  });
+  // console.log("🔍 Crawler Query Debug:", {
+  //   crawler: crawler?.name,
+  //   crawlerLoading,
+  //   enabled: !!crawlerId
+  // });
 
   // Only show loading on initial load, not on background refetches
   const isInitialLoading = crawlerLoading && !crawler;

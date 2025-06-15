@@ -22,7 +22,7 @@ import CrawlerLoadout from "@/pages/crawler-loadout";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  console.log("🔍 Router Debug:", { isAuthenticated, isLoading });
+  // console.log("🔍 Router Debug:", { isAuthenticated, isLoading });
 
   if (isLoading) {
     return (
