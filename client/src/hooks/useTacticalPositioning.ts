@@ -49,7 +49,11 @@ export function useTacticalPositioning({
         const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
         if (entryDirection) {
+          console.log(`🚪 Spawning player at ${entryDirection.toUpperCase()} Gate`);
           console.log(`placementDirection: ${entryDirection.toUpperCase()}`);
+        } else {
+          console.log(`🚪 Spawning player at CENTER (no entry direction stored)`);
+          console.log(`placementDirection: CENTER`);
         }
         
         combatSystem.initializePlayer(recoveryPosition, {

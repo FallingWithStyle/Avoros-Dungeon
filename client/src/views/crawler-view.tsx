@@ -150,6 +150,22 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     );
   }
 
+  const handleRoomMovement = async (direction: string) => {
+    console.log("movementDirection = " + direction.toUpperCase());
+    console.log(`🚪 Storing movement direction: ${direction.toUpperCase()}`);
+
+    if (!tacticalData?.crawler?.id) {
+      console.log("No crawler ID available for room movement");
+      return;
+    }
+
+    // Call the function to handle room change and refetch data
+    // Assuming handleRoomChangeWithRefetch is defined elsewhere and handles API calls and state updates
+    //  await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
+
+    // console.log("Room movement triggered for crawler:", tacticalData.crawler.id, "in direction:", direction);
+  };
+
   return (
     <div className="min-h-screen bg-game-bg text-slate-100">
       {/* Header */}
@@ -203,7 +219,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
 
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
-            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} />
+            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} handleRoomMovement={handleRoomMovement} />
           </div>
 
           {/* Secondary: Status & Quick Info - Condensed on mobile */}
