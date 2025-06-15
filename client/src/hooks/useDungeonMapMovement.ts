@@ -35,9 +35,9 @@ export function useDungeonMapMovement({
       // Optimistic update - immediately show movement is happening
       setPendingDirection(direction);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, direction) => {
       // Use immediate refetch for responsive UI updates
-      handleRoomChangeWithRefetch(crawler.id);
+      handleRoomChangeWithRefetch(crawler.id, direction);
       setPendingDirection(null);
     },
     onError: (error) => {

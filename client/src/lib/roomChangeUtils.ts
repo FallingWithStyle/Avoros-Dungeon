@@ -44,7 +44,7 @@ export function getCachedRoomData(roomId: number) {
  * Uses optimistic updates and cached data for instant feel
  */
 export async function handleRoomChangeWithRefetch(
-  crawler: CrawlerWithDetails,
+  crawlerId: number,
   direction: string
 ): Promise<boolean> {
   console.log("🔄 Starting room change with refetch for direction:", direction);
@@ -59,7 +59,7 @@ export async function handleRoomChangeWithRefetch(
 
     console.log(`📍 Stored entry direction: ${entryDirection} (opposite of movement ${direction})`);
 
-    const response = await fetch(`/api/crawlers/${crawler.id}/move`, {
+    const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ direction }),
@@ -83,19 +83,19 @@ export async function handleRoomChangeWithRefetch(
 
     // Invalidate crawler data
     queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawler.id}`],
+      queryKey: [`/api/crawlers/${crawlerId}`],
     });
 
     // Invalidate room-specific queries
     if (result.newRoomId) {
       queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+        queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`],
       });
     }
 
     // Invalidate adjacent room prefetch data since we moved
     queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawler.id}/adjacent-rooms`],
+      queryKey: [`/api/crawlers/${crawlerId}/adjacent-rooms`],
     });
 
     // Small delay to allow server state to update
