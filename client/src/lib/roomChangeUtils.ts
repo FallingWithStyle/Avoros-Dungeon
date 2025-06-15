@@ -100,7 +100,6 @@ export class RoomChangeManager {
     const entryPosition = this.getEntryPosition(direction);
     
     console.log(`🎯 Entry position for direction ${direction}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
-    console.log(`🚪 Spawning player at ${direction.toUpperCase()} Gate`);
     
     // Position player at the correct entry point
     combatSystem.initializePlayer(entryPosition, {
