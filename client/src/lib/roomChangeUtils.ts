@@ -93,10 +93,7 @@ export class RoomChangeManager {
     combatSystem: any,
     crawler: { name: string; serial?: string }
   ): void {
-    // Store the movement direction
-    this.storeMovementDirection(direction);
-    
-    // Get the correct entry position
+    // Get the correct entry position (don't store direction here - it's already stored)
     const entryPosition = this.getEntryPosition(direction);
     
     // Position player at the correct entry point
@@ -104,6 +101,9 @@ export class RoomChangeManager {
       name: crawler.name,
       serial: crawler.serial
     });
+    
+    // Clear the stored direction after positioning is complete
+    this.clearStoredMovementDirection();
   }
 
   /**
