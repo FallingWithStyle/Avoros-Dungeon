@@ -54,11 +54,11 @@ export function useKeyboardMovement({
   const startMovement = () => {
     if (movementInterval.current) return;
 
-    console.log('⌨️ Starting continuous keyboard movement');
+    // console.log('⌨️ Starting continuous keyboard movement');
     movementInterval.current = setInterval(() => {
       const direction = calculateMovementVector();
       if (direction.x !== 0 || direction.y !== 0) {
-        console.log('⌨️ Sending continuous movement:', direction);
+        // console.log('⌨️ Sending continuous movement:', direction);
         onMovementRef.current(direction);
       }
     }, 50); // 20 FPS movement updates, consistent with gesture movement
@@ -69,7 +69,7 @@ export function useKeyboardMovement({
       clearInterval(movementInterval.current);
       movementInterval.current = null;
     }
-    console.log('⌨️ Stopped keyboard movement - sending stop signal');
+    // console.log('⌨️ Stopped keyboard movement - sending stop signal');
     onMovementRef.current({ x: 0, y: 0 });
   };
 
