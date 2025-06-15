@@ -30,35 +30,27 @@ export class RoomChangeManager {
    * @returns Position object with x, y coordinates (percentage-based, 0-100)
    */
   static getEntryPosition(movementDirection: string | null): Position {
-    console.log(`🎯 getEntryPosition called with movement direction: '${movementDirection}'`);
-    
     // Default center position if no direction specified
     if (!movementDirection) {
-      console.log(`🎯 No movement direction specified, using center position`);
       return { x: 50, y: 50 };
     }
 
     // Position player at the OPPOSITE edge from their movement direction
-    console.log(`🎯 Processing movement direction: '${movementDirection.toLowerCase()}'`);
     switch (movementDirection.toLowerCase()) {
       case "north":
         // Player moved NORTH, so they enter from the SOUTH edge (bottom) of the new room
-        console.log(`🎯 Player moved NORTH → entering from SOUTH edge (bottom) at y: 85`);
         return { x: 50, y: 85 };
       
       case "south":
         // Player moved SOUTH, so they enter from the NORTH edge (top) of the new room
-        console.log(`🎯 Player moved SOUTH → entering from NORTH edge (top) at y: 15`);
         return { x: 50, y: 15 };
       
       case "east":
         // Player moved EAST, so they enter from the WEST edge (left) of the new room
-        console.log(`🎯 Player moved EAST → entering from WEST edge (left) at x: 15`);
         return { x: 15, y: 50 };
       
       case "west":
         // Player moved WEST, so they enter from the EAST edge (right) of the new room
-        console.log(`🎯 Player moved WEST → entering from EAST edge (right) at x: 85`);
         return { x: 85, y: 50 };
       
       default:
@@ -73,7 +65,6 @@ export class RoomChangeManager {
    */
   static storeMovementDirection(direction: string): void {
     sessionStorage.setItem(this.STORAGE_KEY, direction);
-    console.log(`📍 Stored movement direction: ${direction}`);
   }
 
   /**
@@ -89,7 +80,6 @@ export class RoomChangeManager {
    */
   static clearStoredMovementDirection(): void {
     sessionStorage.removeItem(this.STORAGE_KEY);
-    console.log('🧹 Cleared movement direction from session storage');
   }
 
   /**
@@ -155,16 +145,12 @@ export async function handleRoomChangeWithRefetch(
   crawlerId: number,
   direction: string
 ): Promise<boolean> {
-  console.log("🔄 Starting room change with refetch for direction:", direction);
-
   try {
     // Clear any existing entry direction since we're moving
     RoomChangeManager.clearStoredMovementDirection();
 
     // Store the movement direction for entry positioning
     RoomChangeManager.storeMovementDirection(direction);
-
-    console.log(`📍 Stored movement direction: ${direction}`);
 
     const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
@@ -185,8 +171,6 @@ export async function handleRoomChangeWithRefetch(
       RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
       return false;
     }
-
-    console.log("✅ Room change successful, invalidating relevant queries");
 
     // Invalidate crawler data
     queryClient.invalidateQueries({
