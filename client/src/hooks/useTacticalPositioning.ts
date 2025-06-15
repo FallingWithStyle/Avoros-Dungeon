@@ -46,17 +46,26 @@ export function useTacticalPositioning({
       if (!playerEntity) {
         // Use centralized entry positioning logic
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
-        const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
         if (entryDirection) {
-          // Clear the stored direction after using it
-          RoomChangeManager.clearStoredMovementDirection();
+          console.log("Placing player = " + entryDirection.toUpperCase() + " entry");
+          // Use the centralized positioning method
+          RoomChangeManager.handleRoomEntryPositioning(
+            entryDirection,
+            combatSystem,
+            {
+              name: effectiveTacticalData?.crawler?.name || "Unknown",
+              serial: effectiveTacticalData?.crawler?.serial || ""
+            }
+          );
+        } else {
+          console.log("Placing player = CENTER (no entry direction)");
+          // No stored direction, place at center
+          combatSystem.initializePlayer({ x: 50, y: 50 }, {
+            name: effectiveTacticalData?.crawler?.name || "Unknown",
+            serial: effectiveTacticalData?.crawler?.serial || ""
+          });
         }
-        
-        combatSystem.initializePlayer(recoveryPosition, {
-          name: effectiveTacticalData?.crawler?.name || "Unknown",
-          serial: effectiveTacticalData?.crawler?.serial || ""
-        });
         
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
         if (!newPlayerEntity) {
