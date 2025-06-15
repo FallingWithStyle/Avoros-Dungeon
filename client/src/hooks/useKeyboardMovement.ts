@@ -1,4 +1,3 @@
-
 /**
  * File: useKeyboardMovement.ts
  * Responsibility: Handle keyboard input for 360-degree tactical movement using standard event listeners
@@ -33,7 +32,7 @@ export function useKeyboardMovement({
     onStairsRef.current = onStairs;
   }, [onMovement, onRotation, onStairs]);
 
-  console.log('⌨️ useKeyboardMovement hook initialized - enabled:', isEnabled);
+  // console.log(`⌨️ useKeyboardMovement hook initialized - enabled: ${isEnabled}`);
 
   // Compute movement vector from keys
   const calculateMovementVector = () => {
@@ -42,7 +41,7 @@ export function useKeyboardMovement({
     if (keysPressed.current.has("s") || keysPressed.current.has("arrowdown")) y += 1;
     if (keysPressed.current.has("a") || keysPressed.current.has("arrowleft")) x -= 1;
     if (keysPressed.current.has("d") || keysPressed.current.has("arrowright")) x += 1;
-    
+
     // Normalize diagonals
     if (x !== 0 && y !== 0) {
       const len = Math.sqrt(x * x + y * y);
@@ -54,7 +53,7 @@ export function useKeyboardMovement({
 
   const startMovement = () => {
     if (movementInterval.current) return;
-    
+
     console.log('⌨️ Starting continuous keyboard movement');
     movementInterval.current = setInterval(() => {
       const direction = calculateMovementVector();
@@ -77,14 +76,14 @@ export function useKeyboardMovement({
   // Keyboard event handlers
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!isEnabled) return;
-    
+
     const key = event.key.toLowerCase();
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
       "q", "e", "z"
     ];
-    
+
     if (!validKeys.includes(key)) return;
     event.preventDefault();
 
@@ -95,14 +94,14 @@ export function useKeyboardMovement({
       onRotationRef.current('counter-clockwise');
       return;
     }
-    
+
     if (key === 'e' && onRotationRef.current) {
       event.preventDefault();
       console.log('⌨️ Clockwise rotation');
       onRotationRef.current('clockwise');
       return;
     }
-    
+
     if (key === 'z' && onStairsRef.current) {
       event.preventDefault();
       console.log('⌨️ Stairs/down action');
@@ -115,7 +114,7 @@ export function useKeyboardMovement({
 
     const wasEmpty = keysPressed.current.size === 0;
     keysPressed.current.add(key);
-    
+
     console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Start continuous movement if this is the first key
@@ -126,18 +125,18 @@ export function useKeyboardMovement({
 
   const handleKeyUp = (event: KeyboardEvent) => {
     if (!isEnabled) return;
-    
+
     const key = event.key.toLowerCase();
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
       "q", "e", "z"
     ];
-    
+
     if (!validKeys.includes(key)) return;
-    
+
     keysPressed.current.delete(key);
-    
+
     console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Only stop movement when no keys are pressed

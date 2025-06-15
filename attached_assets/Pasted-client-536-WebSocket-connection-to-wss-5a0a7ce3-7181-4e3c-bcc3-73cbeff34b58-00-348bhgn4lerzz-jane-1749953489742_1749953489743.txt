@@ -1,0 +1,54 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=pRRQPclS84ZF' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=pRRQPclS84ZF' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+crawler-view.tsx:46 🔍 Crawler Query Debug: {crawlerId: '5'}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+combat-system.ts:640 ✅ Created new player entity at position (50, 50)
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 4 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 4 adjacent rooms
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53054
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 4 adjacent rooms
+useKeyboardMovement.ts:118 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:57 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+tactical-view-panel.tsx:85 movementDirection = NORTH
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:61 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useKeyboardMovement.ts:140 ⌨️ Key released: w Keys now: []
+useKeyboardMovement.ts:72 ⌨️ Stopped keyboard movement - sending stop signal

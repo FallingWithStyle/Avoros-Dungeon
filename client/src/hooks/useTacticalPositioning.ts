@@ -44,20 +44,10 @@ export function useTacticalPositioning({
 
       // If no player entity exists, recreate it at default position
       if (!playerEntity) {
-        console.log("🔄 No player entity found - attempting recovery");
-
         // Use centralized entry positioning logic
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
-        console.log(`🔄 Recovery: stored movement direction = '${entryDirection}'`);
         const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
-        if (entryDirection) {
-          console.log(`🔄 Recovering player position based on entry direction '${entryDirection}': (${recoveryPosition.x}, ${recoveryPosition.y})`);
-        } else {
-          console.log("🔄 No entry direction found, using center position for recovery");
-        }
-
-        console.log(`🔄 Initializing player at recovery position: (${recoveryPosition.x}, ${recoveryPosition.y})`);
         combatSystem.initializePlayer(recoveryPosition, {
           name: effectiveTacticalData?.crawler?.name || "Unknown",
           serial: effectiveTacticalData?.crawler?.serial || ""
@@ -67,8 +57,6 @@ export function useTacticalPositioning({
         if (!newPlayerEntity) {
           console.log("❌ Failed to create player entity - movement blocked");
           return;
-        } else {
-          console.log(`✅ Player entity recovered at position: (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
         }
         
         // Re-get the player entity for further movement processing
@@ -79,13 +67,11 @@ export function useTacticalPositioning({
       let newFacing = playerEntity.facing || 0; // Keep current facing if no movement, default to 0 degrees (north)
       if (direction.x !== 0 || direction.y !== 0) {
         newFacing = getFacingDegreesFromMovement(direction.x, direction.y);
-        console.log("🧭 Updating facing direction to:", newFacing, "degrees (from vector:", direction, ")");
       }
 
       // Check for room transition cooldown to prevent spam
       const now = Date.now();
       if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
-        console.log("🚫 Room transition on cooldown - ignoring movement");
         return;
       }
 
@@ -99,13 +85,6 @@ export function useTacticalPositioning({
       const gateStart = 40; // Gate starts at 40%
       const gateEnd = 60; // Gate ends at 60%
 
-      console.log("🎯 Movement attempt:", {
-        currentPos: { x: playerEntity.position.x, y: playerEntity.position.y },
-        newPos: { x: newX, y: newY },
-        availableDirections,
-        gateZone: { start: gateStart, end: gateEnd },
-      });
-
       // Check for room transition through gates - only allow transition when moving toward the exit
       let roomTransitionDirection = "";
 
@@ -115,27 +94,11 @@ export function useTacticalPositioning({
         direction.y < 0 &&
         availableDirections.includes("north")
       ) {
-        console.log("🚪 Moving north toward north exit - checking gate bounds");
-        console.log(
-          "Player X position:",
-          playerEntity.position.x,
-          "Gate bounds:",
-          gateStart,
-          "-",
-          gateEnd,
-        );
         if (
           playerEntity.position.x >= gateStart &&
           playerEntity.position.x <= gateEnd
         ) {
-          console.log(
-            "✅ Player is within north gate bounds - allowing transition",
-          );
           roomTransitionDirection = "north";
-        } else {
-          console.log(
-            "❌ Player is outside north gate bounds - blocking movement",
-          );
         }
       }
       // South exit: only trigger when moving south (positive Y direction) AND hitting boundary
@@ -144,27 +107,11 @@ export function useTacticalPositioning({
         direction.y > 0 &&
         availableDirections.includes("south")
       ) {
-        console.log("🚪 Moving south toward south exit - checking gate bounds");
-        console.log(
-          "Player X position:",
-          playerEntity.position.x,
-          "Gate bounds:",
-          gateStart,
-          "-",
-          gateEnd,
-        );
         if (
           playerEntity.position.x >= gateStart &&
           playerEntity.position.x <= gateEnd
         ) {
-          console.log(
-            "✅ Player is within south gate bounds - allowing transition",
-          );
           roomTransitionDirection = "south";
-        } else {
-          console.log(
-            "❌ Player is outside south gate bounds - blocking movement",
-          );
         }
       }
       // East exit: only trigger when moving east (positive X direction) AND hitting boundary
@@ -173,27 +120,11 @@ export function useTacticalPositioning({
         direction.x > 0 &&
         availableDirections.includes("east")
       ) {
-        console.log("🚪 Moving east toward east exit - checking gate bounds");
-        console.log(
-          "Player Y position:",
-          playerEntity.position.y,
-          "Gate bounds:",
-          gateStart,
-          "-",
-          gateEnd,
-        );
         if (
           playerEntity.position.y >= gateStart &&
           playerEntity.position.y <= gateEnd
         ) {
-          console.log(
-            "✅ Player is within east gate bounds - allowing transition",
-          );
           roomTransitionDirection = "east";
-        } else {
-          console.log(
-            "❌ Player is outside east gate bounds - blocking movement",
-          );
         }
       }
       // West exit: only trigger when moving west (negative X direction) AND hitting boundary
@@ -202,40 +133,22 @@ export function useTacticalPositioning({
         direction.x < 0 &&
         availableDirections.includes("west")
       ) {
-        console.log("🚪 Moving west toward west exit - checking gate bounds");
-        console.log(
-          "Player Y position:",
-          playerEntity.position.y,
-          "Gate bounds:",
-          gateStart,
-          "-",
-          gateEnd,
-        );
         if (
           playerEntity.position.y >= gateStart &&
           playerEntity.position.y <= gateEnd
         ) {
-          console.log(
-            "✅ Player is within west gate bounds - allowing transition",
-          );
           roomTransitionDirection = "west";
-        } else {
-          console.log(
-            "❌ Player is outside west gate bounds - blocking movement",
-          );
         }
       }
 
       // Handle room transition
       if (roomTransitionDirection && !isTransitioning.current) {
-        console.log("🏃 Transitioning to new room:", roomTransitionDirection);
         lastRoomTransitionTime.current = Date.now();
         isTransitioning.current = true;
 
         // Execute the room movement immediately
         try {
           onRoomMovement(roomTransitionDirection);
-          console.log("✅ Room movement function called successfully");
         } catch (error) {
           console.error("❌ Room movement failed:", error);
           isTransitioning.current = false; // Reset flag on error
@@ -244,12 +157,10 @@ export function useTacticalPositioning({
         // Clear transition flag after cooldown period
         setTimeout(() => {
           isTransitioning.current = false;
-          console.log("🔓 Room transition cooldown complete");
         }, ROOM_TRANSITION_COOLDOWN);
 
         return;
       } else if (roomTransitionDirection && isTransitioning.current) {
-        console.log("🚫 Room transition already in progress - ignoring duplicate transition");
         return;
       }
 
@@ -258,31 +169,11 @@ export function useTacticalPositioning({
       const finalX = Math.max(5, Math.min(95, newX));
       const finalY = Math.max(5, Math.min(95, newY));
 
-      // Log wall collisions only if we're not transitioning
-      if (newX !== finalX || newY !== finalY) {
-        console.log("🧱 Wall collision detected:");
-        console.log("  Attempted position:", { x: newX, y: newY });
-        console.log("  Clamped to:", { x: finalX, y: finalY });
-        console.log(
-          "  Collision type:",
-          newX < 5
-            ? "west wall"
-            : newX > 95
-              ? "east wall"
-              : newY < 5
-                ? "north wall"
-                : newY > 95
-                  ? "south wall"
-                  : "boundary",
-        );
-      }
-
       if (
         Math.abs(finalX - playerEntity.position.x) > 0.1 ||
         Math.abs(finalY - playerEntity.position.y) > 0.1 ||
         newFacing !== playerEntity.facing
       ) {
-        console.log("🏃 Moving player to:", { x: finalX, y: finalY, facing: newFacing });
         // Update player position and facing directly
         playerEntity.position.x = finalX;
         playerEntity.position.y = finalY;
@@ -293,10 +184,6 @@ export function useTacticalPositioning({
           position: { x: finalX, y: finalY },
           facing: newFacing
         });
-
-        console.log("✅ Player updated to:", { position: playerEntity.position, facing: playerEntity.facing });
-      } else {
-        console.log("🚫 Movement blocked - no significant position or facing change");
       }
     },
     [
