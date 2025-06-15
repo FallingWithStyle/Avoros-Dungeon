@@ -117,7 +117,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           console.error('❌ Room movement failed:', result?.error || 'Unknown error');
         }
       } catch (error) {
-        console.error('❌ Room transition error:', error);
+        console.error("❌ Room movement API call failed:", error instanceof Error ? error.message : 'Unknown error');
+        // Don't return here - the room change might have succeeded anyway
+        // Let the positioning logic continue to handle the new room
       }
     },
     [crawler, queryClient, refetchTacticalData, refetchExploredRooms]
