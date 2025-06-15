@@ -48,8 +48,14 @@ export function useTacticalPositioning({
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
         const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
+        console.log(`🚪 PLAYER RECOVERY: No player entity found, recreating...`);
+        console.log(`🚪 Entry direction from storage: ${entryDirection || 'none'}`);
+        console.log(`🚪 Recovery position: (${recoveryPosition.x}, ${recoveryPosition.y})`);
+        
         if (entryDirection) {
           console.log(`🚪 Player spawned at ${entryDirection.toUpperCase()} gate (${recoveryPosition.x}, ${recoveryPosition.y})`);
+          // Clear the stored direction after using it
+          RoomChangeManager.clearStoredMovementDirection();
         } else {
           console.log(`🚪 Player spawned at CENTER (${recoveryPosition.x}, ${recoveryPosition.y})`);
         }
@@ -61,8 +67,11 @@ export function useTacticalPositioning({
         
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
         if (!newPlayerEntity) {
+          console.error(`❌ Failed to create player entity after initialization`);
           return;
         }
+        
+        console.log(`✅ Player entity recreated at (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
         
         // Re-get the player entity for further movement processing
         playerEntity = newPlayerEntity;
