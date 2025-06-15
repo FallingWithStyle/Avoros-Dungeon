@@ -1,41 +1,150 @@
+
 /**
  * File: roomChangeUtils.ts
- * Responsibility: Utility functions for handling room changes, position resets, and teleports
- * Notes: Provides centralized logic for updating all map and tactical data when room transitions occur
+ * Responsibility: Unified room change and entry positioning logic
+ * Notes: Consolidates previously scattered positioning logic into a single, consistent system
  */
 
 import { queryClient } from "@/lib/queryClient";
-import { 
-  clearStoredEntryDirection, 
-  getOppositeDirection, 
-  storeEntryDirection
-} from "@/lib/entryPositioning";
-import type { CrawlerWithDetails } from "@shared/schema";
 
-/**
- * Handles room change events by invalidating only essential queries
- * Used for position resets, teleports, or any forced room transition
- */
-export function handleRoomChange(crawlerId: number): void {
-  console.log("Handling room change for crawler " + crawlerId + " - invalidating essential queries only");
-
-  // Only invalidate the batch query - it contains all room data we need
-  queryClient.invalidateQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
-  });
-
-  // Keep map queries cached since they don't change often
-  queryClient.invalidateQueries({
-    queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"],
-  });
+export interface Position {
+  x: number;
+  y: number;
 }
 
 /**
- * Check if room data is already cached for instant transitions
+ * Unified room change and entry positioning utility class
  */
-export function getCachedRoomData(roomId: number) {
-  const cachedData = queryClient.getQueryData([`/api/room/${roomId}/basic-data`]);
-  return cachedData || null;
+export class RoomChangeManager {
+  private static readonly STORAGE_KEY = 'entryDirection';
+
+  /**
+   * Get the entry position for a player based on the direction they moved to enter this room
+   * 
+   * CRITICAL LOGIC:
+   * If a player moves EAST, they should appear at the WEST edge of the destination room.
+   * If a player moves WEST, they should appear at the EAST edge of the destination room.
+   * Think of it as walking through a doorway - you exit one side and enter the opposite side.
+   * 
+   * @param movementDirection - The direction the player moved (e.g., "east" means they moved east)
+   * @returns Position object with x, y coordinates (percentage-based, 0-100)
+   */
+  static getEntryPosition(movementDirection: string | null): Position {
+    console.log(`🎯 getEntryPosition called with movement direction: '${movementDirection}'`);
+    
+    // Default center position if no direction specified
+    if (!movementDirection) {
+      console.log(`🎯 No movement direction specified, using center position`);
+      return { x: 50, y: 50 };
+    }
+
+    // Position player at the OPPOSITE edge from their movement direction
+    console.log(`🎯 Processing movement direction: '${movementDirection.toLowerCase()}'`);
+    switch (movementDirection.toLowerCase()) {
+      case "north":
+        // Player moved NORTH, so they enter from the SOUTH edge (bottom) of the new room
+        console.log(`🎯 Player moved NORTH → entering from SOUTH edge (bottom) at y: 85`);
+        return { x: 50, y: 85 };
+      
+      case "south":
+        // Player moved SOUTH, so they enter from the NORTH edge (top) of the new room
+        console.log(`🎯 Player moved SOUTH → entering from NORTH edge (top) at y: 15`);
+        return { x: 50, y: 15 };
+      
+      case "east":
+        // Player moved EAST, so they enter from the WEST edge (left) of the new room
+        console.log(`🎯 Player moved EAST → entering from WEST edge (left) at x: 15`);
+        return { x: 15, y: 50 };
+      
+      case "west":
+        // Player moved WEST, so they enter from the EAST edge (right) of the new room
+        console.log(`🎯 Player moved WEST → entering from EAST edge (right) at x: 85`);
+        return { x: 85, y: 50 };
+      
+      default:
+        console.warn(`Unknown movement direction: ${movementDirection}, using center position`);
+        return { x: 50, y: 50 };
+    }
+  }
+
+  /**
+   * Store the movement direction for proper entry positioning
+   * @param direction - The direction the player is moving
+   */
+  static storeMovementDirection(direction: string): void {
+    sessionStorage.setItem(this.STORAGE_KEY, direction);
+    console.log(`📍 Stored movement direction: ${direction}`);
+  }
+
+  /**
+   * Get the stored movement direction from session storage
+   * @returns The stored movement direction or null if not found
+   */
+  static getStoredMovementDirection(): string | null {
+    return sessionStorage.getItem(this.STORAGE_KEY);
+  }
+
+  /**
+   * Clear the stored movement direction after positioning is complete
+   */
+  static clearStoredMovementDirection(): void {
+    sessionStorage.removeItem(this.STORAGE_KEY);
+    console.log('🧹 Cleared movement direction from session storage');
+  }
+
+  /**
+   * Handle entry positioning for room transitions
+   * @param direction - The direction the player moved
+   * @param combatSystem - The combat system instance
+   * @param crawler - The crawler data for naming
+   */
+  static handleRoomEntryPositioning(
+    direction: string,
+    combatSystem: any,
+    crawler: { name: string; serial?: string }
+  ): void {
+    // Store the movement direction
+    this.storeMovementDirection(direction);
+    
+    // Get the correct entry position
+    const entryPosition = this.getEntryPosition(direction);
+    
+    console.log(`🎯 Entry position for direction ${direction}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
+    
+    // Position player at the correct entry point
+    combatSystem.initializePlayer(entryPosition, {
+      name: crawler.name,
+      serial: crawler.serial
+    });
+    
+    console.log(`✅ Player positioned at entry point (${entryPosition.x}, ${entryPosition.y})`);
+  }
+
+  /**
+   * Handle room change events by invalidating only essential queries
+   * Used for position resets, teleports, or any forced room transition
+   */
+  static handleRoomChange(crawlerId: number): void {
+    console.log("Handling room change for crawler " + crawlerId + " - invalidating essential queries only");
+
+    // Only invalidate the batch query - it contains all room data we need
+    queryClient.invalidateQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+    });
+
+    // Keep map queries cached since they don't change often
+    queryClient.invalidateQueries({
+      queryKey: ["/api/crawlers/" + crawlerId + "/explored-rooms"],
+    });
+  }
+
+  /**
+   * Check if room data is already cached for instant transitions
+   */
+  static getCachedRoomData(roomId: number) {
+    const cachedData = queryClient.getQueryData([`/api/room/${roomId}/basic-data`]);
+    return cachedData || null;
+  }
 }
 
 /**
@@ -49,14 +158,13 @@ export async function handleRoomChangeWithRefetch(
   console.log("🔄 Starting room change with refetch for direction:", direction);
 
   try {
-    // Clear entry direction since we're moving
-    clearStoredEntryDirection();
+    // Clear any existing entry direction since we're moving
+    RoomChangeManager.clearStoredMovementDirection();
 
-    // Store the opposite direction for entry positioning
-    const entryDirection = getOppositeDirection(direction);
-    storeEntryDirection(entryDirection);
+    // Store the movement direction for entry positioning
+    RoomChangeManager.storeMovementDirection(direction);
 
-    console.log(`📍 Stored entry direction: ${entryDirection} (opposite of movement ${direction})`);
+    console.log(`📍 Stored movement direction: ${direction}`);
 
     const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
@@ -67,14 +175,14 @@ export async function handleRoomChangeWithRefetch(
     if (!response.ok) {
       const errorText = await response.text();
       console.error("❌ Room change failed:", response.status, errorText);
-      clearStoredEntryDirection(); // Clear on failure
+      RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
       return false;
     }
 
     const result = await response.json();
     if (!result.success) {
       console.error("❌ Room change unsuccessful:", result.error);
-      clearStoredEntryDirection(); // Clear on failure
+      RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
       return false;
     }
 
@@ -82,29 +190,45 @@ export async function handleRoomChangeWithRefetch(
 
     // Invalidate crawler data
     queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}`],
+      queryKey: [`/api/crawlers/${crawlerId}`]
     });
 
-    // Invalidate room-specific queries
-    if (result.newRoomId) {
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`],
-      });
-    }
-
-    // Invalidate adjacent room prefetch data since we moved
+    // Invalidate room data
     queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}/adjacent-rooms`],
+      queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`]
     });
 
-    // Small delay to allow server state to update
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Invalidate tactical data
+    queryClient.invalidateQueries({
+      queryKey: [`/api/crawlers/${crawlerId}/tactical-data`]
+    });
 
-    console.log("🔄 Room change with refetch completed successfully");
+    // Invalidate map data
+    queryClient.invalidateQueries({
+      queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`]
+    });
+
     return true;
+
   } catch (error) {
-    console.error("💥 Error during room change with refetch:", error);
-    clearStoredEntryDirection(); // Clear on error
+    console.error("❌ Room change request failed:", error);
+    RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
     return false;
   }
-};
+}
+
+// Export convenience functions for backward compatibility
+export const {
+  getEntryPosition,
+  storeMovementDirection,
+  getStoredMovementDirection,
+  clearStoredMovementDirection,
+  handleRoomEntryPositioning,
+  handleRoomChange,
+  getCachedRoomData
+} = RoomChangeManager;
+
+// Legacy exports for backward compatibility
+export const storeEntryDirection = storeMovementDirection;
+export const getStoredEntryDirection = getStoredMovementDirection;
+export const clearStoredEntryDirection = clearStoredMovementDirection;

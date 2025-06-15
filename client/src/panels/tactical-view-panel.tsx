@@ -22,7 +22,7 @@ import ActionQueuePanel from "./action-queue-panel";
 import TacticalContextMenu from "./tactical-view/tactical-context-menu";
 import { generateFallbackTacticalData, getRoomBackgroundType } from "./tactical-view/tactical-utils";
 import { queryClient } from "@/lib/queryClient";
-import { getEntryPosition, storeMovementDirection, clearStoredMovementDirection, getStoredEntryDirection } from "@/lib/entryPositioning";
+import { RoomChangeManager } from "@/lib/roomChangeUtils";
 
 interface TacticalViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -86,10 +86,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Store the movement direction for proper entry positioning
       console.log(`📍 Storing movement direction: ${direction}`);
-      storeMovementDirection(direction);
-      
+      RoomChangeManager.storeMovementDirection(direction);
+
       // Verify it was stored
-      const storedDirection = getStoredEntryDirection();
+      const storedDirection = RoomChangeManager.getStoredEntryDirection();
       console.log(`✅ Verified stored direction: ${storedDirection}`);
 
       try {
@@ -117,7 +117,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
             console.log('🧹 Clearing stored movement direction after successful transition');
-            clearStoredMovementDirection();
+            RoomChangeManager.clearStoredMovementDirection();
           }, 500);
         } else {
           console.error('❌ Room movement failed: API returned false');
@@ -228,10 +228,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       });
 
       // Get the entry direction and position player correctly using centralized logic
-      const storedDirection = getStoredEntryDirection();
+      const storedDirection = RoomChangeManager.getStoredEntryDirection();
       console.log(`🔍 Stored entry direction from session storage: '${storedDirection}'`);
-      
-      const entryPosition = getEntryPosition(storedDirection);
+
+      const entryPosition = RoomChangeManager.getEntryPosition(storedDirection);
       console.log(`🎯 Calculated entry position for direction '${storedDirection}': {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
       // Position player immediately at the correct entry point
@@ -250,7 +250,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     }
   }, [roomData?.room, lastRoomId, crawler, effectiveTacticalData]);
 
-  // Grid event handlers - disabled for now
+  // Grid event handlers   - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     // Grid clicking disabled - use keyboard/swipe movement instead
     console.log("Grid click disabled - use WASD keys or swipe to move");
