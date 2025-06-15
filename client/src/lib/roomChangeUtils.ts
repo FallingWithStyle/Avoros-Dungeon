@@ -39,7 +39,7 @@ export function getCachedRoomData(roomId: number) {
 export async function handleRoomChangeWithRefetch(
   crawler: CrawlerWithDetails,
   direction: string
-): Promise<boolean> => {
+): Promise<boolean> {
   console.log("🔄 Starting room change with refetch for direction:", direction);
 
   try {
