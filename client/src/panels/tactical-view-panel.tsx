@@ -85,7 +85,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
 
       // Store the movement direction for proper entry positioning
+      console.log(`📍 Storing movement direction: ${direction}`);
       storeMovementDirection(direction);
+      
+      // Verify it was stored
+      const storedDirection = getStoredEntryDirection();
+      console.log(`✅ Verified stored direction: ${storedDirection}`);
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
@@ -111,6 +116,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
+            console.log('🧹 Clearing stored movement direction after successful transition');
             clearStoredMovementDirection();
           }, 500);
         } else {
@@ -223,9 +229,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Get the entry direction and position player correctly using centralized logic
       const storedDirection = getStoredEntryDirection();
+      console.log(`🔍 Stored entry direction from session storage: '${storedDirection}'`);
+      
       const entryPosition = getEntryPosition(storedDirection);
-
-      console.log(`🎯 Entry position for direction ${storedDirection}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
+      console.log(`🎯 Calculated entry position for direction '${storedDirection}': {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
       // Position player immediately at the correct entry point
       combatSystem.initializePlayer(entryPosition, {
