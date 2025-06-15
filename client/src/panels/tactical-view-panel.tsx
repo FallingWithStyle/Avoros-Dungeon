@@ -83,6 +83,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const handleRoomMovement = useCallback(
     async (direction: string) => {
       console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
+      console.log(`movementDirection = ${direction.toUpperCase()}`);
 
       // Store the movement direction for proper entry positioning
       console.log(`📍 Storing movement direction: ${direction}`);
