@@ -82,22 +82,13 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Room movement handler with better fallback functionality
   const handleRoomMovement = useCallback(
     async (direction: string) => {
-      console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
       console.log(`movementDirection = ${direction.toUpperCase()}`);
 
-      // Store the movement direction for proper entry positioning
-      console.log(`📍 Storing movement direction: ${direction}`);
       RoomChangeManager.storeMovementDirection(direction);
-
-      // Verify it was stored
-      const storedDirection = RoomChangeManager.getStoredMovementDirection();
-      console.log(`✅ Verified stored direction: ${storedDirection}`);
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
         if (result === true) {
-          console.log(`✅ Room movement successful to ${direction}`);
-
           // Force invalidate and refetch all room-related data
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/room-data-batch"] }),
@@ -113,15 +104,11 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             refetchExploredRooms()
           ]);
 
-          console.log('⚡ Room transition and data refresh completed successfully');
-
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
-            console.log('🧹 Clearing stored movement direction after successful transition');
             RoomChangeManager.clearStoredMovementDirection();
           }, 500);
         } else {
-          console.error('❌ Room movement failed: API returned false');
           toast({
             title: "Room Movement Failed",
             description: "Could not move to the " + direction + " room. Try again.",
@@ -129,7 +116,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           });
         }
       } catch (error) {
-        console.error("❌ Room movement API call failed:", error instanceof Error ? error.message : 'Unknown error');
         toast({
           title: "Room Movement Failed",
           description: "Network error during room transition. Try again.",
@@ -154,7 +140,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       const isSmallScreen = window.innerWidth <= 768;
       const isMobileDevice = hasTouch && isSmallScreen;
-      console.log('🔍 Mobile detection:', { hasTouch, isSmallScreen, isMobileDevice, innerWidth: window.innerWidth });
       setIsMobile(isMobileDevice);
     };
     checkMobile();
@@ -174,8 +159,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     if (newFacing < 0) newFacing += 360;
     if (newFacing >= 360) newFacing -= 360;
 
-    console.log('🔄 Rotating player to:', newFacing, 'degrees');
-
     // Update player facing
     playerEntity.facing = newFacing;
     combatSystem.updateEntity(playerEntity.id, { facing: newFacing });
@@ -183,7 +166,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   // Handle stairs/down action (placeholder - can be expanded based on game needs)
   const handleStairs = useCallback(() => {
-    console.log('🏃 Stairs/down action - implement stairs logic here');
     // TODO: Implement stairs functionality when stairwells are added to the game
   }, []);
 
@@ -215,7 +197,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
-      console.log(`🚪 Room changed from ${lastRoomId} to ${roomData.room.id}, repositioning player immediately`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player
@@ -230,10 +211,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Get the entry direction and position player correctly using centralized logic
       const storedDirection = RoomChangeManager.getStoredMovementDirection();
-      console.log(`🔍 Stored entry direction from session storage: '${storedDirection}'`);
-
       const entryPosition = RoomChangeManager.getEntryPosition(storedDirection);
-      console.log(`🎯 Calculated entry position for direction '${storedDirection}': {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
       // Position player immediately at the correct entry point
       combatSystem.initializePlayer(entryPosition, {
@@ -241,11 +219,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         serial: crawler.serial
       });
 
-      console.log(`✅ Player repositioned immediately to (${entryPosition.x}, ${entryPosition.y})`);
-
       // Trigger adjacent room prefetching when room changes
       if (roomData?.room && prefetchAdjacentRooms) {
-        console.log(`🔮 Room changed to ${roomData.room.id}, triggering adjacent room prefetch`);
         prefetchAdjacentRooms();
       }
     }
@@ -254,14 +229,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Grid event handlers   - disabled for now
   const handleGridClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     // Grid clicking disabled - use keyboard/swipe movement instead
-    console.log("Grid click disabled - use WASD keys or swipe to move");
     return;
   }, []);
 
   const handleGridRightClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
     // Disabled for now - right-clicking on screen should not do anything
-    console.log("Grid right-clicked - functionality disabled");
     return;
   }, []);
 
@@ -305,7 +278,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     event.preventDefault();
     event.stopPropagation();
     // Disabled for now - right-clicking on entities should not do anything
-    console.log("Entity right-clicked: " + entityId + " - functionality disabled");
     return;
   }, []);
 
@@ -423,7 +395,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const handleMoveToPosition = useCallback((position?: { x: number; y: number }) => {
     // Disabled for now - move to position should not do anything
-    console.log("Move to position clicked - functionality disabled");
     setContextMenu(null);
   }, []);
 
@@ -455,7 +426,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // CONDITIONAL RENDERING ONLY AFTER ALL HOOKS HAVE BEEN CALLED
   // Early return if no data - MUST be after all hooks
   if (!effectiveTacticalData || !effectiveTacticalData.room) {
-    console.log("No effective tactical data available");
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
