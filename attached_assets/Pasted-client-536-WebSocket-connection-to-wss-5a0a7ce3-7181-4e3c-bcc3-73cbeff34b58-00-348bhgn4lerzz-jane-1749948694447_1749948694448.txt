@@ -1,0 +1,317 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=u4telFk9yCZA' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=u4telFk9yCZA' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.tsx:25 🔍 Router Debug: {isAuthenticated: false, isLoading: true}
+App.tsx:25 🔍 Router Debug: {isAuthenticated: true, isLoading: false}
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: undefined, crawlerLoading: true, enabled: true}
+crawler-view.tsx:46 🔍 Crawler Query Debug: {crawlerId: '5'}
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: 'Florence Peterson', crawlerLoading: false, enabled: true}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+tactical-view-panel.tsx:442 No effective tactical data available
+tactical-view-panel.tsx:142 🔍 Mobile detection: {hasTouch: false, isSmallScreen: false, isMobileDevice: false, innerWidth: 1078}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53037
+tactical-view-panel.tsx:203 🚪 Room changed from null to 53037, repositioning player immediately
+entryPositioning.ts:25 🎯 getEntryPosition called with direction: 'west'
+entryPositioning.ts:36 🎯 Processing entry direction: 'west'
+entryPositioning.ts:55 🎯 Player moved WEST → entering from EAST edge (right) at x: 85
+tactical-view-panel.tsx:220 🎯 Entry position for direction west: {x: 85, y: 50}
+combat-system.ts:640 ✅ Created new player entity at position (85, 50)
+tactical-view-panel.tsx:228 ✅ Player repositioned immediately to (85, 50)
+tactical-view-panel.tsx:232 🔮 Room changed to 53037, triggering adjacent room prefetch
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53037
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+crawler-view.tsx:35 🔍 CrawlerView Debug: {crawlerId: '5', isAuthenticated: true, isLoading: false, authLoading: false}
+crawler-view.tsx:110 🔍 Crawler Query Debug: {crawler: 'Florence Peterson', crawlerLoading: false, enabled: true}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53037
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useKeyboardMovement.ts:119 ⌨️ Key pressed: a Keys now: ['a']
+useKeyboardMovement.ts:58 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 82.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 80, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 77.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 75, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 72.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 70, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 67.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 65, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 62.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 60, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -1, y: 0}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 270 degrees (from vector: {x: -1, y: 0} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 50, facing: 270}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 270}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:141 ⌨️ Key released: a Keys now: []
+useKeyboardMovement.ts:73 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:293 🚫 Movement blocked - no significant position or facing change
+useKeyboardMovement.ts:119 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:58 ⌨️ Starting continuous keyboard movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 47.5, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 45, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 42.5, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 40, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 37.5, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 57.5, y: 35, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:119 ⌨️ Key pressed: a Keys now: (2) ['w', 'a']
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -0.7071067811865475, y: -0.7071067811865475}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 315 degrees (from vector: {x: -0.7071067811865475, y: -0.7071067811865475} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 55.73223304703363, y: 33.23223304703363, facing: 315}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 315}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -0.7071067811865475, y: -0.7071067811865475}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 315 degrees (from vector: {x: -0.7071067811865475, y: -0.7071067811865475} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 53.96446609406726, y: 31.464466094067262, facing: 315}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 315}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: -0.7071067811865475, y: -0.7071067811865475}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 315 degrees (from vector: {x: -0.7071067811865475, y: -0.7071067811865475} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 29.696699141100893, facing: 315}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 315}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:141 ⌨️ Key released: a Keys now: ['w']
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 27.196699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 24.696699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 22.196699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 19.696699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 17.196699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 14.696699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 12.196699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 9.696699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:279 🏃 Moving player to: {x: 52.19669914110089, y: 7.196699141100893, facing: 0}
+useTacticalPositioning.ts:291 ✅ Player updated to: {position: {…}, facing: 0}
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:96 🎯 Movement attempt: {currentPos: {…}, newPos: {…}, availableDirections: Array(3), gateZone: {…}}
+useTacticalPositioning.ts:112 🚪 Moving north toward north exit - checking gate bounds
+useTacticalPositioning.ts:113 Player X position: 52.19669914110089 Gate bounds: 40 - 60
+useTacticalPositioning.ts:125 ✅ Player is within north gate bounds - allowing transition
+useTacticalPositioning.ts:225 🏃 Transitioning to new room: north
+tactical-view-panel.tsx:85 ⚡ Ultra-fast room transition north starting...
+roomChangeUtils.ts:50 🔄 Starting room change with refetch for direction: north
+entryPositioning.ts:94 🧹 Cleared entry direction from session storage
+entryPositioning.ts:103 📍 Stored entry direction: south
+roomChangeUtils.ts:60 📍 Stored entry direction: south (opposite of movement north)
+useTacticalPositioning.ts:232 ✅ Room movement function called successfully
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:62 ⌨️ Sending continuous movement: {x: 0, y: -1}
+useTacticalPositioning.ts:76 🧭 Updating facing direction to: 0 degrees (from vector: {x: 0, y: -1} )
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+useKeyboardMovement.ts:141 ⌨️ Key released: w Keys now: []
+useKeyboardMovement.ts:73 ⌨️ Stopped keyboard movement - sending stop signal
+useTacticalPositioning.ts:82 🚫 Room transition on cooldown - ignoring movement
+roomChangeUtils.ts:82 ✅ Room change successful, invalidating relevant queries
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53037
+roomChangeUtils.ts:104 🔄 Room change with refetch completed successfully
+tactical-view-panel.tsx:117 ❌ Room movement failed: Unknown error
+(anonymous) @ tactical-view-panel.tsx:117
+await in (anonymous)
+(anonymous) @ useTacticalPositioning.ts:231
+(anonymous) @ useKeyboardMovement.ts:63
+setInterval
+startMovement @ useKeyboardMovement.ts:59
+handleKeyDown @ useKeyboardMovement.ts:123
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useTacticalPositioning.ts:241 🔓 Room transition cooldown complete
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false
+useKeyboardMovement.ts:36 ⌨️ useKeyboardMovement hook initialized - enabled: true
+useGestureMovement.ts:19 🎯 useGestureMovement hook initialized - enabled: false

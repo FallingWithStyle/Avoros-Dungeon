@@ -44,7 +44,7 @@ export function useTacticalPositioning({
 
       // If no player entity exists, recreate it at default position
       if (!playerEntity) {
-        console.log("No player entity found - attempting recovery");
+        console.log("🔄 No player entity found - attempting recovery");
 
         // Use centralized entry positioning logic
         const entryDirection = getStoredEntryDirection();
@@ -57,10 +57,15 @@ export function useTacticalPositioning({
           console.log("🔄 No entry direction found, using center position for recovery");
         }
 
+        console.log(`🔄 Initializing player at recovery position: (${recoveryPosition.x}, ${recoveryPosition.y})`);
         combatSystem.initializePlayer(recoveryPosition);
-        if (!combatSystem.getState().entities.find((e) => e.id === "player")) {
-          console.log("Failed to create player entity - movement blocked");
+        
+        const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
+        if (!newPlayerEntity) {
+          console.log("❌ Failed to create player entity - movement blocked");
           return;
+        } else {
+          console.log(`✅ Player entity recovered at position: (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
         }
       }
 
