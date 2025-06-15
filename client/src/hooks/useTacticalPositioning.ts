@@ -58,7 +58,10 @@ export function useTacticalPositioning({
         }
 
         console.log(`🔄 Initializing player at recovery position: (${recoveryPosition.x}, ${recoveryPosition.y})`);
-        combatSystem.initializePlayer(recoveryPosition);
+        combatSystem.initializePlayer(recoveryPosition, {
+          name: effectiveTacticalData?.crawler?.name || "Unknown",
+          serial: effectiveTacticalData?.crawler?.serial || ""
+        });
         
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
         if (!newPlayerEntity) {
@@ -67,6 +70,9 @@ export function useTacticalPositioning({
         } else {
           console.log(`✅ Player entity recovered at position: (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
         }
+        
+        // Re-get the player entity for further movement processing
+        playerEntity = newPlayerEntity;
       }
 
       // Determine facing direction based on movement (360-degree rotation)

@@ -8,8 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 import { 
   clearStoredEntryDirection, 
   getOppositeDirection, 
-  storeEntryDirection,
-  clearStoredMovementDirection 
+  storeEntryDirection
 } from "@/lib/entryPositioning";
 import type { CrawlerWithDetails } from "@shared/schema";
 
