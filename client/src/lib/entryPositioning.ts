@@ -22,29 +22,37 @@ export interface Position {
  * @returns Position object with x, y coordinates (percentage-based, 0-100)
  */
 export function getEntryPosition(entryDirection: string | null): Position {
+  console.log(`🎯 getEntryPosition called with direction: '${entryDirection}'`);
+  
   // Default center position if no direction specified
   if (!entryDirection) {
+    console.log(`🎯 No entry direction specified, using center position`);
     return { x: 50, y: 50 };
   }
 
   // Position player at the OPPOSITE edge from their movement direction
   // If they moved SOUTH (through south door), they enter from NORTH edge (top of room)
   // If they moved NORTH (through north door), they enter from SOUTH edge (bottom of room)
+  console.log(`🎯 Processing entry direction: '${entryDirection.toLowerCase()}'`);
   switch (entryDirection.toLowerCase()) {
     case "north":
       // Player moved NORTH, so they enter from the SOUTH edge (bottom) of the new room
+      console.log(`🎯 Player moved NORTH → entering from SOUTH edge (bottom) at y: 85`);
       return { x: 50, y: 85 };
     
     case "south":
       // Player moved SOUTH, so they enter from the NORTH edge (top) of the new room
+      console.log(`🎯 Player moved SOUTH → entering from NORTH edge (top) at y: 15`);
       return { x: 50, y: 15 };
     
     case "east":
       // Player moved EAST, so they enter from the WEST edge (left) of the new room
+      console.log(`🎯 Player moved EAST → entering from WEST edge (left) at x: 15`);
       return { x: 15, y: 50 };
     
     case "west":
       // Player moved WEST, so they enter from the EAST edge (right) of the new room
+      console.log(`🎯 Player moved WEST → entering from EAST edge (right) at x: 85`);
       return { x: 85, y: 50 };
     
     default:

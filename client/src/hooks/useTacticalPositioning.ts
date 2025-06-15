@@ -48,6 +48,7 @@ export function useTacticalPositioning({
 
         // Use centralized entry positioning logic
         const entryDirection = getStoredEntryDirection();
+        console.log(`🔄 Recovery: stored entry direction = '${entryDirection}'`);
         const recoveryPosition = getEntryPosition(entryDirection);
         
         if (entryDirection) {
