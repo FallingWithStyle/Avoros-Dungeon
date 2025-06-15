@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { mobs, mobTypes, rooms, factions } from "@shared/schema";
+import { mobs, mobTypes, rooms, factions, crawlers, roomConnections } from "@shared/schema";
 import { eq, and, lt, isNull, or, inArray } from "drizzle-orm";
 /**
  * File: mob-storage.ts
@@ -292,8 +292,50 @@ export class MobStorage extends BaseStorage {
     // Invalidate cache
     try {
       await redisService.invalidateRoomMobs(mobData.roomId);
+      
+      // Also invalidate adjacent room cache for all crawlers in the area
+      await this.invalidateAdjacentCacheForRoom(mobData.roomId);
     } catch (error) {
       console.log('Failed to invalidate room mobs cache');
+    }
+  }
+
+  // Helper method to invalidate adjacent room cache for all crawlers near a room
+  private async invalidateAdjacentCacheForRoom(roomId: number): Promise<void> {
+    try {
+      // Find all crawlers currently in or near this room
+      const crawlers = await db
+        .select({ id: crawlers.id })
+        .from(crawlers)
+        .where(eq(crawlers.currentRoomId, roomId));
+
+      // Also get crawlers in adjacent rooms (they might have this room cached)
+      const connections = await db
+        .select({ fromRoomId: roomConnections.fromRoomId })
+        .from(roomConnections)
+        .where(or(
+          eq(roomConnections.toRoomId, roomId),
+          eq(roomConnections.fromRoomId, roomId)
+        ));
+
+      const adjacentRoomIds = connections.map(c => c.fromRoomId);
+      if (adjacentRoomIds.length > 0) {
+        const adjacentCrawlers = await db
+          .select({ id: crawlers.id })
+          .from(crawlers)
+          .where(inArray(crawlers.currentRoomId, adjacentRoomIds));
+
+        crawlers.push(...adjacentCrawlers);
+      }
+
+      // Invalidate adjacent room cache for all affected crawlers
+      for (const crawler of crawlers) {
+        await redisService.invalidateAdjacentRooms(crawler.id);
+      }
+
+      console.log(`🗑️ Invalidated adjacent room cache for ${crawlers.length} crawlers due to mob death in room ${roomId}`);
+    } catch (error) {
+      console.log('Failed to invalidate adjacent room caches:', error);
     }
   }
 

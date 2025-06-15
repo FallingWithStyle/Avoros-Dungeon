@@ -212,7 +212,7 @@ export function registerExplorationRoutes(app: Express) {
           .where(eq(crawlerPositions.crawlerId, crawlerId))
           .orderBy(desc(crawlerPositions.enteredAt))
           .limit(2); // Get current and previous
-        
+
         // Also invalidate tactical data for both old and new rooms
         if (currentPos) {
           await storage.redisService.del(`tactical:${currentPos.roomId}`);
@@ -302,6 +302,17 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(404).json({ message: "Crawler not in any room" });
       }
 
+      // Check Redis cache first
+      const cacheKey = `adjacent-rooms:${crawlerId}:${radius}`;
+      const cached = await storage.redisService.get(cacheKey);
+
+      if (cached && cached.currentRoomId === currentRoom.id) {
+        console.log(`🔮 Cache hit for adjacent rooms - crawler ${crawlerId}, radius ${radius}`);
+        return res.json(cached);
+      }
+
+      console.log(`🔮 Getting adjacent rooms within radius ${radius} for crawler ${crawlerId} from room ${currentRoom.id}`);
+
       // Get rooms within the specified radius
       const adjacentRooms = await storage.getRoomsWithinRadius(currentRoom.id, radius);
       console.log(`Found ${adjacentRooms.length} rooms within radius ${radius} of room ${currentRoom.id}`);
@@ -325,6 +336,15 @@ export function registerExplorationRoutes(app: Express) {
 
       // Sort by distance for better caching priority
       roomsData.sort((a, b) => a.distance - b.distance);
+
+      const result = {
+        currentRoomId: currentRoom.id,
+        adjacentRooms: roomsData,
+        radius
+      };
+
+      // Cache for 2 minutes (shorter than normal since we want to detect changes)
+      await storage.redisService.set(cacheKey, result, 120);
 
       console.log(`Returning ${roomsData.length} adjacent rooms for prefetching`);
       res.json({
@@ -398,7 +418,7 @@ export function registerExplorationRoutes(app: Express) {
       // Generate or get tactical entities for this room with comprehensive error handling
       console.log(`Generating tactical data for room ${currentRoom.id}...`);
       let tacticalEntities = [];
-      
+
       if (storage.tacticalStorage && storage.tacticalStorage.generateAndSaveTacticalData) {
         try {
           const roomData = {
@@ -408,9 +428,9 @@ export function registerExplorationRoutes(app: Express) {
             factionId: currentRoom.factionId || null,
             environment: currentRoom.environment || 'indoor'
           };
-          
+
           console.log(`Room data for tactical generation:`, roomData);
-          
+
           tacticalEntities = await storage.tacticalStorage.generateAndSaveTacticalData(
             currentRoom.id, 
             roomData
@@ -420,7 +440,7 @@ export function registerExplorationRoutes(app: Express) {
         } catch (tacticalError) {
           console.error(`ERROR generating tactical data for room ${currentRoom.id}:`, tacticalError);
           console.error(`Tactical error stack:`, tacticalError.stack);
-          
+
           // Try to get existing tactical data instead
           try {
             if (storage.tacticalStorage.getTacticalPositions) {
@@ -457,7 +477,7 @@ export function registerExplorationRoutes(app: Express) {
       console.error("Stack trace:", error.stack);
       console.error("Crawler ID:", crawlerId);
       console.error("Request params:", req.params);
-      
+
       res.status(500).json({ 
         error: "Failed to fetch tactical data",
         details: error instanceof Error ? error.message : "Unknown error",

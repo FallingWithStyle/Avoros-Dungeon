@@ -333,6 +333,58 @@ export function registerDebugRoutes(app: Express) {
       res.json({
         success: true,
         message: `Redis fallback mode ${enabled ? 'enabled' : 'disabled'}`,
+        fallbackMode: enabled,
+        currentMode: enabled ? 'Database Only' : 'Redis + Database'
+      });
+    } catch (error) {
+      console.error("Error toggling Redis fallback mode:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to toggle Redis fallback mode" 
+      });
+    }
+  });
+
+  // DEBUG: Get Redis status and cache statistics
+  app.get("/api/debug/redis-status", isAuthenticated, async (req: any, res) => {
+    try {
+      const fallbackMode = storage.redisService.isForceFallbackMode();
+      
+      res.json({
+        success: true,
+        fallbackMode,
+        currentMode: fallbackMode ? 'Database Only' : 'Redis + Database',
+        redisConfigured: !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN),
+        message: fallbackMode 
+          ? 'Redis fallback mode is enabled - all operations use database directly'
+          : 'Redis is active - caching enabled for improved performance'
+      });
+    } catch (error) {
+      console.error("Error getting Redis status:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to get Redis status" 
+      });
+    }
+  });
+
+  // DEBUG: Clear adjacent room cache for a specific crawler
+  app.delete("/api/debug/clear-adjacent-cache/:crawlerId", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.crawlerId);
+      
+      if (isNaN(crawlerId)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid crawler ID" 
+        });
+      }
+
+      await storage.redisService.invalidateAdjacentRooms(crawlerId);
+
+      res.json({
+        success: true,
+        message: `Redis fallback mode ${enabled ? 'enabled' : 'disabled'}`,
         fallbackMode: enabled
       });
     } catch (error) {

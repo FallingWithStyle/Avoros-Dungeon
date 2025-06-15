@@ -39,9 +39,9 @@ export function useAdjacentRoomPrefetch({
       // Cache individual room data for instant access
       if (data.adjacentRooms) {
         data.adjacentRooms.forEach((roomData: any) => {
-          // Prioritize caching based on distance
-          const staleTime = roomData.distance === 1 ? 5 * 60 * 1000 : 3 * 60 * 1000;
-          const gcTime = roomData.distance === 1 ? 10 * 60 * 1000 : 5 * 60 * 1000;
+          // Prioritize caching based on distance - shorter times for real-time updates
+          const staleTime = roomData.distance === 1 ? 2 * 60 * 1000 : 90 * 1000; // 2min for distance 1, 90s for distance 2+
+          const gcTime = roomData.distance === 1 ? 5 * 60 * 1000 : 3 * 60 * 1000; // Keep in memory longer
           
           queryClient.setQueryData(
             [`/api/room/${roomData.room.id}/basic-data`],
@@ -60,7 +60,7 @@ export function useAdjacentRoomPrefetch({
               _isCached: true,
               _cachedAt: Date.now()
             },
-            { staleTime: staleTime / 2 } // Shorter cache for tactical data
+            { staleTime: staleTime / 2 } // Shorter cache for tactical data (45s for distance 1, 45s for distance 2+)
           );
         });
       }
@@ -77,10 +77,18 @@ export function useAdjacentRoomPrefetch({
     queryKey: [`/api/crawlers/${crawler.id}/adjacent-rooms`, currentRoomId, radius],
     queryFn: prefetchAdjacentRooms,
     enabled: enabled && !!currentRoomId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 90 * 1000, // 90 seconds - shorter for faster real-time updates
     gcTime: 5 * 60 * 1000, // Keep for 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    retry: (failureCount, error) => {
+      // Don't retry if it's a 404 or auth error
+      if (error && 'status' in error && (error.status === 404 || error.status === 403)) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
   });
 
   // Prefetch when room changes
