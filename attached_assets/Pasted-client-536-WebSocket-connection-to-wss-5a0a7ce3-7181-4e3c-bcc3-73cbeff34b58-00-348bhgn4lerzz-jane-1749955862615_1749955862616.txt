@@ -1,0 +1,68 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=26SYmGkIk3DJ' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=26SYmGkIk3DJ' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+crawler-view.tsx:47 🔍 Crawler Query Debug: {crawlerId: '5'}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+combat-system.ts:640 ✅ Created new player entity at position (50, 50)
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 6 adjacent rooms
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 6 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 6 adjacent rooms
+useKeyboardMovement.ts:118 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:140 ⌨️ Key released: w Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:140 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: a Keys now: ['a']
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: (2) ['a', 's']
+useKeyboardMovement.ts:140 ⌨️ Key released: a Keys now: ['s']
+useKeyboardMovement.ts:118 ⌨️ Key pressed: a Keys now: (2) ['s', 'a']
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: ['a']
+useTacticalPositioning.ts:151 🚪 ROOM TRANSITION: Moving WEST
+tactical-view-panel.tsx:85 movementDirection = WEST
+useKeyboardMovement.ts:140 ⌨️ Key released: a Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: d Keys now: ['d']
+useKeyboardMovement.ts:140 ⌨️ Key released: d Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:118 ⌨️ Key pressed: d Keys now: (2) ['w', 'd']
+useKeyboardMovement.ts:140 ⌨️ Key released: w Keys now: ['d']
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: (2) ['d', 's']
+useKeyboardMovement.ts:140 ⌨️ Key released: d Keys now: ['s']
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: a Keys now: ['a']
+useKeyboardMovement.ts:140 ⌨️ Key released: a Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: ['s']
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: ['s']
+useTacticalPositioning.ts:151 🚪 ROOM TRANSITION: Moving SOUTH
+tactical-view-panel.tsx:85 movementDirection = SOUTH
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: w Keys now: ['w']
+useKeyboardMovement.ts:140 ⌨️ Key released: w Keys now: []
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53193
+combat-system.ts:602 🔄 Updated existing player position to (50, 50)
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53193
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53193
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useKeyboardMovement.ts:118 ⌨️ Key pressed: a Keys now: ['a']
+useTacticalPositioning.ts:151 🚪 ROOM TRANSITION: Moving WEST
+tactical-view-panel.tsx:85 movementDirection = WEST
+useKeyboardMovement.ts:140 ⌨️ Key released: a Keys now: []
+useKeyboardMovement.ts:118 ⌨️ Key pressed: a Keys now: ['a']
+useTacticalPositioning.ts:151 🚪 ROOM TRANSITION: Moving WEST
+tactical-view-panel.tsx:85 movementDirection = WEST
+useKeyboardMovement.ts:140 ⌨️ Key released: a Keys now: []
+useKeyboardMovement.ts:153 ⌨️ Window blur - stopping movement
