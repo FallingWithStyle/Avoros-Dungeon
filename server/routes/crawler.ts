@@ -273,13 +273,24 @@ export function registerCrawlerRoutes(app: Express) {
 
       if (cachedData) {
         console.log(`Using cached tactical data for room ${currentRoom.id}`);
-        cachedData = JSON.parse(cachedData);
-        return res.json({
-          room: currentRoom,
-          availableDirections: cachedData.availableDirections,
-          playersInRoom: cachedData.playersInRoom,
-          tacticalEntities: cachedData.tacticalEntities,
-        });
+        // Handle case where cached data is already an object
+        if (typeof cachedData === 'string') {
+          try {
+            cachedData = JSON.parse(cachedData);
+          } catch (error) {
+            console.log(`Invalid cached JSON for room ${currentRoom.id}, regenerating...`);
+            cachedData = null;
+          }
+        }
+        
+        if (cachedData) {
+          return res.json({
+            room: currentRoom,
+            availableDirections: cachedData.availableDirections,
+            playersInRoom: cachedData.playersInRoom,
+            tacticalEntities: cachedData.tacticalEntities,
+          });
+        }
       }
 
       // Get all players in the current room

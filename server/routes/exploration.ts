@@ -130,6 +130,45 @@ export function registerExplorationRoutes(app: Express) {
     }
   });
 
+  // Adjacent rooms prefetch endpoint
+  app.get("/api/crawlers/:id/adjacent-rooms/:distance", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const distance = parseInt(req.params.distance) || 2;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ error: "Crawler not found" });
+      }
+
+      // Get current room
+      const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
+      if (!currentRoom) {
+        return res.status(404).json({ error: "Current room not found" });
+      }
+
+      // Get adjacent rooms within specified distance
+      const adjacentRooms = await storage.getAdjacentRooms(currentRoom.id, distance);
+      
+      console.log(`🔮 Found ${adjacentRooms.length} adjacent rooms within ${distance} moves of room ${currentRoom.id}`);
+
+      res.json({
+        currentRoomId: currentRoom.id,
+        distance: distance,
+        adjacentRooms: adjacentRooms || []
+      });
+
+    } catch (error) {
+      console.error("Error fetching adjacent rooms:", error);
+      res.status(500).json({ error: "Failed to fetch adjacent rooms" });
+    }
+  });
+
   app.get("/api/crawlers/:id/scanned-rooms", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);

@@ -23,7 +23,7 @@ class RedisService {
 
         this.isConnected = true;
         console.log('Upstash Redis initialized successfully');
-        
+
         // Auto-enable fallback mode in debug environment
         if (this.forceFallbackMode) {
           console.log('🔧 Debug mode detected - Redis fallback mode ENABLED by default');
@@ -441,7 +441,7 @@ class RedisService {
     const oldMode = this.forceFallbackMode;
     this.forceFallbackMode = enabled;
     console.log(`🔧 Redis fallback mode ${enabled ? 'ENABLED' : 'DISABLED'} via debug override`);
-    
+
     if (oldMode !== enabled) {
       console.log(`📊 Cache operations will now ${enabled ? 'SKIP Redis and use database only' : 'USE Redis normally'}`);
     }

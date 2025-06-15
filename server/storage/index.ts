@@ -74,7 +74,8 @@ export interface IStorage {
   getRoom(roomId: number): Promise<any>;
   createRoomConnection(fromRoomId: number, toRoomId: number, direction: string): Promise<any>;
   getAvailableDirections(roomId: number): Promise<any>;
-  moveToRoom(crawlerId: number, direction: string): Promise<any>;
+  getAdjacentRooms(startRoomId: number, maxDistance?: number): Promise<any[]>;
+  moveToRoom(crawlerId: number, direction: string): Promise<{success: boolean, newRoom?: any, error?: string}>;
   getCrawlerCurrentRoom(crawlerId: number): Promise<any>;
   getPlayersInRoom(roomId: number): Promise<any>;
   getFactions(): Promise<any>;
@@ -269,6 +270,10 @@ export class ModularStorage implements IStorage {
 
   async getAvailableDirections(roomId: number) {
     return this._explorationStorage.getAvailableDirections(roomId);
+  }
+
+  async getAdjacentRooms(startRoomId: number, maxDistance?: number) {
+    return this._explorationStorage.getAdjacentRooms(startRoomId, maxDistance);
   }
 
   async moveToRoom(crawlerId: number, direction: string) {
