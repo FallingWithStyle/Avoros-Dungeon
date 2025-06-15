@@ -103,39 +103,97 @@ export class ExplorationStorage extends BaseStorage {
   }
 
   async getAvailableDirections(roomId: number): Promise<string[]> {
-    // Try to get from cache first
     try {
+      // Check cache first
       const cached = await redisService.getAvailableDirections(roomId);
       if (cached) {
         return cached;
       }
+
+      const connections = await db
+        .select()
+        .from(roomConnections)
+        .where(eq(roomConnections.fromRoomId, roomId));
+
+      let directions = connections.map((conn) => conn.direction);
+
+      // Check if this room is a stairs room and add staircase direction if so
+      const [room] = await db
+        .select()
+        .from(rooms)
+        .where(eq(rooms.id, roomId));
+
+      if (room && room.type === "stairs") {
+        directions.push("staircase");
+      }
+
+      // Cache the result
+      await redisService.setAvailableDirections(roomId, directions);
+
+      return directions;
     } catch (error) {
-      // Redis error, continue with database query
-      console.log(
-        "Redis cache miss for available directions, fetching from database",
-      );
+      console.error("Error getting available directions:", error);
+      return [];
     }
+  }
 
-    const connections = await db
-      .select()
-      .from(roomConnections)
-      .where(eq(roomConnections.fromRoomId, roomId));
-
-    const directions = connections.map((conn) => conn.direction);
-
-    const room = await this.getRoom(roomId);
-    if (room && room.type === "stairs") {
-      directions.push("staircase");
-    }
-
-    // Cache the result (room connections rarely change)
+  async getAdjacentRooms(startRoomId: number, maxDistance: number = 2): Promise<any[]> {
     try {
-      await redisService.setAvailableDirections(roomId, directions, 600); // 10 minutes TTL
-    } catch (error) {
-      console.log("Failed to cache available directions data");
-    }
+      const cacheKey = `adjacent_rooms_${startRoomId}_${maxDistance}`;
+      const cached = await redisService.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
 
-    return directions;
+      const visited = new Set<number>();
+      const result: any[] = [];
+      const queue: Array<{roomId: number, distance: number}> = [{roomId: startRoomId, distance: 0}];
+
+      while (queue.length > 0) {
+        const {roomId, distance} = queue.shift()!;
+
+        if (visited.has(roomId) || distance > maxDistance) {
+          continue;
+        }
+
+        visited.add(roomId);
+
+        // Skip the starting room itself
+        if (distance > 0) {
+          const [room] = await db
+            .select()
+            .from(rooms)
+            .where(eq(rooms.id, roomId));
+
+          if (room) {
+            result.push({
+              room: room,
+              distance: distance
+            });
+          }
+        }
+
+        // Get connections from this room
+        const connections = await db
+          .select()
+          .from(roomConnections)
+          .where(eq(roomConnections.fromRoomId, roomId));
+
+        for (const connection of connections) {
+          if (!visited.has(connection.toRoomId)) {
+            queue.push({roomId: connection.toRoomId, distance: distance + 1});
+          }
+        }
+      }
+
+      // Cache for 5 minutes
+      await redisService.set(cacheKey, result, 300);
+
+      return result;
+    } catch (error) {
+      console.error("Error getting adjacent rooms:", error);
+      return [];
+    }
   }
 
   async moveToRoom(
