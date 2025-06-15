@@ -21,6 +21,7 @@ import { ArrowLeft, Map, Target, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
 interface CrawlerViewProps {
   crawlerId: string;
@@ -150,6 +151,27 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     );
   }
 
+  const handleRoomMovement = async (direction: string) => {
+    console.log("movementDirection = " + direction.toUpperCase());
+    console.log(`🚪 Storing movement direction: ${direction.toUpperCase()}`);
+
+    if (!tacticalData?.crawler?.id) {
+      console.log("No crawler ID available for room movement");
+      return;
+    }
+
+    try {
+      const result = await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
+      if (result) {
+        console.log("✅ Room movement successful");
+      } else {
+        console.log("❌ Room movement failed");
+      }
+    } catch (error) {
+      console.error("❌ Room movement error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-game-bg text-slate-100">
       {/* Header */}
@@ -203,7 +225,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
 
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
-            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} />
+            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} handleRoomMovement={handleRoomMovement} />
           </div>
 
           {/* Secondary: Status & Quick Info - Condensed on mobile */}
