@@ -85,11 +85,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       console.log(`⚡ Ultra-fast room transition ${direction} starting...`);
 
       // Store the movement direction for proper entry positioning
+      console.log(`📍 Storing movement direction: ${direction}`);
       storeMovementDirection(direction);
+      
+      // Verify it was stored
+      const storedDirection = getStoredEntryDirection();
+      console.log(`✅ Verified stored direction: ${storedDirection}`);
 
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
-        if (result && result.success) {
+        if (result === true) {
           console.log(`✅ Room movement successful to ${direction}`);
 
           // Force invalidate and refetch all room-related data
@@ -111,15 +116,24 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
           // Clear movement direction after a delay to ensure positioning is complete
           setTimeout(() => {
+            console.log('🧹 Clearing stored movement direction after successful transition');
             clearStoredMovementDirection();
           }, 500);
         } else {
-          console.error('❌ Room movement failed:', result?.error || 'Unknown error');
+          console.error('❌ Room movement failed: API returned false');
+          toast({
+            title: "Room Movement Failed",
+            description: "Could not move to the " + direction + " room. Try again.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("❌ Room movement API call failed:", error instanceof Error ? error.message : 'Unknown error');
-        // Don't return here - the room change might have succeeded anyway
-        // Let the positioning logic continue to handle the new room
+        toast({
+          title: "Room Movement Failed",
+          description: "Network error during room transition. Try again.",
+          variant: "destructive",
+        });
       }
     },
     [crawler, queryClient, refetchTacticalData, refetchExploredRooms]
@@ -215,9 +229,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
       // Get the entry direction and position player correctly using centralized logic
       const storedDirection = getStoredEntryDirection();
+      console.log(`🔍 Stored entry direction from session storage: '${storedDirection}'`);
+      
       const entryPosition = getEntryPosition(storedDirection);
-
-      console.log(`🎯 Entry position for direction ${storedDirection}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
+      console.log(`🎯 Calculated entry position for direction '${storedDirection}': {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
 
       // Position player immediately at the correct entry point
       combatSystem.initializePlayer(entryPosition, {
