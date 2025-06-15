@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useRef } from "react";
-import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import { combatSystem } from "../../../shared/combat-system";
 import { getFacingDegreesFromMovement } from "@/lib/vector";
 import { RoomChangeManager } from "@/lib/roomChangeUtils";
@@ -83,19 +82,11 @@ export function useTacticalPositioning({
         newFacing = getFacingDegreesFromMovement(direction.x, direction.y);
       }
 
-      // Check for room transition cooldown to prevent spam
-      const now = Date.now();
-      if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
-        return;
-      }
-
-      const availableDirections =
-        effectiveTacticalData.availableDirections || [];
-
       // Calculate new position
       let newX = playerEntity.position.x + direction.x * speed;
       let newY = playerEntity.position.y + direction.y * speed;
 
+      const availableDirections = effectiveTacticalData.availableDirections || [];
       const gateStart = 40; // Gate starts at 40%
       const gateEnd = 60; // Gate ends at 60%
 
@@ -155,18 +146,19 @@ export function useTacticalPositioning({
         }
       }
 
-      // Handle room transition
+      // Handle room transition - delegate to parent component
       if (roomTransitionDirection && !isTransitioning.current) {
-        lastRoomTransitionTime.current = Date.now();
+        // Check for room transition cooldown to prevent spam
+        const now = Date.now();
+        if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
+          return;
+        }
+
+        lastRoomTransitionTime.current = now;
         isTransitioning.current = true;
 
-        // Execute the room movement immediately
-        try {
-          onRoomMovement(roomTransitionDirection);
-        } catch (error) {
-          console.error("❌ Room movement failed:", error);
-          isTransitioning.current = false; // Reset flag on error
-        }
+        // Delegate to parent component which handles roomChangeUtils
+        onRoomMovement(roomTransitionDirection);
 
         // Clear transition flag after cooldown period
         setTimeout(() => {
@@ -177,8 +169,6 @@ export function useTacticalPositioning({
       } else if (roomTransitionDirection && isTransitioning.current) {
         return;
       }
-
-      // Only clamp and move if we're NOT transitioning rooms
       // Clamp to room boundaries (5% margin from edges)
       const finalX = Math.max(5, Math.min(95, newX));
       const finalY = Math.max(5, Math.min(95, newY));
