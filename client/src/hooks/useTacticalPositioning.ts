@@ -96,17 +96,23 @@ export function useTacticalPositioning({
       // Check for room transition through gates - only allow transition when moving toward the exit
       let roomTransitionDirection = "";
 
+      console.log(`🎯 Movement check: newX=${newX.toFixed(1)}, newY=${newY.toFixed(1)}, direction=(${direction.x}, ${direction.y})`);
+      console.log(`🎯 Player position: x=${playerEntity.position.x.toFixed(1)}, y=${playerEntity.position.y.toFixed(1)}`);
+      console.log(`🎯 Available directions: [${availableDirections.join(', ')}]`);
+
       // North exit: only trigger when moving north (negative Y direction) AND hitting boundary
       if (
         newY <= 5 &&
         direction.y < 0 &&
         availableDirections.includes("north")
       ) {
+        console.log(`🚪 North gate check: player at x=${playerEntity.position.x.toFixed(1)}, gate range=${gateStart}-${gateEnd}`);
         if (
           playerEntity.position.x >= gateStart &&
           playerEntity.position.x <= gateEnd
         ) {
           roomTransitionDirection = "north";
+          console.log(`✅ North room transition triggered!`);
         }
       }
       // South exit: only trigger when moving south (positive Y direction) AND hitting boundary
@@ -115,11 +121,13 @@ export function useTacticalPositioning({
         direction.y > 0 &&
         availableDirections.includes("south")
       ) {
+        console.log(`🚪 South gate check: player at x=${playerEntity.position.x.toFixed(1)}, gate range=${gateStart}-${gateEnd}`);
         if (
           playerEntity.position.x >= gateStart &&
           playerEntity.position.x <= gateEnd
         ) {
           roomTransitionDirection = "south";
+          console.log(`✅ South room transition triggered!`);
         }
       }
       // East exit: only trigger when moving east (positive X direction) AND hitting boundary
@@ -128,11 +136,13 @@ export function useTacticalPositioning({
         direction.x > 0 &&
         availableDirections.includes("east")
       ) {
+        console.log(`🚪 East gate check: player at y=${playerEntity.position.y.toFixed(1)}, gate range=${gateStart}-${gateEnd}`);
         if (
           playerEntity.position.y >= gateStart &&
           playerEntity.position.y <= gateEnd
         ) {
           roomTransitionDirection = "east";
+          console.log(`✅ East room transition triggered!`);
         }
       }
       // West exit: only trigger when moving west (negative X direction) AND hitting boundary
@@ -141,16 +151,19 @@ export function useTacticalPositioning({
         direction.x < 0 &&
         availableDirections.includes("west")
       ) {
+        console.log(`🚪 West gate check: player at y=${playerEntity.position.y.toFixed(1)}, gate range=${gateStart}-${gateEnd}`);
         if (
           playerEntity.position.y >= gateStart &&
           playerEntity.position.y <= gateEnd
         ) {
           roomTransitionDirection = "west";
+          console.log(`✅ West room transition triggered!`);
         }
       }
 
       // Handle room transition
       if (roomTransitionDirection && !isTransitioning.current) {
+        console.log(`🚪 ROOM TRANSITION: Moving ${roomTransitionDirection.toUpperCase()}`);
         lastRoomTransitionTime.current = Date.now();
         isTransitioning.current = true;
 
@@ -169,6 +182,7 @@ export function useTacticalPositioning({
 
         return;
       } else if (roomTransitionDirection && isTransitioning.current) {
+        console.log(`⏳ Room transition in progress, ignoring ${roomTransitionDirection} request`);
         return;
       }
 

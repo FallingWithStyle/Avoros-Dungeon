@@ -1,0 +1,147 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=B2dQEJ3VoAPH' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=B2dQEJ3VoAPH' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+crawler-view.tsx:47 🔍 Crawler Query Debug: {crawlerId: '5'}
+useGestureMovement.ts:43 🎯 Stopped gesture movement
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53238
+combat-system.ts:640 ✅ Created new player entity at position (50, 50)
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53238
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useKeyboardMovement.ts:118 ⌨️ Key pressed: w Keys now: ['w']
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=47.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=50.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=45.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=47.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=42.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=45.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=40.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=42.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=37.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=40.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=35.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=37.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53238
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=32.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=35.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=30.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=32.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=27.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=30.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 9 adjacent rooms
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=25.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=27.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=22.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=25.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=20.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=22.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=17.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=20.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=15.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=17.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=12.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=15.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=10.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=12.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=7.5, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=10.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=5.0, direction=(0, -1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=7.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east]
+useTacticalPositioning.ts:109 🚪 North gate check: player at x=50.0, gate range=40-60
+useTacticalPositioning.ts:115 ✅ North room transition triggered!
+useTacticalPositioning.ts:166 🚪 ROOM TRANSITION: Moving NORTH
+tactical-view-panel.tsx:85 movementDirection = NORTH
+useKeyboardMovement.ts:140 ⌨️ Key released: w Keys now: []
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+combat-system.ts:602 🔄 Updated existing player position to (50, 50)
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useAdjacentRoomPrefetch.ts:28 🔮 Prefetching rooms within 2 moves of room 53047
+useAdjacentRoomPrefetch.ts:37 🔮 Successfully prefetched 8 adjacent rooms
+useKeyboardMovement.ts:118 ⌨️ Key pressed: s Keys now: ['s']
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=52.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=50.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=55.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=52.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=57.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=55.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=60.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=57.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=62.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=60.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=65.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=62.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=67.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=65.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=70.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=67.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=72.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=70.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=75.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=72.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=77.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=75.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=80.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=77.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=82.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=80.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=85.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=82.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=87.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=85.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=90.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=87.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=92.5, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=90.0
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:99 🎯 Movement check: newX=50.0, newY=95.0, direction=(0, 1)
+useTacticalPositioning.ts:100 🎯 Player position: x=50.0, y=92.5
+useTacticalPositioning.ts:101 🎯 Available directions: [north, south, east, west]
+useTacticalPositioning.ts:124 🚪 South gate check: player at x=50.0, gate range=40-60
+useTacticalPositioning.ts:130 ✅ South room transition triggered!
+useTacticalPositioning.ts:166 🚪 ROOM TRANSITION: Moving SOUTH
+tactical-view-panel.tsx:85 movementDirection = SOUTH
+useKeyboardMovement.ts:140 ⌨️ Key released: s Keys now: []
