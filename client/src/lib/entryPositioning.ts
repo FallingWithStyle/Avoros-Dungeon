@@ -11,8 +11,14 @@ export interface Position {
 }
 
 /**
- * Get the entry position for a player based on the direction they came from
- * @param entryDirection - The direction the player moved to enter this room
+ * Get the entry position for a player based on the direction they moved to enter this room
+ * 
+ * CRITICAL LOGIC - DO NOT CHANGE WITHOUT CAREFUL CONSIDERATION:
+ * If a player exits through a SOUTH door, they should appear at the NORTH edge of the destination room.
+ * If a player exits through a NORTH door, they should appear at the SOUTH edge of the destination room.
+ * Think of it as walking through a doorway - you exit one side and enter the opposite side.
+ * 
+ * @param entryDirection - The direction the player moved to enter this room (e.g., "south" means they moved south)
  * @returns Position object with x, y coordinates (percentage-based, 0-100)
  */
 export function getEntryPosition(entryDirection: string | null): Position {
@@ -21,25 +27,24 @@ export function getEntryPosition(entryDirection: string | null): Position {
     return { x: 50, y: 50 };
   }
 
-  // Position player near the appropriate edge based on entry direction
-  // When entering from north, player should be near the south edge (they came from north)
-  // When entering from south, player should be near the north edge (they came from south)
-  // etc.
+  // Position player at the OPPOSITE edge from their movement direction
+  // If they moved SOUTH (through south door), they enter from NORTH edge (top of room)
+  // If they moved NORTH (through north door), they enter from SOUTH edge (bottom of room)
   switch (entryDirection.toLowerCase()) {
     case "north":
-      // Came from north, so enter from the south edge
+      // Player moved NORTH, so they enter from the SOUTH edge (bottom) of the new room
       return { x: 50, y: 85 };
     
     case "south":
-      // Came from south, so enter from the north edge  
+      // Player moved SOUTH, so they enter from the NORTH edge (top) of the new room
       return { x: 50, y: 15 };
     
     case "east":
-      // Came from east, so enter from the west edge
+      // Player moved EAST, so they enter from the WEST edge (left) of the new room
       return { x: 15, y: 50 };
     
     case "west":
-      // Came from west, so enter from the east edge
+      // Player moved WEST, so they enter from the EAST edge (right) of the new room
       return { x: 85, y: 50 };
     
     default:
