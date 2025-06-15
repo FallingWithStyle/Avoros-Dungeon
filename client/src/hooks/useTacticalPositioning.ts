@@ -8,7 +8,7 @@ import { useCallback, useRef } from "react";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import { combatSystem } from "../../../shared/combat-system";
 import { getFacingDegreesFromMovement } from "@/lib/vector";
-import { getEntryPosition, getStoredEntryDirection } from "@/lib/entryPositioning";
+import { RoomChangeManager } from "@/lib/roomChangeUtils";
 
 interface MovementVector {
   x: number;
@@ -47,9 +47,9 @@ export function useTacticalPositioning({
         console.log("🔄 No player entity found - attempting recovery");
 
         // Use centralized entry positioning logic
-        const entryDirection = getStoredEntryDirection();
-        console.log(`🔄 Recovery: stored entry direction = '${entryDirection}'`);
-        const recoveryPosition = getEntryPosition(entryDirection);
+        const entryDirection = RoomChangeManager.getStoredMovementDirection();
+        console.log(`🔄 Recovery: stored movement direction = '${entryDirection}'`);
+        const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
         
         if (entryDirection) {
           console.log(`🔄 Recovering player position based on entry direction '${entryDirection}': (${recoveryPosition.x}, ${recoveryPosition.y})`);
