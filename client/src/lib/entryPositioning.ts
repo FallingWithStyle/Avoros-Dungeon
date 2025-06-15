@@ -74,6 +74,38 @@ export function clearStoredMovementDirection(): void {
 }
 
 /**
+ * Clear the stored entry direction
+ */
+export function clearStoredEntryDirection(): void {
+  sessionStorage.removeItem('entryDirection');
+  console.log('🧹 Cleared entry direction from session storage');
+}
+
+/**
+ * Store the entry direction for proper positioning
+ * @param direction - The direction the player entered from
+ */
+export function storeEntryDirection(direction: string): void {
+  sessionStorage.setItem('entryDirection', direction);
+  console.log(`📍 Stored entry direction: ${direction}`);
+}
+
+/**
+ * Get the opposite direction for entry positioning
+ * @param direction - The movement direction
+ * @returns The opposite direction
+ */
+export function getOppositeDirection(direction: string): string {
+  const opposites: Record<string, string> = {
+    'north': 'south',
+    'south': 'north',
+    'east': 'west',
+    'west': 'east'
+  };
+  return opposites[direction.toLowerCase()] || direction;
+}
+
+/**
  * Handle entry positioning for room transitions
  * @param direction - The direction the player moved
  * @param combatSystem - The combat system instance
