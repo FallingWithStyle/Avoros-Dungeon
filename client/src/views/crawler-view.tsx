@@ -155,19 +155,11 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
     console.log("movementDirection = " + direction.toUpperCase());
 
     if (!tacticalData?.crawler?.id) {
-      console.log("❌ No crawler ID available for room movement");
       return;
     }
 
-    console.log(`🚪 About to call handleRoomChangeWithRefetch with crawler ${tacticalData.crawler.id} direction ${direction}`);
-
     try {
-      const result = await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
-      if (result) {
-        console.log("✅ Room movement successful");
-      } else {
-        console.log("❌ Room movement failed");
-      }
+      await handleRoomChangeWithRefetch(tacticalData.crawler.id, direction);
     } catch (error) {
       console.error("❌ Room movement error:", error);
     }

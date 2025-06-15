@@ -111,8 +111,6 @@ export class RoomChangeManager {
    * Used for position resets, teleports, or any forced room transition
    */
   static handleRoomChange(crawlerId: number): void {
-    console.log("Handling room change for crawler " + crawlerId + " - invalidating essential queries only");
-
     // Only invalidate the batch query - it contains all room data we need
     queryClient.invalidateQueries({
       queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
@@ -141,26 +139,18 @@ export async function handleRoomChangeWithRefetch(
   crawlerId: number,
   direction: string
 ): Promise<boolean> {
-  console.log(`🚪 handleRoomChangeWithRefetch CALLED: crawler ${crawlerId}, direction ${direction}`);
-  
   try {
     // Clear any existing entry direction since we're moving
     RoomChangeManager.clearStoredMovementDirection();
-    console.log(`🚪 Cleared stored movement direction`);
 
     // Store the movement direction for entry positioning
     RoomChangeManager.storeMovementDirection(direction);
-    console.log(`🚪 Stored new movement direction: ${direction}`);
 
-    console.log(`🚪 Making fetch request to /api/crawlers/${crawlerId}/move with direction: ${direction}`);
-    
     const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ direction }),
     });
-    
-    console.log(`🚪 Fetch response status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -169,9 +159,7 @@ export async function handleRoomChangeWithRefetch(
       return false;
     }
 
-    console.log(`🚪 Response OK, parsing JSON...`);
     const result = await response.json();
-    console.log(`🚪 Parsed result:`, result);
     
     if (!result.success) {
       console.error("❌ Room change unsuccessful:", result.error);
@@ -179,8 +167,6 @@ export async function handleRoomChangeWithRefetch(
       return false;
     }
 
-    console.log(`🚪 Invalidating queries...`);
-    
     // Invalidate crawler data
     queryClient.invalidateQueries({
       queryKey: [`/api/crawlers/${crawlerId}`]
@@ -201,7 +187,6 @@ export async function handleRoomChangeWithRefetch(
       queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`]
     });
 
-    console.log(`🚪 All queries invalidated, returning true`);
     return true;
 
   } catch (error) {
