@@ -12,23 +12,47 @@ export interface Position {
 
 // Combat entity interface
 export interface CombatEntity {
+  // Core identity
   id: string;
   name: string;
-  type: "player" | "hostile" | "neutral" | "ally";
+  type: "player" | "other_player" | "hostile" | "neutral" | "ally";
+  
+  // Health and Power Resources
   hp: number;
   maxHp: number;
-  attack: number;
-  defense: number;
-  speed: number;
+  energy: number;
+  maxEnergy: number;
+  power: number;
+  maxPower: number;
+  
+  // Primary Stats (dynamic based on equipment/effects)
+  might: number;        // Physical strength, melee damage
+  agility: number;      // Speed, evasion, ranged accuracy
+  endurance: number;    // Health, stamina, physical resistance
+  intellect: number;    // Magical damage, mana efficiency
+  charisma: number;     // Social interactions, leadership bonuses
+  wisdom: number;       // Magical resistance, perception, insight
+  
+  // Derived Combat Stats
+  attack: number;       // Calculated from might + weapon + effects
+  defense: number;      // Calculated from endurance + armor + effects
+  speed: number;        // Calculated from agility + equipment + effects
+  accuracy: number;     // Calculated from relevant primary stats
+  evasion: number;      // Calculated from agility + equipment + effects
+  
+  // Positioning
   position: Position;
-  facing?: number; // Direction in degrees
+  facing?: number;      // Direction in degrees (0° = North)
+  
+  // Character Information
   level?: number;
-  accuracy?: number;
-  evasion?: number;
-  isSelected?: boolean;
+  serial?: number;      // For player identification
+  
+  // Action management
   cooldowns?: Record<string, number>;
-  serial?: number;
-  might?: number; // Strength stat for unarmed combat
+  
+  // State flags
+  isSelected?: boolean;
   isAlive?: boolean;
 }
 
@@ -301,19 +325,35 @@ export class CombatSystem {
       name: crawlerData.name || "Player",
       type: "player",
       position: { x: position.x, y: position.y },
+      
+      // Health and Power Resources
       hp: crawlerData.currentHealth || crawlerData.maxHealth || 100,
       maxHp: crawlerData.maxHealth || 100,
-      attack: crawlerData.attack || 0,
-      defense: crawlerData.defense || 0,
-      speed: crawlerData.agility || 10,
+      energy: crawlerData.currentEnergy || crawlerData.maxEnergy || 50,
+      maxEnergy: crawlerData.maxEnergy || 50,
+      power: crawlerData.currentPower || crawlerData.maxPower || 25,
+      maxPower: crawlerData.maxPower || 25,
+      
+      // Primary Stats
+      might: crawlerData.might || 10,
+      agility: crawlerData.agility || 10,
+      endurance: crawlerData.endurance || 10,
+      intellect: crawlerData.intellect || 10,
+      charisma: crawlerData.charisma || 10,
+      wisdom: crawlerData.wisdom || 10,
+      
+      // Derived Combat Stats
+      attack: crawlerData.attack || Math.floor((crawlerData.might || 10) * 1.2),
+      defense: crawlerData.defense || Math.floor((crawlerData.endurance || 10) * 0.8),
+      speed: Math.floor((crawlerData.agility || 10) * 1.1),
+      accuracy: (crawlerData.wisdom || 10) + (crawlerData.intellect || 10),
+      evasion: Math.floor((crawlerData.agility || 10) * 1.2),
+      
       level: crawlerData.level || 1,
-      accuracy: (crawlerData.wisdom || 5) + (crawlerData.intellect || 5),
-      evasion: crawlerData.agility || 5,
-      might: crawlerData.might || 5,
+      serial: crawlerData.serial,
       facing: 0,
       isAlive: true,
-      cooldowns: {},
-      serial: crawlerData.serial
+      cooldowns: {}
     };
 
     this.state.entities.push(playerEntity);

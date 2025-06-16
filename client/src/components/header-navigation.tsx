@@ -56,6 +56,12 @@ export default function HeaderNavigation() {
       label: "Account",
       icon: User,
       description: "Profile & Settings"
+    },
+    {
+      href: "/test",
+      label: "TEST",
+      icon: Settings,
+      description: "Combat System Test"
     }
   ];
 
@@ -65,6 +71,9 @@ export default function HeaderNavigation() {
     }
     if (href === "/crawler") {
       return location.startsWith("/crawler");
+    }
+    if (href === "/test") {
+      return location === "/test";
     }
     return location === href;
   };
