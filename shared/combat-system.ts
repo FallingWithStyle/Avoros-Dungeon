@@ -231,9 +231,10 @@ export class CombatSystem {
     const dy = targetPosition.y - entity.position.y;
 
     if (dx !== 0 || dy !== 0) {
-      // Calculate angle in degrees (0° = North)
-      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-      angle = angle - 90;
+      // Calculate angle in degrees (0° = North, pointing up)
+      // atan2(dy, dx) gives us the angle from the positive x-axis
+      // We need to adjust so that 0° points north (negative y direction)
+      let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
 
       // Normalize angle to 0-360
       if (angle < 0) {
