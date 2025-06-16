@@ -59,10 +59,49 @@ export default function TestCombat() {
     }
   }, [selectedTarget]);
 
+  // Manual rotation handler
+  const handleManualRotation = useCallback((direction: 'left' | 'right') => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player) return;
+
+    const rotationAmount = direction === 'right' ? 15 : -15; // 15 degrees per rotation
+    let newFacing = (player.facing || 0) + rotationAmount;
+
+    // Normalize angle to be between 0 and 360
+    if (newFacing < 0) newFacing += 360;
+    if (newFacing >= 360) newFacing -= 360;
+
+    combatSystem.updateEntity("player", { facing: newFacing });
+  }, [combatState]);
+
+  // Auto-target facing when target changes or player moves
+  useEffect(() => {
+    const player = combatState.entities.find(e => e.id === "player");
+    const target = combatState.entities.find(e => e.id === selectedTarget);
+    
+    if (player && target && selectedTarget) {
+      // Calculate angle to target
+      const dx = target.position.x - player.position.x;
+      const dy = target.position.y - player.position.y;
+      
+      if (dx !== 0 || dy !== 0) {
+        // Calculate angle in degrees (0° = North)
+        let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+        
+        // Normalize angle to 0-360
+        if (angle < 0) {
+          angle += 360;
+        }
+        
+        combatSystem.updateEntity("player", { facing: Math.round(angle) });
+      }
+    }
+  }, [selectedTarget, combatState.entities]);
+
   // Keyboard hotkey handler
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      const key = event.key;
+      const key = event.key.toLowerCase();
       
       // Hotkey shortcuts
       switch (key) {
@@ -78,7 +117,15 @@ export default function TestCombat() {
           event.preventDefault();
           handleHotbarAction("special", "ability", "Special");
           break;
-        case 'Tab':
+        case 'q':
+          event.preventDefault();
+          handleManualRotation('left');
+          break;
+        case 'e':
+          event.preventDefault();
+          handleManualRotation('right');
+          break;
+        case 'tab':
           event.preventDefault();
           // Cycle through targets
           const enemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
@@ -93,7 +140,7 @@ export default function TestCombat() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleHotbarAction, selectedTarget, combatState]);
+  }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation]);
 
   useEffect(() => {
     // Subscribe to combat system updates
@@ -339,6 +386,17 @@ export default function TestCombat() {
                         {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
                         {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
                         
+                        {/* Facing indicator */}
+                        {entity.facing !== undefined && (
+                          <div 
+                            className="absolute w-3 h-0.5 bg-yellow-400 origin-left"
+                            style={{
+                              transform: `rotate(${entity.facing}deg) translateX(12px)`,
+                              transformOrigin: 'left center'
+                            }}
+                          />
+                        )}
+                        
                         {/* Health bar */}
                         <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
                           <div 
@@ -504,6 +562,7 @@ export default function TestCombat() {
                 
                 <div className="mt-2 text-xs text-muted-foreground">
                   <div>WASD: Move</div>
+                  <div>QE: Rotate Left/Right</div>
                   <div>1-3: Hotbar Actions</div>
                   <div>Tab: Cycle Targets</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
