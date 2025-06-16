@@ -18,12 +18,14 @@ interface UseTacticalPositioningProps {
   effectiveTacticalData: any;
   combatState: any;
   onRoomMovement: (direction: string) => void;
+  crawler: { name: string; serial: string | number };
 }
 
 export function useTacticalPositioning({
   effectiveTacticalData,
   combatState,
   onRoomMovement,
+  crawler,
 }: UseTacticalPositioningProps) {
   const speed = 2.5; // Movement speed per frame
   const ROOM_TRANSITION_COOLDOWN = 2000; // 2 second cooldown between room transitions
@@ -63,8 +65,6 @@ export function useTacticalPositioning({
         position = { x: 50, y: 50 }; // Default center position
       }
 
-      const crawler = effectiveTacticalData?.crawler;
-
       // Initialize player with combat system using actual crawler data
       combatSystem.initializePlayer(position, {
         name: crawler.name,
@@ -97,19 +97,13 @@ export function useTacticalPositioning({
           RoomChangeManager.handleRoomEntryPositioning(
             entryDirection,
             combatSystem,
-            {
-              name: effectiveTacticalData?.crawler?.name || "Unknown",
-              serial: effectiveTacticalData?.crawler?.serial || ""
-            }
+            crawler
           );
 
           // Clear direction after successful positioning
           RoomChangeManager.clearStoredMovementDirection();
         } else {
           // No stored direction, place at center
-          const crawler = effectiveTacticalData?.crawler;
-
-          // Initialize player with combat system using actual crawler data
           combatSystem.initializePlayer({ x: 50, y: 50 }, {
             name: crawler.name,
             serial: crawler.serial
@@ -251,10 +245,17 @@ export function useTacticalPositioning({
 
   // Log avatar URL when used on tactical map
   useEffect(() => {
-    if (effectiveTacticalData?.crawler?.avatar) {
-      console.log(`Avatar URL used on tactical map: ${effectiveTacticalData.crawler.avatar}`);
+    if (crawler?.name && crawler?.serial !== undefined) {
+      // Use the same Dicebear API as avatarUtils.ts
+      const getAvatarUrl = (name: string, serial: string | number, backgroundColor: string = "1e293b"): string => {
+        const seed = `${name}${serial}`;
+        return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${backgroundColor}`;
+      };
+
+      const avatarUrl = getAvatarUrl(crawler.name, crawler.serial);
+      console.log(`Avatar URL used on tactical map: ${avatarUrl}`);
     }
-  }, [effectiveTacticalData?.crawler?.avatar]);
+  }, [crawler?.name, crawler?.serial]);
 
   return {
     handleMovement,
