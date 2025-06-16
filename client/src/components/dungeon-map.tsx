@@ -301,7 +301,7 @@ const getFactionBorderStyle = (
 
 export default function DungeonMap(props: DungeonMapProps | undefined) {
   const crawler = props?.crawler;
-  
+
   if (!crawler) {
     return <div>Loading crawler data...</div>;
   }
@@ -376,8 +376,15 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // Build the visible rooms map - only show what the player should see
   const visibleRoomsMap = new Map<string, ExploredRoom>();
 
-  // 1. Add explored rooms
-  (exploredRooms ?? []).forEach((room) => {
+  // Process rooms data and create room map
+  const roomMap = new Map();
+  const roomPositions = new Map();
+
+  // Ensure exploredRooms is an array before processing
+  const safeExploredRooms = Array.isArray(exploredRooms) ? exploredRooms : [];
+
+  // Add explored rooms to the map
+  safeExploredRooms.forEach((room) => {
     if (room && typeof room.x === "number" && typeof room.y === "number") {
       const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
       // Improved current room detection
@@ -583,7 +590,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     floorRooms.find((r) => Number(r.id) === Number(actualCurrentRoomId)) ||
     floorRooms.find((r) => Number(r.id) === Number(crawler.roomId)) ||
     floorRooms.find((r) => r.isCurrentRoom);
-    
+
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">

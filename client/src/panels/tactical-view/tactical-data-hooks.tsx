@@ -68,7 +68,9 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     queryFn: async () => {
       const response = await fetch(`/api/crawlers/${crawler?.id}/explored-rooms`);
       if (!response.ok) throw new Error('Failed to fetch explored rooms');
-      return response.json();
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
     },
     staleTime: 30000, // 30 seconds
     enabled: !!crawler?.id,
@@ -112,8 +114,8 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
 
   return {
     roomData,
-    exploredRooms: exploredRooms?.length || 0,
-    tacticalData: !!tacticalData,
+    exploredRooms: Array.isArray(exploredRooms) ? exploredRooms : [],
+    tacticalData,
     isLoading,
     tacticalLoading,
     tacticalError,
