@@ -61,7 +61,7 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
     if (roomData) {
       eventsSystem.onRoomChange(roomData.room.id, crawler.name, crawler.id);
     }
-  }, [roomData?.room.id, crawler.name, crawler.id]);
+  }, [roomData?.room?.id, crawler.name, crawler.id]);
 
   // Auto-scroll to bottom when new events are added
   useEffect(() => {
@@ -152,6 +152,25 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
       minute: "2-digit",
     });
   };
+
+  // Early return if no roomData is available
+  if (!roomData?.room) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Room Events
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-slate-400 text-sm py-8">
+            Waiting for room data...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-game-panel border-game-border">
