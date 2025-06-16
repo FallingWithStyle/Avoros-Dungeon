@@ -116,7 +116,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     crawler: crawler
   });
 
-  
+
 
   // Detect mobile device with more comprehensive detection
   const [isMobile, setIsMobile] = useState(false);
@@ -349,6 +349,35 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
     return (timeRemaining / actionCooldown) * 100;
   }, [combatState.entities]);
+
+  // Handle combat action execution
+  const handleCombatAction = useCallback((actionId: string, targetId?: string) => {
+    const player = combatState.entities.find((e: any) => e.id === "player");
+    if (!player) return;
+
+    // Check if action can be used (cooldown check)
+    if (!combatSystem.canUseAction("player", actionId)) {
+      console.log(`Action ${actionId} is on cooldown`);
+      return;
+    }
+
+    // Execute action immediately
+    let success = false;
+    if (actionId === "basic_attack") {
+      success = combatSystem.executeAttack("player", targetId);
+    }
+
+    if (success) {
+      // Notify events system
+      eventsSystem.onCombatAction(
+        { id: actionId, name: actionId, type: actionId === "move" ? "move" : "attack" },
+        "player",
+        targetId
+      );
+
+      setActiveActionMode(null);
+    }
+  }, [combatState]);
 
   // Context menu handlers
   const handleActionClick = useCallback((action: any, targetEntityId: string) => {

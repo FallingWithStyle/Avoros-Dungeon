@@ -1,24 +1,12 @@
-
 /**
  * File: action-queue-panel.tsx
- * Responsibility: Displays a real-time queue of combat actions with execution timers and progress indicators
- * Notes: Shows queued player and enemy actions with cooldowns, execution order, and visual feedback
+ * Responsibility: Display active cooldowns and combat status instead of action queue
+ * Notes: Simplified to show cooldown timers rather than complex queued actions
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import {
-  Clock,
-  Sword,
-  Shield,
-  Target,
-  Footprints,
-  Zap,
-  ArrowRight,
-} from "lucide-react";
 import { useEffect, useState } from "react";
-import { combatSystem, type QueuedAction } from "@shared/combat-system";
+import { combatSystem, type CombatState } from "@shared/combat-system";
+import { Sword, Shield, Footprints, Clock } from "lucide-react";
 
 interface ActionQueuePanelProps {
   className?: string;
@@ -34,7 +22,7 @@ export default function ActionQueuePanel({ className }: ActionQueuePanelProps) {
     return unsubscribe;
   }, []);
 
-  // Update current time every 100ms for countdown
+  // Update current time every 100ms for cooldown timers
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
@@ -43,226 +31,100 @@ export default function ActionQueuePanel({ className }: ActionQueuePanelProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Sort actions by execution time (soonest first)
-  const sortedActions = [...combatState.actionQueue].sort((a, b) => a.executesAt - b.executesAt);
+  const player = combatState.entities.find(e => e.id === "player");
 
-  const getActionIcon = (action: QueuedAction) => {
-    switch (action.action.type) {
-      case "attack":
+  if (!player || !player.cooldowns) {
+    return (
+      <div className={`bg-slate-800 border border-slate-700 rounded-lg p-4 ${className}`}>
+        <h3 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          Action Status
+        </h3>
+        <p className="text-xs text-slate-400">No active cooldowns</p>
+      </div>
+    );
+  }
+
+  const activeCooldowns = Object.entries(player.cooldowns)
+    .map(([actionId, lastUsed]) => {
+      const cooldownDurations = {
+        "basic_attack": 800,
+        "move": 0,
+        "dodge": 3000
+      };
+
+      const cooldownDuration = cooldownDurations[actionId] || 1000;
+      const timeRemaining = Math.max(0, (lastUsed + cooldownDuration) - currentTime);
+
+      return {
+        actionId,
+        timeRemaining,
+        isActive: timeRemaining > 0
+      };
+    })
+    .filter(cooldown => cooldown.isActive);
+
+  const getActionIcon = (actionId: string) => {
+    switch (actionId) {
+      case "basic_attack":
         return <Sword className="w-4 h-4 text-red-400" />;
-      case "ability":
-        if (action.action.id === "dodge") {
-          return <Shield className="w-4 h-4 text-blue-400" />;
-        }
-        return <Zap className="w-4 h-4 text-purple-400" />;
+      case "dodge":
+        return <Shield className="w-4 h-4 text-blue-400" />;
       case "move":
         return <Footprints className="w-4 h-4 text-green-400" />;
       default:
-        return <Target className="w-4 h-4 text-gray-400" />;
+        return <Clock className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const getActionBadgeStyle = (action: QueuedAction) => {
-    switch (action.action.type) {
-      case "attack":
-        return "bg-red-500/20 text-red-300 border-red-500/30";
-      case "ability":
-        if (action.action.id === "dodge") {
-          return "bg-blue-500/20 text-blue-300 border-blue-500/30";
-        }
-        return "bg-purple-500/20 text-purple-300 border-purple-500/30";
+  const getActionName = (actionId: string) => {
+    switch (actionId) {
+      case "basic_attack":
+        return "Attack";
+      case "dodge":
+        return "Dodge";
       case "move":
-        return "bg-green-500/20 text-green-300 border-green-500/30";
+        return "Move";
       default:
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
-    }
-  };
-
-  const getEntityDisplayName = (entityId: string) => {
-    const entity = combatState.entities.find(e => e.id === entityId);
-    if (!entity) return entityId;
-    
-    if (entity.type === 'player') {
-      return `${entity.name} (You)`;
-    }
-    return entity.name;
-  };
-
-  const getTargetDisplayName = (targetId?: string) => {
-    if (!targetId) return null;
-    const target = combatState.entities.find(e => e.id === targetId);
-    return target ? target.name : targetId;
-  };
-
-  const formatTimeRemaining = (executesAt: number) => {
-    const remaining = Math.max(0, executesAt - currentTime);
-    if (remaining === 0) return "Executing...";
-    if (remaining < 1000) return `${Math.ceil(remaining / 100) * 100}ms`;
-    return `${(remaining / 1000).toFixed(1)}s`;
-  };
-
-  const getActionDescription = (action: QueuedAction) => {
-    const entityName = getEntityDisplayName(action.entityId);
-    const targetName = getTargetDisplayName(action.targetId);
-    
-    if (action.action.type === "move") {
-      if (action.targetPosition) {
-        return `${entityName} moving to (${action.targetPosition.x.toFixed(0)}, ${action.targetPosition.y.toFixed(0)})`;
-      }
-      return `${entityName} moving`;
-    }
-    
-    if (targetName) {
-      return `${entityName} using ${action.action.name} on ${targetName}`;
-    }
-    
-    return `${entityName} using ${action.action.name}`;
-  };
-
-  const getEntityTypeColor = (entityId: string) => {
-    const entity = combatState.entities.find(e => e.id === entityId);
-    if (!entity) return "text-gray-400";
-    
-    switch (entity.type) {
-      case "player":
-        return "text-blue-400";
-      case "hostile":
-        return "text-red-400";
-      case "neutral":
-      case "npc":
-        return "text-orange-400";
-      default:
-        return "text-gray-400";
+        return actionId;
     }
   };
 
   return (
-    <Card className={`bg-game-panel border-game-border ${className}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-          <Clock className="w-4 h-4" />
-          Action Queue
-          {sortedActions.length > 0 && (
-            <Badge variant="outline" className="ml-auto bg-slate-700/50 text-slate-300 border-slate-600">
-              {sortedActions.length} queued
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-48 w-full">
-          <div className="space-y-2">
-            {sortedActions.length === 0 ? (
-              <div className="text-center text-slate-400 text-sm py-8">
-                No actions queued
+    <div className={`bg-slate-800 border border-slate-700 rounded-lg p-4 ${className}`}>
+      <h3 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+        <Clock className="w-4 h-4" />
+        Action Cooldowns
+      </h3>
+
+      {combatState.isInCombat && (
+        <div className="mb-3 p-2 bg-red-900/20 border border-red-700/50 rounded text-xs text-red-300">
+          Combat Active
+        </div>
+      )}
+
+      {activeCooldowns.length === 0 ? (
+        <p className="text-xs text-slate-400">All actions ready</p>
+      ) : (
+        <div className="space-y-2">
+          {activeCooldowns.map((cooldown) => (
+            <div
+              key={cooldown.actionId}
+              className="flex items-center justify-between p-2 bg-slate-700/50 rounded"
+            >
+              <div className="flex items-center gap-2">
+                {getActionIcon(cooldown.actionId)}
+                <span className="text-xs text-slate-300">
+                  {getActionName(cooldown.actionId)}
+                </span>
               </div>
-            ) : (
-              sortedActions.map((queuedAction, index) => {
-                const timeRemaining = queuedAction.executesAt - currentTime;
-                const isExecuting = timeRemaining <= 0;
-                
-                return (
-                  <div
-                    key={`${queuedAction.entityId}-${queuedAction.queuedAt}`}
-                    className={`flex items-center gap-3 p-3 rounded border transition-all duration-200 ${
-                      isExecuting
-                        ? "bg-yellow-500/20 border-yellow-500/50 animate-pulse"
-                        : index === 0
-                        ? "bg-slate-800/50 border-slate-600/50"
-                        : "bg-slate-800/30 border-slate-700/30"
-                    } hover:bg-slate-700/40`}
-                  >
-                    {/* Position indicator */}
-                    <div className="flex flex-col items-center justify-center w-8">
-                      <div className={`text-xs font-bold ${
-                        index === 0 ? "text-yellow-400" : "text-slate-500"
-                      }`}>
-                        #{index + 1}
-                      </div>
-                      {index < sortedActions.length - 1 && (
-                        <ArrowRight className="w-3 h-3 text-slate-600 mt-1" />
-                      )}
-                    </div>
-
-                    {/* Action icon */}
-                    <div className="flex-shrink-0">
-                      {getActionIcon(queuedAction)}
-                    </div>
-
-                    {/* Action details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <p className={`text-sm font-medium ${getEntityTypeColor(queuedAction.entityId)} leading-snug`}>
-                            {getActionDescription(queuedAction)}
-                          </p>
-                          
-                          {/* Additional action info */}
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${getActionBadgeStyle(queuedAction)}`}
-                            >
-                              {queuedAction.action.name}
-                            </Badge>
-                            
-                            {queuedAction.action.damage && (
-                              <span className="text-xs text-red-400">
-                                {queuedAction.action.damage} dmg
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Time remaining */}
-                        <div className="flex flex-col items-end flex-shrink-0">
-                          <span className={`text-xs font-mono ${
-                            isExecuting
-                              ? "text-yellow-400 font-bold"
-                              : timeRemaining < 1000
-                              ? "text-orange-400"
-                              : "text-slate-400"
-                          }`}>
-                            {formatTimeRemaining(queuedAction.executesAt)}
-                          </span>
-                          
-                          {/* Progress bar for current action */}
-                          {index === 0 && !isExecuting && (
-                            <div className="w-16 h-1 bg-slate-700 rounded-full mt-1 overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-100 ease-linear"
-                                style={{
-                                  width: `${Math.max(0, Math.min(100, 
-                                    ((queuedAction.action.executionTime - timeRemaining) / queuedAction.action.executionTime) * 100
-                                  ))}%`
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Queue statistics */}
-        {sortedActions.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-700">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>
-                Next: {formatTimeRemaining(sortedActions[0]?.executesAt || 0)}
-              </span>
-              <span>
-                Queue depth: {sortedActions.length}
+              <span className="text-xs text-orange-400 font-mono">
+                {(cooldown.timeRemaining / 1000).toFixed(1)}s
               </span>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
