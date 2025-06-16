@@ -79,12 +79,14 @@ export default function TestCombat() {
     }, 200);
   }, [combatState]);
 
-  // Auto-target facing when target changes or player moves
+  // Auto-target facing when target changes
   useEffect(() => {
+    if (!selectedTarget) return;
+
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
 
-    if (player && target && selectedTarget) {
+    if (player && target) {
       // Calculate angle to target
       const dx = target.position.x - player.position.x;
       const dy = target.position.y - player.position.y;
@@ -98,10 +100,14 @@ export default function TestCombat() {
           angle += 360;
         }
 
-        combatSystem.updateEntity("player", { facing: Math.round(angle) });
+        const newFacing = Math.round(angle);
+        // Only update if facing actually changed to prevent infinite loops
+        if (player.facing !== newFacing) {
+          combatSystem.updateEntity("player", { facing: newFacing });
+        }
       }
     }
-  }, [selectedTarget, combatState.entities]);
+  }, [selectedTarget]); // Only depend on selectedTarget to prevent infinite loop
 
   // Keyboard hotkey handler
   useEffect(() => {
