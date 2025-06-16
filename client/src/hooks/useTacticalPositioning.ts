@@ -63,10 +63,12 @@ export function useTacticalPositioning({
         position = { x: 50, y: 50 }; // Default center position
       }
 
-      // Initialize player with combat system
+      const crawler = effectiveTacticalData?.crawler;
+
+      // Initialize player with combat system using actual crawler data
       combatSystem.initializePlayer(position, {
-        name: effectiveTacticalData?.crawler?.name || "Unknown",
-        serial: effectiveTacticalData?.crawler?.serial || ""
+        name: crawler.name,
+        serial: crawler.serial
       });
 
       if (entryDirection) {
@@ -105,9 +107,12 @@ export function useTacticalPositioning({
           RoomChangeManager.clearStoredMovementDirection();
         } else {
           // No stored direction, place at center
+          const crawler = effectiveTacticalData?.crawler;
+
+          // Initialize player with combat system using actual crawler data
           combatSystem.initializePlayer({ x: 50, y: 50 }, {
-            name: effectiveTacticalData?.crawler?.name || "Unknown",
-            serial: effectiveTacticalData?.crawler?.serial || ""
+            name: crawler.name,
+            serial: crawler.serial
           });
         }
 
