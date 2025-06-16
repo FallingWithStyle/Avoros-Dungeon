@@ -33,19 +33,10 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const { toast } = useToast();
   const [energyDisabled, setEnergyDisabled] = useState(false);
 
-  // Debug logging
-  // console.log("🔍 CrawlerView Debug:", {
-  //   crawlerId,
-  //   isAuthenticated,
-  //   isLoading,
-  //   authLoading: isLoading
-  // });
-
   // Fetch crawler data with cache control
   const { data: crawler, isLoading: crawlerLoading, error: crawlerError, refetch } = useQuery<CrawlerWithDetails>({
     queryKey: ["crawler", crawlerId],
     queryFn: async () => {
-      console.log("🔍 Crawler Query Debug:", { crawlerId });
       try {
         const response = await fetch(`/api/crawlers/${crawlerId}`, {
           credentials: "include",
@@ -109,11 +100,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const tacticalData = roomBatchData?.tacticalData;
   const scannedRooms = roomBatchData?.scannedRooms;
 
-  // console.log("🔍 Crawler Query Debug:", {
-  //   crawler: crawler?.name,
-  //   crawlerLoading,
-  //   enabled: !!crawlerId
-  // });
+  
 
   // Only show loading on initial load, not on background refetches
   const isInitialLoading = crawlerLoading && !crawler;
@@ -153,8 +140,6 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   }
 
   const handleRoomMovement = async (direction: string) => {
-    console.log("movementDirection = " + direction.toUpperCase());
-
     if (!tacticalData?.crawler?.id) {
       return;
     }

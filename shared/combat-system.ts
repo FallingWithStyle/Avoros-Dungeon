@@ -446,14 +446,6 @@ export class CombatSystem {
     entity.position.x = Math.max(-10, Math.min(110, targetPosition.x));
     entity.position.y = Math.max(-10, Math.min(110, targetPosition.y));
 
-    console.log(
-      "moveEntityToPosition:",
-      entityId,
-      "->",
-      entity.position,
-      "facing:",
-      entity.facing,
-    );
   }
 
   calculateDistance(pos1: Position, pos2: Position): number {
@@ -462,7 +454,7 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  
+
 
   // Combat state management
   startCombat(): void {
@@ -545,9 +537,6 @@ export class CombatSystem {
         );
         if (entity) {
           entity.position = { ...action.position };
-          console.log(
-            `Applied queued move: ${entity.id} to (${entity.position.x.toFixed(1)}, ${entity.position.y.toFixed(1)})`,
-          );
         } else {
           console.warn(
             `Entity ${action.entityId} not found for queued move action`,
@@ -562,53 +551,52 @@ export class CombatSystem {
     }
   }
 
-  initializePlayer(startPosition?: { x: number; y: number }, crawlerData?: { name?: string; serial?: number }) {
-    const existingPlayer = this.state.entities.find((e) => e.id === "player");
+  initializePlayer(position: { x: number; y: number }, playerInfo?: { name?: string; serial?: string | number }): void {
+    // Remove existing player if any
+    this.removeEntity("player");
 
-    if (existingPlayer) {
-      if (startPosition) {
-        existingPlayer.position = { ...startPosition };
-        console.log(
-          `🔄 Updated existing player position to (${startPosition.x}, ${startPosition.y})`,
-        );
-      }
-      // Update crawler data if provided
-      if (crawlerData) {
-        if (crawlerData.name) existingPlayer.name = crawlerData.name;
-        if (crawlerData.serial) existingPlayer.serial = crawlerData.serial;
-      }
-      // Force immediate state update
-      this.notifySubscribers();
-      return;
+    const playerName = playerInfo?.name || "Player";
+    const playerSerial = playerInfo?.serial;
+
+    // Generate and log avatar URL for tactical map display
+    if (playerName && playerSerial !== undefined) {
+      // Import getAvatarUrl function inline to avoid circular dependencies
+      const getAvatarUrl = (name: string, serial: string | number): string => {
+        const serialStr = String(serial);
+        const combinedString = name + "_" + serialStr;
+
+        let hash = 0;
+        for (let i = 0; i < combinedString.length; i++) {
+          const char = combinedString.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+
+        const avatarId = Math.abs(hash) % 1000;
+        return `https://robohash.org/${avatarId}?set=set1&size=64x64`;
+      };
+
+      const avatarUrl = getAvatarUrl(playerName, playerSerial);
+      console.log(`🎨 Tactical Map Avatar: ${playerName} [${playerSerial}] -> ${avatarUrl}`);
     }
 
-    // Default starting position if none provided
-    const defaultPosition = startPosition || { x: 50, y: 50 };
-
+    // Create player entity
     const playerEntity: CombatEntity = {
       id: "player",
-      name: crawlerData?.name || "Player",
+      name: playerName,
       type: "player",
-      position: { ...defaultPosition },
+      position: { x: position.x, y: position.y },
       hp: 100,
       maxHp: 100,
-      attack: 0, // No weapon equipped
-      defense: 2,
-      speed: 10,
-      might: 8, // Base strength for punch damage
-      accuracy: 10,
-      evasion: 5,
-      level: 1,
-      isSelected: false,
+      attack: 10,
+      defense: 5,
+      speed: 15,
+      facing: 0,
       isAlive: true,
-      facing: 0, // Set initial facing to 0 degrees (north)
-      serial: crawlerData?.serial,
+      cooldowns: {}
     };
 
     this.state.entities.push(playerEntity);
-    console.log(
-      `✅ Created new player entity at position (${defaultPosition.x}, ${defaultPosition.y})`,
-    );
     this.notifySubscribers();
   }
 
