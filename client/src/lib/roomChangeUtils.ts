@@ -86,21 +86,18 @@ export class RoomChangeManager {
    * Handle entry positioning for room transitions
    * @param direction - The direction the player moved
    * @param combatSystem - The combat system instance
-   * @param crawler - The crawler data for naming
+   * @param crawler - The full crawler data
    */
   static handleRoomEntryPositioning(
     direction: string,
     combatSystem: any,
-    crawler: { name: string; serial?: string }
+    crawler: any
   ): void {
     // Get the correct entry position (don't store direction here - it's already stored)
     const entryPosition = this.getEntryPosition(direction);
     
     // Position player at the correct entry point
-    combatSystem.initializePlayer(entryPosition, {
-      name: crawler.name,
-      serial: crawler.serial
-    });
+    combatSystem.initializePlayer(entryPosition, crawler);
     
     // Note: Direction clearing is handled by the caller after successful positioning
   }

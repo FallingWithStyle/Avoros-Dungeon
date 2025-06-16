@@ -551,39 +551,37 @@ export class CombatSystem {
     }
   }
 
-  initializePlayer(position: { x: number; y: number }, playerInfo?: { name?: string; serial?: string | number }): void {
+  initializePlayer(position: { x: number; y: number }, crawlerData?: any): void {
     // Remove existing player if any
     this.removeEntity("player");
 
-    const playerName = playerInfo?.name || "Player";
-    const playerSerial = playerInfo?.serial;
-
-    // Generate and log avatar URL for tactical map display
-    if (playerName && playerSerial !== undefined) {
-      // Use the same Dicebear API as avatarUtils.ts
-      const getAvatarUrl = (name: string, serial: string | number, backgroundColor: string = "1e293b"): string => {
-        const seed = `${name}${serial}`;
-        return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${backgroundColor}`;
-      };
-
-      const avatarUrl = getAvatarUrl(playerName, playerSerial);
-      console.log(`🎨 Tactical Map Avatar: ${playerName} [${playerSerial}] -> ${avatarUrl}`);
+    if (!crawlerData) {
+      console.error("No crawler data provided to initializePlayer");
+      return;
     }
 
-    // Create player entity
+    const playerName = crawlerData.name || "Player";
+    const playerSerial = crawlerData.serial;
+
+    // Create player entity using real crawler stats
     const playerEntity: CombatEntity = {
       id: "player",
       name: playerName,
       type: "player",
       position: { x: position.x, y: position.y },
-      hp: 100,
-      maxHp: 100,
-      attack: 10,
-      defense: 5,
-      speed: 15,
+      hp: crawlerData.currentHealth || crawlerData.maxHealth || 100,
+      maxHp: crawlerData.maxHealth || 100,
+      attack: crawlerData.attack || 0, // Weapon attack, separate from might
+      defense: crawlerData.defense || 0, // Armor defense, separate from endurance
+      speed: crawlerData.agility || 10,
+      level: crawlerData.level || 1,
+      accuracy: (crawlerData.wisdom || 5) + (crawlerData.intellect || 5),
+      evasion: crawlerData.agility || 5,
+      might: crawlerData.might || 5, // For unarmed combat damage
       facing: 0,
       isAlive: true,
-      cooldowns: {}
+      cooldowns: {},
+      serial: playerSerial
     };
 
     this.state.entities.push(playerEntity);

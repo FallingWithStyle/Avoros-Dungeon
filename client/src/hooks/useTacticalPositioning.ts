@@ -72,10 +72,7 @@ export function useTacticalPositioning({
         serialType: typeof crawler.serial,
         position: position
       });
-      combatSystem.initializePlayer(position, {
-        name: crawler.name,
-        serial: crawler.serial
-      });
+      combatSystem.initializePlayer(position, crawler);
 
       if (entryDirection) {
         RoomChangeManager.clearStoredMovementDirection();
@@ -110,10 +107,7 @@ export function useTacticalPositioning({
           RoomChangeManager.clearStoredMovementDirection();
         } else {
           // No stored direction, place at center
-          combatSystem.initializePlayer({ x: 50, y: 50 }, {
-            name: crawler.name,
-            serial: crawler.serial
-          });
+          combatSystem.initializePlayer({ x: 50, y: 50 }, crawler);
         }
 
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
