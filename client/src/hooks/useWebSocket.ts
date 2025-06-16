@@ -16,15 +16,27 @@ export function useWebSocket(token: string | null) {
     // Handle WebSocket URL construction more safely for Replit
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const hostname = window.location.hostname;
+    const port = window.location.port;
 
-    // For Replit deployments, use the current host without port manipulation
-    const host = window.location.host; // This includes port if present
+    // Build host string properly
+    let host;
+    if (port && port !== '80' && port !== '443') {
+      host = hostname + ':' + port;
+    } else {
+      host = hostname;
+    }
 
     let wsUrl = `${protocol}//${host}/ws?token=${token}`;
 
-    // Validate URL before creating WebSocket
-    if (wsUrl.includes('undefined')) {
+    // Validate URL before creating WebSocket - check for undefined in the URL string
+    if (wsUrl.includes('undefined') || wsUrl.includes(':undefined')) {
       console.error('Invalid WebSocket URL detected:', wsUrl);
+      console.log('Location details:', { 
+        hostname, 
+        port, 
+        protocol: window.location.protocol,
+        host: window.location.host 
+      });
       return;
     }
 
