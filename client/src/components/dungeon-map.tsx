@@ -294,7 +294,10 @@ const getFactionBorderStyle = (
 
 export default function DungeonMap(props: DungeonMapProps | undefined) {
   const crawler = props?.crawler;
+  console.log("DungeonMap - Props and crawler:", { props, crawler });
+  
   if (!crawler) {
+    console.log("DungeonMap - No crawler data provided");
     return <div>Loading crawler data...</div>;
   }
 

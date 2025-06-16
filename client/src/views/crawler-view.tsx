@@ -129,6 +129,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   }
 
   if (!crawler) {
+    console.log("Crawler is null/undefined, crawler loading:", crawlerLoading, "error:", crawlerError);
     return (
       <div className="min-h-screen bg-game-bg text-slate-100 flex items-center justify-center">
         <div className="text-center">
@@ -138,6 +139,13 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       </div>
     );
   }
+
+  console.log("CrawlerView - Crawler data:", {
+    id: crawler.id,
+    name: crawler.name,
+    roomId: crawler.roomId,
+    currentFloor: crawler.currentFloor
+  });
 
   const handleRoomMovement = async (direction: string) => {
     if (!tacticalData?.crawler?.id) {
