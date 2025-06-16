@@ -245,8 +245,8 @@ export function useTacticalPositioning({
 
   // Log avatar URL when used on tactical map
   useEffect(() => {
-    if (crawler?.name && crawler?.serial !== undefined) {
-      // Use the same Dicebear API as avatarUtils.ts
+    if (crawler?.name && crawler?.serial !== undefined && crawler?.serial !== null) {
+      // Use the same Dicebear API as avatarUtils.ts  
       const getAvatarUrl = (name: string, serial: string | number, backgroundColor: string = "1e293b"): string => {
         const seed = `${name}${serial}`;
         return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${backgroundColor}`;
@@ -254,6 +254,9 @@ export function useTacticalPositioning({
 
       const avatarUrl = getAvatarUrl(crawler.name, crawler.serial);
       console.log(`Avatar URL used on tactical map: ${avatarUrl}`);
+      console.log(`Crawler data for avatar: name="${crawler.name}", serial="${crawler.serial}"`);
+    } else {
+      console.log(`Avatar generation skipped - crawler data:`, { name: crawler?.name, serial: crawler?.serial });
     }
   }, [crawler?.name, crawler?.serial]);
 

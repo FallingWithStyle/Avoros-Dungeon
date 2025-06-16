@@ -116,6 +116,16 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     crawler: { name: crawler.name, serial: crawler.serial }
   });
 
+  // Debug crawler data being passed
+  useEffect(() => {
+    console.log(`TacticalViewPanel crawler data:`, { 
+      id: crawler.id, 
+      name: crawler.name, 
+      serial: crawler.serial,
+      fullCrawler: crawler 
+    });
+  }, [crawler.id, crawler.name, crawler.serial]);
+
   // Detect mobile device with more comprehensive detection
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
