@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
  */
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getAvatarUrl } from "@/lib/avatarUtils.ts";
+import { getAvatar } from "@/lib/avatarUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CrawlerCardProps {
@@ -50,7 +50,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
     setLocation(`/crawler/${crawler.id}`);
   };
 
-  const avatarUrl = getAvatarUrl(crawler.name, crawler.id);
+  const avatarUrl = getAvatar(crawler.name, crawler.serial);
 
   return (
     <Card className="bg-game-surface border-game-border h-full flex flex-col">
@@ -59,11 +59,18 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
         <div className="flex items-start justify-between mb-4 h-16">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
-              <AvatarImage
-                src={getAvatarUrl(crawler.name, crawler.serial)}
-                alt={crawler.name}
-              />
-              <AvatarFallback className="bg-blue-600">
+              {(() => {
+                const avatar = getAvatar(crawler.name, crawler.serial);
+                if (avatar.imageUrl) {
+                  return <AvatarImage src={avatar.imageUrl} alt={crawler.name} />;
+                }
+                return null;
+              })()}
+              <AvatarFallback className="bg-blue-600 text-xs">
+                {(() => {
+                  const avatar = getAvatar(crawler.name, crawler.serial);
+                  return avatar.textFallback || crawler.name.charAt(0).toUpperCase();
+                })()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">

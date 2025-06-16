@@ -89,25 +89,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
         if (result === true) {
-          // Force invalidate and refetch all room-related data
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/room-data-batch"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/current-room"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] }),
-            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] })
-          ]);
-
-          // Force refetch the data immediately
-          await Promise.all([
-            refetchTacticalData(),
-            refetchExploredRooms()
-          ]);
-
-          // Clear movement direction after a delay to ensure positioning is complete
-          setTimeout(() => {
-            RoomChangeManager.clearStoredMovementDirection();
-          }, 500);
+          // handleRoomChangeWithRefetch already invalidates the necessary queries
+          // Just refetch the tactical data to get the fresh room info
+          await refetchTacticalData();
         } else {
           toast({
             title: "Room Movement Failed",
@@ -197,6 +181,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
+      console.log(`🏠 Room changed from ${lastRoomId} to ${roomData.room.id}: ${roomData.room.name}`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player
@@ -209,15 +194,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
 
-      // Get the entry direction and position player correctly using centralized logic
-      const storedDirection = RoomChangeManager.getStoredMovementDirection();
-      const entryPosition = RoomChangeManager.getEntryPosition(storedDirection);
-
-      // Position player immediately at the correct entry point
-      combatSystem.initializePlayer(entryPosition, {
-        name: crawler.name,
-        serial: crawler.serial
-      });
+      // Note: Player positioning is handled by useTacticalPositioning hook
 
       // Trigger adjacent room prefetching when room changes
       if (roomData?.room && prefetchAdjacentRooms) {

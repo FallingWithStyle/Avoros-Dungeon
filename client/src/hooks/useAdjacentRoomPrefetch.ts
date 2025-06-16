@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -21,34 +20,31 @@ export function useAdjacentRoomPrefetch({
   enabled = true,
   radius = 2
 }: UseAdjacentRoomPrefetchProps) {
-  
+
   const prefetchAdjacentRooms = useCallback(async () => {
     if (!currentRoomId || !enabled) return null;
-    
-    console.log(`🔮 Prefetching rooms within ${radius} moves of room ${currentRoomId}`);
-    
+
     try {
       const response = await fetch(`/api/crawlers/${crawler.id}/adjacent-rooms/${radius}`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
-      console.log(`🔮 Successfully prefetched ${data.adjacentRooms?.length || 0} adjacent rooms`);
-      
+
       // Cache individual room data for instant access
       if (data.adjacentRooms) {
         data.adjacentRooms.forEach((roomData: any) => {
           // Prioritize caching based on distance - shorter times for real-time updates
           const staleTime = roomData.distance === 1 ? 2 * 60 * 1000 : 90 * 1000; // 2min for distance 1, 90s for distance 2+
           const gcTime = roomData.distance === 1 ? 5 * 60 * 1000 : 3 * 60 * 1000; // Keep in memory longer
-          
+
           queryClient.setQueryData(
             [`/api/room/${roomData.room.id}/basic-data`],
             roomData,
             { staleTime }
           );
-          
+
           // Also cache the data in a format expected by tactical data
           queryClient.setQueryData(
             [`/api/room/${roomData.room.id}/cached-tactical`],
@@ -64,7 +60,7 @@ export function useAdjacentRoomPrefetch({
           );
         });
       }
-      
+
       return data;
     } catch (error) {
       console.log(`🔮 Adjacent room prefetch failed:`, error);
@@ -98,7 +94,7 @@ export function useAdjacentRoomPrefetch({
       const timer = setTimeout(() => {
         prefetchAdjacentRooms();
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [currentRoomId, prefetchAdjacentRooms, enabled]);

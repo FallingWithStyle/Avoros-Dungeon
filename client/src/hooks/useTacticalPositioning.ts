@@ -4,8 +4,7 @@
  * Notes: Focuses on movement validation and positioning logic, relies on other hooks for input handling
  */
 
-import { useCallback, useRef } from "react";
-import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
+import { useCallback, useRef, useEffect } from "react";
 import { combatSystem } from "../../../shared/combat-system";
 import { getFacingDegreesFromMovement } from "@/lib/vector";
 import { RoomChangeManager } from "@/lib/roomChangeUtils";
@@ -31,6 +30,78 @@ export function useTacticalPositioning({
   const lastRoomTransitionTime = useRef<number>(0);
   const isTransitioning = useRef<boolean>(false);
 
+  useEffect(() => {
+    if (!effectiveTacticalData?.room || !combatState.entities) {
+      console.log("🔄 useTacticalPositioning: Missing data, skipping positioning");
+      return;
+    }
+
+    // Get stored movement direction for entry positioning
+    const entryDirection = RoomChangeManager.getStoredMovementDirection();
+    console.log(`🔄 useTacticalPositioning: Entry direction = ${entryDirection || 'none'}`);
+
+    // Check if there's already a player entity
+    const existingPlayer = combatState.entities.find((entity) => entity.id === "player");
+
+    if (existingPlayer && !entryDirection) {
+      // Player exists and no pending positioning - skip
+      console.log("🔄 useTacticalPositioning: Player exists, no entry direction, skipping");
+      return;
+    }
+
+    if (existingPlayer && entryDirection) {
+      // Player exists but we have a stored direction - reposition for room change
+      console.log(`🔄 useTacticalPositioning: Repositioning existing player for ${entryDirection} entry`);
+      const entryPosition = RoomChangeManager.getEntryPosition(entryDirection);
+
+      combatSystem.updateEntity("player", {
+        position: entryPosition
+      });
+
+      // Clear direction after successful positioning
+      console.log(`🎯 useTacticalPositioning: Repositioned player for ${entryDirection} entry, clearing stored direction`);
+      RoomChangeManager.clearStoredMovementDirection();
+      return;
+    }
+
+    console.log("🔄 useTacticalPositioning: No player found, creating new one");
+
+    if (entryDirection) {
+      console.log(`🔄 useTacticalPositioning: Using entry direction: ${entryDirection}`);
+      // Position player at entry point based on movement direction
+      const entryPosition = RoomChangeManager.getEntryPosition(entryDirection);
+
+      combatSystem.initializePlayer(
+        entryPosition,
+        {
+          name: effectiveTacticalData?.crawler?.name || "Unknown",
+          serial: effectiveTacticalData?.crawler?.serial || ""
+        }
+      );
+
+      // Clear direction after successful positioning
+      console.log(`🎯 useTacticalPositioning: Positioned player for ${entryDirection} entry, clearing stored direction`);
+      RoomChangeManager.clearStoredMovementDirection();
+    } else {
+      console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
+      // No stored direction, place at center
+      combatSystem.initializePlayer(
+        { x: 50, y: 50 },
+        {
+          name: effectiveTacticalData?.crawler?.name || "Unknown",
+          serial: effectiveTacticalData?.crawler?.serial || ""
+        });
+
+        // No direction to clear since we didn't use one
+        console.log(`🎯 useTacticalPositioning: Placed player at center (no direction to clear)`);
+    }
+
+    const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
+    if (newPlayerEntity) {
+      console.log(`🎯 Player positioned at (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
+    }
+  }, [effectiveTacticalData, combatState.entities, effectiveTacticalData?.room?.id]);
+
   const handleMovement = useCallback(
     (direction: MovementVector) => {
       if (!effectiveTacticalData || combatState.isInCombat) {
@@ -46,24 +117,40 @@ export function useTacticalPositioning({
       if (!playerEntity) {
         // Use centralized entry positioning logic
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
-        const recoveryPosition = RoomChangeManager.getEntryPosition(entryDirection);
-        
+
         if (entryDirection) {
-          console.log(`🚪 Player spawned at ${entryDirection.toUpperCase()} gate (${recoveryPosition.x}, ${recoveryPosition.y})`);
+          console.log("🔄 useTacticalPositioning: Placing player = " + entryDirection.toUpperCase() + " entry");
+          // Use the centralized positioning method
+          RoomChangeManager.handleRoomEntryPositioning(
+            entryDirection,
+            combatSystem,
+            {
+              name: effectiveTacticalData?.crawler?.name || "Unknown",
+              serial: effectiveTacticalData?.crawler?.serial || ""
+            }
+          );
+
+          // Clear direction after successful positioning
+          console.log(`🎯 useTacticalPositioning: Positioned player for ${entryDirection} entry, clearing stored direction`);
+          RoomChangeManager.clearStoredMovementDirection();
         } else {
-          console.log(`🚪 Player spawned at CENTER (${recoveryPosition.x}, ${recoveryPosition.y})`);
+          console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
+          // No stored direction, place at center
+          combatSystem.initializePlayer({ x: 50, y: 50 }, {
+            name: effectiveTacticalData?.crawler?.name || "Unknown",
+            serial: effectiveTacticalData?.crawler?.serial || ""
+          });
+
+          // No direction to clear since we didn't use one
+          console.log(`🎯 useTacticalPositioning: Placed player at center (no direction to clear)`);
         }
-        
-        combatSystem.initializePlayer(recoveryPosition, {
-          name: effectiveTacticalData?.crawler?.name || "Unknown",
-          serial: effectiveTacticalData?.crawler?.serial || ""
-        });
-        
+
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
         if (!newPlayerEntity) {
+          console.error(`❌ Failed to create player entity after initialization`);
           return;
         }
-        
+
         // Re-get the player entity for further movement processing
         playerEntity = newPlayerEntity;
       }
@@ -74,19 +161,11 @@ export function useTacticalPositioning({
         newFacing = getFacingDegreesFromMovement(direction.x, direction.y);
       }
 
-      // Check for room transition cooldown to prevent spam
-      const now = Date.now();
-      if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
-        return;
-      }
-
-      const availableDirections =
-        effectiveTacticalData.availableDirections || [];
-
       // Calculate new position
       let newX = playerEntity.position.x + direction.x * speed;
       let newY = playerEntity.position.y + direction.y * speed;
 
+      const availableDirections = effectiveTacticalData.availableDirections || [];
       const gateStart = 40; // Gate starts at 40%
       const gateEnd = 60; // Gate ends at 60%
 
@@ -146,19 +225,19 @@ export function useTacticalPositioning({
         }
       }
 
-      // Handle room transition
+      // Handle room transition - delegate to parent component
       if (roomTransitionDirection && !isTransitioning.current) {
-        console.log(`🚪 ROOM TRANSITION: Moving ${roomTransitionDirection.toUpperCase()}`);
-        lastRoomTransitionTime.current = Date.now();
+        // Check for room transition cooldown to prevent spam
+        const now = Date.now();
+        if (now - lastRoomTransitionTime.current < ROOM_TRANSITION_COOLDOWN) {
+          return;
+        }
+
+        lastRoomTransitionTime.current = now;
         isTransitioning.current = true;
 
-        // Execute the room movement immediately
-        try {
-          onRoomMovement(roomTransitionDirection);
-        } catch (error) {
-          console.error("❌ Room movement failed:", error);
-          isTransitioning.current = false; // Reset flag on error
-        }
+        // Delegate to parent component which handles roomChangeUtils
+        onRoomMovement(roomTransitionDirection);
 
         // Clear transition flag after cooldown period
         setTimeout(() => {
@@ -169,8 +248,6 @@ export function useTacticalPositioning({
       } else if (roomTransitionDirection && isTransitioning.current) {
         return;
       }
-
-      // Only clamp and move if we're NOT transitioning rooms
       // Clamp to room boundaries (5% margin from edges)
       const finalX = Math.max(5, Math.min(95, newX));
       const finalY = Math.max(5, Math.min(95, newY));

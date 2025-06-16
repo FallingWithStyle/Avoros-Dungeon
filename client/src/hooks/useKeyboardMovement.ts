@@ -115,7 +115,7 @@ export function useKeyboardMovement({
     const wasEmpty = keysPressed.current.size === 0;
     keysPressed.current.add(key);
 
-    console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+    //console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Start continuous movement if this is the first key
     if (wasEmpty) {
@@ -137,7 +137,7 @@ export function useKeyboardMovement({
 
     keysPressed.current.delete(key);
 
-    console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
+    //console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Only stop movement when no keys are pressed
     if (keysPressed.current.size === 0) {

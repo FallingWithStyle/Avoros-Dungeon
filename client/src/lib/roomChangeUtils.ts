@@ -93,13 +93,8 @@ export class RoomChangeManager {
     combatSystem: any,
     crawler: { name: string; serial?: string }
   ): void {
-    // Store the movement direction
-    this.storeMovementDirection(direction);
-    
-    // Get the correct entry position
+    // Get the correct entry position (don't store direction here - it's already stored)
     const entryPosition = this.getEntryPosition(direction);
-    
-    console.log(`🎯 Entry position for direction ${direction}: {x: ${entryPosition.x}, y: ${entryPosition.y}}`);
     
     // Position player at the correct entry point
     combatSystem.initializePlayer(entryPosition, {
@@ -107,7 +102,7 @@ export class RoomChangeManager {
       serial: crawler.serial
     });
     
-    console.log(`✅ Player positioned at entry point (${entryPosition.x}, ${entryPosition.y})`);
+    // Note: Direction clearing is handled by the caller after successful positioning
   }
 
   /**
@@ -115,8 +110,6 @@ export class RoomChangeManager {
    * Used for position resets, teleports, or any forced room transition
    */
   static handleRoomChange(crawlerId: number): void {
-    console.log("Handling room change for crawler " + crawlerId + " - invalidating essential queries only");
-
     // Only invalidate the batch query - it contains all room data we need
     queryClient.invalidateQueries({
       queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
@@ -166,6 +159,7 @@ export async function handleRoomChangeWithRefetch(
     }
 
     const result = await response.json();
+    
     if (!result.success) {
       console.error("❌ Room change unsuccessful:", result.error);
       RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
