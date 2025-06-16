@@ -31,81 +31,55 @@ export function useTacticalPositioning({
   const isTransitioning = useRef<boolean>(false);
 
   useEffect(() => {
-    if (!effectiveTacticalData?.room || !combatState.entities) {
-      console.log("🔄 useTacticalPositioning: Missing data, skipping positioning");
+    // Early return if essential data is missing
+    if (!effectiveTacticalData || !effectiveTacticalData.room || !combatState) {
       return;
     }
 
-    // Get stored movement direction for entry positioning
+    // Get stored entry direction for room positioning
     const entryDirection = RoomChangeManager.getStoredMovementDirection();
-    console.log(`🔄 useTacticalPositioning: Entry direction = ${entryDirection || 'none'}`);
 
-    // Check if there's already a player entity
-    const existingPlayer = combatState.entities.find((entity) => entity.id === "player");
+    // Find existing player entity
+    const existingPlayer = combatState.entities.find((e: any) => e.id === "player");
 
     if (existingPlayer && !entryDirection) {
-      // Player exists and no pending positioning - skip
-      console.log("🔄 useTacticalPositioning: Player exists, no entry direction, skipping");
       return;
     }
 
     if (existingPlayer && entryDirection) {
-      // Player exists but we have a stored direction - reposition for room change
-      console.log(`🔄 useTacticalPositioning: Repositioning existing player for ${entryDirection} entry`);
       const entryPosition = RoomChangeManager.getEntryPosition(entryDirection);
-
-      combatSystem.updateEntity("player", {
-        position: entryPosition
-      });
-
-      // Clear direction after successful positioning
-      console.log(`🎯 useTacticalPositioning: Repositioned player for ${entryDirection} entry, clearing stored direction`);
+      combatSystem.updateEntity("player", { position: entryPosition });
       RoomChangeManager.clearStoredMovementDirection();
       return;
     }
 
-    console.log("🔄 useTacticalPositioning: No player found, creating new one");
+    if (!existingPlayer) {
+      // Determine position based on entry direction
+      let position: { x: number; y: number };
 
-    if (entryDirection) {
-      console.log(`🔄 useTacticalPositioning: Using entry direction: ${entryDirection}`);
-      // Position player at entry point based on movement direction
-      const entryPosition = RoomChangeManager.getEntryPosition(entryDirection);
+      if (entryDirection) {
+        position = RoomChangeManager.getEntryPosition(entryDirection);
+      } else {
+        position = { x: 50, y: 50 }; // Default center position
+      }
 
-      combatSystem.initializePlayer(
-        entryPosition,
-        {
-          name: effectiveTacticalData?.crawler?.name || "Unknown",
-          serial: effectiveTacticalData?.crawler?.serial || ""
-        }
-      );
+      const crawler = effectiveTacticalData?.crawler;
 
-      // Clear direction after successful positioning
-      console.log(`🎯 useTacticalPositioning: Positioned player for ${entryDirection} entry, clearing stored direction`);
-      RoomChangeManager.clearStoredMovementDirection();
-    } else {
-      console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
-      // No stored direction, place at center
-      combatSystem.initializePlayer(
-        { x: 50, y: 50 },
-        {
-          name: effectiveTacticalData?.crawler?.name || "Unknown",
-          serial: effectiveTacticalData?.crawler?.serial || ""
-        });
+      // Initialize player with combat system using actual crawler data
+      combatSystem.initializePlayer(position, {
+        name: crawler.name,
+        serial: crawler.serial
+      });
 
-        // No direction to clear since we didn't use one
-        console.log(`🎯 useTacticalPositioning: Placed player at center (no direction to clear)`);
+      if (entryDirection) {
+        RoomChangeManager.clearStoredMovementDirection();
+      }
     }
-
-    const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
-    if (newPlayerEntity) {
-      console.log(`🎯 Player positioned at (${newPlayerEntity.position.x}, ${newPlayerEntity.position.y})`);
-    }
-  }, [effectiveTacticalData, combatState.entities, effectiveTacticalData?.room?.id]);
+  }, [effectiveTacticalData, combatState, effectiveTacticalData?.crawler]);
 
   const handleMovement = useCallback(
     (direction: MovementVector) => {
       if (!effectiveTacticalData || combatState.isInCombat) {
-        console.log("Movement blocked - no tactical data or in combat");
         return;
       }
 
@@ -119,7 +93,6 @@ export function useTacticalPositioning({
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
 
         if (entryDirection) {
-          console.log("🔄 useTacticalPositioning: Placing player = " + entryDirection.toUpperCase() + " entry");
           // Use the centralized positioning method
           RoomChangeManager.handleRoomEntryPositioning(
             entryDirection,
@@ -131,18 +104,16 @@ export function useTacticalPositioning({
           );
 
           // Clear direction after successful positioning
-          console.log(`🎯 useTacticalPositioning: Positioned player for ${entryDirection} entry, clearing stored direction`);
           RoomChangeManager.clearStoredMovementDirection();
         } else {
-          console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
           // No stored direction, place at center
-          combatSystem.initializePlayer({ x: 50, y: 50 }, {
-            name: effectiveTacticalData?.crawler?.name || "Unknown",
-            serial: effectiveTacticalData?.crawler?.serial || ""
-          });
+          const crawler = effectiveTacticalData?.crawler;
 
-          // No direction to clear since we didn't use one
-          console.log(`🎯 useTacticalPositioning: Placed player at center (no direction to clear)`);
+          // Initialize player with combat system using actual crawler data
+          combatSystem.initializePlayer({ x: 50, y: 50 }, {
+            name: crawler.name,
+            serial: crawler.serial
+          });
         }
 
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
@@ -277,6 +248,13 @@ export function useTacticalPositioning({
       ROOM_TRANSITION_COOLDOWN,
     ],
   );
+
+  // Log avatar URL when used on tactical map
+  useEffect(() => {
+    if (effectiveTacticalData?.crawler?.avatar) {
+      console.log(`Avatar URL used on tactical map: ${effectiveTacticalData.crawler.avatar}`);
+    }
+  }, [effectiveTacticalData?.crawler?.avatar]);
 
   return {
     handleMovement,

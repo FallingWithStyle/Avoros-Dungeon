@@ -82,8 +82,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Room movement handler with better fallback functionality
   const handleRoomMovement = useCallback(
     async (direction: string) => {
-      console.log(`movementDirection = ${direction.toUpperCase()}`);
-
       RoomChangeManager.storeMovementDirection(direction);
 
       try {
@@ -114,7 +112,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { handleMovement: handleTacticalMovement } = useTacticalPositioning({
     effectiveTacticalData,
     combatState,
-    onRoomMovement: handleRoomMovement
+    onRoomMovement: handleRoomMovement,
+    crawler: { name: crawler.name, serial: crawler.serial }
   });
 
   // Detect mobile device with more comprehensive detection
@@ -181,7 +180,6 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
-      console.log(`🏠 Room changed from ${lastRoomId} to ${roomData.room.id}: ${roomData.room.name}`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player

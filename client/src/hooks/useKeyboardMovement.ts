@@ -90,14 +90,12 @@ export function useKeyboardMovement({
     // Handle special keys immediately (non-movement keys)
     if (key === 'q' && onRotationRef.current) {
       event.preventDefault();
-      console.log('⌨️ Counter-clockwise rotation');
       onRotationRef.current('counter-clockwise');
       return;
     }
 
     if (key === 'e' && onRotationRef.current) {
       event.preventDefault();
-      console.log('⌨️ Clockwise rotation');
       onRotationRef.current('clockwise');
       return;
     }
