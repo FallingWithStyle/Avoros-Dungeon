@@ -303,7 +303,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                     Debug Controls
                   </CardTitle>
                   <CardDescription className={`${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} text-[0.60rem]`}>
-                    Development tools - these will be removed in production
+                    {isDbOnlyMode ? 'DB Only mode - Cost optimized' : 'Cache mode - EXPENSIVE!'}
                   </CardDescription>
                 </div>
                 <Button
@@ -497,7 +497,9 @@ function RedisFallbackControl() {
           ? "border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
           : "border-red-600 text-red-400 hover:bg-red-600/10")
       }
-      title="Forces database-only mode to conserve Redis bandwidth"
+      title={fallbackStatus?.fallbackMode 
+        ? "DB Only mode - Cost optimized, Redis cache disabled" 
+        : "Cache + DB mode - EXPENSIVE! Redis cache enabled"}
     >
       <RefreshCw className={miniIconClasses + (toggleFallbackMutation.isPending ? " animate-spin" : "")} />
       {toggleFallbackMutation.isPending 
