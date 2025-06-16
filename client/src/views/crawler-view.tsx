@@ -19,6 +19,7 @@ import type { CrawlerWithDetails } from "@shared/schema";
 import { getAvatarUrl } from "@/lib/avatarUtils.ts";
 import { ArrowLeft, Map, Target, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
@@ -173,16 +174,10 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Avatar image */}
-              <img
-                src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)}
-                alt={`${crawler.name} avatar`}
-                className="w-12 h-12 rounded-full border-2 border-game-border bg-blue-600"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="w-12 h-12 rounded-full border-2 border-game-border bg-blue-600 hidden"></div>
+              <Avatar>
+                <AvatarImage src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)} alt={`${crawler.name} avatar`} />
+                <AvatarFallback>{crawler.name}</AvatarFallback>
+              </Avatar>
               <div>
                 <h1 className="text-2xl font-bold text-white">
                   {crawler.name} {crawler.serial && `[${crawler.serial}]`}
