@@ -428,10 +428,21 @@ export function registerCrawlerRoutes(app: Express) {
       // Use crawler's scan range, default to 2 if not set
       const scanRange = crawler.scanRange || 2;
       const scannedRooms = await storage.getScannedRooms(crawlerId, scanRange);
-      res.json(scannedRooms);
+      res.json(scannedRooms || []);
     } catch (error) {
       console.error("Error fetching scanned rooms:", error);
-      res.status(500).json({ error: "Failed to fetch scanned rooms" });
+      
+      // Handle specific database timeout errors
+      if (error.message && error.message.includes('timeout exceeded')) {
+        return res.status(503).json({ 
+          error: "Database temporarily unavailable", 
+          message: "Please try again in a moment",
+          fallback: []
+        });
+      }
+      
+      // Return empty array as fallback instead of complete failure
+      res.status(200).json([]);
     }
   });
 

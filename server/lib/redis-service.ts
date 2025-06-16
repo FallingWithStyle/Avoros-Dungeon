@@ -310,9 +310,32 @@ class RedisService {
 
     try {
       const data = await this.redis?.get(`tactical:room:${roomId}`);
-      return data ? JSON.parse(data as string) : null;
+      if (!data) return null;
+
+      // Handle case where data is already an object (shouldn't happen but handle it)
+      if (typeof data === 'object') {
+        console.warn('Redis returned object instead of string, clearing key:', `tactical:room:${roomId}`);
+        await this.redis.del(`tactical:room:${roomId}`);
+        return null;
+      }
+
+      // Check if data starts with "[object" which indicates corrupted data
+      if (typeof data === 'string' && data.startsWith('[object')) {
+        console.warn('Corrupted tactical data in Redis, clearing key:', `tactical:room:${roomId}`);
+        await this.redis.del(`tactical:room:${roomId}`);
+        return null;
+      }
+
+      return JSON.parse(data as string);
     } catch (error) {
       console.error('Redis getTacticalPositions error:', error);
+      // Clear the corrupted key
+      try {
+        await this.redis?.del(`tactical:room:${roomId}`);
+        console.log('Cleared corrupted tactical Redis key:', `tactical:room:${roomId}`);
+      } catch (deleteError) {
+        console.error('Failed to clear corrupted tactical key:', deleteError);
+      }
       return null;
     }
   }
