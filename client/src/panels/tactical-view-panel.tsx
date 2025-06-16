@@ -181,6 +181,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Handle room changes and entity management
   useEffect(() => {
     if (roomData?.room && roomData.room.id !== lastRoomId) {
+      console.log(`🏠 Room changed from ${lastRoomId} to ${roomData.room.id}: ${roomData.room.name}`);
       setLastRoomId(roomData.room.id);
 
       // Clear existing entities except player
@@ -193,17 +194,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         }
       });
 
-      // Get the entry direction and position player correctly using centralized logic
-      const storedDirection = RoomChangeManager.getStoredMovementDirection();
-      const entryPosition = RoomChangeManager.getEntryPosition(storedDirection);
-
-      // Position player immediately at the correct entry point
-      combatSystem.initializePlayer(entryPosition, {
-        name: crawler.name,
-        serial: crawler.serial
-      });
-
-      // Note: Direction will be cleared by useTacticalPositioning after it uses it
+      // Note: Player positioning is handled by useTacticalPositioning hook
 
       // Trigger adjacent room prefetching when room changes
       if (roomData?.room && prefetchAdjacentRooms) {
