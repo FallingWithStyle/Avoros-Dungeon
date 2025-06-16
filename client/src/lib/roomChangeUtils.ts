@@ -149,45 +149,65 @@ export async function handleRoomChangeWithRefetch(
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Room change failed:", response.status, errorText);
-      RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
+      if (response.status === 502) {
+        console.error("❌ Server temporarily unavailable (502)");
+        RoomChangeManager.clearStoredMovementDirection();
+        return false;
+      }
+      
+      let errorText = "Unknown error";
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        // Ignore text parsing errors
+      }
+      
+      console.error("❌ Room change failed:", response.status, response.statusText);
+      RoomChangeManager.clearStoredMovementDirection();
       return false;
     }
 
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch (e) {
+      console.error("❌ Invalid JSON response from server");
+      RoomChangeManager.clearStoredMovementDirection();
+      return false;
+    }
     
     if (!result.success) {
       console.error("❌ Room change unsuccessful:", result.error);
-      RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
+      RoomChangeManager.clearStoredMovementDirection();
       return false;
     }
 
-    // Invalidate crawler data
-    queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}`]
-    });
+    // Invalidate queries only if movement was successful
+    try {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawlerId}`]
+      });
 
-    // Invalidate room data
-    queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`]
-    });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`]
+      });
 
-    // Invalidate tactical data
-    queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}/tactical-data`]
-    });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawlerId}/tactical-data`]
+      });
 
-    // Invalidate map data
-    queryClient.invalidateQueries({
-      queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`]
-    });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`]
+      });
+    } catch (e) {
+      console.error("Error invalidating queries:", e);
+    }
 
     return true;
 
   } catch (error) {
     console.error("❌ Room change request failed:", error);
-    RoomChangeManager.clearStoredMovementDirection(); // Clear on failure
+    RoomChangeManager.clearStoredMovementDirection();
     return false;
   }
 }

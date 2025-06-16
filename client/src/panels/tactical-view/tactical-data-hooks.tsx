@@ -4,7 +4,7 @@
  * Notes: Handles data fetching with proper refetch intervals and error handling for tactical view components
  */
 
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -21,9 +21,11 @@ interface TacticalDataHooks {
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails) {
-  // Reduced logging for production
-  if (process.env.NODE_ENV === 'development') {
-    console.log('useTacticalData - Crawler input:', crawler);
+  // Only log on first call, not on every re-render
+  const hasLoggedRef = useRef(false);
+  if (process.env.NODE_ENV === 'development' && !hasLoggedRef.current && crawler) {
+    console.log('useTacticalData - Initializing for crawler:', crawler.id, crawler.name);
+    hasLoggedRef.current = true;
   }
 
   // Fetch current room data
@@ -35,34 +37,48 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
     queryFn: async () => {
-      console.log('Fetching room data for crawler:', crawler?.id);
-      const response = await fetch(`/api/crawlers/${crawler?.id}/room-data-batch`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch room data: ${response.status} ${errorText}`);
+      if (!crawler?.id) {
+        throw new Error('No crawler ID available');
       }
-      const data = await response.json();
-      // Always ensure we have fallback data structure
-      return {
-        room: data.room || null,
-        scannedRooms: Array.isArray(data.scannedRooms) ? data.scannedRooms : [],
-        playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
-        factions: Array.isArray(data.factions) ? data.factions : [],
-        availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
-        fallback: data.fallback || false
-      };
+      
+      try {
+        const response = await fetch(`/api/crawlers/${crawler.id}/room-data-batch`);
+        
+        if (!response.ok) {
+          if (response.status === 502) {
+            throw new Error('Server temporarily unavailable (502)');
+          }
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch room data: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Always ensure we have fallback data structure
+        return {
+          room: data.room || null,
+          scannedRooms: Array.isArray(data.scannedRooms) ? data.scannedRooms : [],
+          playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
+          factions: Array.isArray(data.factions) ? data.factions : [],
+          availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
+          fallback: data.fallback || false
+        };
+      } catch (error) {
+        console.error('Room data fetch error:', error);
+        throw error;
+      }
     },
-    staleTime: 10000, // 10 seconds
-    refetchOnWindowFocus: true,
+    staleTime: 15000, // 15 seconds to reduce frequency
+    refetchOnWindowFocus: false, // Disable to reduce requests
     enabled: !!crawler?.id,
     retry: (failureCount, error) => {
-      // Don't retry timeout errors as aggressively
-      if (error.message.includes('503')) {
-        return failureCount < 2;
+      // More conservative retry logic
+      if (error.message.includes('502') || error.message.includes('503')) {
+        return failureCount < 1; // Only retry once for server errors
       }
-      return failureCount < 3;
+      return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    retryDelay: (attemptIndex) => Math.min(2000 * 2 ** attemptIndex, 10000), // Longer delays
   });
 
   // Fetch explored rooms
@@ -74,14 +90,31 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/explored-rooms`],
     queryFn: async () => {
-      const response = await fetch(`/api/crawlers/${crawler?.id}/explored-rooms`);
-      if (!response.ok) throw new Error('Failed to fetch explored rooms');
-      const data = await response.json();
-      // Ensure we always return an array
-      return Array.isArray(data) ? data : [];
+      if (!crawler?.id) {
+        throw new Error('No crawler ID available');
+      }
+      
+      try {
+        const response = await fetch(`/api/crawlers/${crawler.id}/explored-rooms`);
+        
+        if (!response.ok) {
+          if (response.status === 502) {
+            return []; // Return empty array for server errors
+          }
+          throw new Error('Failed to fetch explored rooms');
+        }
+        
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Explored rooms fetch error:', error);
+        return []; // Return empty array on error
+      }
     },
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 60 seconds to reduce frequency
+    refetchOnWindowFocus: false,
     enabled: !!crawler?.id,
+    retry: false, // Don't retry this query
   });
 
   // Fetch tactical data
@@ -93,12 +126,30 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/tactical-data`],
     queryFn: async () => {
-      const response = await fetch(`/api/crawlers/${crawler?.id}/tactical-data`);
-      if (!response.ok) throw new Error('Failed to fetch tactical data');
-      return response.json();
+      if (!crawler?.id) {
+        throw new Error('No crawler ID available');
+      }
+      
+      try {
+        const response = await fetch(`/api/crawlers/${crawler.id}/tactical-data`);
+        
+        if (!response.ok) {
+          if (response.status === 502) {
+            return null; // Return null for server errors
+          }
+          throw new Error('Failed to fetch tactical data');
+        }
+        
+        return response.json();
+      } catch (error) {
+        console.error('Tactical data fetch error:', error);
+        return null; // Return null on error
+      }
     },
-    staleTime: 15000, // 15 seconds
+    staleTime: 20000, // 20 seconds to reduce frequency
+    refetchOnWindowFocus: false,
     enabled: !!crawler?.id,
+    retry: false, // Don't retry this query
   });
 
   const handleRoomChange = useCallback(() => {
