@@ -5,16 +5,95 @@
  * Notes: Provides a testing environment for fast-paced, immediate action combat
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
+import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { Sword, Shield, Zap, Heart, Target, Move, Skull } from "lucide-react";
 
 export default function TestCombat() {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+  const [activeActionMode, setActiveActionMode] = useState<{
+    type: "move" | "attack" | "ability";
+    actionId: string;
+    actionName: string;
+  } | null>(null);
+
+  // Keyboard movement handler
+  const handleMovement = useCallback((direction: { x: number; y: number }) => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player) return;
+
+    // Only move if there's actual movement input
+    if (direction.x === 0 && direction.y === 0) return;
+
+    const moveSpeed = 2; // Movement speed
+    const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+    const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+
+    combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
+  }, [combatState]);
+
+  // Enable keyboard movement
+  useKeyboardMovement({
+    onMovement: handleMovement,
+    isEnabled: true,
+  });
+
+  // Hotbar action handler
+  const handleHotbarAction = useCallback((actionId: string, actionType: string, actionName: string) => {
+    if (actionType === "attack" && actionId === "basic_attack") {
+      if (selectedTarget) {
+        combatSystem.executeAttack("player", selectedTarget);
+      } else {
+        // Show available targets or attack without target
+        combatSystem.executeAttack("player");
+      }
+      setActiveActionMode(null);
+    } else if (actionType === "ability") {
+      // Handle other abilities
+      setActiveActionMode({ type: actionType as any, actionId, actionName });
+    }
+  }, [selectedTarget]);
+
+  // Keyboard hotkey handler
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const key = event.key;
+      
+      // Hotkey shortcuts
+      switch (key) {
+        case '1':
+          event.preventDefault();
+          handleHotbarAction("basic_attack", "attack", "Attack");
+          break;
+        case '2':
+          event.preventDefault();
+          handleHotbarAction("defend", "ability", "Defend");
+          break;
+        case '3':
+          event.preventDefault();
+          handleHotbarAction("special", "ability", "Special");
+          break;
+        case 'Tab':
+          event.preventDefault();
+          // Cycle through targets
+          const enemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
+          if (enemies.length > 0) {
+            const currentIndex = enemies.findIndex(e => e.id === selectedTarget);
+            const nextIndex = (currentIndex + 1) % enemies.length;
+            setSelectedTarget(enemies[nextIndex].id);
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleHotbarAction, selectedTarget, combatState]);
 
   useEffect(() => {
     // Subscribe to combat system updates
@@ -166,6 +245,26 @@ export default function TestCombat() {
   const resetScenario = () => {
     initializeTestScenario();
     setSelectedTarget(null);
+    setActiveActionMode(null);
+  };
+
+  // Get cooldown percentage for hotbar display
+  const getCooldownPercentage = (actionId: string): number => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player || !player.cooldowns) return 0;
+
+    const now = Date.now();
+    const lastUsed = player.cooldowns[actionId] || 0;
+
+    const cooldowns: Record<string, number> = {
+      "basic_attack": 800,
+      "defend": 3000,
+      "special": 5000
+    };
+
+    const cooldown = cooldowns[actionId] || 1000;
+    const timeLeft = Math.max(0, (lastUsed + cooldown) - now);
+    return (timeLeft / cooldown) * 100;
   };
 
   const player = combatState.entities.find(e => e.id === "player");
@@ -323,12 +422,102 @@ export default function TestCombat() {
               </CardContent>
             </Card>
 
-            {/* Combat Actions */}
+            {/* Hotbar */}
+            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Combat Hotbar
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1">
+                  {/* Attack Action */}
+                  <Button
+                    variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}
+                    size="sm"
+                    className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+                    onClick={() => handleHotbarAction("basic_attack", "attack", "Attack")}
+                    disabled={getCooldownPercentage("basic_attack") > 0}
+                    title="Attack [1]"
+                  >
+                    <Sword className="w-4 h-4" />
+                    <span className="text-xs text-muted-foreground">1</span>
+
+                    {/* Cooldown indicator */}
+                    {getCooldownPercentage("basic_attack") > 0 && (
+                      <div 
+                        className="absolute inset-0 bg-gray-600/50 rounded"
+                        style={{ 
+                          clipPath: `polygon(0 ${100 - getCooldownPercentage("basic_attack")}%, 100% ${100 - getCooldownPercentage("basic_attack")}%, 100% 100%, 0% 100%)` 
+                        }}
+                      />
+                    )}
+                  </Button>
+
+                  {/* Defend Action */}
+                  <Button
+                    variant={activeActionMode?.actionId === "defend" ? "default" : "outline"}
+                    size="sm"
+                    className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+                    onClick={() => handleHotbarAction("defend", "ability", "Defend")}
+                    disabled={getCooldownPercentage("defend") > 0}
+                    title="Defend [2]"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span className="text-xs text-muted-foreground">2</span>
+
+                    {/* Cooldown indicator */}
+                    {getCooldownPercentage("defend") > 0 && (
+                      <div 
+                        className="absolute inset-0 bg-gray-600/50 rounded"
+                        style={{ 
+                          clipPath: `polygon(0 ${100 - getCooldownPercentage("defend")}%, 100% ${100 - getCooldownPercentage("defend")}%, 100% 100%, 0% 100%)` 
+                        }}
+                      />
+                    )}
+                  </Button>
+
+                  {/* Special Ability */}
+                  <Button
+                    variant={activeActionMode?.actionId === "special" ? "default" : "outline"}
+                    size="sm"
+                    className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+                    onClick={() => handleHotbarAction("special", "ability", "Special")}
+                    disabled={getCooldownPercentage("special") > 0}
+                    title="Special [3]"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span className="text-xs text-muted-foreground">3</span>
+
+                    {/* Cooldown indicator */}
+                    {getCooldownPercentage("special") > 0 && (
+                      <div 
+                        className="absolute inset-0 bg-gray-600/50 rounded"
+                        style={{ 
+                          clipPath: `polygon(0 ${100 - getCooldownPercentage("special")}%, 100% ${100 - getCooldownPercentage("special")}%, 100% 100%, 0% 100%)` 
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+                
+                <div className="mt-2 text-xs text-muted-foreground">
+                  <div>WASD: Move</div>
+                  <div>1-3: Hotbar Actions</div>
+                  <div>Tab: Cycle Targets</div>
+                  {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
+                  {activeActionMode && <div className="text-green-400">Mode: {activeActionMode.actionName}</div>}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Manual Combat Actions */}
             <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-red-300 text-sm flex items-center gap-2">
                   <Sword className="w-4 h-4" />
-                  Combat Actions
+                  Manual Actions
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -340,15 +529,6 @@ export default function TestCombat() {
                 >
                   <Target className="w-4 h-4 mr-2" />
                   Attack {selectedEntity?.name || "Target"}
-                </Button>
-                
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  disabled={!combatSystem.canUseAction("player", "dodge")}
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Dodge (3s cooldown)
                 </Button>
               </CardContent>
             </Card>
