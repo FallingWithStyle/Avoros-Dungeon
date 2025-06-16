@@ -3,9 +3,10 @@
 
 ## Overview
 
-The new combat system is designed around the vision of **Dungeon Crawler Carl meets old school Legend of Zelda: Link's Awakening meets Borderlands**. This means:
+The new combat system is designed around the vision of **Legend of Zelda: Link's Awakening meets Dungeon Crawler Carl meets Borderlands**. This means:
 
-- **Fast-paced, responsive action** - No complex queues or delays
+- **Real-time action** - Click to attack, move freely, no turns or queues
+- **Immediate responsiveness** - Actions happen instantly when triggered
 - **Over-powered feel** - Players should feel strong and capable
 - **Massive variety** - Ridiculous numbers of classes, skills, spells, and equipment
 - **Environmental interaction** - Hazards, cover, and tactical positioning matter
@@ -133,32 +134,32 @@ CombatEntity {
 }
 ```
 
-## Combat Flow
+## Combat Flow (Real-time)
 
-### 1. Initialization
-- Player enters room
-- Enemies spawn at tactical positions
-- Environmental hazards activate
-- Combat state initializes
+### 1. Room Entry
+- Player enters room freely
+- Enemies spawn and begin AI behavior
+- Environmental hazards are active
+- Combat state tracks all entities
 
-### 2. Action Phase
-- Player selects action (attack, spell, ability, move)
-- System validates action (cooldown, range, resources)
-- Action executes immediately
-- Effects apply to targets
-- Cooldown starts
+### 2. Real-time Actions
+- Player clicks to attack in direction/target
+- Movement is free and immediate
+- All actions respect cooldowns only
+- Effects apply instantly
+- Multiple entities can act simultaneously
 
-### 3. Response Phase
-- AI entities respond (if applicable)
-- Environmental effects trigger
-- Status effects tick
-- Victory/defeat conditions check
+### 3. Continuous Updates
+- AI entities act independently
+- Environmental effects are always active
+- Status effects tick in real-time
+- Victory/defeat conditions check continuously
 
-### 4. Resolution
-- Combat ends when objectives met
-- Loot distribution
+### 4. Combat Resolution
+- Combat ends when all hostiles defeated
+- Loot drops immediately
 - Experience/progression updates
-- State cleanup
+- Room returns to peaceful state
 
 ## Extensibility Points
 

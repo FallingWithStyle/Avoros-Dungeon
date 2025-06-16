@@ -363,19 +363,25 @@ export default function TestCombat() {
               </div>
             </div>
 
-            {/* Turn Progress */}
+            {/* Real-time Combat Status */}
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-200">Turn Progress</h3>
-              <Progress value={combatState.turnProgress} />
+              <h3 className="text-lg font-semibold text-slate-200">Combat Status</h3>
               <div className="text-sm text-slate-400">
-                Turn: {combatState.turn} | Phase: {combatState.phase}
+                Status: {combatState.isInCombat ? "In Combat" : "Peaceful"}
               </div>
+              {combatState.isInCombat && combatState.combatStartTime && (
+                <div className="text-sm text-slate-400">
+                  Combat Duration: {Math.floor((Date.now() - combatState.combatStartTime) / 1000)}s
+                </div>
+              )}
             </div>
 
-            {/* Manual Turn Advancement */}
+            {/* Real-time Actions */}
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-200">Manual Control</h3>
-              <Button onClick={() => combatSystem.advanceTurn()}>Advance Turn</Button>
+              <h3 className="text-lg font-semibold text-slate-200">Real-time Actions</h3>
+              <div className="text-xs text-slate-400">
+                Click to attack • Mouse hover for targeting
+              </div>
             </div>
           </CardContent>
         </Card>

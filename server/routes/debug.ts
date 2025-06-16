@@ -553,4 +553,36 @@ export function registerDebugRoutes(app: Express) {
       });
     }
   });
+
+  // Return basic debug info
+  app.get("/api/debug/status", (req, res) => {
+    res.json({
+      success: true,
+      message: "Debug endpoint is working",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development"
+    });
+  });
+
+  // Get weapons for combat testing
+  app.get("/api/debug/weapons", async (req, res) => {
+    try {
+      const weapons = await storage.db
+        .select()
+        .from(storage.schema.equipment)
+        .where(storage.schema.eq(storage.schema.equipment.category, "weapon"))
+        .limit(10);
+
+      res.json({
+        success: true,
+        weapons: weapons
+      });
+    } catch (error) {
+      console.error("Error fetching weapons:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch weapons"
+      });
+    }
+  });
 }
