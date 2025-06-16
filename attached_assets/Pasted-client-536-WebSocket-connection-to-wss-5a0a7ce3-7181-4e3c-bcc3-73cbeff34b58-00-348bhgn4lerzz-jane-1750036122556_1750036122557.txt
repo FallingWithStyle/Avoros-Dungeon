@@ -1,0 +1,1154 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=zSXbGrx2ksIY' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=zSXbGrx2ksIY' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+useTacticalPositioning.ts:256 Avatar URL used on tactical map: https://api.dicebear.com/9.x/adventurer/svg?seed=Florence%20Peterson732420&backgroundColor=1e293b
+useTacticalPositioning.ts:257 Crawler data for avatar: name="Florence Peterson", serial="732420"
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+useTacticalPositioning.ts:69 Initializing player with data: {name: 'Florence Peterson', serial: 732420, serialType: 'number', position: {…}}
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+roomChangeUtils.ts:145 
+            
+            
+           POST https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/api/crawlers/5/move 500 (Internal Server Error)
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:145
+(anonymous) @ tactical-view-panel.tsx:88
+(anonymous) @ useTacticalPositioning.ts:205
+(anonymous) @ useKeyboardMovement.ts:62
+setInterval
+startMovement @ useKeyboardMovement.ts:58
+handleKeyDown @ useKeyboardMovement.ts:120
+roomChangeUtils.ts:153 ❌ Room change failed: 500 {"message":"Movement request timed out. Please try again."}
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:153
+await in handleRoomChangeWithRefetch
+(anonymous) @ tactical-view-panel.tsx:88
+(anonymous) @ useTacticalPositioning.ts:205
+(anonymous) @ useKeyboardMovement.ts:62
+setInterval
+startMovement @ useKeyboardMovement.ts:58
+handleKeyDown @ useKeyboardMovement.ts:120
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
+dungeon-map.tsx:355 DungeonMap - Current room detection: {currentRoomDataId: undefined, crawlerRoomId: undefined, actualCurrentRoomId: undefined, crawlerFloor: 1}
+dungeon-map.tsx:383 Room 53013 (Ruined Castle Grounds Entrance) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53016 (Descent to Ancient Crypts) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53018 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53019 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53020 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53021 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53025 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53026 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53027 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53028 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53029 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53035 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53036 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53037 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53038 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53042 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53043 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53044 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53045 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53046 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53047 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53048 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53053 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53054 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53055 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53064 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53065 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53070 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53071 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53078 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53096 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53097 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53098 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53099 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53114 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53122 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53132 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53133 (Overgrown Courtyard) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53141 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53183 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53184 (Old Armory) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53191 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53193 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53199 (Treasure Cache) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53200 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53207 (Collapsed Watchtower) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53210 (Ruined Barracks) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53213 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53214 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53215 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53217 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53218 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53219 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53224 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53229 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53231 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53232 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53233 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53238 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:383 Room 53239 (Corridor) - isCurrentRoom: false, actualCurrentRoomId: undefined, crawlerRoomId: undefined
+dungeon-map.tsx:577 DungeonMap - Current room found: Collapsed Watchtower (ID: 53036)
