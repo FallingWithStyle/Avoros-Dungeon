@@ -16,7 +16,7 @@ import RoomEventsPanel from "@/panels/room-events-panel";
 import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { getAvatarUrl } from "@/lib/avatarUtils.ts";
+import { getAvatar } from "@/lib/avatarUtils";
 import { ArrowLeft, Map, Target, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -175,9 +175,18 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
             <div className="flex items-center space-x-4">
               {/* Avatar image */}
               <Avatar>
-                <AvatarImage src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)} alt={`${crawler.name} avatar`} />
-                <AvatarFallback className="bg-blue-600">
-                  {crawler.name.charAt(0).toUpperCase()}
+                {(() => {
+                  const avatar = getAvatar(crawler.name, crawler.serial);
+                  if (avatar.imageUrl) {
+                    return <AvatarImage src={avatar.imageUrl} alt={`${crawler.name} avatar`} />;
+                  }
+                  return null;
+                })()}
+                <AvatarFallback className="bg-blue-600 text-xs">
+                  {(() => {
+                    const avatar = getAvatar(crawler.name, crawler.serial);
+                    return avatar.textFallback || crawler.name.charAt(0).toUpperCase();
+                  })()}
                 </AvatarFallback>
               </Avatar>
               <div>

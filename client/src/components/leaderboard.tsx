@@ -11,6 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAvatarUrl } from "@/lib/avatarUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
 
+// New function to get avatar URL or fallback
+function getAvatar(name: string | null | undefined, serial: string | null | undefined): { imageUrl?: string; textFallback?: string } {
+  if (name && serial) {
+    return { imageUrl: getAvatarUrl(name, serial) }; // Use existing avatar URL generation
+  } else {
+    const fallbackText = `[${name || 'Unknown'}, ${serial || 'Unknown'}]`;
+    return { textFallback: fallbackText };
+  }
+}
+
 export default function Leaderboard() {
   const { data: topCrawlers, isLoading } = useQuery<CrawlerWithDetails[]>({
     queryKey: ["/api/leaderboards/crawlers"],
@@ -62,9 +72,18 @@ export default function Leaderboard() {
                   {index + 1}
                 </div>
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={getAvatarUrl(crawler.name || 'Unknown', crawler.serial || crawler.id)} alt={crawler.name || 'Unknown'} />
-                  <AvatarFallback className="bg-crawler text-white text-xs">
-                    {(crawler.name || 'U').charAt(0).toUpperCase()}
+                  {(() => {
+                    const avatar = getAvatar(crawler.name, crawler.serial);
+                    if (avatar.imageUrl) {
+                      return <AvatarImage src={avatar.imageUrl} alt={crawler.name || 'Unknown'} />;
+                    }
+                    return null;
+                  })()}
+                  <AvatarFallback className="bg-blue-600 text-xs">
+                    {(() => {
+                      const avatar = getAvatar(crawler.name, crawler.serial);
+                      return avatar.textFallback || (crawler.name || 'Unknown').charAt(0).toUpperCase();
+                    })()}
                   </AvatarFallback>
                 </Avatar>
                 <div>

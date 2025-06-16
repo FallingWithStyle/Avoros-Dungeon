@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Zap, Shield, Gauge, Brain, Users, Archive, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getAvatarUrl } from "@/lib/avatarUtils";
+import { getAvatar } from "@/lib/avatarUtils"; // Import getAvatar
 
 interface CrawlerCandidate {
   id: string;
@@ -96,9 +97,18 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
             <CardHeader className="pb-3 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={getAvatarUrl(candidate.name, candidate.serial)} alt={candidate.name} />
-                  <AvatarFallback className="bg-blue-600">
-                    {candidate.name.charAt(0).toUpperCase()}
+                  {(() => {
+                    const avatar = getAvatar(candidate.name, candidate.serial);
+                    if (avatar.imageUrl) {
+                      return <AvatarImage src={avatar.imageUrl} alt={candidate.name} />;
+                    }
+                    return null;
+                  })()}
+                  <AvatarFallback className="bg-blue-600 text-xs">
+                    {(() => {
+                      const avatar = getAvatar(candidate.name, candidate.serial);
+                      return avatar.textFallback || candidate.name.charAt(0).toUpperCase();
+                    })()}
                   </AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-lg">{candidate.name}</CardTitle>
@@ -224,9 +234,18 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={getAvatarUrl(selectedCandidate.name, selectedCandidate.serial)} alt={selectedCandidate.name} />
-                  <AvatarFallback className="bg-crawler text-white">
-                    {selectedCandidate.name.charAt(0).toUpperCase()}
+                  {(() => {
+                    const avatar = getAvatar(selectedCandidate.name, selectedCandidate.serial);
+                    if (avatar.imageUrl) {
+                      return <AvatarImage src={avatar.imageUrl} alt={selectedCandidate.name} />;
+                    }
+                    return null;
+                  })()}
+                  <AvatarFallback className="bg-blue-600 text-xs">
+                    {(() => {
+                      const avatar = getAvatar(selectedCandidate.name, selectedCandidate.serial);
+                      return avatar.textFallback || selectedCandidate.name.charAt(0).toUpperCase();
+                    })()}
                   </AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-xl text-slate-200">{selectedCandidate.name}</CardTitle>
