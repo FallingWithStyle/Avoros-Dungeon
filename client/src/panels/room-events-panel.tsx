@@ -38,6 +38,23 @@ interface RoomData {
 }
 
 export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
+  // Early return if essential data is missing
+  if (!crawler?.id) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Room Events
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-slate-400">Loading crawler data...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [events, setEvents] = useState<RoomEvent[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
