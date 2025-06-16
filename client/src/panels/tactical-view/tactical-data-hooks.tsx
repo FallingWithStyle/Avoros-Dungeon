@@ -53,12 +53,9 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/explored-rooms`],
     queryFn: async () => {
-      console.log("Fetching explored rooms for crawler:", crawler?.id);
       const response = await fetch(`/api/crawlers/${crawler?.id}/explored-rooms`);
       if (!response.ok) throw new Error('Failed to fetch explored rooms');
-      const data = await response.json();
-      console.log("Explored rooms response:", data);
-      return data;
+      return response.json();
     },
     staleTime: 30000, // 30 seconds
     enabled: !!crawler?.id,
@@ -73,12 +70,9 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/tactical-data`],
     queryFn: async () => {
-      console.log("Fetching tactical data for crawler:", crawler?.id);
       const response = await fetch(`/api/crawlers/${crawler?.id}/tactical-data`);
       if (!response.ok) throw new Error('Failed to fetch tactical data');
-      const data = await response.json();
-      console.log("Tactical data response:", data);
-      return data;
+      return response.json();
     },
     staleTime: 15000, // 15 seconds
     enabled: !!crawler?.id,
@@ -103,26 +97,16 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     };
   }
 
-  console.log("useTacticalData - Final return values:", {
-    roomData,
-    exploredRooms: exploredRooms?.length,
-    tacticalData: !!tacticalData,
-    isLoading,
-    tacticalLoading,
-    tacticalError,
-    crawlerId: crawler?.id,
-    crawlerRoomId: crawler?.roomId
-  });
-
   return {
     roomData,
-    exploredRooms,
-    tacticalData,
+    exploredRooms: exploredRooms?.length || 0,
+    tacticalData: !!tacticalData,
     isLoading,
     tacticalLoading,
     tacticalError,
     refetchTacticalData,
     refetchExploredRooms,
-    handleRoomChange
+    handleRoomChange,
   };
 }
+`

@@ -243,7 +243,7 @@ export function useTacticalPositioning({
     ],
   );
 
-  // Log avatar URL when used on tactical map
+  // Remove avatar URL logging
   useEffect(() => {
     if (crawler?.name && crawler?.serial !== undefined && crawler?.serial !== null) {
       // Use the same Dicebear API as avatarUtils.ts  

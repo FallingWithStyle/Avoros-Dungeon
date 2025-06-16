@@ -301,10 +301,8 @@ const getFactionBorderStyle = (
 
 export default function DungeonMap(props: DungeonMapProps | undefined) {
   const crawler = props?.crawler;
-  console.log("DungeonMap - Props and crawler:", { props, crawler });
   
   if (!crawler) {
-    console.log("DungeonMap - No crawler data provided");
     return <div>Loading crawler data...</div>;
   }
 
@@ -361,14 +359,6 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // Current room ID - declare this early so it can be used throughout
   // Use multiple sources to ensure we get the correct room ID, prioritizing tactical data
   const actualCurrentRoomId = tacticalData?.room?.id || currentRoomData?.room?.id || crawler.roomId;
-  
-  console.log("DungeonMap - Current room detection:", {
-    tacticalRoomId: tacticalData?.room?.id,
-    currentRoomDataId: currentRoomData?.room?.id,
-    crawlerRoomId: crawler.roomId,
-    actualCurrentRoomId,
-    crawlerFloor: crawler.currentFloor
-  });
 
   // Fetch ALL rooms on the current floor
   const { data: allRoomsOnFloor = [] } = useQuery({
@@ -396,7 +386,6 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
         String(room.id) === String(actualCurrentRoomId) ||
         room.id === actualCurrentRoomId
       );
-      console.log(`Room ${room.id} (${room.name}) - isCurrentRoom: ${isCurrentRoom}, actualCurrentRoomId: ${actualCurrentRoomId}, crawlerRoomId: ${crawler.roomId}`);
       visibleRoomsMap.set(`${room.x},${room.y}`, {
         ...room,
         isCurrentRoom: !!isCurrentRoom,
@@ -595,8 +584,6 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
     floorRooms.find((r) => Number(r.id) === Number(crawler.roomId)) ||
     floorRooms.find((r) => r.isCurrentRoom);
     
-  console.log("DungeonMap - Current room found:", currentRoom ? `${currentRoom.name} (ID: ${currentRoom.id})` : 'None');
-
   if (!currentRoom) {
     return (
       <Card className="bg-game-panel border-game-border">
