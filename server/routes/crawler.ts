@@ -282,7 +282,7 @@ export function registerCrawlerRoutes(app: Express) {
             cachedData = null;
           }
         }
-        
+
         if (cachedData) {
           return res.json({
             room: currentRoom,
@@ -572,6 +572,91 @@ export function registerCrawlerRoutes(app: Express) {
       }
 
       res.status(500).json({ message: errorMessage });
+    }
+  });
+
+  // Get current room data with enhanced error handling and caching
+  app.get("/api/crawlers/:id/current-room", async (req, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      if (isNaN(crawlerId)) {
+        return res.status(400).json({ message: "Invalid crawler ID" });
+      }
+
+      // Use cached data if available
+      try {
+        const cached = await redisService.get(`crawler:${crawlerId}:current-room`);
+        if (cached) {
+          return res.json(cached);
+        }
+      } catch (cacheError) {
+        console.warn("Cache error for current room:", cacheError.message);
+        // Continue without cache
+      }
+
+      const roomData = await storage.explorationStorage.getCurrentRoom(crawlerId);
+      if (!roomData) {
+        return res.status(404).json({ message: "Current room not found" });
+      }
+
+      // Try to cache, but don't fail if caching fails
+      try {
+        await redisService.set(`crawler:${crawlerId}:current-room`, roomData, 30);
+      } catch (cacheError) {
+        console.warn("Failed to cache current room data:", cacheError.message);
+      }
+
+      res.json(roomData);
+    } catch (error) {
+      console.error("Error fetching current room:", error);
+      res.status(500).json({ message: "Failed to fetch current room data" });
+    }
+  });
+
+  // Get comprehensive room data for tactical display
+  app.get("/api/crawlers/:id/room-data-batch", async (req, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      if (isNaN(crawlerId)) {
+        return res.status(400).json({ message: "Invalid crawler ID" });
+      }
+
+      // Fetch data with individual error handling
+      let crawler, currentRoom, exploredRooms;
+
+      try {
+        crawler = await storage.crawlerStorage.getCrawler(crawlerId);
+      } catch (error) {
+        console.error("Error fetching crawler:", error);
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      if (!crawler) {
+        return res.status(404).json({ message: "Crawler not found" });
+      }
+
+      try {
+        currentRoom = await storage.explorationStorage.getCurrentRoom(crawlerId);
+      } catch (error) {
+        console.error("Error fetching current room:", error);
+        currentRoom = null;
+      }
+
+      try {
+        exploredRooms = await storage.explorationStorage.getExploredRooms(crawlerId);
+      } catch (error) {
+        console.error("Error fetching explored rooms:", error);
+        exploredRooms = [];
+      }
+
+      res.json({
+        crawler,
+        room: currentRoom,
+        exploredRooms: exploredRooms || []
+      });
+    } catch (error) {
+      console.error("Error fetching room data batch:", error);
+      res.status(500).json({ message: "Failed to fetch room data" });
     }
   });
 }
