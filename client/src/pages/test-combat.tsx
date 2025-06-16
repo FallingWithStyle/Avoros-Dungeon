@@ -397,15 +397,31 @@ export default function TestCombat() {
                         {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
                         {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
 
-                        {/* Facing indicator */}
+                        {/* Facing direction indicator - colored arrows based on entity type */}
                         {entity.facing !== undefined && (
-                          <div 
-                            className="absolute w-3 h-0.5 bg-yellow-400 origin-left"
+                          <div
+                            className="absolute w-12 h-12 pointer-events-none z-10"
                             style={{
-                              transform: `rotate(${entity.facing}deg) translateX(12px)`,
-                              transformOrigin: 'left center'
+                              transform: `rotate(${entity.facing}deg)`,
+                              transformOrigin: "center",
                             }}
-                          />
+                          >
+                            <div className="w-full h-full flex items-start justify-center">
+                              <div
+                                className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                                  entity.type === "player" 
+                                    ? "border-b-blue-400" 
+                                    : entity.type === "hostile"
+                                    ? "border-b-red-400"
+                                    : "border-b-green-400"
+                                }`}
+                                style={{
+                                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
+                                  marginTop: "-6px", // Position arrow to extend from behind the circle
+                                }}
+                              />
+                            </div>
+                          </div>
                         )}
 
                         {/* Health bar */}
