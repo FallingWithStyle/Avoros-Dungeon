@@ -18,6 +18,7 @@ import CrawlerMode from "@/pages/crawler-mode";
 import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
 import CrawlerLoadout from "@/pages/crawler-loadout";
+import TestCombat from "@/pages/test-combat";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,6 +49,7 @@ function Router() {
               <CrawlerLoadout crawlerId={params.id} />
             )} />
             <Route path="/account" component={Account} />
+            <Route path="/test" component={TestCombat} />
           </>
         )}
         <Route component={NotFound} />
