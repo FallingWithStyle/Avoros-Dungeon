@@ -47,7 +47,7 @@ export function useTacticalPositioning({
         const entryDirection = RoomChangeManager.getStoredMovementDirection();
         
         if (entryDirection) {
-          console.log("Placing player = " + entryDirection.toUpperCase() + " entry");
+          console.log("🔄 useTacticalPositioning: Placing player = " + entryDirection.toUpperCase() + " entry");
           // Use the centralized positioning method
           RoomChangeManager.handleRoomEntryPositioning(
             entryDirection,
@@ -58,7 +58,7 @@ export function useTacticalPositioning({
             }
           );
         } else {
-          console.log("Placing player = CENTER (no entry direction)");
+          console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
           // No stored direction, place at center
           combatSystem.initializePlayer({ x: 50, y: 50 }, {
             name: effectiveTacticalData?.crawler?.name || "Unknown",

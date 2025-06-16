@@ -89,25 +89,9 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       try {
         const result = await handleRoomChangeWithRefetch(crawler.id, direction);
         if (result === true) {
-          // Force invalidate and refetch all room-related data
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/room-data-batch"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/current-room"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/tactical-data"] }),
-            queryClient.invalidateQueries({ queryKey: ["/api/crawlers/" + crawler.id + "/explored-rooms"] }),
-            queryClient.invalidateQueries({ queryKey: ["dungeonMap"] })
-          ]);
-
-          // Force refetch the data immediately
-          await Promise.all([
-            refetchTacticalData(),
-            refetchExploredRooms()
-          ]);
-
-          // Clear movement direction after a delay to ensure positioning is complete
-          setTimeout(() => {
-            RoomChangeManager.clearStoredMovementDirection();
-          }, 500);
+          // handleRoomChangeWithRefetch already invalidates the necessary queries
+          // Just refetch the tactical data to get the fresh room info
+          await refetchTacticalData();
         } else {
           toast({
             title: "Room Movement Failed",
@@ -218,6 +202,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         name: crawler.name,
         serial: crawler.serial
       });
+
+      // Clear the stored direction immediately after positioning
+      if (storedDirection) {
+        console.log(`🎯 Positioned player at entry point for direction: ${storedDirection}, clearing stored direction`);
+        RoomChangeManager.clearStoredMovementDirection();
+      }
 
       // Trigger adjacent room prefetching when room changes
       if (roomData?.room && prefetchAdjacentRooms) {
