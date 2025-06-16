@@ -22,21 +22,25 @@ export function getAvatarUrl(name: string, serial: string | number, backgroundCo
  * Never uses crawler ID as part of the avatar generation
  *
  * @param name - The crawler's name
- * @param serial - The crawler's serial number
+ * @param serial - The crawler's serial number (string or number)
  * @returns Object with either imageUrl or textFallback
  */
-export function getAvatar(name?: string, serial?: string): { imageUrl?: string; textFallback?: string } {
+export function getAvatar(name?: string, serial?: string | number): { imageUrl?: string; textFallback?: string } {
+  // Convert to strings safely
+  const nameStr = name ? String(name) : "";
+  const serialStr = serial !== undefined && serial !== null ? String(serial) : "";
+
   // Check if we have valid name and serial
-  if (name && name.trim() && serial && serial.trim()) {
+  if (nameStr.trim() && serialStr.trim()) {
     return {
-      imageUrl: getAvatarUrl(name, serial)
+      imageUrl: getAvatarUrl(nameStr, serialStr)
     };
   }
-  
+
   // Return text fallback if name/serial are missing or invalid
-  const fallbackName = name?.trim() || "Unknown";
-  const fallbackSerial = serial?.trim() || "???";
-  
+  const fallbackName = nameStr.trim() || "Unknown";
+  const fallbackSerial = serialStr.trim() || "???";
+
   return {
     textFallback: `${fallbackName} [${fallbackSerial}]`
   };
