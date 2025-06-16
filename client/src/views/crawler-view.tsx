@@ -100,7 +100,7 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
   const tacticalData = roomBatchData?.tacticalData;
   const scannedRooms = roomBatchData?.scannedRooms;
 
-  
+
 
   // Only show loading on initial load, not on background refetches
   const isInitialLoading = crawlerLoading && !crawler;
@@ -139,13 +139,6 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
       </div>
     );
   }
-
-  console.log("CrawlerView - Crawler data:", {
-    id: crawler.id,
-    name: crawler.name,
-    roomId: crawler.roomId,
-    currentFloor: crawler.currentFloor
-  });
 
   const handleRoomMovement = async (direction: string) => {
     if (!tacticalData?.crawler?.id) {

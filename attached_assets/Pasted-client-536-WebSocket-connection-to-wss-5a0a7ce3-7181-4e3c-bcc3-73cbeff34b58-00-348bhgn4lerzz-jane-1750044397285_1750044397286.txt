@@ -1,0 +1,141 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=-3Dj4DxtyDT1' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=-3Dj4DxtyDT1' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+tactical-data-hooks.tsx:24 useTacticalData - Crawler input: Object
+tactical-data-hooks.tsx:24 useTacticalData - Crawler input: Object
+tactical-data-hooks.tsx:24 useTacticalData - Crawler input: Object
+useTacticalPositioning.ts:256 Avatar URL used on tactical map: https://api.dicebear.com/9.x/adventurer/svg?seed=Florence%20Peterson732420&backgroundColor=1e293b
+useTacticalPositioning.ts:257 Crawler data for avatar: name="Florence Peterson", serial="732420"
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=c64965cc
+main.tsx:42 Line: 16670
+main.tsx:43 Column: 15
+main.tsx:44 Error object: TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
+chunk-WERSD76P.js?v=c64965cc:16670 Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=c64965cc
+main.tsx:42 Line: 16670
+main.tsx:43 Column: 15
+main.tsx:44 Error object: TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
+chunk-WERSD76P.js?v=c64965cc:16670 Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
+chunk-WERSD76P.js?v=c64965cc:14032 The above error occurred in the <RoomEventsPanel> component:
+
+    at RoomEventsPanel (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/panels/room-events-panel.tsx:37:43)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at CrawlerView (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/views/crawler-view.tsx:34:39)
+    at CrawlerMode (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/pages/crawler-mode.tsx:18:39)
+    at component (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=GFasaT4CdEv1ZJLAJtTId:63:161)
+    at Route (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:323:16)
+    at Switch (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:379:17)
+    at div
+    at Router (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=GFasaT4CdEv1ZJLAJtTId:34:42)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=c64965cc:38:15)
+    at TooltipProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=c64965cc:63:5)
+    at QueryClientProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=c64965cc:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=c64965cc:14032
+chunk-WERSD76P.js?v=c64965cc:14032 The above error occurred in the <RoomEventsPanel> component:
+
+    at RoomEventsPanel (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/panels/room-events-panel.tsx:37:43)
+    at div
+    at details
+    at div
+    at div
+    at div
+    at div
+    at div
+    at CrawlerView (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/views/crawler-view.tsx:34:39)
+    at CrawlerMode (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/pages/crawler-mode.tsx:18:39)
+    at component (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=GFasaT4CdEv1ZJLAJtTId:63:161)
+    at Route (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:323:16)
+    at Switch (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:379:17)
+    at div
+    at Router (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=GFasaT4CdEv1ZJLAJtTId:34:42)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=c64965cc:38:15)
+    at TooltipProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=c64965cc:63:5)
+    at QueryClientProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=c64965cc:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=c64965cc:14032
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=c64965cc
+main.tsx:42 Line: 9129
+main.tsx:43 Column: 15
+main.tsx:44 Error object: TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
+chunk-WERSD76P.js?v=c64965cc:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'id')
+    at room-events-panel.tsx:62:47
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+    at commitRoot (chunk-WERSD76P.js?v=c64965cc:19277:13)
