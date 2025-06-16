@@ -1,0 +1,491 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=nTKtfvaqwKVH' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=nTKtfvaqwKVH' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+crawler-view.tsx:48 🔍 Crawler Query Debug: {crawlerId: '5'}
+useTacticalPositioning.ts:35 🔄 useTacticalPositioning: Missing data, skipping positioning
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:67 🔄 useTacticalPositioning: No player found, creating new one
+useTacticalPositioning.ts:86 🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)
+combat-system.ts:609 ✅ Created new player entity at position (50, 50)
+useTacticalPositioning.ts:96 🎯 useTacticalPositioning: Placed player at center (no direction to clear)
+useTacticalPositioning.ts:101 🎯 Player positioned at (50, 50)
+tactical-view-panel.tsx:184 🏠 Room changed from null to 53048: Old Armory
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:153 ⌨️ Window blur - stopping movement
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+tactical-view-panel.tsx:85 movementDirection = WEST
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = west
+useTacticalPositioning.ts:54 🔄 useTacticalPositioning: Repositioning existing player for west entry
+useTacticalPositioning.ts:62 🎯 useTacticalPositioning: Repositioned player for west entry, clearing stored direction
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:100 ⌨️ Clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:93 ⌨️ Counter-clockwise rotation
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+tactical-view-panel.tsx:85 movementDirection = SOUTH
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = south
+useTacticalPositioning.ts:54 🔄 useTacticalPositioning: Repositioning existing player for south entry
+useTacticalPositioning.ts:62 🎯 useTacticalPositioning: Repositioned player for south entry, clearing stored direction
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+tactical-view-panel.tsx:85 movementDirection = EAST
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = east
+useTacticalPositioning.ts:54 🔄 useTacticalPositioning: Repositioning existing player for east entry
+useTacticalPositioning.ts:62 🎯 useTacticalPositioning: Repositioned player for east entry, clearing stored direction
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+tactical-view-panel.tsx:85 movementDirection = NORTH
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = north
+useTacticalPositioning.ts:54 🔄 useTacticalPositioning: Repositioning existing player for north entry
+useTacticalPositioning.ts:62 🎯 useTacticalPositioning: Repositioned player for north entry, clearing stored direction
+useTacticalPositioning.ts:41 🔄 useTacticalPositioning: Entry direction = none
+useTacticalPositioning.ts:48 🔄 useTacticalPositioning: Player exists, no entry direction, skipping
+useKeyboardMovement.ts:153 ⌨️ Window blur - stopping movement
