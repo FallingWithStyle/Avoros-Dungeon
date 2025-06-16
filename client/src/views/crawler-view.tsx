@@ -176,7 +176,9 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
               {/* Avatar image */}
               <Avatar>
                 <AvatarImage src={getAvatarUrl(crawler.name, crawler.serial || crawler.id)} alt={`${crawler.name} avatar`} />
-                <AvatarFallback>{crawler.name}</AvatarFallback>
+                <AvatarFallback className="bg-blue-600">
+                  {crawler.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold text-white">

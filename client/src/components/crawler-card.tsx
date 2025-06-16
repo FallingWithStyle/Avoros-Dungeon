@@ -64,6 +64,7 @@ export default function CrawlerCard({ crawler }: CrawlerCardProps) {
                 alt={crawler.name}
               />
               <AvatarFallback className="bg-blue-600">
+                {crawler.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">

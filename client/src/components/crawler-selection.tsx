@@ -97,7 +97,7 @@ export default function CrawlerSelection({ onSelect, onCancel }: CrawlerSelectio
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={getAvatarUrl(candidate.name, candidate.serial)} alt={candidate.name} />
-                  <AvatarFallback className="bg-crawler text-white">
+                  <AvatarFallback className="bg-blue-600">
                     {candidate.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
