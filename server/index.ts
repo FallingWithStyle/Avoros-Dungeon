@@ -111,7 +111,10 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';
 
   process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    // Don't exit, just log the error
+    // Don't exit, just log the error - but ensure it's handled
+    if (promise && typeof promise.catch === 'function') {
+      promise.catch(() => {}); // Silence the rejection
+    }
   });
 
   // Start the server with error handling

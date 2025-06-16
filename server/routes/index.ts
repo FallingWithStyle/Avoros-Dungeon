@@ -52,12 +52,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   wss.on("connection", (ws, request) => {
     console.log("WebSocket client connected from:", request.socket.remoteAddress);
 
-    // Send welcome message
-    ws.send(JSON.stringify({
-      type: "connection",
-      data: { message: "Connected to game server" },
-      timestamp: Date.now()
-    }));
+    // Send welcome message with error handling
+    try {
+      ws.send(JSON.stringify({
+        type: "connection",
+        data: { message: "Connected to game server" },
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.error("Error sending welcome message:", error);
+    }
 
     ws.on("message", (data) => {
       try {
@@ -65,29 +69,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("WebSocket message received:", message);
 
         // Echo the message back to sender
-        ws.send(JSON.stringify({
-          type: "echo",
-          data: message,
-          timestamp: Date.now()
-        }));
+        try {
+          ws.send(JSON.stringify({
+            type: "echo",
+            data: message,
+            timestamp: Date.now()
+          }));
+        } catch (sendError) {
+          console.error("Error echoing message:", sendError);
+        }
 
         // Broadcast message to all other connected clients
         wss.clients.forEach((client) => {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: "broadcast",
-              data: message,
-              timestamp: Date.now()
-            }));
+            try {
+              client.send(JSON.stringify({
+                type: "broadcast",
+                data: message,
+                timestamp: Date.now()
+              }));
+            } catch (broadcastError) {
+              console.error("Error broadcasting message:", broadcastError);
+            }
           }
         });
       } catch (error) {
         console.error("Error processing WebSocket message:", error);
-        ws.send(JSON.stringify({
-          type: "error",
-          data: { message: "Failed to process message" },
-          timestamp: Date.now()
-        }));
+        try {
+          ws.send(JSON.stringify({
+            type: "error",
+            data: { message: "Failed to process message" },
+            timestamp: Date.now()
+          }));
+        } catch (sendError) {
+          console.error("Error sending error message:", sendError);
+        }
       }
     });
 
@@ -97,6 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on("error", (error) => {
       console.error("WebSocket error:", error);
+      // Don't throw - just log the error
     });
   });
 
@@ -105,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Redis status endpoint
   app.get("/api/system/redis-status", async (req, res) => {
     try {
-      const { redisService } = await import('./lib/redis-service');
+      const { redisService } = await import('../lib/redis-service');
       const isAvailable = await redisStatus.getStatus();
       const isForcedFallback = redisService.isForceFallbackMode();
 
@@ -122,10 +139,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message
       });
     } catch (error) {
+      console.error("Redis status check error:", error);
       res.json({ 
         available: false, 
-        fallbackMode: false,
-        message: 'Redis status check failed'
+        fallbackMode: true, // Default to fallback mode on error
+        message: 'Redis status check failed - using fallback mode'
       });
     }
   });
