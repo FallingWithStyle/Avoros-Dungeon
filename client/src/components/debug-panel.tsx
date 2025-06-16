@@ -66,6 +66,17 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     retry: false,
   });
 
+  // Get Redis fallback status for color theming
+  const { data: fallbackStatus } = useQuery({
+    queryKey: ["/api/debug/redis-fallback"],
+    refetchInterval: 5000,
+    retry: false,
+  });
+
+  // Determine color scheme based on fallback mode
+  const isDbOnlyMode = fallbackStatus?.fallbackMode;
+  const colorScheme = isDbOnlyMode ? 'yellow' : 'red';
+
   const toggleMinimized = () => {
     const newState = !minimized;
     setMinimized(newState);
@@ -247,31 +258,31 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
-      <Card className="bg-red-900/20 border-red-600/30 rounded-none border-x-0 border-b-0 shadow-md">
+      <Card className={`${isDbOnlyMode ? 'bg-yellow-900/20 border-yellow-600/30' : 'bg-red-900/20 border-red-600/30'} rounded-none border-x-0 border-b-0 shadow-md`}>
         <CardHeader className="p-2 pb-1">
           {/* Show different content based on minimized state */}
           {minimized ? (
             /* Collapsed: Single line with all info */
-            <div className="text-[0.60rem] text-red-300 font-mono flex items-center gap-1">
+            <div className={`text-[0.60rem] ${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} font-mono flex items-center gap-1`}>
               <span>
                 {getVersionInfo().displayVersion} (
                 {getVersionInfo().buildTime.split("T")[0]})
               </span>
-              <Wrench className="w-3 h-3 text-red-400" />
+              <Wrench className={`w-3 h-3 ${isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}`} />
               <span>Debug Controls</span>
               <span>
                 Floor{" "}
                 {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
                 Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
-              <span className="text-red-400">|</span>
+              <span className={isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}>|</span>
               <span>ID: {activeCrawler?.id ?? "N/A"}</span>
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={toggleMinimized}
                 aria-label="Expand Debug Panel"
-                className="text-red-200 hover:bg-red-900/30 p-1 h-4 w-4 ml-auto"
+                className={`${isDbOnlyMode ? 'text-yellow-200 hover:bg-yellow-900/30' : 'text-red-200 hover:bg-red-900/30'} p-1 h-4 w-4 ml-auto`}
               >
                 <ChevronUp className="w-3 h-3" />
               </Button>
@@ -280,18 +291,18 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             /* Expanded: Version at top, then title row */
             <>
               {/* Version and build date at top-left */}
-              <div className="text-red-300 text-[0.60rem] font-mono mb-1">
+              <div className={`${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} text-[0.60rem] font-mono mb-1`}>
                 {getVersionInfo().displayVersion} (
                 {getVersionInfo().buildTime.split("T")[0]})
               </div>
 
               <div className="flex flex-row items-center justify-between">
                 <div className="flex flex-row items-center gap-2">
-                  <CardTitle className="text-red-400 flex items-center gap-1 text-xs">
+                  <CardTitle className={`${isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'} flex items-center gap-1 text-xs`}>
                     <Wrench className="w-3 h-3" />
                     Debug Controls
                   </CardTitle>
-                  <CardDescription className="text-red-300 text-[0.60rem]">
+                  <CardDescription className={`${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} text-[0.60rem]`}>
                     Development tools - these will be removed in production
                   </CardDescription>
                 </div>
@@ -300,7 +311,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                   variant="ghost"
                   onClick={toggleMinimized}
                   aria-label="Minimize Debug Panel"
-                  className="text-red-200 hover:bg-red-900/30 p-1 h-6 w-6"
+                  className={`${isDbOnlyMode ? 'text-yellow-200 hover:bg-yellow-900/30' : 'text-red-200 hover:bg-red-900/30'} p-1 h-6 w-6`}
                 >
                   <ChevronDown className="w-3 h-3" />
                 </Button>
@@ -399,17 +410,17 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
             </div>
 
             {/* Debug Info - all on one line, pipe-separated */}
-            <div className="text-[0.65rem] text-red-300 flex flex-row items-center gap-1">
+            <div className={`text-[0.65rem] ${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} flex flex-row items-center gap-1`}>
               <span>
                 Coordinates: Floor{" "}
                 {roomData?.room?.floorId || activeCrawler?.currentFloor || 1},
                 Room {roomData?.room?.x ?? 0},{roomData?.room?.y ?? 0}
               </span>
-              <span className="text-red-400">|</span>
+              <span className={isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}>|</span>
               <span>Crawler ID: {activeCrawler?.id ?? "N/A"}</span>
-              <span className="text-red-400">|</span>
+              <span className={isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}>|</span>
               <span>Luck: {activeCrawler?.luck ?? 0}</span>
-              <span className="text-red-400">|</span>
+              <span className={isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}>|</span>
               <span>Scan: {activeCrawler?.scanRange ?? 0}</span>
             </div>
           </CardContent>
@@ -483,8 +494,8 @@ function RedisFallbackControl() {
         miniButtonClasses +
         " " +
         (fallbackStatus?.fallbackMode
-          ? "border-cyan-600 text-cyan-400 hover:bg-cyan-600/10"
-          : "border-gray-600 text-gray-400 hover:bg-gray-600/10")
+          ? "border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
+          : "border-red-600 text-red-400 hover:bg-red-600/10")
       }
       title="Forces database-only mode to conserve Redis bandwidth"
     >

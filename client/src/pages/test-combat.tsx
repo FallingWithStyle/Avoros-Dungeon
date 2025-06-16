@@ -1,4 +1,3 @@
-
 /**
  * File: test-combat.tsx
  * Responsibility: Test page for the new combat system based on the combat philosophy
@@ -21,6 +20,7 @@ export default function TestCombat() {
     actionId: string;
     actionName: string;
   } | null>(null);
+  const [manualRotation, setManualRotation] = useState(false);
 
   // Keyboard movement handler
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
@@ -61,6 +61,7 @@ export default function TestCombat() {
 
   // Manual rotation handler
   const handleManualRotation = useCallback((direction: 'left' | 'right') => {
+    setManualRotation(true);
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
 
@@ -72,27 +73,31 @@ export default function TestCombat() {
     if (newFacing >= 360) newFacing -= 360;
 
     combatSystem.updateEntity("player", { facing: newFacing });
+
+    setTimeout(() => {
+      setManualRotation(false);
+    }, 200);
   }, [combatState]);
 
   // Auto-target facing when target changes or player moves
   useEffect(() => {
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
-    
+
     if (player && target && selectedTarget) {
       // Calculate angle to target
       const dx = target.position.x - player.position.x;
       const dy = target.position.y - player.position.y;
-      
+
       if (dx !== 0 || dy !== 0) {
         // Calculate angle in degrees (0° = North)
         let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
-        
+
         // Normalize angle to 0-360
         if (angle < 0) {
           angle += 360;
         }
-        
+
         combatSystem.updateEntity("player", { facing: Math.round(angle) });
       }
     }
@@ -102,7 +107,7 @@ export default function TestCombat() {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      
+
       // Hotkey shortcuts
       switch (key) {
         case '1':
@@ -321,7 +326,7 @@ export default function TestCombat() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-amber-950/20 to-orange-900/30 p-4">
       <div className="container mx-auto max-w-7xl space-y-6">
-        
+
         {/* Header */}
         <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
           <CardHeader>
@@ -341,7 +346,7 @@ export default function TestCombat() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           {/* Combat Arena */}
           <div className="lg:col-span-2">
             <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
@@ -385,7 +390,7 @@ export default function TestCombat() {
                       }`}>
                         {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
                         {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
-                        
+
                         {/* Facing indicator */}
                         {entity.facing !== undefined && (
                           <div 
@@ -396,7 +401,7 @@ export default function TestCombat() {
                             }}
                           />
                         )}
-                        
+
                         {/* Health bar */}
                         <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
                           <div 
@@ -422,7 +427,7 @@ export default function TestCombat() {
 
           {/* Control Panel */}
           <div className="space-y-4">
-            
+
             {/* Player Status */}
             {player && (
               <Card className="border-blue-600/30 bg-black/40 backdrop-blur-sm">
@@ -559,7 +564,7 @@ export default function TestCombat() {
                     )}
                   </Button>
                 </div>
-                
+
                 <div className="mt-2 text-xs text-muted-foreground">
                   <div>WASD: Move</div>
                   <div>QE: Rotate Left/Right</div>
