@@ -349,7 +349,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   const isLoadingRooms = !exploredRooms;
 
   // Current room ID - declare this early so it can be used throughout
-  const actualCurrentRoomId = currentRoomData?.room?.id;
+  const actualCurrentRoomId = currentRoomData?.room?.id || crawler.roomId;
 
   // Fetch ALL rooms on the current floor
   const { data: allRoomsOnFloor = [] } = useQuery({
@@ -373,7 +373,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
       const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
       visibleRoomsMap.set(`${room.x},${room.y}`, {
         ...room,
-        isCurrentRoom: room.id === actualCurrentRoomId,
+        isCurrentRoom: room.id === actualCurrentRoomId || room.id === crawler.roomId,
         isExplored: true,
         hasEnemies: mobData.hostileCount > 0,
         neutralCount: mobData.neutralCount,
@@ -390,7 +390,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
         const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
         visibleRoomsMap.set(key, {
           ...room,
-          isCurrentRoom: room.id === actualCurrentRoomId,
+          isCurrentRoom: room.id === actualCurrentRoomId || room.id === crawler.roomId,
           isExplored: false,
           isScanned: true,
           hasEnemies: mobData.hostileCount > 0,
@@ -560,6 +560,7 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   // Find current room
   const currentRoom =
     floorRooms.find((r) => r.id === actualCurrentRoomId) ||
+    floorRooms.find((r) => r.id === crawler.roomId) ||
     floorRooms.find((r) => r.isCurrentRoom);
 
   if (!currentRoom) {
