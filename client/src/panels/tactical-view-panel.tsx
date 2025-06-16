@@ -113,8 +113,10 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     effectiveTacticalData,
     combatState,
     onRoomMovement: handleRoomMovement,
-    crawler: { name: crawler.name, serial: crawler.serial }
+    crawler: crawler
   });
+
+  
 
   // Detect mobile device with more comprehensive detection
   const [isMobile, setIsMobile] = useState(false);
