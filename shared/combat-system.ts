@@ -560,20 +560,10 @@ export class CombatSystem {
 
     // Generate and log avatar URL for tactical map display
     if (playerName && playerSerial !== undefined) {
-      // Import getAvatarUrl function inline to avoid circular dependencies
-      const getAvatarUrl = (name: string, serial: string | number): string => {
-        const serialStr = String(serial);
-        const combinedString = name + "_" + serialStr;
-
-        let hash = 0;
-        for (let i = 0; i < combinedString.length; i++) {
-          const char = combinedString.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash = hash & hash;
-        }
-
-        const avatarId = Math.abs(hash) % 1000;
-        return `https://robohash.org/${avatarId}?set=set1&size=64x64`;
+      // Use the same Dicebear API as avatarUtils.ts
+      const getAvatarUrl = (name: string, serial: string | number, backgroundColor: string = "1e293b"): string => {
+        const seed = `${name}${serial}`;
+        return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${backgroundColor}`;
       };
 
       const avatarUrl = getAvatarUrl(playerName, playerSerial);
