@@ -86,21 +86,45 @@ CombatEntity {
   // Core identity
   id: string
   name: string
-  type: "player" | "hostile" | "neutral" | "ally"
+  type: "player" | "other_player" | "hostile" | "neutral" | "ally"
   
-  // Stats (dynamic based on equipment/effects)
+  // Health and Power Resources
   hp: number
   maxHp: number
-  attack: number
-  defense: number
-  speed: number
+  energy: number
+  maxEnergy: number
+  power: number
+  maxPower: number
+  
+  // Primary Stats (dynamic based on equipment/effects)
+  might: number        // Physical strength, melee damage
+  agility: number      // Speed, evasion, ranged accuracy
+  endurance: number    // Health, stamina, physical resistance
+  intellect: number    // Magical damage, mana efficiency
+  charisma: number     // Social interactions, leadership bonuses
+  wisdom: number       // Magical resistance, perception, insight
+  
+  // Derived Combat Stats
+  attack: number       // Calculated from might + weapon + effects
+  defense: number      // Calculated from endurance + armor + effects
+  speed: number        // Calculated from agility + equipment + effects
+  accuracy: number     // Calculated from relevant primary stats
+  evasion: number      // Calculated from agility + equipment + effects
   
   // Positioning
   position: Position
-  facing?: number
+  facing?: number      // Direction in degrees (0° = North)
+  
+  // Character Information
+  level?: number
+  serial?: number      // For player identification
   
   // Action management
   cooldowns: Record<string, number>
+  
+  // State flags
+  isSelected?: boolean
+  isAlive?: boolean
   
   // Extensibility
   activeEffects?: Effect[]
