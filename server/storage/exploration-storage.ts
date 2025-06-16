@@ -110,29 +110,46 @@ export class ExplorationStorage extends BaseStorage {
         return cached;
       }
 
-      const connections = await db
+      // Add timeout wrapper for database operations
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Database query timeout')), 5000);
+      });
+
+      const connectionsPromise = db
         .select()
         .from(roomConnections)
         .where(eq(roomConnections.fromRoomId, roomId));
 
+      const connections = await Promise.race([connectionsPromise, timeoutPromise]);
       let directions = connections.map((conn) => conn.direction);
 
       // Check if this room is a stairs room and add staircase direction if so
-      const [room] = await db
-        .select()
-        .from(rooms)
-        .where(eq(rooms.id, roomId));
+      try {
+        const roomPromise = db
+          .select()
+          .from(rooms)
+          .where(eq(rooms.id, roomId));
 
-      if (room && room.type === "stairs") {
-        directions.push("staircase");
+        const [room] = await Promise.race([roomPromise, timeoutPromise]);
+
+        if (room && room.type === "stairs") {
+          directions.push("staircase");
+        }
+      } catch (roomError) {
+        console.log("Failed to check room type for stairs, continuing without staircase option");
       }
 
       // Cache the result
-      await redisService.setAvailableDirections(roomId, directions);
+      try {
+        await redisService.setAvailableDirections(roomId, directions);
+      } catch (cacheError) {
+        console.log("Failed to cache directions, continuing");
+      }
 
       return directions;
     } catch (error) {
       console.error("Error getting available directions:", error);
+      // Return empty array as fallback to prevent UI crashes
       return [];
     }
   }

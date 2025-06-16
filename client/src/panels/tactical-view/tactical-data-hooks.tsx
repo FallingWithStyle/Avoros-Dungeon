@@ -27,34 +27,42 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   }
 
   // Fetch current room data
-  const { 
-    data: roomData, 
-    isLoading, 
+  const {
+    data: roomData,
+    isLoading,
     error: roomError,
     refetch: refetchRoomData
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
     queryFn: async () => {
-      // Only log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Fetching room data for crawler:', crawler?.id);
-      }
+      console.log('Fetching room data for crawler:', crawler?.id);
       const response = await fetch(`/api/crawlers/${crawler?.id}/room-data-batch`);
       if (!response.ok) {
-        // If we get a 503 (service unavailable), return fallback data instead of throwing
-        if (response.status === 503) {
-          const errorData = await response.json().catch(() => ({}));
-          return errorData.fallback || { currentRoom: null, tacticalData: [], scannedRooms: [], exploredRooms: [] };
-        }
-        throw new Error('Failed to fetch room data');
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch room data: ${response.status} ${errorText}`);
       }
       const data = await response.json();
-      console.log("Room data response:", data);
-      return data;
+      // Always ensure we have fallback data structure
+      return {
+        room: data.room || null,
+        scannedRooms: Array.isArray(data.scannedRooms) ? data.scannedRooms : [],
+        playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
+        factions: Array.isArray(data.factions) ? data.factions : [],
+        availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
+        fallback: data.fallback || false
+      };
     },
     staleTime: 10000, // 10 seconds
     refetchOnWindowFocus: true,
     enabled: !!crawler?.id,
+    retry: (failureCount, error) => {
+      // Don't retry timeout errors as aggressively
+      if (error.message.includes('503')) {
+        return failureCount < 2;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
   // Fetch explored rooms

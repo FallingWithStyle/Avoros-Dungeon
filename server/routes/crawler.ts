@@ -431,7 +431,7 @@ export function registerCrawlerRoutes(app: Express) {
       res.json(scannedRooms || []);
     } catch (error) {
       console.error("Error fetching scanned rooms:", error);
-      
+
       // Handle specific database timeout errors
       if (error.message && error.message.includes('timeout exceeded')) {
         return res.status(503).json({ 
@@ -440,7 +440,7 @@ export function registerCrawlerRoutes(app: Express) {
           fallback: []
         });
       }
-      
+
       // Return empty array as fallback instead of complete failure
       res.status(200).json([]);
     }
