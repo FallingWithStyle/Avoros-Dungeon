@@ -1,3 +1,4 @@
+
 /**
  * File: test-combat.tsx
  * Responsibility: Combat system testing and demonstration page
@@ -34,7 +35,7 @@ interface Weapon {
 
 export default function TestCombat() {
   const [combatState, setCombatState] = useState<CombatState>(combatSystem.getState());
-  const [selectedAction, setSelectedAction] = useState<string>("attack");
+  const [selectedAction, setSelectedAction] = useState<string>("move");
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [selectedWeaponId, setSelectedWeaponId] = useState<number | null>(null);
   const { toast } = useToast();
@@ -100,14 +101,14 @@ export default function TestCombat() {
       attack: weaponStats.damage
     };
     combatSystem.initializePlayer({ x: 25, y: 50 }, playerData);
+
+    // Spawn 2 default enemies
+    spawnEnemy(75, 30, "Goblin Scout");
+    spawnEnemy(70, 70, "Orc Warrior");
   }, [selectedWeaponId, weaponStats.damage]);
 
   const spawnEnemy = (x: number, y: number, name: string = "Test Enemy") => {
     combatSystem.spawnTestEnemy({ x, y }, name);
-    toast({
-      title: "Enemy Spawned",
-      description: `Spawned ${name} at X:${x}, Y:${y}`,
-    });
   };
 
   const handleGridClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -119,6 +120,11 @@ export default function TestCombat() {
       combatSystem.handleAttack(x, y);
     } else if (selectedAction === "spawn") {
       spawnEnemy(x, y);
+    } else if (selectedAction === "move") {
+      const player = combatState.entities.find(e => e.id === "player");
+      if (player) {
+        combatSystem.moveEntityToPosition("player", { x, y });
+      }
     }
   };
 
@@ -158,10 +164,12 @@ export default function TestCombat() {
     fetchWeapons();
   }, []);
 
-  // Initialize test scenario
+  // Initialize test scenario when weapon changes
   useEffect(() => {
-    initializeTestScenario();
-  }, []);
+    if (weapons.length > 0) {
+      initializeTestScenario();
+    }
+  }, [initializeTestScenario, weapons.length]);
 
   const selectedEntity = combatState.entities.find((entity) => entity.isSelected);
 
@@ -279,6 +287,10 @@ export default function TestCombat() {
                       left: `${entity.position.x}%`,
                       top: `${entity.position.y}%`,
                     }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      combatSystem.selectEntity(entity.id);
+                    }}
                   >
                     <div className="relative">
                       {/* Entity Icon */}
@@ -291,6 +303,21 @@ export default function TestCombat() {
                       {entity.isSelected && (
                         <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
                       )}
+
+                      {/* Health Bar */}
+                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-12">
+                        <div className="h-1 bg-gray-700 rounded">
+                          <div
+                            className="h-full bg-red-500 rounded"
+                            style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Name */}
+                      <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-xs text-white text-center whitespace-nowrap">
+                        {entity.name}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -323,19 +350,19 @@ export default function TestCombat() {
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>HP: {entity.hp}/{entity.maxHp}</div>
-                    <div>Energy: {entity.energy}/{entity.maxEnergy}</div>
-                    <div>Power: {entity.power}/{entity.maxPower}</div>
-                    <div>Level: {entity.level}</div>
-                    {entity.id === "player" && selectedWeapon && (
-                      <>
-                        <div className="col-span-2 border-t border-slate-600 pt-1 mt-1">
-                          <div className="text-amber-400">{selectedWeapon.name}</div>
-                          <div>Dmg: {weaponStats.damage} | Range: {weaponStats.range}</div>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                        <div>HP: {entity.hp}/{entity.maxHp}</div>
+                        <div>Energy: {entity.energy}/{entity.maxEnergy}</div>
+                        <div>Power: {entity.power}/{entity.maxPower}</div>
+                        <div>Level: {entity.level}</div>
+                        {entity.id === "player" && selectedWeapon && (
+                          <>
+                            <div className="col-span-2 border-t border-slate-600 pt-1 mt-1">
+                              <div className="text-amber-400">{selectedWeapon.name}</div>
+                              <div>Dmg: {weaponStats.damage} | Range: {weaponStats.range}</div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -348,6 +375,12 @@ export default function TestCombat() {
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-slate-200">Actions</h3>
               <div className="flex space-x-2">
+                <Button
+                  variant={selectedAction === "move" ? "default" : "outline"}
+                  onClick={() => setSelectedAction("move")}
+                >
+                  Move
+                </Button>
                 <Button
                   variant={selectedAction === "attack" ? "default" : "outline"}
                   onClick={() => setSelectedAction("attack")}
@@ -376,11 +409,15 @@ export default function TestCombat() {
               )}
             </div>
 
-            {/* Real-time Actions */}
+            {/* Instructions */}
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-200">Real-time Actions</h3>
-              <div className="text-xs text-slate-400">
-                Click to attack • Mouse hover for targeting
+              <h3 className="text-lg font-semibold text-slate-200">Instructions</h3>
+              <div className="text-xs text-slate-400 space-y-1">
+                <div>• Click "Move" then click on the grid to move your character</div>
+                <div>• Click "Attack" then click near enemies to attack them</div>
+                <div>• Click "Spawn Enemy" then click anywhere to spawn a new enemy</div>
+                <div>• Click on entities to select them and see their stats</div>
+                <div>• Change weapons to see different damage and range values</div>
               </div>
             </div>
           </CardContent>
