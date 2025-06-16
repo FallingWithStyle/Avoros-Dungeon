@@ -21,7 +21,10 @@ interface TacticalDataHooks {
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails) {
-  console.log("useTacticalData - Crawler input:", crawler);
+  // Reduced logging for production
+  if (process.env.NODE_ENV === 'development') {
+    console.log('useTacticalData - Crawler input:', crawler);
+  }
 
   // Fetch current room data
   const { 
@@ -32,9 +35,19 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
     queryFn: async () => {
-      console.log("Fetching room data for crawler:", crawler?.id);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Fetching room data for crawler:', crawler?.id);
+      }
       const response = await fetch(`/api/crawlers/${crawler?.id}/room-data-batch`);
-      if (!response.ok) throw new Error('Failed to fetch room data');
+      if (!response.ok) {
+        // If we get a 503 (service unavailable), return fallback data instead of throwing
+        if (response.status === 503) {
+          const errorData = await response.json().catch(() => ({}));
+          return errorData.fallback || { currentRoom: null, tacticalData: [], scannedRooms: [], exploredRooms: [] };
+        }
+        throw new Error('Failed to fetch room data');
+      }
       const data = await response.json();
       console.log("Room data response:", data);
       return data;

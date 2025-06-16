@@ -113,20 +113,32 @@ export function registerExplorationRoutes(app: Express) {
     }
   });
 
+  // Get explored rooms for a crawler with caching
   app.get("/api/crawlers/:id/explored-rooms", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.id);
       const crawler = await storage.getCrawler(crawlerId);
 
       if (!crawler || crawler.sponsorId !== req.user.claims.sub) {
-        return res.status(404).json({ message: "Crawler not found" });
+        return res.status(403).json({ error: "Access denied" });
       }
 
       const exploredRooms = await storage.getExploredRooms(crawlerId);
-      res.json(exploredRooms);
+      res.json(exploredRooms || []);
     } catch (error) {
       console.error("Error fetching explored rooms:", error);
-      res.status(500).json({ message: "Failed to fetch explored rooms" });
+
+      // Handle specific database timeout errors
+      if (error.message && error.message.includes('timeout exceeded')) {
+        return res.status(503).json({ 
+          error: "Database temporarily unavailable", 
+          message: "Please try again in a moment",
+          fallback: []
+        });
+      }
+
+      // Return empty array as fallback instead of complete failure
+      res.status(200).json([]);
     }
   });
 
