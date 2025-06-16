@@ -122,6 +122,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       id: crawler.id, 
       name: crawler.name, 
       serial: crawler.serial,
+      serialType: typeof crawler.serial,
       fullCrawler: crawler 
     });
   }, [crawler.id, crawler.name, crawler.serial]);

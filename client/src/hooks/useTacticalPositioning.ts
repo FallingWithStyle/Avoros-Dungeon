@@ -66,6 +66,12 @@ export function useTacticalPositioning({
       }
 
       // Initialize player with combat system using actual crawler data
+      console.log(`Initializing player with data:`, { 
+        name: crawler.name, 
+        serial: crawler.serial, 
+        serialType: typeof crawler.serial,
+        position: position
+      });
       combatSystem.initializePlayer(position, {
         name: crawler.name,
         serial: crawler.serial
