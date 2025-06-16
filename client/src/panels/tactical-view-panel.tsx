@@ -203,11 +203,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
         serial: crawler.serial
       });
 
-      // Clear the stored direction immediately after positioning
-      if (storedDirection) {
-        console.log(`🎯 Positioned player at entry point for direction: ${storedDirection}, clearing stored direction`);
-        RoomChangeManager.clearStoredMovementDirection();
-      }
+      // Note: Direction will be cleared by useTacticalPositioning after it uses it
 
       // Trigger adjacent room prefetching when room changes
       if (roomData?.room && prefetchAdjacentRooms) {

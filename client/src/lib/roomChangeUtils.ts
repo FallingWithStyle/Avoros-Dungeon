@@ -102,8 +102,7 @@ export class RoomChangeManager {
       serial: crawler.serial
     });
     
-    // Clear the stored direction after positioning is complete
-    this.clearStoredMovementDirection();
+    // Note: Direction clearing is handled by the caller after successful positioning
   }
 
   /**

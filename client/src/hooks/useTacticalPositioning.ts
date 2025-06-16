@@ -57,6 +57,10 @@ export function useTacticalPositioning({
               serial: effectiveTacticalData?.crawler?.serial || ""
             }
           );
+          
+          // Clear direction after successful positioning
+          console.log(`🎯 useTacticalPositioning: Positioned player for ${entryDirection} entry, clearing stored direction`);
+          RoomChangeManager.clearStoredMovementDirection();
         } else {
           console.log("🔄 useTacticalPositioning: Placing player = CENTER (no entry direction)");
           // No stored direction, place at center
@@ -64,6 +68,9 @@ export function useTacticalPositioning({
             name: effectiveTacticalData?.crawler?.name || "Unknown",
             serial: effectiveTacticalData?.crawler?.serial || ""
           });
+          
+          // No direction to clear since we didn't use one
+          console.log(`🎯 useTacticalPositioning: Placed player at center (no direction to clear)`);
         }
         
         const newPlayerEntity = combatSystem.getState().entities.find((e) => e.id === "player");
