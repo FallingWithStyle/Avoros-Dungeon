@@ -138,10 +138,10 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
     },
     onSuccess: () => {
       if (!activeCrawler) return;
-
+      
       // Use centralized room change handler for consistent updates
       handleRoomChangeWithRefetch(activeCrawler.id);
-
+      
       toast({
         title: "Position Reset",
         description: "Crawler has been moved to the entrance. Map and tactical view updated.",
@@ -239,7 +239,6 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
           title: "Cannot Spawn Mob",
           description: result.error || "Unknown error",
           variant: "destructive",
-          
         });
       }
     } catch (error) {
@@ -304,7 +303,7 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
                     Debug Controls
                   </CardTitle>
                   <CardDescription className={`${isDbOnlyMode ? 'text-yellow-300' : 'text-red-300'} text-[0.60rem]`}>
-                    {isDbOnlyMode ? 'DB Only mode - Cost optimized' : 'Cache mode - EXPENSIVE!'}
+                    Development tools - these will be removed in production
                   </CardDescription>
                 </div>
                 <Button

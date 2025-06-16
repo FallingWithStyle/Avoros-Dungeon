@@ -94,11 +94,10 @@ export function calculateHitChance(attacker: any, defender: any): number {
   return hitChance;
 }
 
-// Real-time Combat System class (Link's Awakening style)
+// Simplified Combat System class
 export class CombatSystem {
   private state: CombatState;
   private subscribers: Set<(state: CombatState) => void>;
-  private hoveredPosition: Position | null = null;
 
   constructor() {
     this.state = {
@@ -377,84 +376,6 @@ export class CombatSystem {
     // Keep only player when changing rooms
     this.state.entities = this.state.entities.filter((e) => e.id === "player");
     this.notifySubscribers();
-  }
-
-  // Real-time combat functions (Link's Awakening style)
-  setHoveredPosition(position: Position | null): void {
-    this.hoveredPosition = position;
-    // No need to notify subscribers for hover position
-  }
-
-  getHoveredPosition(): Position | null {
-    return this.hoveredPosition;
-  }
-
-  // Real-time attack handling (click to attack)
-  handleAttack(x: number, y: number): boolean {
-    const player = this.state.entities.find(e => e.id === "player");
-    if (!player) return false;
-
-    // Check if attack is on cooldown
-    if (!this.canUseAction("player", "basic_attack")) {
-      return false;
-    }
-
-    // Find target at position
-    const targetEntity = this.state.entities.find(entity => {
-      if (entity.id === "player") return false;
-      const distance = this.calculateDistance(
-        { x, y },
-        entity.position
-      );
-      return distance <= 8; // Attack range in pixels
-    });
-
-    if (targetEntity) {
-      return this.executeAttack("player", targetEntity.id);
-    } else {
-      // Attack empty space - still consume cooldown
-      return this.executeAttack("player");
-    }
-  }
-
-  // Spawn test enemy for combat testing
-  spawnTestEnemy(position: Position, name: string = "Test Enemy"): void {
-    const enemy: CombatEntity = {
-      id: "enemy_" + Math.random().toString(36).substr(2, 9),
-      name: name,
-      type: "hostile",
-      position: { x: position.x, y: position.y },
-      
-      // Health and Power Resources
-      hp: 50,
-      maxHp: 50,
-      energy: 20,
-      maxEnergy: 20,
-      power: 10,
-      maxPower: 10,
-      
-      // Primary Stats
-      might: 8,
-      agility: 6,
-      endurance: 7,
-      intellect: 4,
-      charisma: 3,
-      wisdom: 4,
-      
-      // Derived Combat Stats
-      attack: 6,
-      defense: 3,
-      speed: 6,
-      accuracy: 12,
-      evasion: 8,
-      
-      level: 2,
-      facing: 0,
-      isAlive: true,
-      cooldowns: {}
-    };
-
-    this.addEntity(enemy);
   }
 }
 

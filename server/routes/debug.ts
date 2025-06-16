@@ -1,3 +1,4 @@
+
 /**
  * File: debug.ts
  * Responsibility: Development and debugging utility API routes
@@ -105,16 +106,16 @@ export function registerDebugRoutes(app: Express) {
       if (crawlerIds.length > 0) {
         // Import activities table
         const { activities } = await import("@shared/schema");
-
+        
         // Delete activities first (foreign key constraint)
         await db
           .delete(activities)
           .where(inArray(activities.crawlerId, crawlerIds));
-
+        
         await db
           .delete(crawlerPositions)
           .where(inArray(crawlerPositions.crawlerId, crawlerIds));
-
+        
         await db
           .delete(crawlerEquipment)
           .where(inArray(crawlerEquipment.crawlerId, crawlerIds));
@@ -181,7 +182,7 @@ export function registerDebugRoutes(app: Express) {
   app.post("/api/debug/clear-tactical-data/:crawlerId", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.crawlerId);
-
+      
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
         return res.status(404).json({ message: "Crawler not in any room" });
@@ -189,7 +190,7 @@ export function registerDebugRoutes(app: Express) {
 
       // Clear tactical positions from database
       await storage.tacticalStorage.clearTacticalPositions(currentRoom.id);
-
+      
       // Clear from cache
       await storage.redisService.del(`tactical:${currentRoom.id}`);
 
@@ -290,9 +291,9 @@ export function registerDebugRoutes(app: Express) {
         await storage.redisService.invalidateTacticalPositions(currentRoom.id);
         await storage.redisService.invalidateRoomData(currentRoom.id);
         await storage.redisService.invalidateCrawlerRoomData(crawlerId);
-
+        
         console.log(`Cleared all cached data for room ${currentRoom.id}`);
-
+        
         res.json({
           success: true,
           message: `Cleared all cached data for room ${currentRoom.id} (${currentRoom.name})`,
@@ -319,7 +320,7 @@ export function registerDebugRoutes(app: Express) {
   app.post("/api/debug/redis-fallback", isAuthenticated, async (req: any, res) => {
     try {
       const { enabled } = req.body;
-
+      
       if (typeof enabled !== 'boolean') {
         return res.status(400).json({ 
           success: false, 
@@ -348,7 +349,7 @@ export function registerDebugRoutes(app: Express) {
   app.get("/api/debug/redis-status", isAuthenticated, async (req: any, res) => {
     try {
       const fallbackMode = storage.redisService.isForceFallbackMode();
-
+      
       res.json({
         success: true,
         fallbackMode,
@@ -371,7 +372,7 @@ export function registerDebugRoutes(app: Express) {
   app.delete("/api/debug/clear-adjacent-cache/:crawlerId", isAuthenticated, async (req: any, res) => {
     try {
       const crawlerId = parseInt(req.params.crawlerId);
-
+      
       if (isNaN(crawlerId)) {
         return res.status(400).json({ 
           success: false, 
@@ -399,7 +400,7 @@ export function registerDebugRoutes(app: Express) {
   app.get("/api/debug/redis-fallback", isAuthenticated, async (req: any, res) => {
     try {
       const isFallbackMode = storage.redisService.isForceFallbackMode();
-
+      
       res.json({
         success: true,
         fallbackMode: isFallbackMode,
@@ -422,7 +423,7 @@ export function registerDebugRoutes(app: Express) {
                          process.env.NODE_ENV === 'test' ||
                          process.env.DEBUG === 'true' ||
                          !!process.env.REPL_ID;
-
+      
       res.json({
         success: true,
         isDebugMode,
@@ -550,38 +551,6 @@ export function registerDebugRoutes(app: Express) {
       res.status(500).json({ 
         success: false, 
         error: `Failed to spawn mob: ${error instanceof Error ? error.message : 'Unknown error'}` 
-      });
-    }
-  });
-
-  // Return basic debug info
-  app.get("/api/debug/status", (req, res) => {
-    res.json({
-      success: true,
-      message: "Debug endpoint is working",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || "development"
-    });
-  });
-
-  // Get weapons for combat testing
-  app.get("/api/debug/weapons", async (req, res) => {
-    try {
-      const weapons = await storage.db
-        .select()
-        .from(storage.schema.equipment)
-        .where(storage.schema.eq(storage.schema.equipment.category, "weapon"))
-        .limit(10);
-
-      res.json({
-        success: true,
-        weapons: weapons
-      });
-    } catch (error) {
-      console.error("Error fetching weapons:", error);
-      res.status(500).json({
-        success: false,
-        error: "Failed to fetch weapons"
       });
     }
   });

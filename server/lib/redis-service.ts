@@ -8,7 +8,7 @@ import { Redis } from "@upstash/redis";
 class RedisService {
   private redis: Redis | null = null;
   private isConnected = false;
-  private forceFallbackMode = true; // Default to DB Only mode for cost savings
+  private forceFallbackMode = false; // Enable Redis by default
 
   constructor() {
     try {
@@ -24,9 +24,11 @@ class RedisService {
         this.isConnected = true;
         console.log('Upstash Redis initialized successfully');
 
-        // Always enable fallback mode by default to save costs
-        console.log('🔧 Redis fallback mode ENABLED by default for cost optimization');
-        console.log('📊 Cache operations will use database only - Redis disabled to save money');
+        // Auto-enable fallback mode in debug environment
+        if (this.forceFallbackMode) {
+          console.log('🔧 Debug mode detected - Redis fallback mode ENABLED by default');
+          console.log('📊 Cache operations will use database only for consistent debugging');
+        }
       } else {
         console.warn('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN environment variables not set');
         console.log('Redis will be disabled - falling back to database storage');
@@ -45,8 +47,8 @@ class RedisService {
   }
 
   private isDebugMode(): boolean {
-    // Always return true to ensure fallback mode stays enabled
-    return true;
+    // Only enable debug mode when explicitly requested
+    return process.env.DEBUG === 'true' || process.env.FORCE_DB_FALLBACK === 'true';
   }
 
   private async testConnection(): Promise<void> {
