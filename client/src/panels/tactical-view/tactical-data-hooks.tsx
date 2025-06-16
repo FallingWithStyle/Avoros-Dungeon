@@ -20,32 +20,68 @@ interface TacticalDataHooks {
   handleRoomChange: () => void;
 }
 
-export function useTacticalData(crawler: CrawlerWithDetails | null) {
+export function useTacticalData(crawler: CrawlerWithDetails) {
+  console.log("useTacticalData - Crawler input:", crawler);
+
   // Fetch current room data
-  const { data: roomData, refetch: refetchRoomData } = useQuery({
-    queryKey: [`/api/crawlers/${crawler?.id}/current-room`],
+  const { 
+    data: roomData, 
+    isLoading, 
+    error: roomError,
+    refetch: refetchRoomData
+  } = useQuery({
+    queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
+    queryFn: async () => {
+      console.log("Fetching room data for crawler:", crawler?.id);
+      const response = await fetch(`/api/crawlers/${crawler?.id}/room-data-batch`);
+      if (!response.ok) throw new Error('Failed to fetch room data');
+      const data = await response.json();
+      console.log("Room data response:", data);
+      return data;
+    },
+    staleTime: 10000, // 10 seconds
+    refetchOnWindowFocus: true,
     enabled: !!crawler?.id,
-    refetchInterval: 5000,
-    staleTime: 30000,
-    retry: false,
   });
 
-  // Fetch explored rooms for map display
-  const { data: exploredRooms, refetch: refetchExploredRooms } = useQuery({
+  // Fetch explored rooms
+  const { 
+    data: exploredRooms = [], 
+    isLoading: exploredRoomsLoading,
+    error: exploredRoomsError,
+    refetch: refetchExploredRooms
+  } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/explored-rooms`],
+    queryFn: async () => {
+      console.log("Fetching explored rooms for crawler:", crawler?.id);
+      const response = await fetch(`/api/crawlers/${crawler?.id}/explored-rooms`);
+      if (!response.ok) throw new Error('Failed to fetch explored rooms');
+      const data = await response.json();
+      console.log("Explored rooms response:", data);
+      return data;
+    },
+    staleTime: 30000, // 30 seconds
     enabled: !!crawler?.id,
-    refetchInterval: 30000,
-    staleTime: 120000,
-    retry: false,
   });
 
-  // Fetch tactical data - this includes all the combat entities and positioning
-  const { data: tacticalData, refetch: refetchTacticalData } = useQuery({
+  // Fetch tactical data
+  const { 
+    data: tacticalData, 
+    isLoading: tacticalLoading,
+    error: tacticalError,
+    refetch: refetchTacticalData
+  } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/tactical-data`],
+    queryFn: async () => {
+      console.log("Fetching tactical data for crawler:", crawler?.id);
+      const response = await fetch(`/api/crawlers/${crawler?.id}/tactical-data`);
+      if (!response.ok) throw new Error('Failed to fetch tactical data');
+      const data = await response.json();
+      console.log("Tactical data response:", data);
+      return data;
+    },
+    staleTime: 15000, // 15 seconds
     enabled: !!crawler?.id,
-    refetchInterval: 3000,
-    staleTime: 10000,
-    retry: false,
   });
 
   const handleRoomChange = useCallback(() => {
@@ -67,13 +103,26 @@ export function useTacticalData(crawler: CrawlerWithDetails | null) {
     };
   }
 
+  console.log("useTacticalData - Final return values:", {
+    roomData,
+    exploredRooms: exploredRooms?.length,
+    tacticalData: !!tacticalData,
+    isLoading,
+    tacticalLoading,
+    tacticalError,
+    crawlerId: crawler?.id,
+    crawlerRoomId: crawler?.roomId
+  });
+
   return {
     roomData,
-    exploredRooms: exploredRooms || [],
+    exploredRooms,
     tacticalData,
-    refetchRoomData,
-    refetchExploredRooms,
+    isLoading,
+    tacticalLoading,
+    tacticalError,
     refetchTacticalData,
-    handleRoomChange,
+    refetchExploredRooms,
+    handleRoomChange
   };
 }
