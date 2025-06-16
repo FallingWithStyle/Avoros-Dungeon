@@ -17,7 +17,7 @@ The new combat system is designed around the vision of **Dungeon Crawler Carl me
 - **No action queues** - Actions execute immediately when triggered
 - **Cooldown-based limiting** - Use cooldowns instead of complex timing systems
 - **Responsive feedback** - Instant visual and audio feedback for all actions
-- **Real-time feel** - Even in turn-based scenarios, feel immediate
+- **Real-time feel** - Actions, and their effects, feel immediate when triggered
 
 ### 2. Simplified State Management
 - **Single source of truth** - One combat state object
