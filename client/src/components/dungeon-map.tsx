@@ -72,7 +72,14 @@ const getRoomIcon = (
   const iconSize = isExpanded ? "w-6 h-6" : "w-3 h-3";
   const textSize = isExpanded ? "text-sm" : "text-xs";
 
-  if (Number(room.id) === Number(actualCurrentRoomId)) {
+  // Check if this is the current room using multiple comparison methods
+  const isCurrentRoom = actualCurrentRoomId && (
+    Number(room.id) === Number(actualCurrentRoomId) ||
+    String(room.id) === String(actualCurrentRoomId) ||
+    room.id === actualCurrentRoomId
+  );
+
+  if (isCurrentRoom) {
     return (
       <div
         className={`${iconSize} bg-blue-500 rounded-full border-2 border-blue-300 animate-pulse shadow-lg shadow-blue-400/50 z-10`}
@@ -352,10 +359,11 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   const isLoadingRooms = !exploredRooms;
 
   // Current room ID - declare this early so it can be used throughout
-  // Use multiple sources to ensure we get the correct room ID
-  const actualCurrentRoomId = currentRoomData?.room?.id || crawler.roomId;
+  // Use multiple sources to ensure we get the correct room ID, prioritizing tactical data
+  const actualCurrentRoomId = tacticalData?.room?.id || currentRoomData?.room?.id || crawler.roomId;
   
   console.log("DungeonMap - Current room detection:", {
+    tacticalRoomId: tacticalData?.room?.id,
     currentRoomDataId: currentRoomData?.room?.id,
     crawlerRoomId: crawler.roomId,
     actualCurrentRoomId,
@@ -382,11 +390,16 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
   (exploredRooms ?? []).forEach((room) => {
     if (room && typeof room.x === "number" && typeof room.y === "number") {
       const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
-      const isCurrentRoom = Number(room.id) === Number(actualCurrentRoomId) || Number(room.id) === Number(crawler.roomId);
+      // Improved current room detection
+      const isCurrentRoom = actualCurrentRoomId && (
+        Number(room.id) === Number(actualCurrentRoomId) ||
+        String(room.id) === String(actualCurrentRoomId) ||
+        room.id === actualCurrentRoomId
+      );
       console.log(`Room ${room.id} (${room.name}) - isCurrentRoom: ${isCurrentRoom}, actualCurrentRoomId: ${actualCurrentRoomId}, crawlerRoomId: ${crawler.roomId}`);
       visibleRoomsMap.set(`${room.x},${room.y}`, {
         ...room,
-        isCurrentRoom,
+        isCurrentRoom: !!isCurrentRoom,
         isExplored: true,
         hasEnemies: mobData.hostileCount > 0,
         neutralCount: mobData.neutralCount,
@@ -401,10 +414,15 @@ export default function DungeonMap(props: DungeonMapProps | undefined) {
       const key = `${room.x},${room.y}`;
       if (!visibleRoomsMap.has(key)) {
         const mobData = roomMobsData[room.id] || { hostileCount: 0, neutralCount: 0, playerCount: 0 };
-        const isCurrentRoom = Number(room.id) === Number(actualCurrentRoomId) || Number(room.id) === Number(crawler.roomId);
+        // Improved current room detection
+        const isCurrentRoom = actualCurrentRoomId && (
+          Number(room.id) === Number(actualCurrentRoomId) ||
+          String(room.id) === String(actualCurrentRoomId) ||
+          room.id === actualCurrentRoomId
+        );
         visibleRoomsMap.set(key, {
           ...room,
-          isCurrentRoom,
+          isCurrentRoom: !!isCurrentRoom,
           isExplored: false,
           isScanned: true,
           hasEnemies: mobData.hostileCount > 0,
