@@ -595,41 +595,41 @@ export default function TestCombat() {
               <CardContent className="space-y-4">
                 {/* Current Weapon */}
                 <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2">Equipped Weapon:</div>
+                  <div className="text-sm font-medium text-amber-300 mb-2">Equipped Weapon:</div>
                   {equippedWeapon ? (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="font-medium text-blue-900">{equippedWeapon.name}</div>
-                      <div className="text-sm text-blue-700">{equippedWeapon.description}</div>
-                      <div className="text-xs text-blue-600 mt-1">
+                    <div className="p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm">
+                      <div className="font-medium text-blue-200">{equippedWeapon.name}</div>
+                      <div className="text-sm text-blue-300">{equippedWeapon.description}</div>
+                      <div className="text-xs text-blue-400 mt-1">
                         Range: {getWeaponRange(equippedWeapon)} | 
                         Damage Attr: {equippedWeapon.damageAttribute} |
                         Bonus: +{equippedWeapon.mightBonus || 0}
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                      <div className="text-gray-600">Unarmed (Fists)</div>
-                      <div className="text-xs text-gray-500">Range: 1 | Base damage</div>
+                    <div className="p-3 bg-gray-800/30 border border-gray-600/30 rounded-lg backdrop-blur-sm">
+                      <div className="text-gray-300">Unarmed (Fists)</div>
+                      <div className="text-xs text-gray-400">Range: 1 | Base damage</div>
                     </div>
                   )}
                 </div>
 
                 {/* Available Weapons */}
                 <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2">Available Weapons:</div>
+                  <div className="text-sm font-medium text-amber-300 mb-2">Available Weapons:</div>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {availableWeapons.map((weapon) => (
                       <button
                         key={weapon.id}
                         onClick={() => handleWeaponChange(weapon)}
-                        className={`w-full p-2 text-left border rounded-lg transition-colors ${
+                        className={`w-full p-2 text-left border rounded-lg transition-colors backdrop-blur-sm ${
                           equippedWeapon?.id === weapon.id
-                            ? "bg-blue-100 border-blue-300"
-                            : "bg-white border-gray-200 hover:bg-gray-50"
+                            ? "bg-blue-800/40 border-blue-500/40 text-blue-200"
+                            : "bg-gray-800/20 border-gray-600/30 text-gray-300 hover:bg-gray-700/30 hover:border-gray-500/40"
                         }`}
                       >
                         <div className="font-medium text-sm">{weapon.name}</div>
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-400">
                           Range: {getWeaponRange(weapon)} | +{weapon.mightBonus || 0} dmg
                         </div>
                       </button>
