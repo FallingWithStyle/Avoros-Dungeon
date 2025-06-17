@@ -387,10 +387,10 @@ export function registerDebugRoutes(app: Express) {
         crawlerId: crawlerId
       });
     } catch (error) {
-      console.error("Error toggling Redis fallback mode:", error);
+      console.error("Error clearing adjacent room cache:", error);
       res.status(500).json({ 
         success: false, 
-        error: "Failed to toggle Redis fallback mode" 
+        error: "Failed to clear adjacent room cache" 
       });
     }
   });
