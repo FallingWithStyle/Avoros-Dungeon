@@ -276,25 +276,41 @@ export default function TestCombat() {
     return unsubscribe;
   }, []);
 
-  // Load available weapons for testing
+  // Load mock weapons for testing
   useEffect(() => {
-    const loadWeapons = async () => {
-      try {
-        const response = await fetch("/api/debug/test-weapons");
-        const data = await response.json();
-        if (data.success) {
-          setAvailableWeapons(data.weapons);
-          // Auto-equip the first weapon for testing
-          if (data.weapons.length > 0) {
-            setEquippedWeapon(data.weapons[0]);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load test weapons:", error);
+    const mockWeapons: Equipment[] = [
+      {
+        id: "sword1",
+        name: "Iron Sword",
+        description: "A sturdy iron blade",
+        type: "weapon",
+        damageAttribute: "might",
+        range: 1,
+        mightBonus: 5
+      },
+      {
+        id: "bow1", 
+        name: "Hunting Bow",
+        description: "A flexible ranged weapon",
+        type: "weapon",
+        damageAttribute: "agility",
+        range: 3,
+        agilityBonus: 3
+      },
+      {
+        id: "staff1",
+        name: "Wizard Staff",
+        description: "Channels magical energy",
+        type: "weapon", 
+        damageAttribute: "might",
+        range: 2,
+        mightBonus: 2
       }
-    };
-
-    loadWeapons();
+    ];
+    
+    setAvailableWeapons(mockWeapons);
+    // Auto-equip the first weapon for testing
+    setEquippedWeapon(mockWeapons[0]);
   }, []);
 
   const initializeTestScenario = () => {
