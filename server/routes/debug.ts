@@ -129,7 +129,7 @@ export function registerDebugRoutes(app: Express) {
       await storage.updateUserActiveCrawler(userId, 0);
 
       res.json({ 
-        message: `Successfully deleted ${userCrawlers.length} crawler(s)`,
+        message: "Successfully deleted " + userCrawlers.length + " crawler(s)",
         deletedCount: userCrawlers.length 
       });
     } catch (error) {
@@ -194,7 +194,7 @@ export function registerDebugRoutes(app: Express) {
       await storage.redisService.del(`tactical:${currentRoom.id}`);
 
       res.json({ 
-        message: `Cleared tactical data for room ${currentRoom.id} (${currentRoom.name})`,
+        message: "Cleared tactical data for room " + currentRoom.id + " (" + currentRoom.name + ")",
         roomId: currentRoom.id,
         roomName: currentRoom.name
       });
@@ -295,7 +295,7 @@ export function registerDebugRoutes(app: Express) {
 
         res.json({
           success: true,
-          message: `Cleared all cached data for room ${currentRoom.id} (${currentRoom.name})`,
+          message: "Cleared all cached data for room " + currentRoom.id + " (" + currentRoom.name + ")",
           roomId: currentRoom.id,
           roomName: currentRoom.name
         });
@@ -331,9 +331,9 @@ export function registerDebugRoutes(app: Express) {
 
       res.json({
         success: true,
-        message: `Redis fallback mode ${enabled ? 'enabled' : 'disabled'}`,
+        message: "Redis fallback mode " + (enabled ? "enabled" : "disabled"),
         fallbackMode: enabled,
-        currentMode: enabled ? 'Database Only' : 'Redis + Database'
+        currentMode: enabled ? "Database Only" : "Redis + Database"
       });
     } catch (error) {
       console.error("Error toggling Redis fallback mode:", error);
@@ -355,8 +355,8 @@ export function registerDebugRoutes(app: Express) {
         currentMode: fallbackMode ? 'Database Only' : 'Redis + Database',
         redisConfigured: !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN),
         message: fallbackMode 
-          ? 'Redis fallback mode is enabled - all operations use database directly'
-          : 'Redis is active - caching enabled for improved performance'
+          ? "Redis fallback mode is enabled - all operations use database directly"
+          : "Redis is active - caching enabled for improved performance"
       });
     } catch (error) {
       console.error("Error getting Redis status:", error);
@@ -383,7 +383,7 @@ export function registerDebugRoutes(app: Express) {
 
       res.json({
         success: true,
-        message: `Cleared adjacent room cache for crawler ${crawlerId}`,
+        message: "Cleared adjacent room cache for crawler " + crawlerId,
         crawlerId: crawlerId
       });
     } catch (error) {
@@ -403,7 +403,7 @@ export function registerDebugRoutes(app: Express) {
       res.json({
         success: true,
         fallbackMode: isFallbackMode,
-        message: `Redis fallback mode is currently ${isFallbackMode ? 'enabled' : 'disabled'}`,
+        message: "Redis fallback mode is currently " + (isFallbackMode ? "enabled" : "disabled"),
         debugModeDefault: true // Indicates debug mode defaults to DB Only
       });
     } catch (error) {
@@ -549,7 +549,7 @@ export function registerDebugRoutes(app: Express) {
       console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         success: false, 
-        error: `Failed to spawn mob: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        error: "Failed to spawn mob: " + (error instanceof Error ? error.message : "Unknown error") 
       });
     }
   });
