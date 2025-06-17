@@ -12,6 +12,18 @@ import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { Sword, Shield, Zap, Heart, Target, Move, Skull } from "lucide-react";
 
+export interface Equipment {
+  id: string;
+  name: string;
+  description: string;
+  type: "weapon" | "armor";
+  damageAttribute: "might" | "agility";
+  range: number;
+  mightBonus?: number;
+  agilityBonus?: number;
+  defenseBonus?: number;
+}
+
 export default function TestCombat() {
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
@@ -21,6 +33,9 @@ export default function TestCombat() {
     actionName: string;
   } | null>(null);
   const [manualRotation, setManualRotation] = useState(false);
+  const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
+  const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
+  const [showRangeIndicator, setShowRangeIndicator] = useState(false);
 
   // Keyboard movement handler
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
@@ -153,6 +168,75 @@ export default function TestCombat() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation]);
 
+  // Get weapon range from equipment
+  const getWeaponRange = (weapon: Equipment): number => {
+    return weapon.range;
+  };
+
+  // Handle click events on the combat grid
+  const handleGridClick = useCallback((gridX: number, gridY: number) => {
+    if (activeActionMode?.type === "move") {
+      const newPosition = { x: gridX, y: gridY };
+      combatSystem.moveEntityToPosition("player", newPosition);
+      setActiveActionMode(null);
+    } else if (activeActionMode?.type === "attack") {
+      // Check if target is within weapon range
+      const player = combatState.entities.find(e => e.id === "player");
+      if (!player) return;
+
+      const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10; // Convert to grid units
+      const distance = Math.sqrt(
+        Math.pow(gridX - player.position.x, 2) + 
+        Math.pow(gridY - player.position.y, 2)
+      );
+
+      if (distance > weaponRange) {
+        console.log("Target out of range!");
+        return;
+      }
+
+      // Find entity at clicked position
+      const clickedEntity = combatState.entities.find(entity => 
+        Math.abs(entity.position.x - gridX) < 5 && 
+        Math.abs(entity.position.y - gridY) < 5 &&
+        entity.id !== "player"
+      );
+
+      if (clickedEntity) {
+        handleAttack(clickedEntity.id);
+      } else {
+        // Cancel attack if no valid target
+        setActiveActionMode(null);
+        setSelectedTarget(null);
+        setShowRangeIndicator(false);
+      }
+    }
+  }, [activeActionMode, combatState.entities, handleAttack, equippedWeapon]);
+
+  const handleAttack = useCallback((targetId: string) => {
+    setSelectedTarget(null);
+    setActiveActionMode(null);
+    setShowRangeIndicator(false);
+    combatSystem.executeAttack("player", targetId);
+  }, []);
+
+  const selectTarget = useCallback((targetId: string) => {
+    setSelectedTarget(targetId);
+  }, []);
+
+  const handleWeaponChange = useCallback((weapon: Equipment) => {
+    setEquippedWeapon(weapon);
+  }, []);
+
+  const handleAttackMode = useCallback(() => {
+    setActiveActionMode({
+      type: "attack",
+      actionId: "basic_attack",
+      actionName: "Attack"
+    });
+    setShowRangeIndicator(true);
+  }, []);
+
   useEffect(() => {
     // Subscribe to combat system updates
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -165,11 +249,37 @@ export default function TestCombat() {
     return unsubscribe;
   }, []);
 
+  // Load available weapons for testing
+  useEffect(() => {
+    const loadWeapons = async () => {
+      try {
+        const response = await fetch("/api/debug/test-weapons");
+        const data = await response.json();
+        if (data.success) {
+          setAvailableWeapons(data.weapons);
+          // Auto-equip the first weapon for testing
+          if (data.weapons.length > 0) {
+            setEquippedWeapon(data.weapons[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load test weapons:", error);
+      }
+    };
+
+    loadWeapons();
+  }, []);
+
   const initializeTestScenario = () => {
     // Clear existing entities
     combatState.entities.forEach(entity => {
       combatSystem.removeEntity(entity.id);
     });
+
+    // Calculate weapon bonuses for player
+    const weaponAttack = equippedWeapon ? 
+      (equippedWeapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
+      0; // Unarmed
 
     // Create player entity
     const player: CombatEntity = {
@@ -188,7 +298,7 @@ export default function TestCombat() {
       intellect: 10,
       charisma: 8,
       wisdom: 11,
-      attack: 18,
+      attack: 18 + weaponAttack,
       defense: 12,
       speed: 15,
       accuracy: 22,
@@ -199,7 +309,8 @@ export default function TestCombat() {
       serial: 1001,
       isSelected: false,
       isAlive: true,
-      cooldowns: {}
+      cooldowns: {},
+      equippedWeapon: equippedWeapon
     };
 
     combatSystem.addEntity(player);
@@ -263,15 +374,6 @@ export default function TestCombat() {
 
     combatSystem.addEntity(goblin);
     combatSystem.addEntity(orc);
-  };
-
-  const handleAttack = (targetId?: string) => {
-    const target = targetId || selectedTarget;
-    if (!target) {
-      console.log("No target selected");
-      return;
-    }
-    combatSystem.executeAttack("player", target);
   };
 
   const handleMove = (direction: string) => {
@@ -374,6 +476,21 @@ export default function TestCombat() {
                     ))}
                   </div>
 
+                  {/* Weapon range indicator */}
+                  {showRangeIndicator && combatState.entities.find(e => e.id === "player") && (
+                    <div
+                      className="absolute border-2 border-yellow-400 border-dashed rounded-full pointer-events-none z-0"
+                      style={{
+                        left: combatState.entities.find(e => e.id === "player")!.position.x + '%',
+                        top: combatState.entities.find(e => e.id === "player")!.position.y + '%',
+                        width: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
+                        height: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
+                        transform: 'translate(-50%, -50%)',
+                        opacity: 0.5
+                      }}
+                    />
+                  )}
+
                   {/* Entities */}
                   {combatState.entities.map((entity) => (
                     <div
@@ -449,6 +566,61 @@ export default function TestCombat() {
 
           {/* Control Panel */}
           <div className="space-y-4">
+
+            {/* Weapon Selection */}
+            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
+                  <Sword className="w-4 h-4" />
+                  Weapon Selection
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Current Weapon */}
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-2">Equipped Weapon:</div>
+                  {equippedWeapon ? (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="font-medium text-blue-900">{equippedWeapon.name}</div>
+                      <div className="text-sm text-blue-700">{equippedWeapon.description}</div>
+                      <div className="text-xs text-blue-600 mt-1">
+                        Range: {getWeaponRange(equippedWeapon)} | 
+                        Damage Attr: {equippedWeapon.damageAttribute} |
+                        Bonus: +{equippedWeapon.mightBonus || 0}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="text-gray-600">Unarmed (Fists)</div>
+                      <div className="text-xs text-gray-500">Range: 1 | Base damage</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Available Weapons */}
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-2">Available Weapons:</div>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {availableWeapons.map((weapon) => (
+                      <button
+                        key={weapon.id}
+                        onClick={() => handleWeaponChange(weapon)}
+                        className={`w-full p-2 text-left border rounded-lg transition-colors ${
+                          equippedWeapon?.id === weapon.id
+                            ? "bg-blue-100 border-blue-300"
+                            : "bg-white border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="font-medium text-sm">{weapon.name}</div>
+                        <div className="text-xs text-gray-600">
+                          Range: {getWeaponRange(weapon)} | +{weapon.mightBonus || 0} dmg
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Player Status */}
             {player && (
@@ -609,9 +781,8 @@ export default function TestCombat() {
               <CardContent className="space-y-2">
                 <Button 
                   className="w-full" 
-                  onClick={() => handleAttack()}
-                  disabled={!selectedTarget || !combatSystem.canUseAction("player", "basic_attack")}
-                  variant={selectedTarget ? "destructive" : "outline"}
+                  onClick={handleAttackMode}
+                  variant={activeActionMode?.type === "attack" ? "destructive" : "outline"}
                 >
                   <Target className="w-4 h-4 mr-2" />
                   Attack {selectedEntity?.name || "Target"}
