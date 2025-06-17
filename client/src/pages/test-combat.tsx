@@ -307,7 +307,7 @@ export default function TestCombat() {
         mightBonus: 2
       }
     ];
-    
+
     setAvailableWeapons(mockWeapons);
     // Auto-equip the first weapon for testing
     setEquippedWeapon(mockWeapons[0]);
@@ -673,29 +673,6 @@ export default function TestCombat() {
               </Card>
             )}
 
-            {/* Movement Controls */}
-            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
-                  <Move className="w-4 h-4" />
-                  Movement
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-1">
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("up")}>↑</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("left")}>←</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("right")}>→</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("down")}>↓</Button>
-                  <div></div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Hotbar */}
             <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
               <CardHeader>
@@ -806,91 +783,6 @@ export default function TestCombat() {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* Action Log */}
-            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
-                  <Heart className="w-4 h-4" />
-                  Action Log
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1 max-h-64 overflow-y-auto text-xs">
-                  {combatState.actionLog.length === 0 ? (
-                    <div className="text-gray-400 italic">No actions yet...</div>
-                  ) : (
-                    combatState.actionLog.slice(0, 20).map((log) => (
-                      <div key={log.id} className="border-b border-gray-700/30 pb-1 mb-1">
-                        <div className={`font-medium ${
-                          log.result === "critical" ? "text-orange-400" :
-                          log.result === "hit" ? "text-red-300" :
-                          log.result === "miss" ? "text-gray-400" :
-                          log.result === "moved" ? "text-blue-300" :
-                          "text-gray-300"
-                        }`}>
-                          {log.description}
-                        </div>
-                        {log.weapon && (
-                          <div className="text-gray-400 text-xs">
-                            Weapon: {log.weapon}
-                          </div>
-                        )}
-                        {log.toHitRoll !== undefined && log.toHitTarget !== undefined && (
-                          <div className="text-gray-400 text-xs">
-                            To-Hit: {log.toHitRoll}/100 vs {log.toHitTarget}% target
-                          </div>
-                        )}
-                        {log.damageRoll && (
-                          <div className="text-gray-400 text-xs">
-                            Damage: {log.damageRoll}
-                          </div>
-                        )}
-                        <div className="text-gray-500 text-xs">
-                          {new Date(log.timestamp).toLocaleTimeString()}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Enemy Status */}
-            {enemies.length > 0 && (
-              <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-red-300 text-sm flex items-center gap-2">
-                    <Skull className="w-4 h4" />
-                    Enemies
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {enemies.map((enemy) => (
-                    <div 
-                      key={enemy.id}
-                      className={`p-2 rounded border cursor-pointer transition-colors ${
-                        selectedTarget === enemy.id 
-                          ? "border-yellow-400 bg-yellow-400/10" 
-                          : "border-red-600/30 hover:border-red-400/50"
-                      }`}
-                      onClick={() => setSelectedTarget(enemy.id)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{enemy.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          Lv.{enemy.level}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between text-xs mt-1">
-                        <span>HP: {enemy.hp}/{enemy.maxHp}</span>
-                        <span>ATK: {enemy.attack}</span>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
 
           </div>
         </div>
