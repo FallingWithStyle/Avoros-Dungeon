@@ -48,6 +48,9 @@ export interface CombatEntity {
   level?: number;
   serial?: number;      // For player identification
   
+  // Equipment
+  equippedWeapon?: any; // Equipment interface from schema
+  
   // Action management
   cooldowns?: Record<string, number>;
   
@@ -67,10 +70,39 @@ export interface CombatState {
 // Combat calculation functions
 export function calculateDamage(attacker: any, defender: any): number {
   const might = attacker.might || 1;
-  const weaponAttack = attacker.attack || 0;
+  let baseDamage = 0;
 
-  // Use weapon attack if available, otherwise use might for unarmed combat
-  const baseDamage = weaponAttack > 0 ? weaponAttack : Math.floor(might * 0.5) + 1;
+  // Calculate damage based on equipped weapon
+  if (attacker.equippedWeapon) {
+    // Use weapon's damage attribute to determine base damage
+    const damageAttribute = attacker.equippedWeapon.damageAttribute || "might";
+    let attributeValue = 0;
+    
+    switch (damageAttribute) {
+      case "might":
+        attributeValue = attacker.might || 1;
+        break;
+      case "agility":
+        attributeValue = attacker.agility || 1;
+        break;
+      case "intellect":
+        attributeValue = attacker.intellect || 1;
+        break;
+      case "wisdom":
+        attributeValue = attacker.wisdom || 1;
+        break;
+      default:
+        attributeValue = attacker.might || 1;
+    }
+
+    // Base weapon damage + attribute modifier + weapon bonus
+    const weaponBonus = attacker.equippedWeapon.mightBonus || 0;
+    baseDamage = Math.floor(attributeValue * 0.8) + 3 + weaponBonus; // Weapon base damage
+  } else {
+    // Unarmed combat - reduced damage
+    baseDamage = Math.floor(might * 0.4) + 1;
+  }
+
   const defense = defender.defense || 0;
   const levelMod = (attacker.level || 1) * 0.1;
 
@@ -231,9 +263,10 @@ export class CombatSystem {
     const dy = targetPosition.y - entity.position.y;
 
     if (dx !== 0 || dy !== 0) {
-      // Calculate angle in degrees (0° = North)
-      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-      angle = angle - 90;
+      // Calculate angle in degrees (0° = North, pointing up)
+      // atan2(dy, dx) gives us the angle from the positive x-axis
+      // We need to adjust so that 0° points north (negative y direction)
+      let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
 
       // Normalize angle to 0-360
       if (angle < 0) {
