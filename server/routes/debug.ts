@@ -383,8 +383,8 @@ export function registerDebugRoutes(app: Express) {
 
       res.json({
         success: true,
-        message: `Redis fallback mode ${enabled ? 'enabled' : 'disabled'}`,
-        fallbackMode: enabled
+        message: `Cleared adjacent room cache for crawler ${crawlerId}`,
+        crawlerId: crawlerId
       });
     } catch (error) {
       console.error("Error toggling Redis fallback mode:", error);
