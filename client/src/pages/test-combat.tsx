@@ -37,6 +37,40 @@ export default function TestCombat() {
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [showRangeIndicator, setShowRangeIndicator] = useState(false);
 
+  // Action handlers - Define these first before they're used
+  const handleAttack = useCallback((targetId: string) => {
+    setSelectedTarget(null);
+    setActiveActionMode(null);
+    setShowRangeIndicator(false);
+    combatSystem.executeAttack("player", targetId);
+  }, []);
+
+  const handleMove = (direction: string) => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player) return;
+
+    let newX = player.position.x;
+    let newY = player.position.y;
+    const moveDistance = 10;
+
+    switch (direction) {
+      case "up":
+        newY -= moveDistance;
+        break;
+      case "down":
+        newY += moveDistance;
+        break;
+      case "left":
+        newX -= moveDistance;
+        break;
+      case "right":
+        newX += moveDistance;
+        break;
+    }
+
+    combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
+  };
+
   // Keyboard movement handler
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
@@ -213,13 +247,6 @@ export default function TestCombat() {
     }
   }, [activeActionMode, combatState.entities, handleAttack, equippedWeapon]);
 
-  const handleAttack = useCallback((targetId: string) => {
-    setSelectedTarget(null);
-    setActiveActionMode(null);
-    setShowRangeIndicator(false);
-    combatSystem.executeAttack("player", targetId);
-  }, []);
-
   const selectTarget = useCallback((targetId: string) => {
     setSelectedTarget(targetId);
   }, []);
@@ -374,32 +401,6 @@ export default function TestCombat() {
 
     combatSystem.addEntity(goblin);
     combatSystem.addEntity(orc);
-  };
-
-  const handleMove = (direction: string) => {
-    const player = combatState.entities.find(e => e.id === "player");
-    if (!player) return;
-
-    let newX = player.position.x;
-    let newY = player.position.y;
-    const moveDistance = 10;
-
-    switch (direction) {
-      case "up":
-        newY -= moveDistance;
-        break;
-      case "down":
-        newY += moveDistance;
-        break;
-      case "left":
-        newX -= moveDistance;
-        break;
-      case "right":
-        newX += moveDistance;
-        break;
-    }
-
-    combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
   };
 
   const resetScenario = () => {
@@ -795,7 +796,7 @@ export default function TestCombat() {
               <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-red-300 text-sm flex items-center gap-2">
-                    <Skull className="w-4 h-4" />
+                    <Skull className="w-4 h4" />
                     Enemies
                   </CardTitle>
                 </CardHeader>
