@@ -807,6 +807,55 @@ export default function TestCombat() {
               </CardContent>
             </Card>
 
+            {/* Action Log */}
+            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Action Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1 max-h-64 overflow-y-auto text-xs">
+                  {combatState.actionLog.length === 0 ? (
+                    <div className="text-gray-400 italic">No actions yet...</div>
+                  ) : (
+                    combatState.actionLog.slice(0, 20).map((log) => (
+                      <div key={log.id} className="border-b border-gray-700/30 pb-1 mb-1">
+                        <div className={`font-medium ${
+                          log.result === "critical" ? "text-orange-400" :
+                          log.result === "hit" ? "text-red-300" :
+                          log.result === "miss" ? "text-gray-400" :
+                          log.result === "moved" ? "text-blue-300" :
+                          "text-gray-300"
+                        }`}>
+                          {log.description}
+                        </div>
+                        {log.weapon && (
+                          <div className="text-gray-400 text-xs">
+                            Weapon: {log.weapon}
+                          </div>
+                        )}
+                        {log.toHitRoll !== undefined && log.toHitTarget !== undefined && (
+                          <div className="text-gray-400 text-xs">
+                            To-Hit: {log.toHitRoll}/100 vs {log.toHitTarget}% target
+                          </div>
+                        )}
+                        {log.damageRoll && (
+                          <div className="text-gray-400 text-xs">
+                            Damage: {log.damageRoll}
+                          </div>
+                        )}
+                        <div className="text-gray-500 text-xs">
+                          {new Date(log.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Enemy Status */}
             {enemies.length > 0 && (
               <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm">
