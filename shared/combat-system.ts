@@ -277,6 +277,9 @@ export class CombatSystem {
       return false;
     }
 
+    // Get weapon name for logging
+    const weaponName = weapon ? weapon.name : "Fists";
+
     // Calculate to-hit chance
     const attackerAccuracy = attacker.accuracy || 20;
     const targetEvasion = target.evasion || 10;

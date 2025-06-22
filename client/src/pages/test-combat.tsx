@@ -35,14 +35,12 @@ export default function TestCombat() {
   const [manualRotation, setManualRotation] = useState(false);
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
-  const [showRangeIndicator, setShowRangeIndicator] = useState(false);
   const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
 
   // Action handlers - Define these first before they're used
   const handleAttack = useCallback((targetId: string) => {
     setSelectedTarget(null);
     setActiveActionMode(null);
-    setShowRangeIndicator(false);
     combatSystem.executeAttack("player", targetId);
   }, []);
 
@@ -279,7 +277,6 @@ export default function TestCombat() {
         // Cancel attack if no valid target
         setActiveActionMode(null);
         setSelectedTarget(null);
-        setShowRangeIndicator(false);
       }
     }
   }, [activeActionMode, combatState.entities, handleAttack, equippedWeapon]);
@@ -298,7 +295,6 @@ export default function TestCombat() {
       actionId: "basic_attack",
       actionName: "Attack"
     });
-    setShowRangeIndicator(true);
   }, []);
 
   useEffect(() => {
@@ -475,7 +471,6 @@ export default function TestCombat() {
     // Clear all state first
     setSelectedTarget(null);
     setActiveActionMode(null);
-    setShowRangeIndicator(false);
     setManualRotation(false);
     
     // Then reinitialize
@@ -550,171 +545,110 @@ export default function TestCombat() {
                     ))}
                   </div>
 
-                  {/* Weapon range indicator */}
-                  {showRangeIndicator && combatState.entities.find(e => e.id === "player") && (
-                    <div
-                      className="absolute border-2 border-yellow-400 border-dashed rounded-full pointer-events-none z-0"
-                      style={{
-                        left: combatState.entities.find(e => e.id === "player")!.position.x + '%',
-                        top: combatState.entities.find(e => e.id === "player")!.position.y + '%',
-                        width: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                        height: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                        transform: 'translate(-50%, -50%)',
-                        opacity: 0.5
-                      }}
-                    />
-                  )}
-
-                  {/* Target range indicator - shows range needed to reach selected target */}
-                  {selectedTarget && selectedEntity && combatState.entities.find(e => e.id === "player") && (
-                    <div>
-                      {/* Player's current weapon range */}
-                      <div
-                        className="absolute border-2 border-green-400 border-solid rounded-full pointer-events-none z-0"
-                        style={{
-                          left: combatState.entities.find(e => e.id === "player")!.position.x + '%',
-                          top: combatState.entities.find(e => e.id === "player")!.position.y + '%',
-                          width: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                          height: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                          transform: 'translate(-50%, -50%)',
-                          opacity: 0.3
-                        }}
-                      />
-                      
-                      {/* Range line to target */}
-                      {(() => {
-                        const player = combatState.entities.find(e => e.id === "player")!;
-                        const distance = Math.sqrt(
-                          Math.pow(selectedEntity.position.x - player.position.x, 2) + 
-                          Math.pow(selectedEntity.position.y - player.position.y, 2)
-                        );
-                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
-                        const isInRange = distance <= weaponRange;
-                        
-                        const angle = Math.atan2(
-                          selectedEntity.position.y - player.position.y,
-                          selectedEntity.position.x - player.position.x
-                        );
-                        
-                        const lineLength = Math.min(distance, 50); // Cap visual line length
-                        
-                        return (
-                          <div
-                            className={`absolute pointer-events-none z-0 ${
-                              isInRange ? 'border-green-400' : 'border-red-400'
-                            }`}
-                            style={{
-                              left: player.position.x + '%',
-                              top: player.position.y + '%',
-                              width: lineLength + '%',
-                              height: '2px',
-                              backgroundColor: isInRange ? '#4ade80' : '#f87171',
-                              transformOrigin: 'left center',
-                              transform: `translate(0, -50%) rotate(${angle}rad)`,
-                              opacity: 0.6
-                            }}
-                          />
-                        );
-                      })()}
-                      
-                      {/* Distance indicator */}
-                      {(() => {
-                        const player = combatState.entities.find(e => e.id === "player")!;
-                        const distance = Math.sqrt(
-                          Math.pow(selectedEntity.position.x - player.position.x, 2) + 
-                          Math.pow(selectedEntity.position.y - player.position.y, 2)
-                        );
-                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
-                        const isInRange = distance <= weaponRange;
-                        
-                        return (
-                          <div
-                            className={`absolute pointer-events-none z-10 px-2 py-1 rounded text-xs font-medium ${
-                              isInRange 
-                                ? 'bg-green-800/80 text-green-200 border border-green-600' 
-                                : 'bg-red-800/80 text-red-200 border border-red-600'
-                            }`}
-                            style={{
-                              left: (player.position.x + selectedEntity.position.x) / 2 + '%',
-                              top: (player.position.y + selectedEntity.position.y) / 2 + '%',
-                              transform: 'translate(-50%, -50%)',
-                            }}
-                          >
-                            {isInRange ? 'IN RANGE' : `OUT OF RANGE (${Math.round(distance - weaponRange)} too far)`}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
+                  
 
                   {/* Entities */}
-                  {combatState.entities.map((entity) => (
-                    <div
-                      key={entity.id}
-                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
-                        selectedTarget === entity.id ? 'scale-110 z-10' : 'hover:scale-105'
-                      }`}
-                      style={{
-                        left: `${entity.position.x}%`,
-                        top: `${entity.position.y}%`,
-                      }}
-                      onClick={() => entity.type === "hostile" ? setSelectedTarget(entity.id) : null}
-                    >
-                      <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                        entity.type === "player" 
-                          ? "bg-blue-600 border-blue-400" 
-                          : entity.type === "hostile"
-                          ? "bg-red-600 border-red-400"
-                          : "bg-green-600 border-green-400"
-                      }`}>
-                        {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
-                        {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+                  {combatState.entities.map((entity) => {
+                    // Calculate if this entity is in range of player's weapon (for hostile entities)
+                    let rangeStatus = "neutral";
+                    if (entity.type === "hostile" && entity.id !== "player") {
+                      const player = combatState.entities.find(e => e.id === "player");
+                      if (player) {
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const distance = Math.sqrt(
+                          Math.pow(entity.position.x - player.position.x, 2) + 
+                          Math.pow(entity.position.y - player.position.y, 2)
+                        );
+                        rangeStatus = distance <= weaponRange ? "inRange" : "outOfRange";
+                      }
+                    }
 
-                        {/* Facing direction indicator - colored arrows based on entity type */}
-                        {entity.facing !== undefined && (
-                          <div
-                            className="absolute w-12 h-12 pointer-events-none z-10"
-                            style={{
-                              transform: `rotate(${entity.facing}deg)`,
-                              transformOrigin: "center",
-                            }}
-                          >
-                            <div className="w-full h-full flex items-start justify-center">
-                              <div
-                                className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
-                                  entity.type === "player" 
-                                    ? "border-b-blue-400" 
-                                    : entity.type === "hostile"
-                                    ? "border-b-red-400"
-                                    : "border-b-green-400"
-                                }`}
-                                style={{
-                                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
-                                  marginTop: "-6px", // Position arrow to extend from behind the circle
-                                }}
-                              />
+                    return (
+                      <div
+                        key={entity.id}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
+                          selectedTarget === entity.id ? 'scale-110 z-10' : 'hover:scale-105'
+                        }`}
+                        style={{
+                          left: `${entity.position.x}%`,
+                          top: `${entity.position.y}%`,
+                        }}
+                        onClick={() => entity.type === "hostile" ? setSelectedTarget(entity.id) : null}
+                      >
+                        {/* Range indicator ring for hostile entities */}
+                        {entity.type === "hostile" && rangeStatus !== "neutral" && (
+                          <div className={`absolute -inset-2 rounded-full border-2 ${
+                            rangeStatus === "inRange" 
+                              ? "border-green-400 shadow-lg shadow-green-400/50" 
+                              : "border-red-400/60"
+                          } transition-all duration-300`} />
+                        )}
+
+                        {/* Main entity circle */}
+                        <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                          entity.type === "player" 
+                            ? "bg-blue-600 border-blue-400" 
+                            : entity.type === "hostile"
+                            ? rangeStatus === "inRange" 
+                              ? "bg-red-600 border-green-400 shadow-lg shadow-green-400/30" 
+                              : "bg-red-600 border-red-400"
+                            : "bg-green-600 border-green-400"
+                        }`}>
+                          {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
+                          {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+
+                          {/* Facing direction indicator - colored arrows based on entity type */}
+                          {entity.facing !== undefined && (
+                            <div
+                              className="absolute w-12 h-12 pointer-events-none z-10"
+                              style={{
+                                transform: `rotate(${entity.facing}deg)`,
+                                transformOrigin: "center",
+                              }}
+                            >
+                              <div className="w-full h-full flex items-start justify-center">
+                                <div
+                                  className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                                    entity.type === "player" 
+                                      ? "border-b-blue-400" 
+                                      : entity.type === "hostile"
+                                      ? "border-b-red-400"
+                                      : "border-b-green-400"
+                                  }`}
+                                  style={{
+                                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
+                                    marginTop: "-6px", // Position arrow to extend from behind the circle
+                                  }}
+                                />
+                              </div>
                             </div>
+                          )}
+
+                          {/* Health bar */}
+                          <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
+                            <div 
+                              className={`h-full rounded transition-all duration-300 ${
+                                entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
+                                entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
+                              }`}
+                              style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                            />
                           </div>
-                        )}
 
-                        {/* Health bar */}
-                        <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
-                          <div 
-                            className={`h-full rounded transition-all duration-300 ${
-                              entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
-                              entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
-                            }`}
-                            style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
-                          />
+                          {/* Selection indicator */}
+                          {selectedTarget === entity.id && (
+                            <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
+                          )}
+
+                          {/* Range status indicator for enemies */}
+                          {entity.type === "hostile" && rangeStatus === "inRange" && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border border-green-200 animate-pulse" 
+                                 title="In weapon range" />
+                          )}
                         </div>
-
-                        {/* Selection indicator */}
-                        {selectedTarget === entity.id && (
-                          <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
