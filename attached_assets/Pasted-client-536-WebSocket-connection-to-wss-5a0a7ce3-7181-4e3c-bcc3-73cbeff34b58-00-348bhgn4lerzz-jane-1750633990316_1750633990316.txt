@@ -1,0 +1,48 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=3whsUmKekV0n' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=3whsUmKekV0n' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+database-size-analyzer.tsx:248 Received HTML response instead of JSON: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import { createHotContext } from "/@vite/client";
+const hot = createHotContext("/__dummy__runtime-error-plugin");
+
+function sendError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error("(unknown runtime error)");
+  }
+  const serialized = {
+    message: error.message,
+    stack: error.stack,
+  };
+  hot.send("runtime-error-plugin:error", serialized);
+}
+
+window.addEventListener("error", (evt) => {
+  sendError(evt.er
+onClick @ database-size-analyzer.tsx:248
+await in onClick
+callCallback2 @ chunk-WERSD76P.js?v=c64965cc:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=c64965cc:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=c64965cc:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=c64965cc:3736
+executeDispatch @ chunk-WERSD76P.js?v=c64965cc:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=c64965cc:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=c64965cc:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=c64965cc:7051
+(anonymous) @ chunk-WERSD76P.js?v=c64965cc:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=c64965cc:18913
+batchedUpdates @ chunk-WERSD76P.js?v=c64965cc:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=c64965cc:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=c64965cc:5478
+dispatchEvent @ chunk-WERSD76P.js?v=c64965cc:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=c64965cc:5449
