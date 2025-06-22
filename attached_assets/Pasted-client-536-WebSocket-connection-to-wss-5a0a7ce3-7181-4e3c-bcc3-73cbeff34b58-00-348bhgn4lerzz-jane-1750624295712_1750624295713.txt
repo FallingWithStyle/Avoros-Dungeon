@@ -1,0 +1,61 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=3XTGMFvGgCtH' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=3XTGMFvGgCtH' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+test-combat.tsx:134 Target out of range for attack!
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught ReferenceError: Cannot access 'damage2' before initialization
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/shared/combat-system.ts
+main.tsx:42 Line: 173
+main.tsx:43 Column: 17
+main.tsx:44 Error object: ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+combat-system.ts:318 Uncaught ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+executeAttack @ combat-system.ts:318
+(anonymous) @ test-combat.tsx:132
+handleKeyDown @ test-combat.tsx:219
+test-combat.tsx:134 Target out of range for attack!
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught ReferenceError: Cannot access 'damage2' before initialization
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/shared/combat-system.ts
+main.tsx:42 Line: 173
+main.tsx:43 Column: 17
+main.tsx:44 Error object: ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+combat-system.ts:318 Uncaught ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+executeAttack @ combat-system.ts:318
+(anonymous) @ test-combat.tsx:132
+handleKeyDown @ test-combat.tsx:219
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught ReferenceError: Cannot access 'damage2' before initialization
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/shared/combat-system.ts
+main.tsx:42 Line: 173
+main.tsx:43 Column: 17
+main.tsx:44 Error object: ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+combat-system.ts:318 Uncaught ReferenceError: Cannot access 'damage2' before initialization
+    at CombatSystem.executeAttack (combat-system.ts:318:9)
+    at test-combat.tsx:132:26
+    at handleKeyDown (test-combat.tsx:219:11)
+executeAttack @ combat-system.ts:318
+(anonymous) @ test-combat.tsx:132
+handleKeyDown @ test-combat.tsx:219
