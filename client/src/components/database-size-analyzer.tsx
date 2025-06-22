@@ -232,22 +232,33 @@ export function DatabaseSizeAnalyzer() {
                               const response = await fetch('/api/debug/cleanup-tactical-positions', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
                               });
                               
+                              const responseText = await response.text();
+                              
                               if (!response.ok) {
-                                const errorText = await response.text();
-                                alert('Cleanup failed with status ' + response.status + ': ' + errorText.substring(0, 200));
+                                console.error('Cleanup failed with status', response.status, ':', responseText);
+                                alert('Cleanup failed with status ' + response.status + ': ' + responseText.substring(0, 200));
                                 return;
                               }
                               
-                              const contentType = response.headers.get('content-type');
-                              if (!contentType || !contentType.includes('application/json')) {
-                                const responseText = await response.text();
-                                alert('Unexpected response format: ' + responseText.substring(0, 200));
+                              // Check if response is HTML (error page)
+                              if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+                                console.error('Received HTML response instead of JSON:', responseText.substring(0, 500));
+                                alert('Server returned an error page instead of JSON. Check console for details.');
                                 return;
                               }
                               
-                              const result = await response.json();
+                              let result;
+                              try {
+                                result = JSON.parse(responseText);
+                              } catch (parseError) {
+                                console.error('Failed to parse JSON response:', responseText);
+                                alert('Invalid JSON response from server: ' + responseText.substring(0, 200));
+                                return;
+                              }
+                              
                               if (result.success) {
                                 alert('Cleanup completed! Deleted ' + result.deletedCount + ' records. ' + result.details.spaceSaved);
                                 // Refresh the analysis
@@ -256,6 +267,7 @@ export function DatabaseSizeAnalyzer() {
                                 alert('Cleanup failed: ' + result.error);
                               }
                             } catch (error) {
+                              console.error('Network or other error during cleanup:', error);
                               alert('Error running cleanup: ' + error);
                             }
                           }}
