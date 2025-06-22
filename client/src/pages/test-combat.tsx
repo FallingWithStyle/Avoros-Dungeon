@@ -71,7 +71,7 @@ export default function TestCombat() {
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
   };
 
-  // Keyboard movement handler with debouncing
+  // Keyboard movement handler
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
@@ -79,7 +79,7 @@ export default function TestCombat() {
     // Only move if there's actual movement input
     if (direction.x === 0 && direction.y === 0) return;
 
-    const moveSpeed = 2; // Movement speed
+    const moveSpeed = 3; // Increased movement speed
     const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
@@ -91,18 +91,18 @@ export default function TestCombat() {
     }
     const newFacing = Math.round(facing);
 
-    // Batch the updates to prevent multiple state changes
+    // Update position immediately
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
     
-    // Only update facing if it changed significantly
+    // Update facing with smaller threshold for movement
     const currentFacing = player.facing || 0;
     const facingDiff = Math.abs(newFacing - currentFacing);
     const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
     
-    if (normalizedDiff > 5) { // Larger threshold for movement-based facing
+    if (normalizedDiff > 2) { // Smaller threshold for smoother movement-based facing
       combatSystem.updateEntity("player", { facing: newFacing });
     }
-  }, []);
+  }, [combatState.entities]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -169,17 +169,17 @@ export default function TestCombat() {
         }
 
         const newFacing = Math.round(angle);
-        // Only update if facing actually changed significantly (more than 1 degree difference)
+        // Only update if facing actually changed (reduce threshold for better responsiveness)
         const currentFacing = player.facing || 0;
         const facingDiff = Math.abs(newFacing - currentFacing);
         const normalizedDiff = Math.min(facingDiff, 360 - facingDiff); // Handle wrap-around
         
-        if (normalizedDiff > 1) {
+        if (normalizedDiff > 0.5) { // Much smaller threshold for targeting
           combatSystem.updateEntity("player", { facing: newFacing });
         }
       }
     }
-  }, [selectedTarget, manualRotation, combatState.entities.find(e => e.id === "player")?.position]); // Only depend on specific properties
+  }, [selectedTarget, manualRotation, combatState.entities]); // Include full entities for proper change detection
 
   // Keyboard hotkey handler
   useEffect(() => {
@@ -292,7 +292,7 @@ export default function TestCombat() {
     let updateTimeout: NodeJS.Timeout | null = null;
     
     const unsubscribe = combatSystem.subscribe((state) => {
-      // Throttle state updates to prevent overwhelming the UI
+      // Light throttling to prevent excessive updates while maintaining responsiveness
       if (updateTimeout) {
         clearTimeout(updateTimeout);
       }
@@ -300,7 +300,7 @@ export default function TestCombat() {
       updateTimeout = setTimeout(() => {
         setCombatState(state);
         updateTimeout = null;
-      }, 16); // ~60fps throttling
+      }, 8); // ~120fps throttling for better responsiveness
     });
 
     // Initialize test scenario
