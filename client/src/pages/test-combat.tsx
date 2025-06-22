@@ -36,6 +36,14 @@ export default function TestCombat() {
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
+  const [coverElements, setCoverElements] = useState<Array<{
+    id: string;
+    type: "full_wall" | "half_wall";
+    position: { x: number; y: number };
+    width: number;
+    height: number;
+    facing: number; // 0=horizontal, 90=vertical
+  }>>([]);
 
   // Action handlers - Define these first before they're used
   const handleAttack = useCallback((targetId: string) => {
@@ -79,8 +87,65 @@ export default function TestCombat() {
     if (direction.x === 0 && direction.y === 0) return;
 
     const moveSpeed = 3; // Increased movement speed
-    const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
-    const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+    let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+    let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+
+    // Check collision with cover elements
+    const playerRadius = 2; // Player collision radius
+    const wouldCollide = coverElements.some(cover => {
+      const coverLeft = cover.position.x - cover.width / 2;
+      const coverRight = cover.position.x + cover.width / 2;
+      const coverTop = cover.position.y - cover.height / 2;
+      const coverBottom = cover.position.y + cover.height / 2;
+
+      return (newX + playerRadius > coverLeft && 
+              newX - playerRadius < coverRight &&
+              newY + playerRadius > coverTop && 
+              newY - playerRadius < coverBottom);
+    });
+
+    if (wouldCollide) {
+      // Try moving only horizontally
+      newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      newY = player.position.y;
+      
+      const horizontalCollision = coverElements.some(cover => {
+        const coverLeft = cover.position.x - cover.width / 2;
+        const coverRight = cover.position.x + cover.width / 2;
+        const coverTop = cover.position.y - cover.height / 2;
+        const coverBottom = cover.position.y + cover.height / 2;
+
+        return (newX + playerRadius > coverLeft && 
+                newX - playerRadius < coverRight &&
+                newY + playerRadius > coverTop && 
+                newY - playerRadius < coverBottom);
+      });
+
+      if (horizontalCollision) {
+        // Try moving only vertically
+        newX = player.position.x;
+        newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        
+        const verticalCollision = coverElements.some(cover => {
+          const coverLeft = cover.position.x - cover.width / 2;
+          const coverRight = cover.position.x + cover.width / 2;
+          const coverTop = cover.position.y - cover.height / 2;
+          const coverBottom = cover.position.y + cover.height / 2;
+
+          return (newX + playerRadius > coverLeft && 
+                  newX - playerRadius < coverRight &&
+                  newY + playerRadius > coverTop && 
+                  newY - playerRadius < coverBottom);
+        });
+
+        if (verticalCollision) {
+          // Can't move at all, keep original position
+          newX = player.position.x;
+          newY = player.position.y;
+          return; // Exit early, no movement
+        }
+      }
+    }
 
     // Calculate facing direction based on movement
     // Convert movement vector to degrees (0° = North, positive clockwise)
@@ -129,7 +194,13 @@ export default function TestCombat() {
           );
 
           if (distance <= weaponRange) {
-            combatSystem.executeAttack("player", selectedTarget);
+            // Check line of sight - if full walls block the attack
+            const hasLineOfSight = checkLineOfSight(player.position, target.position, coverElements);
+            if (hasLineOfSight) {
+              combatSystem.executeAttack("player", selectedTarget);
+            } else {
+              console.log("Attack blocked by cover!");
+            }
           } else {
             console.log("Target out of range for attack!");
           }
@@ -144,6 +215,83 @@ export default function TestCombat() {
       setActiveActionMode({ type: actionType as any, actionId, actionName });
     }
   }, [selectedTarget, combatState.entities, equippedWeapon]);
+
+  // Line of sight checking function
+  const checkLineOfSight = useCallback((start: { x: number; y: number }, end: { x: number; y: number }, covers: typeof coverElements): boolean => {
+    // Simple line intersection test with full walls only
+    const fullWalls = covers.filter(c => c.type === "full_wall");
+    
+    for (const wall of fullWalls) {
+      const wallLeft = wall.position.x - wall.width / 2;
+      const wallRight = wall.position.x + wall.width / 2;
+      const wallTop = wall.position.y - wall.height / 2;
+      const wallBottom = wall.position.y + wall.height / 2;
+
+      // Simple bounding box intersection with line of sight
+      if (lineIntersectsRect(start, end, { 
+        left: wallLeft, 
+        right: wallRight, 
+        top: wallTop, 
+        bottom: wallBottom 
+      })) {
+        return false; // Line of sight blocked
+      }
+    }
+    return true; // Clear line of sight
+  }, []);
+
+  // Helper function for line-rectangle intersection
+  const lineIntersectsRect = (start: { x: number; y: number }, end: { x: number; y: number }, rect: { left: number; right: number; top: number; bottom: number }): boolean => {
+    // Simple check: if line passes through rectangle
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    
+    if (dx === 0 && dy === 0) return false; // No line
+    
+    // Check if either endpoint is inside rectangle
+    const startInside = start.x >= rect.left && start.x <= rect.right && start.y >= rect.top && start.y <= rect.bottom;
+    const endInside = end.x >= rect.left && end.x <= rect.right && end.y >= rect.top && end.y <= rect.bottom;
+    
+    if (startInside || endInside) return true;
+    
+    // Check intersection with rectangle edges
+    const t1 = rect.left <= Math.max(start.x, end.x) && rect.right >= Math.min(start.x, end.x);
+    const t2 = rect.top <= Math.max(start.y, end.y) && rect.bottom >= Math.min(start.y, end.y);
+    
+    return t1 && t2;
+  };
+
+  // Check if entity is behind cover (for damage reduction)
+  const getEntityCoverBonus = useCallback((entityPos: { x: number; y: number }, attackerPos: { x: number; y: number }): { covered: boolean; coverType: string | null } => {
+    const halfWalls = coverElements.filter(c => c.type === "half_wall");
+    
+    for (const wall of halfWalls) {
+      const wallLeft = wall.position.x - wall.width / 2;
+      const wallRight = wall.position.x + wall.width / 2;
+      const wallTop = wall.position.y - wall.height / 2;
+      const wallBottom = wall.position.y + wall.height / 2;
+
+      // Check if entity is near the half wall
+      const nearWall = entityPos.x >= wallLeft - 3 && entityPos.x <= wallRight + 3 && 
+                       entityPos.y >= wallTop - 3 && entityPos.y <= wallBottom + 3;
+      
+      if (nearWall) {
+        // Check if wall is between entity and attacker
+        const wallBetween = lineIntersectsRect(entityPos, attackerPos, {
+          left: wallLeft,
+          right: wallRight, 
+          top: wallTop,
+          bottom: wallBottom
+        });
+        
+        if (wallBetween) {
+          return { covered: true, coverType: "half_wall" };
+        }
+      }
+    }
+    
+    return { covered: false, coverType: null };
+  }, [coverElements]);
 
   // Manual rotation handler
   const handleManualRotation = useCallback((direction: 'left' | 'right') => {
@@ -581,6 +729,43 @@ export default function TestCombat() {
 
     combatSystem.addEntity(goblin);
     combatSystem.addEntity(orc);
+
+    // Add some cover elements for testing
+    const testCover = [
+      {
+        id: "wall1",
+        type: "full_wall" as const,
+        position: { x: 35, y: 30 },
+        width: 15,
+        height: 3,
+        facing: 0 // horizontal
+      },
+      {
+        id: "wall2", 
+        type: "half_wall" as const,
+        position: { x: 65, y: 45 },
+        width: 3,
+        height: 12,
+        facing: 90 // vertical
+      },
+      {
+        id: "wall3",
+        type: "full_wall" as const,
+        position: { x: 50, y: 75 },
+        width: 8,
+        height: 3,
+        facing: 0 // horizontal
+      },
+      {
+        id: "wall4",
+        type: "half_wall" as const,
+        position: { x: 20, y: 60 },
+        width: 10,
+        height: 3,
+        facing: 0 // horizontal
+      }
+    ];
+    setCoverElements(testCover);
   };
 
   const resetScenario = () => {
@@ -799,6 +984,9 @@ export default function TestCombat() {
               <Button onClick={spawnFriendlyMob} variant="default" size="sm" className="bg-green-600 hover:bg-green-700 border-green-500 text-white">
                 Spawn Friendly Mob
               </Button>
+              <div className="text-xs text-muted-foreground mt-2">
+                Cover: {coverElements.length} elements ({coverElements.filter(c => c.type === "full_wall").length} full, {coverElements.filter(c => c.type === "half_wall").length} half)
+              </div>
             </div>
           </CardHeader>
         </Card>
@@ -930,6 +1118,54 @@ export default function TestCombat() {
                     }
                     return null;
                   })}
+
+                  {/* Cover Elements */}
+                  {coverElements.map((cover) => (
+                    <div
+                      key={cover.id}
+                      className={`absolute ${
+                        cover.type === "full_wall" 
+                          ? "bg-stone-600 border-2 border-stone-500" 
+                          : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                      } rounded-sm shadow-lg`}
+                      style={{
+                        left: `${cover.position.x - cover.width / 2}%`,
+                        top: `${cover.position.y - cover.height / 2}%`,
+                        width: `${cover.width}%`,
+                        height: `${cover.height}%`,
+                        zIndex: cover.type === "full_wall" ? 15 : 10,
+                        transform: `rotate(${cover.facing}deg)`,
+                        transformOrigin: "center",
+                        filter: cover.type === "full_wall" 
+                          ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                          : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
+                      }}
+                      title={`${cover.type === "full_wall" ? "Full Wall" : "Half Wall"} - ${cover.type === "full_wall" ? "Blocks movement and attacks" : "Blocks movement, provides cover"}`}
+                    >
+                      {/* Wall texture */}
+                      <div className="absolute inset-0 opacity-30">
+                        {cover.type === "full_wall" ? (
+                          // Stone brick pattern for full walls
+                          <div className="w-full h-full bg-gradient-to-br from-stone-500 to-stone-700 bg-repeat"
+                               style={{
+                                 backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px),
+                                                  repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)`
+                               }} />
+                        ) : (
+                          // Lighter pattern for half walls
+                          <div className="w-full h-full bg-gradient-to-br from-stone-300 to-stone-500 bg-repeat"
+                               style={{
+                                 backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)`
+                               }} />
+                        )}
+                      </div>
+
+                      {/* Height indicator for half walls */}
+                      {cover.type === "half_wall" && (
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-2 h-1 bg-yellow-400 rounded-full opacity-60" />
+                      )}
+                    </div>
+                  ))}
 
                   {/* Entities */}
                   {combatState.entities.map((entity) => {
@@ -1433,6 +1669,12 @@ export default function TestCombat() {
                   <div>Hold Tab: Clear Target</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
                   {activeActionMode && <div className="text-green-400">Mode: {activeActionMode.actionName}</div>}
+                  <div className="mt-2 text-xs text-amber-400">
+                    <div>Cover System:</div>
+                    <div>• Full walls block movement & attacks</div>
+                    <div>• Half walls block movement, provide cover</div>
+                    <div>• Stay near half walls for protection</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
