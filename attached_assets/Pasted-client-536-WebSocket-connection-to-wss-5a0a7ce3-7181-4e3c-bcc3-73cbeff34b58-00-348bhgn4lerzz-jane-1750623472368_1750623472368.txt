@@ -1,0 +1,211 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=LXg9hOvfuGy7' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=LXg9hOvfuGy7' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 0}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: null, manualRotation: false, entityCount: 3}
+test-combat.tsx:177 🎯 Auto-targeting skipped: {selectedTarget: null, manualRotation: false}
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 35, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 80.2724214485984, newFacing: 80, currentFacing: 0, difference: 80}
+test-combat.tsx:218 🎯 Updating player facing from 0 to 80
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 32, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 79.38034472384487, newFacing: 79, currentFacing: 80, difference: 1}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 78.3106308245608, newFacing: 78, currentFacing: 80, difference: 2}
+test-combat.tsx:218 🎯 Updating player facing from 80 to 78
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 78.3106308245608, newFacing: 78, currentFacing: 78, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 26, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 77.0053832080835, newFacing: 77, currentFacing: 78, difference: 1}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 78, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 78 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 75, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 20, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 73.30075576600639, newFacing: 73, currentFacing: 75, difference: 2}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 73
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 20, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 73.30075576600639, newFacing: 73, currentFacing: 73, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 20, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 140.19442890773482, newFacing: 140, currentFacing: 73, difference: 67}
+test-combat.tsx:218 🎯 Updating player facing from 73 to 140
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 140, difference: 4}
+test-combat.tsx:218 🎯 Updating player facing from 140 to 136
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 136, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 26, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 132.70938995736148, newFacing: 133, currentFacing: 136, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 136 to 133
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 26, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 132.70938995736148, newFacing: 133, currentFacing: 133, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 129.6106882400266, newFacing: 130, currentFacing: 133, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 133 to 130
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 129.6106882400266, newFacing: 130, currentFacing: 130, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 32, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 126.86989764584402, newFacing: 127, currentFacing: 130, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 130 to 127
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 32, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 126.86989764584402, newFacing: 127, currentFacing: 127, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 35, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 124.43898930880361, newFacing: 124, currentFacing: 127, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 127 to 124
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 35, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 124.43898930880361, newFacing: 124, currentFacing: 124, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 35, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 80.2724214485984, newFacing: 80, currentFacing: 124, difference: 44}
+test-combat.tsx:218 🎯 Updating player facing from 124 to 80
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 32, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 79.38034472384487, newFacing: 79, currentFacing: 80, difference: 1}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 78.3106308245608, newFacing: 78, currentFacing: 80, difference: 2}
+test-combat.tsx:218 🎯 Updating player facing from 80 to 78
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 29, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 78.3106308245608, newFacing: 78, currentFacing: 78, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 26, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 77.0053832080835, newFacing: 77, currentFacing: 78, difference: 1}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 78, difference: 3}
+test-combat.tsx:218 🎯 Updating player facing from 78 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 75, difference: 0}
+test-combat.tsx:221 🎯 Facing update skipped - change too small
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 75, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 136
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 136, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 136 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 75, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 136
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 136, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 136 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 75, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 136
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 136, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 136 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 75, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 136
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'goblin1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: -6}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 75.37912601136834, newFacing: 75, currentFacing: 136, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 136 to 75
+test-combat.tsx:170 🎯 Auto-targeting effect triggered: {selectedTarget: 'orc1', manualRotation: false, entityCount: 3}
+test-combat.tsx:184 🎯 Found entities: {player: {…}, target: {…}}
+test-combat.tsx:194 🎯 Position delta: {dx: 23, dy: 24}
+test-combat.tsx:209 🎯 Facing calculation: {angle: 136.21887523513132, newFacing: 136, currentFacing: 75, difference: 61}
+test-combat.tsx:218 🎯 Updating player facing from 75 to 136
