@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Bot, User, Settings, Menu, ChevronDown } from "lucide-react";
+import { Building2, Bot, User, Settings, Menu, ChevronDown, Database } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,6 +62,12 @@ export default function HeaderNavigation() {
       label: "TEST",
       icon: Settings,
       description: "Combat System Test"
+    },
+    {
+      href: "/database",
+      label: "DB",
+      icon: Database,
+      description: "Database Analysis"
     }
   ];
 

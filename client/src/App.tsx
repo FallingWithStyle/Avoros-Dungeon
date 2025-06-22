@@ -19,6 +19,7 @@ import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
 import CrawlerLoadout from "@/pages/crawler-loadout";
 import TestCombat from "@/pages/test-combat";
+import DatabaseAnalysis from "@/pages/database-analysis";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,6 +51,7 @@ function Router() {
             )} />
             <Route path="/account" component={Account} />
             <Route path="/test" component={TestCombat} />
+            <Route path="/database" component={DatabaseAnalysis} />
           </>
         )}
         <Route component={NotFound} />
