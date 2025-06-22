@@ -71,7 +71,7 @@ export default function TestCombat() {
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
   };
 
-  // Keyboard movement handler
+  // Keyboard movement handler with debouncing
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
@@ -83,8 +83,26 @@ export default function TestCombat() {
     const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
+    // Calculate facing direction based on movement
+    // Convert movement vector to degrees (0° = North, positive clockwise)
+    let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+    if (facing < 0) {
+      facing += 360;
+    }
+    const newFacing = Math.round(facing);
+
+    // Batch the updates to prevent multiple state changes
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
-  }, [combatState]);
+    
+    // Only update facing if it changed significantly
+    const currentFacing = player.facing || 0;
+    const facingDiff = Math.abs(newFacing - currentFacing);
+    const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+    
+    if (normalizedDiff > 5) { // Larger threshold for movement-based facing
+      combatSystem.updateEntity("player", { facing: newFacing });
+    }
+  }, []);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -128,9 +146,9 @@ export default function TestCombat() {
     }, 200);
   }, [combatState]);
 
-  // Auto-target facing when target changes
+  // Auto-target facing when target changes (only if not manually rotating)
   useEffect(() => {
-    if (!selectedTarget) return;
+    if (!selectedTarget || manualRotation) return;
 
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
@@ -141,7 +159,8 @@ export default function TestCombat() {
       const dy = target.position.y - player.position.y;
 
       if (dx !== 0 || dy !== 0) {
-        // Calculate angle in degrees (0° = North)
+        // Calculate angle in degrees (0° = North, positive clockwise)
+        // For screen coordinates where Y increases downward
         let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
 
         // Normalize angle to 0-360
@@ -150,13 +169,17 @@ export default function TestCombat() {
         }
 
         const newFacing = Math.round(angle);
-        // Only update if facing actually changed to prevent infinite loops
-        if (player.facing !== newFacing) {
+        // Only update if facing actually changed significantly (more than 1 degree difference)
+        const currentFacing = player.facing || 0;
+        const facingDiff = Math.abs(newFacing - currentFacing);
+        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff); // Handle wrap-around
+        
+        if (normalizedDiff > 1) {
           combatSystem.updateEntity("player", { facing: newFacing });
         }
       }
     }
-  }, [selectedTarget]); // Only depend on selectedTarget to prevent infinite loop
+  }, [selectedTarget, manualRotation, combatState.entities.find(e => e.id === "player")?.position]); // Only depend on specific properties
 
   // Keyboard hotkey handler
   useEffect(() => {
@@ -265,36 +288,67 @@ export default function TestCombat() {
   }, []);
 
   useEffect(() => {
-    // Subscribe to combat system updates
+    // Subscribe to combat system updates with throttling
+    let updateTimeout: NodeJS.Timeout | null = null;
+    
     const unsubscribe = combatSystem.subscribe((state) => {
-      setCombatState(state);
+      // Throttle state updates to prevent overwhelming the UI
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      
+      updateTimeout = setTimeout(() => {
+        setCombatState(state);
+        updateTimeout = null;
+      }, 16); // ~60fps throttling
     });
 
     // Initialize test scenario
     initializeTestScenario();
 
-    return unsubscribe;
+    return () => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      unsubscribe();
+    };
   }, []);
 
-  // Load available weapons for testing
+  // Load mock weapons for testing
   useEffect(() => {
-    const loadWeapons = async () => {
-      try {
-        const response = await fetch("/api/debug/test-weapons");
-        const data = await response.json();
-        if (data.success) {
-          setAvailableWeapons(data.weapons);
-          // Auto-equip the first weapon for testing
-          if (data.weapons.length > 0) {
-            setEquippedWeapon(data.weapons[0]);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load test weapons:", error);
+    const mockWeapons: Equipment[] = [
+      {
+        id: "sword1",
+        name: "Iron Sword",
+        description: "A sturdy iron blade",
+        type: "weapon",
+        damageAttribute: "might",
+        range: 1,
+        mightBonus: 5
+      },
+      {
+        id: "bow1", 
+        name: "Hunting Bow",
+        description: "A flexible ranged weapon",
+        type: "weapon",
+        damageAttribute: "agility",
+        range: 3,
+        agilityBonus: 3
+      },
+      {
+        id: "staff1",
+        name: "Wizard Staff",
+        description: "Channels magical energy",
+        type: "weapon", 
+        damageAttribute: "might",
+        range: 2,
+        mightBonus: 2
       }
-    };
+    ];
 
-    loadWeapons();
+    setAvailableWeapons(mockWeapons);
+    // Auto-equip the first weapon for testing
+    setEquippedWeapon(mockWeapons[0]);
   }, []);
 
   const initializeTestScenario = () => {
@@ -404,9 +458,14 @@ export default function TestCombat() {
   };
 
   const resetScenario = () => {
-    initializeTestScenario();
+    // Clear all state first
     setSelectedTarget(null);
     setActiveActionMode(null);
+    setShowRangeIndicator(false);
+    setManualRotation(false);
+    
+    // Then reinitialize
+    initializeTestScenario();
   };
 
   // Get cooldown percentage for hotbar display
@@ -579,41 +638,41 @@ export default function TestCombat() {
               <CardContent className="space-y-4">
                 {/* Current Weapon */}
                 <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2">Equipped Weapon:</div>
+                  <div className="text-sm font-medium text-amber-300 mb-2">Equipped Weapon:</div>
                   {equippedWeapon ? (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="font-medium text-blue-900">{equippedWeapon.name}</div>
-                      <div className="text-sm text-blue-700">{equippedWeapon.description}</div>
-                      <div className="text-xs text-blue-600 mt-1">
+                    <div className="p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm">
+                      <div className="font-medium text-blue-200">{equippedWeapon.name}</div>
+                      <div className="text-sm text-blue-300">{equippedWeapon.description}</div>
+                      <div className="text-xs text-blue-400 mt-1">
                         Range: {getWeaponRange(equippedWeapon)} | 
                         Damage Attr: {equippedWeapon.damageAttribute} |
                         Bonus: +{equippedWeapon.mightBonus || 0}
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                      <div className="text-gray-600">Unarmed (Fists)</div>
-                      <div className="text-xs text-gray-500">Range: 1 | Base damage</div>
+                    <div className="p-3 bg-gray-800/30 border border-gray-600/30 rounded-lg backdrop-blur-sm">
+                      <div className="text-gray-300">Unarmed (Fists)</div>
+                      <div className="text-xs text-gray-400">Range: 1 | Base damage</div>
                     </div>
                   )}
                 </div>
 
                 {/* Available Weapons */}
                 <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2">Available Weapons:</div>
+                  <div className="text-sm font-medium text-amber-300 mb-2">Available Weapons:</div>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {availableWeapons.map((weapon) => (
                       <button
                         key={weapon.id}
                         onClick={() => handleWeaponChange(weapon)}
-                        className={`w-full p-2 text-left border rounded-lg transition-colors ${
+                        className={`w-full p-2 text-left border rounded-lg transition-colors backdrop-blur-sm ${
                           equippedWeapon?.id === weapon.id
-                            ? "bg-blue-100 border-blue-300"
-                            : "bg-white border-gray-200 hover:bg-gray-50"
+                            ? "bg-blue-800/40 border-blue-500/40 text-blue-200"
+                            : "bg-gray-800/20 border-gray-600/30 text-gray-300 hover:bg-gray-700/30 hover:border-gray-500/40"
                         }`}
                       >
                         <div className="font-medium text-sm">{weapon.name}</div>
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-400">
                           Range: {getWeaponRange(weapon)} | +{weapon.mightBonus || 0} dmg
                         </div>
                       </button>
@@ -656,29 +715,6 @@ export default function TestCombat() {
                 </CardContent>
               </Card>
             )}
-
-            {/* Movement Controls */}
-            <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-amber-300 text-sm flex items-center gap-2">
-                  <Move className="w-4 h-4" />
-                  Movement
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-1">
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("up")}>↑</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("left")}>←</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("right")}>→</Button>
-                  <div></div>
-                  <Button size="sm" variant="outline" onClick={() => handleMove("down")}>↓</Button>
-                  <div></div>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Hotbar */}
             <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm">
@@ -790,42 +826,6 @@ export default function TestCombat() {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* Enemy Status */}
-            {enemies.length > 0 && (
-              <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-red-300 text-sm flex items-center gap-2">
-                    <Skull className="w-4 h4" />
-                    Enemies
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {enemies.map((enemy) => (
-                    <div 
-                      key={enemy.id}
-                      className={`p-2 rounded border cursor-pointer transition-colors ${
-                        selectedTarget === enemy.id 
-                          ? "border-yellow-400 bg-yellow-400/10" 
-                          : "border-red-600/30 hover:border-red-400/50"
-                      }`}
-                      onClick={() => setSelectedTarget(enemy.id)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{enemy.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          Lv.{enemy.level}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between text-xs mt-1">
-                        <span>HP: {enemy.hp}/{enemy.maxHp}</span>
-                        <span>ATK: {enemy.attack}</span>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
 
           </div>
         </div>

@@ -16,7 +16,7 @@ export interface CombatEntity {
   id: string;
   name: string;
   type: "player" | "other_player" | "hostile" | "neutral" | "ally";
-  
+
   // Health and Power Resources
   hp: number;
   maxHp: number;
@@ -24,7 +24,7 @@ export interface CombatEntity {
   maxEnergy: number;
   power: number;
   maxPower: number;
-  
+
   // Primary Stats (dynamic based on equipment/effects)
   might: number;        // Physical strength, melee damage
   agility: number;      // Speed, evasion, ranged accuracy
@@ -32,39 +32,54 @@ export interface CombatEntity {
   intellect: number;    // Magical damage, mana efficiency
   charisma: number;     // Social interactions, leadership bonuses
   wisdom: number;       // Magical resistance, perception, insight
-  
+
   // Derived Combat Stats
   attack: number;       // Calculated from might + weapon + effects
   defense: number;      // Calculated from endurance + armor + effects
   speed: number;        // Calculated from agility + equipment + effects
   accuracy: number;     // Calculated from relevant primary stats
   evasion: number;      // Calculated from agility + equipment + effects
-  
+
   // Positioning
   position: Position;
   facing?: number;      // Direction in degrees (0° = North)
-  
+
   // Character Information
   level?: number;
   serial?: number;      // For player identification
-  
+
   // Equipment
   equippedWeapon?: any; // Equipment interface from schema
-  
+
   // Action management
   cooldowns?: Record<string, number>;
-  
+
   // State flags
   isSelected?: boolean;
   isAlive?: boolean;
 }
 
-// Combat state interface
+export interface CombatActionLog {
+  id: string;
+  timestamp: number;
+  entityId: string;
+  entityName: string;
+  action: string;
+  target?: string;
+  weapon?: string;
+  toHitRoll?: number;
+  toHitTarget?: number;
+  damage?: number;
+  damageRoll?: string;
+  result: "hit" | "miss" | "critical" | "moved" | "other";
+  description: string;
+}
+
 export interface CombatState {
   entities: CombatEntity[];
   isInCombat: boolean;
-  combatStartTime?: number;
   selectedEntityId?: string;
+  actionLog: CombatActionLog[];
 }
 
 // Combat calculation functions
@@ -77,7 +92,7 @@ export function calculateDamage(attacker: any, defender: any): number {
     // Use weapon's damage attribute to determine base damage
     const damageAttribute = attacker.equippedWeapon.damageAttribute || "might";
     let attributeValue = 0;
-    
+
     switch (damageAttribute) {
       case "might":
         attributeValue = attacker.might || 1;
@@ -128,20 +143,21 @@ export function calculateHitChance(attacker: any, defender: any): number {
 
 // Simplified Combat System class
 export class CombatSystem {
-  private state: CombatState;
+  private state: CombatState = {
+    entities: [],
+    isInCombat: false,
+    selectedEntityId: undefined,
+    actionLog: [],
+  };
   private subscribers: Set<(state: CombatState) => void>;
 
   constructor() {
-    this.state = {
-      entities: [],
-      isInCombat: false,
-    };
     this.subscribers = new Set();
   }
 
   // State management
   getState(): CombatState {
-    return { ...this.state, entities: [...this.state.entities] };
+    return { ...this.state, entities: [...this.state.entities], actionLog: [...this.state.actionLog] };
   }
 
   subscribe(callback: (state: CombatState) => void): () => void {
@@ -152,6 +168,22 @@ export class CombatSystem {
   private notifySubscribers(): void {
     const currentState = this.getState();
     this.subscribers.forEach((callback) => callback(currentState));
+  }
+
+  private addActionLog(log: Omit<CombatActionLog, 'id' | 'timestamp'>) {
+    const actionLog: CombatActionLog = {
+      ...log,
+      id: `action-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+    };
+
+    // Add to beginning of array (most recent first)
+    this.state.actionLog.unshift(actionLog);
+
+    // Keep only last 50 actions to prevent memory issues
+    if (this.state.actionLog.length > 50) {
+      this.state.actionLog = this.state.actionLog.slice(0, 50);
+    }
   }
 
   // Entity management
@@ -195,92 +227,133 @@ export class CombatSystem {
     this.notifySubscribers();
   }
 
-  // Immediate action execution (no queue)
   executeAttack(attackerId: string, targetId?: string): boolean {
-    const attacker = this.state.entities.find((e) => e.id === attackerId);
+    const attacker = this.state.entities.find(e => e.id === attackerId);
     if (!attacker) return false;
 
-    // Check cooldown for basic attack
+    // Check cooldown
     const now = Date.now();
-    const lastAttack = attacker.cooldowns?.["basic_attack"] || 0;
+    const lastAttack = attacker.cooldowns?.basic_attack || 0;
     const attackCooldown = 800; // 800ms cooldown
 
-    if (now < lastAttack + attackCooldown) {
-      console.log(`Attack is on cooldown for ${attacker.name}`);
-      return false;
+    if (now - lastAttack < attackCooldown) {
+      return false; // Still on cooldown
     }
 
-    // Set cooldown
-    if (!attacker.cooldowns) attacker.cooldowns = {};
-    attacker.cooldowns["basic_attack"] = now;
-
-    if (!targetId) {
-      console.log(`${attacker.name} swings at empty air!`);
-      return true;
-    }
-
-    const target = this.state.entities.find((e) => e.id === targetId);
-    if (!target) {
-      console.log(`${attacker.name} swings at missing target!`);
-      return true;
-    }
-
-    // Start combat if not already active
-    if (!this.state.isInCombat) {
-      this.startCombat();
-    }
-
-    const hitChance = calculateHitChance(attacker, target);
-    const hits = Math.random() < hitChance;
-
-    if (hits) {
-      const damage = calculateDamage(attacker, target);
-      target.hp = Math.max(0, target.hp - damage);
-
-      console.log(`${attacker.name} hits ${target.name} for ${damage} damage! (HP: ${target.hp}/${target.maxHp})`);
-
-      // Check if target is defeated
-      if (target.hp <= 0) {
-        console.log(`${target.name} is defeated!`);
-        target.isAlive = false;
-      }
+    // If no target specified, find nearest enemy
+    let target: CombatEntity | undefined;
+    if (targetId) {
+      target = this.state.entities.find(e => e.id === targetId);
     } else {
-      console.log(`${attacker.name} misses ${target.name}!`);
+      // Auto-target nearest enemy
+      const enemies = this.state.entities.filter(e => 
+        e.type === "hostile" && e.hp > 0 && e.id !== attackerId
+      );
+      if (enemies.length > 0) {
+        target = enemies[0]; // Simple targeting - could be enhanced
+      }
     }
 
-    this.updateCombatState();
+    if (!target || target.hp <= 0) return false;
+
+    // Get weapon info
+    const weapon = (attacker as any).equippedWeapon;
+    const weaponName = weapon ? weapon.name : "Fists";
+
+    // Calculate to-hit chance
+    const attackerAccuracy = attacker.accuracy || 20;
+    const targetEvasion = target.evasion || 10;
+    const toHitTarget = Math.max(5, Math.min(95, attackerAccuracy - targetEvasion + 50)); // Base 50% + modifiers
+    const toHitRoll = Math.floor(Math.random() * 100) + 1;
+
+    let damage = 0;
+    let result: "hit" | "miss" | "critical" = "miss";
+    let damageRoll = "";
+    let description = "";
+
+    if (toHitRoll <= toHitTarget) {
+      // Hit! Calculate damage
+      const baseDamage = attacker.attack || 10;
+      const weaponBonus = weapon?.mightBonus || 0;
+      const rawDamage = baseDamage + weaponBonus;
+
+      // Critical hit check (natural 95+ or if roll is 20+ over target evasion)
+      const isCritical = toHitRoll >= 95 || toHitRoll >= (toHitTarget + 20);
+
+      if (isCritical) {
+        damage = Math.max(1, (rawDamage * 2) - (target.defense || 0));
+        result = "critical";
+        damageRoll = `${rawDamage} x2 - ${target.defense || 0} = ${damage}`;
+        description = `${attacker.name} scores a critical hit on ${target.name} with ${weaponName} for ${damage} damage!`;
+      } else {
+        damage = Math.max(1, rawDamage - (target.defense || 0));
+        result = "hit";
+        damageRoll = `${rawDamage} - ${target.defense || 0} = ${damage}`;
+        description = `${attacker.name} hits ${target.name} with ${weaponName} for ${damage} damage`;
+      }
+
+      // Apply damage
+      target.hp = Math.max(0, target.hp - damage);
+    } else {
+      // Miss
+      result = "miss";
+      description = `${attacker.name} misses ${target.name} with ${weaponName}`;
+    }
+
+    // Log the action
+    this.addActionLog({
+      entityId: attackerId,
+      entityName: attacker.name,
+      action: "Attack",
+      target: target.name,
+      weapon: weaponName,
+      toHitRoll,
+      toHitTarget,
+      damage: damage > 0 ? damage : undefined,
+      damageRoll: damageRoll || undefined,
+      result,
+      description,
+    });
+
+    // Update cooldown
+    if (!attacker.cooldowns) attacker.cooldowns = {};
+    attacker.cooldowns.basic_attack = now;
+
+    // Check if target died
+    if (target.hp <= 0) {
+      target.isAlive = false;
+      this.addActionLog({
+        entityId: target.id,
+        entityName: target.name,
+        action: "Defeated",
+        result: "other",
+        description: `${target.name} has been defeated!`,
+      });
+    }
+
     this.notifySubscribers();
     return true;
   }
 
   // Movement with immediate position update
-  moveEntityToPosition(entityId: string, targetPosition: Position): void {
-    const entity = this.state.entities.find((e) => e.id === entityId);
-    if (!entity) return;
+  moveEntityToPosition(entityId: string, position: Position): boolean {
+    const entity = this.state.entities.find(e => e.id === entityId);
+    if (!entity) return false;
 
-    // Update facing direction based on movement
-    const dx = targetPosition.x - entity.position.x;
-    const dy = targetPosition.y - entity.position.y;
+    const oldPosition = { ...entity.position };
+    entity.position = { ...position };
 
-    if (dx !== 0 || dy !== 0) {
-      // Calculate angle in degrees (0° = North, pointing up)
-      // atan2(dy, dx) gives us the angle from the positive x-axis
-      // We need to adjust so that 0° points north (negative y direction)
-      let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
-
-      // Normalize angle to 0-360
-      if (angle < 0) {
-        angle += 360;
-      }
-
-      entity.facing = Math.round(angle);
-    }
-
-    // Allow extended boundaries for room transitions
-    entity.position.x = Math.max(-10, Math.min(110, targetPosition.x));
-    entity.position.y = Math.max(-10, Math.min(110, targetPosition.y));
+    // Log movement
+    this.addActionLog({
+      entityId,
+      entityName: entity.name,
+      action: "Move",
+      result: "moved",
+      description: `${entity.name} moved from (${Math.round(oldPosition.x)}, ${Math.round(oldPosition.y)}) to (${Math.round(position.x)}, ${Math.round(position.y)})`,
+    });
 
     this.notifySubscribers();
+    return true;
   }
 
   calculateDistance(pos1: Position, pos2: Position): number {
@@ -358,7 +431,7 @@ export class CombatSystem {
       name: crawlerData.name || "Player",
       type: "player",
       position: { x: position.x, y: position.y },
-      
+
       // Health and Power Resources
       hp: crawlerData.currentHealth || crawlerData.maxHealth || 100,
       maxHp: crawlerData.maxHealth || 100,
@@ -366,7 +439,7 @@ export class CombatSystem {
       maxEnergy: crawlerData.maxEnergy || 50,
       power: crawlerData.currentPower || crawlerData.maxPower || 25,
       maxPower: crawlerData.maxPower || 25,
-      
+
       // Primary Stats
       might: crawlerData.might || 10,
       agility: crawlerData.agility || 10,
@@ -374,14 +447,14 @@ export class CombatSystem {
       intellect: crawlerData.intellect || 10,
       charisma: crawlerData.charisma || 10,
       wisdom: crawlerData.wisdom || 10,
-      
+
       // Derived Combat Stats
       attack: crawlerData.attack || Math.floor((crawlerData.might || 10) * 1.2),
       defense: crawlerData.defense || Math.floor((crawlerData.endurance || 10) * 0.8),
       speed: Math.floor((crawlerData.agility || 10) * 1.1),
       accuracy: (crawlerData.wisdom || 10) + (crawlerData.intellect || 10),
       evasion: Math.floor((crawlerData.agility || 10) * 1.2),
-      
+
       level: crawlerData.level || 1,
       serial: crawlerData.serial,
       facing: 0,
