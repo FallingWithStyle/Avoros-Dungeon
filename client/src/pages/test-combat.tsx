@@ -289,7 +289,8 @@ export default function TestCombat() {
     setEquippedWeapon(weapon);
     
     // Update the player entity with the new weapon
-    const player = combatState.entities.find(e => e.id === "player");
+    const currentState = combatSystem.getState();
+    const player = currentState.entities.find(e => e.id === "player");
     if (player) {
       const weaponAttack = weapon ? 
         (weapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
@@ -300,7 +301,7 @@ export default function TestCombat() {
         equippedWeapon: weapon
       });
     }
-  }, [combatState.entities]);
+  }, []); // No dependencies needed since we get fresh state
 
   const handleAttackMode = useCallback(() => {
     setActiveActionMode({
@@ -339,7 +340,7 @@ export default function TestCombat() {
     initializeTestScenario();
   }, []);
 
-  // Load mock weapons for testing
+  // Load mock weapons for testing - run only once
   useEffect(() => {
     const mockWeapons: Equipment[] = [
       {
@@ -373,22 +374,8 @@ export default function TestCombat() {
 
     setAvailableWeapons(mockWeapons);
     // Auto-equip the first weapon for testing
-    const firstWeapon = mockWeapons[0];
-    setEquippedWeapon(firstWeapon);
-
-    // Update player entity if it exists
-    const player = combatState.entities.find(e => e.id === "player");
-    if (player) {
-      const weaponAttack = firstWeapon ? 
-        (firstWeapon.mightBonus || 0) + 5 : 
-        0;
-
-      combatSystem.updateEntity("player", {
-        attack: 18 + weaponAttack,
-        equippedWeapon: firstWeapon
-      });
-    }
-  }, [combatState.entities]);
+    setEquippedWeapon(mockWeapons[0]);
+  }, []); // Empty dependency array - run only once
 
   const initializeTestScenario = () => {
     // Clear existing entities
