@@ -249,101 +249,65 @@ export class CombatSystem {
       return false; // Still on cooldown
     }
 
-    // If no target specified, find nearest enemy
-    let target: CombatEntity | undefined;
-    if (targetId) {
-      target = this.state.entities.find(e => e.id === targetId);
-    } else {
-      // Auto-target nearest enemy
-      const enemies = this.state.entities.filter(e => 
-        e.type === "hostile" && e.hp > 0 && e.id !== attackerId
-      );
-      if (enemies.length > 0) {
-        target = enemies[0]; // Simple targeting - could be enhanced
-      }
-    }
-
-    if (!target || target.hp <= 0) return false;
-
-    // Check weapon range
+    // Get weapon info
     const weapon = (attacker as any).equippedWeapon;
     const weaponRange = weapon ? (weapon.range || weapon.baseRange || 1) : 1; // Unarmed range = 1
     const rangeInGridUnits = weaponRange * 10; // Convert to grid units (1 range = 10 grid units)
-
-    const distance = this.calculateDistance(attacker.position, target.position);
-
-    if (distance > rangeInGridUnits) {
-      // Target is out of range
-      this.addActionLog({
-        entityId: attackerId,
-        entityName: attacker.name,
-        action: "Attack Failed",
-        target: target.name,
-        weapon: weapon ? weapon.name : "Fists",
-        result: "miss",
-        description: `${attacker.name} cannot reach ${target.name} - target is out of range (${Math.round(distance)} > ${rangeInGridUnits})`,
-      });
-      return false;
-    }
-
-    // Get weapon name for logging
     const weaponName = weapon ? weapon.name : "Fists";
 
-    // Calculate to-hit chance
-    const attackerAccuracy = attacker.accuracy || 20;
-    const targetEvasion = target.evasion || 10;
-    const toHitTarget = Math.max(5, Math.min(95, attackerAccuracy - targetEvasion + 50)); // Base 50% + modifiers
-    const toHitRoll = Math.floor(Math.random() * 100) + 1;
+    // Find all potential targets in range
+    let primaryTarget: CombatEntity | undefined;
+    let allTargetsInRange: CombatEntity[] = [];
 
-    let finalDamage = 0;
-    let result: "hit" | "miss" | "critical" = "miss";
-    let damageRoll = "";
-    let description = "";
+    if (targetId) {
+      // Specific target was provided
+      primaryTarget = this.state.entities.find(e => e.id === targetId);
+      if (!primaryTarget || primaryTarget.hp <= 0) return false;
 
-    if (toHitRoll <= toHitTarget) {
-      // Hit! Calculate damage
-      const baseDamage = attacker.attack || 10;
-      const weaponBonus = weapon?.mightBonus || 0;
-      const rawDamage = baseDamage + weaponBonus;
-
-      // Critical hit check (natural 95+ or if roll is 20+ over target evasion)
-      const isCritical = toHitRoll >= 95 || toHitRoll >= (toHitTarget + 20);
-
-      if (isCritical) {
-        finalDamage = Math.max(1, (rawDamage * 2) - (target.defense || 0));
-        result = "critical";
-        damageRoll = `${rawDamage} x2 - ${target.defense || 0} = ${finalDamage}`;
-        description = `${attacker.name} scores a critical hit on ${target.name} with ${weaponName} for ${finalDamage} damage!`;
-      } else {
-        finalDamage = Math.max(1, rawDamage - (target.defense || 0));
-        result = "hit";
-        damageRoll = `${rawDamage} - ${target.defense || 0} = ${finalDamage}`;
-        description = `${attacker.name} hits ${target.name} with ${weaponName} for ${finalDamage} damage`;
+      const distance = this.calculateDistance(attacker.position, primaryTarget.position);
+      if (distance > rangeInGridUnits) {
+        // Primary target is out of range
+        this.addActionLog({
+          entityId: attackerId,
+          entityName: attacker.name,
+          action: "Attack Failed",
+          target: primaryTarget.name,
+          weapon: weaponName,
+          result: "miss",
+          description: `${attacker.name} cannot reach ${primaryTarget.name} - target is out of range (${Math.round(distance)} > ${rangeInGridUnits})`,
+        });
+        return false;
       }
 
-      // Apply damage to target
-      target.hp = Math.max(0, target.hp - finalDamage);
-      target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
+      // For targeted attacks, only hit the specific target (even if it's hostile)
+      // This ensures neutral/friendly entities must be explicitly targeted
+      allTargetsInRange = [primaryTarget];
     } else {
-      // Miss
-      result = "miss";
-      description = `${attacker.name} misses ${target.name} with ${weaponName}`;
-    }
+      // No specific target - area attack against all hostile entities in range
+      const hostileEntitiesInRange = this.state.entities.filter(entity => {
+        if (entity.id === attackerId || entity.hp <= 0 || entity.type !== "hostile") {
+          return false;
+        }
+        const distance = this.calculateDistance(attacker.position, entity.position);
+        return distance <= rangeInGridUnits;
+      });
 
-    // Log the action
-    this.addActionLog({
-      entityId: attackerId,
-      entityName: attacker.name,
-      action: "Attack",
-      target: target.name,
-      weapon: weaponName,
-      toHitRoll,
-      toHitTarget,
-      damage: finalDamage > 0 ? finalDamage : undefined,
-      damageRoll: damageRoll || undefined,
-      result,
-      description,
-    });
+      if (hostileEntitiesInRange.length === 0) {
+        // No hostile targets in range
+        this.addActionLog({
+          entityId: attackerId,
+          entityName: attacker.name,
+          action: "Attack Failed",
+          weapon: weaponName,
+          result: "miss",
+          description: `${attacker.name} swings ${weaponName} but there are no hostile targets in range`,
+        });
+        return false;
+      }
+
+      allTargetsInRange = hostileEntitiesInRange;
+      primaryTarget = hostileEntitiesInRange[0]; // Use first target for animation positioning
+    }
 
     // Determine attack animation type based on equipped weapon
     let animationType: "melee" | "ranged" | "magic" = "melee";
@@ -360,27 +324,111 @@ export class CombatSystem {
       }
     }
 
-    // Add attack animation to attacker
+    // Add attack animation to attacker (using primary target for positioning)
     attacker.attackAnimation = {
       type: animationType,
       timestamp: Date.now(),
       duration: animationType === "ranged" ? 800 : animationType === "magic" ? 1000 : 600,
-      targetPosition: target.position
+      targetPosition: primaryTarget!.position
     };
 
     // Update cooldown
     if (!attacker.cooldowns) attacker.cooldowns = {};
     attacker.cooldowns.basic_attack = now;
 
-    // Check if target died
-    if (target.hp <= 0) {
-      target.isAlive = false;
+    // Execute attack against all targets in range
+    let hitCount = 0;
+    let totalDamage = 0;
+    const attackResults: string[] = [];
+
+    for (const target of allTargetsInRange) {
+      // Calculate to-hit chance for each target
+      const attackerAccuracy = attacker.accuracy || 20;
+      const targetEvasion = target.evasion || 10;
+      const toHitTarget = Math.max(5, Math.min(95, attackerAccuracy - targetEvasion + 50)); // Base 50% + modifiers
+      const toHitRoll = Math.floor(Math.random() * 100) + 1;
+
+      let finalDamage = 0;
+      let result: "hit" | "miss" | "critical" = "miss";
+      let damageRoll = "";
+      let description = "";
+
+      if (toHitRoll <= toHitTarget) {
+        // Hit! Calculate damage
+        const baseDamage = attacker.attack || 10;
+        const weaponBonus = weapon?.mightBonus || 0;
+        const rawDamage = baseDamage + weaponBonus;
+
+        // Critical hit check (natural 95+ or if roll is 20+ over target evasion)
+        const isCritical = toHitRoll >= 95 || toHitRoll >= (toHitTarget + 20);
+
+        if (isCritical) {
+          finalDamage = Math.max(1, (rawDamage * 2) - (target.defense || 0));
+          result = "critical";
+          damageRoll = `${rawDamage} x2 - ${target.defense || 0} = ${finalDamage}`;
+          description = `${attacker.name} scores a critical hit on ${target.name} with ${weaponName} for ${finalDamage} damage!`;
+        } else {
+          finalDamage = Math.max(1, rawDamage - (target.defense || 0));
+          result = "hit";
+          damageRoll = `${rawDamage} - ${target.defense || 0} = ${finalDamage}`;
+          description = `${attacker.name} hits ${target.name} with ${weaponName} for ${finalDamage} damage`;
+        }
+
+        // Apply damage to target
+        target.hp = Math.max(0, target.hp - finalDamage);
+        target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
+        
+        hitCount++;
+        totalDamage += finalDamage;
+        attackResults.push(`${target.name}: ${finalDamage} damage`);
+
+        // Check if target died
+        if (target.hp <= 0) {
+          target.isAlive = false;
+          this.addActionLog({
+            entityId: target.id,
+            entityName: target.name,
+            action: "Defeated",
+            result: "other",
+            description: `${target.name} has been defeated!`,
+          });
+        }
+      } else {
+        // Miss
+        result = "miss";
+        description = `${attacker.name} misses ${target.name} with ${weaponName}`;
+        attackResults.push(`${target.name}: missed`);
+      }
+
+      // Log each individual attack
       this.addActionLog({
-        entityId: target.id,
-        entityName: target.name,
-        action: "Defeated",
-        result: "other",
-        description: `${target.name} has been defeated!`,
+        entityId: attackerId,
+        entityName: attacker.name,
+        action: "Attack",
+        target: target.name,
+        weapon: weaponName,
+        toHitRoll,
+        toHitTarget,
+        damage: finalDamage > 0 ? finalDamage : undefined,
+        damageRoll: damageRoll || undefined,
+        result,
+        description,
+      });
+    }
+
+    // Log summary if multiple targets were hit
+    if (allTargetsInRange.length > 1) {
+      const summaryDescription = hitCount > 0 
+        ? `${attacker.name} strikes with ${weaponName} hitting ${hitCount}/${allTargetsInRange.length} targets for ${totalDamage} total damage (${attackResults.join(", ")})`
+        : `${attacker.name} swings ${weaponName} but misses all targets (${attackResults.join(", ")})`;
+
+      this.addActionLog({
+        entityId: attackerId,
+        entityName: attacker.name,
+        action: "Area Attack",
+        weapon: weaponName,
+        result: hitCount > 0 ? "hit" : "miss",
+        description: summaryDescription,
       });
     }
 
