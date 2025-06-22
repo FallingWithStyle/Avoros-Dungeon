@@ -326,6 +326,15 @@ export default function TestCombat() {
 
       updateTimeout = setTimeout(() => {
         setCombatState(state);
+        
+        // Clear selectedTarget if the currently selected entity is dead or no longer selected in combat system
+        if (selectedTarget) {
+          const selectedEntity = state.entities.find(e => e.id === selectedTarget);
+          if (!selectedEntity || selectedEntity.hp <= 0 || !selectedEntity.isSelected) {
+            setSelectedTarget(null);
+          }
+        }
+        
         updateTimeout = null;
       }, 8); // ~120fps throttling for better responsiveness
     });
@@ -336,7 +345,7 @@ export default function TestCombat() {
       }
       unsubscribe();
     };
-  }, []);
+  }, [selectedTarget]);
 
   // Initialize test scenario only once
   useEffect(() => {

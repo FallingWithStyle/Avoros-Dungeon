@@ -260,9 +260,9 @@ export class CombatSystem {
     const weapon = (attacker as any).equippedWeapon;
     const weaponRange = weapon ? (weapon.range || weapon.baseRange || 1) : 1; // Unarmed range = 1
     const rangeInGridUnits = weaponRange * 10; // Convert to grid units (1 range = 10 grid units)
-    
+
     const distance = this.calculateDistance(attacker.position, target.position);
-    
+
     if (distance > rangeInGridUnits) {
       // Target is out of range
       this.addActionLog({
