@@ -57,6 +57,15 @@ export interface CombatEntity {
   // State flags
   isSelected?: boolean;
   isAlive?: boolean;
+
+  // Visual attack animation
+  attackAnimation?: {
+    type: "melee" | "ranged" | "magic";
+    timestamp: number;
+    duration: number;
+    targetPosition: Position;
+  };
+  lastDamageTime?: number;
 }
 
 export interface CombatActionLog {
@@ -312,8 +321,12 @@ export class CombatSystem {
         description = `${attacker.name} hits ${target.name} with ${weaponName} for ${damage} damage`;
       }
 
-      // Apply damage
-      target.hp = Math.max(0, target.hp - damage);
+      // Apply damage and effects
+      const damage = calculateDamage(attacker, target);
+      const actualDamage = Math.max(1, damage - (target.defense || 0));
+
+      target.hp = Math.max(0, target.hp - actualDamage);
+      target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
     } else {
       // Miss
       result = "miss";
@@ -334,6 +347,24 @@ export class CombatSystem {
       result,
       description,
     });
+
+    // Determine attack animation type based on equipped weapon
+    let animationType: "melee" | "ranged" | "magic" = "melee";
+    if (attacker.equippedWeapon) {
+      if (attacker.equippedWeapon.name.toLowerCase().includes("bow")) {
+        animationType = "ranged";
+      } else if (attacker.equippedWeapon.name.toLowerCase().includes("staff")) {
+        animationType = "magic";
+      }
+    }
+
+    // Add attack animation to attacker
+    attacker.attackAnimation = {
+      type: animationType,
+      timestamp: Date.now(),
+      duration: animationType === "ranged" ? 800 : animationType === "magic" ? 1000 : 600,
+      targetPosition: target.position
+    };
 
     // Update cooldown
     if (!attacker.cooldowns) attacker.cooldowns = {};
