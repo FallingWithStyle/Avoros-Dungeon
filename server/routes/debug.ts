@@ -505,6 +505,77 @@ export function registerDebugRoutes(app: Express) {
     }
   });
 
+  // DEBUG: Analyze database space usage
+  app.get("/api/debug/database-size", isAuthenticated, async (req: any, res) => {
+    try {
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+
+      // Get table sizes
+      const tableSizes = await db.execute(sql`
+        SELECT 
+          schemaname,
+          tablename,
+          pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
+          pg_total_relation_size(schemaname||'.'||tablename) as size_bytes,
+          pg_size_pretty(pg_relation_size(schemaname||'.'||tablename)) as table_size,
+          pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename) - pg_relation_size(schemaname||'.'||tablename)) as index_size
+        FROM pg_tables 
+        WHERE schemaname = 'public'
+        ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+      `);
+
+      // Get total database size
+      const dbSize = await db.execute(sql`
+        SELECT pg_size_pretty(pg_database_size(current_database())) as total_size,
+               pg_database_size(current_database()) as total_size_bytes
+      `);
+
+      // Get row counts for main tables
+      const rowCounts = await Promise.all([
+        db.execute(sql`SELECT COUNT(*) as count FROM users`),
+        db.execute(sql`SELECT COUNT(*) as count FROM crawlers`),
+        db.execute(sql`SELECT COUNT(*) as count FROM rooms`),
+        db.execute(sql`SELECT COUNT(*) as count FROM room_connections`),
+        db.execute(sql`SELECT COUNT(*) as count FROM crawler_positions`),
+        db.execute(sql`SELECT COUNT(*) as count FROM activities`),
+        db.execute(sql`SELECT COUNT(*) as count FROM mobs`),
+        db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`),
+        db.execute(sql`SELECT COUNT(*) as count FROM sessions`),
+      ]);
+
+      const rowCountData = [
+        { table: "users", count: rowCounts[0][0].count },
+        { table: "crawlers", count: rowCounts[1][0].count },
+        { table: "rooms", count: rowCounts[2][0].count },
+        { table: "room_connections", count: rowCounts[3][0].count },
+        { table: "crawler_positions", count: rowCounts[4][0].count },
+        { table: "activities", count: rowCounts[5][0].count },
+        { table: "mobs", count: rowCounts[6][0].count },
+        { table: "tactical_positions", count: rowCounts[7][0].count },
+        { table: "sessions", count: rowCounts[8][0].count },
+      ];
+
+      res.json({
+        success: true,
+        totalDatabaseSize: dbSize[0],
+        tableSizes: tableSizes,
+        rowCounts: rowCountData,
+        analysis: {
+          largestTables: tableSizes.slice(0, 5),
+          totalTables: tableSizes.length,
+        },
+      });
+    } catch (error) {
+      console.error("Error analyzing database size:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to analyze database size: " + 
+               (error instanceof Error ? error.message : "Unknown error"),
+      });
+    }
+  });
+
   // DEBUG: Spawn hostile mob in current room
   app.post(
     "/api/debug/spawn-mob/:crawlerId",
