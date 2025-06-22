@@ -814,10 +814,11 @@ export default function TestCombat() {
               <CardContent>
                 
           <div 
-            className="relative w-full aspect-square bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
+            className="relative bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden mx-auto"
             style={{ 
               backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
-              maxHeight: '500px'
+              width: '500px',
+              height: '500px'
             }}
                 >
                   {/* Grid overlay */}
