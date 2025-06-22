@@ -812,6 +812,9 @@ export default function TestCombat() {
                           {/* Attack Animation Effects */}
                           {entity.attackAnimation && Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration && (() => {
                             const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
+                            
+                            // Define base grid box size for all animation types
+                            const baseGridBoxSizePx = 40; // Approximate pixels per grid box
 
                             if (entity.attackAnimation.type === "melee") {
                               // Sword swing animation - 30 degree arc from -15 to +15 degrees
@@ -826,7 +829,6 @@ export default function TestCombat() {
                               // Calculate blade length based on weapon range
                               // 1 range = 1 grid box = 10% of arena = approximately 40px at typical screen sizes
                               const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
-                              const baseGridBoxSizePx = 40; // Approximate pixels per grid box
                               const bladeLengthPx = Math.max(12, baseGridBoxSizePx * weaponRange); // Minimum 12px, scales with range
                               const bladeWidthPx = Math.max(2, Math.min(4, 2 + weaponRange)); // Width scales too, between 2-4px
                               const trailLengthPx = Math.max(8, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
