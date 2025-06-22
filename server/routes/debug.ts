@@ -511,7 +511,10 @@ export function registerDebugRoutes(app: Express) {
       const { db } = await import("../db");
       const { sql } = await import("drizzle-orm");
 
-      // Get table sizes
+      // Test basic database connection first
+      await db.execute(sql`SELECT 1`);
+
+      // Get table sizes with error handling
       const tableSizes = await db.execute(sql`
         SELECT 
           schemaname,
@@ -531,30 +534,19 @@ export function registerDebugRoutes(app: Express) {
                pg_database_size(current_database()) as total_size_bytes
       `);
 
-      // Get row counts for main tables
-      const rowCounts = await Promise.all([
-        db.execute(sql`SELECT COUNT(*) as count FROM users`),
-        db.execute(sql`SELECT COUNT(*) as count FROM crawlers`),
-        db.execute(sql`SELECT COUNT(*) as count FROM rooms`),
-        db.execute(sql`SELECT COUNT(*) as count FROM room_connections`),
-        db.execute(sql`SELECT COUNT(*) as count FROM crawler_positions`),
-        db.execute(sql`SELECT COUNT(*) as count FROM activities`),
-        db.execute(sql`SELECT COUNT(*) as count FROM mobs`),
-        db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`),
-        db.execute(sql`SELECT COUNT(*) as count FROM sessions`),
-      ]);
+      // Get row counts for main tables with individual error handling
+      const tableNames = ["users", "crawlers", "rooms", "room_connections", "crawler_positions", "activities", "mobs", "tactical_positions", "sessions"];
+      const rowCountData = [];
 
-      const rowCountData = [
-        { table: "users", count: rowCounts[0][0].count },
-        { table: "crawlers", count: rowCounts[1][0].count },
-        { table: "rooms", count: rowCounts[2][0].count },
-        { table: "room_connections", count: rowCounts[3][0].count },
-        { table: "crawler_positions", count: rowCounts[4][0].count },
-        { table: "activities", count: rowCounts[5][0].count },
-        { table: "mobs", count: rowCounts[6][0].count },
-        { table: "tactical_positions", count: rowCounts[7][0].count },
-        { table: "sessions", count: rowCounts[8][0].count },
-      ];
+      for (const tableName of tableNames) {
+        try {
+          const result = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${tableName}`));
+          rowCountData.push({ table: tableName, count: result[0].count });
+        } catch (tableError) {
+          console.error(`Error counting rows for table ${tableName}:`, tableError);
+          rowCountData.push({ table: tableName, count: "Error" });
+        }
+      }
 
       res.json({
         success: true,

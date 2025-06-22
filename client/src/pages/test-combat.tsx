@@ -35,13 +35,12 @@ export default function TestCombat() {
   const [manualRotation, setManualRotation] = useState(false);
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
-  const [showRangeIndicator, setShowRangeIndicator] = useState(false);
+  const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
 
   // Action handlers - Define these first before they're used
   const handleAttack = useCallback((targetId: string) => {
     setSelectedTarget(null);
     setActiveActionMode(null);
-    setShowRangeIndicator(false);
     combatSystem.executeAttack("player", targetId);
   }, []);
 
@@ -71,7 +70,7 @@ export default function TestCombat() {
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
   };
 
-  // Keyboard movement handler with debouncing
+  // Keyboard movement handler
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
@@ -79,7 +78,7 @@ export default function TestCombat() {
     // Only move if there's actual movement input
     if (direction.x === 0 && direction.y === 0) return;
 
-    const moveSpeed = 2; // Movement speed
+    const moveSpeed = 3; // Increased movement speed
     const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
@@ -91,18 +90,22 @@ export default function TestCombat() {
     }
     const newFacing = Math.round(facing);
 
-    // Batch the updates to prevent multiple state changes
+    // Update position immediately
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
-    
-    // Only update facing if it changed significantly
-    const currentFacing = player.facing || 0;
-    const facingDiff = Math.abs(newFacing - currentFacing);
-    const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
-    
-    if (normalizedDiff > 5) { // Larger threshold for movement-based facing
-      combatSystem.updateEntity("player", { facing: newFacing });
+
+    // Only update facing from movement if no target is selected
+    if (!selectedTarget) {
+      const currentFacing = player.facing || 0;
+      const facingDiff = Math.abs(newFacing - currentFacing);
+      const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+
+      if (normalizedDiff > 2) { // Smaller threshold for smoother movement-based facing
+        combatSystem.updateEntity("player", { facing: newFacing });
+      }
     }
-  }, []);
+    // If target is selected, facing will be handled by the targeting effect
+    // Target selection is preserved during movement
+  }, [combatState.entities, selectedTarget]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -114,7 +117,23 @@ export default function TestCombat() {
   const handleHotbarAction = useCallback((actionId: string, actionType: string, actionName: string) => {
     if (actionType === "attack" && actionId === "basic_attack") {
       if (selectedTarget) {
-        combatSystem.executeAttack("player", selectedTarget);
+        // Check if target is in range before attacking
+        const player = combatState.entities.find(e => e.id === "player");
+        const target = combatState.entities.find(e => e.id === selectedTarget);
+
+        if (player && target) {
+          const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+          const distance = Math.sqrt(
+            Math.pow(target.position.x - player.position.x, 2) + 
+            Math.pow(target.position.y - player.position.y, 2)
+          );
+
+          if (distance <= weaponRange) {
+            combatSystem.executeAttack("player", selectedTarget);
+          } else {
+            console.log("Target out of range for attack!");
+          }
+        }
       } else {
         // Show available targets or attack without target
         combatSystem.executeAttack("player");
@@ -124,7 +143,7 @@ export default function TestCombat() {
       // Handle other abilities
       setActiveActionMode({ type: actionType as any, actionId, actionName });
     }
-  }, [selectedTarget]);
+  }, [selectedTarget, combatState.entities, equippedWeapon]);
 
   // Manual rotation handler
   const handleManualRotation = useCallback((direction: 'left' | 'right') => {
@@ -148,15 +167,31 @@ export default function TestCombat() {
 
   // Auto-target facing when target changes (only if not manually rotating)
   useEffect(() => {
-    if (!selectedTarget || manualRotation) return;
+    console.log("🎯 Auto-targeting effect triggered:", {
+      selectedTarget,
+      manualRotation,
+      entityCount: combatState.entities.length
+    });
+
+    if (!selectedTarget || manualRotation) {
+      console.log("🎯 Auto-targeting skipped:", { selectedTarget, manualRotation });
+      return;
+    }
 
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
+
+    console.log("🎯 Found entities:", {
+      player: player ? { id: player.id, facing: player.facing, pos: player.position } : null,
+      target: target ? { id: target.id, pos: target.position } : null
+    });
 
     if (player && target) {
       // Calculate angle to target
       const dx = target.position.x - player.position.x;
       const dy = target.position.y - player.position.y;
+
+      console.log("🎯 Position delta:", { dx, dy });
 
       if (dx !== 0 || dy !== 0) {
         // Calculate angle in degrees (0° = North, positive clockwise)
@@ -169,21 +204,38 @@ export default function TestCombat() {
         }
 
         const newFacing = Math.round(angle);
-        // Only update if facing actually changed significantly (more than 1 degree difference)
         const currentFacing = player.facing || 0;
-        const facingDiff = Math.abs(newFacing - currentFacing);
-        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff); // Handle wrap-around
         
-        if (normalizedDiff > 1) {
+        console.log("🎯 Facing calculation:", { 
+          angle, 
+          newFacing, 
+          currentFacing, 
+          difference: Math.abs(newFacing - currentFacing) 
+        });
+        
+        // Only update if facing has actually changed to avoid unnecessary updates
+        if (Math.abs(newFacing - currentFacing) > 1) {
+          console.log("🎯 Updating player facing from", currentFacing, "to", newFacing);
           combatSystem.updateEntity("player", { facing: newFacing });
+        } else {
+          console.log("🎯 Facing update skipped - change too small");
         }
+      } else {
+        console.log("🎯 No position difference - skipping facing update");
       }
+    } else {
+      console.log("🎯 Missing entities - cannot update facing");
     }
-  }, [selectedTarget, manualRotation, combatState.entities.find(e => e.id === "player")?.position]); // Only depend on specific properties
+  }, [selectedTarget, manualRotation, combatState.entities]); // Include combatState.entities to ensure we have current entity data
+
+  // State for TAB hold detection
+  const [isTabHeld, setIsTabHeld] = useState(false);
+  const [tabHoldTimer, setTabHoldTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tabTimerExpired, setTabTimerExpired] = useState(false);
 
   // Keyboard hotkey handler
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
 
       // Hotkey shortcuts
@@ -210,20 +262,68 @@ export default function TestCombat() {
           break;
         case 'tab':
           event.preventDefault();
-          // Cycle through targets
-          const enemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
-          if (enemies.length > 0) {
-            const currentIndex = enemies.findIndex(e => e.id === selectedTarget);
-            const nextIndex = (currentIndex + 1) % enemies.length;
-            setSelectedTarget(enemies[nextIndex].id);
-          }
+          
+          // If TAB is already being held, ignore repeated keydown events
+          if (isTabHeld) return;
+          
+          setIsTabHeld(true);
+          setTabTimerExpired(false);
+          
+          // Set a timer - if TAB is held for more than 500ms, clear target
+          const timer = setTimeout(() => {
+            setSelectedTarget(null);
+            setTabTimerExpired(true);
+          }, 500);
+          setTabHoldTimer(timer);
+          
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation]);
+    const handleKeyUp = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      
+      if (key === 'tab') {
+        event.preventDefault();
+        
+        // Check if the timer is still running (TAB was released quickly)
+        const wasQuickRelease = tabHoldTimer !== null && !tabTimerExpired;
+        
+        // Clear the hold timer
+        if (tabHoldTimer) {
+          clearTimeout(tabHoldTimer);
+          setTabHoldTimer(null);
+        }
+        
+        // Only cycle through targets if TAB was released quickly (timer didn't expire)
+        if (isTabHeld && wasQuickRelease) {
+          const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
+          if (livingEnemies.length > 0) {
+            const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
+            const nextIndex = (currentIndex + 1) % livingEnemies.length;
+            setSelectedTarget(livingEnemies[nextIndex].id);
+          } else {
+            // Clear selection if no living enemies
+            setSelectedTarget(null);
+          }
+        }
+        // If TAB was held (timer expired and target was already cleared), don't cycle
+        
+        setIsTabHeld(false);
+        setTabTimerExpired(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      if (tabHoldTimer) {
+        clearTimeout(tabHoldTimer);
+      }
+    };
+  }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation, isTabHeld, tabHoldTimer]);
 
   // Get weapon range from equipment
   const getWeaponRange = (weapon: Equipment): number => {
@@ -248,7 +348,7 @@ export default function TestCombat() {
       );
 
       if (distance > weaponRange) {
-        console.log("Target out of range!");
+        console.log("Target out of range! Distance: " + Math.round(distance) + ", Range: " + weaponRange);
         return;
       }
 
@@ -265,7 +365,6 @@ export default function TestCombat() {
         // Cancel attack if no valid target
         setActiveActionMode(null);
         setSelectedTarget(null);
-        setShowRangeIndicator(false);
       }
     }
   }, [activeActionMode, combatState.entities, handleAttack, equippedWeapon]);
@@ -276,7 +375,21 @@ export default function TestCombat() {
 
   const handleWeaponChange = useCallback((weapon: Equipment) => {
     setEquippedWeapon(weapon);
-  }, []);
+    
+    // Update the player entity with the new weapon
+    const currentState = combatSystem.getState();
+    const player = currentState.entities.find(e => e.id === "player");
+    if (player) {
+      const weaponAttack = weapon ? 
+        (weapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
+        0; // Unarmed
+
+      combatSystem.updateEntity("player", {
+        attack: 18 + weaponAttack,
+        equippedWeapon: weapon
+      });
+    }
+  }, []); // No dependencies needed since we get fresh state
 
   const handleAttackMode = useCallback(() => {
     setActiveActionMode({
@@ -284,27 +397,32 @@ export default function TestCombat() {
       actionId: "basic_attack",
       actionName: "Attack"
     });
-    setShowRangeIndicator(true);
   }, []);
 
+  // Subscribe to combat system updates
   useEffect(() => {
-    // Subscribe to combat system updates with throttling
     let updateTimeout: NodeJS.Timeout | null = null;
-    
+
     const unsubscribe = combatSystem.subscribe((state) => {
-      // Throttle state updates to prevent overwhelming the UI
+      // Light throttling to prevent excessive updates while maintaining responsiveness
       if (updateTimeout) {
         clearTimeout(updateTimeout);
       }
-      
+
       updateTimeout = setTimeout(() => {
         setCombatState(state);
+        
+        // Clear selectedTarget if the currently selected entity is dead or no longer exists
+        if (selectedTarget) {
+          const selectedEntity = state.entities.find(e => e.id === selectedTarget);
+          if (!selectedEntity || selectedEntity.hp <= 0) {
+            setSelectedTarget(null);
+          }
+        }
+        
         updateTimeout = null;
-      }, 16); // ~60fps throttling
+      }, 8); // ~120fps throttling for better responsiveness
     });
-
-    // Initialize test scenario
-    initializeTestScenario();
 
     return () => {
       if (updateTimeout) {
@@ -312,9 +430,14 @@ export default function TestCombat() {
       }
       unsubscribe();
     };
+  }, [selectedTarget]);
+
+  // Initialize test scenario only once
+  useEffect(() => {
+    initializeTestScenario();
   }, []);
 
-  // Load mock weapons for testing
+  // Load mock weapons for testing - run only once
   useEffect(() => {
     const mockWeapons: Equipment[] = [
       {
@@ -349,7 +472,7 @@ export default function TestCombat() {
     setAvailableWeapons(mockWeapons);
     // Auto-equip the first weapon for testing
     setEquippedWeapon(mockWeapons[0]);
-  }, []);
+  }, []); // Empty dependency array - run only once
 
   const initializeTestScenario = () => {
     // Clear existing entities
@@ -357,9 +480,12 @@ export default function TestCombat() {
       combatSystem.removeEntity(entity.id);
     });
 
+    // Get current equipped weapon (will be set after useEffect runs)
+    const currentWeapon = equippedWeapon || availableWeapons[0] || null;
+
     // Calculate weapon bonuses for player
-    const weaponAttack = equippedWeapon ? 
-      (equippedWeapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
+    const weaponAttack = currentWeapon ? 
+      (currentWeapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
       0; // Unarmed
 
     // Create player entity
@@ -391,7 +517,7 @@ export default function TestCombat() {
       isSelected: false,
       isAlive: true,
       cooldowns: {},
-      equippedWeapon: equippedWeapon
+      equippedWeapon: currentWeapon
     };
 
     combatSystem.addEntity(player);
@@ -461,9 +587,8 @@ export default function TestCombat() {
     // Clear all state first
     setSelectedTarget(null);
     setActiveActionMode(null);
-    setShowRangeIndicator(false);
     setManualRotation(false);
-    
+
     // Then reinitialize
     initializeTestScenario();
   };
@@ -536,89 +661,112 @@ export default function TestCombat() {
                     ))}
                   </div>
 
-                  {/* Weapon range indicator */}
-                  {showRangeIndicator && combatState.entities.find(e => e.id === "player") && (
-                    <div
-                      className="absolute border-2 border-yellow-400 border-dashed rounded-full pointer-events-none z-0"
-                      style={{
-                        left: combatState.entities.find(e => e.id === "player")!.position.x + '%',
-                        top: combatState.entities.find(e => e.id === "player")!.position.y + '%',
-                        width: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                        height: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
-                        transform: 'translate(-50%, -50%)',
-                        opacity: 0.5
-                      }}
-                    />
-                  )}
+
 
                   {/* Entities */}
-                  {combatState.entities.map((entity) => (
-                    <div
-                      key={entity.id}
-                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
-                        selectedTarget === entity.id ? 'scale-110 z-10' : 'hover:scale-105'
-                      }`}
-                      style={{
-                        left: `${entity.position.x}%`,
-                        top: `${entity.position.y}%`,
-                      }}
-                      onClick={() => entity.type === "hostile" ? setSelectedTarget(entity.id) : null}
-                    >
-                      <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                        entity.type === "player" 
-                          ? "bg-blue-600 border-blue-400" 
-                          : entity.type === "hostile"
-                          ? "bg-red-600 border-red-400"
-                          : "bg-green-600 border-green-400"
-                      }`}>
-                        {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
-                        {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+                  {combatState.entities.map((entity) => {
+                    // Calculate if this entity is in range of player's weapon (for non-player entities)
+                    let isInRange = false;
+                    let friendlinessColor = "border-red-400"; // Default for hostile
 
-                        {/* Facing direction indicator - colored arrows based on entity type */}
-                        {entity.facing !== undefined && (
-                          <div
-                            className="absolute w-12 h-12 pointer-events-none z-10"
-                            style={{
-                              transform: `rotate(${entity.facing}deg)`,
-                              transformOrigin: "center",
-                            }}
-                          >
-                            <div className="w-full h-full flex items-start justify-center">
-                              <div
-                                className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
-                                  entity.type === "player" 
-                                    ? "border-b-blue-400" 
-                                    : entity.type === "hostile"
-                                    ? "border-b-red-400"
-                                    : "border-b-green-400"
-                                }`}
-                                style={{
-                                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
-                                  marginTop: "-6px", // Position arrow to extend from behind the circle
-                                }}
-                              />
+                    if (entity.id !== "player") {
+                      const player = combatState.entities.find(e => e.id === "player");
+                      if (player) {
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const distance = Math.sqrt(
+                          Math.pow(entity.position.x - player.position.x, 2) + 
+                          Math.pow(entity.position.y - player.position.y, 2)
+                        );
+                        isInRange = distance <= weaponRange;
+
+                        // Set color based on entity type/friendliness
+                        if (entity.type === "hostile") {
+                          friendlinessColor = "border-red-400";
+                        } else if (entity.type === "neutral") {
+                          friendlinessColor = "border-yellow-400";
+                        } else if (entity.type === "friendly" || entity.type === "ally") {
+                          friendlinessColor = "border-green-400";
+                        }
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={entity.id}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
+                          entity.hp <= 0 
+                            ? 'cursor-not-allowed opacity-50' 
+                            : entity.type === "hostile" 
+                              ? 'cursor-pointer hover:scale-105' 
+                              : 'cursor-default'
+                        } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
+                        style={{
+                          left: `${entity.position.x}%`,
+                          top: `${entity.position.y}%`,
+                        }}
+                        onClick={() => entity.type === "hostile" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
+                      >
+                        {/* Main entity circle */}
+                        <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                          entity.type === "player" 
+                            ? "bg-blue-600 border-blue-400" 
+                            : entity.type === "hostile"
+                            ? entity.hp <= 0
+                              ? "bg-gray-600 border-gray-500"
+                              : "bg-red-600 border-red-400"
+                            : "bg-green-600 border-green-400"
+                        }`}>
+                          {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
+                          {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+
+                          {/* Facing direction indicator - colored arrows based on entity type */}
+                          {entity.facing !== undefined && (
+                            <div
+                              className="absolute w-12 h-12 pointer-events-none z-10"
+                              style={{
+                                transform: `rotate(${entity.facing}deg)`,
+                                transformOrigin: "center",
+                              }}
+                            >
+                              <div className="w-full h-full flex items-start justify-center">
+                                <div
+                                  className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                                    entity.hp <= 0 ? "border-b-gray-500" :
+                                    entity.type === "player" 
+                                      ? "border-b-blue-400" 
+                                      : entity.type === "hostile"
+                                      ? "border-b-red-400"
+                                      : "border-b-green-400"
+                                  }`}
+                                  style={{
+                                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
+                                    marginTop: "-6px", // Position arrow to extend from behind the circle
+                                  }}
+                                />
+                              </div>
                             </div>
+                          )}
+
+                          {/* Health bar */}
+                          <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
+                            <div 
+                              className={`h-full rounded transition-all duration-300 ${
+                                entity.hp <= 0 ? "bg-gray-500" :
+                                entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
+                                entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
+                              }`}
+                              style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                            />
                           </div>
-                        )}
 
-                        {/* Health bar */}
-                        <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
-                          <div 
-                            className={`h-full rounded transition-all duration-300 ${
-                              entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
-                              entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
-                            }`}
-                            style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
-                          />
+                          {/* Selection indicator */}
+                          {selectedTarget === entity.id && entity.hp > 0 && (
+                            <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
+                          )}
                         </div>
-
-                        {/* Selection indicator */}
-                        {selectedTarget === entity.id && (
-                          <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -636,12 +784,22 @@ export default function TestCombat() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Current Weapon */}
-                <div>
-                  <div className="text-sm font-medium text-amber-300 mb-2">Equipped Weapon:</div>
+                {/* Current Weapon Display & Cycle Button */}
+                <button
+                  onClick={() => {
+                    const currentIndex = equippedWeapon ? availableWeapons.findIndex(w => w.id === equippedWeapon.id) : -1;
+                    const nextIndex = (currentIndex + 1) % availableWeapons.length;
+                    handleWeaponChange(availableWeapons[nextIndex]);
+                  }}
+                  className="w-full p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm hover:bg-blue-800/40 transition-colors"
+                  title="Click to cycle to next weapon"
+                >
                   {equippedWeapon ? (
-                    <div className="p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm">
-                      <div className="font-medium text-blue-200">{equippedWeapon.name}</div>
+                    <div>
+                      <div className="font-medium text-blue-200 flex items-center justify-between">
+                        {equippedWeapon.name}
+                        <span className="text-xs text-blue-400">Click to cycle</span>
+                      </div>
                       <div className="text-sm text-blue-300">{equippedWeapon.description}</div>
                       <div className="text-xs text-blue-400 mt-1">
                         Range: {getWeaponRange(equippedWeapon)} | 
@@ -650,34 +808,19 @@ export default function TestCombat() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-gray-800/30 border border-gray-600/30 rounded-lg backdrop-blur-sm">
-                      <div className="text-gray-300">Unarmed (Fists)</div>
+                    <div>
+                      <div className="text-gray-300 flex items-center justify-between">
+                        Unarmed (Fists)
+                        <span className="text-xs text-gray-400">Click to equip weapon</span>
+                      </div>
                       <div className="text-xs text-gray-400">Range: 1 | Base damage</div>
                     </div>
                   )}
-                </div>
+                </button>
 
-                {/* Available Weapons */}
-                <div>
-                  <div className="text-sm font-medium text-amber-300 mb-2">Available Weapons:</div>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
-                    {availableWeapons.map((weapon) => (
-                      <button
-                        key={weapon.id}
-                        onClick={() => handleWeaponChange(weapon)}
-                        className={`w-full p-2 text-left border rounded-lg transition-colors backdrop-blur-sm ${
-                          equippedWeapon?.id === weapon.id
-                            ? "bg-blue-800/40 border-blue-500/40 text-blue-200"
-                            : "bg-gray-800/20 border-gray-600/30 text-gray-300 hover:bg-gray-700/30 hover:border-gray-500/40"
-                        }`}
-                      >
-                        <div className="font-medium text-sm">{weapon.name}</div>
-                        <div className="text-xs text-gray-400">
-                          Range: {getWeaponRange(weapon)} | +{weapon.mightBonus || 0} dmg
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                {/* Weapon Count Indicator */}
+                <div className="text-xs text-center text-amber-400">
+                  Weapon {equippedWeapon ? availableWeapons.findIndex(w => w.id === equippedWeapon.id) + 1 : 0} of {availableWeapons.length}
                 </div>
               </CardContent>
             </Card>
@@ -801,6 +944,7 @@ export default function TestCombat() {
                   <div>QE: Rotate Left/Right</div>
                   <div>1-3: Hotbar Actions</div>
                   <div>Tab: Cycle Targets</div>
+                  <div>Hold Tab: Clear Target</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
                   {activeActionMode && <div className="text-green-400">Mode: {activeActionMode.actionName}</div>}
                 </div>
@@ -818,11 +962,62 @@ export default function TestCombat() {
               <CardContent className="space-y-2">
                 <Button 
                   className="w-full" 
-                  onClick={handleAttackMode}
+                  onClick={() => {
+                    if (selectedTarget) {
+                      const player = combatState.entities.find(e => e.id === "player");
+                      const target = combatState.entities.find(e => e.id === selectedTarget);
+
+                      if (player && target) {
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const distance = Math.sqrt(
+                          Math.pow(target.position.x - player.position.x, 2) + 
+                          Math.pow(target.position.y - player.position.y, 2)
+                        );
+
+                        if (distance <= weaponRange) {
+                          combatSystem.executeAttack("player", selectedTarget);
+                        } else {
+                          console.log("Target out of range for manual attack!");
+                        }
+                      }
+                    } else {
+                      handleAttackMode();
+                    }
+                  }}
                   variant={activeActionMode?.type === "attack" ? "destructive" : "outline"}
+                  disabled={selectedTarget && (() => {
+                    const player = combatState.entities.find(e => e.id === "player");
+                    const target = combatState.entities.find(e => e.id === selectedTarget);
+
+                    if (player && target) {
+                      const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                      const distance = Math.sqrt(
+                        Math.pow(target.position.x - player.position.x, 2) + 
+                        Math.pow(target.position.y - player.position.y, 2)
+                      );
+                      return distance > weaponRange;
+                    }
+                    return false;
+                  })()}
                 >
                   <Target className="w-4 h-4 mr-2" />
-                  Attack {selectedEntity?.name || "Target"}
+                  {selectedTarget && (() => {
+                    const player = combatState.entities.find(e => e.id === "player");
+                    const target = combatState.entities.find(e => e.id === selectedTarget);
+
+                    if (player && target) {
+                      const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                      const distance = Math.sqrt(
+                        Math.pow(target.position.x - player.position.x, 2) + 
+                        Math.pow(target.position.y - player.position.y, 2)
+                      );
+
+                      if (distance > weaponRange) {
+                        return `Out of Range (${selectedEntity?.name})`;
+                      }
+                    }
+                    return `Attack ${selectedEntity?.name}`;
+                  })() || "Attack Target"}
                 </Button>
               </CardContent>
             </Card>
