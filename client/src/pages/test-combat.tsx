@@ -817,8 +817,9 @@ export default function TestCombat() {
             className="relative bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden mx-auto"
             style={{ 
               backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
-              width: '500px',
-              height: '500px'
+              width: 'min(90vw, 90vh, 600px)',
+              height: 'min(90vw, 90vh, 600px)',
+              aspectRatio: '1'
             }}
                 >
                   {/* Grid overlay */}
