@@ -497,6 +497,89 @@ export function registerDebugRoutes(app: Express) {
         redisDefaultMode: isDebugMode ? "DB Only" : "Cache + DB",
       });
     } catch (error) {
+
+
+  // DEBUG: Clean up redundant tactical positions
+  app.post(
+    "/api/debug/cleanup-tactical-positions",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const { db } = await import("../db");
+        const { tacticalPositions, mobs } = await import("@shared/schema");
+        const { sql, eq, and, notInArray } = await import("drizzle-orm");
+
+        // Get count before cleanup
+        const countBefore = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
+
+        // 1. Remove ALL mob positions (mobs should only be in mobs table)
+        console.log("🧹 Removing all mob entries from tactical_positions...");
+        const deletedMobsCount = await storage.tacticalStorage.removeAllMobsFromTacticalPositions();
+        console.log("✅ Removed " + deletedMobsCount + " mob entries");
+
+        // 2. Remove tactical positions for rooms that don't exist
+        console.log("🧹 Removing positions for non-existent rooms...");
+        const orphanedRoomsResult = await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE room_id NOT IN (SELECT id FROM rooms)
+        `);
+        console.log("✅ Removed orphaned room positions");
+
+        // 3. Remove ALL inactive positions (not just old ones)
+        console.log("🧹 Removing all inactive positions...");
+        await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE is_active = false
+        `);
+        console.log("✅ Removed all inactive positions");
+
+        // 4. Remove duplicate active positions (keep only most recent)
+        console.log("🧹 Removing duplicate positions...");
+        await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE id NOT IN (
+            SELECT DISTINCT ON (room_id, entity_type, position_x, position_y) id
+            FROM tactical_positions 
+            WHERE is_active = true
+            ORDER BY room_id, entity_type, position_x, position_y, created_at DESC
+          )
+        `);
+        console.log("✅ Removed duplicate positions");
+
+        // 5. VACUUM the table to reclaim space (PostgreSQL specific)
+        console.log("🧹 Vacuuming tactical_positions table to reclaim space...");
+        await db.execute(sql`VACUUM FULL tactical_positions`);
+        console.log("✅ Table vacuumed - space reclaimed");
+
+        // Get count after cleanup
+        const countAfter = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
+
+        const beforeCount = countBefore.rows?.[0]?.count || countBefore[0]?.count || 0;
+        const afterCount = countAfter.rows?.[0]?.count || countAfter[0]?.count || 0;
+        const deletedCount = beforeCount - afterCount;
+
+        res.json({
+          success: true,
+          message: "Tactical positions cleanup completed",
+          deletedCount: deletedCount,
+          remainingCount: afterCount,
+          details: {
+            beforeCount: beforeCount,
+            afterCount: afterCount,
+            spaceSaved: "Estimated " + Math.round((deletedCount / beforeCount) * 619) + " MB"
+          }
+        });
+      } catch (error) {
+        console.error("Error cleaning up tactical positions:", error);
+        res.status(500).json({
+          success: false,
+          error: "Failed to cleanup tactical positions: " + 
+                 (error instanceof Error ? error.message : "Unknown error"),
+        });
+      }
+    },
+  );
+
       console.error("Error getting debug environment status:", error);
       res.status(500).json({
         success: false,
@@ -541,21 +624,25 @@ export function registerDebugRoutes(app: Express) {
       for (const tableName of tableNames) {
         try {
           const result = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${tableName}`));
-          rowCountData.push({ table: tableName, count: result[0].count });
+          const count = result.rows && result.rows[0] ? result.rows[0].count : result[0]?.count || "0";
+          rowCountData.push({ table: tableName, count: count.toString() });
         } catch (tableError) {
           console.error(`Error counting rows for table ${tableName}:`, tableError);
           rowCountData.push({ table: tableName, count: "Error" });
         }
       }
 
+      // Ensure tableSizes is an array
+      const tableSizesArray = Array.isArray(tableSizes) ? tableSizes : (tableSizes.rows || []);
+
       res.json({
         success: true,
-        totalDatabaseSize: dbSize[0],
-        tableSizes: tableSizes,
+        totalDatabaseSize: dbSize.rows && dbSize.rows[0] ? dbSize.rows[0] : dbSize[0],
+        tableSizes: tableSizesArray,
         rowCounts: rowCountData,
         analysis: {
-          largestTables: tableSizes.slice(0, 5),
-          totalTables: tableSizes.length,
+          largestTables: tableSizesArray.slice(0, 5),
+          totalTables: tableSizesArray.length,
         },
       });
     } catch (error) {

@@ -66,6 +66,13 @@ export interface CombatEntity {
     targetPosition: Position;
   };
   lastDamageTime?: number;
+
+  // Cover status
+  coverStatus?: {
+    inCover: boolean;
+    coverType: "half_wall" | "full_wall" | null;
+    coverBonus: number; // Damage reduction percentage
+  };
 }
 
 export interface CombatActionLog {

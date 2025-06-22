@@ -84,6 +84,7 @@ export class TacticalStorage extends BaseStorage {
       console.log('Redis cache miss for tactical positions, fetching from database');
     }
 
+    // Get tactical positions (loot, NPCs) from tactical_positions table
     const positions = await db
       .select()
       .from(tacticalPositions)
@@ -103,6 +104,39 @@ export class TacticalStorage extends BaseStorage {
         y: parseFloat(pos.positionY),
       },
     }));
+
+    // Get mobs from mobs table and add them to tactical entities
+    if (this.mobStorage && typeof this.mobStorage.getRoomMobs === 'function') {
+      try {
+        const roomMobs = await this.mobStorage.getRoomMobs(roomId);
+        for (const mobData of roomMobs) {
+          if (mobData.mob.isAlive && mobData.mob.isActive) {
+            entities.push({
+              type: 'mob',
+              name: mobData.mob.displayName,
+              data: {
+                id: mobData.mob.id,
+                hp: mobData.mob.currentHealth,
+                maxHp: mobData.mob.maxHealth,
+                attack: mobData.mobType.attack,
+                defense: mobData.mobType.defense,
+                speed: mobData.mobType.speed,
+                creditsReward: mobData.mobType.creditsReward,
+                experienceReward: mobData.mobType.experienceReward,
+                rarity: mobData.mob.rarity,
+              },
+              position: {
+                x: parseFloat(mobData.mob.positionX),
+                y: parseFloat(mobData.mob.positionY)
+              },
+            });
+          }
+        }
+        console.log(`Added ${roomMobs.filter(m => m.mob.isAlive && m.mob.isActive).length} mobs from mobs table to tactical positions`);
+      } catch (error) {
+        console.error(`Error getting mobs for tactical positions in room ${roomId}:`, error);
+      }
+    }
 
     // Cache in request cache
     if (this.requestCache) {
@@ -249,12 +283,17 @@ export class TacticalStorage extends BaseStorage {
           }
         }
 
+        // DON'T store mobs in tactical_positions - they have their own table
+        // Mobs will be fetched separately via mobStorage.getRoomMobs()
+        console.log(`Found ${roomMobs.length} mobs in room ${roomId} - these are stored in mobs table, not tactical_positions`);
+        
+        // Add mob entities to the response but DON'T save them to tactical_positions
         for (const mobData of roomMobs) {
           if (mobData.mob.isAlive && mobData.mob.isActive) {
-            console.log(`Adding mob to tactical data: ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
+            console.log(`Adding mob to tactical response (not saving): ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
             entities.push({
               type: 'mob',
-              name: mobData.mob.displayName, // Use display name from database
+              name: mobData.mob.displayName,
               data: {
                 id: mobData.mob.id,
                 hp: mobData.mob.currentHealth,
@@ -265,15 +304,13 @@ export class TacticalStorage extends BaseStorage {
                 creditsReward: mobData.mobType.creditsReward,
                 experienceReward: mobData.mobType.experienceReward,
                 hostileType: roomData.type === "boss" ? "boss" : "normal",
-                rarity: mobData.mob.rarity, // Include rarity information
+                rarity: mobData.mob.rarity,
               },
               position: {
                 x: parseFloat(mobData.mob.positionX),
                 y: parseFloat(mobData.mob.positionY)
               },
             });
-          } else {
-            console.log(`Skipping mob ${mobData.mob.displayName}: alive=${mobData.mob.isAlive}, active=${mobData.mob.isActive}`);
           }
         }
       } catch (mobError) {
@@ -319,8 +356,11 @@ export class TacticalStorage extends BaseStorage {
       }
     }
 
-    // Save to database (this will overwrite with fresh data)
-    await this.saveTacticalPositions(roomId, entities);
+    // Save ONLY non-mob entities to database (mobs are stored in mobs table)
+    const nonMobEntities = entities.filter(entity => entity.type !== 'mob');
+    await this.saveTacticalPositions(roomId, nonMobEntities);
+    
+    console.log(`Saved ${nonMobEntities.length} non-mob tactical entities to database (${entities.length - nonMobEntities.length} mobs stored separately)`);
 
     // Cache the result for 15 seconds to speed up subsequent requests
     try {
@@ -337,6 +377,14 @@ export class TacticalStorage extends BaseStorage {
   async clearTacticalEntities(roomId: number): Promise<void> {
     await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
     console.log(`Cleared tactical entities for room ${roomId}`);
+  }
+
+  async removeAllMobsFromTacticalPositions(): Promise<number> {
+    const result = await db.delete(tacticalPositions)
+      .where(eq(tacticalPositions.entityType, 'mob'));
+    
+    console.log(`Removed all mob entries from tactical_positions table`);
+    return Array.isArray(result) ? result.length : 0;
   }
 
   private getRandomEmptyCell(excludeCells: Set<string> = new Set()): { gridX: number; gridY: number } {

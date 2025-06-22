@@ -36,6 +36,14 @@ export default function TestCombat() {
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
+  const [coverElements, setCoverElements] = useState<Array<{
+    id: string;
+    type: "full_wall" | "half_wall";
+    position: { x: number; y: number };
+    width: number;
+    height: number;
+    facing: number; // 0=horizontal, 90=vertical
+  }>>([]);
 
   // Action handlers - Define these first before they're used
   const handleAttack = useCallback((targetId: string) => {
@@ -79,8 +87,66 @@ export default function TestCombat() {
     if (direction.x === 0 && direction.y === 0) return;
 
     const moveSpeed = 3; // Increased movement speed
-    const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
-    const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+    let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+    let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+
+    // Check collision with cover elements using improved collision detection
+    const playerRadius = 1.5; // Slightly smaller radius for more precise collision
+    
+    const checkCollisionWithCover = (x: number, y: number): boolean => {
+      return coverElements.some(cover => {
+        // Calculate actual wall bounds considering rotation
+        let wallLeft, wallRight, wallTop, wallBottom;
+        
+        if (cover.facing === 90) {
+          // Vertical wall - swap width and height for collision detection
+          wallLeft = cover.position.x - cover.height / 2;
+          wallRight = cover.position.x + cover.height / 2;
+          wallTop = cover.position.y - cover.width / 2;
+          wallBottom = cover.position.y + cover.width / 2;
+        } else {
+          // Horizontal wall (facing 0)
+          wallLeft = cover.position.x - cover.width / 2;
+          wallRight = cover.position.x + cover.width / 2;
+          wallTop = cover.position.y - cover.height / 2;
+          wallBottom = cover.position.y + cover.height / 2;
+        }
+
+        // Add small buffer to prevent edge clipping
+        const buffer = 0.5;
+        return (x + playerRadius > wallLeft - buffer && 
+                x - playerRadius < wallRight + buffer &&
+                y + playerRadius > wallTop - buffer && 
+                y - playerRadius < wallBottom + buffer);
+      });
+    };
+
+    const wouldCollide = checkCollisionWithCover(newX, newY);
+
+    if (wouldCollide) {
+      // Try moving only horizontally
+      const horizontalX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      const horizontalY = player.position.y;
+      
+      if (!checkCollisionWithCover(horizontalX, horizontalY)) {
+        newX = horizontalX;
+        newY = horizontalY;
+      } else {
+        // Try moving only vertically
+        const verticalX = player.position.x;
+        const verticalY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        
+        if (!checkCollisionWithCover(verticalX, verticalY)) {
+          newX = verticalX;
+          newY = verticalY;
+        } else {
+          // Can't move at all, keep original position
+          newX = player.position.x;
+          newY = player.position.y;
+          return; // Exit early, no movement
+        }
+      }
+    }
 
     // Calculate facing direction based on movement
     // Convert movement vector to degrees (0° = North, positive clockwise)
@@ -129,7 +195,13 @@ export default function TestCombat() {
           );
 
           if (distance <= weaponRange) {
-            combatSystem.executeAttack("player", selectedTarget);
+            // Check line of sight - if full walls block the attack
+            const hasLineOfSight = checkLineOfSight(player.position, target.position, coverElements);
+            if (hasLineOfSight) {
+              combatSystem.executeAttack("player", selectedTarget);
+            } else {
+              console.log("Attack blocked by cover!");
+            }
           } else {
             console.log("Target out of range for attack!");
           }
@@ -144,6 +216,105 @@ export default function TestCombat() {
       setActiveActionMode({ type: actionType as any, actionId, actionName });
     }
   }, [selectedTarget, combatState.entities, equippedWeapon]);
+
+  // Line of sight checking function
+  const checkLineOfSight = useCallback((start: { x: number; y: number }, end: { x: number; y: number }, covers: typeof coverElements): boolean => {
+    // Simple line intersection test with full walls only
+    const fullWalls = covers.filter(c => c.type === "full_wall");
+    
+    for (const wall of fullWalls) {
+      let wallLeft, wallRight, wallTop, wallBottom;
+      
+      if (wall.facing === 90) {
+        // Vertical wall - swap width and height for bounds calculation
+        wallLeft = wall.position.x - wall.height / 2;
+        wallRight = wall.position.x + wall.height / 2;
+        wallTop = wall.position.y - wall.width / 2;
+        wallBottom = wall.position.y + wall.width / 2;
+      } else {
+        // Horizontal wall (facing 0)
+        wallLeft = wall.position.x - wall.width / 2;
+        wallRight = wall.position.x + wall.width / 2;
+        wallTop = wall.position.y - wall.height / 2;
+        wallBottom = wall.position.y + wall.height / 2;
+      }
+
+      // Simple bounding box intersection with line of sight
+      if (lineIntersectsRect(start, end, { 
+        left: wallLeft, 
+        right: wallRight, 
+        top: wallTop, 
+        bottom: wallBottom 
+      })) {
+        return false; // Line of sight blocked
+      }
+    }
+    return true; // Clear line of sight
+  }, []);
+
+  // Helper function for line-rectangle intersection
+  const lineIntersectsRect = (start: { x: number; y: number }, end: { x: number; y: number }, rect: { left: number; right: number; top: number; bottom: number }): boolean => {
+    // Simple check: if line passes through rectangle
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    
+    if (dx === 0 && dy === 0) return false; // No line
+    
+    // Check if either endpoint is inside rectangle
+    const startInside = start.x >= rect.left && start.x <= rect.right && start.y >= rect.top && start.y <= rect.bottom;
+    const endInside = end.x >= rect.left && end.x <= rect.right && end.y >= rect.top && end.y <= rect.bottom;
+    
+    if (startInside || endInside) return true;
+    
+    // Check intersection with rectangle edges
+    const t1 = rect.left <= Math.max(start.x, end.x) && rect.right >= Math.min(start.x, end.x);
+    const t2 = rect.top <= Math.max(start.y, end.y) && rect.bottom >= Math.min(start.y, end.y);
+    
+    return t1 && t2;
+  };
+
+  // Check if entity is behind cover (for damage reduction)
+  const getEntityCoverBonus = useCallback((entityPos: { x: number; y: number }, attackerPos: { x: number; y: number }): { covered: boolean; coverType: string | null } => {
+    const halfWalls = coverElements.filter(c => c.type === "half_wall");
+    
+    for (const wall of halfWalls) {
+      let wallLeft, wallRight, wallTop, wallBottom;
+      
+      if (wall.facing === 90) {
+        // Vertical wall - swap width and height for bounds calculation
+        wallLeft = wall.position.x - wall.height / 2;
+        wallRight = wall.position.x + wall.height / 2;
+        wallTop = wall.position.y - wall.width / 2;
+        wallBottom = wall.position.y + wall.width / 2;
+      } else {
+        // Horizontal wall (facing 0)
+        wallLeft = wall.position.x - wall.width / 2;
+        wallRight = wall.position.x + wall.width / 2;
+        wallTop = wall.position.y - wall.height / 2;
+        wallBottom = wall.position.y + wall.height / 2;
+      }
+
+      // Check if entity is near the half wall
+      const nearWall = entityPos.x >= wallLeft - 3 && entityPos.x <= wallRight + 3 && 
+                       entityPos.y >= wallTop - 3 && entityPos.y <= wallBottom + 3;
+      
+      if (nearWall) {
+        // Check if wall is between entity and attacker
+        const wallBetween = lineIntersectsRect(entityPos, attackerPos, {
+          left: wallLeft,
+          right: wallRight, 
+          top: wallTop,
+          bottom: wallBottom
+        });
+        
+        if (wallBetween) {
+          return { covered: true, coverType: "half_wall" };
+        }
+      }
+    }
+    
+    return { covered: false, coverType: null };
+  }, [coverElements]);
 
   // Manual rotation handler
   const handleManualRotation = useCallback((direction: 'left' | 'right') => {
@@ -279,13 +450,13 @@ export default function TestCombat() {
 
         // Only cycle through targets if TAB was released quickly (timer didn't expire)
         if (isTabHeld && wasQuickRelease) {
-          const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
-          if (livingEnemies.length > 0) {
-            const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
-            const nextIndex = (currentIndex + 1) % livingEnemies.length;
-            setSelectedTarget(livingEnemies[nextIndex].id);
+          const livingTargets = combatState.entities.filter(e => e.id !== "player" && e.hp > 0);
+          if (livingTargets.length > 0) {
+            const currentIndex = livingTargets.findIndex(e => e.id === selectedTarget);
+            const nextIndex = (currentIndex + 1) % livingTargets.length;
+            setSelectedTarget(livingTargets[nextIndex].id);
           } else {
-            // Clear selection if no living enemies
+            // Clear selection if no living targets
             setSelectedTarget(null);
           }
         }
@@ -428,7 +599,7 @@ export default function TestCombat() {
         description: "A sturdy iron blade",
         type: "weapon",
         damageAttribute: "might",
-        range: 1,
+        range: 1.5,
         mightBonus: 5
       },
       {
@@ -446,7 +617,7 @@ export default function TestCombat() {
         description: "A quick, precise blade for close combat",
         type: "weapon",
         damageAttribute: "agility",
-        range: 0.5,
+        range: 1,
         agilityBonus: 4
       },
       {
@@ -581,6 +752,59 @@ export default function TestCombat() {
 
     combatSystem.addEntity(goblin);
     combatSystem.addEntity(orc);
+
+    // Add some cover elements for testing with proper mix of horizontal and vertical walls
+    const testCover = [
+      {
+        id: "wall1",
+        type: "full_wall" as const,
+        position: { x: 35, y: 30 },
+        width: 15,
+        height: 3,
+        facing: 0 // horizontal
+      },
+      {
+        id: "wall2", 
+        type: "half_wall" as const,
+        position: { x: 65, y: 45 },
+        width: 12, // This will be the length when rotated
+        height: 3, // This will be the thickness when rotated
+        facing: 90 // vertical
+      },
+      {
+        id: "wall3",
+        type: "full_wall" as const,
+        position: { x: 50, y: 75 },
+        width: 8,
+        height: 3,
+        facing: 0 // horizontal
+      },
+      {
+        id: "wall4",
+        type: "half_wall" as const,
+        position: { x: 20, y: 60 },
+        width: 10,
+        height: 3,
+        facing: 0 // horizontal
+      },
+      {
+        id: "wall5",
+        type: "full_wall" as const,
+        position: { x: 80, y: 25 },
+        width: 8, // length when vertical
+        height: 3, // thickness when vertical
+        facing: 90 // vertical
+      },
+      {
+        id: "wall6",
+        type: "half_wall" as const,
+        position: { x: 45, y: 55 },
+        width: 6,
+        height: 3,
+        facing: 90 // vertical
+      }
+    ];
+    setCoverElements(testCover);
   };
 
   const resetScenario = () => {
@@ -592,6 +816,135 @@ export default function TestCombat() {
     // Then reinitialize
     initializeTestScenario();
   };
+
+  // Spawn functions for different entity types
+  const spawnToughEnemy = useCallback(() => {
+    const entityId = "tough_enemy_" + Date.now();
+    const toughEnemy: CombatEntity = {
+      id: entityId,
+      name: "Elite Orc Champion",
+      type: "hostile",
+      hp: 120,
+      maxHp: 120,
+      energy: 40,
+      maxEnergy: 40,
+      power: 20,
+      maxPower: 20,
+      might: 22,
+      agility: 10,
+      endurance: 20,
+      intellect: 8,
+      charisma: 5,
+      wisdom: 9,
+      attack: 28,
+      defense: 18,
+      speed: 12,
+      accuracy: 18,
+      evasion: 10,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 6,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(toughEnemy);
+  }, []);
+
+  const spawnEasyEnemy = useCallback(() => {
+    const entityId = "easy_enemy_" + Date.now();
+    const easyEnemy: CombatEntity = {
+      id: entityId,
+      name: "Goblin Scout",
+      type: "hostile",
+      hp: 25,
+      maxHp: 25,
+      energy: 15,
+      maxEnergy: 15,
+      power: 5,
+      maxPower: 5,
+      might: 8,
+      agility: 12,
+      endurance: 6,
+      intellect: 5,
+      charisma: 3,
+      wisdom: 6,
+      attack: 8,
+      defense: 5,
+      speed: 18,
+      accuracy: 14,
+      evasion: 20,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 2,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(easyEnemy);
+  }, []);
+
+  const spawnNeutralMob = useCallback(() => {
+    const entityId = "neutral_mob_" + Date.now();
+    const neutralMob: CombatEntity = {
+      id: entityId,
+      name: "Cave Spider",
+      type: "neutral",
+      hp: 40,
+      maxHp: 40,
+      energy: 20,
+      maxEnergy: 20,
+      power: 8,
+      maxPower: 8,
+      might: 12,
+      agility: 16,
+      endurance: 10,
+      intellect: 4,
+      charisma: 2,
+      wisdom: 8,
+      attack: 14,
+      defense: 8,
+      speed: 20,
+      accuracy: 18,
+      evasion: 22,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 3,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(neutralMob);
+  }, []);
+
+  const spawnFriendlyMob = useCallback(() => {
+    const entityId = "friendly_mob_" + Date.now();
+    const friendlyMob: CombatEntity = {
+      id: entityId,
+      name: "Dungeon Guide",
+      type: "friendly",
+      hp: 60,
+      maxHp: 60,
+      energy: 30,
+      maxEnergy: 30,
+      power: 15,
+      maxPower: 15,
+      might: 14,
+      agility: 14,
+      endurance: 12,
+      intellect: 16,
+      charisma: 18,
+      wisdom: 15,
+      attack: 16,
+      defense: 12,
+      speed: 14,
+      accuracy: 16,
+      evasion: 16,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 4,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(friendlyMob);
+  }, []);
 
   // Get cooldown percentage for hotbar display
   const getCooldownPercentage = useCallback((actionId: string): number => {
@@ -648,13 +1001,31 @@ export default function TestCombat() {
               <Sword className="w-5 h-5" />
               Combat System Test
             </CardTitle>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
                 {combatState.isInCombat ? "IN COMBAT" : "READY"}
               </Badge>
               <Button onClick={resetScenario} variant="outline" size="sm">
                 Reset Scenario
               </Button>
+              <Button onClick={() => {/* TODO: Implement freeze/unfreeze logic */}} variant="outline" size="sm" disabled>
+                Freeze NPCs
+              </Button>
+              <Button onClick={spawnToughEnemy} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700 border-red-500 text-white">
+                Spawn Tough Enemy
+              </Button>
+              <Button onClick={spawnEasyEnemy} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700 border-red-500 text-white">
+                Spawn Easy Enemy
+              </Button>
+              <Button onClick={spawnNeutralMob} variant="outline" size="sm" className="bg-yellow-600 hover:bg-yellow-700 border-yellow-500 text-white">
+                Spawn Neutral Mob
+              </Button>
+              <Button onClick={spawnFriendlyMob} variant="default" size="sm" className="bg-green-600 hover:bg-green-700 border-green-500 text-white">
+                Spawn Friendly Mob
+              </Button>
+              <div className="text-xs text-muted-foreground mt-2">
+                Cover: {coverElements.length} elements ({coverElements.filter(c => c.type === "full_wall").length} full, {coverElements.filter(c => c.type === "half_wall").length} half)
+              </div>
             </div>
           </CardHeader>
         </Card>
@@ -670,20 +1041,170 @@ export default function TestCombat() {
               <CardContent>
                 
           <div 
-            className="relative w-full h-96 bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
-            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)' }}
+            className="relative bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden mx-auto"
+            style={{ 
+              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
+              width: 'min(90vw, 90vh, 600px)',
+              height: 'min(90vw, 90vh, 600px)',
+              aspectRatio: '1'
+            }}
                 >
                   {/* Grid overlay */}
                   <div className="absolute inset-0 opacity-10">
-                    {Array.from({ length: 10 }).map((_, i) => (
+                    {Array.from({ length: 11 }).map((_, i) => (
                       <div key={`v-${i}`} className="absolute h-full w-px bg-amber-400" style={{ left: `${i * 10}%` }} />
                     ))}
-                    {Array.from({ length: 10 }).map((_, i) => (
+                    {Array.from({ length: 11 }).map((_, i) => (
                       <div key={`h-${i}`} className="absolute w-full h-px bg-amber-400" style={{ top: `${i * 10}%` }} />
                     ))}
                   </div>
 
 
+
+                  {/* Arena-level Ranged Attack Animations */}
+                  {combatState.entities.map((entity) => {
+                    if (entity.attackAnimation && 
+                        entity.attackAnimation.type === "ranged" && 
+                        entity.attackAnimation.targetPosition &&
+                        Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration) {
+                      
+                      const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
+                      const baseGridBoxSizePx = 40;
+                      const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
+                      const entityFacing = entity.facing || 0;
+                      
+                      // Calculate bow tip position (where arrow starts) - small offset from entity center
+                      const bowTipOffsetX = Math.sin(entityFacing * Math.PI / 180) * 2; // 2% offset for bow tip
+                      const bowTipOffsetY = -Math.cos(entityFacing * Math.PI / 180) * 2;
+                      
+                      const startX = entity.position.x + bowTipOffsetX;
+                      const startY = entity.position.y + bowTipOffsetY;
+                      const endX = entity.attackAnimation.targetPosition.x;
+                      const endY = entity.attackAnimation.targetPosition.y;
+
+                      // Add slight arc to the projectile path
+                      const midProgress = 0.5;
+                      const arcHeight = 3; // 3% arc height for more realistic trajectory
+
+                      let currentX, currentY;
+                      if (progress <= midProgress) {
+                        const t = progress / midProgress;
+                        currentX = startX + (endX - startX) * t * 0.5;
+                        currentY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                      } else {
+                        const t = (progress - midProgress) / (1 - midProgress);
+                        currentX = startX + (endX - startX) * (0.5 + t * 0.5);
+                        currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                      }
+
+                      // Calculate projectile angle based on velocity direction
+                      const nextProgress = Math.min(1, progress + 0.05);
+                      let nextX, nextY;
+                      if (nextProgress <= midProgress) {
+                        const t = nextProgress / midProgress;
+                        nextX = startX + (endX - startX) * t * 0.5;
+                        nextY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                      } else {
+                        const t = (nextProgress - midProgress) / (1 - midProgress);
+                        nextX = startX + (endX - startX) * (0.5 + t * 0.5);
+                        nextY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                      }
+                      const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
+
+                      return (
+                        <div
+                          key={`arrow-${entity.id}`}
+                          className="absolute pointer-events-none z-30"
+                          style={{
+                            left: `${currentX}%`,
+                            top: `${currentY}%`,
+                            transform: "translate(-50%, -50%)",
+                          }}
+                        >
+                          <div
+                            className="w-2 h-6 bg-gradient-to-t from-amber-800 via-yellow-500 to-yellow-200 rounded-full shadow-lg"
+                            style={{ 
+                              transform: `rotate(${angle}deg)`,
+                              filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
+                              opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
+                            }} 
+                          />
+                          {/* Arrow fletching */}
+                          <div
+                            className="absolute w-3 h-2 bg-red-600/60"
+                            style={{
+                              transform: `rotate(${angle}deg) translateY(120%)`,
+                              left: "50%",
+                              top: "50%",
+                              marginLeft: "-6px",
+                              opacity: progress * 0.8,
+                              clipPath: "polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%)",
+                            }}
+                          />
+                          {/* Arrow trail */}
+                          <div
+                            className="absolute w-1 h-3 bg-gradient-to-t from-transparent to-yellow-400/40"
+                            style={{
+                              transform: `rotate(${angle}deg) translateY(150%)`,
+                              left: "50%",
+                              top: "50%",
+                              marginLeft: "-2px",
+                              opacity: progress * 0.5,
+                            }}
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  {/* Cover Elements */}
+                  {coverElements.map((cover) => (
+                    <div
+                      key={cover.id}
+                      className={`absolute ${
+                        cover.type === "full_wall" 
+                          ? "bg-stone-600 border-2 border-stone-500" 
+                          : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                      } rounded-sm shadow-lg`}
+                      style={{
+                        left: `${cover.position.x - cover.width / 2}%`,
+                        top: `${cover.position.y - cover.height / 2}%`,
+                        width: `${cover.width}%`,
+                        height: `${cover.height}%`,
+                        zIndex: cover.type === "full_wall" ? 15 : 10,
+                        transform: `rotate(${cover.facing}deg)`,
+                        transformOrigin: "center",
+                        filter: cover.type === "full_wall" 
+                          ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                          : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
+                      }}
+                      title={`${cover.type === "full_wall" ? "Full Wall" : "Half Wall"} - ${cover.type === "full_wall" ? "Blocks movement and attacks" : "Blocks movement, provides cover"}`}
+                    >
+                      {/* Wall texture */}
+                      <div className="absolute inset-0 opacity-30">
+                        {cover.type === "full_wall" ? (
+                          // Stone brick pattern for full walls
+                          <div className="w-full h-full bg-gradient-to-br from-stone-500 to-stone-700 bg-repeat"
+                               style={{
+                                 backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px),
+                                                  repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)`
+                               }} />
+                        ) : (
+                          // Lighter pattern for half walls
+                          <div className="w-full h-full bg-gradient-to-br from-stone-300 to-stone-500 bg-repeat"
+                               style={{
+                                 backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)`
+                               }} />
+                        )}
+                      </div>
+
+                      {/* Height indicator for half walls */}
+                      {cover.type === "half_wall" && (
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-2 h-1 bg-yellow-400 rounded-full opacity-60" />
+                      )}
+                    </div>
+                  ))}
 
                   {/* Entities */}
                   {combatState.entities.map((entity) => {
@@ -718,7 +1239,7 @@ export default function TestCombat() {
                         className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
                           entity.hp <= 0 
                             ? 'cursor-not-allowed opacity-50' 
-                            : entity.type === "hostile" 
+                            : entity.id !== "player"
                               ? 'cursor-pointer hover:scale-105' 
                               : 'cursor-default'
                         } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
@@ -726,17 +1247,21 @@ export default function TestCombat() {
                           left: `${entity.position.x}%`,
                           top: `${entity.position.y}%`,
                         }}
-                        onClick={() => entity.type === "hostile" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
+                        onClick={() => entity.id !== "player" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
                       >
                         {/* Main entity circle */}
                         <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                           entity.type === "player" 
                             ? "bg-blue-600 border-blue-400" 
+                            : entity.hp <= 0
+                            ? "bg-gray-600 border-gray-500"
                             : entity.type === "hostile"
-                            ? entity.hp <= 0
-                              ? "bg-gray-600 border-gray-500"
-                              : "bg-red-600 border-red-400"
-                            : "bg-green-600 border-green-400"
+                            ? "bg-red-600 border-red-400"
+                            : entity.type === "neutral"
+                            ? "bg-yellow-600 border-yellow-400"
+                            : entity.type === "friendly" || entity.type === "ally"
+                            ? "bg-green-600 border-green-400"
+                            : "bg-gray-600 border-gray-400"
                         }`}>
                           {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
                           {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
@@ -758,7 +1283,11 @@ export default function TestCombat() {
                                       ? "border-b-blue-400" 
                                       : entity.type === "hostile"
                                       ? "border-b-red-400"
-                                      : "border-b-green-400"
+                                      : entity.type === "neutral"
+                                      ? "border-b-yellow-400"
+                                      : entity.type === "friendly" || entity.type === "ally"
+                                      ? "border-b-green-400"
+                                      : "border-b-gray-400"
                                   }`}
                                   style={{
                                     filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
@@ -784,6 +1313,24 @@ export default function TestCombat() {
                           {/* Selection indicator */}
                           {selectedTarget === entity.id && entity.hp > 0 && (
                             <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
+                          )}
+
+                          {/* Threatened indicator - colored ring based on entity type when in range */}
+                          {isInRange && entity.hp > 0 && (
+                            <div 
+                              className={`absolute -inset-3 rounded-full border-2 animate-pulse ${
+                                entity.type === "hostile" 
+                                  ? "border-red-400 shadow-lg shadow-red-400/50" 
+                                  : entity.type === "neutral"
+                                  ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
+                                  : entity.type === "friendly" || entity.type === "ally"
+                                  ? "border-green-400 shadow-lg shadow-green-400/50"
+                                  : "border-red-400 shadow-lg shadow-red-400/50"
+                              }`}
+                              style={{
+                                filter: "drop-shadow(0 0 8px currentColor)",
+                              }}
+                            />
                           )}
 
                           {/* Hit Impact Effect - shows on targets taking damage */}
@@ -812,6 +1359,9 @@ export default function TestCombat() {
                           {/* Attack Animation Effects */}
                           {entity.attackAnimation && Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration && (() => {
                             const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
+                            
+                            // Define base grid box size for all animation types
+                            const baseGridBoxSizePx = 40; // Approximate pixels per grid box
 
                             if (entity.attackAnimation.type === "melee") {
                               // Sword swing animation - 30 degree arc from -15 to +15 degrees
@@ -826,7 +1376,6 @@ export default function TestCombat() {
                               // Calculate blade length based on weapon range
                               // 1 range = 1 grid box = 10% of arena = approximately 40px at typical screen sizes
                               const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
-                              const baseGridBoxSizePx = 40; // Approximate pixels per grid box
                               const bladeLengthPx = Math.max(12, baseGridBoxSizePx * weaponRange); // Minimum 12px, scales with range
                               const bladeWidthPx = Math.max(2, Math.min(4, 2 + weaponRange)); // Width scales too, between 2-4px
                               const trailLengthPx = Math.max(8, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
@@ -887,93 +1436,7 @@ export default function TestCombat() {
                               );
                             }
 
-                            if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
-                              // Arrow/projectile animation originating from bow position
-                              const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
-                              const bowLength = Math.max(12, baseGridBoxSizePx * weaponRange * 0.6); // Bow is 60% of weapon range
-                              const entityFacing = entity.facing || 0;
-                              
-                              // Calculate bow tip position (where arrow starts)
-                              const bowTipOffsetX = Math.sin(entityFacing * Math.PI / 180) * (bowLength / 8); // Convert to percentage
-                              const bowTipOffsetY = -Math.cos(entityFacing * Math.PI / 180) * (bowLength / 8);
-                              
-                              const startX = entity.position.x + bowTipOffsetX;
-                              const startY = entity.position.y + bowTipOffsetY;
-                              const endX = entity.attackAnimation.targetPosition.x;
-                              const endY = entity.attackAnimation.targetPosition.y;
-
-                              // Add slight arc to the projectile path
-                              const midProgress = 0.5;
-                              const arcHeight = 3; // 3% arc height for more realistic trajectory
-
-                              let currentX, currentY;
-                              if (progress <= midProgress) {
-                                const t = progress / midProgress;
-                                currentX = startX + (endX - startX) * t * 0.5;
-                                currentY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
-                              } else {
-                                const t = (progress - midProgress) / (1 - midProgress);
-                                currentX = startX + (endX - startX) * (0.5 + t * 0.5);
-                                currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
-                              }
-
-                              // Calculate projectile angle based on velocity direction
-                              const nextProgress = Math.min(1, progress + 0.05);
-                              let nextX, nextY;
-                              if (nextProgress <= midProgress) {
-                                const t = nextProgress / midProgress;
-                                nextX = startX + (endX - startX) * t * 0.5;
-                                nextY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
-                              } else {
-                                const t = (nextProgress - midProgress) / (1 - midProgress);
-                                nextX = startX + (endX - startX) * (0.5 + t * 0.5);
-                                nextY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
-                              }
-                              const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
-
-                              return (
-                                <div
-                                  className="absolute pointer-events-none z-30"
-                                  style={{
-                                    left: `${currentX}%`,
-                                    top: `${currentY}%`,
-                                    transform: "translate(-50%, -50%)",
-                                  }}
-                                >
-                                  <div
-                                    className="w-2 h-6 bg-gradient-to-t from-amber-800 via-yellow-500 to-yellow-200 rounded-full shadow-lg"
-                                    style={{ 
-                                      transform: `rotate(${angle}deg)`,
-                                      filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
-                                      opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
-                                    }} 
-                                  />
-                                  {/* Arrow fletching */}
-                                  <div
-                                    className="absolute w-3 h-2 bg-red-600/60"
-                                    style={{
-                                      transform: `rotate(${angle}deg) translateY(120%)`,
-                                      left: "50%",
-                                      top: "50%",
-                                      marginLeft: "-6px",
-                                      opacity: progress * 0.8,
-                                      clipPath: "polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%)",
-                                    }}
-                                  />
-                                  {/* Arrow trail */}
-                                  <div
-                                    className="absolute w-1 h-3 bg-gradient-to-t from-transparent to-yellow-400/40"
-                                    style={{
-                                      transform: `rotate(${angle}deg) translateY(150%)`,
-                                      left: "50%",
-                                      top: "50%",
-                                      marginLeft: "-2px",
-                                      opacity: progress * 0.5,
-                                    }}
-                                  />
-                                </div>
-                              );
-                            }
+                            
 
                             if (entity.attackAnimation.type === "magic") {
                               // Enhanced magic spell animation scaled to weapon range
@@ -1245,6 +1708,12 @@ export default function TestCombat() {
                   <div>Hold Tab: Clear Target</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
                   {activeActionMode && <div className="text-green-400">Mode: {activeActionMode.actionName}</div>}
+                  <div className="mt-2 text-xs text-amber-400">
+                    <div>Cover System:</div>
+                    <div>• Full walls block movement & attacks</div>
+                    <div>• Half walls block movement, provide cover</div>
+                    <div>• Stay near half walls for protection</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

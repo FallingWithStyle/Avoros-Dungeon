@@ -222,8 +222,59 @@ export function DatabaseSizeAnalyzer() {
                       </div>
                     )}
                     {analysis.tableSizes.find(t => t.tablename === 'tactical_positions' && t.size_bytes > 1024 * 1024) && (
-                      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded">
-                        🎯 <strong>Tactical positions is large:</strong> Consider clearing old tactical data
+                      <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded">
+                        🚨 <strong>Tactical positions is MASSIVE ({analysis.tableSizes.find(t => t.tablename === 'tactical_positions')?.size}):</strong> 
+                        <br />This table stores redundant mob data. Mobs should only be in the mobs table.
+                        <br />
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/debug/cleanup-tactical-positions', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                              });
+                              
+                              const responseText = await response.text();
+                              
+                              if (!response.ok) {
+                                console.error('Cleanup failed with status', response.status, ':', responseText);
+                                alert('Cleanup failed with status ' + response.status + ': ' + responseText.substring(0, 200));
+                                return;
+                              }
+                              
+                              // Check if response is HTML (error page)
+                              if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+                                console.error('Received HTML response instead of JSON:', responseText.substring(0, 500));
+                                alert('Server returned an error page instead of JSON. Check console for details.');
+                                return;
+                              }
+                              
+                              let result;
+                              try {
+                                result = JSON.parse(responseText);
+                              } catch (parseError) {
+                                console.error('Failed to parse JSON response:', responseText);
+                                alert('Invalid JSON response from server: ' + responseText.substring(0, 200));
+                                return;
+                              }
+                              
+                              if (result.success) {
+                                alert('Cleanup completed! Deleted ' + result.deletedCount + ' records. ' + result.details.spaceSaved);
+                                // Refresh the analysis
+                                window.location.reload();
+                              } else {
+                                alert('Cleanup failed: ' + result.error);
+                              }
+                            } catch (error) {
+                              console.error('Network or other error during cleanup:', error);
+                              alert('Error running cleanup: ' + error);
+                            }
+                          }}
+                          className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                        >
+                          🧹 Run Tactical Cleanup Now
+                        </button>
                       </div>
                     )}
                     <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded">
