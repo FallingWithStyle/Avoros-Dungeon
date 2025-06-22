@@ -633,12 +633,22 @@ export default function TestCombat() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Current Weapon */}
-                <div>
-                  <div className="text-sm font-medium text-amber-300 mb-2">Equipped Weapon:</div>
+                {/* Current Weapon Display & Cycle Button */}
+                <button
+                  onClick={() => {
+                    const currentIndex = equippedWeapon ? availableWeapons.findIndex(w => w.id === equippedWeapon.id) : -1;
+                    const nextIndex = (currentIndex + 1) % availableWeapons.length;
+                    handleWeaponChange(availableWeapons[nextIndex]);
+                  }}
+                  className="w-full p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm hover:bg-blue-800/40 transition-colors"
+                  title="Click to cycle to next weapon"
+                >
                   {equippedWeapon ? (
-                    <div className="p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg backdrop-blur-sm">
-                      <div className="font-medium text-blue-200">{equippedWeapon.name}</div>
+                    <div>
+                      <div className="font-medium text-blue-200 flex items-center justify-between">
+                        {equippedWeapon.name}
+                        <span className="text-xs text-blue-400">Click to cycle</span>
+                      </div>
                       <div className="text-sm text-blue-300">{equippedWeapon.description}</div>
                       <div className="text-xs text-blue-400 mt-1">
                         Range: {getWeaponRange(equippedWeapon)} | 
@@ -647,34 +657,19 @@ export default function TestCombat() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 bg-gray-800/30 border border-gray-600/30 rounded-lg backdrop-blur-sm">
-                      <div className="text-gray-300">Unarmed (Fists)</div>
+                    <div>
+                      <div className="text-gray-300 flex items-center justify-between">
+                        Unarmed (Fists)
+                        <span className="text-xs text-gray-400">Click to equip weapon</span>
+                      </div>
                       <div className="text-xs text-gray-400">Range: 1 | Base damage</div>
                     </div>
                   )}
-                </div>
+                </button>
 
-                {/* Available Weapons */}
-                <div>
-                  <div className="text-sm font-medium text-amber-300 mb-2">Available Weapons:</div>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
-                    {availableWeapons.map((weapon) => (
-                      <button
-                        key={weapon.id}
-                        onClick={() => handleWeaponChange(weapon)}
-                        className={`w-full p-2 text-left border rounded-lg transition-colors backdrop-blur-sm ${
-                          equippedWeapon?.id === weapon.id
-                            ? "bg-blue-800/40 border-blue-500/40 text-blue-200"
-                            : "bg-gray-800/20 border-gray-600/30 text-gray-300 hover:bg-gray-700/30 hover:border-gray-500/40"
-                        }`}
-                      >
-                        <div className="font-medium text-sm">{weapon.name}</div>
-                        <div className="text-xs text-gray-400">
-                          Range: {getWeaponRange(weapon)} | +{weapon.mightBonus || 0} dmg
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                {/* Weapon Count Indicator */}
+                <div className="text-xs text-center text-amber-400">
+                  Weapon {equippedWeapon ? availableWeapons.findIndex(w => w.id === equippedWeapon.id) + 1 : 0} of {availableWeapons.length}
                 </div>
               </CardContent>
             </Card>
