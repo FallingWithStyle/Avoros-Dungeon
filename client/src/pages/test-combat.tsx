@@ -428,7 +428,7 @@ export default function TestCombat() {
         description: "A sturdy iron blade",
         type: "weapon",
         damageAttribute: "might",
-        range: 1,
+        range: 1.5,
         mightBonus: 5
       },
       {
@@ -446,7 +446,7 @@ export default function TestCombat() {
         description: "A quick, precise blade for close combat",
         type: "weapon",
         damageAttribute: "agility",
-        range: 0.5,
+        range: 1,
         agilityBonus: 4
       },
       {
