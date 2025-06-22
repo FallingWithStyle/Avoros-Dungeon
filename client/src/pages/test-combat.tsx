@@ -787,16 +787,16 @@ export default function TestCombat() {
               <Button onClick={() => {/* TODO: Implement freeze/unfreeze logic */}} variant="outline" size="sm" disabled>
                 Freeze NPCs
               </Button>
-              <Button onClick={spawnToughEnemy} variant="destructive" size="sm">
+              <Button onClick={spawnToughEnemy} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700 border-red-500 text-white">
                 Spawn Tough Enemy
               </Button>
-              <Button onClick={spawnEasyEnemy} variant="secondary" size="sm">
+              <Button onClick={spawnEasyEnemy} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700 border-red-500 text-white">
                 Spawn Easy Enemy
               </Button>
-              <Button onClick={spawnNeutralMob} variant="outline" size="sm">
+              <Button onClick={spawnNeutralMob} variant="outline" size="sm" className="bg-yellow-600 hover:bg-yellow-700 border-yellow-500 text-white">
                 Spawn Neutral Mob
               </Button>
-              <Button onClick={spawnFriendlyMob} variant="default" size="sm">
+              <Button onClick={spawnFriendlyMob} variant="default" size="sm" className="bg-green-600 hover:bg-green-700 border-green-500 text-white">
                 Spawn Friendly Mob
               </Button>
             </div>
@@ -973,11 +973,15 @@ export default function TestCombat() {
                         <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                           entity.type === "player" 
                             ? "bg-blue-600 border-blue-400" 
+                            : entity.hp <= 0
+                            ? "bg-gray-600 border-gray-500"
                             : entity.type === "hostile"
-                            ? entity.hp <= 0
-                              ? "bg-gray-600 border-gray-500"
-                              : "bg-red-600 border-red-400"
-                            : "bg-green-600 border-green-400"
+                            ? "bg-red-600 border-red-400"
+                            : entity.type === "neutral"
+                            ? "bg-yellow-600 border-yellow-400"
+                            : entity.type === "friendly" || entity.type === "ally"
+                            ? "bg-green-600 border-green-400"
+                            : "bg-gray-600 border-gray-400"
                         }`}>
                           {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
                           {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
@@ -999,7 +1003,11 @@ export default function TestCombat() {
                                       ? "border-b-blue-400" 
                                       : entity.type === "hostile"
                                       ? "border-b-red-400"
-                                      : "border-b-green-400"
+                                      : entity.type === "neutral"
+                                      ? "border-b-yellow-400"
+                                      : entity.type === "friendly" || entity.type === "ally"
+                                      ? "border-b-green-400"
+                                      : "border-b-gray-400"
                                   }`}
                                   style={{
                                     filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
