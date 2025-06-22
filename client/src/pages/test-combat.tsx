@@ -104,7 +104,8 @@ export default function TestCombat() {
       }
     }
     // If target is selected, facing will be handled by the targeting effect
-  }, [combatState.entities]);
+    // Target selection is preserved during movement
+  }, [combatState.entities, selectedTarget]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -193,9 +194,13 @@ export default function TestCombat() {
     }
   }, [selectedTarget, manualRotation, combatState.entities]); // Include full entities for proper change detection
 
+  // State for TAB hold detection
+  const [isTabHeld, setIsTabHeld] = useState(false);
+  const [tabHoldTimer, setTabHoldTimer] = useState<NodeJS.Timeout | null>(null);
+
   // Keyboard hotkey handler
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
 
       // Hotkey shortcuts
@@ -222,7 +227,36 @@ export default function TestCombat() {
           break;
         case 'tab':
           event.preventDefault();
-          // Cycle through living targets only
+          
+          // If TAB is already being held, ignore repeated keydown events
+          if (isTabHeld) return;
+          
+          setIsTabHeld(true);
+          
+          // Set a timer - if TAB is held for more than 500ms, clear target
+          const timer = setTimeout(() => {
+            setSelectedTarget(null);
+          }, 500);
+          setTabHoldTimer(timer);
+          
+          break;
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      
+      if (key === 'tab') {
+        event.preventDefault();
+        
+        // Clear the hold timer
+        if (tabHoldTimer) {
+          clearTimeout(tabHoldTimer);
+          setTabHoldTimer(null);
+        }
+        
+        // If TAB was released quickly (not held), cycle through targets
+        if (isTabHeld) {
           const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
           if (livingEnemies.length > 0) {
             const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
@@ -232,13 +266,22 @@ export default function TestCombat() {
             // Clear selection if no living enemies
             setSelectedTarget(null);
           }
-          break;
+        }
+        
+        setIsTabHeld(false);
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation]);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      if (tabHoldTimer) {
+        clearTimeout(tabHoldTimer);
+      }
+    };
+  }, [handleHotbarAction, selectedTarget, combatState, handleManualRotation, isTabHeld, tabHoldTimer]);
 
   // Get weapon range from equipment
   const getWeaponRange = (weapon: Equipment): number => {
@@ -859,6 +902,7 @@ export default function TestCombat() {
                   <div>QE: Rotate Left/Right</div>
                   <div>1-3: Hotbar Actions</div>
                   <div>Tab: Cycle Targets</div>
+                  <div>Hold Tab: Clear Target</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
                   {activeActionMode && <div className="text-green-400">Mode: {activeActionMode.actionName}</div>}
                 </div>
