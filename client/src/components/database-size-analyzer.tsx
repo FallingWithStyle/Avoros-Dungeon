@@ -258,7 +258,7 @@ export function DatabaseSizeAnalyzer() {
                             } catch (error) {
                               alert('Error running cleanup: ' + error);
                             }
-                          }
+                          }}
                           className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                         >
                           🧹 Run Tactical Cleanup Now
