@@ -197,6 +197,7 @@ export default function TestCombat() {
   // State for TAB hold detection
   const [isTabHeld, setIsTabHeld] = useState(false);
   const [tabHoldTimer, setTabHoldTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tabTimerExpired, setTabTimerExpired] = useState(false);
 
   // Keyboard hotkey handler
   useEffect(() => {
@@ -232,10 +233,12 @@ export default function TestCombat() {
           if (isTabHeld) return;
           
           setIsTabHeld(true);
+          setTabTimerExpired(false);
           
           // Set a timer - if TAB is held for more than 500ms, clear target
           const timer = setTimeout(() => {
             setSelectedTarget(null);
+            setTabTimerExpired(true);
           }, 500);
           setTabHoldTimer(timer);
           
@@ -250,7 +253,7 @@ export default function TestCombat() {
         event.preventDefault();
         
         // Check if the timer is still running (TAB was released quickly)
-        const wasQuickRelease = tabHoldTimer !== null;
+        const wasQuickRelease = tabHoldTimer !== null && !tabTimerExpired;
         
         // Clear the hold timer
         if (tabHoldTimer) {
@@ -258,7 +261,7 @@ export default function TestCombat() {
           setTabHoldTimer(null);
         }
         
-        // Only cycle through targets if TAB was released quickly (timer was still running)
+        // Only cycle through targets if TAB was released quickly (timer didn't expire)
         if (isTabHeld && wasQuickRelease) {
           const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
           if (livingEnemies.length > 0) {
@@ -273,6 +276,7 @@ export default function TestCombat() {
         // If TAB was held (timer expired and target was already cleared), don't cycle
         
         setIsTabHeld(false);
+        setTabTimerExpired(false);
       }
     };
 
