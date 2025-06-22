@@ -189,12 +189,12 @@ export default function TestCombat() {
 
         const newFacing = Math.round(angle);
         const currentFacing = player.facing || 0;
-        
+
         // Only update if facing has actually changed to avoid unnecessary updates
         if (Math.abs(newFacing - currentFacing) > 1) {
           // Update the combat system and force a state refresh
           combatSystem.updateEntity("player", { facing: newFacing });
-          
+
           // Force an immediate state update to ensure the UI reflects the change
           setCombatState(combatSystem.getState());
         }
@@ -244,39 +244,39 @@ export default function TestCombat() {
           break;
         case 'tab':
           event.preventDefault();
-          
+
           // If TAB is already being held, ignore repeated keydown events
           if (isTabHeld) return;
-          
+
           setIsTabHeld(true);
           setTabTimerExpired(false);
-          
+
           // Set a timer - if TAB is held for more than 500ms, clear target
           const timer = setTimeout(() => {
             setSelectedTarget(null);
             setTabTimerExpired(true);
           }, 500);
           setTabHoldTimer(timer);
-          
+
           break;
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      
+
       if (key === 'tab') {
         event.preventDefault();
-        
+
         // Check if the timer is still running (TAB was released quickly)
         const wasQuickRelease = tabHoldTimer !== null && !tabTimerExpired;
-        
+
         // Clear the hold timer
         if (tabHoldTimer) {
           clearTimeout(tabHoldTimer);
           setTabHoldTimer(null);
         }
-        
+
         // Only cycle through targets if TAB was released quickly (timer didn't expire)
         if (isTabHeld && wasQuickRelease) {
           const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
@@ -290,7 +290,7 @@ export default function TestCombat() {
           }
         }
         // If TAB was held (timer expired and target was already cleared), don't cycle
-        
+
         setIsTabHeld(false);
         setTabTimerExpired(false);
       }
@@ -357,7 +357,7 @@ export default function TestCombat() {
 
   const handleWeaponChange = useCallback((weapon: Equipment) => {
     setEquippedWeapon(weapon);
-    
+
     // Update the player entity with the new weapon
     const currentState = combatSystem.getState();
     const player = currentState.entities.find(e => e.id === "player");
@@ -393,7 +393,7 @@ export default function TestCombat() {
 
       updateTimeout = setTimeout(() => {
         setCombatState(state);
-        
+
         // Clear selectedTarget if the currently selected entity is dead or no longer exists
         if (selectedTarget) {
           const selectedEntity = state.entities.find(e => e.id === selectedTarget);
@@ -401,7 +401,7 @@ export default function TestCombat() {
             setSelectedTarget(null);
           }
         }
-        
+
         updateTimeout = null;
       }, 8); // ~120fps throttling for better responsiveness
     });
@@ -623,7 +623,7 @@ export default function TestCombat() {
           const timeSince = now - lastUsed;
           return timeSince < 5000; // Check for any cooldown within 5 seconds
         });
-        
+
         if (hasActiveCooldowns) {
           forceUpdate({});
         }
@@ -668,9 +668,10 @@ export default function TestCombat() {
                 <CardTitle className="text-amber-300">Combat Arena</CardTitle>
               </CardHeader>
               <CardContent>
-                <div 
-                  className="relative w-full h-96 bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
-                  style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)' }}
+                
+          <div 
+            className="relative w-full h-96 bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
+            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)' }}
                 >
                   {/* Grid overlay */}
                   <div className="absolute inset-0 opacity-10">
@@ -811,7 +812,7 @@ export default function TestCombat() {
                           {/* Attack Animation Effects */}
                           {entity.attackAnimation && Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration && (() => {
                             const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
-                            
+
                             if (entity.attackAnimation.type === "melee") {
                               // Sword swing animation - 30 degree arc from -15 to +15 degrees
                               // Swing happens 3x faster (in first 1/3 of duration), then holds at end position
@@ -821,7 +822,7 @@ export default function TestCombat() {
                               const currentSwingAngle = startAngle + (swingProgress * (endAngle - startAngle)); // -15 to +15 degrees
                               const entityFacing = entity.facing || 0;
                               const absoluteAngle = entityFacing + currentSwingAngle;
-                              
+
                               // Calculate blade length based on weapon range
                               // 1 range = 1 grid box = 10% of arena = approximately 40px at typical screen sizes
                               const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
@@ -829,7 +830,7 @@ export default function TestCombat() {
                               const bladeLengthPx = Math.max(12, baseGridBoxSizePx * weaponRange); // Minimum 12px, scales with range
                               const bladeWidthPx = Math.max(2, Math.min(4, 2 + weaponRange)); // Width scales too, between 2-4px
                               const trailLengthPx = Math.max(8, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
-                              
+
                               return (
                                 <div
                                   className="absolute pointer-events-none z-20"
@@ -855,7 +856,7 @@ export default function TestCombat() {
                                       opacity: Math.sin(swingProgress * Math.PI) * 0.7 + 0.3,
                                     }}
                                   />
-                                  
+
                                   {/* Sword hilt - slightly larger for longer weapons */}
                                   <div
                                     className="absolute bg-amber-700 rounded origin-bottom"
@@ -869,7 +870,7 @@ export default function TestCombat() {
                                       marginBottom: "-1px",
                                     }}
                                   />
-                                  
+
                                   {/* Motion blur trail - scales with blade length */}
                                   <div
                                     className="absolute w-1 bg-gradient-to-t from-transparent via-white/30 to-transparent origin-bottom"
@@ -885,18 +886,18 @@ export default function TestCombat() {
                                 </div>
                               );
                             }
-                            
+
                             if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
                               // Arrow/projectile animation with better positioning
                               const startX = entity.position.x;
                               const startY = entity.position.y;
                               const endX = entity.attackAnimation.targetPosition.x;
                               const endY = entity.attackAnimation.targetPosition.y;
-                              
+
                               // Add slight arc to the projectile path
                               const midProgress = 0.5;
                               const arcHeight = 5; // 5% arc height
-                              
+
                               let currentX, currentY;
                               if (progress <= midProgress) {
                                 const t = progress / midProgress;
@@ -907,13 +908,13 @@ export default function TestCombat() {
                                 currentX = startX + (endX - startX) * (0.5 + t * 0.5);
                                 currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
                               }
-                              
+
                               // Calculate projectile angle based on velocity direction
                               const nextProgress = Math.min(1, progress + 0.05);
                               const nextX = startX + (endX - startX) * nextProgress;
                               const nextY = startY + (endY - startY) * nextProgress;
                               const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
-                              
+
                               return (
                                 <div
                                   className="absolute pointer-events-none z-30"
@@ -945,7 +946,7 @@ export default function TestCombat() {
                                 </div>
                               );
                             }
-                            
+
                             if (entity.attackAnimation.type === "magic") {
                               // Enhanced magic spell animation
                               return (
@@ -975,7 +976,7 @@ export default function TestCombat() {
                                       />
                                     );
                                   })}
-                                  
+
                                   {/* Central magical energy */}
                                   <div
                                     className="absolute inset-3 rounded-full bg-gradient-radial from-purple-200 via-blue-300 to-transparent"
@@ -985,14 +986,14 @@ export default function TestCombat() {
                                       transform: `scale(${0.5 + Math.sin(progress * Math.PI * 4) * 0.3})`,
                                     }}
                                   />
-                                  
+
                                   {/* Sparkle effects */}
                                   {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, index) => {
                                     const sparkleProgress = (progress + index * 0.1) % 1;
                                     const distance = 20 + sparkleProgress * 15;
                                     const x = Math.cos(angle * Math.PI / 180) * distance;
                                     const y = Math.sin(angle * Math.PI / 180) * distance;
-                                    
+
                                     return (
                                       <div
                                         key={index}
@@ -1010,7 +1011,7 @@ export default function TestCombat() {
                                 </div>
                               );
                             }
-                            
+
                             return null;
                           })()}
                         </div>
