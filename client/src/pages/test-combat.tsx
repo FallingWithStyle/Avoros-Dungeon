@@ -83,7 +83,17 @@ export default function TestCombat() {
     const newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     const newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
+    // Calculate facing direction based on movement
+    // Convert movement vector to degrees (0° = North, positive clockwise)
+    let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+    if (facing < 0) {
+      facing += 360;
+    }
+    const newFacing = Math.round(facing);
+
+    // Update position and facing
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
+    combatSystem.updateEntity("player", { facing: newFacing });
   }, [combatState]);
 
   // Enable keyboard movement
@@ -128,9 +138,9 @@ export default function TestCombat() {
     }, 200);
   }, [combatState]);
 
-  // Auto-target facing when target changes
+  // Auto-target facing when target changes (only if not manually rotating)
   useEffect(() => {
-    if (!selectedTarget) return;
+    if (!selectedTarget || manualRotation) return;
 
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
@@ -143,7 +153,7 @@ export default function TestCombat() {
       if (dx !== 0 || dy !== 0) {
         // Calculate angle in degrees (0° = North, positive clockwise)
         // For screen coordinates where Y increases downward
-        let angle = Math.atan2(dx, dy) * (180 / Math.PI);
+        let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
 
         // Normalize angle to 0-360
         if (angle < 0) {
@@ -157,7 +167,7 @@ export default function TestCombat() {
         }
       }
     }
-  }, [selectedTarget]); // Only depend on selectedTarget to prevent infinite loop
+  }, [selectedTarget, manualRotation]); // Also depend on manualRotation to prevent conflicts
 
   // Keyboard hotkey handler
   useEffect(() => {
