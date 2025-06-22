@@ -233,6 +233,20 @@ export function DatabaseSizeAnalyzer() {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                               });
+                              
+                              if (!response.ok) {
+                                const errorText = await response.text();
+                                alert('Cleanup failed with status ' + response.status + ': ' + errorText.substring(0, 200));
+                                return;
+                              }
+                              
+                              const contentType = response.headers.get('content-type');
+                              if (!contentType || !contentType.includes('application/json')) {
+                                const responseText = await response.text();
+                                alert('Unexpected response format: ' + responseText.substring(0, 200));
+                                return;
+                              }
+                              
                               const result = await response.json();
                               if (result.success) {
                                 alert('Cleanup completed! Deleted ' + result.deletedCount + ' records. ' + result.details.spaceSaved);
@@ -244,7 +258,7 @@ export function DatabaseSizeAnalyzer() {
                             } catch (error) {
                               alert('Error running cleanup: ' + error);
                             }
-                          }}
+                          }
                           className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                         >
                           🧹 Run Tactical Cleanup Now

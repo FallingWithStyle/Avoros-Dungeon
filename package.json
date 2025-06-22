@@ -25,7 +25,8 @@
     "test:analyze": "tsx scripts/check-test-coverage.ts",
     "test:storage": "jest server/storage/__tests__",
     "test:storage:watch": "jest server/storage/__tests__ --watch",
-    "test:storage:coverage": "jest server/storage/__tests__ --coverage"
+    "test:storage:coverage": "jest server/storage/__tests__ --coverage",
+    "cleanup:tactical": "tsx scripts/cleanup-tactical-positions.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
