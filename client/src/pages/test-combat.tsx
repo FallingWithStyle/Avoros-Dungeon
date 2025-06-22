@@ -310,8 +310,8 @@ export default function TestCombat() {
     });
   }, []);
 
+  // Subscribe to combat system updates
   useEffect(() => {
-    // Subscribe to combat system updates with throttling
     let updateTimeout: NodeJS.Timeout | null = null;
 
     const unsubscribe = combatSystem.subscribe((state) => {
@@ -326,15 +326,17 @@ export default function TestCombat() {
       }, 8); // ~120fps throttling for better responsiveness
     });
 
-    // Initialize test scenario
-    initializeTestScenario();
-
     return () => {
       if (updateTimeout) {
         clearTimeout(updateTimeout);
       }
       unsubscribe();
     };
+  }, []);
+
+  // Initialize test scenario only once
+  useEffect(() => {
+    initializeTestScenario();
   }, []);
 
   // Load mock weapons for testing
