@@ -255,6 +255,21 @@ export class CombatSystem {
     const rangeInGridUnits = weaponRange * 10; // Convert to grid units (1 range = 10 grid units)
     const weaponName = weapon ? weapon.name : "Fists";
 
+    // Determine attack animation type based on equipped weapon
+    let animationType: "melee" | "ranged" | "magic" = "melee";
+    if (attacker.equippedWeapon) {
+      const weaponName = attacker.equippedWeapon.name.toLowerCase();
+      const weaponType = attacker.equippedWeapon.weapon_type?.toLowerCase() || "";
+      
+      if (weaponName.includes("bow") || weaponType.includes("bow") || weaponName.includes("crossbow")) {
+        animationType = "ranged";
+      } else if (weaponName.includes("staff") || weaponType.includes("staff") || 
+                 weaponName.includes("wand") || weaponName.includes("wizard") || 
+                 attacker.equippedWeapon.damageAttribute === "intellect") {
+        animationType = "magic";
+      }
+    }
+
     // Find all potential targets in range
     let primaryTarget: CombatEntity | undefined;
     let allTargetsInRange: CombatEntity[] = [];
@@ -325,21 +340,6 @@ export class CombatSystem {
 
       allTargetsInRange = hostileEntitiesInRange;
       primaryTarget = hostileEntitiesInRange[0]; // Use first target for animation positioning
-    }
-
-    // Determine attack animation type based on equipped weapon
-    let animationType: "melee" | "ranged" | "magic" = "melee";
-    if (attacker.equippedWeapon) {
-      const weaponName = attacker.equippedWeapon.name.toLowerCase();
-      const weaponType = attacker.equippedWeapon.weapon_type?.toLowerCase() || "";
-      
-      if (weaponName.includes("bow") || weaponType.includes("bow") || weaponName.includes("crossbow")) {
-        animationType = "ranged";
-      } else if (weaponName.includes("staff") || weaponType.includes("staff") || 
-                 weaponName.includes("wand") || weaponName.includes("wizard") || 
-                 attacker.equippedWeapon.damageAttribute === "intellect") {
-        animationType = "magic";
-      }
     }
 
     // Add attack animation to attacker (using primary target for positioning)
