@@ -287,7 +287,20 @@ export default function TestCombat() {
 
   const handleWeaponChange = useCallback((weapon: Equipment) => {
     setEquippedWeapon(weapon);
-  }, []);
+    
+    // Update the player entity with the new weapon
+    const player = combatState.entities.find(e => e.id === "player");
+    if (player) {
+      const weaponAttack = weapon ? 
+        (weapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
+        0; // Unarmed
+
+      combatSystem.updateEntity("player", {
+        attack: 18 + weaponAttack,
+        equippedWeapon: weapon
+      });
+    }
+  }, [combatState.entities]);
 
   const handleAttackMode = useCallback(() => {
     setActiveActionMode({
@@ -358,8 +371,22 @@ export default function TestCombat() {
 
     setAvailableWeapons(mockWeapons);
     // Auto-equip the first weapon for testing
-    setEquippedWeapon(mockWeapons[0]);
-  }, []);
+    const firstWeapon = mockWeapons[0];
+    setEquippedWeapon(firstWeapon);
+
+    // Update player entity if it exists
+    const player = combatState.entities.find(e => e.id === "player");
+    if (player) {
+      const weaponAttack = firstWeapon ? 
+        (firstWeapon.mightBonus || 0) + 5 : 
+        0;
+
+      combatSystem.updateEntity("player", {
+        attack: 18 + weaponAttack,
+        equippedWeapon: firstWeapon
+      });
+    }
+  }, [combatState.entities]);
 
   const initializeTestScenario = () => {
     // Clear existing entities
@@ -367,9 +394,12 @@ export default function TestCombat() {
       combatSystem.removeEntity(entity.id);
     });
 
+    // Get current equipped weapon (will be set after useEffect runs)
+    const currentWeapon = equippedWeapon || availableWeapons[0] || null;
+
     // Calculate weapon bonuses for player
-    const weaponAttack = equippedWeapon ? 
-      (equippedWeapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
+    const weaponAttack = currentWeapon ? 
+      (currentWeapon.mightBonus || 0) + 5 : // Base weapon damage + bonus
       0; // Unarmed
 
     // Create player entity
@@ -401,7 +431,7 @@ export default function TestCombat() {
       isSelected: false,
       isAlive: true,
       cooldowns: {},
-      equippedWeapon: equippedWeapon
+      equippedWeapon: currentWeapon
     };
 
     combatSystem.addEntity(player);
