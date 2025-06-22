@@ -222,12 +222,15 @@ export default function TestCombat() {
           break;
         case 'tab':
           event.preventDefault();
-          // Cycle through targets
-          const enemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
-          if (enemies.length > 0) {
-            const currentIndex = enemies.findIndex(e => e.id === selectedTarget);
-            const nextIndex = (currentIndex + 1) % enemies.length;
-            setSelectedTarget(enemies[nextIndex].id);
+          // Cycle through living targets only
+          const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
+          if (livingEnemies.length > 0) {
+            const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
+            const nextIndex = (currentIndex + 1) % livingEnemies.length;
+            setSelectedTarget(livingEnemies[nextIndex].id);
+          } else {
+            // Clear selection if no living enemies
+            setSelectedTarget(null);
           }
           break;
       }
@@ -596,31 +599,26 @@ export default function TestCombat() {
                     return (
                       <div
                         key={entity.id}
-                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
-                          selectedTarget === entity.id ? 'scale-110 z-10' : 'hover:scale-105'
-                        }`}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
+                          entity.hp <= 0 
+                            ? 'cursor-not-allowed opacity-50' 
+                            : entity.type === "hostile" 
+                              ? 'cursor-pointer hover:scale-105' 
+                              : 'cursor-default'
+                        } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
                         style={{
                           left: `${entity.position.x}%`,
                           top: `${entity.position.y}%`,
                         }}
-                        onClick={() => entity.type === "hostile" ? setSelectedTarget(entity.id) : null}
+                        onClick={() => entity.type === "hostile" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
                       >
-                        {/* Range indicator ring - only show when in range */}
-                        {entity.id !== "player" && isInRange && (
-                          <div className={`absolute -inset-2 rounded-full border-2 ${friendlinessColor} shadow-lg transition-all duration-300`} style={{
-                            boxShadow: `0 0 10px ${friendlinessColor.includes('red') ? 'rgba(239, 68, 68, 0.5)' : 
-                                                    friendlinessColor.includes('yellow') ? 'rgba(245, 158, 11, 0.5)' : 
-                                                    'rgba(34, 197, 94, 0.5)'}`
-                          }} />
-                        )}
-
                         {/* Main entity circle */}
                         <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                           entity.type === "player" 
                             ? "bg-blue-600 border-blue-400" 
                             : entity.type === "hostile"
-                            ? isInRange 
-                              ? "bg-red-600 border-green-400 shadow-lg shadow-green-400/30" 
+                            ? entity.hp <= 0
+                              ? "bg-gray-600 border-gray-500"
                               : "bg-red-600 border-red-400"
                             : "bg-green-600 border-green-400"
                         }`}>
@@ -639,6 +637,7 @@ export default function TestCombat() {
                               <div className="w-full h-full flex items-start justify-center">
                                 <div
                                   className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                                    entity.hp <= 0 ? "border-b-gray-500" :
                                     entity.type === "player" 
                                       ? "border-b-blue-400" 
                                       : entity.type === "hostile"
@@ -658,6 +657,7 @@ export default function TestCombat() {
                           <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
                             <div 
                               className={`h-full rounded transition-all duration-300 ${
+                                entity.hp <= 0 ? "bg-gray-500" :
                                 entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
                                 entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
                               }`}
@@ -666,14 +666,8 @@ export default function TestCombat() {
                           </div>
 
                           {/* Selection indicator */}
-                          {selectedTarget === entity.id && (
+                          {selectedTarget === entity.id && entity.hp > 0 && (
                             <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
-                          )}
-
-                          {/* Range status indicator for enemies */}
-                          {entity.type === "hostile" && isInRange && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border border-green-200 animate-pulse" 
-                                 title="In weapon range" />
                           )}
                         </div>
                       </div>
