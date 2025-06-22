@@ -256,6 +256,27 @@ export class CombatSystem {
 
     if (!target || target.hp <= 0) return false;
 
+    // Check weapon range
+    const weapon = (attacker as any).equippedWeapon;
+    const weaponRange = weapon ? (weapon.range || weapon.baseRange || 1) : 1; // Unarmed range = 1
+    const rangeInGridUnits = weaponRange * 10; // Convert to grid units (1 range = 10 grid units)
+    
+    const distance = this.calculateDistance(attacker.position, target.position);
+    
+    if (distance > rangeInGridUnits) {
+      // Target is out of range
+      this.addActionLog({
+        entityId: attackerId,
+        entityName: attacker.name,
+        action: "Attack Failed",
+        target: target.name,
+        weapon: weapon ? weapon.name : "Fists",
+        result: "miss",
+        description: `${attacker.name} cannot reach ${target.name} - target is out of range (${Math.round(distance)} > ${rangeInGridUnits})`,
+      });
+      return false;
+    }
+
     // Get weapon info
     const weapon = (attacker as any).equippedWeapon;
     const weaponName = weapon ? weapon.name : "Fists";

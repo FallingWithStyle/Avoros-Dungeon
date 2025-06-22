@@ -36,6 +36,7 @@ export default function TestCombat() {
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [showRangeIndicator, setShowRangeIndicator] = useState(false);
+  const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
 
   // Action handlers - Define these first before they're used
   const handleAttack = useCallback((targetId: string) => {
@@ -117,7 +118,23 @@ export default function TestCombat() {
   const handleHotbarAction = useCallback((actionId: string, actionType: string, actionName: string) => {
     if (actionType === "attack" && actionId === "basic_attack") {
       if (selectedTarget) {
-        combatSystem.executeAttack("player", selectedTarget);
+        // Check if target is in range before attacking
+        const player = combatState.entities.find(e => e.id === "player");
+        const target = combatState.entities.find(e => e.id === selectedTarget);
+        
+        if (player && target) {
+          const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+          const distance = Math.sqrt(
+            Math.pow(target.position.x - player.position.x, 2) + 
+            Math.pow(target.position.y - player.position.y, 2)
+          );
+          
+          if (distance <= weaponRange) {
+            combatSystem.executeAttack("player", selectedTarget);
+          } else {
+            console.log("Target out of range for attack!");
+          }
+        }
       } else {
         // Show available targets or attack without target
         combatSystem.executeAttack("player");
@@ -127,7 +144,7 @@ export default function TestCombat() {
       // Handle other abilities
       setActiveActionMode({ type: actionType as any, actionId, actionName });
     }
-  }, [selectedTarget]);
+  }, [selectedTarget, combatState.entities, equippedWeapon]);
 
   // Manual rotation handler
   const handleManualRotation = useCallback((direction: 'left' | 'right') => {
@@ -245,7 +262,7 @@ export default function TestCombat() {
       );
 
       if (distance > weaponRange) {
-        console.log("Target out of range!");
+        console.log("Target out of range! Distance: " + Math.round(distance) + ", Range: " + weaponRange);
         return;
       }
 
@@ -548,6 +565,88 @@ export default function TestCombat() {
                     />
                   )}
 
+                  {/* Target range indicator - shows range needed to reach selected target */}
+                  {selectedTarget && selectedEntity && combatState.entities.find(e => e.id === "player") && (
+                    <div>
+                      {/* Player's current weapon range */}
+                      <div
+                        className="absolute border-2 border-green-400 border-solid rounded-full pointer-events-none z-0"
+                        style={{
+                          left: combatState.entities.find(e => e.id === "player")!.position.x + '%',
+                          top: combatState.entities.find(e => e.id === "player")!.position.y + '%',
+                          width: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
+                          height: (equippedWeapon ? getWeaponRange(equippedWeapon) * 20 : 20),
+                          transform: 'translate(-50%, -50%)',
+                          opacity: 0.3
+                        }}
+                      />
+                      
+                      {/* Range line to target */}
+                      {(() => {
+                        const player = combatState.entities.find(e => e.id === "player")!;
+                        const distance = Math.sqrt(
+                          Math.pow(selectedEntity.position.x - player.position.x, 2) + 
+                          Math.pow(selectedEntity.position.y - player.position.y, 2)
+                        );
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const isInRange = distance <= weaponRange;
+                        
+                        const angle = Math.atan2(
+                          selectedEntity.position.y - player.position.y,
+                          selectedEntity.position.x - player.position.x
+                        );
+                        
+                        const lineLength = Math.min(distance, 50); // Cap visual line length
+                        
+                        return (
+                          <div
+                            className={`absolute pointer-events-none z-0 ${
+                              isInRange ? 'border-green-400' : 'border-red-400'
+                            }`}
+                            style={{
+                              left: player.position.x + '%',
+                              top: player.position.y + '%',
+                              width: lineLength + '%',
+                              height: '2px',
+                              backgroundColor: isInRange ? '#4ade80' : '#f87171',
+                              transformOrigin: 'left center',
+                              transform: `translate(0, -50%) rotate(${angle}rad)`,
+                              opacity: 0.6
+                            }}
+                          />
+                        );
+                      })()}
+                      
+                      {/* Distance indicator */}
+                      {(() => {
+                        const player = combatState.entities.find(e => e.id === "player")!;
+                        const distance = Math.sqrt(
+                          Math.pow(selectedEntity.position.x - player.position.x, 2) + 
+                          Math.pow(selectedEntity.position.y - player.position.y, 2)
+                        );
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const isInRange = distance <= weaponRange;
+                        
+                        return (
+                          <div
+                            className={`absolute pointer-events-none z-10 px-2 py-1 rounded text-xs font-medium ${
+                              isInRange 
+                                ? 'bg-green-800/80 text-green-200 border border-green-600' 
+                                : 'bg-red-800/80 text-red-200 border border-red-600'
+                            }`}
+                            style={{
+                              left: (player.position.x + selectedEntity.position.x) / 2 + '%',
+                              top: (player.position.y + selectedEntity.position.y) / 2 + '%',
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                          >
+                            {isInRange ? 'IN RANGE' : `OUT OF RANGE (${Math.round(distance - weaponRange)} too far)`}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
                   {/* Entities */}
                   {combatState.entities.map((entity) => (
                     <div
@@ -810,11 +909,62 @@ export default function TestCombat() {
               <CardContent className="space-y-2">
                 <Button 
                   className="w-full" 
-                  onClick={handleAttackMode}
+                  onClick={() => {
+                    if (selectedTarget) {
+                      const player = combatState.entities.find(e => e.id === "player");
+                      const target = combatState.entities.find(e => e.id === selectedTarget);
+                      
+                      if (player && target) {
+                        const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                        const distance = Math.sqrt(
+                          Math.pow(target.position.x - player.position.x, 2) + 
+                          Math.pow(target.position.y - player.position.y, 2)
+                        );
+                        
+                        if (distance <= weaponRange) {
+                          combatSystem.executeAttack("player", selectedTarget);
+                        } else {
+                          console.log("Target out of range for manual attack!");
+                        }
+                      }
+                    } else {
+                      handleAttackMode();
+                    }
+                  }}
                   variant={activeActionMode?.type === "attack" ? "destructive" : "outline"}
+                  disabled={selectedTarget && (() => {
+                    const player = combatState.entities.find(e => e.id === "player");
+                    const target = combatState.entities.find(e => e.id === selectedTarget);
+                    
+                    if (player && target) {
+                      const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                      const distance = Math.sqrt(
+                        Math.pow(target.position.x - player.position.x, 2) + 
+                        Math.pow(target.position.y - player.position.y, 2)
+                      );
+                      return distance > weaponRange;
+                    }
+                    return false;
+                  })()}
                 >
                   <Target className="w-4 h-4 mr-2" />
-                  Attack {selectedEntity?.name || "Target"}
+                  {selectedTarget && (() => {
+                    const player = combatState.entities.find(e => e.id === "player");
+                    const target = combatState.entities.find(e => e.id === selectedTarget);
+                    
+                    if (player && target) {
+                      const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
+                      const distance = Math.sqrt(
+                        Math.pow(target.position.x - player.position.x, 2) + 
+                        Math.pow(target.position.y - player.position.y, 2)
+                      );
+                      
+                      if (distance > weaponRange) {
+                        return `Out of Range (${selectedEntity?.name})`;
+                      }
+                    }
+                    return `Attack ${selectedEntity?.name}`;
+                  })() || "Attack Target"}
                 </Button>
               </CardContent>
             </Card>
