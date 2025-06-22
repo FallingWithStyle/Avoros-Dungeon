@@ -488,24 +488,102 @@ export class CombatSystem {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  // AI Movement and behavior
+  updateAI(): void {
+    const player = this.state.entities.find(e => e.id === "player");
+    if (!player) return;
+
+    const hostileEntities = this.state.entities.filter(e => e.type === "hostile" && e.hp > 0);
+    
+    hostileEntities.forEach(entity => {
+      // Calculate distance to player
+      const distance = this.calculateDistance(entity.position, player.position);
+      
+      // If player is within detection range (30 units), move toward them
+      if (distance <= 30 && distance > 8) {
+        const dx = player.position.x - entity.position.x;
+        const dy = player.position.y - entity.position.y;
+        const magnitude = Math.sqrt(dx * dx + dy * dy);
+        
+        if (magnitude > 0) {
+          // Normalize and apply movement speed
+          const moveSpeed = (entity.speed || 10) * 0.3; // Scale down for smoother movement
+          const newX = Math.max(0, Math.min(100, entity.position.x + (dx / magnitude) * moveSpeed));
+          const newY = Math.max(0, Math.min(100, entity.position.y + (dy / magnitude) * moveSpeed));
+          
+          // Update position
+          entity.position = { x: newX, y: newY };
+          
+          // Update facing to look at player
+          const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+          entity.facing = angle < 0 ? angle + 360 : angle;
+        }
+      }
+      
+      // If close enough and can attack, attempt to attack player
+      if (distance <= 8 && this.canUseAction(entity.id, "basic_attack")) {
+        this.executeAttack(entity.id, "player");
+      }
+    });
+  }
+
   // Combat state management
   startCombat(): void {
     if (!this.state.isInCombat) {
       this.state.isInCombat = true;
       this.state.combatStartTime = Date.now();
       console.log("Combat started");
+      
+      // Start AI update loop
+      this.startAILoop();
+    }
+  }
+
+  private aiLoopId: NodeJS.Timeout | null = null;
+
+  startAILoop(): void {
+    if (this.aiLoopId) return; // Already running
+    
+    this.aiLoopId = setInterval(() => {
+      this.updateCombatState(); // Check for combat start/end conditions
+      
+      if (this.state.isInCombat) {
+        this.updateAI();
+        this.notifySubscribers();
+      }
+    }, 200); // Update AI every 200ms
+  }
+
+  stopAILoop(): void {
+    if (this.aiLoopId) {
+      clearInterval(this.aiLoopId);
+      this.aiLoopId = null;
     }
   }
 
   endCombat(): void {
     this.state.isInCombat = false;
     this.state.combatStartTime = undefined;
+    this.stopAILoop();
     console.log("Combat ended");
   }
 
   private updateCombatState(): void {
     const hostiles = this.getHostileEntities();
     const friendlies = this.getFriendlyEntities();
+    const player = this.state.entities.find(e => e.id === "player");
+
+    // Start combat if hostiles are near player (within 25 units)
+    if (!this.state.isInCombat && hostiles.length > 0 && player) {
+      const nearbyHostiles = hostiles.some(hostile => {
+        const distance = this.calculateDistance(player.position, hostile.position);
+        return distance <= 25;
+      });
+      
+      if (nearbyHostiles) {
+        this.startCombat();
+      }
+    }
 
     // End combat if no hostiles remain or all friendlies are defeated
     if (this.state.isInCombat && (hostiles.length === 0 || friendlies.length === 0)) {
