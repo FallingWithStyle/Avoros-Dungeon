@@ -541,21 +541,25 @@ export function registerDebugRoutes(app: Express) {
       for (const tableName of tableNames) {
         try {
           const result = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${tableName}`));
-          rowCountData.push({ table: tableName, count: result[0].count });
+          const count = result.rows && result.rows[0] ? result.rows[0].count : result[0]?.count || "0";
+          rowCountData.push({ table: tableName, count: count.toString() });
         } catch (tableError) {
           console.error(`Error counting rows for table ${tableName}:`, tableError);
           rowCountData.push({ table: tableName, count: "Error" });
         }
       }
 
+      // Ensure tableSizes is an array
+      const tableSizesArray = Array.isArray(tableSizes) ? tableSizes : (tableSizes.rows || []);
+
       res.json({
         success: true,
-        totalDatabaseSize: dbSize[0],
-        tableSizes: tableSizes,
+        totalDatabaseSize: dbSize.rows && dbSize.rows[0] ? dbSize.rows[0] : dbSize[0],
+        tableSizes: tableSizesArray,
         rowCounts: rowCountData,
         analysis: {
-          largestTables: tableSizes.slice(0, 5),
-          totalTables: tableSizes.length,
+          largestTables: tableSizesArray.slice(0, 5),
+          totalTables: tableSizesArray.length,
         },
       });
     } catch (error) {
