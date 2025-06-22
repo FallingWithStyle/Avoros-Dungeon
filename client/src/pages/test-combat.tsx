@@ -593,6 +593,135 @@ export default function TestCombat() {
     initializeTestScenario();
   };
 
+  // Spawn functions for different entity types
+  const spawnToughEnemy = useCallback(() => {
+    const entityId = "tough_enemy_" + Date.now();
+    const toughEnemy: CombatEntity = {
+      id: entityId,
+      name: "Elite Orc Champion",
+      type: "hostile",
+      hp: 120,
+      maxHp: 120,
+      energy: 40,
+      maxEnergy: 40,
+      power: 20,
+      maxPower: 20,
+      might: 22,
+      agility: 10,
+      endurance: 20,
+      intellect: 8,
+      charisma: 5,
+      wisdom: 9,
+      attack: 28,
+      defense: 18,
+      speed: 12,
+      accuracy: 18,
+      evasion: 10,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 6,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(toughEnemy);
+  }, []);
+
+  const spawnEasyEnemy = useCallback(() => {
+    const entityId = "easy_enemy_" + Date.now();
+    const easyEnemy: CombatEntity = {
+      id: entityId,
+      name: "Goblin Scout",
+      type: "hostile",
+      hp: 25,
+      maxHp: 25,
+      energy: 15,
+      maxEnergy: 15,
+      power: 5,
+      maxPower: 5,
+      might: 8,
+      agility: 12,
+      endurance: 6,
+      intellect: 5,
+      charisma: 3,
+      wisdom: 6,
+      attack: 8,
+      defense: 5,
+      speed: 18,
+      accuracy: 14,
+      evasion: 20,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 2,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(easyEnemy);
+  }, []);
+
+  const spawnNeutralMob = useCallback(() => {
+    const entityId = "neutral_mob_" + Date.now();
+    const neutralMob: CombatEntity = {
+      id: entityId,
+      name: "Cave Spider",
+      type: "neutral",
+      hp: 40,
+      maxHp: 40,
+      energy: 20,
+      maxEnergy: 20,
+      power: 8,
+      maxPower: 8,
+      might: 12,
+      agility: 16,
+      endurance: 10,
+      intellect: 4,
+      charisma: 2,
+      wisdom: 8,
+      attack: 14,
+      defense: 8,
+      speed: 20,
+      accuracy: 18,
+      evasion: 22,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 3,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(neutralMob);
+  }, []);
+
+  const spawnFriendlyMob = useCallback(() => {
+    const entityId = "friendly_mob_" + Date.now();
+    const friendlyMob: CombatEntity = {
+      id: entityId,
+      name: "Dungeon Guide",
+      type: "friendly",
+      hp: 60,
+      maxHp: 60,
+      energy: 30,
+      maxEnergy: 30,
+      power: 15,
+      maxPower: 15,
+      might: 14,
+      agility: 14,
+      endurance: 12,
+      intellect: 16,
+      charisma: 18,
+      wisdom: 15,
+      attack: 16,
+      defense: 12,
+      speed: 14,
+      accuracy: 16,
+      evasion: 16,
+      position: { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 },
+      facing: Math.floor(Math.random() * 360),
+      level: 4,
+      isAlive: true,
+      cooldowns: {}
+    };
+    combatSystem.addEntity(friendlyMob);
+  }, []);
+
   // Get cooldown percentage for hotbar display
   const getCooldownPercentage = useCallback((actionId: string): number => {
     const player = combatState.entities.find(e => e.id === "player");
@@ -648,12 +777,27 @@ export default function TestCombat() {
               <Sword className="w-5 h-5" />
               Combat System Test
             </CardTitle>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
                 {combatState.isInCombat ? "IN COMBAT" : "READY"}
               </Badge>
               <Button onClick={resetScenario} variant="outline" size="sm">
                 Reset Scenario
+              </Button>
+              <Button onClick={() => {/* TODO: Implement freeze/unfreeze logic */}} variant="outline" size="sm" disabled>
+                Freeze NPCs
+              </Button>
+              <Button onClick={spawnToughEnemy} variant="destructive" size="sm">
+                Spawn Tough Enemy
+              </Button>
+              <Button onClick={spawnEasyEnemy} variant="secondary" size="sm">
+                Spawn Easy Enemy
+              </Button>
+              <Button onClick={spawnNeutralMob} variant="outline" size="sm">
+                Spawn Neutral Mob
+              </Button>
+              <Button onClick={spawnFriendlyMob} variant="default" size="sm">
+                Spawn Friendly Mob
               </Button>
             </div>
           </CardHeader>
