@@ -374,10 +374,10 @@ export default function TestCombat() {
       updateTimeout = setTimeout(() => {
         setCombatState(state);
         
-        // Clear selectedTarget if the currently selected entity is dead or no longer selected in combat system
+        // Clear selectedTarget if the currently selected entity is dead or no longer exists
         if (selectedTarget) {
           const selectedEntity = state.entities.find(e => e.id === selectedTarget);
-          if (!selectedEntity || selectedEntity.hp <= 0 || !selectedEntity.isSelected) {
+          if (!selectedEntity || selectedEntity.hp <= 0) {
             setSelectedTarget(null);
           }
         }
