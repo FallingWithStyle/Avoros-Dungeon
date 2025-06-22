@@ -30,7 +30,6 @@ import { showErrorToast } from "@/lib/errorToast";
 import { getVersionInfo } from "@/lib/version";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
-import { DatabaseSizeAnalyzer } from "./database-size-analyzer";
 
 interface DebugPanelProps {
   activeCrawler?: CrawlerWithDetails;

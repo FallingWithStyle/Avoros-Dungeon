@@ -6,10 +6,35 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database, HardDrive } from "lucide-react";
+import { Database, HardDrive, Lock } from "lucide-react";
 import { DatabaseSizeAnalyzer } from "@/components/database-size-analyzer";
 
+// Check if debug mode is enabled
+const IS_DEBUG_MODE = import.meta.env.DEV || 
+                     import.meta.env.VITE_DEBUG === "true" ||
+                     typeof window !== "undefined" && window.location.hostname.includes("replit");
+
 export default function DatabaseAnalysis() {
+  // If not in debug mode, show access denied message
+  if (!IS_DEBUG_MODE) {
+    return (
+      <div className="min-h-screen bg-game-bg flex items-center justify-center">
+        <Card className="border-red-600/30 bg-black/40 backdrop-blur-sm max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-300">
+              <Lock className="w-5 h-5" />
+              Access Denied
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-200/70 text-sm">
+              Database analysis is only available in debug mode.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-game-bg">
       <div className="container mx-auto max-w-4xl p-6 space-y-6">

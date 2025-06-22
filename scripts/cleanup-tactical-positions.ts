@@ -1,6 +1,4 @@
 
-#!/usr/bin/env tsx
-
 /**
  * File: cleanup-tactical-positions.ts
  * Responsibility: Command-line script to clean up redundant tactical positions data

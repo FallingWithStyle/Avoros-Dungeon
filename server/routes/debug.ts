@@ -504,61 +504,94 @@ export function registerDebugRoutes(app: Express) {
     "/api/debug/cleanup-tactical-positions",
     isAuthenticated,
     async (req: any, res) => {
+      console.log("🧹 Starting tactical positions cleanup via API...");
+      
       try {
+        // Set JSON response headers early
+        res.setHeader('Content-Type', 'application/json');
+        
         const { db } = await import("../db");
-        const { tacticalPositions, mobs } = await import("@shared/schema");
-        const { sql, eq, and, notInArray } = await import("drizzle-orm");
+        const { tacticalPositions } = await import("@shared/schema");
+        const { sql } = await import("drizzle-orm");
 
         // Get count before cleanup
+        console.log("📊 Getting count before cleanup...");
         const countBefore = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
+        const beforeCount = countBefore.rows?.[0]?.count || countBefore[0]?.count || 0;
+        console.log("📊 Records before cleanup:", beforeCount);
 
         // 1. Remove ALL mob positions (mobs should only be in mobs table)
         console.log("🧹 Removing all mob entries from tactical_positions...");
-        const deletedMobsCount = await storage.tacticalStorage.removeAllMobsFromTacticalPositions();
-        console.log("✅ Removed " + deletedMobsCount + " mob entries");
+        let deletedMobsCount = 0;
+        try {
+          deletedMobsCount = await storage.tacticalStorage.removeAllMobsFromTacticalPositions();
+          console.log("✅ Removed " + deletedMobsCount + " mob entries");
+        } catch (mobError) {
+          console.error("Error removing mobs:", mobError);
+          // Continue with other cleanup steps
+        }
 
         // 2. Remove tactical positions for rooms that don't exist
         console.log("🧹 Removing positions for non-existent rooms...");
-        const orphanedRoomsResult = await db.execute(sql`
-          DELETE FROM tactical_positions 
-          WHERE room_id NOT IN (SELECT id FROM rooms)
-        `);
-        console.log("✅ Removed orphaned room positions");
+        try {
+          await db.execute(sql`
+            DELETE FROM tactical_positions 
+            WHERE room_id NOT IN (SELECT id FROM rooms)
+          `);
+          console.log("✅ Removed orphaned room positions");
+        } catch (orphanError) {
+          console.error("Error removing orphaned positions:", orphanError);
+        }
 
-        // 3. Remove ALL inactive positions (not just old ones)
+        // 3. Remove ALL inactive positions
         console.log("🧹 Removing all inactive positions...");
-        await db.execute(sql`
-          DELETE FROM tactical_positions 
-          WHERE is_active = false
-        `);
-        console.log("✅ Removed all inactive positions");
+        try {
+          await db.execute(sql`
+            DELETE FROM tactical_positions 
+            WHERE is_active = false
+          `);
+          console.log("✅ Removed all inactive positions");
+        } catch (inactiveError) {
+          console.error("Error removing inactive positions:", inactiveError);
+        }
 
         // 4. Remove duplicate active positions (keep only most recent)
         console.log("🧹 Removing duplicate positions...");
-        await db.execute(sql`
-          DELETE FROM tactical_positions 
-          WHERE id NOT IN (
-            SELECT DISTINCT ON (room_id, entity_type, position_x, position_y) id
-            FROM tactical_positions 
-            WHERE is_active = true
-            ORDER BY room_id, entity_type, position_x, position_y, created_at DESC
-          )
-        `);
-        console.log("✅ Removed duplicate positions");
+        try {
+          await db.execute(sql`
+            DELETE FROM tactical_positions 
+            WHERE id NOT IN (
+              SELECT DISTINCT ON (room_id, entity_type, position_x, position_y) id
+              FROM tactical_positions 
+              WHERE is_active = true
+              ORDER BY room_id, entity_type, position_x, position_y, created_at DESC
+            )
+          `);
+          console.log("✅ Removed duplicate positions");
+        } catch (duplicateError) {
+          console.error("Error removing duplicates:", duplicateError);
+        }
 
         // 5. VACUUM the table to reclaim space (PostgreSQL specific)
         console.log("🧹 Vacuuming tactical_positions table to reclaim space...");
-        await db.execute(sql`VACUUM FULL tactical_positions`);
-        console.log("✅ Table vacuumed - space reclaimed");
+        try {
+          await db.execute(sql`VACUUM FULL tactical_positions`);
+          console.log("✅ Table vacuumed - space reclaimed");
+        } catch (vacuumError) {
+          console.error("Error vacuuming table:", vacuumError);
+          // Vacuum errors are not critical
+        }
 
         // Get count after cleanup
+        console.log("📊 Getting count after cleanup...");
         const countAfter = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
-
-        const beforeCount = countBefore.rows?.[0]?.count || countBefore[0]?.count || 0;
         const afterCount = countAfter.rows?.[0]?.count || countAfter[0]?.count || 0;
-        const deletedCount = beforeCount - afterCount;
+        const deletedCount = Math.max(0, beforeCount - afterCount);
 
-        res.json({
+        console.log("📊 Cleanup Summary:");
+        console.log("Before:", beforeCount, "After:", afterCount, "Deleted:", deletedCount);
+
+        const response = {
           success: true,
           message: "Tactical positions cleanup completed",
           deletedCount: deletedCount,
@@ -566,16 +599,26 @@ export function registerDebugRoutes(app: Express) {
           details: {
             beforeCount: beforeCount,
             afterCount: afterCount,
-            spaceSaved: "Estimated " + Math.round((deletedCount / beforeCount) * 619) + " MB"
+            spaceSaved: beforeCount > 0 ? 
+              "Estimated " + Math.round((deletedCount / beforeCount) * 619) + " MB" : 
+              "0 MB"
           }
-        });
+        };
+
+        console.log("✅ Sending successful response:", JSON.stringify(response));
+        return res.status(200).json(response);
+
       } catch (error) {
-        console.error("Error cleaning up tactical positions:", error);
-        res.status(500).json({
+        console.error("❌ Error cleaning up tactical positions:", error);
+        
+        const errorResponse = {
           success: false,
           error: "Failed to cleanup tactical positions: " + 
                  (error instanceof Error ? error.message : "Unknown error"),
-        });
+        };
+        
+        console.log("❌ Sending error response:", JSON.stringify(errorResponse));
+        return res.status(500).json(errorResponse);
       }
     },
   );

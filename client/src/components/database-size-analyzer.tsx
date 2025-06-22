@@ -37,10 +37,24 @@ interface DatabaseAnalysis {
   };
 }
 
+// Check if debug mode is enabled
+const IS_DEBUG_MODE = import.meta.env.DEV || 
+                     import.meta.env.VITE_DEBUG === "true" ||
+                     typeof window !== "undefined" && window.location.hostname.includes("replit");
+
 export function DatabaseSizeAnalyzer() {
   const [analysis, setAnalysis] = useState<DatabaseAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Don't render if not in debug mode
+  if (!IS_DEBUG_MODE) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-muted-foreground">Database analysis is only available in debug mode.</p>
+      </div>
+    );
+  }
 
   const analyzeDatabase = async () => {
     setLoading(true);

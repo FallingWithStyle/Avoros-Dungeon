@@ -189,6 +189,26 @@ export class TacticalStorage extends BaseStorage {
     console.log(`Cleared tactical positions for room ${roomId}`);
   }
 
+  async removeAllMobsFromTacticalPositions(): Promise<number> {
+    const { sql } = await import("drizzle-orm");
+    
+    // Count mobs before deletion
+    const countResult = await db.execute(sql`
+      SELECT COUNT(*) as count FROM tactical_positions 
+      WHERE entity_type = 'mob'
+    `);
+    const mobCount = countResult.rows?.[0]?.count || countResult[0]?.count || 0;
+    
+    // Delete all mob entries
+    await db.execute(sql`
+      DELETE FROM tactical_positions 
+      WHERE entity_type = 'mob'
+    `);
+    
+    console.log(`Removed ${mobCount} mob entries from tactical_positions`);
+    return mobCount;
+  }
+
   async generateAndSaveTacticalData(roomId: number, roomData: any, forceRegenerate: boolean = false): Promise<TacticalEntity[]> {
     // Check if we have cached tactical data that's still fresh
     const cacheKey = `tactical_entities_${roomId}`;
