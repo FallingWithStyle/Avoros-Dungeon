@@ -167,15 +167,31 @@ export default function TestCombat() {
 
   // Auto-target facing when target changes (only if not manually rotating)
   useEffect(() => {
-    if (!selectedTarget || manualRotation) return;
+    console.log("🎯 Auto-targeting effect triggered:", {
+      selectedTarget,
+      manualRotation,
+      entityCount: combatState.entities.length
+    });
+
+    if (!selectedTarget || manualRotation) {
+      console.log("🎯 Auto-targeting skipped:", { selectedTarget, manualRotation });
+      return;
+    }
 
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
+
+    console.log("🎯 Found entities:", {
+      player: player ? { id: player.id, facing: player.facing, pos: player.position } : null,
+      target: target ? { id: target.id, pos: target.position } : null
+    });
 
     if (player && target) {
       // Calculate angle to target
       const dx = target.position.x - player.position.x;
       const dy = target.position.y - player.position.y;
+
+      console.log("🎯 Position delta:", { dx, dy });
 
       if (dx !== 0 || dy !== 0) {
         // Calculate angle in degrees (0° = North, positive clockwise)
@@ -190,11 +206,25 @@ export default function TestCombat() {
         const newFacing = Math.round(angle);
         const currentFacing = player.facing || 0;
         
+        console.log("🎯 Facing calculation:", { 
+          angle, 
+          newFacing, 
+          currentFacing, 
+          difference: Math.abs(newFacing - currentFacing) 
+        });
+        
         // Only update if facing has actually changed to avoid unnecessary updates
         if (Math.abs(newFacing - currentFacing) > 1) {
+          console.log("🎯 Updating player facing from", currentFacing, "to", newFacing);
           combatSystem.updateEntity("player", { facing: newFacing });
+        } else {
+          console.log("🎯 Facing update skipped - change too small");
         }
+      } else {
+        console.log("🎯 No position difference - skipping facing update");
       }
+    } else {
+      console.log("🎯 Missing entities - cannot update facing");
     }
   }, [selectedTarget, manualRotation, combatState.entities]); // Include combatState.entities to ensure we have current entity data
 
