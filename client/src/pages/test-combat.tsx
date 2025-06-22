@@ -249,14 +249,17 @@ export default function TestCombat() {
       if (key === 'tab') {
         event.preventDefault();
         
+        // Check if the timer is still running (TAB was released quickly)
+        const wasQuickRelease = tabHoldTimer !== null;
+        
         // Clear the hold timer
         if (tabHoldTimer) {
           clearTimeout(tabHoldTimer);
           setTabHoldTimer(null);
         }
         
-        // If TAB was released quickly (not held), cycle through targets
-        if (isTabHeld) {
+        // Only cycle through targets if TAB was released quickly (before timer expired)
+        if (isTabHeld && wasQuickRelease) {
           const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
           if (livingEnemies.length > 0) {
             const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
@@ -267,6 +270,7 @@ export default function TestCombat() {
             setSelectedTarget(null);
           }
         }
+        // If TAB was held (timer expired and cleared target), don't cycle through targets
         
         setIsTabHeld(false);
       }
