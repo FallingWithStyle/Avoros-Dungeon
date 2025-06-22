@@ -7,7 +7,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database, HardDrive } from "lucide-react";
-import DatabaseSizeAnalyzer from "@/components/database-size-analyzer";
+import { DatabaseSizeAnalyzer } from "@/components/database-size-analyzer";
 
 export default function DatabaseAnalysis() {
   return (
