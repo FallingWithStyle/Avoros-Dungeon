@@ -71,7 +71,7 @@ export default function TestCombat() {
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
   };
 
-  // Keyboard movement handler
+  // Keyboard movement handler with debouncing
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
@@ -91,10 +91,18 @@ export default function TestCombat() {
     }
     const newFacing = Math.round(facing);
 
-    // Update position and facing
+    // Batch the updates to prevent multiple state changes
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
-    combatSystem.updateEntity("player", { facing: newFacing });
-  }, [combatState]);
+    
+    // Only update facing if it changed significantly
+    const currentFacing = player.facing || 0;
+    const facingDiff = Math.abs(newFacing - currentFacing);
+    const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+    
+    if (normalizedDiff > 5) { // Larger threshold for movement-based facing
+      combatSystem.updateEntity("player", { facing: newFacing });
+    }
+  }, []);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -161,13 +169,17 @@ export default function TestCombat() {
         }
 
         const newFacing = Math.round(angle);
-        // Only update if facing actually changed to prevent infinite loops
-        if (player.facing !== newFacing) {
+        // Only update if facing actually changed significantly (more than 1 degree difference)
+        const currentFacing = player.facing || 0;
+        const facingDiff = Math.abs(newFacing - currentFacing);
+        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff); // Handle wrap-around
+        
+        if (normalizedDiff > 1) {
           combatSystem.updateEntity("player", { facing: newFacing });
         }
       }
     }
-  }, [selectedTarget, manualRotation]); // Also depend on manualRotation to prevent conflicts
+  }, [selectedTarget, manualRotation, combatState.entities.find(e => e.id === "player")?.position]); // Only depend on specific properties
 
   // Keyboard hotkey handler
   useEffect(() => {
@@ -276,15 +288,30 @@ export default function TestCombat() {
   }, []);
 
   useEffect(() => {
-    // Subscribe to combat system updates
+    // Subscribe to combat system updates with throttling
+    let updateTimeout: NodeJS.Timeout | null = null;
+    
     const unsubscribe = combatSystem.subscribe((state) => {
-      setCombatState(state);
+      // Throttle state updates to prevent overwhelming the UI
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      
+      updateTimeout = setTimeout(() => {
+        setCombatState(state);
+        updateTimeout = null;
+      }, 16); // ~60fps throttling
     });
 
     // Initialize test scenario
     initializeTestScenario();
 
-    return unsubscribe;
+    return () => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      unsubscribe();
+    };
   }, []);
 
   // Load mock weapons for testing
@@ -431,9 +458,14 @@ export default function TestCombat() {
   };
 
   const resetScenario = () => {
-    initializeTestScenario();
+    // Clear all state first
     setSelectedTarget(null);
     setActiveActionMode(null);
+    setShowRangeIndicator(false);
+    setManualRotation(false);
+    
+    // Then reinitialize
+    initializeTestScenario();
   };
 
   // Get cooldown percentage for hotbar display
