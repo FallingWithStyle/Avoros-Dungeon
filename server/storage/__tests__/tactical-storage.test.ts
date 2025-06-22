@@ -66,7 +66,7 @@ describe('TacticalStorage', () => {
       expect(mockRedisService.getTacticalPositions).toHaveBeenCalledWith(1);
     });
 
-    it('should fetch from database when cache miss', async () => {
+    it('should fetch from database when cache miss and include mobs from mob storage', async () => {
       const mockDbPositions = [
         {
           entityType: 'loot',
@@ -76,7 +76,31 @@ describe('TacticalStorage', () => {
         }
       ];
 
+      const mockRoomMobs = [
+        {
+          mob: {
+            id: 1,
+            displayName: 'Goblin',
+            isAlive: true,
+            isActive: true,
+            currentHealth: 30,
+            maxHealth: 30,
+            positionX: '10.0',
+            positionY: '15.0',
+            rarity: 'common'
+          },
+          mobType: {
+            attack: 5,
+            defense: 2,
+            speed: 3,
+            creditsReward: 10,
+            experienceReward: 15
+          }
+        }
+      ];
+
       mockRedisService.getTacticalPositions.mockResolvedValue(null);
+      mockMobStorage.getRoomMobs.mockResolvedValue(mockRoomMobs);
 
       const mockSelect = {
         from: jest.fn().mockReturnThis(),
@@ -86,12 +110,28 @@ describe('TacticalStorage', () => {
 
       const result = await tacticalStorage.getTacticalPositions(1);
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
         type: 'loot',
         name: 'Chest',
         data: { name: 'Chest' },
         position: { x: 25.5, y: 75.0 }
+      });
+      expect(result[1]).toEqual({
+        type: 'mob',
+        name: 'Goblin',
+        data: {
+          id: 1,
+          hp: 30,
+          maxHp: 30,
+          attack: 5,
+          defense: 2,
+          speed: 3,
+          creditsReward: 10,
+          experienceReward: 15,
+          rarity: 'common'
+        },
+        position: { x: 10.0, y: 15.0 }
       });
       expect(mockRedisService.setTacticalPositions).toHaveBeenCalled();
     });
@@ -99,7 +139,7 @@ describe('TacticalStorage', () => {
     it('should handle entities with missing names', async () => {
       const mockDbPositions = [
         {
-          entityType: 'mob',
+          entityType: 'loot',
           entityData: {},
           positionX: '10',
           positionY: '20'
@@ -114,9 +154,13 @@ describe('TacticalStorage', () => {
       };
       mockDb.select.mockReturnValue(mockSelect as any);
 
+      // Mock mob storage to return no mobs
+      mockMobStorage.getRoomMobs.mockResolvedValue([]);
+
       const result = await tacticalStorage.getTacticalPositions(1);
 
       expect(result[0].name).toBe('Unknown');
+      expect(result[0].type).toBe('loot');
     });
   });
 

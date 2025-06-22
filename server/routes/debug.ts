@@ -513,8 +513,7 @@ export function registerDebugRoutes(app: Express) {
         const countBefore = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
 
         // 1. Remove duplicate mob positions (mobs should only be in mobs table)
-        const deletedMobs = await db.delete(tacticalPositions)
-          .where(eq(tacticalPositions.entityType, 'mob'));
+        const deletedMobsCount = await storage.tacticalStorage.removeAllMobsFromTacticalPositions();
 
         // 2. Remove tactical positions for rooms that don't exist
         await db.execute(sql`
