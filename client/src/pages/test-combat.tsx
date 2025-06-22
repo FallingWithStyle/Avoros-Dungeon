@@ -823,11 +823,12 @@ export default function TestCombat() {
                               const absoluteAngle = entityFacing + currentSwingAngle;
                               
                               // Calculate blade length based on weapon range
+                              // 1 range = 1 grid box = 10% of arena = approximately 40px at typical screen sizes
                               const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
-                              const baseBladeLengthPx = 16; // Base blade length in pixels
-                              const bladeLengthPx = Math.max(8, baseBladeLengthPx * weaponRange); // Minimum 8px, scales with range
-                              const bladeWidthPx = Math.max(1, Math.min(3, 2 * weaponRange)); // Width scales too, between 1-3px
-                              const trailLengthPx = Math.max(6, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
+                              const baseGridBoxSizePx = 40; // Approximate pixels per grid box
+                              const bladeLengthPx = Math.max(12, baseGridBoxSizePx * weaponRange); // Minimum 12px, scales with range
+                              const bladeWidthPx = Math.max(2, Math.min(4, 2 + weaponRange)); // Width scales too, between 2-4px
+                              const trailLengthPx = Math.max(8, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
                               
                               return (
                                 <div
