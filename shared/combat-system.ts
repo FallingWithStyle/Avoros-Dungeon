@@ -295,7 +295,7 @@ export class CombatSystem {
     const toHitTarget = Math.max(5, Math.min(95, attackerAccuracy - targetEvasion + 50)); // Base 50% + modifiers
     const toHitRoll = Math.floor(Math.random() * 100) + 1;
 
-    let damage = 0;
+    let finalDamage = 0;
     let result: "hit" | "miss" | "critical" = "miss";
     let damageRoll = "";
     let description = "";
@@ -310,22 +310,19 @@ export class CombatSystem {
       const isCritical = toHitRoll >= 95 || toHitRoll >= (toHitTarget + 20);
 
       if (isCritical) {
-        damage = Math.max(1, (rawDamage * 2) - (target.defense || 0));
+        finalDamage = Math.max(1, (rawDamage * 2) - (target.defense || 0));
         result = "critical";
-        damageRoll = `${rawDamage} x2 - ${target.defense || 0} = ${damage}`;
-        description = `${attacker.name} scores a critical hit on ${target.name} with ${weaponName} for ${damage} damage!`;
+        damageRoll = `${rawDamage} x2 - ${target.defense || 0} = ${finalDamage}`;
+        description = `${attacker.name} scores a critical hit on ${target.name} with ${weaponName} for ${finalDamage} damage!`;
       } else {
-        damage = Math.max(1, rawDamage - (target.defense || 0));
+        finalDamage = Math.max(1, rawDamage - (target.defense || 0));
         result = "hit";
-        damageRoll = `${rawDamage} - ${target.defense || 0} = ${damage}`;
-        description = `${attacker.name} hits ${target.name} with ${weaponName} for ${damage} damage`;
+        damageRoll = `${rawDamage} - ${target.defense || 0} = ${finalDamage}`;
+        description = `${attacker.name} hits ${target.name} with ${weaponName} for ${finalDamage} damage`;
       }
 
-      // Apply damage and effects
-      const damage = calculateDamage(attacker, target);
-      const actualDamage = Math.max(1, damage - (target.defense || 0));
-
-      target.hp = Math.max(0, target.hp - actualDamage);
+      // Apply damage to target
+      target.hp = Math.max(0, target.hp - finalDamage);
       target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
     } else {
       // Miss
@@ -342,7 +339,7 @@ export class CombatSystem {
       weapon: weaponName,
       toHitRoll,
       toHitTarget,
-      damage: damage > 0 ? damage : undefined,
+      damage: finalDamage > 0 ? finalDamage : undefined,
       damageRoll: damageRoll || undefined,
       result,
       description,
