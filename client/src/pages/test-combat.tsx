@@ -92,13 +92,13 @@ export default function TestCombat() {
 
     // Update position immediately
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
-    
+
     // Only update facing from movement if no target is selected
     if (!selectedTarget) {
       const currentFacing = player.facing || 0;
       const facingDiff = Math.abs(newFacing - currentFacing);
       const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
-      
+
       if (normalizedDiff > 2) { // Smaller threshold for smoother movement-based facing
         combatSystem.updateEntity("player", { facing: newFacing });
       }
@@ -119,14 +119,14 @@ export default function TestCombat() {
         // Check if target is in range before attacking
         const player = combatState.entities.find(e => e.id === "player");
         const target = combatState.entities.find(e => e.id === selectedTarget);
-        
+
         if (player && target) {
           const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
           const distance = Math.sqrt(
             Math.pow(target.position.x - player.position.x, 2) + 
             Math.pow(target.position.y - player.position.y, 2)
           );
-          
+
           if (distance <= weaponRange) {
             combatSystem.executeAttack("player", selectedTarget);
           } else {
@@ -300,13 +300,13 @@ export default function TestCombat() {
   useEffect(() => {
     // Subscribe to combat system updates with throttling
     let updateTimeout: NodeJS.Timeout | null = null;
-    
+
     const unsubscribe = combatSystem.subscribe((state) => {
       // Light throttling to prevent excessive updates while maintaining responsiveness
       if (updateTimeout) {
         clearTimeout(updateTimeout);
       }
-      
+
       updateTimeout = setTimeout(() => {
         setCombatState(state);
         updateTimeout = null;
@@ -472,7 +472,7 @@ export default function TestCombat() {
     setSelectedTarget(null);
     setActiveActionMode(null);
     setManualRotation(false);
-    
+
     // Then reinitialize
     initializeTestScenario();
   };
@@ -545,13 +545,15 @@ export default function TestCombat() {
                     ))}
                   </div>
 
-                  
+
 
                   {/* Entities */}
                   {combatState.entities.map((entity) => {
-                    // Calculate if this entity is in range of player's weapon (for hostile entities)
-                    let rangeStatus = "neutral";
-                    if (entity.type === "hostile" && entity.id !== "player") {
+                    // Calculate if this entity is in range of player's weapon (for non-player entities)
+                    let isInRange = false;
+                    let friendlinessColor = "border-red-400"; // Default for hostile
+
+                    if (entity.id !== "player") {
                       const player = combatState.entities.find(e => e.id === "player");
                       if (player) {
                         const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
@@ -559,7 +561,16 @@ export default function TestCombat() {
                           Math.pow(entity.position.x - player.position.x, 2) + 
                           Math.pow(entity.position.y - player.position.y, 2)
                         );
-                        rangeStatus = distance <= weaponRange ? "inRange" : "outOfRange";
+                        isInRange = distance <= weaponRange;
+
+                        // Set color based on entity type/friendliness
+                        if (entity.type === "hostile") {
+                          friendlinessColor = "border-red-400";
+                        } else if (entity.type === "neutral") {
+                          friendlinessColor = "border-yellow-400";
+                        } else if (entity.type === "friendly" || entity.type === "ally") {
+                          friendlinessColor = "border-green-400";
+                        }
                       }
                     }
 
@@ -575,13 +586,13 @@ export default function TestCombat() {
                         }}
                         onClick={() => entity.type === "hostile" ? setSelectedTarget(entity.id) : null}
                       >
-                        {/* Range indicator ring for hostile entities */}
-                        {entity.type === "hostile" && rangeStatus !== "neutral" && (
-                          <div className={`absolute -inset-2 rounded-full border-2 ${
-                            rangeStatus === "inRange" 
-                              ? "border-green-400 shadow-lg shadow-green-400/50" 
-                              : "border-red-400/60"
-                          } transition-all duration-300`} />
+                        {/* Range indicator ring - only show when in range */}
+                        {entity.id !== "player" && isInRange && (
+                          <div className={`absolute -inset-2 rounded-full border-2 ${friendlinessColor} shadow-lg transition-all duration-300`} style={{
+                            boxShadow: `0 0 10px ${friendlinessColor.includes('red') ? 'rgba(239, 68, 68, 0.5)' : 
+                                                    friendlinessColor.includes('yellow') ? 'rgba(245, 158, 11, 0.5)' : 
+                                                    'rgba(34, 197, 94, 0.5)'}`
+                          }} />
                         )}
 
                         {/* Main entity circle */}
@@ -589,7 +600,7 @@ export default function TestCombat() {
                           entity.type === "player" 
                             ? "bg-blue-600 border-blue-400" 
                             : entity.type === "hostile"
-                            ? rangeStatus === "inRange" 
+                            ? isInRange 
                               ? "bg-red-600 border-green-400 shadow-lg shadow-green-400/30" 
                               : "bg-red-600 border-red-400"
                             : "bg-green-600 border-green-400"
@@ -641,7 +652,7 @@ export default function TestCombat() {
                           )}
 
                           {/* Range status indicator for enemies */}
-                          {entity.type === "hostile" && rangeStatus === "inRange" && (
+                          {entity.type === "hostile" && isInRange && (
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border border-green-200 animate-pulse" 
                                  title="In weapon range" />
                           )}
@@ -847,14 +858,14 @@ export default function TestCombat() {
                     if (selectedTarget) {
                       const player = combatState.entities.find(e => e.id === "player");
                       const target = combatState.entities.find(e => e.id === selectedTarget);
-                      
+
                       if (player && target) {
                         const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
                         const distance = Math.sqrt(
                           Math.pow(target.position.x - player.position.x, 2) + 
                           Math.pow(target.position.y - player.position.y, 2)
                         );
-                        
+
                         if (distance <= weaponRange) {
                           combatSystem.executeAttack("player", selectedTarget);
                         } else {
@@ -869,7 +880,7 @@ export default function TestCombat() {
                   disabled={selectedTarget && (() => {
                     const player = combatState.entities.find(e => e.id === "player");
                     const target = combatState.entities.find(e => e.id === selectedTarget);
-                    
+
                     if (player && target) {
                       const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
                       const distance = Math.sqrt(
@@ -885,14 +896,14 @@ export default function TestCombat() {
                   {selectedTarget && (() => {
                     const player = combatState.entities.find(e => e.id === "player");
                     const target = combatState.entities.find(e => e.id === selectedTarget);
-                    
+
                     if (player && target) {
                       const weaponRange = equippedWeapon ? getWeaponRange(equippedWeapon) * 10 : 10;
                       const distance = Math.sqrt(
                         Math.pow(target.position.x - player.position.x, 2) + 
                         Math.pow(target.position.y - player.position.y, 2)
                       );
-                      
+
                       if (distance > weaponRange) {
                         return `Out of Range (${selectedEntity?.name})`;
                       }
