@@ -169,8 +169,10 @@ export default function TestCombat() {
   useEffect(() => {
     if (!selectedTarget || manualRotation) return;
 
-    const player = combatState.entities.find(e => e.id === "player");
-    const target = combatState.entities.find(e => e.id === selectedTarget);
+    // Get fresh state instead of relying on dependency
+    const currentState = combatSystem.getState();
+    const player = currentState.entities.find(e => e.id === "player");
+    const target = currentState.entities.find(e => e.id === selectedTarget);
 
     if (player && target) {
       // Calculate angle to target
@@ -192,7 +194,7 @@ export default function TestCombat() {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [selectedTarget, manualRotation]); // Remove combatState.entities dependency to fix immediate facing
+  }, [selectedTarget, manualRotation]); // Fixed: Get fresh state inside effect instead of depending on combatState.entities
 
   // State for TAB hold detection
   const [isTabHeld, setIsTabHeld] = useState(false);
