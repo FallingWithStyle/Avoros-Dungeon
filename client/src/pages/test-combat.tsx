@@ -804,6 +804,13 @@ export default function TestCombat() {
                               const entityFacing = entity.facing || 0;
                               const absoluteAngle = entityFacing + currentSwingAngle;
                               
+                              // Calculate blade length based on weapon range
+                              const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
+                              const baseBladeLengthPx = 16; // Base blade length in pixels
+                              const bladeLengthPx = Math.max(8, baseBladeLengthPx * weaponRange); // Minimum 8px, scales with range
+                              const bladeWidthPx = Math.max(1, Math.min(3, 2 * weaponRange)); // Width scales too, between 1-3px
+                              const trailLengthPx = Math.max(6, (bladeLengthPx * 0.875)); // Trail is slightly shorter than blade
+                              
                               return (
                                 <div
                                   className="absolute pointer-events-none z-20"
@@ -815,10 +822,12 @@ export default function TestCombat() {
                                     height: "80px",
                                   }}
                                 >
-                                  {/* Sword blade extending from center */}
+                                  {/* Sword blade extending from center - dynamic length */}
                                   <div
-                                    className="absolute w-2 h-16 bg-gradient-to-t from-gray-600 via-silver to-gray-300 rounded-sm origin-bottom shadow-lg"
+                                    className="absolute bg-gradient-to-t from-gray-600 via-silver to-gray-300 rounded-sm origin-bottom shadow-lg"
                                     style={{
+                                      width: bladeWidthPx + "px",
+                                      height: bladeLengthPx + "px",
                                       left: "50%",
                                       bottom: "50%",
                                       transform: "translateX(-50%) rotate(" + absoluteAngle + "deg)",
@@ -828,10 +837,12 @@ export default function TestCombat() {
                                     }}
                                   />
                                   
-                                  {/* Sword hilt */}
+                                  {/* Sword hilt - slightly larger for longer weapons */}
                                   <div
-                                    className="absolute w-3 h-2 bg-amber-700 rounded origin-bottom"
+                                    className="absolute bg-amber-700 rounded origin-bottom"
                                     style={{
+                                      width: Math.max(2, bladeWidthPx + 1) + "px",
+                                      height: Math.max(2, Math.min(4, weaponRange * 2)) + "px",
                                       left: "50%",
                                       bottom: "50%",
                                       transform: "translateX(-50%) rotate(" + absoluteAngle + "deg)",
@@ -840,10 +851,11 @@ export default function TestCombat() {
                                     }}
                                   />
                                   
-                                  {/* Motion blur trail */}
+                                  {/* Motion blur trail - scales with blade length */}
                                   <div
-                                    className="absolute w-1 h-14 bg-gradient-to-t from-transparent via-white/30 to-transparent origin-bottom"
+                                    className="absolute w-1 bg-gradient-to-t from-transparent via-white/30 to-transparent origin-bottom"
                                     style={{
+                                      height: trailLengthPx + "px",
                                       left: "50%",
                                       bottom: "50%",
                                       transform: "translateX(-50%) rotate(" + (absoluteAngle - 8) + "deg)",
