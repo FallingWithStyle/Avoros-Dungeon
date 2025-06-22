@@ -151,7 +151,7 @@ export default function TestCombat() {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
 
-    const rotationAmount = direction === 'right' ? 15 : -15; // 15 degrees per rotation
+    const rotationAmount = direction === 'right' ? 30 : -30; // 30 degrees per rotation
     let newFacing = (player.facing || 0) + rotationAmount;
 
     // Normalize angle to be between 0 and 360
@@ -167,31 +167,15 @@ export default function TestCombat() {
 
   // Auto-target facing when target changes (only if not manually rotating)
   useEffect(() => {
-    console.log("🎯 Auto-targeting effect triggered:", {
-      selectedTarget,
-      manualRotation,
-      entityCount: combatState.entities.length
-    });
-
-    if (!selectedTarget || manualRotation) {
-      console.log("🎯 Auto-targeting skipped:", { selectedTarget, manualRotation });
-      return;
-    }
+    if (!selectedTarget || manualRotation) return;
 
     const player = combatState.entities.find(e => e.id === "player");
     const target = combatState.entities.find(e => e.id === selectedTarget);
-
-    console.log("🎯 Found entities:", {
-      player: player ? { id: player.id, facing: player.facing, pos: player.position } : null,
-      target: target ? { id: target.id, pos: target.position } : null
-    });
 
     if (player && target) {
       // Calculate angle to target
       const dx = target.position.x - player.position.x;
       const dy = target.position.y - player.position.y;
-
-      console.log("🎯 Position delta:", { dx, dy });
 
       if (dx !== 0 || dy !== 0) {
         // Calculate angle in degrees (0° = North, positive clockwise)
@@ -206,27 +190,17 @@ export default function TestCombat() {
         const newFacing = Math.round(angle);
         const currentFacing = player.facing || 0;
         
-        console.log("🎯 Facing calculation:", { 
-          angle, 
-          newFacing, 
-          currentFacing, 
-          difference: Math.abs(newFacing - currentFacing) 
-        });
-        
         // Only update if facing has actually changed to avoid unnecessary updates
         if (Math.abs(newFacing - currentFacing) > 1) {
-          console.log("🎯 Updating player facing from", currentFacing, "to", newFacing);
+          // Update the combat system and force a state refresh
           combatSystem.updateEntity("player", { facing: newFacing });
-        } else {
-          console.log("🎯 Facing update skipped - change too small");
+          
+          // Force an immediate state update to ensure the UI reflects the change
+          setCombatState(combatSystem.getState());
         }
-      } else {
-        console.log("🎯 No position difference - skipping facing update");
       }
-    } else {
-      console.log("🎯 Missing entities - cannot update facing");
     }
-  }, [selectedTarget, manualRotation, combatState.entities]); // Include combatState.entities to ensure we have current entity data
+  }, [selectedTarget, manualRotation]); // Remove combatState.entities dependency to prevent circular updates
 
   // State for TAB hold detection
   const [isTabHeld, setIsTabHeld] = useState(false);
@@ -763,6 +737,133 @@ export default function TestCombat() {
                           {selectedTarget === entity.id && entity.hp > 0 && (
                             <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
                           )}
+
+                          {/* Hit Impact Effect - shows on targets taking damage */}
+                          {(() => {
+                            // Check if this entity was recently damaged (within last 500ms)
+                            const recentDamageTime = entity.lastDamageTime || 0;
+                            const timeSinceDamage = Date.now() - recentDamageTime;
+                            if (timeSinceDamage < 500) {
+                              const impactProgress = timeSinceDamage / 500;
+                              return (
+                                <div className="absolute -inset-2 pointer-events-none">
+                                  <div 
+                                    className="w-full h-full rounded-full border-4 border-red-400"
+                                    style={{
+                                      opacity: (1 - impactProgress) * 0.8,
+                                      transform: `scale(${1 + impactProgress * 0.5})`,
+                                      filter: "drop-shadow(0 0 8px rgba(239,68,68,0.6))",
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+
+                          {/* Attack Animation Effects */}
+                          {entity.attackAnimation && Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration && (() => {
+                            const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
+                            
+                            if (entity.attackAnimation.type === "melee") {
+                              // Sword swing animation - rotating arc
+                              return (
+                                <div
+                                  className="absolute w-16 h-16 pointer-events-none"
+                                  style={{
+                                    transform: `rotate(${entity.facing || 0}deg)`,
+                                    transformOrigin: "center",
+                                  }}
+                                >
+                                  <div
+                                    className="absolute w-full h-full"
+                                    style={{
+                                      transform: `rotate(${-45 + (progress * 90)}deg)`,
+                                      transformOrigin: "center bottom",
+                                    }}
+                                  >
+                                    <div
+                                      className="w-1 h-8 bg-gradient-to-t from-gray-300 to-white rounded-full mx-auto"
+                                      style={{
+                                        filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
+                                        opacity: 1 - progress,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
+                              // Arrow/projectile animation
+                              const startX = entity.position.x;
+                              const startY = entity.position.y;
+                              const endX = entity.attackAnimation.targetPosition.x;
+                              const endY = entity.attackAnimation.targetPosition.y;
+                              
+                              const currentX = startX + (endX - startX) * progress;
+                              const currentY = startY + (endY - startY) * progress;
+                              
+                              // Calculate projectile angle
+                              const angle = Math.atan2(endX - startX, -(endY - startY)) * (180 / Math.PI);
+                              
+                              return (
+                                <div
+                                  className="absolute w-2 h-6 pointer-events-none z-20"
+                                  style={{
+                                    left: `${currentX}%`,
+                                    top: `${currentY}%`,
+                                    transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                                    opacity: progress < 0.9 ? 1 : 1 - ((progress - 0.9) / 0.1),
+                                  }}
+                                >
+                                  <div className="w-full h-full bg-gradient-to-t from-amber-600 to-yellow-400 rounded-full shadow-lg" 
+                                       style={{ filter: "drop-shadow(0 0 3px rgba(255,191,0,0.8))" }} />
+                                </div>
+                              );
+                            }
+                            
+                            if (entity.attackAnimation.type === "magic") {
+                              // Magic spell animation - expanding energy rings
+                              return (
+                                <div
+                                  className="absolute w-20 h-20 pointer-events-none"
+                                  style={{
+                                    transform: "translate(-50%, -50%)",
+                                    left: "50%",
+                                    top: "50%",
+                                  }}
+                                >
+                                  {/* Multiple magic rings */}
+                                  {[0, 0.3, 0.6].map((delay, index) => {
+                                    const ringProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
+                                    return (
+                                      <div
+                                        key={index}
+                                        className="absolute inset-0 rounded-full border-2 border-purple-400"
+                                        style={{
+                                          transform: `scale(${0.2 + ringProgress * 0.8})`,
+                                          opacity: ringProgress > 0 ? (1 - ringProgress) * 0.8 : 0,
+                                          filter: "drop-shadow(0 0 6px rgba(147,51,234,0.6))",
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                  
+                                  {/* Central energy burst */}
+                                  <div
+                                    className="absolute inset-4 rounded-full bg-gradient-radial from-purple-300 to-transparent"
+                                    style={{
+                                      opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
+                                      filter: "blur(2px)",
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+                            
+                            return null;
+                          })()}
                         </div>
                       </div>
                     );
