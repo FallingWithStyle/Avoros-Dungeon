@@ -796,9 +796,11 @@ export default function TestCombat() {
                             
                             if (entity.attackAnimation.type === "melee") {
                               // Sword swing animation - 30 degree arc from -15 to +15 degrees
+                              // Swing happens 3x faster (in first 1/3 of duration), then holds at end position
                               const startAngle = -15; // Start 15 degrees left of facing
                               const endAngle = 15;    // End 15 degrees right of facing
-                              const currentSwingAngle = startAngle + (progress * (endAngle - startAngle)); // -15 to +15 degrees
+                              const swingProgress = Math.min(1, progress * 3); // Complete swing in first 33% of duration
+                              const currentSwingAngle = startAngle + (swingProgress * (endAngle - startAngle)); // -15 to +15 degrees
                               const entityFacing = entity.facing || 0;
                               const absoluteAngle = entityFacing + currentSwingAngle;
                               
@@ -822,7 +824,7 @@ export default function TestCombat() {
                                       transform: "translateX(-50%) rotate(" + absoluteAngle + "deg)",
                                       transformOrigin: "center bottom",
                                       filter: "drop-shadow(0 0 6px rgba(255,255,255,0.9))",
-                                      opacity: Math.sin(progress * Math.PI) * 0.7 + 0.3,
+                                      opacity: Math.sin(swingProgress * Math.PI) * 0.7 + 0.3,
                                     }}
                                   />
                                   
@@ -846,7 +848,7 @@ export default function TestCombat() {
                                       bottom: "50%",
                                       transform: "translateX(-50%) rotate(" + (absoluteAngle - 8) + "deg)",
                                       transformOrigin: "center bottom",
-                                      opacity: Math.sin(progress * Math.PI) * 0.5,
+                                      opacity: Math.sin(swingProgress * Math.PI) * 0.5,
                                     }}
                                   />
                                 </div>
