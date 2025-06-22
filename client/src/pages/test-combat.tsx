@@ -888,15 +888,23 @@ export default function TestCombat() {
                             }
 
                             if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
-                              // Arrow/projectile animation with better positioning
-                              const startX = entity.position.x;
-                              const startY = entity.position.y;
+                              // Arrow/projectile animation originating from bow position
+                              const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
+                              const bowLength = Math.max(12, baseGridBoxSizePx * weaponRange * 0.6); // Bow is 60% of weapon range
+                              const entityFacing = entity.facing || 0;
+                              
+                              // Calculate bow tip position (where arrow starts)
+                              const bowTipOffsetX = Math.sin(entityFacing * Math.PI / 180) * (bowLength / 8); // Convert to percentage
+                              const bowTipOffsetY = -Math.cos(entityFacing * Math.PI / 180) * (bowLength / 8);
+                              
+                              const startX = entity.position.x + bowTipOffsetX;
+                              const startY = entity.position.y + bowTipOffsetY;
                               const endX = entity.attackAnimation.targetPosition.x;
                               const endY = entity.attackAnimation.targetPosition.y;
 
                               // Add slight arc to the projectile path
                               const midProgress = 0.5;
-                              const arcHeight = 5; // 5% arc height
+                              const arcHeight = 3; // 3% arc height for more realistic trajectory
 
                               let currentX, currentY;
                               if (progress <= midProgress) {
@@ -911,8 +919,16 @@ export default function TestCombat() {
 
                               // Calculate projectile angle based on velocity direction
                               const nextProgress = Math.min(1, progress + 0.05);
-                              const nextX = startX + (endX - startX) * nextProgress;
-                              const nextY = startY + (endY - startY) * nextProgress;
+                              let nextX, nextY;
+                              if (nextProgress <= midProgress) {
+                                const t = nextProgress / midProgress;
+                                nextX = startX + (endX - startX) * t * 0.5;
+                                nextY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                              } else {
+                                const t = (nextProgress - midProgress) / (1 - midProgress);
+                                nextX = startX + (endX - startX) * (0.5 + t * 0.5);
+                                nextY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                              }
                               const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
 
                               return (
@@ -925,22 +941,34 @@ export default function TestCombat() {
                                   }}
                                 >
                                   <div
-                                    className="w-3 h-8 bg-gradient-to-t from-amber-700 via-yellow-400 to-yellow-200 rounded-full shadow-lg"
+                                    className="w-2 h-6 bg-gradient-to-t from-amber-800 via-yellow-500 to-yellow-200 rounded-full shadow-lg"
                                     style={{ 
                                       transform: `rotate(${angle}deg)`,
                                       filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
                                       opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
                                     }} 
                                   />
+                                  {/* Arrow fletching */}
+                                  <div
+                                    className="absolute w-3 h-2 bg-red-600/60"
+                                    style={{
+                                      transform: `rotate(${angle}deg) translateY(120%)`,
+                                      left: "50%",
+                                      top: "50%",
+                                      marginLeft: "-6px",
+                                      opacity: progress * 0.8,
+                                      clipPath: "polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%)",
+                                    }}
+                                  />
                                   {/* Arrow trail */}
                                   <div
-                                    className="absolute w-1 h-4 bg-gradient-to-t from-transparent to-yellow-400/50"
+                                    className="absolute w-1 h-3 bg-gradient-to-t from-transparent to-yellow-400/40"
                                     style={{
-                                      transform: `rotate(${angle}deg) translateY(100%)`,
+                                      transform: `rotate(${angle}deg) translateY(150%)`,
                                       left: "50%",
                                       top: "50%",
                                       marginLeft: "-2px",
-                                      opacity: progress * 0.6,
+                                      opacity: progress * 0.5,
                                     }}
                                   />
                                 </div>
@@ -948,7 +976,11 @@ export default function TestCombat() {
                             }
 
                             if (entity.attackAnimation.type === "magic") {
-                              // Enhanced magic spell animation
+                              // Enhanced magic spell animation scaled to weapon range
+                              const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
+                              const spellSize = Math.max(60, baseGridBoxSizePx * weaponRange * 1.8); // Spell effect scales with range
+                              const maxRingScale = Math.max(1.0, weaponRange * 0.8); // Larger weapons = bigger spell rings
+                              
                               return (
                                 <div
                                   className="absolute pointer-events-none z-20"
@@ -956,11 +988,11 @@ export default function TestCombat() {
                                     left: "50%",
                                     top: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    width: "80px",
-                                    height: "80px",
+                                    width: spellSize + "px",
+                                    height: spellSize + "px",
                                   }}
                                 >
-                                  {/* Multiple expanding magic rings */}
+                                  {/* Multiple expanding magic rings - scales with weapon range */}
                                   {[0, 0.15, 0.3, 0.45].map((delay, index) => {
                                     const ringProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
                                     const colors = ["border-purple-400", "border-blue-400", "border-pink-400", "border-indigo-400"];
@@ -969,7 +1001,7 @@ export default function TestCombat() {
                                         key={index}
                                         className={`absolute inset-0 rounded-full border-2 ${colors[index]}`}
                                         style={{
-                                          transform: `scale(${0.1 + ringProgress * 1.2})`,
+                                          transform: `scale(${0.1 + ringProgress * maxRingScale})`,
                                           opacity: ringProgress > 0 ? Math.sin(ringProgress * Math.PI) * 0.8 : 0,
                                           filter: "drop-shadow(0 0 8px rgba(147,51,234,0.7))",
                                         }}
@@ -977,37 +1009,51 @@ export default function TestCombat() {
                                     );
                                   })}
 
-                                  {/* Central magical energy */}
+                                  {/* Central magical energy - scales with spell size */}
                                   <div
-                                    className="absolute inset-3 rounded-full bg-gradient-radial from-purple-200 via-blue-300 to-transparent"
+                                    className="absolute rounded-full bg-gradient-radial from-purple-200 via-blue-300 to-transparent"
                                     style={{
+                                      left: "15%",
+                                      top: "15%",
+                                      right: "15%",
+                                      bottom: "15%",
                                       opacity: Math.sin(progress * Math.PI * 2) * 0.6 + 0.4,
-                                      filter: "blur(1px)",
+                                      filter: "blur(2px)",
                                       transform: `scale(${0.5 + Math.sin(progress * Math.PI * 4) * 0.3})`,
                                     }}
                                   />
 
-                                  {/* Sparkle effects */}
+                                  {/* Sparkle effects - distributed across the full spell range */}
                                   {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, index) => {
                                     const sparkleProgress = (progress + index * 0.1) % 1;
-                                    const distance = 20 + sparkleProgress * 15;
+                                    const baseDistance = spellSize * 0.25; // Base distance from center
+                                    const distance = baseDistance + sparkleProgress * (spellSize * 0.15); // Sparkles move outward
                                     const x = Math.cos(angle * Math.PI / 180) * distance;
                                     const y = Math.sin(angle * Math.PI / 180) * distance;
 
                                     return (
                                       <div
                                         key={index}
-                                        className="absolute w-1 h-1 bg-white rounded-full"
+                                        className="absolute w-2 h-2 bg-white rounded-full"
                                         style={{
                                           left: `calc(50% + ${x}px)`,
                                           top: `calc(50% + ${y}px)`,
                                           transform: "translate(-50%, -50%)",
                                           opacity: Math.sin(sparkleProgress * Math.PI) * 0.8,
-                                          filter: "drop-shadow(0 0 2px rgba(255,255,255,0.8))",
+                                          filter: "drop-shadow(0 0 3px rgba(255,255,255,0.9))",
                                         }}
                                       />
                                     );
                                   })}
+
+                                  {/* Range indicator - shows the full extent of the spell */}
+                                  <div
+                                    className="absolute inset-0 rounded-full border border-purple-300/20"
+                                    style={{
+                                      opacity: Math.sin(progress * Math.PI) * 0.3,
+                                      filter: "drop-shadow(0 0 4px rgba(147,51,234,0.4))",
+                                    }}
+                                  />
                                 </div>
                               );
                             }
