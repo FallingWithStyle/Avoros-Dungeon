@@ -94,14 +94,17 @@ export default function TestCombat() {
     // Update position immediately
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
     
-    // Update facing with smaller threshold for movement
-    const currentFacing = player.facing || 0;
-    const facingDiff = Math.abs(newFacing - currentFacing);
-    const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
-    
-    if (normalizedDiff > 2) { // Smaller threshold for smoother movement-based facing
-      combatSystem.updateEntity("player", { facing: newFacing });
+    // Only update facing from movement if no target is selected
+    if (!selectedTarget) {
+      const currentFacing = player.facing || 0;
+      const facingDiff = Math.abs(newFacing - currentFacing);
+      const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+      
+      if (normalizedDiff > 2) { // Smaller threshold for smoother movement-based facing
+        combatSystem.updateEntity("player", { facing: newFacing });
+      }
     }
+    // If target is selected, facing will be handled by the targeting effect
   }, [combatState.entities]);
 
   // Enable keyboard movement
@@ -169,14 +172,8 @@ export default function TestCombat() {
         }
 
         const newFacing = Math.round(angle);
-        // Only update if facing actually changed (reduce threshold for better responsiveness)
-        const currentFacing = player.facing || 0;
-        const facingDiff = Math.abs(newFacing - currentFacing);
-        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff); // Handle wrap-around
-        
-        if (normalizedDiff > 0.5) { // Much smaller threshold for targeting
-          combatSystem.updateEntity("player", { facing: newFacing });
-        }
+        // Always update facing when targeting (override movement-based facing)
+        combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
   }, [selectedTarget, manualRotation, combatState.entities]); // Include full entities for proper change detection
