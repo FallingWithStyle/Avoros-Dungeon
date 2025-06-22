@@ -766,98 +766,165 @@ export default function TestCombat() {
                             const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
                             
                             if (entity.attackAnimation.type === "melee") {
-                              // Sword swing animation - rotating arc
+                              // Sword swing animation - rotating arc with trail
+                              const swingAngle = -60 + (progress * 120); // 120 degree swing arc
                               return (
                                 <div
-                                  className="absolute w-16 h-16 pointer-events-none"
+                                  className="absolute w-24 h-24 pointer-events-none z-20"
                                   style={{
-                                    transform: `rotate(${entity.facing || 0}deg)`,
+                                    left: "50%",
+                                    top: "50%",
+                                    transform: `translate(-50%, -50%) rotate(${(entity.facing || 0) + swingAngle}deg)`,
                                     transformOrigin: "center",
                                   }}
                                 >
+                                  {/* Sword blade with motion blur effect */}
                                   <div
-                                    className="absolute w-full h-full"
+                                    className="absolute w-1.5 h-10 bg-gradient-to-t from-gray-400 via-white to-gray-300 rounded-full"
                                     style={{
-                                      transform: `rotate(${-45 + (progress * 90)}deg)`,
-                                      transformOrigin: "center bottom",
+                                      left: "50%",
+                                      top: "0",
+                                      transform: "translateX(-50%)",
+                                      filter: "drop-shadow(0 0 6px rgba(255,255,255,0.9)) blur(0.5px)",
+                                      opacity: Math.sin(progress * Math.PI) * 0.9 + 0.1,
                                     }}
-                                  >
-                                    <div
-                                      className="w-1 h-8 bg-gradient-to-t from-gray-300 to-white rounded-full mx-auto"
-                                      style={{
-                                        filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
-                                        opacity: 1 - progress,
-                                      }}
-                                    />
-                                  </div>
+                                  />
+                                  {/* Swing trail effect */}
+                                  <div
+                                    className="absolute w-20 h-20 rounded-full border-2 border-white/30"
+                                    style={{
+                                      left: "50%",
+                                      top: "50%",
+                                      transform: "translate(-50%, -50%)",
+                                      clipPath: `polygon(50% 50%, ${50 + 40 * Math.cos((swingAngle - 30) * Math.PI / 180)}% ${50 + 40 * Math.sin((swingAngle - 30) * Math.PI / 180)}%, ${50 + 40 * Math.cos(swingAngle * Math.PI / 180)}% ${50 + 40 * Math.sin(swingAngle * Math.PI / 180)}%)`,
+                                      opacity: (1 - progress) * 0.5,
+                                    }}
+                                  />
                                 </div>
                               );
                             }
                             
                             if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
-                              // Arrow/projectile animation
+                              // Arrow/projectile animation with better positioning
                               const startX = entity.position.x;
                               const startY = entity.position.y;
                               const endX = entity.attackAnimation.targetPosition.x;
                               const endY = entity.attackAnimation.targetPosition.y;
                               
-                              const currentX = startX + (endX - startX) * progress;
-                              const currentY = startY + (endY - startY) * progress;
+                              // Add slight arc to the projectile path
+                              const midProgress = 0.5;
+                              const arcHeight = 5; // 5% arc height
                               
-                              // Calculate projectile angle
-                              const angle = Math.atan2(endX - startX, -(endY - startY)) * (180 / Math.PI);
+                              let currentX, currentY;
+                              if (progress <= midProgress) {
+                                const t = progress / midProgress;
+                                currentX = startX + (endX - startX) * t * 0.5;
+                                currentY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                              } else {
+                                const t = (progress - midProgress) / (1 - midProgress);
+                                currentX = startX + (endX - startX) * (0.5 + t * 0.5);
+                                currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                              }
+                              
+                              // Calculate projectile angle based on velocity direction
+                              const nextProgress = Math.min(1, progress + 0.05);
+                              const nextX = startX + (endX - startX) * nextProgress;
+                              const nextY = startY + (endY - startY) * nextProgress;
+                              const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
                               
                               return (
                                 <div
-                                  className="absolute w-2 h-6 pointer-events-none z-20"
+                                  className="absolute pointer-events-none z-30"
                                   style={{
                                     left: `${currentX}%`,
                                     top: `${currentY}%`,
-                                    transform: `translate(-50%, -50%) rotate(${angle}deg)`,
-                                    opacity: progress < 0.9 ? 1 : 1 - ((progress - 0.9) / 0.1),
+                                    transform: "translate(-50%, -50%)",
                                   }}
                                 >
-                                  <div className="w-full h-full bg-gradient-to-t from-amber-600 to-yellow-400 rounded-full shadow-lg" 
-                                       style={{ filter: "drop-shadow(0 0 3px rgba(255,191,0,0.8))" }} />
+                                  <div
+                                    className="w-3 h-8 bg-gradient-to-t from-amber-700 via-yellow-400 to-yellow-200 rounded-full shadow-lg"
+                                    style={{ 
+                                      transform: `rotate(${angle}deg)`,
+                                      filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
+                                      opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
+                                    }} 
+                                  />
+                                  {/* Arrow trail */}
+                                  <div
+                                    className="absolute w-1 h-4 bg-gradient-to-t from-transparent to-yellow-400/50"
+                                    style={{
+                                      transform: `rotate(${angle}deg) translateY(100%)`,
+                                      left: "50%",
+                                      top: "50%",
+                                      marginLeft: "-2px",
+                                      opacity: progress * 0.6,
+                                    }}
+                                  />
                                 </div>
                               );
                             }
                             
                             if (entity.attackAnimation.type === "magic") {
-                              // Magic spell animation - expanding energy rings
+                              // Enhanced magic spell animation
                               return (
                                 <div
-                                  className="absolute w-20 h-20 pointer-events-none"
+                                  className="absolute pointer-events-none z-20"
                                   style={{
-                                    transform: "translate(-50%, -50%)",
                                     left: "50%",
                                     top: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    width: "80px",
+                                    height: "80px",
                                   }}
                                 >
-                                  {/* Multiple magic rings */}
-                                  {[0, 0.3, 0.6].map((delay, index) => {
+                                  {/* Multiple expanding magic rings */}
+                                  {[0, 0.15, 0.3, 0.45].map((delay, index) => {
                                     const ringProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
+                                    const colors = ["border-purple-400", "border-blue-400", "border-pink-400", "border-indigo-400"];
                                     return (
                                       <div
                                         key={index}
-                                        className="absolute inset-0 rounded-full border-2 border-purple-400"
+                                        className={`absolute inset-0 rounded-full border-2 ${colors[index]}`}
                                         style={{
-                                          transform: `scale(${0.2 + ringProgress * 0.8})`,
-                                          opacity: ringProgress > 0 ? (1 - ringProgress) * 0.8 : 0,
-                                          filter: "drop-shadow(0 0 6px rgba(147,51,234,0.6))",
+                                          transform: `scale(${0.1 + ringProgress * 1.2})`,
+                                          opacity: ringProgress > 0 ? Math.sin(ringProgress * Math.PI) * 0.8 : 0,
+                                          filter: "drop-shadow(0 0 8px rgba(147,51,234,0.7))",
                                         }}
                                       />
                                     );
                                   })}
                                   
-                                  {/* Central energy burst */}
+                                  {/* Central magical energy */}
                                   <div
-                                    className="absolute inset-4 rounded-full bg-gradient-radial from-purple-300 to-transparent"
+                                    className="absolute inset-3 rounded-full bg-gradient-radial from-purple-200 via-blue-300 to-transparent"
                                     style={{
-                                      opacity: progress < 0.5 ? progress * 2 : (1 - progress) * 2,
-                                      filter: "blur(2px)",
+                                      opacity: Math.sin(progress * Math.PI * 2) * 0.6 + 0.4,
+                                      filter: "blur(1px)",
+                                      transform: `scale(${0.5 + Math.sin(progress * Math.PI * 4) * 0.3})`,
                                     }}
                                   />
+                                  
+                                  {/* Sparkle effects */}
+                                  {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, index) => {
+                                    const sparkleProgress = (progress + index * 0.1) % 1;
+                                    const distance = 20 + sparkleProgress * 15;
+                                    const x = Math.cos(angle * Math.PI / 180) * distance;
+                                    const y = Math.sin(angle * Math.PI / 180) * distance;
+                                    
+                                    return (
+                                      <div
+                                        key={index}
+                                        className="absolute w-1 h-1 bg-white rounded-full"
+                                        style={{
+                                          left: `calc(50% + ${x}px)`,
+                                          top: `calc(50% + ${y}px)`,
+                                          transform: "translate(-50%, -50%)",
+                                          opacity: Math.sin(sparkleProgress * Math.PI) * 0.8,
+                                          filter: "drop-shadow(0 0 2px rgba(255,255,255,0.8))",
+                                        }}
+                                      />
+                                    );
+                                  })}
                                 </div>
                               );
                             }

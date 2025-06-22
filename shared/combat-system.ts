@@ -348,9 +348,14 @@ export class CombatSystem {
     // Determine attack animation type based on equipped weapon
     let animationType: "melee" | "ranged" | "magic" = "melee";
     if (attacker.equippedWeapon) {
-      if (attacker.equippedWeapon.name.toLowerCase().includes("bow")) {
+      const weaponName = attacker.equippedWeapon.name.toLowerCase();
+      const weaponType = attacker.equippedWeapon.weapon_type?.toLowerCase() || "";
+      
+      if (weaponName.includes("bow") || weaponType.includes("bow") || weaponName.includes("crossbow")) {
         animationType = "ranged";
-      } else if (attacker.equippedWeapon.name.toLowerCase().includes("staff")) {
+      } else if (weaponName.includes("staff") || weaponType.includes("staff") || 
+                 weaponName.includes("wand") || weaponName.includes("wizard") || 
+                 attacker.equippedWeapon.damageAttribute === "intellect") {
         animationType = "magic";
       }
     }
