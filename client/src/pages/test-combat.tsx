@@ -814,15 +814,18 @@ export default function TestCombat() {
               <CardContent>
                 
           <div 
-            className="relative w-full h-96 bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
-            style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)' }}
+            className="relative w-full aspect-square bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden"
+            style={{ 
+              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
+              maxHeight: '500px'
+            }}
                 >
                   {/* Grid overlay */}
                   <div className="absolute inset-0 opacity-10">
-                    {Array.from({ length: 10 }).map((_, i) => (
+                    {Array.from({ length: 11 }).map((_, i) => (
                       <div key={`v-${i}`} className="absolute h-full w-px bg-amber-400" style={{ left: `${i * 10}%` }} />
                     ))}
-                    {Array.from({ length: 10 }).map((_, i) => (
+                    {Array.from({ length: 11 }).map((_, i) => (
                       <div key={`h-${i}`} className="absolute w-full h-px bg-amber-400" style={{ top: `${i * 10}%` }} />
                     ))}
                   </div>
