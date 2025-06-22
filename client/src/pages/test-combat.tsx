@@ -279,13 +279,13 @@ export default function TestCombat() {
 
         // Only cycle through targets if TAB was released quickly (timer didn't expire)
         if (isTabHeld && wasQuickRelease) {
-          const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
-          if (livingEnemies.length > 0) {
-            const currentIndex = livingEnemies.findIndex(e => e.id === selectedTarget);
-            const nextIndex = (currentIndex + 1) % livingEnemies.length;
-            setSelectedTarget(livingEnemies[nextIndex].id);
+          const livingTargets = combatState.entities.filter(e => e.id !== "player" && e.hp > 0);
+          if (livingTargets.length > 0) {
+            const currentIndex = livingTargets.findIndex(e => e.id === selectedTarget);
+            const nextIndex = (currentIndex + 1) % livingTargets.length;
+            setSelectedTarget(livingTargets[nextIndex].id);
           } else {
-            // Clear selection if no living enemies
+            // Clear selection if no living targets
             setSelectedTarget(null);
           }
         }
@@ -959,7 +959,7 @@ export default function TestCombat() {
                         className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
                           entity.hp <= 0 
                             ? 'cursor-not-allowed opacity-50' 
-                            : entity.type === "hostile" 
+                            : entity.id !== "player"
                               ? 'cursor-pointer hover:scale-105' 
                               : 'cursor-default'
                         } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
@@ -967,7 +967,7 @@ export default function TestCombat() {
                           left: `${entity.position.x}%`,
                           top: `${entity.position.y}%`,
                         }}
-                        onClick={() => entity.type === "hostile" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
+                        onClick={() => entity.id !== "player" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
                       >
                         {/* Main entity circle */}
                         <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
