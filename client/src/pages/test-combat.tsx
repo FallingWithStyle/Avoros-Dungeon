@@ -90,55 +90,56 @@ export default function TestCombat() {
     let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
-    // Check collision with cover elements
-    const playerRadius = 2; // Player collision radius
-    const wouldCollide = coverElements.some(cover => {
-      const coverLeft = cover.position.x - cover.width / 2;
-      const coverRight = cover.position.x + cover.width / 2;
-      const coverTop = cover.position.y - cover.height / 2;
-      const coverBottom = cover.position.y + cover.height / 2;
+    // Check collision with cover elements using improved collision detection
+    const playerRadius = 1.5; // Slightly smaller radius for more precise collision
+    
+    const checkCollisionWithCover = (x: number, y: number): boolean => {
+      return coverElements.some(cover => {
+        // Calculate actual wall bounds considering rotation
+        let wallLeft, wallRight, wallTop, wallBottom;
+        
+        if (cover.facing === 90) {
+          // Vertical wall - swap width and height for collision detection
+          wallLeft = cover.position.x - cover.height / 2;
+          wallRight = cover.position.x + cover.height / 2;
+          wallTop = cover.position.y - cover.width / 2;
+          wallBottom = cover.position.y + cover.width / 2;
+        } else {
+          // Horizontal wall (facing 0)
+          wallLeft = cover.position.x - cover.width / 2;
+          wallRight = cover.position.x + cover.width / 2;
+          wallTop = cover.position.y - cover.height / 2;
+          wallBottom = cover.position.y + cover.height / 2;
+        }
 
-      return (newX + playerRadius > coverLeft && 
-              newX - playerRadius < coverRight &&
-              newY + playerRadius > coverTop && 
-              newY - playerRadius < coverBottom);
-    });
+        // Add small buffer to prevent edge clipping
+        const buffer = 0.5;
+        return (x + playerRadius > wallLeft - buffer && 
+                x - playerRadius < wallRight + buffer &&
+                y + playerRadius > wallTop - buffer && 
+                y - playerRadius < wallBottom + buffer);
+      });
+    };
+
+    const wouldCollide = checkCollisionWithCover(newX, newY);
 
     if (wouldCollide) {
       // Try moving only horizontally
-      newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
-      newY = player.position.y;
+      const horizontalX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      const horizontalY = player.position.y;
       
-      const horizontalCollision = coverElements.some(cover => {
-        const coverLeft = cover.position.x - cover.width / 2;
-        const coverRight = cover.position.x + cover.width / 2;
-        const coverTop = cover.position.y - cover.height / 2;
-        const coverBottom = cover.position.y + cover.height / 2;
-
-        return (newX + playerRadius > coverLeft && 
-                newX - playerRadius < coverRight &&
-                newY + playerRadius > coverTop && 
-                newY - playerRadius < coverBottom);
-      });
-
-      if (horizontalCollision) {
+      if (!checkCollisionWithCover(horizontalX, horizontalY)) {
+        newX = horizontalX;
+        newY = horizontalY;
+      } else {
         // Try moving only vertically
-        newX = player.position.x;
-        newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        const verticalX = player.position.x;
+        const verticalY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
         
-        const verticalCollision = coverElements.some(cover => {
-          const coverLeft = cover.position.x - cover.width / 2;
-          const coverRight = cover.position.x + cover.width / 2;
-          const coverTop = cover.position.y - cover.height / 2;
-          const coverBottom = cover.position.y + cover.height / 2;
-
-          return (newX + playerRadius > coverLeft && 
-                  newX - playerRadius < coverRight &&
-                  newY + playerRadius > coverTop && 
-                  newY - playerRadius < coverBottom);
-        });
-
-        if (verticalCollision) {
+        if (!checkCollisionWithCover(verticalX, verticalY)) {
+          newX = verticalX;
+          newY = verticalY;
+        } else {
           // Can't move at all, keep original position
           newX = player.position.x;
           newY = player.position.y;
@@ -222,10 +223,21 @@ export default function TestCombat() {
     const fullWalls = covers.filter(c => c.type === "full_wall");
     
     for (const wall of fullWalls) {
-      const wallLeft = wall.position.x - wall.width / 2;
-      const wallRight = wall.position.x + wall.width / 2;
-      const wallTop = wall.position.y - wall.height / 2;
-      const wallBottom = wall.position.y + wall.height / 2;
+      let wallLeft, wallRight, wallTop, wallBottom;
+      
+      if (wall.facing === 90) {
+        // Vertical wall - swap width and height for bounds calculation
+        wallLeft = wall.position.x - wall.height / 2;
+        wallRight = wall.position.x + wall.height / 2;
+        wallTop = wall.position.y - wall.width / 2;
+        wallBottom = wall.position.y + wall.width / 2;
+      } else {
+        // Horizontal wall (facing 0)
+        wallLeft = wall.position.x - wall.width / 2;
+        wallRight = wall.position.x + wall.width / 2;
+        wallTop = wall.position.y - wall.height / 2;
+        wallBottom = wall.position.y + wall.height / 2;
+      }
 
       // Simple bounding box intersection with line of sight
       if (lineIntersectsRect(start, end, { 
@@ -266,10 +278,21 @@ export default function TestCombat() {
     const halfWalls = coverElements.filter(c => c.type === "half_wall");
     
     for (const wall of halfWalls) {
-      const wallLeft = wall.position.x - wall.width / 2;
-      const wallRight = wall.position.x + wall.width / 2;
-      const wallTop = wall.position.y - wall.height / 2;
-      const wallBottom = wall.position.y + wall.height / 2;
+      let wallLeft, wallRight, wallTop, wallBottom;
+      
+      if (wall.facing === 90) {
+        // Vertical wall - swap width and height for bounds calculation
+        wallLeft = wall.position.x - wall.height / 2;
+        wallRight = wall.position.x + wall.height / 2;
+        wallTop = wall.position.y - wall.width / 2;
+        wallBottom = wall.position.y + wall.width / 2;
+      } else {
+        // Horizontal wall (facing 0)
+        wallLeft = wall.position.x - wall.width / 2;
+        wallRight = wall.position.x + wall.width / 2;
+        wallTop = wall.position.y - wall.height / 2;
+        wallBottom = wall.position.y + wall.height / 2;
+      }
 
       // Check if entity is near the half wall
       const nearWall = entityPos.x >= wallLeft - 3 && entityPos.x <= wallRight + 3 && 
@@ -730,7 +753,7 @@ export default function TestCombat() {
     combatSystem.addEntity(goblin);
     combatSystem.addEntity(orc);
 
-    // Add some cover elements for testing
+    // Add some cover elements for testing with proper mix of horizontal and vertical walls
     const testCover = [
       {
         id: "wall1",
@@ -744,8 +767,8 @@ export default function TestCombat() {
         id: "wall2", 
         type: "half_wall" as const,
         position: { x: 65, y: 45 },
-        width: 3,
-        height: 12,
+        width: 12, // This will be the length when rotated
+        height: 3, // This will be the thickness when rotated
         facing: 90 // vertical
       },
       {
@@ -763,6 +786,22 @@ export default function TestCombat() {
         width: 10,
         height: 3,
         facing: 0 // horizontal
+      },
+      {
+        id: "wall5",
+        type: "full_wall" as const,
+        position: { x: 80, y: 25 },
+        width: 8, // length when vertical
+        height: 3, // thickness when vertical
+        facing: 90 // vertical
+      },
+      {
+        id: "wall6",
+        type: "half_wall" as const,
+        position: { x: 45, y: 55 },
+        width: 6,
+        height: 3,
+        facing: 90 // vertical
       }
     ];
     setCoverElements(testCover);
