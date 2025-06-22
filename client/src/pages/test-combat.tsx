@@ -192,7 +192,7 @@ export default function TestCombat() {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [selectedTarget, manualRotation, combatState.entities]); // Include full entities for proper change detection
+  }, [selectedTarget, manualRotation]); // Remove combatState.entities dependency to fix immediate facing
 
   // State for TAB hold detection
   const [isTabHeld, setIsTabHeld] = useState(false);
@@ -258,7 +258,7 @@ export default function TestCombat() {
           setTabHoldTimer(null);
         }
         
-        // Only cycle through targets if TAB was released quickly (before timer expired)
+        // Only cycle through targets if TAB was released quickly (timer was still running)
         if (isTabHeld && wasQuickRelease) {
           const livingEnemies = combatState.entities.filter(e => e.type === "hostile" && e.hp > 0);
           if (livingEnemies.length > 0) {
@@ -270,7 +270,7 @@ export default function TestCombat() {
             setSelectedTarget(null);
           }
         }
-        // If TAB was held (timer expired and cleared target), don't cycle through targets
+        // If TAB was held (timer expired and target was already cleared), don't cycle
         
         setIsTabHeld(false);
       }
