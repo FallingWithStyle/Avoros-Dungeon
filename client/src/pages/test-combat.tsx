@@ -234,6 +234,14 @@ export default function TestCombat() {
           event.preventDefault();
           handleManualRotation('right');
           break;
+        case '`':
+        case 'backquote':
+          event.preventDefault();
+          // Cycle to next weapon
+          const currentIndex = equippedWeapon ? availableWeapons.findIndex(w => w.id === equippedWeapon.id) : -1;
+          const nextIndex = (currentIndex + 1) % availableWeapons.length;
+          handleWeaponChange(availableWeapons[nextIndex]);
+          break;
         case 'tab':
           event.preventDefault();
           
@@ -1111,6 +1119,7 @@ export default function TestCombat() {
                   <div>WASD: Move</div>
                   <div>QE: Rotate Left/Right</div>
                   <div>1-3: Hotbar Actions</div>
+                  <div>`: Swap Weapon</div>
                   <div>Tab: Cycle Targets</div>
                   <div>Hold Tab: Clear Target</div>
                   {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
