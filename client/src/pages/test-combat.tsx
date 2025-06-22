@@ -151,7 +151,7 @@ export default function TestCombat() {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
 
-    const rotationAmount = direction === 'right' ? 15 : -15; // 15 degrees per rotation
+    const rotationAmount = direction === 'right' ? 30 : -30; // 30 degrees per rotation
     let newFacing = (player.facing || 0) + rotationAmount;
 
     // Normalize angle to be between 0 and 360
