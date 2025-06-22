@@ -497,6 +497,78 @@ export function registerDebugRoutes(app: Express) {
         redisDefaultMode: isDebugMode ? "DB Only" : "Cache + DB",
       });
     } catch (error) {
+
+
+  // DEBUG: Clean up redundant tactical positions
+  app.post(
+    "/api/debug/cleanup-tactical-positions",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const { db } = await import("../db");
+        const { tacticalPositions, mobs } = await import("@shared/schema");
+        const { sql, eq, and, notInArray } = await import("drizzle-orm");
+
+        // Get count before cleanup
+        const countBefore = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
+
+        // 1. Remove duplicate mob positions (mobs should only be in mobs table)
+        const deletedMobs = await db.delete(tacticalPositions)
+          .where(eq(tacticalPositions.entityType, 'mob'));
+
+        // 2. Remove tactical positions for rooms that don't exist
+        await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE room_id NOT IN (SELECT id FROM rooms)
+        `);
+
+        // 3. Remove inactive positions older than 1 day
+        await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE is_active = false 
+          AND updated_at < NOW() - INTERVAL '1 day'
+        `);
+
+        // 4. Remove duplicate active positions (keep only most recent)
+        await db.execute(sql`
+          DELETE FROM tactical_positions 
+          WHERE id NOT IN (
+            SELECT DISTINCT ON (room_id, entity_type, position_x, position_y) id
+            FROM tactical_positions 
+            WHERE is_active = true
+            ORDER BY room_id, entity_type, position_x, position_y, created_at DESC
+          )
+        `);
+
+        // Get count after cleanup
+        const countAfter = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
+
+        const beforeCount = countBefore.rows?.[0]?.count || countBefore[0]?.count || 0;
+        const afterCount = countAfter.rows?.[0]?.count || countAfter[0]?.count || 0;
+        const deletedCount = beforeCount - afterCount;
+
+        res.json({
+          success: true,
+          message: "Tactical positions cleanup completed",
+          deletedCount: deletedCount,
+          remainingCount: afterCount,
+          details: {
+            beforeCount: beforeCount,
+            afterCount: afterCount,
+            spaceSaved: "Estimated " + Math.round((deletedCount / beforeCount) * 619) + " MB"
+          }
+        });
+      } catch (error) {
+        console.error("Error cleaning up tactical positions:", error);
+        res.status(500).json({
+          success: false,
+          error: "Failed to cleanup tactical positions: " + 
+                 (error instanceof Error ? error.message : "Unknown error"),
+        });
+      }
+    },
+  );
+
       console.error("Error getting debug environment status:", error);
       res.status(500).json({
         success: false,

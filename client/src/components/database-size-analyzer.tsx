@@ -222,8 +222,10 @@ export function DatabaseSizeAnalyzer() {
                       </div>
                     )}
                     {analysis.tableSizes.find(t => t.tablename === 'tactical_positions' && t.size_bytes > 1024 * 1024) && (
-                      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded">
-                        🎯 <strong>Tactical positions is large:</strong> Consider clearing old tactical data
+                      <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded">
+                        🚨 <strong>Tactical positions is MASSIVE ({analysis.tableSizes.find(t => t.tablename === 'tactical_positions')?.size}):</strong> 
+                        <br />This table stores redundant mob data. Mobs should only be in the mobs table.
+                        <br />Consider running the tactical cleanup endpoint to remove duplicates.
                       </div>
                     )}
                     <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded">
