@@ -432,6 +432,24 @@ export default function TestCombat() {
         mightBonus: 5
       },
       {
+        id: "longsword1",
+        name: "Longsword",
+        description: "A long, two-handed blade with extended reach",
+        type: "weapon",
+        damageAttribute: "might",
+        range: 2,
+        mightBonus: 7
+      },
+      {
+        id: "dagger1",
+        name: "Steel Dagger",
+        description: "A quick, precise blade for close combat",
+        type: "weapon",
+        damageAttribute: "agility",
+        range: 0.5,
+        agilityBonus: 4
+      },
+      {
         id: "bow1", 
         name: "Hunting Bow",
         description: "A flexible ranged weapon",
