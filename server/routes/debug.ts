@@ -512,23 +512,29 @@ export function registerDebugRoutes(app: Express) {
         // Get count before cleanup
         const countBefore = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);
 
-        // 1. Remove duplicate mob positions (mobs should only be in mobs table)
+        // 1. Remove ALL mob positions (mobs should only be in mobs table)
+        console.log("🧹 Removing all mob entries from tactical_positions...");
         const deletedMobsCount = await storage.tacticalStorage.removeAllMobsFromTacticalPositions();
+        console.log("✅ Removed " + deletedMobsCount + " mob entries");
 
         // 2. Remove tactical positions for rooms that don't exist
-        await db.execute(sql`
+        console.log("🧹 Removing positions for non-existent rooms...");
+        const orphanedRoomsResult = await db.execute(sql`
           DELETE FROM tactical_positions 
           WHERE room_id NOT IN (SELECT id FROM rooms)
         `);
+        console.log("✅ Removed orphaned room positions");
 
-        // 3. Remove inactive positions older than 1 day
+        // 3. Remove ALL inactive positions (not just old ones)
+        console.log("🧹 Removing all inactive positions...");
         await db.execute(sql`
           DELETE FROM tactical_positions 
-          WHERE is_active = false 
-          AND updated_at < NOW() - INTERVAL '1 day'
+          WHERE is_active = false
         `);
+        console.log("✅ Removed all inactive positions");
 
         // 4. Remove duplicate active positions (keep only most recent)
+        console.log("🧹 Removing duplicate positions...");
         await db.execute(sql`
           DELETE FROM tactical_positions 
           WHERE id NOT IN (
@@ -538,6 +544,12 @@ export function registerDebugRoutes(app: Express) {
             ORDER BY room_id, entity_type, position_x, position_y, created_at DESC
           )
         `);
+        console.log("✅ Removed duplicate positions");
+
+        // 5. VACUUM the table to reclaim space (PostgreSQL specific)
+        console.log("🧹 Vacuuming tactical_positions table to reclaim space...");
+        await db.execute(sql`VACUUM FULL tactical_positions`);
+        console.log("✅ Table vacuumed - space reclaimed");
 
         // Get count after cleanup
         const countAfter = await db.execute(sql`SELECT COUNT(*) as count FROM tactical_positions`);

@@ -225,7 +225,30 @@ export function DatabaseSizeAnalyzer() {
                       <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded">
                         🚨 <strong>Tactical positions is MASSIVE ({analysis.tableSizes.find(t => t.tablename === 'tactical_positions')?.size}):</strong> 
                         <br />This table stores redundant mob data. Mobs should only be in the mobs table.
-                        <br />Consider running the tactical cleanup endpoint to remove duplicates.
+                        <br />
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/debug/cleanup-tactical-positions', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                              });
+                              const result = await response.json();
+                              if (result.success) {
+                                alert('Cleanup completed! Deleted ' + result.deletedCount + ' records. ' + result.details.spaceSaved);
+                                // Refresh the analysis
+                                window.location.reload();
+                              } else {
+                                alert('Cleanup failed: ' + result.error);
+                              }
+                            } catch (error) {
+                              alert('Error running cleanup: ' + error);
+                            }
+                          }}
+                          className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                        >
+                          🧹 Run Tactical Cleanup Now
+                        </button>
                       </div>
                     )}
                     <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded">
