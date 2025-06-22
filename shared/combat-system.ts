@@ -293,7 +293,23 @@ export class CombatSystem {
       });
 
       if (hostileEntitiesInRange.length === 0) {
-        // No hostile targets in range
+        // No hostile targets in range, but still show attack animation
+        const defaultTargetPosition = {
+          x: attacker.position.x + Math.sin((attacker.facing || 0) * Math.PI / 180) * 20,
+          y: attacker.position.y - Math.cos((attacker.facing || 0) * Math.PI / 180) * 20
+        };
+        
+        attacker.attackAnimation = {
+          type: animationType,
+          timestamp: Date.now(),
+          duration: animationType === "ranged" ? 800 : animationType === "magic" ? 1000 : 600,
+          targetPosition: defaultTargetPosition
+        };
+        
+        // Update cooldown
+        if (!attacker.cooldowns) attacker.cooldowns = {};
+        attacker.cooldowns.basic_attack = now;
+        
         this.addActionLog({
           entityId: attackerId,
           entityName: attacker.name,
@@ -302,7 +318,9 @@ export class CombatSystem {
           result: "miss",
           description: `${attacker.name} swings ${weaponName} but there are no hostile targets in range`,
         });
-        return false;
+        
+        this.notifySubscribers();
+        return true; // Return true to indicate animation played
       }
 
       allTargetsInRange = hostileEntitiesInRange;

@@ -774,38 +774,57 @@ export default function TestCombat() {
                             const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
                             
                             if (entity.attackAnimation.type === "melee") {
-                              // Sword swing animation - rotating arc with trail
-                              const swingAngle = -60 + (progress * 120); // 120 degree swing arc
+                              // Sword swing animation - 30 degree arc from -15 to +15 degrees
+                              const startAngle = -15; // Start 15 degrees left of facing
+                              const endAngle = 15;    // End 15 degrees right of facing
+                              const currentSwingAngle = startAngle + (progress * (endAngle - startAngle)); // -15 to +15 degrees
+                              const entityFacing = entity.facing || 0;
+                              const absoluteAngle = entityFacing + currentSwingAngle;
+                              
                               return (
                                 <div
-                                  className="absolute w-24 h-24 pointer-events-none z-20"
+                                  className="absolute pointer-events-none z-20"
                                   style={{
                                     left: "50%",
                                     top: "50%",
-                                    transform: `translate(-50%, -50%) rotate(${(entity.facing || 0) + swingAngle}deg)`,
-                                    transformOrigin: "center",
+                                    transform: "translate(-50%, -50%)",
+                                    width: "60px",
+                                    height: "60px",
                                   }}
                                 >
-                                  {/* Sword blade with motion blur effect */}
+                                  {/* Sword blade extending from center */}
                                   <div
-                                    className="absolute w-1.5 h-10 bg-gradient-to-t from-gray-400 via-white to-gray-300 rounded-full"
+                                    className="absolute w-1.5 h-12 bg-gradient-to-t from-gray-500 via-white to-gray-300 rounded-full origin-bottom"
                                     style={{
                                       left: "50%",
-                                      top: "0",
-                                      transform: "translateX(-50%)",
-                                      filter: "drop-shadow(0 0 6px rgba(255,255,255,0.9)) blur(0.5px)",
-                                      opacity: Math.sin(progress * Math.PI) * 0.9 + 0.1,
+                                      bottom: "50%",
+                                      transform: `translateX(-50%) rotate(${absoluteAngle}deg)`,
+                                      filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
+                                      opacity: Math.sin(progress * Math.PI) * 0.8 + 0.2,
                                     }}
                                   />
-                                  {/* Swing trail effect */}
+                                  
+                                  {/* Attack arc indicator - shows the swing area */}
                                   <div
-                                    className="absolute w-20 h-20 rounded-full border-2 border-white/30"
+                                    className="absolute w-16 h-16 border-2 border-white/40"
                                     style={{
                                       left: "50%",
                                       top: "50%",
                                       transform: "translate(-50%, -50%)",
-                                      clipPath: `polygon(50% 50%, ${50 + 40 * Math.cos((swingAngle - 30) * Math.PI / 180)}% ${50 + 40 * Math.sin((swingAngle - 30) * Math.PI / 180)}%, ${50 + 40 * Math.cos(swingAngle * Math.PI / 180)}% ${50 + 40 * Math.sin(swingAngle * Math.PI / 180)}%)`,
-                                      opacity: (1 - progress) * 0.5,
+                                      borderRadius: "50%",
+                                      clipPath: `polygon(50% 50%, ${50 + 32 * Math.cos((entityFacing + startAngle) * Math.PI / 180)}% ${50 + 32 * Math.sin((entityFacing + startAngle) * Math.PI / 180)}%, ${50 + 32 * Math.cos((entityFacing + currentSwingAngle) * Math.PI / 180)}% ${50 + 32 * Math.sin((entityFacing + currentSwingAngle) * Math.PI / 180)}%)`,
+                                      opacity: (1 - progress) * 0.6,
+                                    }}
+                                  />
+                                  
+                                  {/* Motion trail effect */}
+                                  <div
+                                    className="absolute w-0.5 h-10 bg-gradient-to-t from-transparent to-white/60 origin-bottom"
+                                    style={{
+                                      left: "50%",
+                                      bottom: "50%",
+                                      transform: `translateX(-50%) rotate(${absoluteAngle - 5}deg)`,
+                                      opacity: progress * 0.7,
                                     }}
                                   />
                                 </div>
