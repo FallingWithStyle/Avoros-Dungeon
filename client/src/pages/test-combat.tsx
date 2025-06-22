@@ -883,6 +883,24 @@ export default function TestCombat() {
                             <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
                           )}
 
+                          {/* Threatened indicator - colored ring based on entity type when in range */}
+                          {isInRange && entity.hp > 0 && (
+                            <div 
+                              className={`absolute -inset-3 rounded-full border-2 animate-pulse ${
+                                entity.type === "hostile" 
+                                  ? "border-red-400 shadow-lg shadow-red-400/50" 
+                                  : entity.type === "neutral"
+                                  ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
+                                  : entity.type === "friendly" || entity.type === "ally"
+                                  ? "border-green-400 shadow-lg shadow-green-400/50"
+                                  : "border-red-400 shadow-lg shadow-red-400/50"
+                              }`}
+                              style={{
+                                filter: "drop-shadow(0 0 8px currentColor)",
+                              }}
+                            />
+                          )}
+
                           {/* Hit Impact Effect - shows on targets taking damage */}
                           {(() => {
                             // Check if this entity was recently damaged (within last 500ms)
