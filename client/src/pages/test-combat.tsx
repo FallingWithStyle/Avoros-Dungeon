@@ -576,7 +576,7 @@ export default function TestCombat() {
   };
 
   // Get cooldown percentage for hotbar display
-  const getCooldownPercentage = (actionId: string): number => {
+  const getCooldownPercentage = useCallback((actionId: string): number => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player || !player.cooldowns) return 0;
 
@@ -592,7 +592,28 @@ export default function TestCombat() {
     const cooldown = cooldowns[actionId] || 1000;
     const timeLeft = Math.max(0, (lastUsed + cooldown) - now);
     return (timeLeft / cooldown) * 100;
-  };
+  }, [combatState.entities]);
+
+  // Force re-render during cooldowns
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const player = combatState.entities.find(e => e.id === "player");
+      if (player?.cooldowns) {
+        const now = Date.now();
+        const hasActiveCooldowns = Object.values(player.cooldowns).some(lastUsed => {
+          const timeSince = now - lastUsed;
+          return timeSince < 5000; // Check for any cooldown within 5 seconds
+        });
+        
+        if (hasActiveCooldowns) {
+          forceUpdate({});
+        }
+      }
+    }, 50); // Update every 50ms for smooth cooldown animation
+
+    return () => clearInterval(interval);
+  }, [combatState.entities]);
 
   const player = combatState.entities.find(e => e.id === "player");
   const enemies = combatState.entities.filter(e => e.type === "hostile");
@@ -788,43 +809,44 @@ export default function TestCombat() {
                                     left: "50%",
                                     top: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    width: "60px",
-                                    height: "60px",
+                                    width: "80px",
+                                    height: "80px",
                                   }}
                                 >
                                   {/* Sword blade extending from center */}
                                   <div
-                                    className="absolute w-1.5 h-12 bg-gradient-to-t from-gray-500 via-white to-gray-300 rounded-full origin-bottom"
+                                    className="absolute w-2 h-16 bg-gradient-to-t from-gray-600 via-silver to-gray-300 rounded-sm origin-bottom shadow-lg"
                                     style={{
                                       left: "50%",
                                       bottom: "50%",
-                                      transform: `translateX(-50%) rotate(${absoluteAngle}deg)`,
-                                      filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
-                                      opacity: Math.sin(progress * Math.PI) * 0.8 + 0.2,
+                                      transform: "translateX(-50%) rotate(" + absoluteAngle + "deg)",
+                                      transformOrigin: "center bottom",
+                                      filter: "drop-shadow(0 0 6px rgba(255,255,255,0.9))",
+                                      opacity: Math.sin(progress * Math.PI) * 0.7 + 0.3,
                                     }}
                                   />
                                   
-                                  {/* Attack arc indicator - shows the swing area */}
+                                  {/* Sword hilt */}
                                   <div
-                                    className="absolute w-16 h-16 border-2 border-white/40"
-                                    style={{
-                                      left: "50%",
-                                      top: "50%",
-                                      transform: "translate(-50%, -50%)",
-                                      borderRadius: "50%",
-                                      clipPath: `polygon(50% 50%, ${50 + 32 * Math.cos((entityFacing + startAngle) * Math.PI / 180)}% ${50 + 32 * Math.sin((entityFacing + startAngle) * Math.PI / 180)}%, ${50 + 32 * Math.cos((entityFacing + currentSwingAngle) * Math.PI / 180)}% ${50 + 32 * Math.sin((entityFacing + currentSwingAngle) * Math.PI / 180)}%)`,
-                                      opacity: (1 - progress) * 0.6,
-                                    }}
-                                  />
-                                  
-                                  {/* Motion trail effect */}
-                                  <div
-                                    className="absolute w-0.5 h-10 bg-gradient-to-t from-transparent to-white/60 origin-bottom"
+                                    className="absolute w-3 h-2 bg-amber-700 rounded origin-bottom"
                                     style={{
                                       left: "50%",
                                       bottom: "50%",
-                                      transform: `translateX(-50%) rotate(${absoluteAngle - 5}deg)`,
-                                      opacity: progress * 0.7,
+                                      transform: "translateX(-50%) rotate(" + absoluteAngle + "deg)",
+                                      transformOrigin: "center bottom",
+                                      marginBottom: "-1px",
+                                    }}
+                                  />
+                                  
+                                  {/* Motion blur trail */}
+                                  <div
+                                    className="absolute w-1 h-14 bg-gradient-to-t from-transparent via-white/30 to-transparent origin-bottom"
+                                    style={{
+                                      left: "50%",
+                                      bottom: "50%",
+                                      transform: "translateX(-50%) rotate(" + (absoluteAngle - 8) + "deg)",
+                                      transformOrigin: "center bottom",
+                                      opacity: Math.sin(progress * Math.PI) * 0.5,
                                     }}
                                   />
                                 </div>
