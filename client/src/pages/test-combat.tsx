@@ -685,6 +685,103 @@ export default function TestCombat() {
 
 
 
+                  {/* Arena-level Ranged Attack Animations */}
+                  {combatState.entities.map((entity) => {
+                    if (entity.attackAnimation && 
+                        entity.attackAnimation.type === "ranged" && 
+                        entity.attackAnimation.targetPosition &&
+                        Date.now() - entity.attackAnimation.timestamp < entity.attackAnimation.duration) {
+                      
+                      const progress = (Date.now() - entity.attackAnimation.timestamp) / entity.attackAnimation.duration;
+                      const baseGridBoxSizePx = 40;
+                      const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
+                      const entityFacing = entity.facing || 0;
+                      
+                      // Calculate bow tip position (where arrow starts) - small offset from entity center
+                      const bowTipOffsetX = Math.sin(entityFacing * Math.PI / 180) * 2; // 2% offset for bow tip
+                      const bowTipOffsetY = -Math.cos(entityFacing * Math.PI / 180) * 2;
+                      
+                      const startX = entity.position.x + bowTipOffsetX;
+                      const startY = entity.position.y + bowTipOffsetY;
+                      const endX = entity.attackAnimation.targetPosition.x;
+                      const endY = entity.attackAnimation.targetPosition.y;
+
+                      // Add slight arc to the projectile path
+                      const midProgress = 0.5;
+                      const arcHeight = 3; // 3% arc height for more realistic trajectory
+
+                      let currentX, currentY;
+                      if (progress <= midProgress) {
+                        const t = progress / midProgress;
+                        currentX = startX + (endX - startX) * t * 0.5;
+                        currentY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                      } else {
+                        const t = (progress - midProgress) / (1 - midProgress);
+                        currentX = startX + (endX - startX) * (0.5 + t * 0.5);
+                        currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                      }
+
+                      // Calculate projectile angle based on velocity direction
+                      const nextProgress = Math.min(1, progress + 0.05);
+                      let nextX, nextY;
+                      if (nextProgress <= midProgress) {
+                        const t = nextProgress / midProgress;
+                        nextX = startX + (endX - startX) * t * 0.5;
+                        nextY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
+                      } else {
+                        const t = (nextProgress - midProgress) / (1 - midProgress);
+                        nextX = startX + (endX - startX) * (0.5 + t * 0.5);
+                        nextY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
+                      }
+                      const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
+
+                      return (
+                        <div
+                          key={`arrow-${entity.id}`}
+                          className="absolute pointer-events-none z-30"
+                          style={{
+                            left: `${currentX}%`,
+                            top: `${currentY}%`,
+                            transform: "translate(-50%, -50%)",
+                          }}
+                        >
+                          <div
+                            className="w-2 h-6 bg-gradient-to-t from-amber-800 via-yellow-500 to-yellow-200 rounded-full shadow-lg"
+                            style={{ 
+                              transform: `rotate(${angle}deg)`,
+                              filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
+                              opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
+                            }} 
+                          />
+                          {/* Arrow fletching */}
+                          <div
+                            className="absolute w-3 h-2 bg-red-600/60"
+                            style={{
+                              transform: `rotate(${angle}deg) translateY(120%)`,
+                              left: "50%",
+                              top: "50%",
+                              marginLeft: "-6px",
+                              opacity: progress * 0.8,
+                              clipPath: "polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%)",
+                            }}
+                          />
+                          {/* Arrow trail */}
+                          <div
+                            className="absolute w-1 h-3 bg-gradient-to-t from-transparent to-yellow-400/40"
+                            style={{
+                              transform: `rotate(${angle}deg) translateY(150%)`,
+                              left: "50%",
+                              top: "50%",
+                              marginLeft: "-2px",
+                              opacity: progress * 0.5,
+                            }}
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+
                   {/* Entities */}
                   {combatState.entities.map((entity) => {
                     // Calculate if this entity is in range of player's weapon (for non-player entities)
@@ -889,93 +986,7 @@ export default function TestCombat() {
                               );
                             }
 
-                            if (entity.attackAnimation.type === "ranged" && entity.attackAnimation.targetPosition) {
-                              // Arrow/projectile animation originating from bow position
-                              const weaponRange = entity.equippedWeapon ? (entity.equippedWeapon.range || entity.equippedWeapon.baseRange || 1) : 1;
-                              const bowLength = Math.max(12, baseGridBoxSizePx * weaponRange * 0.6); // Bow is 60% of weapon range
-                              const entityFacing = entity.facing || 0;
-                              
-                              // Calculate bow tip position (where arrow starts)
-                              const bowTipOffsetX = Math.sin(entityFacing * Math.PI / 180) * (bowLength / 8); // Convert to percentage
-                              const bowTipOffsetY = -Math.cos(entityFacing * Math.PI / 180) * (bowLength / 8);
-                              
-                              const startX = entity.position.x + bowTipOffsetX;
-                              const startY = entity.position.y + bowTipOffsetY;
-                              const endX = entity.attackAnimation.targetPosition.x;
-                              const endY = entity.attackAnimation.targetPosition.y;
-
-                              // Add slight arc to the projectile path
-                              const midProgress = 0.5;
-                              const arcHeight = 3; // 3% arc height for more realistic trajectory
-
-                              let currentX, currentY;
-                              if (progress <= midProgress) {
-                                const t = progress / midProgress;
-                                currentX = startX + (endX - startX) * t * 0.5;
-                                currentY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
-                              } else {
-                                const t = (progress - midProgress) / (1 - midProgress);
-                                currentX = startX + (endX - startX) * (0.5 + t * 0.5);
-                                currentY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
-                              }
-
-                              // Calculate projectile angle based on velocity direction
-                              const nextProgress = Math.min(1, progress + 0.05);
-                              let nextX, nextY;
-                              if (nextProgress <= midProgress) {
-                                const t = nextProgress / midProgress;
-                                nextX = startX + (endX - startX) * t * 0.5;
-                                nextY = startY + (endY - startY) * t * 0.5 - arcHeight * t;
-                              } else {
-                                const t = (nextProgress - midProgress) / (1 - midProgress);
-                                nextX = startX + (endX - startX) * (0.5 + t * 0.5);
-                                nextY = startY + (endY - startY) * (0.5 + t * 0.5) - arcHeight * (1 - t);
-                              }
-                              const angle = Math.atan2(nextX - currentX, -(nextY - currentY)) * (180 / Math.PI);
-
-                              return (
-                                <div
-                                  className="absolute pointer-events-none z-30"
-                                  style={{
-                                    left: `${currentX}%`,
-                                    top: `${currentY}%`,
-                                    transform: "translate(-50%, -50%)",
-                                  }}
-                                >
-                                  <div
-                                    className="w-2 h-6 bg-gradient-to-t from-amber-800 via-yellow-500 to-yellow-200 rounded-full shadow-lg"
-                                    style={{ 
-                                      transform: `rotate(${angle}deg)`,
-                                      filter: "drop-shadow(0 0 4px rgba(255,191,0,0.8))",
-                                      opacity: progress < 0.85 ? 1 : 1 - ((progress - 0.85) / 0.15),
-                                    }} 
-                                  />
-                                  {/* Arrow fletching */}
-                                  <div
-                                    className="absolute w-3 h-2 bg-red-600/60"
-                                    style={{
-                                      transform: `rotate(${angle}deg) translateY(120%)`,
-                                      left: "50%",
-                                      top: "50%",
-                                      marginLeft: "-6px",
-                                      opacity: progress * 0.8,
-                                      clipPath: "polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%)",
-                                    }}
-                                  />
-                                  {/* Arrow trail */}
-                                  <div
-                                    className="absolute w-1 h-3 bg-gradient-to-t from-transparent to-yellow-400/40"
-                                    style={{
-                                      transform: `rotate(${angle}deg) translateY(150%)`,
-                                      left: "50%",
-                                      top: "50%",
-                                      marginLeft: "-2px",
-                                      opacity: progress * 0.5,
-                                    }}
-                                  />
-                                </div>
-                              );
-                            }
+                            
 
                             if (entity.attackAnimation.type === "magic") {
                               // Enhanced magic spell animation scaled to weapon range
