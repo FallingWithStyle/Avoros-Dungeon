@@ -424,6 +424,15 @@ export default function DebugPanel({ activeCrawler }: DebugPanelProps) {
               <span className={isDbOnlyMode ? 'text-yellow-400' : 'text-red-400'}>|</span>
               <span>Scan: {activeCrawler?.scanRange ?? 0}</span>
             </div>
+			{/* Debug Database Size Analyzer - only in debug mode */}
+            {IS_DEBUG_MODE && (
+              <div className="mt-3 p-2 border border-gray-600/20 rounded bg-gray-900/20">
+                <div className="text-[0.60rem] text-gray-400 mb-2 font-mono">
+                  Database Storage Analysis
+                </div>
+                <DatabaseSizeAnalyzer />
+              </div>
+            )}
           </CardContent>
         )}
       </Card>
