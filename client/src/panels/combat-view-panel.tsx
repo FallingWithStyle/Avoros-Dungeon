@@ -103,16 +103,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize combat system with crawler data
   const initializeCombatSystem = useCallback(() => {
-    if (!effectiveRoomData?.room) {
-      console.log('No room data available for combat initialization');
+    if (!effectiveTacticalData || !tacticalEntities.length) {
+      console.log('No tactical data available for combat initialization');
       return;
     }
 
-    console.log('Initializing combat with room:', effectiveRoomData.room.name);
+    console.log('Initializing combat with room:', effectiveRoomData?.room?.name || 'Unknown Room');
     console.log('Tactical data available:', !!effectiveTacticalData);
-    if (effectiveTacticalData?.tacticalEntities) {
-      console.log('Tactical entities count:', effectiveTacticalData.tacticalEntities.length);
-    }
+    console.log('Tactical entities count:', tacticalEntities.length);
 
     // Clear existing entities first
     const currentState = combatSystem.getState();
@@ -421,7 +419,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize when component mounts and data is available
   useEffect(() => {
-    if (!roomLoading && !tacticalLoading && effectiveRoomData?.room && effectiveTacticalData) {
+    // Initialize if we have tactical data, even without room data
+    if (!roomLoading && !tacticalLoading && effectiveTacticalData && tacticalEntities.length > 0) {
       setIsInitialized(false); // Reset initialization flag when room changes
       initializeCombatSystem();
     }
@@ -457,7 +456,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
 
   // Show loading state
-  if ((roomLoading || tacticalLoading) && !effectiveRoomData?.room) {
+  if ((roomLoading || tacticalLoading) && (!effectiveTacticalData || !tacticalEntities.length)) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -470,7 +469,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <div className="w-full h-64 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <span className="text-slate-400">Loading room data...</span>
+              <span className="text-slate-400">Loading tactical data...</span>
             </div>
           </div>
         </CardContent>
