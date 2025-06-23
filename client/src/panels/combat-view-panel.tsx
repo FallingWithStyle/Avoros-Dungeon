@@ -69,6 +69,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const effectiveRoomData = roomData || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
+  console.log('Combat View Data Debug:', {
+    roomData: effectiveRoomData?.room?.name,
+    tacticalDataLength: effectiveTacticalData?.length,
+    tacticalEntities: effectiveTacticalData?.map(e => ({ type: e.type, name: e.name })),
+    combatEntities: combatState.entities.length
+  });
+
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
     {
@@ -146,8 +153,48 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     setEquippedWeapon(availableWeapons[0]);
 
     // Add entities from tactical data (mobs, etc.)
-    if (effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities)) {
-      console.log('Loading tactical entities:', effectiveTacticalData.tacticalEntities.length);
+    if (effectiveTacticalData && Array.isArray(effectiveTacticalData)) {
+      console.log('Loading tactical entities:', effectiveTacticalData.length);
+      effectiveTacticalData.forEach((tacticalEntity: any) => {
+        if (tacticalEntity.type === "mob" && tacticalEntity.data) {
+          const mobEntity: CombatEntity = {
+            id: "mob_" + tacticalEntity.data.id,
+            name: tacticalEntity.name,
+            type: "hostile", // Default to hostile for now
+            hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
+            maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
+            energy: 20,
+            maxEnergy: 20,
+            power: 10,
+            maxPower: 10,
+            might: 10,
+            agility: 14,
+            endurance: 8,
+            intellect: 6,
+            charisma: 4,
+            wisdom: 7,
+            attack: tacticalEntity.data.attack || 12,
+            defense: tacticalEntity.data.defense || 8,
+            speed: tacticalEntity.data.speed || 16,
+            accuracy: 16,
+            evasion: 18,
+            position: { 
+              x: tacticalEntity.position.x, 
+              y: tacticalEntity.position.y 
+            },
+            facing: 180,
+            level: 3,
+            isAlive: true,
+            cooldowns: {}
+          };
+
+          combatSystem.addEntity(mobEntity);
+          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
+        }
+      });
+    } else if (effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities)) {
+      // Fallback for old format
+      console.log('Loading tactical entities (old format):', effectiveTacticalData.tacticalEntities.length);
       effectiveTacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
         if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
           const mobEntity: CombatEntity = {
@@ -182,11 +229,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           };
 
           combatSystem.addEntity(mobEntity);
-          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
+          console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
         }
       });
     } else {
-      console.log('No tactical entities found or tacticalData is null');
+      console.log('No tactical entities found. tacticalData:', effectiveTacticalData);
     }
 
     if (aiEnabled) {
@@ -211,16 +258,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const playerRadius = 1.5;
     
     const checkCollisionWithCover = (x: number, y: number): boolean => {
-      if (!effectiveTacticalData?.tacticalEntities || !Array.isArray(effectiveTacticalData.tacticalEntities)) return false;
+      if (!effectiveTacticalData || !Array.isArray(effectiveTacticalData)) return false;
       
-      return effectiveTacticalData.tacticalEntities.some((entity: any) => {
+      return effectiveTacticalData.some((entity: any) => {
         if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
         
-        // Convert tactical grid positions to combat view percentages
-        const wallLeft = (entity.x / 10) * 100 - 2;
-        const wallRight = (entity.x / 10) * 100 + 2;
-        const wallTop = (entity.y / 10) * 100 - 2;
-        const wallBottom = (entity.y / 10) * 100 + 2;
+        // Use entity position directly (already in percentage format)
+        const wallLeft = entity.position.x - 2;
+        const wallRight = entity.position.x + 2;
+        const wallTop = entity.position.y - 2;
+        const wallBottom = entity.position.y + 2;
 
         const buffer = 0.5;
         return (x + playerRadius > wallLeft - buffer && 
@@ -371,7 +418,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize when component mounts and data is available
   useEffect(() => {
-    if (!roomLoading && !tacticalLoading && effectiveRoomData?.room) {
+    if (!roomLoading && !tacticalLoading && effectiveRoomData?.room && effectiveTacticalData) {
       setIsInitialized(false); // Reset initialization flag when room changes
       initializeCombatSystem();
     }
@@ -379,7 +426,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return () => {
       combatSystem.stopAILoop();
     };
-  }, [initializeCombatSystem, roomLoading, tacticalLoading, effectiveRoomData?.room?.id, effectiveTacticalData]);
+  }, [initializeCombatSystem, roomLoading, tacticalLoading, effectiveRoomData?.room?.id, effectiveTacticalData?.length]);
 
   // Force re-render during cooldowns
   const [, forceUpdate] = useState({});
@@ -490,16 +537,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           </div>
 
           {/* Room Layout Elements */}
-          {effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities) ? 
-            effectiveTacticalData.tacticalEntities.map((entity: any) => {
+          {effectiveTacticalData && Array.isArray(effectiveTacticalData) ? 
+            effectiveTacticalData.map((entity: any) => {
               if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
               
-              const x = (entity.x / 10) * 100;
-              const y = (entity.y / 10) * 100;
+              const x = entity.position.x;
+              const y = entity.position.y;
             
             return (
               <div
-                key={entity.id || `${entity.type}-${entity.x}-${entity.y}`}
+                key={entity.id || `${entity.type}-${x}-${y}`}
                 className={`absolute ${
                   entity.type === "wall" 
                     ? "bg-stone-600 border-2 border-stone-500" 
