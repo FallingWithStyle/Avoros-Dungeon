@@ -159,18 +159,6 @@ export function calculateHitChance(attacker: any, defender: any): number {
 
 // Simplified Combat System class
 export class CombatSystem {
-  private canvas: HTMLCanvasElement | null = null;
-  private ctx: CanvasRenderingContext2D | null = null;
-  private entities: Map<string, CombatEntity> = new Map();
-  private selectedEntityId: string | null = null;
-
-  initialize(canvas: HTMLCanvasElement): void {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-    if (!this.ctx) {
-      throw new Error('Failed to get 2D context from canvas');
-    }
-  }
   private state: CombatState = {
     entities: [],
     isInCombat: false,
@@ -279,7 +267,7 @@ export class CombatSystem {
     if (attacker.equippedWeapon) {
       const weaponName = attacker.equippedWeapon.name.toLowerCase();
       const weaponType = attacker.equippedWeapon.weapon_type?.toLowerCase() || "";
-
+      
       if (weaponName.includes("bow") || weaponType.includes("bow") || weaponName.includes("crossbow")) {
         animationType = "ranged";
       } else if (weaponName.includes("staff") || weaponType.includes("staff") || 
@@ -332,18 +320,18 @@ export class CombatSystem {
           x: attacker.position.x + Math.sin((attacker.facing || 0) * Math.PI / 180) * 20,
           y: attacker.position.y - Math.cos((attacker.facing || 0) * Math.PI / 180) * 20
         };
-
+        
         attacker.attackAnimation = {
           type: animationType,
           timestamp: Date.now(),
           duration: animationType === "ranged" ? 800 : animationType === "magic" ? 1000 : 600,
           targetPosition: defaultTargetPosition
         };
-
+        
         // Update cooldown
         if (!attacker.cooldowns) attacker.cooldowns = {};
         attacker.cooldowns.basic_attack = now;
-
+        
         this.addActionLog({
           entityId: attackerId,
           entityName: attacker.name,
@@ -352,7 +340,7 @@ export class CombatSystem {
           result: "miss",
           description: `${attacker.name} swings ${weaponName} but there are no hostile targets in range`,
         });
-
+        
         this.notifySubscribers();
         return true; // Return true to indicate animation played
       }
@@ -414,7 +402,7 @@ export class CombatSystem {
         // Apply damage to target
         target.hp = Math.max(0, target.hp - finalDamage);
         target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
-
+        
         hitCount++;
         totalDamage += finalDamage;
         attackResults.push(`${target.name}: ${finalDamage} damage`);
@@ -506,32 +494,32 @@ export class CombatSystem {
     if (!player) return;
 
     const hostileEntities = this.state.entities.filter(e => e.type === "hostile" && e.hp > 0);
-
+    
     hostileEntities.forEach(entity => {
       // Calculate distance to player
       const distance = this.calculateDistance(entity.position, player.position);
-
+      
       // If player is within detection range (30 units), move toward them
       if (distance <= 30 && distance > 8) {
         const dx = player.position.x - entity.position.x;
         const dy = player.position.y - entity.position.y;
         const magnitude = Math.sqrt(dx * dx + dy * dy);
-
+        
         if (magnitude > 0) {
           // Normalize and apply movement speed
           const moveSpeed = (entity.speed || 10) * 0.3; // Scale down for smoother movement
           const newX = Math.max(0, Math.min(100, entity.position.x + (dx / magnitude) * moveSpeed));
           const newY = Math.max(0, Math.min(100, entity.position.y + (dy / magnitude) * moveSpeed));
-
+          
           // Update position
           entity.position = { x: newX, y: newY };
-
+          
           // Update facing to look at player
           const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
           entity.facing = angle < 0 ? angle + 360 : angle;
         }
       }
-
+      
       // If close enough and can attack, attempt to attack player
       if (distance <= 8 && this.canUseAction(entity.id, "basic_attack")) {
         this.executeAttack(entity.id, "player");
@@ -545,7 +533,7 @@ export class CombatSystem {
       this.state.isInCombat = true;
       this.state.combatStartTime = Date.now();
       console.log("Combat started");
-
+      
       // Start AI update loop
       this.startAILoop();
     }
@@ -555,10 +543,10 @@ export class CombatSystem {
 
   startAILoop(): void {
     if (this.aiLoopId) return; // Already running
-
+    
     this.aiLoopId = setInterval(() => {
       this.updateCombatState(); // Check for combat start/end conditions
-
+      
       if (this.state.isInCombat) {
         this.updateAI();
         this.notifySubscribers();
@@ -591,7 +579,7 @@ export class CombatSystem {
         const distance = this.calculateDistance(player.position, hostile.position);
         return distance <= 25;
       });
-
+      
       if (nearbyHostiles) {
         this.startCombat();
       }
@@ -698,209 +686,6 @@ export class CombatSystem {
     // Keep only player when changing rooms
     this.state.entities = this.state.entities.filter((e) => e.id === "player");
     this.notifySubscribers();
-  }
-
-  // Canvas rendering method
-  render(): void {
-    if (!this.canvas || !this.ctx) return;
-
-    const ctx = this.ctx;
-    const canvas = this.canvas;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw grid background
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1;
-    const gridSize = 20;
-    
-    for (let x = 0; x <= canvas.width; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
-      ctx.stroke();
-    }
-    
-    for (let y = 0; y <= canvas.height; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(canvas.width, y);
-      ctx.stroke();
-    }
-
-    // Draw entities
-    this.state.entities.forEach(entity => {
-      this.drawEntity(ctx, entity);
-    });
-  }
-
-  private drawEntity(ctx: CanvasRenderingContext2D, entity: CombatEntity): void {
-    const x = entity.position.x;
-    const y = entity.position.y;
-    const size = 16;
-
-    // Entity color based on type
-    let color = '#888';
-    switch (entity.type) {
-      case 'player':
-        color = '#4CAF50';
-        break;
-      case 'hostile':
-        color = '#F44336';
-        break;
-      case 'neutral':
-        color = '#FF9800';
-        break;
-      case 'ally':
-        color = '#2196F3';
-        break;
-    }
-
-    // Draw entity circle
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw selection highlight
-    if (entity.isSelected) {
-      ctx.strokeStyle = '#FFEB3B';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(x, y, size / 2 + 2, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
-    // Draw health bar
-    if (entity.hp < entity.maxHp) {
-      const barWidth = size + 4;
-      const barHeight = 4;
-      const barX = x - barWidth / 2;
-      const barY = y - size / 2 - 8;
-
-      // Background
-      ctx.fillStyle = '#333';
-      ctx.fillRect(barX, barY, barWidth, barHeight);
-
-      // Health
-      const healthPercent = entity.hp / entity.maxHp;
-      ctx.fillStyle = healthPercent > 0.5 ? '#4CAF50' : healthPercent > 0.25 ? '#FF9800' : '#F44336';
-      ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-    }
-
-    // Draw name
-    ctx.fillStyle = '#FFF';
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(entity.name, x, y + size / 2 + 12);
-
-    // Draw attack animation if active
-    if (entity.attackAnimation) {
-      this.drawAttackAnimation(ctx, entity);
-    }
-
-    // Draw damage flash if recently damaged
-    if (entity.lastDamageTime && Date.now() - entity.lastDamageTime < 300) {
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-      ctx.beginPath();
-      ctx.arc(x, y, size / 2 + 4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  private drawAttackAnimation(ctx: CanvasRenderingContext2D, entity: CombatEntity): void {
-    if (!entity.attackAnimation) return;
-
-    const animation = entity.attackAnimation;
-    const elapsed = Date.now() - animation.timestamp;
-    
-    if (elapsed > animation.duration) {
-      // Animation finished, remove it
-      delete entity.attackAnimation;
-      return;
-    }
-
-    const progress = elapsed / animation.duration;
-    const startX = entity.position.x;
-    const startY = entity.position.y;
-    const endX = animation.targetPosition.x;
-    const endY = animation.targetPosition.y;
-
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 3;
-
-    switch (animation.type) {
-      case 'melee':
-        // Draw arc for melee attack
-        const angle = Math.atan2(endY - startY, endX - startX);
-        const attackReach = 30;
-        const arcX = startX + Math.cos(angle) * attackReach * progress;
-        const arcY = startY + Math.sin(angle) * attackReach * progress;
-        
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(arcX, arcY);
-        ctx.stroke();
-        break;
-
-      case 'ranged':
-        // Draw projectile
-        const projX = startX + (endX - startX) * progress;
-        const projY = startY + (endY - startY) * progress;
-        
-        ctx.fillStyle = '#FFD700';
-        ctx.beginPath();
-        ctx.arc(projX, projY, 3, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-
-      case 'magic':
-        // Draw magical effect
-        ctx.strokeStyle = '#9C27B0';
-        ctx.lineWidth = 2;
-        
-        for (let i = 0; i < 5; i++) {
-          const offset = (i * Math.PI * 2) / 5 + elapsed * 0.01;
-          const radius = 20 * progress;
-          const x = endX + Math.cos(offset) * radius;
-          const y = endY + Math.sin(offset) * radius;
-          
-          ctx.beginPath();
-          ctx.arc(x, y, 2, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-        break;
-    }
-  }
-
-  // Helper methods for the combat panel
-  getEntityAt(x: number, y: number): CombatEntity | null {
-    const clickRadius = 20;
-    
-    for (const entity of this.state.entities) {
-      const dx = entity.position.x - x;
-      const dy = entity.position.y - y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      if (distance <= clickRadius) {
-        return entity;
-      }
-    }
-    
-    return null;
-  }
-
-  getPlayerEntity(): CombatEntity | null {
-    return this.state.entities.find(e => e.type === "player") || null;
-  }
-
-  performAttack(attackerId: string, targetId: string): boolean {
-    return this.executeAttack(attackerId, targetId);
-  }
-
-  moveEntity(entityId: string, position: Position): boolean {
-    return this.moveEntityToPosition(entityId, position);
   }
 }
 
