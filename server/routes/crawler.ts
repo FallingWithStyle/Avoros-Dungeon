@@ -350,7 +350,7 @@ export function registerCrawlerRoutes(app: Express) {
       const batchCacheKey = `batch:${crawlerId}:room-data`;
       const cached = await redisService.get(batchCacheKey);
       if (cached) {
-        console.log(`Using cached batch data for crawler ${crawlerId}`);
+        // Fetching room data batch for crawler
         return res.json(cached);
       }
 
@@ -359,8 +359,7 @@ export function registerCrawlerRoutes(app: Express) {
         return res.status(404).json({ error: "Crawler not found" });
       }
 
-      console.log("Fetching room data batch for crawler:", crawlerId);
-
+      // Fetching room data batch for crawler
       // Initialize request cache for this request
       const requestCache = getRequestCache(req);
       storage.tacticalStorage?.setRequestCache(requestCache);
@@ -402,10 +401,7 @@ export function registerCrawlerRoutes(app: Express) {
       // Cache the response for 60 seconds (shorter TTL for fresher data)
       await redisService.set(batchCacheKey, response, 60);
 
-      console.log("=== BATCH DATA RESPONSE for crawler", crawlerId, "===");
-      console.log("Tactical entities:", tacticalData?.length || 0);
-      console.log("Scanned rooms:", scannedRooms?.length || 0);
-      console.log("Explored rooms:", exploredRooms?.length || 0);
+      // Batch data response prepared for crawler
 
       res.json(response);
 
@@ -605,7 +601,8 @@ export function registerCrawlerRoutes(app: Express) {
         // Continue without cache
       }
 
-      const roomData = await storage.explorationStorage.getCurrentRoom(crawlerId);
+      // Use the main storage interface instead of explorationStorage directly
+      const roomData = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!roomData) {
         return res.status(404).json({ message: "Current room not found" });
       }

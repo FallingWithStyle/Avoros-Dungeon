@@ -102,7 +102,7 @@ export function useKeyboardMovement({
 
     if (key === 'z' && onStairsRef.current) {
       event.preventDefault();
-      console.log('⌨️ Stairs/down action');
+      console.log('⌨️ Keyboard: Stairs/down action');
       onStairsRef.current();
       return;
     }
@@ -133,7 +133,7 @@ export function useKeyboardMovement({
 
     keysPressed.current.delete(key);
 
-    //console.log('⌨️ Key released:', key, 'Keys now:', Array.from(keysPressed.current));
+    console.log('⌨️ Keyboard: Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Only stop movement when no keys are pressed
     if (keysPressed.current.size === 0) {

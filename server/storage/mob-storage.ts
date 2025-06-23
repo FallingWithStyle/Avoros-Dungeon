@@ -121,7 +121,7 @@ export class MobStorage extends BaseStorage {
     if (this.requestCache) {
       const cached = this.requestCache.get<any[]>(cacheKey);
       if (cached) {
-        console.log(`Request cache hit for room ${roomId} mobs`);
+        // Request cache hit for room mobs
         return cached;
       }
     }
@@ -129,14 +129,13 @@ export class MobStorage extends BaseStorage {
     try {
       const cached = await redisService.getRoomMobs(roomId);
       if (cached) {
-        console.log(`Found ${cached.length} cached mobs for room ${roomId}`);
+        // console.log(`Found ${cached.length} cached mobs for room ${roomId}`);
         return cached;
       }
     } catch (error) {
-      console.log('Redis cache miss for room mobs, fetching from database');
+      // Redis cache miss for room mobs
     }
 
-    console.log(`Fetching mobs from database for room ${roomId}`);
     const roomMobs = await db
       .select({
         mob: mobs,
@@ -145,16 +144,6 @@ export class MobStorage extends BaseStorage {
       .from(mobs)
       .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
-
-    console.log(`Found ${roomMobs.length} mobs in database for room ${roomId}`);
-    if (roomMobs.length > 0) {
-      console.log(`Mob details:`, roomMobs.map(m => ({
-        id: m.mob.id,
-        name: m.mob.displayName,
-        alive: m.mob.isAlive,
-        active: m.mob.isActive
-      })));
-    }
 
     // Cache in request cache
     if (this.requestCache) {
@@ -165,7 +154,7 @@ export class MobStorage extends BaseStorage {
     try {
       await redisService.setRoomMobs(roomId, roomMobs, 600);
     } catch (error) {
-      console.log('Failed to cache room mobs data');
+      // console.log('Failed to cache room mobs data');
     }
 
     return roomMobs;
@@ -201,14 +190,14 @@ export class MobStorage extends BaseStorage {
       );
 
     if (mobsToRespawn.length > 0) {
-      console.log(`Found ${mobsToRespawn.length} potential mobs to respawn`);
+      // console.log(`Found ${mobsToRespawn.length} potential mobs to respawn`);
 
       // Filter out debug mobs from respawning
       const normalMobsToRespawn = mobsToRespawn.filter(mob => 
         !mob.displayName.startsWith('[Debug]')
       );
 
-      console.log(`Respawning ${normalMobsToRespawn.length} normal mobs (filtered out ${mobsToRespawn.length - normalMobsToRespawn.length} debug mobs)`);
+      // console.log(`Respawning ${normalMobsToRespawn.length} normal mobs (filtered out ${mobsToRespawn.length - normalMobsToRespawn.length} debug mobs)`);
 
       for (const mob of normalMobsToRespawn) {
         await db
@@ -222,13 +211,13 @@ export class MobStorage extends BaseStorage {
           })
           .where(eq(mobs.id, mob.id));
 
-        console.log(`Respawned normal mob: ${mob.displayName}`);
+        // console.log(`Respawned normal mob: ${mob.displayName}`);
 
         // Invalidate cache for this room
         try {
           await redisService.invalidateRoomMobs(mob.roomId);
         } catch (error) {
-          console.log('Failed to invalidate room mobs cache');
+          // console.log('Failed to invalidate room mobs cache');
         }
       }
 
@@ -238,7 +227,7 @@ export class MobStorage extends BaseStorage {
       );
 
       if (debugMobsWithRespawn.length > 0) {
-        console.log(`Cleaning up ${debugMobsWithRespawn.length} debug mobs with respawn times`);
+        // console.log(`Cleaning up ${debugMobsWithRespawn.length} debug mobs with respawn times`);
         for (const debugMob of debugMobsWithRespawn) {
           await db
             .update(mobs)
@@ -248,7 +237,7 @@ export class MobStorage extends BaseStorage {
             })
             .where(eq(mobs.id, debugMob.id));
 
-          console.log(`Cleaned up debug mob respawn time: ${debugMob.displayName}`);
+          // console.log(`Cleaned up debug mob respawn time: ${debugMob.displayName}`);
         }
       }
     }
@@ -273,9 +262,9 @@ export class MobStorage extends BaseStorage {
       respawnAt = new Date();
       respawnAt.setHours(respawnAt.getHours() + respawnHours);
 
-      console.log(`Normal mob ${mobData.displayName} killed - will respawn in ${respawnHours} hours`);
+      // console.log(`Normal mob ${mobData.displayName} killed - will respawn in ${respawnHours} hours`);
     } else {
-      console.log(`Debug mob ${mobData.displayName} killed - will NOT respawn`);
+      // console.log(`Debug mob ${mobData.displayName} killed - will NOT respawn`);
     }
 
     await db
@@ -292,11 +281,11 @@ export class MobStorage extends BaseStorage {
     // Invalidate cache
     try {
       await redisService.invalidateRoomMobs(mobData.roomId);
-      
+
       // Also invalidate adjacent room cache for all crawlers in the area
       await this.invalidateAdjacentCacheForRoom(mobData.roomId);
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      // console.log('Failed to invalidate room mobs cache');
     }
   }
 
@@ -333,9 +322,9 @@ export class MobStorage extends BaseStorage {
         await redisService.invalidateAdjacentRooms(crawler.id);
       }
 
-      console.log(`🗑️ Invalidated adjacent room cache for ${crawlers.length} crawlers due to mob death in room ${roomId}`);
+      // console.log(`🗑️ Invalidated adjacent room cache for ${crawlers.length} crawlers due to mob death in room ${roomId}`);
     } catch (error) {
-      console.log('Failed to invalidate adjacent room caches:', error);
+      // console.log('Failed to invalidate adjacent room caches:', error);
     }
   }
 
@@ -363,18 +352,15 @@ export class MobStorage extends BaseStorage {
     try {
       await redisService.invalidateRoomMobs(mobData.roomId);
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      // console.log('Failed to invalidate room mobs cache');
     }
 
     return false; // Mob still alive
   }
 
   async spawnMobsForRoom(roomId: number, roomData: any): Promise<void> {
-    console.log('🚀 spawnMobsForRoom called for room:', roomId, 'with data:', roomData);
-
     const spawnConfig = await this.getContextualSpawnConfig(roomData);
     if (!spawnConfig || spawnConfig.maxMobs === 0) {
-      console.log('❌ No spawn config or maxMobs is 0, skipping spawn');
       return;
     }
 
@@ -382,48 +368,41 @@ export class MobStorage extends BaseStorage {
     const existingMobs = await this.getRoomMobs(roomId);
     const aliveMobs = existingMobs.filter(m => m.mob.isAlive);
 
-    console.log('📊 Room mob status:', {
-      existingMobs: existingMobs.length,
-      aliveMobs: aliveMobs.length,
-      maxMobs: spawnConfig.maxMobs
-    });
-
     if (aliveMobs.length >= spawnConfig.maxMobs) {
-      console.log('✋ Room already has maximum mobs, skipping spawn');
       return;
     }
 
     // Spawn missing mobs
     const mobsToSpawn = spawnConfig.maxMobs - aliveMobs.length;
-    console.log('🎲 Will attempt to spawn', mobsToSpawn, 'mobs with chance', spawnConfig.spawnChance);
+    // console.log('🎲 Will attempt to spawn', mobsToSpawn, 'mobs with chance', spawnConfig.spawnChance);
 
     for (let i = 0; i < mobsToSpawn; i++) {
       const spawnRoll = Math.random();
-      console.log(`🎯 Spawn attempt ${i + 1}/${mobsToSpawn}: rolled ${spawnRoll} vs chance ${spawnConfig.spawnChance}`);
+      // console.log(`🎯 Spawn attempt ${i + 1}/${mobsToSpawn}: rolled ${spawnRoll} vs chance ${spawnConfig.spawnChance}`);
 
       if (spawnRoll > spawnConfig.spawnChance) {
-        console.log('❌ Spawn roll failed, skipping this mob');
+        // console.log('❌ Spawn roll failed, skipping this mob');
         continue;
       }
 
       // Generate mob based on context
       const mobData = await this.generateContextualMob(spawnConfig, roomData);
       if (!mobData) {
-        console.log('❌ Failed to generate mob data, skipping');
+        // console.log('❌ Failed to generate mob data, skipping');
         continue;
       }
 
       const position = this.getRandomPosition();
-      console.log('📍 Generated position:', position);
+      // console.log('📍 Generated position:', position);
 
-      console.log('💾 Inserting mob into database:', {
-        roomId,
-        enemyId: mobData.mobTypeId,
-        displayName: mobData.displayName,
-        rarity: mobData.rarity,
-        health: mobData.health,
-        position
-      });
+      // console.log('💾 Inserting mob into database:', {
+      //   roomId,
+      //   enemyId: mobData.mobTypeId,
+      //   displayName: mobData.displayName,
+      //   rarity: mobData.rarity,
+      //   health: mobData.health,
+      //   position
+      // });
 
       await db.insert(mobs).values({
         roomId,
@@ -441,43 +420,43 @@ export class MobStorage extends BaseStorage {
         updatedAt: new Date()
       });
 
-      console.log('✅ Successfully spawned mob:', mobData.displayName);
+      // console.log('✅ Successfully spawned mob:', mobData.displayName);
     }
 
     // Invalidate cache
     try {
       await redisService.invalidateRoomMobs(roomId);
-      console.log('🗑️ Invalidated room mobs cache');
+      // console.log('🗑️ Invalidated room mobs cache');
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      // console.log('Failed to invalidate room mobs cache');
     }
   }
 
   private async getContextualSpawnConfig(roomData: any): Promise<ContextualSpawnConfig | null> {
-    console.log('🏠 getContextualSpawnConfig called with roomData:', {
-      type: roomData.type,
-      environment: roomData.environment,
-      factionId: roomData.factionId
-    });
+    // console.log('🏠 getContextualSpawnConfig called with roomData:', {
+    //   type: roomData.type,
+    //   environment: roomData.environment,
+    //   factionId: roomData.factionId
+    // });
 
     const baseConfig = this.getMobSpawnConfig(roomData.type);
     if (!baseConfig) {
-      console.log('❌ No base config found for room type:', roomData.type);
+      // console.log('❌ No base config found for room type:', roomData.type);
       return null;
     }
 
-    console.log('⚙️ Base config found:', baseConfig);
+    // console.log('⚙️ Base config found:', baseConfig);
 
     let mobTypes: string[] = [];
 
     // If room is controlled by a faction, use faction mob types
     if (roomData.factionId) {
-      console.log('🏛️ Room controlled by faction:', roomData.factionId);
+      // console.log('🏛️ Room controlled by faction:', roomData.factionId);
       const faction = await this.getFactionById(roomData.factionId);
-      console.log('📊 Faction data:', faction);
+      // console.log('📊 Faction data:', faction);
       if (faction && faction.mobTypes) {
         mobTypes = faction.mobTypes;
-        console.log('🎭 Using faction mob types:', mobTypes);
+        // console.log('🎭 Using faction mob types:', mobTypes);
       }
     }
 
@@ -486,17 +465,17 @@ export class MobStorage extends BaseStorage {
       const roomTypeMobs = this.neutralMobTypesByRoomType[roomData.type] || [];
       const environmentMobs = this.neutralMobTypesByEnvironment[roomData.environment] || [];
       mobTypes = [...roomTypeMobs, ...environmentMobs];
-      console.log('🌍 Using neutral mob types:', {
-        roomTypeMobs,
-        environmentMobs,
-        combined: mobTypes
-      });
+      // console.log('🌍 Using neutral mob types:', {
+      //   roomTypeMobs,
+      //   environmentMobs,
+      //   combined: mobTypes
+      // });
     }
 
     // Further fallback to basic types
     if (mobTypes.length === 0) {
       mobTypes = baseConfig.creatureCategories;
-      console.log('🔧 Using base config creature categories:', mobTypes);
+      // console.log('🔧 Using base config creature categories:', mobTypes);
     }
 
     const finalConfig = {
@@ -509,21 +488,21 @@ export class MobStorage extends BaseStorage {
       respawnHours: baseConfig.respawnHours
     };
 
-    console.log('✅ Final spawn config:', finalConfig);
+    // console.log('✅ Final spawn config:', finalConfig);
     return finalConfig;
   }
 
   private async generateContextualMob(spawnConfig: ContextualSpawnConfig, roomData: any) {
-    console.log('🎲 generateContextualMob called with:', {
-      roomType: spawnConfig.roomType,
-      environment: spawnConfig.environment,
-      factionId: spawnConfig.factionId,
-      mobTypes: spawnConfig.mobTypes
-    });
+    // console.log('🎲 generateContextualMob called with:', {
+    //   roomType: spawnConfig.roomType,
+    //   environment: spawnConfig.environment,
+    //   factionId: spawnConfig.factionId,
+    //   mobTypes: spawnConfig.mobTypes
+    // });
 
     // Get appropriate enemies based on mob types
     const selectedMobCategory = spawnConfig.mobTypes[Math.floor(Math.random() * spawnConfig.mobTypes.length)];
-    console.log('🎯 Selected mob category:', selectedMobCategory);
+    // console.log('🎯 Selected mob category:', selectedMobCategory);
 
     // Try to find mob types that match the selected category in their name or description
     let availableMobTypes;
@@ -533,19 +512,19 @@ export class MobStorage extends BaseStorage {
         .from(mobTypes);
         // Removed the floor filter temporarily to get all available types
 
-      console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
-        id: mt.id,
-        name: mt.name,
-        description: mt.description,
-        minFloor: mt.minFloor
-      })));
+      // console.log('📋 Available mob types from database:', availableMobTypes.map(mt => ({
+      //   id: mt.id,
+      //   name: mt.name,
+      //   description: mt.description,
+      //   minFloor: mt.minFloor
+      // })));
 
       if (availableMobTypes.length === 0) {
-        console.log('❌ No mob types exist in database at all!');
+        // console.log('❌ No mob types exist in database at all!');
         return null;
       }
     } catch (dbError) {
-      console.error('❌ Database error fetching mob types:', dbError);
+      // console.error('❌ Database error fetching mob types:', dbError);
       return null;
     }
 
@@ -555,37 +534,37 @@ export class MobStorage extends BaseStorage {
       (mobTypeRecord.description && mobTypeRecord.description.toLowerCase().includes(selectedMobCategory.toLowerCase()))
     );
 
-    console.log('🔍 Filtered mob types:', filteredMobTypes.map(mt => ({
-      id: mt.id,
-      name: mt.name,
-      matchedCategory: selectedMobCategory
-    })));
+    // console.log('🔍 Filtered mob types:', filteredMobTypes.map(mt => ({
+    //   id: mt.id,
+    //   name: mt.name,
+    //   matchedCategory: selectedMobCategory
+    // })));
 
     // Use filtered mob types if found, otherwise fall back to all available
     const mobTypesToChoose = filteredMobTypes.length > 0 ? filteredMobTypes : availableMobTypes;
 
-    console.log('⚔️ Final mob types to choose from:', mobTypesToChoose.map(mt => ({
-      id: mt.id,
-      name: mt.name
-    })));
+    // console.log('⚔️ Final mob types to choose from:', mobTypesToChoose.map(mt => ({
+    //   id: mt.id,
+    //   name: mt.name
+    // }));
 
     if (mobTypesToChoose.length === 0) {
-      console.log('❌ No mob types available to choose from!');
-      console.error('This should not happen since we have mob types in the database');
+      // console.log('❌ No mob types available to choose from!');
+      // console.error('This should not happen since we have mob types in the database');
       return null;
     }
 
     const selectedMobType = mobTypesToChoose[Math.floor(Math.random() * mobTypesToChoose.length)];
-    console.log('🎲 Selected mob type:', {
-      id: selectedMobType.id,
-      name: selectedMobType.name,
-      rarity: selectedMobType.rarity,
-      health: selectedMobType.health
-    });
+    // console.log('🎲 Selected mob type:', {
+    //   id: selectedMobType.id,
+    //   name: selectedMobType.name,
+    //   rarity: selectedMobType.rarity,
+    //   health: selectedMobType.health
+    // });
 
     // Generate contextual display name
     const displayName = this.generateContextualDisplayName(selectedMobType, spawnConfig, selectedMobCategory);
-    console.log('📝 Generated display name:', displayName);
+    // console.log('📝 Generated display name:', displayName);
 
     return {
       mobTypeId: selectedMobType.id,
@@ -596,12 +575,12 @@ export class MobStorage extends BaseStorage {
   }
 
   private generateContextualDisplayName(selectedMobType: any, spawnConfig: ContextualSpawnConfig, mobType: string): string {
-    console.log('🏷️ generateContextualDisplayName called with:', {
-      selectedMobTypeName: selectedMobType.name,
-      selectedMobTypeRarity: selectedMobType.rarity,
-      mobTypeCategory: mobType,
-      factionId: spawnConfig.factionId
-    });
+    // console.log('🏷️ generateContextualDisplayName called with:', {
+    //   selectedMobTypeName: selectedMobType.name,
+    //   selectedMobTypeRarity: selectedMobType.rarity,
+    //   mobTypeCategory: mobType,
+    //   factionId: spawnConfig.factionId
+    // });
 
     const rarityModifiers = {
       common: "",
@@ -612,7 +591,7 @@ export class MobStorage extends BaseStorage {
     };
 
     let prefix = rarityModifiers[selectedMobType.rarity as keyof typeof rarityModifiers] || "";
-    console.log('💎 Rarity prefix:', prefix);
+    // console.log('💎 Rarity prefix:', prefix);
 
     // Add faction-specific prefixes
     if (spawnConfig.factionId) {
@@ -627,22 +606,22 @@ export class MobStorage extends BaseStorage {
       const factionPrefix = factionPrefixes[spawnConfig.factionId.toString()];
       if (factionPrefix) {
         prefix = factionPrefix + prefix;
-        console.log('🏛️ Added faction prefix:', factionPrefix, 'Total prefix:', prefix);
+        // console.log('🏛️ Added faction prefix:', factionPrefix, 'Total prefix:', prefix);
       }
     }
 
     // Use mob type as the base name if mob name is generic
     const isGenericName = selectedMobType.name === "Unknown" || selectedMobType.name === "Generic Mob";
-    console.log('🤔 Is generic name?', isGenericName, 'Original name:', selectedMobType.name);
+    // console.log('🤔 Is generic name?', isGenericName, 'Original name:', selectedMobType.name);
 
     const baseName = isGenericName
       ? mobType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
       : selectedMobType.name;
 
-    console.log('🎯 Base name determined:', baseName);
+    // console.log('🎯 Base name determined:', baseName);
 
     const finalName = `${prefix}${baseName}`;
-    console.log('✨ Final display name:', finalName);
+    // console.log('✨ Final display name:', finalName);
 
     return finalName;
   }
@@ -657,7 +636,7 @@ export class MobStorage extends BaseStorage {
 
       return faction || null;
     } catch (error) {
-      console.log('Failed to fetch faction data:', error);
+      // console.log('Failed to fetch faction data:', error);
       return null;
     }
   }
@@ -681,7 +660,7 @@ export class MobStorage extends BaseStorage {
     try {
       await redisService.invalidateRoomMobs(mob[0].roomId);
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      // console.log('Failed to invalidate room mobs cache');
     }
   }
 
@@ -701,7 +680,7 @@ export class MobStorage extends BaseStorage {
     try {
       await redisService.invalidateRoomMobs(mob[0].roomId);
     } catch (error) {
-      console.log('Failed to invalidate room mobs cache');
+      // console.log('Failed to invalidate room mobs cache');
     }
   }
 
@@ -710,7 +689,7 @@ export class MobStorage extends BaseStorage {
   }
 
   async spawnSingleMob(roomId: number, roomData: any, forceSpawn: boolean = false, isDebugSpawn: boolean = false): Promise<void> {
-    console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn, 'isDebugSpawn:', isDebugSpawn);
+    // console.log('🎯 spawnSingleMob called for room:', roomId, 'forceSpawn:', forceSpawn, 'isDebugSpawn:', isDebugSpawn);
 
     try {
       // Validate inputs
@@ -720,7 +699,7 @@ export class MobStorage extends BaseStorage {
 
       const spawnConfig = await this.getContextualSpawnConfig(roomData);
       if (!spawnConfig && !forceSpawn) {
-        console.log('❌ No spawn config and not forced, skipping spawn');
+        // console.log('❌ No spawn config and not forced, skipping spawn');
         return;
       }
 
@@ -735,23 +714,23 @@ export class MobStorage extends BaseStorage {
         respawnHours: 4
       };
 
-      console.log('🎯 Final spawn config:', finalConfig);
+      // console.log('🎯 Final spawn config:', finalConfig);
 
       // Generate mob based on context
       const mobData = await this.generateContextualMob(finalConfig, roomData);
       if (!mobData) {
-        console.log('❌ Failed to generate mob data for forced spawn');
+        // console.log('❌ Failed to generate mob data for forced spawn');
         throw new Error('Failed to generate mob data - no available mob types');
       }
 
       // Validate mob data
       if (!mobData.mobTypeId || !mobData.displayName || !mobData.health) {
-        console.log('❌ Invalid mob data generated:', mobData);
+        // console.log('❌ Invalid mob data generated:', mobData);
         throw new Error('Generated mob data is invalid');
       }
 
       const position = this.getRandomPosition();
-      console.log('📍 Generated position for forced spawn:', position);
+      // console.log('📍 Generated position for forced spawn:', position);
 
       const insertData = {
         roomId,
@@ -770,24 +749,24 @@ export class MobStorage extends BaseStorage {
         updatedAt: new Date()
       };
 
-      console.log('💾 Inserting forced mob into database:', insertData);
+      // console.log('💾 Inserting forced mob into database:', insertData);
 
       const result = await db.insert(mobs).values(insertData);
-      console.log('📝 Database insert result:', result);
+      // console.log('📝 Database insert result:', result);
 
-      console.log('✅ Successfully force spawned mob:', mobData.displayName);
+      // console.log('✅ Successfully force spawned mob:', mobData.displayName);
 
       // Invalidate cache
       try {
         await redisService.invalidateRoomMobs(roomId);
-        console.log('🗑️ Invalidated room mobs cache for forced spawn');
+        // console.log('🗑️ Invalidated room mobs cache for forced spawn');
       } catch (error) {
-        console.log('⚠️ Failed to invalidate room mobs cache:', error);
+        // console.log('⚠️ Failed to invalidate room mobs cache:', error);
         // Don't throw here, cache invalidation failure shouldn't break spawn
       }
     } catch (error) {
-      console.error('💥 Error in spawnSingleMob:', error);
-      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      // console.error('💥 Error in spawnSingleMob:', error);
+      // console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
       throw error; // Re-throw to let caller handle it
     }
   }

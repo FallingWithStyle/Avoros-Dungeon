@@ -27,5 +27,5 @@ export const pool = new Pool({
 });
 
 export const db = drizzle({ client: pool, schema,
-  logger: process.env.NODE_ENV === 'development'
+  logger: false
 });
