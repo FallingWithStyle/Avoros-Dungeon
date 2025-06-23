@@ -156,81 +156,86 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     // Add entities from tactical data (mobs, etc.)
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       console.log('Loading tactical entities:', tacticalEntities.length);
-      tacticalEntities.forEach((tacticalEntity: any) => {
-        if (tacticalEntity.type === "mob" && tacticalEntity.data) {
-          const mobEntity: CombatEntity = {
-            id: "mob_" + tacticalEntity.data.id,
-            name: tacticalEntity.name,
-            type: "hostile", // Default to hostile for now
-            hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
-            maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: tacticalEntity.data.attack || 12,
-            defense: tacticalEntity.data.defense || 8,
-            speed: tacticalEntity.data.speed || 16,
-            accuracy: 16,
-            evasion: 18,
-            position: { 
-              x: tacticalEntity.position.x, 
-              y: tacticalEntity.position.y 
-            },
-            facing: 180,
-            level: 3,
-            isAlive: true,
-            cooldowns: {}
-          };
+      console.log('First few entities:', tacticalEntities.slice(0, 3));
+      
+      tacticalEntities.forEach((tacticalEntity: any, index: number) => {
+        console.log('Processing entity', index, ':', tacticalEntity.type, tacticalEntity);
+        
+        if (tacticalEntity.type === "mob") {
+          // Handle new format where mob data is in the data field
+          if (tacticalEntity.data) {
+            const mobEntity: CombatEntity = {
+              id: "mob_" + (tacticalEntity.data.id || index),
+              name: tacticalEntity.name || tacticalEntity.data.name || "Unknown Mob",
+              type: "hostile", // Default to hostile for now
+              hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
+              maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
+              energy: 20,
+              maxEnergy: 20,
+              power: 10,
+              maxPower: 10,
+              might: 10,
+              agility: 14,
+              endurance: 8,
+              intellect: 6,
+              charisma: 4,
+              wisdom: 7,
+              attack: tacticalEntity.data.attack || 12,
+              defense: tacticalEntity.data.defense || 8,
+              speed: tacticalEntity.data.speed || 16,
+              accuracy: 16,
+              evasion: 18,
+              position: { 
+                x: tacticalEntity.position?.x || 50, 
+                y: tacticalEntity.position?.y || 50 
+              },
+              facing: 180,
+              level: 3,
+              isAlive: true,
+              cooldowns: {}
+            };
 
-          combatSystem.addEntity(mobEntity);
-          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
-        }
-      });
-    } else if (effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities) && tacticalEntities !== effectiveTacticalData.tacticalEntities) {
-      // Fallback for old format
-      console.log('Loading tactical entities (old format):', effectiveTacticalData.tacticalEntities.length);
-      effectiveTacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
-        if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
-          const mobEntity: CombatEntity = {
-            id: "mob_" + tacticalEntity.entity.id,
-            name: tacticalEntity.entity.displayName || tacticalEntity.entity.name,
-            type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
-            hp: tacticalEntity.entity.currentHealth,
-            maxHp: tacticalEntity.entity.maxHealth,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: tacticalEntity.entity.attack || 12,
-            defense: tacticalEntity.entity.defense || 8,
-            speed: tacticalEntity.entity.speed || 16,
-            accuracy: 16,
-            evasion: 18,
-            position: { 
-              x: (tacticalEntity.x / 10) * 100, 
-              y: (tacticalEntity.y / 10) * 100 
-            },
-            facing: 180,
-            level: 3,
-            isAlive: tacticalEntity.entity.isAlive,
-            cooldowns: {}
-          };
+            combatSystem.addEntity(mobEntity);
+            console.log('Added mob entity (new format):', mobEntity.name, 'at position:', mobEntity.position);
+          } 
+          // Handle old format where mob data is in the entity field
+          else if (tacticalEntity.entity) {
+            const mobEntity: CombatEntity = {
+              id: "mob_" + (tacticalEntity.entity.id || index),
+              name: tacticalEntity.entity.displayName || tacticalEntity.entity.name || "Unknown Mob",
+              type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
+              hp: tacticalEntity.entity.currentHealth || 100,
+              maxHp: tacticalEntity.entity.maxHealth || 100,
+              energy: 20,
+              maxEnergy: 20,
+              power: 10,
+              maxPower: 10,
+              might: 10,
+              agility: 14,
+              endurance: 8,
+              intellect: 6,
+              charisma: 4,
+              wisdom: 7,
+              attack: tacticalEntity.entity.attack || 12,
+              defense: tacticalEntity.entity.defense || 8,
+              speed: tacticalEntity.entity.speed || 16,
+              accuracy: 16,
+              evasion: 18,
+              position: { 
+                x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50, 
+                y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50 
+              },
+              facing: 180,
+              level: 3,
+              isAlive: tacticalEntity.entity.isAlive !== false,
+              cooldowns: {}
+            };
 
-          combatSystem.addEntity(mobEntity);
-          console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
+            combatSystem.addEntity(mobEntity);
+            console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
+          } else {
+            console.log('Mob entity missing data/entity field:', tacticalEntity);
+          }
         }
       });
     } else {
@@ -244,60 +249,121 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     setIsInitialized(true);
   }, [crawler, aiEnabled, availableWeapons, roomData, tacticalData]);
 
-  // Movement handler with collision detection
+  // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
 
     if (direction.x === 0 && direction.y === 0) return;
 
-    const moveSpeed = 3;
-    let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
-    let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+    const moveSpeed = 2.5; // Slightly slower for better control
+    let newX = player.position.x + direction.x * moveSpeed;
+    let newY = player.position.y + direction.y * moveSpeed;
 
-    // Check collision with room layout elements
-    const playerRadius = 1.5;
+    // Enhanced collision detection with room layout elements
+    const playerRadius = 2.0; // Slightly larger for better collision feel
     
-    const checkCollisionWithCover = (x: number, y: number): boolean => {
+    const checkCollisionWithElements = (x: number, y: number): boolean => {
       if (!tacticalEntities || !Array.isArray(tacticalEntities)) return false;
       
       return tacticalEntities.some((entity: any) => {
         if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
         
         // Use entity position directly (already in percentage format)
-        const wallLeft = entity.position.x - 2;
-        const wallRight = entity.position.x + 2;
-        const wallTop = entity.position.y - 2;
-        const wallBottom = entity.position.y + 2;
+        const elementLeft = entity.position.x - 2;
+        const elementRight = entity.position.x + 2;
+        const elementTop = entity.position.y - 2;
+        const elementBottom = entity.position.y + 2;
 
-        const buffer = 0.5;
-        return (x + playerRadius > wallLeft - buffer && 
-                x - playerRadius < wallRight + buffer &&
-                y + playerRadius > wallTop - buffer && 
-                y - playerRadius < wallBottom + buffer);
+        const buffer = 1.0; // Larger buffer for smoother collision
+        return (x + playerRadius > elementLeft - buffer && 
+                x - playerRadius < elementRight + buffer &&
+                y + playerRadius > elementTop - buffer && 
+                y - playerRadius < elementBottom + buffer);
       });
     };
 
-    const wouldCollide = checkCollisionWithCover(newX, newY);
+    // Check for collision with other entities (hostile mobs)
+    const checkCollisionWithEntities = (x: number, y: number): boolean => {
+      return combatState.entities.some((entity: any) => {
+        if (entity.id === "player" || entity.hp <= 0) return false;
+        
+        const distance = Math.sqrt(
+          Math.pow(x - entity.position.x, 2) + 
+          Math.pow(y - entity.position.y, 2)
+        );
+        
+        return distance < 4; // Minimum distance to other entities
+      });
+    };
 
-    if (wouldCollide) {
+    // Check room boundaries with gates for exits
+    const gateStart = 40;
+    const gateEnd = 60;
+    const boundary = 5;
+
+    // Check if we're trying to move through an exit
+    let exitDirection = "";
+    const roomConnections = effectiveRoomData?.connections || [];
+    const availableDirections = roomConnections.map((conn: any) => conn.direction);
+
+    if (newY <= boundary && direction.y < 0 && availableDirections.includes("north")) {
+      if (newX >= gateStart && newX <= gateEnd) {
+        exitDirection = "north";
+      }
+    } else if (newY >= (100 - boundary) && direction.y > 0 && availableDirections.includes("south")) {
+      if (newX >= gateStart && newX <= gateEnd) {
+        exitDirection = "south";
+      }
+    } else if (newX >= (100 - boundary) && direction.x > 0 && availableDirections.includes("east")) {
+      if (newY >= gateStart && newY <= gateEnd) {
+        exitDirection = "east";
+      }
+    } else if (newX <= boundary && direction.x < 0 && availableDirections.includes("west")) {
+      if (newY >= gateStart && newY <= gateEnd) {
+        exitDirection = "west";
+      }
+    }
+
+    // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
+    if (exitDirection) {
+      // Clamp to boundary
+      newX = Math.max(boundary, Math.min(100 - boundary, newX));
+      newY = Math.max(boundary, Math.min(100 - boundary, newY));
+    } else {
+      // Normal boundary clamping
+      newX = Math.max(boundary, Math.min(100 - boundary, newX));
+      newY = Math.max(boundary, Math.min(100 - boundary, newY));
+    }
+
+    // Check for collisions and handle sliding movement
+    const wouldCollideWithElements = checkCollisionWithElements(newX, newY);
+    const wouldCollideWithEntities = checkCollisionWithEntities(newX, newY);
+
+    if (wouldCollideWithElements || wouldCollideWithEntities) {
       // Try moving only horizontally
-      const horizontalX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      const horizontalX = Math.max(boundary, Math.min(100 - boundary, player.position.x + direction.x * moveSpeed));
       const horizontalY = player.position.y;
       
-      if (!checkCollisionWithCover(horizontalX, horizontalY)) {
+      if (!checkCollisionWithElements(horizontalX, horizontalY) && !checkCollisionWithEntities(horizontalX, horizontalY)) {
         newX = horizontalX;
         newY = horizontalY;
       } else {
         // Try moving only vertically
         const verticalX = player.position.x;
-        const verticalY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        const verticalY = Math.max(boundary, Math.min(100 - boundary, player.position.y + direction.y * moveSpeed));
         
-        if (!checkCollisionWithCover(verticalX, verticalY)) {
+        if (!checkCollisionWithElements(verticalX, verticalY) && !checkCollisionWithEntities(verticalX, verticalY)) {
           newX = verticalX;
           newY = verticalY;
         } else {
-          return; // Can't move at all
+          // Can't move at all, just update facing
+          if (direction.x !== 0 || direction.y !== 0) {
+            let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+            if (facing < 0) facing += 360;
+            combatSystem.updateEntity("player", { facing: Math.round(facing) });
+          }
+          return;
         }
       }
     }
@@ -309,8 +375,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
     const newFacing = Math.round(facing);
 
+    // Update position
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
 
+    // Update facing if not targeting something
     if (!selectedTarget) {
       const currentFacing = player.facing || 0;
       const facingDiff = Math.abs(newFacing - currentFacing);
@@ -320,12 +388,41 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [combatState.entities, selectedTarget, effectiveTacticalData]);
+  }, [combatState.entities, selectedTarget, tacticalEntities, effectiveRoomData, isInitialized]);
+
+  // Handle target cycling with Tab key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        
+        const hostileTargets = combatState.entities.filter(e => 
+          e.type === "hostile" && e.hp > 0
+        );
+        
+        if (hostileTargets.length === 0) {
+          setSelectedTarget(null);
+          return;
+        }
+        
+        if (!selectedTarget) {
+          setSelectedTarget(hostileTargets[0].id);
+        } else {
+          const currentIndex = hostileTargets.findIndex(e => e.id === selectedTarget);
+          const nextIndex = (currentIndex + 1) % hostileTargets.length;
+          setSelectedTarget(hostileTargets[nextIndex].id);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [combatState.entities, selectedTarget]);
 
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
-    isEnabled: true,
+    isEnabled: !combatState.isInCombat && isInitialized, // Only enable when not in combat and initialized
   });
 
   // Detect mobile device
@@ -786,9 +883,17 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         )}
 
         {/* Controls hint */}
-        <div className="text-xs text-muted-foreground text-center">
-          <div>WASD: Move | 1-3: Actions | Tab: Cycle Targets</div>
+        <div className="text-xs text-muted-foreground text-center space-y-1">
+          <div>
+            {isMobile 
+              ? "Touch & Drag: Move | Tap: Actions" 
+              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"
+            }
+          </div>
           {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
+          {combatState.isInCombat && (
+            <div className="text-red-400">Combat Mode: Movement restricted near enemies</div>
+          )}
         </div>
       </CardContent>
     </Card>

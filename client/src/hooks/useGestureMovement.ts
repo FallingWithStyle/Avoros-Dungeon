@@ -27,7 +27,6 @@ export function useGestureMovement({
 
     movementInterval.current = setInterval(() => {
       if (currentDirection.current.x !== 0 || currentDirection.current.y !== 0) {
-        console.log('movementDirection =', currentDirection.current);
         onMovement(currentDirection.current);
       }
     }, 50); // 20 FPS movement updates

@@ -113,8 +113,6 @@ export function useKeyboardMovement({
     const wasEmpty = keysPressed.current.size === 0;
     keysPressed.current.add(key);
 
-    //console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
-
     // Start continuous movement if this is the first key
     if (wasEmpty) {
       startMovement();
@@ -148,7 +146,6 @@ export function useKeyboardMovement({
   const handleBlur = () => {
     keysPressed.current.clear();
     stopMovement();
-    console.log('⌨️ Window blur - stopping movement');
   };
 
   // Setup and cleanup
