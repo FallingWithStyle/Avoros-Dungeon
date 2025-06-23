@@ -14,6 +14,7 @@ import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface Equipment {
@@ -46,40 +47,20 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Cover elements for testing - in real implementation these would come from room data
-  const [coverElements] = useState<Array<{
-    id: string;
-    type: "full_wall" | "half_wall";
-    position: { x: number; y: number };
-    width: number;
-    height: number;
-    facing: number;
-  }>>([
-    {
-      id: "wall1",
-      type: "full_wall" as const,
-      position: { x: 35, y: 30 },
-      width: 15,
-      height: 3,
-      facing: 0
-    },
-    {
-      id: "wall2", 
-      type: "half_wall" as const,
-      position: { x: 65, y: 45 },
-      width: 12,
-      height: 3,
-      facing: 90
-    },
-    {
-      id: "wall3",
-      type: "full_wall" as const,
-      position: { x: 50, y: 75 },
-      width: 8,
-      height: 3,
-      facing: 0
-    }
-  ]);
+  // Fetch current room data
+  const { data: roomData, isLoading: roomLoading } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
+    refetchInterval: 5000,
+    staleTime: 3000,
+  });
+
+  // Fetch tactical data for room layout
+  const { data: tacticalData, isLoading: tacticalLoading } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
+    refetchInterval: 8000,
+    staleTime: 5000,
+    enabled: !!roomData?.room?.id,
+  });
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -105,7 +86,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize combat system with crawler data
   const initializeCombatSystem = useCallback(() => {
-    if (isInitialized) return;
+    if (isInitialized || !roomData?.room || !tacticalData) return;
 
     // Clear existing entities
     const currentState = combatSystem.getState();
@@ -148,43 +129,52 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     combatSystem.addEntity(playerEntity);
     setEquippedWeapon(availableWeapons[0]);
 
-    // Add some test enemies for demonstration
-    const goblin: CombatEntity = {
-      id: "goblin1",
-      name: "Goblin Warrior",
-      type: "hostile",
-      hp: 45,
-      maxHp: 45,
-      energy: 20,
-      maxEnergy: 20,
-      power: 10,
-      maxPower: 10,
-      might: 10,
-      agility: 14,
-      endurance: 8,
-      intellect: 6,
-      charisma: 4,
-      wisdom: 7,
-      attack: 12,
-      defense: 8,
-      speed: 16,
-      accuracy: 16,
-      evasion: 18,
-      position: { x: 75, y: 35 },
-      facing: 180,
-      level: 3,
-      isAlive: true,
-      cooldowns: {}
-    };
+    // Add entities from tactical data (mobs, etc.)
+    if (tacticalData.tacticalEntities) {
+      tacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
+        if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
+          const mobEntity: CombatEntity = {
+            id: "mob_" + tacticalEntity.entity.id,
+            name: tacticalEntity.entity.displayName || tacticalEntity.entity.name,
+            type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
+            hp: tacticalEntity.entity.currentHealth,
+            maxHp: tacticalEntity.entity.maxHealth,
+            energy: 20,
+            maxEnergy: 20,
+            power: 10,
+            maxPower: 10,
+            might: 10,
+            agility: 14,
+            endurance: 8,
+            intellect: 6,
+            charisma: 4,
+            wisdom: 7,
+            attack: tacticalEntity.entity.attack || 12,
+            defense: tacticalEntity.entity.defense || 8,
+            speed: tacticalEntity.entity.speed || 16,
+            accuracy: 16,
+            evasion: 18,
+            position: { 
+              x: (tacticalEntity.x / 10) * 100, 
+              y: (tacticalEntity.y / 10) * 100 
+            },
+            facing: 180,
+            level: 3,
+            isAlive: tacticalEntity.entity.isAlive,
+            cooldowns: {}
+          };
 
-    combatSystem.addEntity(goblin);
+          combatSystem.addEntity(mobEntity);
+        }
+      });
+    }
 
     if (aiEnabled) {
       combatSystem.startAILoop();
     }
 
     setIsInitialized(true);
-  }, [crawler, aiEnabled, isInitialized, availableWeapons]);
+  }, [crawler, aiEnabled, isInitialized, availableWeapons, roomData, tacticalData]);
 
   // Movement handler with collision detection
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
@@ -197,24 +187,20 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
     let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
 
-    // Check collision with cover elements
+    // Check collision with room layout elements
     const playerRadius = 1.5;
     
     const checkCollisionWithCover = (x: number, y: number): boolean => {
-      return coverElements.some(cover => {
-        let wallLeft, wallRight, wallTop, wallBottom;
+      if (!tacticalData?.tacticalEntities) return false;
+      
+      return tacticalData.tacticalEntities.some((entity: any) => {
+        if (entity.type !== "cover" && entity.type !== "wall") return false;
         
-        if (cover.facing === 90) {
-          wallLeft = cover.position.x - cover.height / 2;
-          wallRight = cover.position.x + cover.height / 2;
-          wallTop = cover.position.y - cover.width / 2;
-          wallBottom = cover.position.y + cover.width / 2;
-        } else {
-          wallLeft = cover.position.x - cover.width / 2;
-          wallRight = cover.position.x + cover.width / 2;
-          wallTop = cover.position.y - cover.height / 2;
-          wallBottom = cover.position.y + cover.height / 2;
-        }
+        // Convert tactical grid positions to combat view percentages
+        const wallLeft = (entity.x / 10) * 100 - 2;
+        const wallRight = (entity.x / 10) * 100 + 2;
+        const wallTop = (entity.y / 10) * 100 - 2;
+        const wallBottom = (entity.y / 10) * 100 + 2;
 
         const buffer = 0.5;
         return (x + playerRadius > wallLeft - buffer && 
@@ -363,14 +349,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return unsubscribe;
   }, [selectedTarget]);
 
-  // Initialize when component mounts
+  // Initialize when component mounts and data is available
   useEffect(() => {
-    initializeCombatSystem();
+    if (!roomLoading && !tacticalLoading && roomData?.room && tacticalData) {
+      initializeCombatSystem();
+    }
     
     return () => {
       combatSystem.stopAILoop();
     };
-  }, [initializeCombatSystem]);
+  }, [initializeCombatSystem, roomLoading, tacticalLoading, roomData, tacticalData]);
 
   // Force re-render during cooldowns
   const [, forceUpdate] = useState({});
@@ -397,24 +385,65 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const enemies = combatState.entities.filter(e => e.type === "hostile");
   const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
 
+  // Show loading state
+  if (roomLoading || tacticalLoading) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Combat View
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="w-full h-64 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <span className="text-slate-400">Loading room data...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
-          Combat View
+          Combat View - {roomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
             {combatState.isInCombat ? "IN COMBAT" : "READY"}
           </Badge>
+          {roomData?.room?.environment && (
+            <Badge variant="outline" className="text-xs">
+              {roomData.room.environment}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Combat Arena */}
         <div
           ref={containerRef}
-          className="relative bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden mx-auto"
+          className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
+            roomData?.room?.environment === "outdoor" 
+              ? "bg-gradient-to-br from-green-900/20 to-blue-800/20" 
+              : roomData?.room?.environment === "cave"
+              ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
+              : roomData?.room?.environment === "dungeon"
+              ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
+              : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
+          }`}
           style={{ 
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
+            backgroundImage: roomData?.room?.environment === "outdoor" 
+              ? 'radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
+              : roomData?.room?.environment === "cave"
+              ? 'radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)'
+              : roomData?.room?.environment === "dungeon"
+              ? 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)'
+              : 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
             width: 'min(90vw, 90vh, 400px)',
             height: 'min(90vw, 90vh, 400px)',
             aspectRatio: '1',
@@ -434,29 +463,77 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             ))}
           </div>
 
-          {/* Cover Elements */}
-          {coverElements.map((cover) => (
-            <div
-              key={cover.id}
-              className={`absolute ${
-                cover.type === "full_wall" 
-                  ? "bg-stone-600 border-2 border-stone-500" 
-                  : "bg-stone-400 border-2 border-stone-300 opacity-80"
-              } rounded-sm shadow-lg`}
-              style={{
-                left: `${cover.position.x - cover.width / 2}%`,
-                top: `${cover.position.y - cover.height / 2}%`,
-                width: `${cover.width}%`,
-                height: `${cover.height}%`,
-                zIndex: cover.type === "full_wall" ? 15 : 10,
-                transform: `rotate(${cover.facing}deg)`,
-                transformOrigin: "center",
-                filter: cover.type === "full_wall" 
-                  ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
-                  : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
-              }}
-            />
-          ))}
+          {/* Room Layout Elements */}
+          {tacticalData?.tacticalEntities?.map((entity: any) => {
+            if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
+            
+            const x = (entity.x / 10) * 100;
+            const y = (entity.y / 10) * 100;
+            
+            return (
+              <div
+                key={entity.id || `${entity.type}-${entity.x}-${entity.y}`}
+                className={`absolute ${
+                  entity.type === "wall" 
+                    ? "bg-stone-600 border-2 border-stone-500" 
+                    : entity.type === "door"
+                    ? "bg-amber-700 border-2 border-amber-500"
+                    : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                } rounded-sm shadow-lg`}
+                style={{
+                  left: `${x - 2}%`,
+                  top: `${y - 2}%`,
+                  width: `4%`,
+                  height: `4%`,
+                  zIndex: entity.type === "wall" ? 15 : entity.type === "door" ? 12 : 10,
+                  filter: entity.type === "wall" 
+                    ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                    : entity.type === "door"
+                    ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
+                    : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
+                }}
+              />
+            );
+          })}
+
+          {/* Exit indicators based on available directions */}
+          {roomData?.availableDirections?.map((direction: string) => {
+            let position = { x: 50, y: 50 };
+            
+            switch(direction) {
+              case "north":
+                position = { x: 50, y: 5 };
+                break;
+              case "south":
+                position = { x: 50, y: 95 };
+                break;
+              case "east":
+                position = { x: 95, y: 50 };
+                break;
+              case "west":
+                position = { x: 5, y: 50 };
+                break;
+              case "staircase":
+                position = { x: 50, y: 50 };
+                break;
+            }
+
+            return (
+              <div
+                key={direction}
+                className="absolute w-6 h-6 bg-blue-500/70 border-2 border-blue-300 rounded-full flex items-center justify-center"
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y}%`,
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 20
+                }}
+                title={`Exit: ${direction}`}
+              >
+                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse" />
+              </div>
+            );
+          })}
 
           {/* Entities */}
           {combatState.entities.map((entity) => (
