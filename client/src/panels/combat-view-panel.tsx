@@ -251,8 +251,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
+    console.log('handleMovement called with direction:', direction);
     const player = combatState.entities.find(e => e.id === "player");
-    if (!player) return;
+    if (!player) {
+      console.log('No player entity found');
+      return;
+    }
 
     if (direction.x === 0 && direction.y === 0) return;
 
@@ -377,6 +381,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const newFacing = Math.round(facing);
 
     // Update position
+    console.log('Moving player to position:', { x: newX, y: newY });
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
 
     // Update facing if not targeting something
@@ -389,7 +394,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [combatState.entities, selectedTarget, tacticalEntities, effectiveRoomData]);
+  }, [combatState.entities, selectedTarget, tacticalEntities, effectiveRoomData, isInitialized]);
 
   // Handle target cycling with Tab key
   useEffect(() => {
@@ -423,7 +428,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
-    isEnabled: true,
+    isEnabled: !combatState.isInCombat && isInitialized, // Only enable when not in combat and initialized
   });
 
   // Detect mobile device

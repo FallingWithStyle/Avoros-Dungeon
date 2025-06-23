@@ -75,7 +75,10 @@ export function useKeyboardMovement({
 
   // Keyboard event handlers
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (!isEnabled) return;
+    if (!isEnabled) {
+      console.log('⌨️ Keyboard movement disabled');
+      return;
+    }
 
     const key = event.key.toLowerCase();
     const validKeys = [
@@ -86,6 +89,7 @@ export function useKeyboardMovement({
 
     if (!validKeys.includes(key)) return;
     event.preventDefault();
+    console.log('⌨️ Valid key pressed:', key);
 
     // Handle special keys immediately (non-movement keys)
     if (key === 'q' && onRotationRef.current) {
@@ -113,10 +117,11 @@ export function useKeyboardMovement({
     const wasEmpty = keysPressed.current.size === 0;
     keysPressed.current.add(key);
 
-    //console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
+    console.log('⌨️ Key pressed:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Start continuous movement if this is the first key
     if (wasEmpty) {
+      console.log('⌨️ Starting movement');
       startMovement();
     }
   };
