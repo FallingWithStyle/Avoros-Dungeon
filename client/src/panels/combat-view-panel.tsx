@@ -46,6 +46,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [aiEnabled, setAiEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [movementOptions, setMovementOptions] = useState<any>([]);
 
   // Use the same tactical data hooks as the tactical view panel
   const {
@@ -552,6 +553,59 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       </Card>
     );
   }
+
+  // Update combat state when data changes - use JSON.stringify to avoid infinite loops
+  useEffect(() => {
+    if (tacticalData?.entities) {
+      const newState = combatSystem.updateEntities(tacticalData.entities);
+      setCombatState(prevState => {
+        // Only update if the state actually changed
+        if (JSON.stringify(prevState.entities) !== JSON.stringify(newState.entities)) {
+          return newState;
+        }
+        return prevState;
+      });
+    }
+  }, [tacticalData?.entities]);
+
+  // Update selected target when entities change - prevent infinite loop
+  useEffect(() => {
+    if (selectedTarget && combatState.entities.length > 0) {
+      const targetEntity = combatState.entities.find(e => e.id === selectedTarget);
+      if (!targetEntity) {
+        setSelectedTarget(null);
+      }
+    }
+  }, [selectedTarget, combatState.entities.length]);
+
+  // Handle automatic target selection - prevent infinite loop
+  useEffect(() => {
+    if (!selectedTarget && combatState.entities.length > 0 && crawler?.tacticalPosition) {
+      const enemies = combatState.entities.filter(e => 
+        e.type === 'mob' && e.position
+      );
+      if (enemies.length > 0) {
+        setSelectedTarget(enemies[0].id);
+      }
+    }
+  }, [selectedTarget, combatState.entities.length, crawler?.tacticalPosition?.x, crawler?.tacticalPosition?.y]);
+
+  // Update movement options when position or entities change - prevent infinite loop
+  useEffect(() => {
+    if (crawler?.tacticalPosition && combatState.entities.length >= 0) {
+      const options = combatSystem.getMovementOptions(
+        crawler.tacticalPosition,
+        combatState.entities
+      );
+      setMovementOptions(prevOptions => {
+        // Only update if options actually changed
+        if (JSON.stringify(prevOptions) !== JSON.stringify(options)) {
+          return options;
+        }
+        return prevOptions;
+      });
+    }
+  }, [crawler?.tacticalPosition?.x, crawler?.tacticalPosition?.y, combatState.entities.length]);
 
   return (
     <Card className="bg-game-panel border-game-border">
