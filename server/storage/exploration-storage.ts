@@ -328,53 +328,48 @@ export class ExplorationStorage extends BaseStorage {
     return { success: true, newRoom };
   }
 
-  async getCrawlerCurrentRoom(crawlerId: number): Promise<Room | undefined> {
-    console.log(`Getting current room for crawler ${crawlerId}`);
-
-    // Try to get from cache first
+  async getCrawlerCurrentRoom(crawlerId: number): Promise<any> {
     try {
-      const cached = await redisService.getCurrentRoom(crawlerId);
-      if (cached) {
-        console.log(`Found cached room for crawler ${crawlerId}:`, cached.name);
-        return cached;
+      const result = await db
+        .select({
+          room: rooms,
+          floor: floors
+        })
+        .from(rooms)
+        .innerJoin(floors, eq(rooms.floorId, floors.id))
+        .innerJoin(crawlers, eq(crawlers.currentRoomId, rooms.id))
+        .where(eq(crawlers.id, crawlerId))
+        .limit(1);
+
+      if (result.length === 0) {
+        return null;
       }
+
+      const roomData = {
+        id: result[0].room.id,
+        name: result[0].room.name,
+        description: result[0].room.description,
+        type: result[0].room.type,
+        environment: result[0].room.environment || 'indoor',
+        factionId: result[0].room.factionId,
+        coordinates: {
+          x: result[0].room.coordinateX,
+          y: result[0].room.coordinateY
+        },
+        floor: {
+          id: result[0].floor.id,
+          number: result[0].floor.floorNumber,
+          name: result[0].floor.name
+        },
+        isSafe: result[0].room.type === 'safe',
+        hasLoot: ['treasure', 'normal', 'chamber'].includes(result[0].room.type)
+      };
+
+      return roomData;
     } catch (error) {
-      // Redis error, continue with database query
-      console.log("Redis cache miss for current room, fetching from database");
+      console.error(`Error getting current room for crawler ${crawlerId}:`, error);
+      throw error;
     }
-
-    // FIX: Use correct join syntax for Drizzle/SQL
-    const result = await db
-      .select()
-      .from(crawlerPositions)
-      .innerJoin(rooms, eq(crawlerPositions.roomId, rooms.id))
-      .where(eq(crawlerPositions.crawlerId, crawlerId))
-      .orderBy(desc(crawlerPositions.enteredAt))
-      .limit(1);
-
-    // Drizzle returns joined results as { crawlerPositions: ..., rooms: ... }
-    const joinedRoom = result[0]?.rooms;
-
-    console.log(
-      `Database query result for crawler ${crawlerId}:`,
-      joinedRoom ? `Found room: ${joinedRoom.name}` : "No position found",
-    );
-
-    if (!joinedRoom) {
-      console.log(
-        `No position found for crawler ${crawlerId} - they may need to be placed in a room`,
-      );
-      return undefined;
-    }
-
-    // Cache the result
-    try {
-      await redisService.setCurrentRoom(crawlerId, joinedRoom, 300); // 5 minutes TTL
-    } catch (error) {
-      console.log("Failed to cache current room data");
-    }
-
-    return joinedRoom;
   }
 
   async getPlayersInRoom(roomId: number): Promise<CrawlerWithDetails[]> {

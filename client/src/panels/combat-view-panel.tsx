@@ -1,4 +1,3 @@
-
 /**
  * File: combat-view-panel.tsx
  * Responsibility: Clean combat interface panel using only the proven test combat system logic
@@ -71,13 +70,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities = effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
-  
-  console.log('Combat View Data Debug:', {
-    roomData: effectiveRoomData?.room?.name,
-    tacticalDataLength: Array.isArray(tacticalEntities) ? tacticalEntities.length : 0,
-    tacticalEntities: Array.isArray(tacticalEntities) ? tacticalEntities.map(e => ({ type: e.type, name: e.name })) : [],
-    combatEntities: combatState.entities.length
-  });
+
+  // Combat view data prepared
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -157,10 +151,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       console.log('Loading tactical entities:', tacticalEntities.length);
       console.log('First few entities:', tacticalEntities.slice(0, 3));
-      
+
       tacticalEntities.forEach((tacticalEntity: any, index: number) => {
         console.log('Processing entity', index, ':', tacticalEntity.type, tacticalEntity);
-        
+
         if (tacticalEntity.type === "mob") {
           // Handle new format where mob data is in the data field
           if (tacticalEntity.data) {
@@ -262,13 +256,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     // Enhanced collision detection with room layout elements
     const playerRadius = 2.0; // Slightly larger for better collision feel
-    
+
     const checkCollisionWithElements = (x: number, y: number): boolean => {
       if (!tacticalEntities || !Array.isArray(tacticalEntities)) return false;
-      
+
       return tacticalEntities.some((entity: any) => {
         if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
-        
+
         // Use entity position directly (already in percentage format)
         const elementLeft = entity.position.x - 2;
         const elementRight = entity.position.x + 2;
@@ -287,12 +281,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const checkCollisionWithEntities = (x: number, y: number): boolean => {
       return combatState.entities.some((entity: any) => {
         if (entity.id === "player" || entity.hp <= 0) return false;
-        
+
         const distance = Math.sqrt(
           Math.pow(x - entity.position.x, 2) + 
           Math.pow(y - entity.position.y, 2)
         );
-        
+
         return distance < 4; // Minimum distance to other entities
       });
     };
@@ -344,7 +338,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       // Try moving only horizontally
       const horizontalX = Math.max(boundary, Math.min(100 - boundary, player.position.x + direction.x * moveSpeed));
       const horizontalY = player.position.y;
-      
+
       if (!checkCollisionWithElements(horizontalX, horizontalY) && !checkCollisionWithEntities(horizontalX, horizontalY)) {
         newX = horizontalX;
         newY = horizontalY;
@@ -352,7 +346,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         // Try moving only vertically
         const verticalX = player.position.x;
         const verticalY = Math.max(boundary, Math.min(100 - boundary, player.position.y + direction.y * moveSpeed));
-        
+
         if (!checkCollisionWithElements(verticalX, verticalY) && !checkCollisionWithEntities(verticalX, verticalY)) {
           newX = verticalX;
           newY = verticalY;
@@ -395,16 +389,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Tab") {
         event.preventDefault();
-        
+
         const hostileTargets = combatState.entities.filter(e => 
           e.type === "hostile" && e.hp > 0
         );
-        
+
         if (hostileTargets.length === 0) {
           setSelectedTarget(null);
           return;
         }
-        
+
         if (!selectedTarget) {
           setSelectedTarget(hostileTargets[0].id);
         } else {
@@ -521,7 +515,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       setIsInitialized(false); // Reset initialization flag when room changes
       initializeCombatSystem();
     }
-    
+
     return () => {
       combatSystem.stopAILoop();
     };
@@ -639,10 +633,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           {tacticalEntities && Array.isArray(tacticalEntities) ? 
             tacticalEntities.map((entity: any) => {
               if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
-              
+
               const x = entity.position.x;
               const y = entity.position.y;
-            
+
             return (
               <div
                 key={entity.id || `${entity.type}-${x}-${y}`}
@@ -672,7 +666,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           {/* Exit indicators based on room connections */}
           {effectiveRoomData?.connections?.map((connection: any) => {
             let position = { x: 50, y: 50 };
-            
+
             switch(connection.direction) {
               case "north":
                 position = { x: 50, y: 5 };

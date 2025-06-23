@@ -3,7 +3,6 @@
  * Responsibility: Provides React hooks for fetching tactical combat data including room data, explored rooms, and tactical entities
  * Notes: Handles data fetching with proper refetch intervals and error handling for tactical view components
  */
-
 import React, { useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -40,10 +39,10 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       if (!crawler?.id) {
         throw new Error('No crawler ID available');
       }
-      
+
       try {
         const response = await fetch(`/api/crawlers/${crawler.id}/room-data-batch`);
-        
+
         if (!response.ok) {
           if (response.status === 502) {
             throw new Error('Server temporarily unavailable (502)');
@@ -51,9 +50,9 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
           const errorText = await response.text();
           throw new Error(`Failed to fetch room data: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Always ensure we have fallback data structure
         return {
           room: data.room || null,
@@ -93,17 +92,17 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       if (!crawler?.id) {
         throw new Error('No crawler ID available');
       }
-      
+
       try {
         const response = await fetch(`/api/crawlers/${crawler.id}/explored-rooms`);
-        
+
         if (!response.ok) {
           if (response.status === 502) {
             return []; // Return empty array for server errors
           }
           throw new Error('Failed to fetch explored rooms');
         }
-        
+
         const data = await response.json();
         return Array.isArray(data) ? data : [];
       } catch (error) {
@@ -129,17 +128,17 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       if (!crawler?.id) {
         throw new Error('No crawler ID available');
       }
-      
+
       try {
         const response = await fetch(`/api/crawlers/${crawler.id}/tactical-data`);
-        
+
         if (!response.ok) {
           if (response.status === 502) {
             return null; // Return null for server errors
           }
           throw new Error('Failed to fetch tactical data');
         }
-        
+
         return response.json();
       } catch (error) {
         console.error('Tactical data fetch error:', error);

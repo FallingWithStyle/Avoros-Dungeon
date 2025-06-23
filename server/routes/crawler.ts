@@ -251,7 +251,6 @@ export function registerCrawlerRoutes(app: Express) {
   app.get("/api/crawlers/:crawlerId/tactical-data", async (req, res) => {
     try {
       const crawlerId = parseInt(req.params.crawlerId);
-      console.log(`=== TACTICAL DATA REQUEST for crawler ${crawlerId} ===`);
 
       // Initialize request cache for this request
       const requestCache = getRequestCache(req);
@@ -261,24 +260,19 @@ export function registerCrawlerRoutes(app: Express) {
       // Get current room using the main storage interface
       const currentRoom = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!currentRoom) {
-        console.log(`No current room found for crawler ${crawlerId}`);
         return res.status(404).json({ error: "Crawler not found or not in a room" });
       }
-
-      console.log(`Current room: ${currentRoom.name} (ID: ${currentRoom.id})`);
 
       // Check for cached tactical data first
       const cacheKey = `tactical_data_${currentRoom.id}`;
       let cachedData = await redisService.get(cacheKey);
 
       if (cachedData) {
-        console.log(`Using cached tactical data for room ${currentRoom.id}`);
         // Handle case where cached data is already an object
         if (typeof cachedData === 'string') {
           try {
             cachedData = JSON.parse(cachedData);
           } catch (error) {
-            console.log(`Invalid cached JSON for room ${currentRoom.id}, regenerating...`);
             cachedData = null;
           }
         }
@@ -295,19 +289,15 @@ export function registerCrawlerRoutes(app: Express) {
 
       // Get all players in the current room
       const playersInRoom = await storage.getPlayersInRoom(currentRoom.id);
-      console.log(`Players in room: ${playersInRoom.length}`);
 
       // Get available directions
       const availableDirections = await storage.getAvailableDirections(currentRoom.id);
-      console.log(`Available directions: ${availableDirections.join(', ')}`);
 
       // Generate or get tactical entities for this room
-      console.log(`Generating tactical data for room ${currentRoom.id}...`);
       const tacticalEntities = await storage.generateAndSaveTacticalData(
         currentRoom.id, 
         currentRoom
       );
-      console.log(`Generated ${tacticalEntities.length} tactical entities:`, tacticalEntities.map(e => `${e.type}: ${e.name}`));
 
       // Cache the result for 30 seconds
       const resultData = {
@@ -324,10 +314,6 @@ export function registerCrawlerRoutes(app: Express) {
         playersInRoom,
         tacticalEntities
       };
-
-      console.log(`=== TACTICAL DATA RESPONSE ===`);
-      console.log(`Entities: ${tacticalEntities.length}`);
-      console.log(`Mob entities: ${tacticalEntities.filter(e => e.type === 'mob').length}`);
 
       res.json(response);
     } catch (error) {
@@ -350,7 +336,6 @@ export function registerCrawlerRoutes(app: Express) {
       const batchCacheKey = `batch:${crawlerId}:room-data`;
       const cached = await redisService.get(batchCacheKey);
       if (cached) {
-        // Fetching room data batch for crawler
         return res.json(cached);
       }
 
@@ -359,7 +344,6 @@ export function registerCrawlerRoutes(app: Express) {
         return res.status(404).json({ error: "Crawler not found" });
       }
 
-      // Fetching room data batch for crawler
       // Initialize request cache for this request
       const requestCache = getRequestCache(req);
       storage.tacticalStorage?.setRequestCache(requestCache);
@@ -400,8 +384,6 @@ export function registerCrawlerRoutes(app: Express) {
 
       // Cache the response for 60 seconds (shorter TTL for fresher data)
       await redisService.set(batchCacheKey, response, 60);
-
-      // Batch data response prepared for crawler
 
       res.json(response);
 
