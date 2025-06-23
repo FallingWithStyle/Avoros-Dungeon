@@ -1,3 +1,4 @@
+
 /**
  * File: combat-view-panel.tsx
  * Responsibility: Clean combat interface panel using only the proven test combat system logic
@@ -34,6 +35,7 @@ interface CombatViewPanelProps {
 }
 
 export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
   const { toast } = useToast();
   const [combatState, setCombatState] = useState(combatSystem.getState());
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
@@ -47,6 +49,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [movementOptions, setMovementOptions] = useState<any>([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [, forceUpdate] = useState({});
 
   // Use the same tactical data hooks as the tactical view panel
   const {
@@ -65,14 +69,25 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     enabled: !roomData?.room // Only fetch if we don't have room data
   });
 
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      const isMobileDevice = hasTouch && isSmallScreen;
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Use batch data as fallback
   const effectiveRoomData = roomData || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities = effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
-
-  // Combat view data prepared
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -405,20 +420,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     isEnabled: !combatState.isInCombat && isInitialized, // Only enable when not in combat and initialized
   });
 
-  // Detect mobile device
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkMobile = () => {
-      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const isSmallScreen = window.innerWidth <= 768;
-      const isMobileDevice = hasTouch && isSmallScreen;
-      setIsMobile(isMobileDevice);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   // Use gesture movement hook for mobile
   const { containerRef, bind } = useGestureMovement({
     onMovement: handleMovement,
@@ -508,7 +509,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   }, [initializeCombatSystem, roomLoading, tacticalLoading, effectiveRoomData?.room?.id, tacticalEntities?.length]);
 
   // Force re-render during cooldowns
-  const [, forceUpdate] = useState({});
   useEffect(() => {
     const interval = setInterval(() => {
       const player = combatState.entities.find(e => e.id === "player");
@@ -527,32 +527,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     return () => clearInterval(interval);
   }, [combatState.entities]);
-
-  const player = combatState.entities.find(e => e.id === "player");
-  const enemies = combatState.entities.filter(e => e.type === "hostile");
-  const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
-
-  // Show loading state
-  if ((roomLoading || tacticalLoading) && (!effectiveTacticalData || !tacticalEntities.length)) {
-    return (
-      <Card className="bg-game-panel border-game-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Combat View
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="w-full h-64 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <span className="text-slate-400">Loading tactical data...</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   // Update combat state when data changes - use JSON.stringify to avoid infinite loops
   useEffect(() => {
@@ -606,6 +580,33 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       });
     }
   }, [crawler?.tacticalPosition?.x, crawler?.tacticalPosition?.y, combatState.entities.length]);
+
+  // CONDITIONAL LOGIC AFTER ALL HOOKS
+  const player = combatState.entities.find(e => e.id === "player");
+  const enemies = combatState.entities.filter(e => e.type === "hostile");
+  const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
+
+  // Show loading state
+  if ((roomLoading || tacticalLoading) && (!effectiveTacticalData || !tacticalEntities.length)) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Combat View
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="w-full h-64 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <span className="text-slate-400">Loading tactical data...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-game-panel border-game-border">
