@@ -98,13 +98,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Initialize combat system with crawler data
   const initializeCombatSystem = useCallback(() => {
     if (!effectiveTacticalData || !tacticalEntities.length) {
-      console.log('No tactical data available for combat initialization');
       return;
     }
-
-    console.log('Initializing combat with room:', effectiveRoomData?.room?.name || 'Unknown Room');
-    console.log('Tactical data available:', !!effectiveTacticalData);
-    console.log('Tactical entities count:', tacticalEntities.length);
 
     // Clear existing entities first
     const currentState = combatSystem.getState();
@@ -149,11 +144,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     // Add entities from tactical data (mobs, etc.)
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
-      console.log('Loading tactical entities:', tacticalEntities.length);
-      console.log('First few entities:', tacticalEntities.slice(0, 3));
-
       tacticalEntities.forEach((tacticalEntity: any, index: number) => {
-        console.log('Processing entity', index, ':', tacticalEntity.type, tacticalEntity);
 
         if (tacticalEntity.type === "mob") {
           // Handle new format where mob data is in the data field
@@ -190,7 +181,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             };
 
             combatSystem.addEntity(mobEntity);
-            console.log('Added mob entity (new format):', mobEntity.name, 'at position:', mobEntity.position);
           } 
           // Handle old format where mob data is in the entity field
           else if (tacticalEntity.entity) {
@@ -226,14 +216,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             };
 
             combatSystem.addEntity(mobEntity);
-            console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
-          } else {
-            console.log('Mob entity missing data/entity field:', tacticalEntity);
           }
         }
       });
-    } else {
-      console.log('No tactical entities found. tacticalData:', effectiveTacticalData, 'tacticalEntities:', tacticalEntities);
     }
 
     if (aiEnabled) {

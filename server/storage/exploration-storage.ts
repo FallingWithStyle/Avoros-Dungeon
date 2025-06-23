@@ -8,6 +8,7 @@ import {
   rooms,
   roomConnections,
   crawlerPositions,
+  crawlers,
   floors,
   factions,
   type Room,
@@ -330,6 +331,19 @@ export class ExplorationStorage extends BaseStorage {
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<any> {
     try {
+      // Get the most recent position for this crawler
+      const [currentPosition] = await db
+        .select()
+        .from(crawlerPositions)
+        .where(eq(crawlerPositions.crawlerId, crawlerId))
+        .orderBy(desc(crawlerPositions.enteredAt))
+        .limit(1);
+
+      if (!currentPosition) {
+        return null;
+      }
+
+      // Get room and floor data
       const result = await db
         .select({
           room: rooms,
@@ -337,8 +351,7 @@ export class ExplorationStorage extends BaseStorage {
         })
         .from(rooms)
         .innerJoin(floors, eq(rooms.floorId, floors.id))
-        .innerJoin(crawlers, eq(crawlers.currentRoomId, rooms.id))
-        .where(eq(crawlers.id, crawlerId))
+        .where(eq(rooms.id, currentPosition.roomId))
         .limit(1);
 
       if (result.length === 0) {
@@ -353,8 +366,8 @@ export class ExplorationStorage extends BaseStorage {
         environment: result[0].room.environment || 'indoor',
         factionId: result[0].room.factionId,
         coordinates: {
-          x: result[0].room.coordinateX,
-          y: result[0].room.coordinateY
+          x: result[0].room.x,
+          y: result[0].room.y
         },
         floor: {
           id: result[0].floor.id,
