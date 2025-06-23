@@ -364,7 +364,7 @@ class RedisService {
 
   async setRoomMobs(roomId: number, mobs: any[], ttlSeconds: number = 600): Promise<void> {
     if (this.forceFallbackMode || !this.redis || !this.isConnected) {
-      console.log(`Redis fallback mode enabled - skipping mob cache for room ${roomId}`);
+      // Redis fallback mode - skipping mob cache
       return;
     }
 
@@ -415,7 +415,7 @@ class RedisService {
 
   async getRoomMobs(roomId: number): Promise<any[] | null> {
     if (this.forceFallbackMode || !this.redis || !this.isConnected) {
-      console.log(`Redis fallback mode enabled - skipping mob cache lookup for room ${roomId}`);
+      // Redis fallback mode - skipping mob cache lookup
       return null;
     }
 

@@ -186,7 +186,7 @@ export class TacticalStorage extends BaseStorage {
 
   async clearTacticalPositions(roomId: number): Promise<void> {
     await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
-    console.log(`Cleared tactical positions for room ${roomId}`);
+    // Cleared tactical positions for room
   }
 
   async removeAllMobsFromTacticalPositions(): Promise<number> {
@@ -205,7 +205,7 @@ export class TacticalStorage extends BaseStorage {
       WHERE entity_type = 'mob'
     `);
     
-    console.log(`Removed ${mobCount} mob entries from tactical_positions`);
+    // Removed mob entries from tactical_positions
     return mobCount;
   }
 
@@ -215,11 +215,11 @@ export class TacticalStorage extends BaseStorage {
     try {
       const cached = await redisService.get(cacheKey);
       if (cached) {
-        console.log(`Using cached tactical entities for room ${roomId}`);
+        // Using cached tactical entities
         return JSON.parse(cached);
       }
     } catch (error) {
-      console.log('Redis cache miss, generating fresh tactical data');
+      // Redis cache miss, generating fresh tactical data
     }
 
     // Always get fresh mob data from the database - don't rely on cached tactical positions for mobs
@@ -234,7 +234,7 @@ export class TacticalStorage extends BaseStorage {
       existingNonMobEntities = existingPositions.filter(entity => entity.type !== 'mob');
 
       if (existingNonMobEntities.length > 0) {
-        console.log(`Using existing non-mob tactical data for room ${roomId}`);
+        // Using existing non-mob tactical data
         entities.push(...existingNonMobEntities);
 
         // Mark cells as occupied by existing entities
@@ -247,7 +247,7 @@ export class TacticalStorage extends BaseStorage {
     } else {
       // Clear existing positions if forcing regeneration
       await this.clearTacticalPositions(roomId);
-      console.log(`Force regenerating tactical data for room ${roomId}`);
+      // Force regenerating tactical data
     }
 
     // Generate loot positions if we don't have existing ones
@@ -274,15 +274,15 @@ export class TacticalStorage extends BaseStorage {
 
     // ALWAYS get fresh mob data - never use cached mob positions
     if (this.mobStorage && typeof this.mobStorage.getRoomMobs === 'function' && roomData.type !== "safe" && roomData.type !== "entrance" && !roomData.isSafe) {
-      console.log(`Getting fresh mob data for room ${roomId} (type: ${roomData.type}, isSafe: ${roomData.isSafe})`);
+      // Getting fresh mob data for room
 
       try {
         // Clear any corrupted mob cache first
         try {
           await redisService.invalidateRoomMobs(roomId);
-          console.log(`Cleared potentially corrupted mob cache for room ${roomId}`);
+          // Cleared potentially corrupted mob cache
         } catch (cacheError) {
-          console.log('Failed to clear mob cache, continuing:', cacheError);
+          // Failed to clear mob cache, continuing
         }
 
         // First check if we need to spawn mobs for this room
@@ -339,7 +339,7 @@ export class TacticalStorage extends BaseStorage {
         // Don't throw the error, just log it and continue without mobs
       }
     } else {
-      console.log(`Skipping mob data for room ${roomId} - type: ${roomData.type}, isSafe: ${roomData.isSafe}`);
+      // Skipping mob data for room - safe or entrance
     }
 
     // Generate NPC positions if we don't have existing ones
@@ -380,30 +380,30 @@ export class TacticalStorage extends BaseStorage {
     const nonMobEntities = entities.filter(entity => entity.type !== 'mob');
     await this.saveTacticalPositions(roomId, nonMobEntities);
     
-    console.log(`Saved ${nonMobEntities.length} non-mob tactical entities to database (${entities.length - nonMobEntities.length} mobs stored separately)`);
+    // Saved non-mob tactical entities to database
 
     // Cache the result for 15 seconds to speed up subsequent requests
     try {
       await redisService.set(cacheKey, JSON.stringify(entities), 'EX', 15);
     } catch (error) {
-      console.log('Failed to cache tactical entities');
+      // Failed to cache tactical entities
     }
 
-    console.log(`Saved ${entities.length} tactical entities for room ${roomId}`);
+    // Saved tactical entities for room
 
     return entities;
   }
 
   async clearTacticalEntities(roomId: number): Promise<void> {
     await db.delete(tacticalPositions).where(eq(tacticalPositions.roomId, roomId));
-    console.log(`Cleared tactical entities for room ${roomId}`);
+    // Cleared tactical entities for room
   }
 
   async removeAllMobsFromTacticalPositions(): Promise<number> {
     const result = await db.delete(tacticalPositions)
       .where(eq(tacticalPositions.entityType, 'mob'));
     
-    console.log(`Removed all mob entries from tactical_positions table`);
+    // Removed all mob entries from tactical_positions table
     return Array.isArray(result) ? result.length : 0;
   }
 

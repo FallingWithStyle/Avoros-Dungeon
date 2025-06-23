@@ -53,10 +53,10 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    console.log('🚀 Starting server initialization...');
+    // Starting server initialization
 
     // Initialize database with game data - with timeout and fallback
-    console.log('📊 Initializing database...');
+    // Initializing database
     let dbInitialized = false;
 
     try {
@@ -68,16 +68,16 @@ app.use((req, res, next) => {
 
       await Promise.race([initPromise, timeoutPromise]);
       dbInitialized = true;
-      console.log('✅ Database initialized');
+      // Database initialized
     } catch (error) {
       console.warn(`⚠️ Database initialization failed:`, error.message);
-      console.log('🔄 Continuing with server startup - database may need manual initialization');
+      // Continuing with server startup - database may need manual initialization
       // Don't throw - allow server to start anyway
     }
 
-    console.log('🛣️ Registering routes...');
+    // Registering routes
     const server = await registerRoutes(app);
-    console.log('✅ Routes registered');
+    // Routes registered
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -128,8 +128,7 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '0.0.0.0';
   // Start the server with error handling
   const PORT = process.env.PORT || 5000;
   const serverInstance = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📱 App URL: http://localhost:${PORT}`);
+    // Server running
   });
 
   serverInstance.on('error', (error: any) => {
