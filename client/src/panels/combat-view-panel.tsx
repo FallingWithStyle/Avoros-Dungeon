@@ -1,14 +1,15 @@
+
 /**
  * File: combat-view-panel.tsx
- * Responsibility: Combat interface panel using the new combat system without tactical view dependencies
- * Notes: Clean implementation based on test combat system, avoiding complex tactical data hooks
+ * Responsibility: Combat interface panel using the new combat system with proper canvas rendering
+ * Notes: Updated to match test combat implementation with smooth movement and proper rendering
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CombatSystem, type CombatEntity } from "@shared/combat-system";
+import { combatSystem, type CombatEntity, type CombatState } from "@shared/combat-system";
 import type { CrawlerWithDetails } from "@shared/schema";
 
 interface CombatViewPanelProps {
@@ -23,11 +24,43 @@ export default function CombatViewPanel({
   handleRoomMovement 
 }: CombatViewPanelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [combatSystem] = useState(() => new CombatSystem());
+  const [combatState, setCombatState] = useState<CombatState>(combatSystem.getState());
   const [selectedEntity, setSelectedEntity] = useState<CombatEntity | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize combat system
+  // Subscribe to combat system updates
+  useEffect(() => {
+    let updateTimeout: NodeJS.Timeout | null = null;
+
+    const unsubscribe = combatSystem.subscribe((state) => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+
+      updateTimeout = setTimeout(() => {
+        setCombatState(state);
+
+        // Clear selectedEntity if the currently selected entity is dead or no longer exists
+        if (selectedEntity) {
+          const selectedEntityStill = state.entities.find(e => e.id === selectedEntity.id);
+          if (!selectedEntityStill || selectedEntityStill.hp <= 0) {
+            setSelectedEntity(null);
+          }
+        }
+
+        updateTimeout = null;
+      }, 8); // ~120fps throttling for better responsiveness
+    });
+
+    return () => {
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+      unsubscribe();
+    };
+  }, [selectedEntity]);
+
+  // Initialize combat system and canvas
   useEffect(() => {
     if (!canvasRef.current || isInitialized) return;
 
@@ -44,7 +77,7 @@ export default function CombatViewPanel({
     }
 
     // Add crawler entity
-    combatSystem.addEntity({
+    const playerEntity: CombatEntity = {
       id: "player",
       name: crawler.name,
       type: "player",
@@ -70,7 +103,9 @@ export default function CombatViewPanel({
       facing: 0,
       isAlive: true,
       cooldowns: {}
-    });
+    };
+
+    combatSystem.addEntity(playerEntity);
 
     // Add entities from tactical data if available
     if (tacticalData?.entities) {
@@ -80,7 +115,7 @@ export default function CombatViewPanel({
             ? JSON.parse(entity.entity_data) 
             : entity.entity_data;
 
-          combatSystem.addEntity({
+          const mobEntity: CombatEntity = {
             id: "mob-" + index,
             name: mobData.name || "Enemy",
             type: "hostile",
@@ -109,7 +144,9 @@ export default function CombatViewPanel({
             facing: 0,
             isAlive: true,
             cooldowns: {}
-          });
+          };
+
+          combatSystem.addEntity(mobEntity);
         }
       });
     }
@@ -117,9 +154,10 @@ export default function CombatViewPanel({
     setIsInitialized(true);
 
     // Start render loop
+    let animationFrameId: number;
     const renderLoop = () => {
       combatSystem.render();
-      requestAnimationFrame(renderLoop);
+      animationFrameId = requestAnimationFrame(renderLoop);
     };
     renderLoop();
 
@@ -135,22 +173,27 @@ export default function CombatViewPanel({
 
     canvas.addEventListener('click', handleCanvasClick);
 
+    // Start AI loop
+    combatSystem.startAILoop();
+
     return () => {
       canvas.removeEventListener('click', handleCanvasClick);
+      cancelAnimationFrame(animationFrameId);
+      combatSystem.stopAILoop();
     };
   }, [combatSystem, crawler, tacticalData, isInitialized]);
 
-  const handleAttack = () => {
+  const handleAttack = useCallback(() => {
     if (!selectedEntity) return;
 
-    const crawlerEntity = combatSystem.getPlayerEntity();
+    const crawlerEntity = combatState.entities.find(e => e.id === "player");
     if (crawlerEntity && selectedEntity.type === "hostile") {
       combatSystem.performAttack(crawlerEntity.id, selectedEntity.id);
     }
-  };
+  }, [selectedEntity, combatState.entities]);
 
-  const handleMove = (direction: string) => {
-    const crawlerEntity = combatSystem.getPlayerEntity();
+  const handleMove = useCallback((direction: string) => {
+    const crawlerEntity = combatState.entities.find(e => e.id === "player");
     if (!crawlerEntity) return;
 
     const moveDistance = 20;
@@ -177,7 +220,7 @@ export default function CombatViewPanel({
     newY = Math.max(10, Math.min(390, newY));
 
     combatSystem.moveEntity(crawlerEntity.id, { x: newX, y: newY });
-  };
+  }, [combatState.entities]);
 
   // Get current room info
   const currentRoom = tacticalData?.currentRoom || { name: "Unknown Room", type: "chamber" };
@@ -202,7 +245,7 @@ export default function CombatViewPanel({
           <canvas
             ref={canvasRef}
             className="w-full border border-game-border rounded bg-slate-900"
-            style={{ maxHeight: "400px" }}
+            style={{ maxHeight: "400px", imageRendering: "pixelated" }}
           />
           {selectedEntity && (
             <div className="absolute top-2 left-2 bg-black/80 text-white p-2 rounded text-xs">
@@ -312,6 +355,15 @@ export default function CombatViewPanel({
             W
           </Button>
         </div>
+
+        {/* Combat Status */}
+        {combatState.isInCombat && (
+          <div className="text-center">
+            <Badge variant="destructive" className="text-xs">
+              IN COMBAT
+            </Badge>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
