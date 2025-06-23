@@ -82,9 +82,19 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Use batch data as fallback
-  const effectiveRoomData = roomData || batchData?.currentRoom;
+  // Use batch data as fallback - fix room data structure access
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
+
+  // Debug logging to understand room data structure
+  if (IS_DEBUG_MODE && roomData) {
+    console.log('Combat View - Room data structure:', {
+      roomData,
+      batchData,
+      effectiveRoomData,
+      connections: effectiveRoomData?.connections
+    });
+  }
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities =
@@ -706,16 +716,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
-          Combat View - {effectiveRoomData?.room?.name || "Unknown Room"}
+          Combat View - {effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
             {combatState.isInCombat ? "IN COMBAT" : "READY"}
           </Badge>
-          {effectiveRoomData?.room?.environment && (
+          {(effectiveRoomData?.environment || effectiveRoomData?.room?.environment) && (
             <Badge variant="outline" className="text-xs">
-              {effectiveRoomData.room.environment}
+              {effectiveRoomData?.environment || effectiveRoomData?.room?.environment}
             </Badge>
           )}
-          {!roomData?.room && batchData?.currentRoom && (
+          {!roomData?.currentRoom && !roomData?.room && batchData?.currentRoom && (
             <Badge variant="outline" className="text-xs text-amber-400">
               Fallback Data
             </Badge>
@@ -727,21 +737,21 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div
           ref={containerRef}
           className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
-            effectiveRoomData?.room?.environment === "outdoor"
+            (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
               ? "bg-gradient-to-br from-green-900/20 to-blue-800/20"
-              : effectiveRoomData?.room?.environment === "cave"
+              : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
                 ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
-                : effectiveRoomData?.room?.environment === "dungeon"
+                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
                   ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
                   : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
           }`}
           style={{
             backgroundImage:
-              effectiveRoomData?.room?.environment === "outdoor"
+              (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
                 ? "radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)"
-                : effectiveRoomData?.room?.environment === "cave"
+                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
                   ? "radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)"
-                  : effectiveRoomData?.room?.environment === "dungeon"
+                  : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
                     ? "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)"
                     : "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)",
             width: "min(90vw, 90vh, 400px)",
