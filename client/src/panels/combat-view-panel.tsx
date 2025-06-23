@@ -1,11 +1,10 @@
-
 /**
  * File: combat-view-panel.tsx
  * Responsibility: Clean combat interface panel using only the proven test combat system logic
  * Notes: Built from test-combat.tsx without any legacy tactical view dependencies
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +57,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     tacticalData,
     isLoading: roomLoading,
     tacticalLoading,
-    tacticalError
+    tacticalError,
   } = useTacticalData(crawler);
 
   // Fallback to batch data if current-room fails
@@ -66,20 +65,20 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
     refetchInterval: 5000,
     staleTime: 3000,
-    enabled: !roomData?.room // Only fetch if we don't have room data
+    enabled: !roomData?.room, // Only fetch if we don't have room data
   });
 
   // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
-      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
       const isSmallScreen = window.innerWidth <= 768;
       const isMobileDevice = hasTouch && isSmallScreen;
       setIsMobile(isMobileDevice);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Use batch data as fallback
@@ -87,7 +86,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
   // Extract the actual tactical entities array from the data structure
-  const tacticalEntities = effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
+  const tacticalEntities =
+    effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -98,17 +98,17 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       type: "weapon",
       damageAttribute: "might",
       range: 1.5,
-      mightBonus: 5
+      mightBonus: 5,
     },
     {
-      id: "bow1", 
+      id: "bow1",
       name: "Hunting Bow",
       description: "A flexible ranged weapon",
       type: "weapon",
       damageAttribute: "agility",
       range: 3,
-      agilityBonus: 3
-    }
+      agilityBonus: 3,
+    },
   ];
 
   // Initialize combat system with crawler data
@@ -119,7 +119,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     // Clear existing entities first
     const currentState = combatSystem.getState();
-    currentState.entities.forEach(entity => {
+    currentState.entities.forEach((entity) => {
       combatSystem.removeEntity(entity.id);
     });
 
@@ -152,7 +152,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       isSelected: false,
       isAlive: true,
       cooldowns: {},
-      equippedWeapon: availableWeapons[0]
+      equippedWeapon: availableWeapons[0],
     };
 
     combatSystem.addEntity(playerEntity);
@@ -161,16 +161,24 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     // Add entities from tactical data (mobs, etc.)
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       tacticalEntities.forEach((tacticalEntity: any, index: number) => {
-
         if (tacticalEntity.type === "mob") {
           // Handle new format where mob data is in the data field
           if (tacticalEntity.data) {
             const mobEntity: CombatEntity = {
               id: "mob_" + (tacticalEntity.data.id || index),
-              name: tacticalEntity.name || tacticalEntity.data.name || "Unknown Mob",
+              name:
+                tacticalEntity.name ||
+                tacticalEntity.data.name ||
+                "Unknown Mob",
               type: "hostile", // Default to hostile for now
-              hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
-              maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
+              hp:
+                tacticalEntity.data.hp ||
+                tacticalEntity.data.currentHealth ||
+                100,
+              maxHp:
+                tacticalEntity.data.maxHp ||
+                tacticalEntity.data.maxHealth ||
+                100,
               energy: 20,
               maxEnergy: 20,
               power: 10,
@@ -186,24 +194,30 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               speed: tacticalEntity.data.speed || 16,
               accuracy: 16,
               evasion: 18,
-              position: { 
-                x: tacticalEntity.position?.x || 50, 
-                y: tacticalEntity.position?.y || 50 
+              position: {
+                x: tacticalEntity.position?.x || 50,
+                y: tacticalEntity.position?.y || 50,
               },
               facing: 180,
               level: 3,
               isAlive: true,
-              cooldowns: {}
+              cooldowns: {},
             };
 
             combatSystem.addEntity(mobEntity);
-          } 
+          }
           // Handle old format where mob data is in the entity field
           else if (tacticalEntity.entity) {
             const mobEntity: CombatEntity = {
               id: "mob_" + (tacticalEntity.entity.id || index),
-              name: tacticalEntity.entity.displayName || tacticalEntity.entity.name || "Unknown Mob",
-              type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
+              name:
+                tacticalEntity.entity.displayName ||
+                tacticalEntity.entity.name ||
+                "Unknown Mob",
+              type:
+                tacticalEntity.entity.disposition === "hostile"
+                  ? "hostile"
+                  : "neutral",
               hp: tacticalEntity.entity.currentHealth || 100,
               maxHp: tacticalEntity.entity.maxHealth || 100,
               energy: 20,
@@ -221,14 +235,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               speed: tacticalEntity.entity.speed || 16,
               accuracy: 16,
               evasion: 18,
-              position: { 
-                x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50, 
-                y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50 
+              position: {
+                x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50,
+                y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50,
               },
               facing: 180,
               level: 3,
               isAlive: tacticalEntity.entity.isAlive !== false,
-              cooldowns: {}
+              cooldowns: {},
             };
 
             combatSystem.addEntity(mobEntity);
@@ -242,148 +256,206 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
 
     setIsInitialized(true);
-  }, [crawler, aiEnabled, availableWeapons, roomData, tacticalData]);
+  }, [
+    crawler,
+    aiEnabled,
+    availableWeapons,
+    effectiveTacticalData,
+    tacticalEntities,
+  ]);
 
   // Movement handler with enhanced collision detection and room transitions
-  const handleMovement = useCallback((direction: { x: number; y: number }) => {
-    const player = combatState.entities.find(e => e.id === "player");
-    if (!player) return;
+  const handleMovement = useCallback(
+    (direction: { x: number; y: number }) => {
+      const player = combatState.entities.find((e) => e.id === "player");
+      if (!player) return;
 
-    if (direction.x === 0 && direction.y === 0) return;
+      if (direction.x === 0 && direction.y === 0) return;
 
-    const moveSpeed = 2.5; // Slightly slower for better control
-    let newX = player.position.x + direction.x * moveSpeed;
-    let newY = player.position.y + direction.y * moveSpeed;
+      const moveSpeed = 2.5; // Slightly slower for better control
+      let newX = player.position.x + direction.x * moveSpeed;
+      let newY = player.position.y + direction.y * moveSpeed;
 
-    // Enhanced collision detection with room layout elements
-    const playerRadius = 2.0; // Slightly larger for better collision feel
+      // Enhanced collision detection with room layout elements
+      const playerRadius = 2.0; // Slightly larger for better collision feel
 
-    const checkCollisionWithElements = (x: number, y: number): boolean => {
-      if (!tacticalEntities || !Array.isArray(tacticalEntities)) return false;
+      const checkCollisionWithElements = (x: number, y: number): boolean => {
+        if (!tacticalEntities || !Array.isArray(tacticalEntities)) return false;
 
-      return tacticalEntities.some((entity: any) => {
-        if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
+        return tacticalEntities.some((entity: any) => {
+          if (
+            entity.type !== "cover" &&
+            entity.type !== "wall" &&
+            entity.type !== "door"
+          )
+            return false;
 
-        // Use entity position directly (already in percentage format)
-        const elementLeft = entity.position.x - 2;
-        const elementRight = entity.position.x + 2;
-        const elementTop = entity.position.y - 2;
-        const elementBottom = entity.position.y + 2;
+          // Use entity position directly (already in percentage format)
+          const elementLeft = entity.position.x - 2;
+          const elementRight = entity.position.x + 2;
+          const elementTop = entity.position.y - 2;
+          const elementBottom = entity.position.y + 2;
 
-        const buffer = 1.0; // Larger buffer for smoother collision
-        return (x + playerRadius > elementLeft - buffer && 
-                x - playerRadius < elementRight + buffer &&
-                y + playerRadius > elementTop - buffer && 
-                y - playerRadius < elementBottom + buffer);
-      });
-    };
+          const buffer = 1.0; // Larger buffer for smoother collision
+          return (
+            x + playerRadius > elementLeft - buffer &&
+            x - playerRadius < elementRight + buffer &&
+            y + playerRadius > elementTop - buffer &&
+            y - playerRadius < elementBottom + buffer
+          );
+        });
+      };
 
-    // Check for collision with other entities (hostile mobs)
-    const checkCollisionWithEntities = (x: number, y: number): boolean => {
-      return combatState.entities.some((entity: any) => {
-        if (entity.id === "player" || entity.hp <= 0) return false;
+      // Check for collision with other entities (hostile mobs)
+      const checkCollisionWithEntities = (x: number, y: number): boolean => {
+        return combatState.entities.some((entity: any) => {
+          if (entity.id === "player" || entity.hp <= 0) return false;
 
-        const distance = Math.sqrt(
-          Math.pow(x - entity.position.x, 2) + 
-          Math.pow(y - entity.position.y, 2)
-        );
+          const distance = Math.sqrt(
+            Math.pow(x - entity.position.x, 2) +
+              Math.pow(y - entity.position.y, 2),
+          );
 
-        return distance < 4; // Minimum distance to other entities
-      });
-    };
+          return distance < 4; // Minimum distance to other entities
+        });
+      };
 
-    // Check room boundaries with gates for exits
-    const gateStart = 40;
-    const gateEnd = 60;
-    const boundary = 5;
+      // Check room boundaries with gates for exits
+      const gateStart = 40;
+      const gateEnd = 60;
+      const boundary = 5;
 
-    // Check if we're trying to move through an exit
-    let exitDirection = "";
-    const roomConnections = effectiveRoomData?.connections || [];
-    const availableDirections = roomConnections.map((conn: any) => conn.direction);
+      // Check if we're trying to move through an exit
+      let exitDirection = "";
+      const roomConnections = effectiveRoomData?.connections || [];
+      const availableDirections = roomConnections.map(
+        (conn: any) => conn.direction,
+      );
 
-    if (newY <= boundary && direction.y < 0 && availableDirections.includes("north")) {
-      if (newX >= gateStart && newX <= gateEnd) {
-        exitDirection = "north";
-      }
-    } else if (newY >= (100 - boundary) && direction.y > 0 && availableDirections.includes("south")) {
-      if (newX >= gateStart && newX <= gateEnd) {
-        exitDirection = "south";
-      }
-    } else if (newX >= (100 - boundary) && direction.x > 0 && availableDirections.includes("east")) {
-      if (newY >= gateStart && newY <= gateEnd) {
-        exitDirection = "east";
-      }
-    } else if (newX <= boundary && direction.x < 0 && availableDirections.includes("west")) {
-      if (newY >= gateStart && newY <= gateEnd) {
-        exitDirection = "west";
-      }
-    }
-
-    // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
-    if (exitDirection) {
-      // Clamp to boundary
-      newX = Math.max(boundary, Math.min(100 - boundary, newX));
-      newY = Math.max(boundary, Math.min(100 - boundary, newY));
-    } else {
-      // Normal boundary clamping
-      newX = Math.max(boundary, Math.min(100 - boundary, newX));
-      newY = Math.max(boundary, Math.min(100 - boundary, newY));
-    }
-
-    // Check for collisions and handle sliding movement
-    const wouldCollideWithElements = checkCollisionWithElements(newX, newY);
-    const wouldCollideWithEntities = checkCollisionWithEntities(newX, newY);
-
-    if (wouldCollideWithElements || wouldCollideWithEntities) {
-      // Try moving only horizontally
-      const horizontalX = Math.max(boundary, Math.min(100 - boundary, player.position.x + direction.x * moveSpeed));
-      const horizontalY = player.position.y;
-
-      if (!checkCollisionWithElements(horizontalX, horizontalY) && !checkCollisionWithEntities(horizontalX, horizontalY)) {
-        newX = horizontalX;
-        newY = horizontalY;
-      } else {
-        // Try moving only vertically
-        const verticalX = player.position.x;
-        const verticalY = Math.max(boundary, Math.min(100 - boundary, player.position.y + direction.y * moveSpeed));
-
-        if (!checkCollisionWithElements(verticalX, verticalY) && !checkCollisionWithEntities(verticalX, verticalY)) {
-          newX = verticalX;
-          newY = verticalY;
-        } else {
-          // Can't move at all, just update facing
-          if (direction.x !== 0 || direction.y !== 0) {
-            let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
-            if (facing < 0) facing += 360;
-            combatSystem.updateEntity("player", { facing: Math.round(facing) });
-          }
-          return;
+      if (
+        newY <= boundary &&
+        direction.y < 0 &&
+        availableDirections.includes("north")
+      ) {
+        if (newX >= gateStart && newX <= gateEnd) {
+          exitDirection = "north";
+        }
+      } else if (
+        newY >= 100 - boundary &&
+        direction.y > 0 &&
+        availableDirections.includes("south")
+      ) {
+        if (newX >= gateStart && newX <= gateEnd) {
+          exitDirection = "south";
+        }
+      } else if (
+        newX >= 100 - boundary &&
+        direction.x > 0 &&
+        availableDirections.includes("east")
+      ) {
+        if (newY >= gateStart && newY <= gateEnd) {
+          exitDirection = "east";
+        }
+      } else if (
+        newX <= boundary &&
+        direction.x < 0 &&
+        availableDirections.includes("west")
+      ) {
+        if (newY >= gateStart && newY <= gateEnd) {
+          exitDirection = "west";
         }
       }
-    }
 
-    // Calculate facing direction based on movement
-    let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
-    if (facing < 0) {
-      facing += 360;
-    }
-    const newFacing = Math.round(facing);
-
-    // Update position
-    combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
-
-    // Update facing if not targeting something
-    if (!selectedTarget) {
-      const currentFacing = player.facing || 0;
-      const facingDiff = Math.abs(newFacing - currentFacing);
-      const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
-
-      if (normalizedDiff > 2) {
-        combatSystem.updateEntity("player", { facing: newFacing });
+      // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
+      if (exitDirection) {
+        // Clamp to boundary
+        newX = Math.max(boundary, Math.min(100 - boundary, newX));
+        newY = Math.max(boundary, Math.min(100 - boundary, newY));
+      } else {
+        // Normal boundary clamping
+        newX = Math.max(boundary, Math.min(100 - boundary, newX));
+        newY = Math.max(boundary, Math.min(100 - boundary, newY));
       }
-    }
-  }, [combatState.entities, selectedTarget, tacticalEntities, effectiveRoomData, isInitialized]);
+
+      // Check for collisions and handle sliding movement
+      const wouldCollideWithElements = checkCollisionWithElements(newX, newY);
+      const wouldCollideWithEntities = checkCollisionWithEntities(newX, newY);
+
+      if (wouldCollideWithElements || wouldCollideWithEntities) {
+        // Try moving only horizontally
+        const horizontalX = Math.max(
+          boundary,
+          Math.min(100 - boundary, player.position.x + direction.x * moveSpeed),
+        );
+        const horizontalY = player.position.y;
+
+        if (
+          !checkCollisionWithElements(horizontalX, horizontalY) &&
+          !checkCollisionWithEntities(horizontalX, horizontalY)
+        ) {
+          newX = horizontalX;
+          newY = horizontalY;
+        } else {
+          // Try moving only vertically
+          const verticalX = player.position.x;
+          const verticalY = Math.max(
+            boundary,
+            Math.min(
+              100 - boundary,
+              player.position.y + direction.y * moveSpeed,
+            ),
+          );
+
+          if (
+            !checkCollisionWithElements(verticalX, verticalY) &&
+            !checkCollisionWithEntities(verticalX, verticalY)
+          ) {
+            newX = verticalX;
+            newY = verticalY;
+          } else {
+            // Can't move at all, just update facing
+            if (direction.x !== 0 || direction.y !== 0) {
+              let facing =
+                Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+              if (facing < 0) facing += 360;
+              combatSystem.updateEntity("player", {
+                facing: Math.round(facing),
+              });
+            }
+            return;
+          }
+        }
+      }
+
+      // Calculate facing direction based on movement
+      let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+      if (facing < 0) {
+        facing += 360;
+      }
+      const newFacing = Math.round(facing);
+
+      // Update position
+      combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
+
+      // Update facing if not targeting something
+      if (!selectedTarget) {
+        const currentFacing = player.facing || 0;
+        const facingDiff = Math.abs(newFacing - currentFacing);
+        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+
+        if (normalizedDiff > 2) {
+          combatSystem.updateEntity("player", { facing: newFacing });
+        }
+      }
+    },
+    [
+      combatState.entities,
+      selectedTarget,
+      tacticalEntities,
+      effectiveRoomData,
+      isInitialized,
+    ],
+  );
 
   // Handle target cycling with Tab key
   useEffect(() => {
@@ -391,8 +463,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       if (event.key === "Tab") {
         event.preventDefault();
 
-        const hostileTargets = combatState.entities.filter(e => 
-          e.type === "hostile" && e.hp > 0
+        const hostileTargets = combatState.entities.filter(
+          (e) => e.type === "hostile" && e.hp > 0,
         );
 
         if (hostileTargets.length === 0) {
@@ -403,7 +475,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         if (!selectedTarget) {
           setSelectedTarget(hostileTargets[0].id);
         } else {
-          const currentIndex = hostileTargets.findIndex(e => e.id === selectedTarget);
+          const currentIndex = hostileTargets.findIndex(
+            (e) => e.id === selectedTarget,
+          );
           const nextIndex = (currentIndex + 1) % hostileTargets.length;
           setSelectedTarget(hostileTargets[nextIndex].id);
         }
@@ -423,60 +497,68 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Use gesture movement hook for mobile
   const { containerRef, bind } = useGestureMovement({
     onMovement: handleMovement,
-    isEnabled: isMobile && !combatState.isInCombat
+    isEnabled: isMobile && !combatState.isInCombat,
   });
 
   // Hotbar action handler
-  const handleHotbarAction = useCallback((actionId: string, actionType: string, actionName: string) => {
-    if (actionType === "attack" && actionId === "basic_attack") {
-      if (selectedTarget) {
-        const player = combatState.entities.find(e => e.id === "player");
-        const target = combatState.entities.find(e => e.id === selectedTarget);
-
-        if (player && target) {
-          const weaponRange = equippedWeapon ? equippedWeapon.range * 10 : 10;
-          const distance = Math.sqrt(
-            Math.pow(target.position.x - player.position.x, 2) + 
-            Math.pow(target.position.y - player.position.y, 2)
+  const handleHotbarAction = useCallback(
+    (actionId: string, actionType: string, actionName: string) => {
+      if (actionType === "attack" && actionId === "basic_attack") {
+        if (selectedTarget) {
+          const player = combatState.entities.find((e) => e.id === "player");
+          const target = combatState.entities.find(
+            (e) => e.id === selectedTarget,
           );
 
-          if (distance <= weaponRange) {
-            combatSystem.executeAttack("player", selectedTarget);
-          } else {
-            toast({
-              title: "Out of Range",
-              description: "Target is too far away to attack",
-              variant: "destructive",
-            });
+          if (player && target) {
+            const weaponRange = equippedWeapon ? equippedWeapon.range * 10 : 10;
+            const distance = Math.sqrt(
+              Math.pow(target.position.x - player.position.x, 2) +
+                Math.pow(target.position.y - player.position.y, 2),
+            );
+
+            if (distance <= weaponRange) {
+              combatSystem.executeAttack("player", selectedTarget);
+            } else {
+              toast({
+                title: "Out of Range",
+                description: "Target is too far away to attack",
+                variant: "destructive",
+              });
+            }
           }
+        } else {
+          combatSystem.executeAttack("player");
         }
-      } else {
-        combatSystem.executeAttack("player");
+        setActiveActionMode(null);
+      } else if (actionType === "ability") {
+        setActiveActionMode({ type: actionType as any, actionId, actionName });
       }
-      setActiveActionMode(null);
-    } else if (actionType === "ability") {
-      setActiveActionMode({ type: actionType as any, actionId, actionName });
-    }
-  }, [selectedTarget, combatState.entities, equippedWeapon, toast]);
+    },
+    [selectedTarget, combatState.entities, equippedWeapon, toast],
+  );
 
   // Get cooldown percentage for hotbar display
-  const getCooldownPercentage = useCallback((actionId: string): number => {
-    const player = combatState.entities.find(e => e.id === "player");
-    if (!player || !player.cooldowns) return 0;
+  const getCooldownPercentage = useCallback(
+    (actionId: string): number => {
+      const player = combatState.entities.find((e) => e.id === "player");
+      if (!player || !player.cooldowns) return 0;
 
-    const now = Date.now();
-    const lastUsed = player.cooldowns[actionId] || 0;
+      const now = Date.now();
+      const lastUsed = player.cooldowns[actionId] || 0;
 
-    const cooldowns: Record<string, number> = {
-      "basic_attack": 800,
-      "defend": 3000,
-      "special": 5000
-    };
+      const cooldowns: Record<string, number> = {
+        basic_attack: 800,
+        defend: 3000,
+        special: 5000,
+      };
 
-    const cooldown = cooldowns[actionId] || 1000;
-    const timeLeft = Math.max(0, (lastUsed + cooldown) - now);
-    return (timeLeft / cooldown) * 100;
-  }, [combatState.entities]);
+      const cooldown = cooldowns[actionId] || 1000;
+      const timeLeft = Math.max(0, lastUsed + cooldown - now);
+      return (timeLeft / cooldown) * 100;
+    },
+    [combatState.entities],
+  );
 
   // Subscribe to combat system updates
   useEffect(() => {
@@ -485,7 +567,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       // Clear selectedTarget if the currently selected entity is dead or no longer exists
       if (selectedTarget) {
-        const selectedEntity = state.entities.find(e => e.id === selectedTarget);
+        const selectedEntity = state.entities.find(
+          (e) => e.id === selectedTarget,
+        );
         if (!selectedEntity || selectedEntity.hp <= 0) {
           setSelectedTarget(null);
         }
@@ -495,29 +579,60 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return unsubscribe;
   }, [selectedTarget]);
 
-  // Initialize when component mounts and data is available
+  // Only reset isInitialized if room or tactical entities actually changed
+  const prevRoomIdRef = useRef<string | undefined>();
+  const prevEntitiesLenRef = useRef<number | undefined>();
+
   useEffect(() => {
-    // Initialize if we have tactical data, even without room data
-    if (!roomLoading && !tacticalLoading && effectiveTacticalData && tacticalEntities.length > 0) {
-      setIsInitialized(false); // Reset initialization flag when room changes
+    const currentRoomId = effectiveRoomData?.room?.id;
+    const entitiesLen = tacticalEntities?.length ?? 0;
+
+    // Only reset isInitialized if room or entities have changed
+    if (
+      prevRoomIdRef.current !== undefined &&
+      (prevRoomIdRef.current !== currentRoomId ||
+        prevEntitiesLenRef.current !== entitiesLen)
+    ) {
+      setIsInitialized(false);
+    }
+    prevRoomIdRef.current = currentRoomId;
+    prevEntitiesLenRef.current = entitiesLen;
+
+    if (
+      !roomLoading &&
+      !tacticalLoading &&
+      effectiveTacticalData &&
+      entitiesLen > 0 &&
+      !isInitialized
+    ) {
       initializeCombatSystem();
     }
 
     return () => {
       combatSystem.stopAILoop();
     };
-  }, [initializeCombatSystem, roomLoading, tacticalLoading, effectiveRoomData?.room?.id, tacticalEntities?.length]);
+  }, [
+    initializeCombatSystem,
+    roomLoading,
+    tacticalLoading,
+    effectiveRoomData?.room?.id,
+    tacticalEntities?.length,
+    effectiveTacticalData,
+    isInitialized,
+  ]);
 
   // Force re-render during cooldowns
   useEffect(() => {
     const interval = setInterval(() => {
-      const player = combatState.entities.find(e => e.id === "player");
+      const player = combatState.entities.find((e) => e.id === "player");
       if (player?.cooldowns) {
         const now = Date.now();
-        const hasActiveCooldowns = Object.values(player.cooldowns).some(lastUsed => {
-          const timeSince = now - lastUsed;
-          return timeSince < 5000;
-        });
+        const hasActiveCooldowns = Object.values(player.cooldowns).some(
+          (lastUsed) => {
+            const timeSince = now - lastUsed;
+            return timeSince < 5000;
+          },
+        );
 
         if (hasActiveCooldowns) {
           forceUpdate({});
@@ -528,66 +643,18 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return () => clearInterval(interval);
   }, [combatState.entities]);
 
-  // Update combat state when data changes - use JSON.stringify to avoid infinite loops
-  useEffect(() => {
-    if (tacticalData?.entities) {
-      const newState = combatSystem.updateEntities(tacticalData.entities);
-      setCombatState(prevState => {
-        // Only update if the state actually changed
-        if (JSON.stringify(prevState.entities) !== JSON.stringify(newState.entities)) {
-          return newState;
-        }
-        return prevState;
-      });
-    }
-  }, [tacticalData?.entities]);
-
-  // Update selected target when entities change - prevent infinite loop
-  useEffect(() => {
-    if (selectedTarget && combatState.entities.length > 0) {
-      const targetEntity = combatState.entities.find(e => e.id === selectedTarget);
-      if (!targetEntity) {
-        setSelectedTarget(null);
-      }
-    }
-  }, [selectedTarget, combatState.entities.length]);
-
-  // Handle automatic target selection - prevent infinite loop
-  useEffect(() => {
-    if (!selectedTarget && combatState.entities.length > 0 && crawler?.tacticalPosition) {
-      const enemies = combatState.entities.filter(e => 
-        e.type === 'mob' && e.position
-      );
-      if (enemies.length > 0) {
-        setSelectedTarget(enemies[0].id);
-      }
-    }
-  }, [selectedTarget, combatState.entities.length, crawler?.tacticalPosition?.x, crawler?.tacticalPosition?.y]);
-
-  // Update movement options when position or entities change - prevent infinite loop
-  useEffect(() => {
-    if (crawler?.tacticalPosition && combatState.entities.length >= 0) {
-      const options = combatSystem.getMovementOptions(
-        crawler.tacticalPosition,
-        combatState.entities
-      );
-      setMovementOptions(prevOptions => {
-        // Only update if options actually changed
-        if (JSON.stringify(prevOptions) !== JSON.stringify(options)) {
-          return options;
-        }
-        return prevOptions;
-      });
-    }
-  }, [crawler?.tacticalPosition?.x, crawler?.tacticalPosition?.y, combatState.entities.length]);
-
   // CONDITIONAL LOGIC AFTER ALL HOOKS
-  const player = combatState.entities.find(e => e.id === "player");
-  const enemies = combatState.entities.filter(e => e.type === "hostile");
-  const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
+  const player = combatState.entities.find((e) => e.id === "player");
+  const enemies = combatState.entities.filter((e) => e.type === "hostile");
+  const selectedEntity = combatState.entities.find(
+    (e) => e.id === selectedTarget,
+  );
 
   // Show loading state
-  if ((roomLoading || tacticalLoading) && (!effectiveTacticalData || !tacticalEntities.length)) {
+  if (
+    (roomLoading || tacticalLoading) &&
+    (!effectiveTacticalData || !tacticalEntities.length)
+  ) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -634,80 +701,101 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div
           ref={containerRef}
           className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
-            effectiveRoomData?.room?.environment === "outdoor" 
-              ? "bg-gradient-to-br from-green-900/20 to-blue-800/20" 
+            effectiveRoomData?.room?.environment === "outdoor"
+              ? "bg-gradient-to-br from-green-900/20 to-blue-800/20"
               : effectiveRoomData?.room?.environment === "cave"
-              ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
-              : effectiveRoomData?.room?.environment === "dungeon"
-              ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
-              : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
+                ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
+                : effectiveRoomData?.room?.environment === "dungeon"
+                  ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
+                  : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
           }`}
-          style={{ 
-            backgroundImage: effectiveRoomData?.room?.environment === "outdoor" 
-              ? 'radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
-              : effectiveRoomData?.room?.environment === "cave"
-              ? 'radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)'
-              : effectiveRoomData?.room?.environment === "dungeon"
-              ? 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)'
-              : 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
-            width: 'min(90vw, 90vh, 400px)',
-            height: 'min(90vw, 90vh, 400px)',
-            aspectRatio: '1',
-            touchAction: 'none',
-            WebkitUserSelect: 'none',
-            userSelect: 'none'
+          style={{
+            backgroundImage:
+              effectiveRoomData?.room?.environment === "outdoor"
+                ? "radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)"
+                : effectiveRoomData?.room?.environment === "cave"
+                  ? "radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)"
+                  : effectiveRoomData?.room?.environment === "dungeon"
+                    ? "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)"
+                    : "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)",
+            width: "min(90vw, 90vh, 400px)",
+            height: "min(90vw, 90vh, 400px)",
+            aspectRatio: "1",
+            touchAction: "none",
+            WebkitUserSelect: "none",
+            userSelect: "none",
           }}
           {...bind()}
         >
           {/* Grid overlay */}
           <div className="absolute inset-0 opacity-10">
             {Array.from({ length: 11 }).map((_, i) => (
-              <div key={`v-${i}`} className="absolute h-full w-px bg-amber-400" style={{ left: `${i * 10}%` }} />
+              <div
+                key={`v-${i}`}
+                className="absolute h-full w-px bg-amber-400"
+                style={{ left: `${i * 10}%` }}
+              />
             ))}
             {Array.from({ length: 11 }).map((_, i) => (
-              <div key={`h-${i}`} className="absolute w-full h-px bg-amber-400" style={{ top: `${i * 10}%` }} />
+              <div
+                key={`h-${i}`}
+                className="absolute w-full h-px bg-amber-400"
+                style={{ top: `${i * 10}%` }}
+              />
             ))}
           </div>
 
           {/* Room Layout Elements */}
-          {tacticalEntities && Array.isArray(tacticalEntities) ? 
-            tacticalEntities.map((entity: any) => {
-              if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
+          {tacticalEntities && Array.isArray(tacticalEntities)
+            ? tacticalEntities.map((entity: any) => {
+                if (
+                  entity.type !== "cover" &&
+                  entity.type !== "wall" &&
+                  entity.type !== "door"
+                )
+                  return null;
 
-              const x = entity.position.x;
-              const y = entity.position.y;
+                const x = entity.position.x;
+                const y = entity.position.y;
 
-            return (
-              <div
-                key={entity.id || `${entity.type}-${x}-${y}`}
-                className={`absolute ${
-                  entity.type === "wall" 
-                    ? "bg-stone-600 border-2 border-stone-500" 
-                    : entity.type === "door"
-                    ? "bg-amber-700 border-2 border-amber-500"
-                    : "bg-stone-400 border-2 border-stone-300 opacity-80"
-                } rounded-sm shadow-lg`}
-                style={{
-                  left: `${x - 2}%`,
-                  top: `${y - 2}%`,
-                  width: `4%`,
-                  height: `4%`,
-                  zIndex: entity.type === "wall" ? 15 : entity.type === "door" ? 12 : 10,
-                  filter: entity.type === "wall" 
-                    ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
-                    : entity.type === "door"
-                    ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
-                    : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
-                }}
-              />
-            );
-            }) : null}
+                return (
+                  <div
+                    key={entity.id || `${entity.type}-${x}-${y}`}
+                    className={`absolute ${
+                      entity.type === "wall"
+                        ? "bg-stone-600 border-2 border-stone-500"
+                        : entity.type === "door"
+                          ? "bg-amber-700 border-2 border-amber-500"
+                          : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                    } rounded-sm shadow-lg`}
+                    style={{
+                      left: `${x - 2}%`,
+                      top: `${y - 2}%`,
+                      width: `4%`,
+                      height: `4%`,
+                      zIndex:
+                        entity.type === "wall"
+                          ? 15
+                          : entity.type === "door"
+                            ? 12
+                            : 10,
+                      filter:
+                        entity.type === "wall"
+                          ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                          : entity.type === "door"
+                            ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
+                            : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))",
+                    }}
+                  />
+                );
+              })
+            : null}
 
           {/* Exit indicators based on room connections */}
           {effectiveRoomData?.connections?.map((connection: any) => {
             let position = { x: 50, y: 50 };
 
-            switch(connection.direction) {
+            switch (connection.direction) {
               case "north":
                 position = { x: 50, y: 5 };
                 break;
@@ -730,21 +818,23 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               <div
                 key={connection.direction}
                 className={`absolute w-6 h-6 border-2 rounded-full flex items-center justify-center ${
-                  connection.isLocked 
-                    ? "bg-red-500/70 border-red-300" 
+                  connection.isLocked
+                    ? "bg-red-500/70 border-red-300"
                     : "bg-blue-500/70 border-blue-300"
                 }`}
                 style={{
                   left: `${position.x}%`,
                   top: `${position.y}%`,
                   transform: "translate(-50%, -50%)",
-                  zIndex: 20
+                  zIndex: 20,
                 }}
                 title={`${connection.isLocked ? "Locked " : ""}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
               >
-                <div className={`w-2 h-2 rounded-full animate-pulse ${
-                  connection.isLocked ? "bg-red-200" : "bg-blue-200"
-                }`} />
+                <div
+                  className={`w-2 h-2 rounded-full animate-pulse ${
+                    connection.isLocked ? "bg-red-200" : "bg-blue-200"
+                  }`}
+                />
               </div>
             );
           })}
@@ -754,30 +844,40 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             <div
               key={entity.id}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
-                entity.hp <= 0 
-                  ? 'cursor-not-allowed opacity-50' 
+                entity.hp <= 0
+                  ? "cursor-not-allowed opacity-50"
                   : entity.id !== "player"
-                    ? 'cursor-pointer hover:scale-105' 
-                    : 'cursor-default'
-              } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
+                    ? "cursor-pointer hover:scale-105"
+                    : "cursor-default"
+              } ${selectedTarget === entity.id ? "scale-110 z-10" : ""}`}
               style={{
                 left: `${entity.position.x}%`,
                 top: `${entity.position.y}%`,
               }}
-              onClick={() => entity.id !== "player" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
+              onClick={() =>
+                entity.id !== "player" && entity.hp > 0
+                  ? setSelectedTarget(entity.id)
+                  : null
+              }
             >
               {/* Main entity circle */}
-              <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                entity.type === "player" 
-                  ? "bg-blue-600 border-blue-400" 
-                  : entity.hp <= 0
-                  ? "bg-gray-600 border-gray-500"
-                  : entity.type === "hostile"
-                  ? "bg-red-600 border-red-400"
-                  : "bg-gray-600 border-gray-400"
-              }`}>
-                {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
-                {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+              <div
+                className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                  entity.type === "player"
+                    ? "bg-blue-600 border-blue-400"
+                    : entity.hp <= 0
+                      ? "bg-gray-600 border-gray-500"
+                      : entity.type === "hostile"
+                        ? "bg-red-600 border-red-400"
+                        : "bg-gray-600 border-gray-400"
+                }`}
+              >
+                {entity.type === "player" && (
+                  <Shield className="w-4 h-4 text-white" />
+                )}
+                {entity.type === "hostile" && (
+                  <Skull className="w-4 h-4 text-white" />
+                )}
 
                 {/* Facing direction indicator */}
                 {entity.facing !== undefined && (
@@ -791,12 +891,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                     <div className="w-full h-full flex items-start justify-center">
                       <div
                         className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
-                          entity.hp <= 0 ? "border-b-gray-500" :
-                          entity.type === "player" 
-                            ? "border-b-blue-400" 
-                            : entity.type === "hostile"
-                            ? "border-b-red-400"
-                            : "border-b-gray-400"
+                          entity.hp <= 0
+                            ? "border-b-gray-500"
+                            : entity.type === "player"
+                              ? "border-b-blue-400"
+                              : entity.type === "hostile"
+                                ? "border-b-red-400"
+                                : "border-b-gray-400"
                         }`}
                         style={{
                           filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
@@ -809,11 +910,15 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
                 {/* Health bar */}
                 <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
-                  <div 
+                  <div
                     className={`h-full rounded transition-all duration-300 ${
-                      entity.hp <= 0 ? "bg-gray-500" :
-                      entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
-                      entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
+                      entity.hp <= 0
+                        ? "bg-gray-500"
+                        : entity.hp > entity.maxHp * 0.6
+                          ? "bg-green-500"
+                          : entity.hp > entity.maxHp * 0.3
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                     }`}
                     style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
                   />
@@ -832,10 +937,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div className="flex gap-1">
           {/* Attack Action */}
           <Button
-            variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}
+            variant={
+              activeActionMode?.actionId === "basic_attack"
+                ? "default"
+                : "outline"
+            }
             size="sm"
             className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
-            onClick={() => handleHotbarAction("basic_attack", "attack", "Attack")}
+            onClick={() =>
+              handleHotbarAction("basic_attack", "attack", "Attack")
+            }
             disabled={getCooldownPercentage("basic_attack") > 0}
             title="Attack [1]"
           >
@@ -844,10 +955,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
             {/* Cooldown indicator */}
             {getCooldownPercentage("basic_attack") > 0 && (
-              <div 
+              <div
                 className="absolute inset-0 bg-gray-600/50 rounded"
-                style={{ 
-                  clipPath: `polygon(0 ${100 - getCooldownPercentage("basic_attack")}%, 100% ${100 - getCooldownPercentage("basic_attack")}%, 100% 100%, 0% 100%)` 
+                style={{
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("basic_attack")}%, 100% ${100 - getCooldownPercentage("basic_attack")}%, 100% 100%, 0% 100%)`,
                 }}
               />
             )}
@@ -855,7 +966,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
           {/* Defend Action */}
           <Button
-            variant={activeActionMode?.actionId === "defend" ? "default" : "outline"}
+            variant={
+              activeActionMode?.actionId === "defend" ? "default" : "outline"
+            }
             size="sm"
             className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
             onClick={() => handleHotbarAction("defend", "ability", "Defend")}
@@ -866,10 +979,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             <span className="text-xs text-muted-foreground">2</span>
 
             {getCooldownPercentage("defend") > 0 && (
-              <div 
+              <div
                 className="absolute inset-0 bg-gray-600/50 rounded"
-                style={{ 
-                  clipPath: `polygon(0 ${100 - getCooldownPercentage("defend")}%, 100% ${100 - getCooldownPercentage("defend")}%, 100% 100%, 0% 100%)` 
+                style={{
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("defend")}%, 100% ${100 - getCooldownPercentage("defend")}%, 100% 100%, 0% 100%)`,
                 }}
               />
             )}
@@ -877,7 +990,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
           {/* Special Ability */}
           <Button
-            variant={activeActionMode?.actionId === "special" ? "default" : "outline"}
+            variant={
+              activeActionMode?.actionId === "special" ? "default" : "outline"
+            }
             size="sm"
             className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
             onClick={() => handleHotbarAction("special", "ability", "Special")}
@@ -888,10 +1003,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             <span className="text-xs text-muted-foreground">3</span>
 
             {getCooldownPercentage("special") > 0 && (
-              <div 
+              <div
                 className="absolute inset-0 bg-gray-600/50 rounded"
-                style={{ 
-                  clipPath: `polygon(0 ${100 - getCooldownPercentage("special")}%, 100% ${100 - getCooldownPercentage("special")}%, 100% 100%, 0% 100%)` 
+                style={{
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("special")}%, 100% ${100 - getCooldownPercentage("special")}%, 100% 100%, 0% 100%)`,
                 }}
               />
             )}
@@ -903,15 +1018,21 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="flex justify-between">
               <span className="text-red-300">HP:</span>
-              <span className="text-white">{player.hp}/{player.maxHp}</span>
+              <span className="text-white">
+                {player.hp}/{player.maxHp}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-blue-300">Energy:</span>
-              <span className="text-white">{player.energy}/{player.maxEnergy}</span>
+              <span className="text-white">
+                {player.energy}/{player.maxEnergy}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-purple-300">Power:</span>
-              <span className="text-white">{player.power}/{player.maxPower}</span>
+              <span className="text-white">
+                {player.power}/{player.maxPower}
+              </span>
             </div>
           </div>
         )}
@@ -919,14 +1040,19 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         {/* Controls hint */}
         <div className="text-xs text-muted-foreground text-center space-y-1">
           <div>
-            {isMobile 
-              ? "Touch & Drag: Move | Tap: Actions" 
-              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"
-            }
+            {isMobile
+              ? "Touch & Drag: Move | Tap: Actions"
+              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"}
           </div>
-          {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
+          {selectedTarget && (
+            <div className="text-yellow-400">
+              Target: {selectedEntity?.name}
+            </div>
+          )}
           {combatState.isInCombat && (
-            <div className="text-red-400">Combat Mode: Movement restricted near enemies</div>
+            <div className="text-red-400">
+              Combat Mode: Movement restricted near enemies
+            </div>
           )}
         </div>
       </CardContent>
