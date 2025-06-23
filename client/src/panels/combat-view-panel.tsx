@@ -251,12 +251,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
-    console.log('handleMovement called with direction:', direction);
     const player = combatState.entities.find(e => e.id === "player");
-    if (!player) {
-      console.log('No player entity found');
-      return;
-    }
+    if (!player) return;
 
     if (direction.x === 0 && direction.y === 0) return;
 
@@ -331,7 +327,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
     if (exitDirection) {
-      console.log("Room transition requested:", exitDirection, "- but not implemented in combat view");
       // Clamp to boundary
       newX = Math.max(boundary, Math.min(100 - boundary, newX));
       newY = Math.max(boundary, Math.min(100 - boundary, newY));
@@ -381,7 +376,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const newFacing = Math.round(facing);
 
     // Update position
-    console.log('Moving player to position:', { x: newX, y: newY });
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
 
     // Update facing if not targeting something
