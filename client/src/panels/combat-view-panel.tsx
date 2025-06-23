@@ -791,50 +791,113 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               })
             : null}
 
-          {/* Exit indicators based on room connections */}
+          {/* Gate-style exit indicators */}
           {effectiveRoomData?.connections?.map((connection: any) => {
-            let position = { x: 50, y: 50 };
+            let gateStyle = {};
+            let gateClass = "";
 
             switch (connection.direction) {
               case "north":
-                position = { x: 50, y: 5 };
+                gateStyle = {
+                  top: "0px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "32px",
+                  height: "8px",
+                };
+                gateClass = "rounded-b";
                 break;
               case "south":
-                position = { x: 50, y: 95 };
+                gateStyle = {
+                  bottom: "0px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "32px",
+                  height: "8px",
+                };
+                gateClass = "rounded-t";
                 break;
               case "east":
-                position = { x: 95, y: 50 };
+                gateStyle = {
+                  right: "0px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "8px",
+                  height: "32px",
+                };
+                gateClass = "rounded-l";
                 break;
               case "west":
-                position = { x: 5, y: 50 };
+                gateStyle = {
+                  left: "0px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "8px",
+                  height: "32px",
+                };
+                gateClass = "rounded-r";
                 break;
               case "up":
               case "down":
-                position = { x: 50, y: 50 };
+                gateStyle = {
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "24px",
+                  height: "24px",
+                };
+                gateClass = "rounded-full";
                 break;
+              default:
+                return null;
             }
 
             return (
               <div
                 key={connection.direction}
-                className={`absolute w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                className={`absolute ${gateClass} ${
                   connection.isLocked
-                    ? "bg-red-500/70 border-red-300"
-                    : "bg-blue-500/70 border-blue-300"
-                }`}
+                    ? "bg-red-400 border-2 border-red-300"
+                    : "bg-green-400 border-2 border-green-300"
+                } transition-all duration-200 hover:scale-110 cursor-pointer`}
                 style={{
-                  left: `${position.x}%`,
-                  top: `${position.y}%`,
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 20,
+                  ...gateStyle,
+                  zIndex: 25,
+                  boxShadow: connection.isLocked 
+                    ? "0 0 8px rgba(239, 68, 68, 0.4)" 
+                    : "0 0 8px rgba(34, 197, 94, 0.4)",
                 }}
-                title={`${connection.isLocked ? "Locked " : ""}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
+                title={`${connection.isLocked ? "🔒 Locked " : "🚪 "}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
               >
+                {/* Gate indicator dot */}
                 <div
-                  className={`w-2 h-2 rounded-full animate-pulse ${
-                    connection.isLocked ? "bg-red-200" : "bg-blue-200"
-                  }`}
-                />
+                  className={`absolute inset-0 flex items-center justify-center`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full animate-pulse ${
+                      connection.isLocked ? "bg-red-100" : "bg-green-100"
+                    }`}
+                  />
+                </div>
+                
+                {/* Directional arrow for vertical/horizontal gates */}
+                {(connection.direction === "north" || connection.direction === "south" || 
+                  connection.direction === "east" || connection.direction === "west") && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <div
+                      className={`text-xs font-bold ${
+                        connection.isLocked ? "text-red-100" : "text-green-100"
+                      }`}
+                    >
+                      {connection.direction === "north" && "↑"}
+                      {connection.direction === "south" && "↓"}
+                      {connection.direction === "east" && "→"}
+                      {connection.direction === "west" && "←"}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
