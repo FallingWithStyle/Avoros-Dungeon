@@ -121,7 +121,7 @@ export class MobStorage extends BaseStorage {
     if (this.requestCache) {
       const cached = this.requestCache.get<any[]>(cacheKey);
       if (cached) {
-        console.log(`Request cache hit for room ${roomId} mobs`);
+        // Request cache hit for room mobs
         return cached;
       }
     }
@@ -133,7 +133,7 @@ export class MobStorage extends BaseStorage {
         return cached;
       }
     } catch (error) {
-      console.log('Redis cache miss for room mobs, fetching from database');
+      // Redis cache miss for room mobs
     }
 
     const roomMobs = await db

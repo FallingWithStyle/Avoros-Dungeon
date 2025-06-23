@@ -66,7 +66,7 @@ export class TacticalStorage extends BaseStorage {
     if (this.requestCache) {
       const cached = this.requestCache.get<TacticalEntity[]>(cacheKey);
       if (cached) {
-        console.log(`Request cache hit for tactical positions room ${roomId}`);
+        // Request cache hit for tactical positions
         return cached;
       }
     }
@@ -81,7 +81,7 @@ export class TacticalStorage extends BaseStorage {
         return cached;
       }
     } catch (error) {
-      console.log('Redis cache miss for tactical positions, fetching from database');
+      // Redis cache miss for tactical positions
     }
 
     // Get tactical positions (loot, NPCs) from tactical_positions table
@@ -132,7 +132,7 @@ export class TacticalStorage extends BaseStorage {
             });
           }
         }
-        console.log(`Added ${roomMobs.filter(m => m.mob.isAlive && m.mob.isActive).length} mobs from mobs table to tactical positions`);
+        // Added mobs from mobs table to tactical positions
       } catch (error) {
         console.error(`Error getting mobs for tactical positions in room ${roomId}:`, error);
       }
