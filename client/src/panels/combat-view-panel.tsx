@@ -156,81 +156,86 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     // Add entities from tactical data (mobs, etc.)
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       console.log('Loading tactical entities:', tacticalEntities.length);
-      tacticalEntities.forEach((tacticalEntity: any) => {
-        if (tacticalEntity.type === "mob" && tacticalEntity.data) {
-          const mobEntity: CombatEntity = {
-            id: "mob_" + tacticalEntity.data.id,
-            name: tacticalEntity.name,
-            type: "hostile", // Default to hostile for now
-            hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
-            maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: tacticalEntity.data.attack || 12,
-            defense: tacticalEntity.data.defense || 8,
-            speed: tacticalEntity.data.speed || 16,
-            accuracy: 16,
-            evasion: 18,
-            position: { 
-              x: tacticalEntity.position.x, 
-              y: tacticalEntity.position.y 
-            },
-            facing: 180,
-            level: 3,
-            isAlive: true,
-            cooldowns: {}
-          };
+      console.log('First few entities:', tacticalEntities.slice(0, 3));
+      
+      tacticalEntities.forEach((tacticalEntity: any, index: number) => {
+        console.log('Processing entity', index, ':', tacticalEntity.type, tacticalEntity);
+        
+        if (tacticalEntity.type === "mob") {
+          // Handle new format where mob data is in the data field
+          if (tacticalEntity.data) {
+            const mobEntity: CombatEntity = {
+              id: "mob_" + (tacticalEntity.data.id || index),
+              name: tacticalEntity.name || tacticalEntity.data.name || "Unknown Mob",
+              type: "hostile", // Default to hostile for now
+              hp: tacticalEntity.data.hp || tacticalEntity.data.currentHealth || 100,
+              maxHp: tacticalEntity.data.maxHp || tacticalEntity.data.maxHealth || 100,
+              energy: 20,
+              maxEnergy: 20,
+              power: 10,
+              maxPower: 10,
+              might: 10,
+              agility: 14,
+              endurance: 8,
+              intellect: 6,
+              charisma: 4,
+              wisdom: 7,
+              attack: tacticalEntity.data.attack || 12,
+              defense: tacticalEntity.data.defense || 8,
+              speed: tacticalEntity.data.speed || 16,
+              accuracy: 16,
+              evasion: 18,
+              position: { 
+                x: tacticalEntity.position?.x || 50, 
+                y: tacticalEntity.position?.y || 50 
+              },
+              facing: 180,
+              level: 3,
+              isAlive: true,
+              cooldowns: {}
+            };
 
-          combatSystem.addEntity(mobEntity);
-          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
-        }
-      });
-    } else if (effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities) && tacticalEntities !== effectiveTacticalData.tacticalEntities) {
-      // Fallback for old format
-      console.log('Loading tactical entities (old format):', effectiveTacticalData.tacticalEntities.length);
-      effectiveTacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
-        if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
-          const mobEntity: CombatEntity = {
-            id: "mob_" + tacticalEntity.entity.id,
-            name: tacticalEntity.entity.displayName || tacticalEntity.entity.name,
-            type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
-            hp: tacticalEntity.entity.currentHealth,
-            maxHp: tacticalEntity.entity.maxHealth,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: tacticalEntity.entity.attack || 12,
-            defense: tacticalEntity.entity.defense || 8,
-            speed: tacticalEntity.entity.speed || 16,
-            accuracy: 16,
-            evasion: 18,
-            position: { 
-              x: (tacticalEntity.x / 10) * 100, 
-              y: (tacticalEntity.y / 10) * 100 
-            },
-            facing: 180,
-            level: 3,
-            isAlive: tacticalEntity.entity.isAlive,
-            cooldowns: {}
-          };
+            combatSystem.addEntity(mobEntity);
+            console.log('Added mob entity (new format):', mobEntity.name, 'at position:', mobEntity.position);
+          } 
+          // Handle old format where mob data is in the entity field
+          else if (tacticalEntity.entity) {
+            const mobEntity: CombatEntity = {
+              id: "mob_" + (tacticalEntity.entity.id || index),
+              name: tacticalEntity.entity.displayName || tacticalEntity.entity.name || "Unknown Mob",
+              type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
+              hp: tacticalEntity.entity.currentHealth || 100,
+              maxHp: tacticalEntity.entity.maxHealth || 100,
+              energy: 20,
+              maxEnergy: 20,
+              power: 10,
+              maxPower: 10,
+              might: 10,
+              agility: 14,
+              endurance: 8,
+              intellect: 6,
+              charisma: 4,
+              wisdom: 7,
+              attack: tacticalEntity.entity.attack || 12,
+              defense: tacticalEntity.entity.defense || 8,
+              speed: tacticalEntity.entity.speed || 16,
+              accuracy: 16,
+              evasion: 18,
+              position: { 
+                x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50, 
+                y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50 
+              },
+              facing: 180,
+              level: 3,
+              isAlive: tacticalEntity.entity.isAlive !== false,
+              cooldowns: {}
+            };
 
-          combatSystem.addEntity(mobEntity);
-          console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
+            combatSystem.addEntity(mobEntity);
+            console.log('Added mob entity (old format):', mobEntity.name, 'at position:', mobEntity.position);
+          } else {
+            console.log('Mob entity missing data/entity field:', tacticalEntity);
+          }
         }
       });
     } else {
