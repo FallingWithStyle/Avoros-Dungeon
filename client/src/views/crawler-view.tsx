@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import CrawlerStatusPanel from "@/panels/crawler-status-panel";
 import FloorInfoPanel from "@/panels/floor-info-panel";
-import TacticalViewPanel from "@/panels/tactical-view-panel";
+import CombatViewPanel from "@/panels/combat-view-panel";
 import RoomEventsPanel from "@/panels/room-events-panel";
 import DungeonMap from "@/components/dungeon-map";
 import DebugPanel from "@/components/debug-panel";
@@ -205,12 +205,12 @@ export default function CrawlerView({ crawlerId }: CrawlerViewProps) {
 
       {/* Main Content - Mobile-First Layout */}
       <div className="w-full px-2 py-4 lg:max-w-7xl lg:mx-auto lg:p-6 pb-20 lg:pb-6">
-        {/* Mobile: Single column stack, Desktop: 3 columns */}
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-2 lg:gap-6">
+        {/* Mobile: Single column stack, Desktop: 3 columns with custom sizing */}
+        <div className="flex flex-col lg:grid lg:grid-cols-[2fr_4fr_2fr] gap-2 lg:gap-6">
 
           {/* Primary: Tactical View - Always first on mobile */}
           <div className="order-1 lg:order-2 lg:col-span-1" data-section="tactical">
-            <TacticalViewPanel crawler={crawler} tacticalData={tacticalData} handleRoomMovement={handleRoomMovement} />
+            <CombatViewPanel crawler={crawler} tacticalData={tacticalData} handleRoomMovement={handleRoomMovement} />
           </div>
 
           {/* Secondary: Status & Quick Info - Condensed on mobile */}
