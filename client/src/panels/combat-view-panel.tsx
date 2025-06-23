@@ -57,7 +57,17 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     tacticalError
   } = useTacticalData(crawler);
 
-  
+  // Fallback to batch data if current-room fails
+  const { data: batchData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+    refetchInterval: 5000,
+    staleTime: 3000,
+    enabled: !roomData?.room // Only fetch if we don't have room data
+  });
+
+  // Use batch data as fallback
+  const effectiveRoomData = roomData || batchData?.currentRoom;
+  const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -83,7 +93,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize combat system with crawler data
   const initializeCombatSystem = useCallback(() => {
-    if (!roomData?.room) return;
+    if (!effectiveRoomData?.room) {
+      console.log('No room data available for combat initialization');
+      return;
+    }
+
+    console.log('Initializing combat with room:', effectiveRoomData.room.name);
+    console.log('Tactical data available:', !!effectiveTacticalData);
+    if (effectiveTacticalData?.tacticalEntities) {
+      console.log('Tactical entities count:', effectiveTacticalData.tacticalEntities.length);
+    }
 
     // Clear existing entities first
     const currentState = combatSystem.getState();
@@ -127,9 +146,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     setEquippedWeapon(availableWeapons[0]);
 
     // Add entities from tactical data (mobs, etc.)
-    if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
-      console.log('Loading tactical entities:', tacticalData.tacticalEntities.length);
-      tacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
+    if (effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities)) {
+      console.log('Loading tactical entities:', effectiveTacticalData.tacticalEntities.length);
+      effectiveTacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
         if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
           const mobEntity: CombatEntity = {
             id: "mob_" + tacticalEntity.entity.id,
@@ -192,9 +211,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const playerRadius = 1.5;
     
     const checkCollisionWithCover = (x: number, y: number): boolean => {
-      if (!tacticalData?.tacticalEntities || !Array.isArray(tacticalData.tacticalEntities)) return false;
+      if (!effectiveTacticalData?.tacticalEntities || !Array.isArray(effectiveTacticalData.tacticalEntities)) return false;
       
-      return tacticalData.tacticalEntities.some((entity: any) => {
+      return effectiveTacticalData.tacticalEntities.some((entity: any) => {
         if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
         
         // Convert tactical grid positions to combat view percentages
@@ -253,7 +272,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [combatState.entities, selectedTarget, tacticalData]);
+  }, [combatState.entities, selectedTarget, effectiveTacticalData]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -352,7 +371,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize when component mounts and data is available
   useEffect(() => {
-    if (!roomLoading && !tacticalLoading && roomData?.room) {
+    if (!roomLoading && !tacticalLoading && effectiveRoomData?.room) {
       setIsInitialized(false); // Reset initialization flag when room changes
       initializeCombatSystem();
     }
@@ -360,7 +379,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return () => {
       combatSystem.stopAILoop();
     };
-  }, [initializeCombatSystem, roomLoading, tacticalLoading, roomData?.room?.id, tacticalData]);
+  }, [initializeCombatSystem, roomLoading, tacticalLoading, effectiveRoomData?.room?.id, effectiveTacticalData]);
 
   // Force re-render during cooldowns
   const [, forceUpdate] = useState({});
@@ -388,7 +407,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
 
   // Show loading state
-  if (roomLoading || tacticalLoading) {
+  if ((roomLoading || tacticalLoading) && !effectiveRoomData?.room) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -414,13 +433,18 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
-          Combat View - {roomData?.room?.name || "Unknown Room"}
+          Combat View - {effectiveRoomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
             {combatState.isInCombat ? "IN COMBAT" : "READY"}
           </Badge>
-          {roomData?.room?.environment && (
+          {effectiveRoomData?.room?.environment && (
             <Badge variant="outline" className="text-xs">
-              {roomData.room.environment}
+              {effectiveRoomData.room.environment}
+            </Badge>
+          )}
+          {!roomData?.room && batchData?.currentRoom && (
+            <Badge variant="outline" className="text-xs text-amber-400">
+              Fallback Data
             </Badge>
           )}
         </CardTitle>
@@ -430,20 +454,20 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div
           ref={containerRef}
           className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
-            roomData?.room?.environment === "outdoor" 
+            effectiveRoomData?.room?.environment === "outdoor" 
               ? "bg-gradient-to-br from-green-900/20 to-blue-800/20" 
-              : roomData?.room?.environment === "cave"
+              : effectiveRoomData?.room?.environment === "cave"
               ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
-              : roomData?.room?.environment === "dungeon"
+              : effectiveRoomData?.room?.environment === "dungeon"
               ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
               : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
           }`}
           style={{ 
-            backgroundImage: roomData?.room?.environment === "outdoor" 
+            backgroundImage: effectiveRoomData?.room?.environment === "outdoor" 
               ? 'radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
-              : roomData?.room?.environment === "cave"
+              : effectiveRoomData?.room?.environment === "cave"
               ? 'radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)'
-              : roomData?.room?.environment === "dungeon"
+              : effectiveRoomData?.room?.environment === "dungeon"
               ? 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)'
               : 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
             width: 'min(90vw, 90vh, 400px)',
@@ -466,8 +490,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           </div>
 
           {/* Room Layout Elements */}
-          {tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities) ? 
-            tacticalData.tacticalEntities.map((entity: any) => {
+          {effectiveTacticalData?.tacticalEntities && Array.isArray(effectiveTacticalData.tacticalEntities) ? 
+            effectiveTacticalData.tacticalEntities.map((entity: any) => {
               if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
               
               const x = (entity.x / 10) * 100;
@@ -500,7 +524,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             }) : null}
 
           {/* Exit indicators based on room connections */}
-          {roomData?.connections?.map((connection: any) => {
+          {effectiveRoomData?.connections?.map((connection: any) => {
             let position = { x: 50, y: 50 };
             
             switch(connection.direction) {
