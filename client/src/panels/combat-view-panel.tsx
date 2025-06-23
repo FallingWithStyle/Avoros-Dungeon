@@ -1,294 +1,721 @@
+
 /**
  * File: combat-view-panel.tsx
- * Responsibility: Combat interface panel using the new combat system without tactical view dependencies
- * Notes: Clean implementation based on test combat system, avoiding complex tactical data hooks
+ * Responsibility: Clean combat interface panel using only the proven test combat system logic
+ * Notes: Built from test-combat.tsx without any legacy tactical view dependencies
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CombatSystem, type CombatEntity } from "@shared/combat-system";
+import { Eye, Sword, Shield, Zap, Target, Heart, Skull } from "lucide-react";
+import { combatSystem, type CombatEntity } from "@shared/combat-system";
+import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
+import { useGestureMovement } from "@/hooks/useGestureMovement";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { useTacticalData } from "./tactical-view/tactical-data-hooks";
+
+interface Equipment {
+  id: string;
+  name: string;
+  description: string;
+  type: "weapon" | "armor";
+  damageAttribute: "might" | "agility";
+  range: number;
+  mightBonus?: number;
+  agilityBonus?: number;
+  defenseBonus?: number;
+}
 
 interface CombatViewPanelProps {
   crawler: CrawlerWithDetails;
-  tacticalData?: any;
-  handleRoomMovement: (direction: string) => void;
 }
 
-export default function CombatViewPanel({ 
-  crawler, 
-  tacticalData, 
-  handleRoomMovement 
-}: CombatViewPanelProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [combatSystem] = useState(() => new CombatSystem());
-  const [selectedEntity, setSelectedEntity] = useState<CombatEntity | null>(null);
+export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
+  const { toast } = useToast();
+  const [combatState, setCombatState] = useState(combatSystem.getState());
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+  const [activeActionMode, setActiveActionMode] = useState<{
+    type: "move" | "attack" | "ability";
+    actionId: string;
+    actionName: string;
+  } | null>(null);
+  const [manualRotation, setManualRotation] = useState(false);
+  const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
+  const [aiEnabled, setAiEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize combat system
-  useEffect(() => {
-    if (!canvasRef.current || isInitialized) return;
+  // Use the same tactical data hooks as the tactical view panel
+  const {
+    roomData,
+    tacticalData,
+    isLoading: roomLoading,
+    tacticalLoading,
+    tacticalError
+  } = useTacticalData(crawler);
 
-    const canvas = canvasRef.current;
-    canvas.width = 600;
-    canvas.height = 400;
+  
 
-    try {
-      // Initialize combat system
-      combatSystem.initialize(canvas);
-    } catch (error) {
-      console.error('Failed to initialize combat system:', error);
-      return;
+  // Mock weapons for testing - in real implementation these would come from crawler equipment
+  const availableWeapons: Equipment[] = [
+    {
+      id: "sword1",
+      name: "Iron Sword",
+      description: "A sturdy iron blade",
+      type: "weapon",
+      damageAttribute: "might",
+      range: 1.5,
+      mightBonus: 5
+    },
+    {
+      id: "bow1", 
+      name: "Hunting Bow",
+      description: "A flexible ranged weapon",
+      type: "weapon",
+      damageAttribute: "agility",
+      range: 3,
+      agilityBonus: 3
     }
+  ];
 
-    // Add crawler entity
-    const crawlerEntity = combatSystem.addEntity({
-      id: "crawler-" + crawler.id,
-      name: crawler.name,
-      type: "player",
-      position: { x: 50, y: 50 },
-      stats: {
-        health: crawler.health,
-        maxHealth: crawler.maxHealth,
-        might: crawler.might,
-        agility: crawler.agility,
-        endurance: crawler.endurance,
-        intellect: crawler.intellect
-      },
-      equipment: {
-        weapon: { name: "Basic Sword", damage: 10 },
-        armor: { name: "Basic Armor", defense: 5 }
-      }
+  // Initialize combat system with crawler data
+  const initializeCombatSystem = useCallback(() => {
+    if (!roomData?.room) return;
+
+    // Clear existing entities first
+    const currentState = combatSystem.getState();
+    currentState.entities.forEach(entity => {
+      combatSystem.removeEntity(entity.id);
     });
 
-    // Add entities from tactical data if available
-    if (tacticalData?.entities) {
-      tacticalData.entities.forEach((entity: any, index: number) => {
-        if (entity.entity_type === "mob") {
-          const mobData = typeof entity.entity_data === 'string' 
-            ? JSON.parse(entity.entity_data) 
-            : entity.entity_data;
+    // Initialize player from crawler data
+    const playerEntity: CombatEntity = {
+      id: "player",
+      name: crawler.name,
+      type: "player",
+      hp: crawler.health,
+      maxHp: crawler.maxHealth,
+      energy: crawler.energy,
+      maxEnergy: crawler.maxEnergy,
+      power: crawler.power,
+      maxPower: crawler.maxPower,
+      might: crawler.might,
+      agility: crawler.agility,
+      endurance: crawler.endurance,
+      intellect: crawler.intellect,
+      charisma: crawler.charisma,
+      wisdom: crawler.wisdom,
+      attack: Math.floor(crawler.might * 1.2) + 8,
+      defense: Math.floor(crawler.endurance * 0.8) + 5,
+      speed: Math.floor(crawler.agility * 1.1),
+      accuracy: crawler.wisdom + crawler.intellect,
+      evasion: Math.floor(crawler.agility * 1.2),
+      position: { x: 25, y: 50 },
+      facing: 0,
+      level: crawler.level,
+      serial: crawler.serial,
+      isSelected: false,
+      isAlive: true,
+      cooldowns: {},
+      equippedWeapon: availableWeapons[0]
+    };
 
-          combatSystem.addEntity({
-            id: "mob-" + index,
-            name: mobData.name || "Enemy",
-            type: "enemy",
+    combatSystem.addEntity(playerEntity);
+    setEquippedWeapon(availableWeapons[0]);
+
+    // Add entities from tactical data (mobs, etc.)
+    if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
+      console.log('Loading tactical entities:', tacticalData.tacticalEntities.length);
+      tacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
+        if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
+          const mobEntity: CombatEntity = {
+            id: "mob_" + tacticalEntity.entity.id,
+            name: tacticalEntity.entity.displayName || tacticalEntity.entity.name,
+            type: tacticalEntity.entity.disposition === "hostile" ? "hostile" : "neutral",
+            hp: tacticalEntity.entity.currentHealth,
+            maxHp: tacticalEntity.entity.maxHealth,
+            energy: 20,
+            maxEnergy: 20,
+            power: 10,
+            maxPower: 10,
+            might: 10,
+            agility: 14,
+            endurance: 8,
+            intellect: 6,
+            charisma: 4,
+            wisdom: 7,
+            attack: tacticalEntity.entity.attack || 12,
+            defense: tacticalEntity.entity.defense || 8,
+            speed: tacticalEntity.entity.speed || 16,
+            accuracy: 16,
+            evasion: 18,
             position: { 
-              x: parseFloat(entity.position_x) * 6, 
-              y: parseFloat(entity.position_y) * 4 
+              x: (tacticalEntity.x / 10) * 100, 
+              y: (tacticalEntity.y / 10) * 100 
             },
-            stats: {
-              health: mobData.health || 50,
-              maxHealth: mobData.health || 50,
-              might: mobData.attack || 10,
-              agility: 10,
-              endurance: 10,
-              intellect: 10
-            }
-          });
+            facing: 180,
+            level: 3,
+            isAlive: tacticalEntity.entity.isAlive,
+            cooldowns: {}
+          };
+
+          combatSystem.addEntity(mobEntity);
+          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
         }
       });
+    } else {
+      console.log('No tactical entities found or tacticalData is null');
+    }
+
+    if (aiEnabled) {
+      combatSystem.startAILoop();
     }
 
     setIsInitialized(true);
+  }, [crawler, aiEnabled, availableWeapons, roomData, tacticalData]);
 
-    // Start render loop
-    const renderLoop = () => {
-      combatSystem.render();
-      requestAnimationFrame(renderLoop);
+  // Movement handler with collision detection
+  const handleMovement = useCallback((direction: { x: number; y: number }) => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player) return;
+
+    if (direction.x === 0 && direction.y === 0) return;
+
+    const moveSpeed = 3;
+    let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+    let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+
+    // Check collision with room layout elements
+    const playerRadius = 1.5;
+    
+    const checkCollisionWithCover = (x: number, y: number): boolean => {
+      if (!tacticalData?.tacticalEntities || !Array.isArray(tacticalData.tacticalEntities)) return false;
+      
+      return tacticalData.tacticalEntities.some((entity: any) => {
+        if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
+        
+        // Convert tactical grid positions to combat view percentages
+        const wallLeft = (entity.x / 10) * 100 - 2;
+        const wallRight = (entity.x / 10) * 100 + 2;
+        const wallTop = (entity.y / 10) * 100 - 2;
+        const wallBottom = (entity.y / 10) * 100 + 2;
+
+        const buffer = 0.5;
+        return (x + playerRadius > wallLeft - buffer && 
+                x - playerRadius < wallRight + buffer &&
+                y + playerRadius > wallTop - buffer && 
+                y - playerRadius < wallBottom + buffer);
+      });
     };
-    renderLoop();
 
-    // Handle canvas clicks
-    const handleCanvasClick = (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+    const wouldCollide = checkCollisionWithCover(newX, newY);
 
-      const entity = combatSystem.getEntityAt(x, y);
-      setSelectedEntity(entity);
+    if (wouldCollide) {
+      // Try moving only horizontally
+      const horizontalX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      const horizontalY = player.position.y;
+      
+      if (!checkCollisionWithCover(horizontalX, horizontalY)) {
+        newX = horizontalX;
+        newY = horizontalY;
+      } else {
+        // Try moving only vertically
+        const verticalX = player.position.x;
+        const verticalY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        
+        if (!checkCollisionWithCover(verticalX, verticalY)) {
+          newX = verticalX;
+          newY = verticalY;
+        } else {
+          return; // Can't move at all
+        }
+      }
+    }
+
+    // Calculate facing direction based on movement
+    let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+    if (facing < 0) {
+      facing += 360;
+    }
+    const newFacing = Math.round(facing);
+
+    combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
+
+    if (!selectedTarget) {
+      const currentFacing = player.facing || 0;
+      const facingDiff = Math.abs(newFacing - currentFacing);
+      const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+
+      if (normalizedDiff > 2) {
+        combatSystem.updateEntity("player", { facing: newFacing });
+      }
+    }
+  }, [combatState.entities, selectedTarget, tacticalData]);
+
+  // Enable keyboard movement
+  useKeyboardMovement({
+    onMovement: handleMovement,
+    isEnabled: true,
+  });
+
+  // Detect mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      const isMobileDevice = hasTouch && isSmallScreen;
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use gesture movement hook for mobile
+  const { containerRef, bind } = useGestureMovement({
+    onMovement: handleMovement,
+    isEnabled: isMobile && !combatState.isInCombat
+  });
+
+  // Hotbar action handler
+  const handleHotbarAction = useCallback((actionId: string, actionType: string, actionName: string) => {
+    if (actionType === "attack" && actionId === "basic_attack") {
+      if (selectedTarget) {
+        const player = combatState.entities.find(e => e.id === "player");
+        const target = combatState.entities.find(e => e.id === selectedTarget);
+
+        if (player && target) {
+          const weaponRange = equippedWeapon ? equippedWeapon.range * 10 : 10;
+          const distance = Math.sqrt(
+            Math.pow(target.position.x - player.position.x, 2) + 
+            Math.pow(target.position.y - player.position.y, 2)
+          );
+
+          if (distance <= weaponRange) {
+            combatSystem.executeAttack("player", selectedTarget);
+          } else {
+            toast({
+              title: "Out of Range",
+              description: "Target is too far away to attack",
+              variant: "destructive",
+            });
+          }
+        }
+      } else {
+        combatSystem.executeAttack("player");
+      }
+      setActiveActionMode(null);
+    } else if (actionType === "ability") {
+      setActiveActionMode({ type: actionType as any, actionId, actionName });
+    }
+  }, [selectedTarget, combatState.entities, equippedWeapon, toast]);
+
+  // Get cooldown percentage for hotbar display
+  const getCooldownPercentage = useCallback((actionId: string): number => {
+    const player = combatState.entities.find(e => e.id === "player");
+    if (!player || !player.cooldowns) return 0;
+
+    const now = Date.now();
+    const lastUsed = player.cooldowns[actionId] || 0;
+
+    const cooldowns: Record<string, number> = {
+      "basic_attack": 800,
+      "defend": 3000,
+      "special": 5000
     };
 
-    canvas.addEventListener('click', handleCanvasClick);
+    const cooldown = cooldowns[actionId] || 1000;
+    const timeLeft = Math.max(0, (lastUsed + cooldown) - now);
+    return (timeLeft / cooldown) * 100;
+  }, [combatState.entities]);
 
+  // Subscribe to combat system updates
+  useEffect(() => {
+    const unsubscribe = combatSystem.subscribe((state) => {
+      setCombatState(state);
+
+      // Clear selectedTarget if the currently selected entity is dead or no longer exists
+      if (selectedTarget) {
+        const selectedEntity = state.entities.find(e => e.id === selectedTarget);
+        if (!selectedEntity || selectedEntity.hp <= 0) {
+          setSelectedTarget(null);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [selectedTarget]);
+
+  // Initialize when component mounts and data is available
+  useEffect(() => {
+    if (!roomLoading && !tacticalLoading && roomData?.room) {
+      setIsInitialized(false); // Reset initialization flag when room changes
+      initializeCombatSystem();
+    }
+    
     return () => {
-      canvas.removeEventListener('click', handleCanvasClick);
+      combatSystem.stopAILoop();
     };
-  }, [combatSystem, crawler, tacticalData, isInitialized]);
+  }, [initializeCombatSystem, roomLoading, tacticalLoading, roomData?.room?.id, tacticalData]);
 
-  const handleAttack = () => {
-    if (!selectedEntity) return;
+  // Force re-render during cooldowns
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const player = combatState.entities.find(e => e.id === "player");
+      if (player?.cooldowns) {
+        const now = Date.now();
+        const hasActiveCooldowns = Object.values(player.cooldowns).some(lastUsed => {
+          const timeSince = now - lastUsed;
+          return timeSince < 5000;
+        });
 
-    const crawlerEntity = combatSystem.getPlayerEntity();
-    if (crawlerEntity && selectedEntity.type === "enemy") {
-      combatSystem.performAttack(crawlerEntity.id, selectedEntity.id);
-    }
-  };
+        if (hasActiveCooldowns) {
+          forceUpdate({});
+        }
+      }
+    }, 50);
 
-  const handleMove = (direction: string) => {
-    const crawlerEntity = combatSystem.getPlayerEntity();
-    if (!crawlerEntity) return;
+    return () => clearInterval(interval);
+  }, [combatState.entities]);
 
-    const moveDistance = 20;
-    let newX = crawlerEntity.position.x;
-    let newY = crawlerEntity.position.y;
+  const player = combatState.entities.find(e => e.id === "player");
+  const enemies = combatState.entities.filter(e => e.type === "hostile");
+  const selectedEntity = combatState.entities.find(e => e.id === selectedTarget);
 
-    switch (direction) {
-      case "north":
-        newY -= moveDistance;
-        break;
-      case "south":
-        newY += moveDistance;
-        break;
-      case "east":
-        newX += moveDistance;
-        break;
-      case "west":
-        newX -= moveDistance;
-        break;
-    }
-
-    // Ensure entity stays within bounds
-    newX = Math.max(10, Math.min(590, newX));
-    newY = Math.max(10, Math.min(390, newY));
-
-    combatSystem.moveEntity(crawlerEntity.id, { x: newX, y: newY });
-  };
-
-  // Get current room info
-  const currentRoom = tacticalData?.currentRoom || { name: "Unknown Room", type: "chamber" };
+  // Show loading state
+  if (roomLoading || tacticalLoading) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Combat View
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="w-full h-64 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <span className="text-slate-400">Loading room data...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-game-surface border-game-border h-full">
+    <Card className="bg-game-panel border-game-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center justify-between">
-          <span className="flex items-center">
-            <i className="fas fa-crosshairs mr-2 text-red-400"></i>
-            Combat View
-          </span>
-          <Badge variant="outline" className="text-xs">
-            {currentRoom.name}
+        <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+          <Eye className="w-4 h-4" />
+          Combat View - {roomData?.room?.name || "Unknown Room"}
+          <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
+            {combatState.isInCombat ? "IN COMBAT" : "READY"}
           </Badge>
+          {roomData?.room?.environment && (
+            <Badge variant="outline" className="text-xs">
+              {roomData.room.environment}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
-
       <CardContent className="space-y-4">
-        {/* Combat Canvas */}
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            className="w-full border border-game-border rounded bg-slate-900"
-            style={{ maxHeight: "400px" }}
-          />
-          {selectedEntity && (
-            <div className="absolute top-2 left-2 bg-black/80 text-white p-2 rounded text-xs">
-              <div className="font-semibold">{selectedEntity.name}</div>
-              <div>HP: {selectedEntity.stats.health}/{selectedEntity.stats.maxHealth}</div>
-              <div>Type: {selectedEntity.type}</div>
+        {/* Combat Arena */}
+        <div
+          ref={containerRef}
+          className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
+            roomData?.room?.environment === "outdoor" 
+              ? "bg-gradient-to-br from-green-900/20 to-blue-800/20" 
+              : roomData?.room?.environment === "cave"
+              ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
+              : roomData?.room?.environment === "dungeon"
+              ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
+              : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
+          }`}
+          style={{ 
+            backgroundImage: roomData?.room?.environment === "outdoor" 
+              ? 'radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
+              : roomData?.room?.environment === "cave"
+              ? 'radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)'
+              : roomData?.room?.environment === "dungeon"
+              ? 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)'
+              : 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
+            width: 'min(90vw, 90vh, 400px)',
+            height: 'min(90vw, 90vh, 400px)',
+            aspectRatio: '1',
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
+          }}
+          {...bind()}
+        >
+          {/* Grid overlay */}
+          <div className="absolute inset-0 opacity-10">
+            {Array.from({ length: 11 }).map((_, i) => (
+              <div key={`v-${i}`} className="absolute h-full w-px bg-amber-400" style={{ left: `${i * 10}%` }} />
+            ))}
+            {Array.from({ length: 11 }).map((_, i) => (
+              <div key={`h-${i}`} className="absolute w-full h-px bg-amber-400" style={{ top: `${i * 10}%` }} />
+            ))}
+          </div>
+
+          {/* Room Layout Elements */}
+          {tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities) ? 
+            tacticalData.tacticalEntities.map((entity: any) => {
+              if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
+              
+              const x = (entity.x / 10) * 100;
+              const y = (entity.y / 10) * 100;
+            
+            return (
+              <div
+                key={entity.id || `${entity.type}-${entity.x}-${entity.y}`}
+                className={`absolute ${
+                  entity.type === "wall" 
+                    ? "bg-stone-600 border-2 border-stone-500" 
+                    : entity.type === "door"
+                    ? "bg-amber-700 border-2 border-amber-500"
+                    : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                } rounded-sm shadow-lg`}
+                style={{
+                  left: `${x - 2}%`,
+                  top: `${y - 2}%`,
+                  width: `4%`,
+                  height: `4%`,
+                  zIndex: entity.type === "wall" ? 15 : entity.type === "door" ? 12 : 10,
+                  filter: entity.type === "wall" 
+                    ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                    : entity.type === "door"
+                    ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
+                    : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))"
+                }}
+              />
+            );
+            }) : null}
+
+          {/* Exit indicators based on room connections */}
+          {roomData?.connections?.map((connection: any) => {
+            let position = { x: 50, y: 50 };
+            
+            switch(connection.direction) {
+              case "north":
+                position = { x: 50, y: 5 };
+                break;
+              case "south":
+                position = { x: 50, y: 95 };
+                break;
+              case "east":
+                position = { x: 95, y: 50 };
+                break;
+              case "west":
+                position = { x: 5, y: 50 };
+                break;
+              case "up":
+              case "down":
+                position = { x: 50, y: 50 };
+                break;
+            }
+
+            return (
+              <div
+                key={connection.direction}
+                className={`absolute w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                  connection.isLocked 
+                    ? "bg-red-500/70 border-red-300" 
+                    : "bg-blue-500/70 border-blue-300"
+                }`}
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y}%`,
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 20
+                }}
+                title={`${connection.isLocked ? "Locked " : ""}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
+              >
+                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                  connection.isLocked ? "bg-red-200" : "bg-blue-200"
+                }`} />
+              </div>
+            );
+          })}
+
+          {/* Entities */}
+          {combatState.entities.map((entity) => (
+            <div
+              key={entity.id}
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
+                entity.hp <= 0 
+                  ? 'cursor-not-allowed opacity-50' 
+                  : entity.id !== "player"
+                    ? 'cursor-pointer hover:scale-105' 
+                    : 'cursor-default'
+              } ${selectedTarget === entity.id ? 'scale-110 z-10' : ''}`}
+              style={{
+                left: `${entity.position.x}%`,
+                top: `${entity.position.y}%`,
+              }}
+              onClick={() => entity.id !== "player" && entity.hp > 0 ? setSelectedTarget(entity.id) : null}
+            >
+              {/* Main entity circle */}
+              <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                entity.type === "player" 
+                  ? "bg-blue-600 border-blue-400" 
+                  : entity.hp <= 0
+                  ? "bg-gray-600 border-gray-500"
+                  : entity.type === "hostile"
+                  ? "bg-red-600 border-red-400"
+                  : "bg-gray-600 border-gray-400"
+              }`}>
+                {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
+                {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+
+                {/* Facing direction indicator */}
+                {entity.facing !== undefined && (
+                  <div
+                    className="absolute w-12 h-12 pointer-events-none z-10"
+                    style={{
+                      transform: `rotate(${entity.facing}deg)`,
+                      transformOrigin: "center",
+                    }}
+                  >
+                    <div className="w-full h-full flex items-start justify-center">
+                      <div
+                        className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                          entity.hp <= 0 ? "border-b-gray-500" :
+                          entity.type === "player" 
+                            ? "border-b-blue-400" 
+                            : entity.type === "hostile"
+                            ? "border-b-red-400"
+                            : "border-b-gray-400"
+                        }`}
+                        style={{
+                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
+                          marginTop: "-6px",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Health bar */}
+                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
+                  <div 
+                    className={`h-full rounded transition-all duration-300 ${
+                      entity.hp <= 0 ? "bg-gray-500" :
+                      entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
+                      entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
+                    }`}
+                    style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                  />
+                </div>
+
+                {/* Selection indicator */}
+                {selectedTarget === entity.id && entity.hp > 0 && (
+                  <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
+                )}
+              </div>
             </div>
-          )}
+          ))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Hotbar */}
+        <div className="flex gap-1">
+          {/* Attack Action */}
           <Button
-            onClick={handleAttack}
-            disabled={!selectedEntity || selectedEntity.type !== "enemy"}
-            variant="destructive"
+            variant={activeActionMode?.actionId === "basic_attack" ? "default" : "outline"}
             size="sm"
+            className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+            onClick={() => handleHotbarAction("basic_attack", "attack", "Attack")}
+            disabled={getCooldownPercentage("basic_attack") > 0}
+            title="Attack [1]"
           >
-            <i className="fas fa-sword mr-1"></i>
-            Attack
+            <Sword className="w-4 h-4" />
+            <span className="text-xs text-muted-foreground">1</span>
+
+            {/* Cooldown indicator */}
+            {getCooldownPercentage("basic_attack") > 0 && (
+              <div 
+                className="absolute inset-0 bg-gray-600/50 rounded"
+                style={{ 
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("basic_attack")}%, 100% ${100 - getCooldownPercentage("basic_attack")}%, 100% 100%, 0% 100%)` 
+                }}
+              />
+            )}
           </Button>
+
+          {/* Defend Action */}
           <Button
-            onClick={() => setSelectedEntity(null)}
-            variant="outline"
+            variant={activeActionMode?.actionId === "defend" ? "default" : "outline"}
             size="sm"
+            className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+            onClick={() => handleHotbarAction("defend", "ability", "Defend")}
+            disabled={getCooldownPercentage("defend") > 0}
+            title="Defend [2]"
           >
-            <i className="fas fa-hand-pointer mr-1"></i>
-            Deselect
+            <Shield className="w-4 h-4" />
+            <span className="text-xs text-muted-foreground">2</span>
+
+            {getCooldownPercentage("defend") > 0 && (
+              <div 
+                className="absolute inset-0 bg-gray-600/50 rounded"
+                style={{ 
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("defend")}%, 100% ${100 - getCooldownPercentage("defend")}%, 100% 100%, 0% 100%)` 
+                }}
+              />
+            )}
+          </Button>
+
+          {/* Special Ability */}
+          <Button
+            variant={activeActionMode?.actionId === "special" ? "default" : "outline"}
+            size="sm"
+            className="w-12 h-12 p-0 flex flex-col items-center justify-center relative"
+            onClick={() => handleHotbarAction("special", "ability", "Special")}
+            disabled={getCooldownPercentage("special") > 0}
+            title="Special [3]"
+          >
+            <Zap className="w-4 h-4" />
+            <span className="text-xs text-muted-foreground">3</span>
+
+            {getCooldownPercentage("special") > 0 && (
+              <div 
+                className="absolute inset-0 bg-gray-600/50 rounded"
+                style={{ 
+                  clipPath: `polygon(0 ${100 - getCooldownPercentage("special")}%, 100% ${100 - getCooldownPercentage("special")}%, 100% 100%, 0% 100%)` 
+                }}
+              />
+            )}
           </Button>
         </div>
 
-        {/* Movement Controls */}
-        <div className="grid grid-cols-3 gap-1 max-w-32 mx-auto">
-          <div></div>
-          <Button
-            onClick={() => handleMove("north")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-up"></i>
-          </Button>
-          <div></div>
+        {/* Player Status */}
+        {player && (
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-red-300">HP:</span>
+              <span className="text-white">{player.hp}/{player.maxHp}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-blue-300">Energy:</span>
+              <span className="text-white">{player.energy}/{player.maxEnergy}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-purple-300">Power:</span>
+              <span className="text-white">{player.power}/{player.maxPower}</span>
+            </div>
+          </div>
+        )}
 
-          <Button
-            onClick={() => handleMove("west")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-left"></i>
-          </Button>
-          <div></div>
-          <Button
-            onClick={() => handleMove("east")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-right"></i>
-          </Button>
-
-          <div></div>
-          <Button
-            onClick={() => handleMove("south")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-down"></i>
-          </Button>
-          <div></div>
-        </div>
-
-        {/* Room Navigation */}
-        <div className="grid grid-cols-4 gap-1 pt-2 border-t border-game-border">
-          <Button
-            onClick={() => handleRoomMovement("north")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            N
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("east")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            E
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("south")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            S
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("west")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            W
-          </Button>
+        {/* Controls hint */}
+        <div className="text-xs text-muted-foreground text-center">
+          <div>WASD: Move | 1-3: Actions | Tab: Cycle Targets</div>
+          {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
         </div>
       </CardContent>
     </Card>
