@@ -39,7 +39,7 @@ interface RoomData {
 
 export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
   // Early return if essential data is missing
-  if (!crawler?.id) {
+  if (!crawler?.id || !crawler?.name) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -75,10 +75,10 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
 
   // Handle room changes
   useEffect(() => {
-    if (roomData) {
+    if (roomData?.room?.id && crawler?.name && crawler?.id) {
       eventsSystem.onRoomChange(roomData.room.id, crawler.name, crawler.id);
     }
-  }, [roomData?.room?.id, crawler.name, crawler.id]);
+  }, [roomData?.room?.id, crawler?.name, crawler?.id]);
 
   // Auto-scroll to bottom when new events are added
   useEffect(() => {
@@ -97,9 +97,9 @@ export default function RoomEventsPanel({ crawler }: RoomEventsPanelProps) {
         return <Footprints className="w-3 h-3" />;
       case "combat":
         // Check if it's a friendly outgoing attack (player attacking something)
-        if (event.message.includes(`${crawler.name} attacks`) || 
+        if (crawler?.name && (event.message.includes(`${crawler.name} attacks`) || 
             event.message.includes(`${crawler.name} uses`) ||
-            event.message.includes(`${crawler.name} casts`)) {
+            event.message.includes(`${crawler.name} casts`))) {
           return <Sword className="w-3 h-3 text-blue-400" />; // Blue icon for friendly attacks
         }
         // Red icon for enemy attacks
