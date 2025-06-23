@@ -1013,30 +1013,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           </Button>
         </div>
 
-        {/* Player Status */}
-        {player && (
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-red-300">HP:</span>
-              <span className="text-white">
-                {player.hp}/{player.maxHp}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-blue-300">Energy:</span>
-              <span className="text-white">
-                {player.energy}/{player.maxEnergy}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-purple-300">Power:</span>
-              <span className="text-white">
-                {player.power}/{player.maxPower}
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Controls hint */}
         <div className="text-xs text-muted-foreground text-center space-y-1">
           <div>
