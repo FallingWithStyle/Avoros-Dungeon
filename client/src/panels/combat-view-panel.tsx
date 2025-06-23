@@ -16,6 +16,7 @@ import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 
 interface Equipment {
   id: string;
@@ -47,20 +48,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Fetch current room data
-  const { data: roomData, isLoading: roomLoading } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/current-room`],
-    refetchInterval: 5000,
-    staleTime: 3000,
-  });
+  // Use the same tactical data hooks as the tactical view panel
+  const {
+    roomData,
+    tacticalData,
+    isLoading: roomLoading,
+    tacticalLoading,
+    tacticalError
+  } = useTacticalData(crawler);
 
-  // Fetch tactical data for room layout
-  const { data: tacticalData, isLoading: tacticalLoading } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-    refetchInterval: 8000,
-    staleTime: 5000,
-    enabled: !!roomData?.room?.id,
-  });
+  
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -252,7 +249,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [combatState.entities, selectedTarget, coverElements]);
+  }, [combatState.entities, selectedTarget, tacticalData]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -496,11 +493,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             );
           })}
 
-          {/* Exit indicators based on available directions */}
-          {roomData?.availableDirections?.map((direction: string) => {
+          {/* Exit indicators based on room connections */}
+          {roomData?.connections?.map((connection: any) => {
             let position = { x: 50, y: 50 };
             
-            switch(direction) {
+            switch(connection.direction) {
               case "north":
                 position = { x: 50, y: 5 };
                 break;
@@ -513,24 +510,31 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               case "west":
                 position = { x: 5, y: 50 };
                 break;
-              case "staircase":
+              case "up":
+              case "down":
                 position = { x: 50, y: 50 };
                 break;
             }
 
             return (
               <div
-                key={direction}
-                className="absolute w-6 h-6 bg-blue-500/70 border-2 border-blue-300 rounded-full flex items-center justify-center"
+                key={connection.direction}
+                className={`absolute w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                  connection.isLocked 
+                    ? "bg-red-500/70 border-red-300" 
+                    : "bg-blue-500/70 border-blue-300"
+                }`}
                 style={{
                   left: `${position.x}%`,
                   top: `${position.y}%`,
                   transform: "translate(-50%, -50%)",
                   zIndex: 20
                 }}
-                title={`Exit: ${direction}`}
+                title={`${connection.isLocked ? "Locked " : ""}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
               >
-                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse" />
+                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                  connection.isLocked ? "bg-red-200" : "bg-blue-200"
+                }`} />
               </div>
             );
           })}
