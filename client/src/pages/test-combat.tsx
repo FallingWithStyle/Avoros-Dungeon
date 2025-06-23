@@ -36,6 +36,7 @@ export default function TestCombat() {
   const [availableWeapons, setAvailableWeapons] = useState<Equipment[]>([]);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [showTargetRangeIndicator, setShowTargetRangeIndicator] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(true);
   const [coverElements, setCoverElements] = useState<Array<{
     id: string;
     type: "full_wall" | "half_wall";
@@ -588,6 +589,16 @@ export default function TestCombat() {
   // Initialize test scenario only once
   useEffect(() => {
     initializeTestScenario();
+    
+    // Start AI loop if enabled
+    if (aiEnabled) {
+      combatSystem.startAILoop();
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      combatSystem.stopAILoop();
+    };
   }, []);
 
   // Load mock weapons for testing - run only once
@@ -1008,8 +1019,21 @@ export default function TestCombat() {
               <Button onClick={resetScenario} variant="outline" size="sm">
                 Reset Scenario
               </Button>
-              <Button onClick={() => {/* TODO: Implement freeze/unfreeze logic */}} variant="outline" size="sm" disabled>
-                Freeze NPCs
+              <Button 
+                onClick={() => {
+                  setAiEnabled(!aiEnabled);
+                  if (!aiEnabled) {
+                    // Start AI loop when enabling
+                    combatSystem.startAILoop();
+                  } else {
+                    // Stop AI loop when disabling
+                    combatSystem.stopAILoop();
+                  }
+                }} 
+                variant={aiEnabled ? "destructive" : "outline"} 
+                size="sm"
+              >
+                {aiEnabled ? "Disable AI" : "Enable AI"}
               </Button>
               <Button onClick={spawnToughEnemy} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700 border-red-500 text-white">
                 Spawn Tough Enemy
