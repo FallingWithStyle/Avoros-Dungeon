@@ -249,60 +249,122 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     setIsInitialized(true);
   }, [crawler, aiEnabled, availableWeapons, roomData, tacticalData]);
 
-  // Movement handler with collision detection
+  // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
     const player = combatState.entities.find(e => e.id === "player");
     if (!player) return;
 
     if (direction.x === 0 && direction.y === 0) return;
 
-    const moveSpeed = 3;
-    let newX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
-    let newY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+    const moveSpeed = 2.5; // Slightly slower for better control
+    let newX = player.position.x + direction.x * moveSpeed;
+    let newY = player.position.y + direction.y * moveSpeed;
 
-    // Check collision with room layout elements
-    const playerRadius = 1.5;
+    // Enhanced collision detection with room layout elements
+    const playerRadius = 2.0; // Slightly larger for better collision feel
     
-    const checkCollisionWithCover = (x: number, y: number): boolean => {
+    const checkCollisionWithElements = (x: number, y: number): boolean => {
       if (!tacticalEntities || !Array.isArray(tacticalEntities)) return false;
       
       return tacticalEntities.some((entity: any) => {
         if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
         
         // Use entity position directly (already in percentage format)
-        const wallLeft = entity.position.x - 2;
-        const wallRight = entity.position.x + 2;
-        const wallTop = entity.position.y - 2;
-        const wallBottom = entity.position.y + 2;
+        const elementLeft = entity.position.x - 2;
+        const elementRight = entity.position.x + 2;
+        const elementTop = entity.position.y - 2;
+        const elementBottom = entity.position.y + 2;
 
-        const buffer = 0.5;
-        return (x + playerRadius > wallLeft - buffer && 
-                x - playerRadius < wallRight + buffer &&
-                y + playerRadius > wallTop - buffer && 
-                y - playerRadius < wallBottom + buffer);
+        const buffer = 1.0; // Larger buffer for smoother collision
+        return (x + playerRadius > elementLeft - buffer && 
+                x - playerRadius < elementRight + buffer &&
+                y + playerRadius > elementTop - buffer && 
+                y - playerRadius < elementBottom + buffer);
       });
     };
 
-    const wouldCollide = checkCollisionWithCover(newX, newY);
+    // Check for collision with other entities (hostile mobs)
+    const checkCollisionWithEntities = (x: number, y: number): boolean => {
+      return combatState.entities.some((entity: any) => {
+        if (entity.id === "player" || entity.hp <= 0) return false;
+        
+        const distance = Math.sqrt(
+          Math.pow(x - entity.position.x, 2) + 
+          Math.pow(y - entity.position.y, 2)
+        );
+        
+        return distance < 4; // Minimum distance to other entities
+      });
+    };
 
-    if (wouldCollide) {
+    // Check room boundaries with gates for exits
+    const gateStart = 40;
+    const gateEnd = 60;
+    const boundary = 5;
+
+    // Check if we're trying to move through an exit
+    let exitDirection = "";
+    const roomConnections = effectiveRoomData?.connections || [];
+    const availableDirections = roomConnections.map((conn: any) => conn.direction);
+
+    if (newY <= boundary && direction.y < 0 && availableDirections.includes("north")) {
+      if (newX >= gateStart && newX <= gateEnd) {
+        exitDirection = "north";
+      }
+    } else if (newY >= (100 - boundary) && direction.y > 0 && availableDirections.includes("south")) {
+      if (newX >= gateStart && newX <= gateEnd) {
+        exitDirection = "south";
+      }
+    } else if (newX >= (100 - boundary) && direction.x > 0 && availableDirections.includes("east")) {
+      if (newY >= gateStart && newY <= gateEnd) {
+        exitDirection = "east";
+      }
+    } else if (newX <= boundary && direction.x < 0 && availableDirections.includes("west")) {
+      if (newY >= gateStart && newY <= gateEnd) {
+        exitDirection = "west";
+      }
+    }
+
+    // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
+    if (exitDirection) {
+      console.log("Room transition requested:", exitDirection, "- but not implemented in combat view");
+      // Clamp to boundary
+      newX = Math.max(boundary, Math.min(100 - boundary, newX));
+      newY = Math.max(boundary, Math.min(100 - boundary, newY));
+    } else {
+      // Normal boundary clamping
+      newX = Math.max(boundary, Math.min(100 - boundary, newX));
+      newY = Math.max(boundary, Math.min(100 - boundary, newY));
+    }
+
+    // Check for collisions and handle sliding movement
+    const wouldCollideWithElements = checkCollisionWithElements(newX, newY);
+    const wouldCollideWithEntities = checkCollisionWithEntities(newX, newY);
+
+    if (wouldCollideWithElements || wouldCollideWithEntities) {
       // Try moving only horizontally
-      const horizontalX = Math.max(0, Math.min(100, player.position.x + direction.x * moveSpeed));
+      const horizontalX = Math.max(boundary, Math.min(100 - boundary, player.position.x + direction.x * moveSpeed));
       const horizontalY = player.position.y;
       
-      if (!checkCollisionWithCover(horizontalX, horizontalY)) {
+      if (!checkCollisionWithElements(horizontalX, horizontalY) && !checkCollisionWithEntities(horizontalX, horizontalY)) {
         newX = horizontalX;
         newY = horizontalY;
       } else {
         // Try moving only vertically
         const verticalX = player.position.x;
-        const verticalY = Math.max(0, Math.min(100, player.position.y + direction.y * moveSpeed));
+        const verticalY = Math.max(boundary, Math.min(100 - boundary, player.position.y + direction.y * moveSpeed));
         
-        if (!checkCollisionWithCover(verticalX, verticalY)) {
+        if (!checkCollisionWithElements(verticalX, verticalY) && !checkCollisionWithEntities(verticalX, verticalY)) {
           newX = verticalX;
           newY = verticalY;
         } else {
-          return; // Can't move at all
+          // Can't move at all, just update facing
+          if (direction.x !== 0 || direction.y !== 0) {
+            let facing = Math.atan2(direction.x, -direction.y) * (180 / Math.PI);
+            if (facing < 0) facing += 360;
+            combatSystem.updateEntity("player", { facing: Math.round(facing) });
+          }
+          return;
         }
       }
     }
@@ -314,8 +376,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
     const newFacing = Math.round(facing);
 
+    // Update position
     combatSystem.moveEntityToPosition("player", { x: newX, y: newY });
 
+    // Update facing if not targeting something
     if (!selectedTarget) {
       const currentFacing = player.facing || 0;
       const facingDiff = Math.abs(newFacing - currentFacing);
@@ -325,7 +389,36 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         combatSystem.updateEntity("player", { facing: newFacing });
       }
     }
-  }, [combatState.entities, selectedTarget, effectiveTacticalData]);
+  }, [combatState.entities, selectedTarget, tacticalEntities, effectiveRoomData]);
+
+  // Handle target cycling with Tab key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        
+        const hostileTargets = combatState.entities.filter(e => 
+          e.type === "hostile" && e.hp > 0
+        );
+        
+        if (hostileTargets.length === 0) {
+          setSelectedTarget(null);
+          return;
+        }
+        
+        if (!selectedTarget) {
+          setSelectedTarget(hostileTargets[0].id);
+        } else {
+          const currentIndex = hostileTargets.findIndex(e => e.id === selectedTarget);
+          const nextIndex = (currentIndex + 1) % hostileTargets.length;
+          setSelectedTarget(hostileTargets[nextIndex].id);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [combatState.entities, selectedTarget]);
 
   // Enable keyboard movement
   useKeyboardMovement({
@@ -791,9 +884,17 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         )}
 
         {/* Controls hint */}
-        <div className="text-xs text-muted-foreground text-center">
-          <div>WASD: Move | 1-3: Actions | Tab: Cycle Targets</div>
+        <div className="text-xs text-muted-foreground text-center space-y-1">
+          <div>
+            {isMobile 
+              ? "Touch & Drag: Move | Tap: Actions" 
+              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"
+            }
+          </div>
           {selectedTarget && <div className="text-yellow-400">Target: {selectedEntity?.name}</div>}
+          {combatState.isInCombat && (
+            <div className="text-red-400">Combat Mode: Movement restricted near enemies</div>
+          )}
         </div>
       </CardContent>
     </Card>
