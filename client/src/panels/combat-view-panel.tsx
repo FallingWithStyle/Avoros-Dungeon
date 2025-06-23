@@ -83,9 +83,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize combat system with crawler data
   const initializeCombatSystem = useCallback(() => {
-    if (isInitialized || !roomData?.room || !tacticalData) return;
+    if (!roomData?.room) return;
 
-    // Clear existing entities
+    // Clear existing entities first
     const currentState = combatSystem.getState();
     currentState.entities.forEach(entity => {
       combatSystem.removeEntity(entity.id);
@@ -127,7 +127,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     setEquippedWeapon(availableWeapons[0]);
 
     // Add entities from tactical data (mobs, etc.)
-    if (tacticalData.tacticalEntities) {
+    if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
+      console.log('Loading tactical entities:', tacticalData.tacticalEntities.length);
       tacticalData.tacticalEntities.forEach((tacticalEntity: any) => {
         if (tacticalEntity.type === "mob" && tacticalEntity.entity) {
           const mobEntity: CombatEntity = {
@@ -162,8 +163,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           };
 
           combatSystem.addEntity(mobEntity);
+          console.log('Added mob entity:', mobEntity.name, 'at position:', mobEntity.position);
         }
       });
+    } else {
+      console.log('No tactical entities found or tacticalData is null');
     }
 
     if (aiEnabled) {
@@ -171,7 +175,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
 
     setIsInitialized(true);
-  }, [crawler, aiEnabled, isInitialized, availableWeapons, roomData, tacticalData]);
+  }, [crawler, aiEnabled, availableWeapons, roomData, tacticalData]);
 
   // Movement handler with collision detection
   const handleMovement = useCallback((direction: { x: number; y: number }) => {
@@ -188,10 +192,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     const playerRadius = 1.5;
     
     const checkCollisionWithCover = (x: number, y: number): boolean => {
-      if (!tacticalData?.tacticalEntities) return false;
+      if (!tacticalData?.tacticalEntities || !Array.isArray(tacticalData.tacticalEntities)) return false;
       
       return tacticalData.tacticalEntities.some((entity: any) => {
-        if (entity.type !== "cover" && entity.type !== "wall") return false;
+        if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return false;
         
         // Convert tactical grid positions to combat view percentages
         const wallLeft = (entity.x / 10) * 100 - 2;
@@ -348,14 +352,15 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Initialize when component mounts and data is available
   useEffect(() => {
-    if (!roomLoading && !tacticalLoading && roomData?.room && tacticalData) {
+    if (!roomLoading && !tacticalLoading && roomData?.room) {
+      setIsInitialized(false); // Reset initialization flag when room changes
       initializeCombatSystem();
     }
     
     return () => {
       combatSystem.stopAILoop();
     };
-  }, [initializeCombatSystem, roomLoading, tacticalLoading, roomData, tacticalData]);
+  }, [initializeCombatSystem, roomLoading, tacticalLoading, roomData?.room?.id, tacticalData]);
 
   // Force re-render during cooldowns
   const [, forceUpdate] = useState({});
@@ -461,11 +466,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           </div>
 
           {/* Room Layout Elements */}
-          {tacticalData?.tacticalEntities?.map((entity: any) => {
-            if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
-            
-            const x = (entity.x / 10) * 100;
-            const y = (entity.y / 10) * 100;
+          {tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities) ? 
+            tacticalData.tacticalEntities.map((entity: any) => {
+              if (entity.type !== "cover" && entity.type !== "wall" && entity.type !== "door") return null;
+              
+              const x = (entity.x / 10) * 100;
+              const y = (entity.y / 10) * 100;
             
             return (
               <div
@@ -491,7 +497,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                 }}
               />
             );
-          })}
+            }) : null}
 
           {/* Exit indicators based on room connections */}
           {roomData?.connections?.map((connection: any) => {
