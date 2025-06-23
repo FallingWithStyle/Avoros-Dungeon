@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
+import { IS_DEBUG_MODE } from "@/components/debug-panel";
 
 interface Equipment {
   id: string;
@@ -332,45 +333,70 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         (conn: any) => conn.direction,
       );
 
+      // More lenient gate detection - larger gate area
+      const gateAreaStart = 35;
+      const gateAreaEnd = 65;
+      const exitBoundary = 8; // Slightly larger boundary for exit detection
+
       if (
-        newY <= boundary &&
+        newY <= exitBoundary &&
         direction.y < 0 &&
         availableDirections.includes("north")
       ) {
-        if (newX >= gateStart && newX <= gateEnd) {
+        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
           exitDirection = "north";
+          toast({
+            title: "Exit Detected",
+            description: "Moving north through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newY >= 100 - boundary &&
+        newY >= 100 - exitBoundary &&
         direction.y > 0 &&
         availableDirections.includes("south")
       ) {
-        if (newX >= gateStart && newX <= gateEnd) {
+        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
           exitDirection = "south";
+          toast({
+            title: "Exit Detected", 
+            description: "Moving south through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newX >= 100 - boundary &&
+        newX >= 100 - exitBoundary &&
         direction.x > 0 &&
         availableDirections.includes("east")
       ) {
-        if (newY >= gateStart && newY <= gateEnd) {
+        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "east";
+          toast({
+            title: "Exit Detected",
+            description: "Moving east through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newX <= boundary &&
+        newX <= exitBoundary &&
         direction.x < 0 &&
         availableDirections.includes("west")
       ) {
-        if (newY >= gateStart && newY <= gateEnd) {
+        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "west";
+          toast({
+            title: "Exit Detected",
+            description: "Moving west through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       }
 
-      // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
+      // If trying to exit, clamp to boundary but allow closer approach to gates
       if (exitDirection) {
-        // Clamp to boundary
-        newX = Math.max(boundary, Math.min(100 - boundary, newX));
-        newY = Math.max(boundary, Math.min(100 - boundary, newY));
+        // Allow player to get closer to the gate
+        newX = Math.max(3, Math.min(97, newX));
+        newY = Math.max(3, Math.min(97, newY));
       } else {
         // Normal boundary clamping
         newX = Math.max(boundary, Math.min(100 - boundary, newX));
@@ -791,6 +817,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               })
             : null}
 
+          {/* Debug: Show room connections data */}
+          {IS_DEBUG_MODE && effectiveRoomData?.connections && (
+            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded z-30">
+              Connections: {effectiveRoomData.connections.map((c: any) => c.direction).join(", ")}
+            </div>
+          )}
+
           {/* Gate-style exit indicators */}
           {effectiveRoomData?.connections?.map((connection: any) => {
             let gateStyle = {};
@@ -799,43 +832,43 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             switch (connection.direction) {
               case "north":
                 gateStyle = {
-                  top: "0px",
+                  top: "2px",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: "32px",
-                  height: "8px",
+                  width: "48px",
+                  height: "12px",
                 };
-                gateClass = "rounded-b";
+                gateClass = "rounded-b-lg";
                 break;
               case "south":
                 gateStyle = {
-                  bottom: "0px",
+                  bottom: "2px",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: "32px",
-                  height: "8px",
+                  width: "48px",
+                  height: "12px",
                 };
-                gateClass = "rounded-t";
+                gateClass = "rounded-t-lg";
                 break;
               case "east":
                 gateStyle = {
-                  right: "0px",
+                  right: "2px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  width: "8px",
-                  height: "32px",
+                  width: "12px",
+                  height: "48px",
                 };
-                gateClass = "rounded-l";
+                gateClass = "rounded-l-lg";
                 break;
               case "west":
                 gateStyle = {
-                  left: "0px",
+                  left: "2px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  width: "8px",
-                  height: "32px",
+                  width: "12px",
+                  height: "48px",
                 };
-                gateClass = "rounded-r";
+                gateClass = "rounded-r-lg";
                 break;
               case "up":
               case "down":
@@ -843,8 +876,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
-                  width: "24px",
-                  height: "24px",
+                  width: "32px",
+                  height: "32px",
                 };
                 gateClass = "rounded-full";
                 break;
