@@ -605,7 +605,8 @@ export function registerCrawlerRoutes(app: Express) {
         // Continue without cache
       }
 
-      const roomData = await storage.explorationStorage.getCurrentRoom(crawlerId);
+      // Use the main storage interface instead of explorationStorage directly
+      const roomData = await storage.getCrawlerCurrentRoom(crawlerId);
       if (!roomData) {
         return res.status(404).json({ message: "Current room not found" });
       }

@@ -136,7 +136,6 @@ export class MobStorage extends BaseStorage {
       console.log('Redis cache miss for room mobs, fetching from database');
     }
 
-    console.log(`Fetching mobs from database for room ${roomId}`);
     const roomMobs = await db
       .select({
         mob: mobs,
@@ -145,16 +144,6 @@ export class MobStorage extends BaseStorage {
       .from(mobs)
       .innerJoin(mobTypes, eq(mobs.enemyId, mobTypes.id))
       .where(and(eq(mobs.roomId, roomId), eq(mobs.isActive, true)));
-
-    console.log(`Found ${roomMobs.length} mobs in database for room ${roomId}`);
-    if (roomMobs.length > 0) {
-      console.log(`Mob details:`, roomMobs.map(m => ({
-        id: m.mob.id,
-        name: m.mob.displayName,
-        alive: m.mob.isAlive,
-        active: m.mob.isActive
-      })));
-    }
 
     // Cache in request cache
     if (this.requestCache) {
@@ -370,11 +359,8 @@ export class MobStorage extends BaseStorage {
   }
 
   async spawnMobsForRoom(roomId: number, roomData: any): Promise<void> {
-    console.log('🚀 spawnMobsForRoom called for room:', roomId, 'with data:', roomData);
-
     const spawnConfig = await this.getContextualSpawnConfig(roomData);
     if (!spawnConfig || spawnConfig.maxMobs === 0) {
-      console.log('❌ No spawn config or maxMobs is 0, skipping spawn');
       return;
     }
 
@@ -382,14 +368,7 @@ export class MobStorage extends BaseStorage {
     const existingMobs = await this.getRoomMobs(roomId);
     const aliveMobs = existingMobs.filter(m => m.mob.isAlive);
 
-    console.log('📊 Room mob status:', {
-      existingMobs: existingMobs.length,
-      aliveMobs: aliveMobs.length,
-      maxMobs: spawnConfig.maxMobs
-    });
-
     if (aliveMobs.length >= spawnConfig.maxMobs) {
-      console.log('✋ Room already has maximum mobs, skipping spawn');
       return;
     }
 

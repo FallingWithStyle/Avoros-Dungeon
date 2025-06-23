@@ -287,30 +287,30 @@ export class TacticalStorage extends BaseStorage {
 
         // First check if we need to spawn mobs for this room
         const roomMobs = await this.mobStorage.getRoomMobs(roomId);
-        console.log(`Found ${roomMobs.length} existing mobs in room ${roomId}`);
-
-        // If no mobs exist and this isn't a safe room, try to spawn some
+        // If no mobs exist and this isn't a safe room, try to spawn some (with rate limiting)
         if (roomMobs.length === 0 && !roomData.isSafe) {
-          console.log(`No mobs found in room ${roomId}, attempting to spawn mobs`);
-          try {
-            await this.mobStorage.spawnMobsForRoom(roomId, roomData);
-            // Re-fetch after spawning
-            const newRoomMobs = await this.mobStorage.getRoomMobs(roomId);
-            console.log(`After spawning attempt: ${newRoomMobs.length} mobs in room ${roomId}`);
-            roomMobs.splice(0, roomMobs.length, ...newRoomMobs);
-          } catch (spawnError) {
-            console.error(`Failed to spawn mobs for room ${roomId}:`, spawnError);
+          // Check if we've recently attempted to spawn mobs for this room
+          const spawnCacheKey = `mob_spawn_attempt_${roomId}`;
+          const lastSpawnAttempt = await redisService.get(spawnCacheKey);
+          
+          if (!lastSpawnAttempt) {
+            // Set a 5-minute cooldown on spawn attempts for this room
+            await redisService.set(spawnCacheKey, Date.now().toString(), 'EX', 300);
+            
+            try {
+              await this.mobStorage.spawnMobsForRoom(roomId, roomData);
+              // Re-fetch after spawning
+              const newRoomMobs = await this.mobStorage.getRoomMobs(roomId);
+              roomMobs.splice(0, roomMobs.length, ...newRoomMobs);
+            } catch (spawnError) {
+              console.error(`Failed to spawn mobs for room ${roomId}:`, spawnError);
+            }
           }
         }
 
-        // DON'T store mobs in tactical_positions - they have their own table
-        // Mobs will be fetched separately via mobStorage.getRoomMobs()
-        console.log(`Found ${roomMobs.length} mobs in room ${roomId} - these are stored in mobs table, not tactical_positions`);
-        
         // Add mob entities to the response but DON'T save them to tactical_positions
         for (const mobData of roomMobs) {
           if (mobData.mob.isAlive && mobData.mob.isActive) {
-            console.log(`Adding mob to tactical response (not saving): ${mobData.mob.displayName} at position (${mobData.mob.positionX}, ${mobData.mob.positionY})`);
             entities.push({
               type: 'mob',
               name: mobData.mob.displayName,
