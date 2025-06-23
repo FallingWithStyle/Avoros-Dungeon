@@ -44,23 +44,32 @@ export default function CombatViewPanel({
     }
 
     // Add crawler entity
-    const crawlerEntity = combatSystem.addEntity({
-      id: "crawler-" + crawler.id,
+    combatSystem.addEntity({
+      id: "player",
       name: crawler.name,
       type: "player",
       position: { x: 50, y: 50 },
-      stats: {
-        health: crawler.health,
-        maxHealth: crawler.maxHealth,
-        might: crawler.might,
-        agility: crawler.agility,
-        endurance: crawler.endurance,
-        intellect: crawler.intellect
-      },
-      equipment: {
-        weapon: { name: "Basic Sword", damage: 10 },
-        armor: { name: "Basic Armor", defense: 5 }
-      }
+      hp: crawler.health,
+      maxHp: crawler.maxHealth,
+      energy: crawler.energy || 50,
+      maxEnergy: crawler.maxEnergy || 50,
+      power: crawler.power || 25,
+      maxPower: crawler.maxPower || 25,
+      might: crawler.might,
+      agility: crawler.agility,
+      endurance: crawler.endurance,
+      intellect: crawler.intellect,
+      charisma: crawler.charisma || 10,
+      wisdom: crawler.wisdom || 10,
+      attack: crawler.might + 5,
+      defense: Math.floor(crawler.endurance * 0.8),
+      speed: Math.floor(crawler.agility * 1.1),
+      accuracy: (crawler.wisdom || 10) + (crawler.intellect || 10),
+      evasion: Math.floor(crawler.agility * 1.2),
+      level: crawler.level || 1,
+      facing: 0,
+      isAlive: true,
+      cooldowns: {}
     });
 
     // Add entities from tactical data if available
@@ -74,19 +83,32 @@ export default function CombatViewPanel({
           combatSystem.addEntity({
             id: "mob-" + index,
             name: mobData.name || "Enemy",
-            type: "enemy",
+            type: "hostile",
             position: { 
               x: parseFloat(entity.position_x) * 6, 
               y: parseFloat(entity.position_y) * 4 
             },
-            stats: {
-              health: mobData.health || 50,
-              maxHealth: mobData.health || 50,
-              might: mobData.attack || 10,
-              agility: 10,
-              endurance: 10,
-              intellect: 10
-            }
+            hp: mobData.health || 50,
+            maxHp: mobData.health || 50,
+            energy: 25,
+            maxEnergy: 25,
+            power: 10,
+            maxPower: 10,
+            might: mobData.attack || 10,
+            agility: 10,
+            endurance: 10,
+            intellect: 10,
+            charisma: 10,
+            wisdom: 10,
+            attack: mobData.attack || 10,
+            defense: 5,
+            speed: 10,
+            accuracy: 15,
+            evasion: 10,
+            level: 1,
+            facing: 0,
+            isAlive: true,
+            cooldowns: {}
           });
         }
       });
@@ -122,7 +144,7 @@ export default function CombatViewPanel({
     if (!selectedEntity) return;
 
     const crawlerEntity = combatSystem.getPlayerEntity();
-    if (crawlerEntity && selectedEntity.type === "enemy") {
+    if (crawlerEntity && selectedEntity.type === "hostile") {
       combatSystem.performAttack(crawlerEntity.id, selectedEntity.id);
     }
   };
@@ -185,7 +207,7 @@ export default function CombatViewPanel({
           {selectedEntity && (
             <div className="absolute top-2 left-2 bg-black/80 text-white p-2 rounded text-xs">
               <div className="font-semibold">{selectedEntity.name}</div>
-              <div>HP: {selectedEntity.stats.health}/{selectedEntity.stats.maxHealth}</div>
+              <div>HP: {selectedEntity.hp}/{selectedEntity.maxHp}</div>
               <div>Type: {selectedEntity.type}</div>
             </div>
           )}
@@ -195,7 +217,7 @@ export default function CombatViewPanel({
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={handleAttack}
-            disabled={!selectedEntity || selectedEntity.type !== "enemy"}
+            disabled={!selectedEntity || selectedEntity.type !== "hostile"}
             variant="destructive"
             size="sm"
           >
