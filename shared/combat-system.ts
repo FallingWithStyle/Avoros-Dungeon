@@ -159,6 +159,18 @@ export function calculateHitChance(attacker: any, defender: any): number {
 
 // Simplified Combat System class
 export class CombatSystem {
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private entities: Map<string, CombatEntity> = new Map();
+  private selectedEntityId: string | null = null;
+
+  initialize(canvas: HTMLCanvasElement): void {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    if (!this.ctx) {
+      throw new Error('Failed to get 2D context from canvas');
+    }
+  }
   private state: CombatState = {
     entities: [],
     isInCombat: false,
@@ -267,7 +279,7 @@ export class CombatSystem {
     if (attacker.equippedWeapon) {
       const weaponName = attacker.equippedWeapon.name.toLowerCase();
       const weaponType = attacker.equippedWeapon.weapon_type?.toLowerCase() || "";
-      
+
       if (weaponName.includes("bow") || weaponType.includes("bow") || weaponName.includes("crossbow")) {
         animationType = "ranged";
       } else if (weaponName.includes("staff") || weaponType.includes("staff") || 
@@ -320,18 +332,18 @@ export class CombatSystem {
           x: attacker.position.x + Math.sin((attacker.facing || 0) * Math.PI / 180) * 20,
           y: attacker.position.y - Math.cos((attacker.facing || 0) * Math.PI / 180) * 20
         };
-        
+
         attacker.attackAnimation = {
           type: animationType,
           timestamp: Date.now(),
           duration: animationType === "ranged" ? 800 : animationType === "magic" ? 1000 : 600,
           targetPosition: defaultTargetPosition
         };
-        
+
         // Update cooldown
         if (!attacker.cooldowns) attacker.cooldowns = {};
         attacker.cooldowns.basic_attack = now;
-        
+
         this.addActionLog({
           entityId: attackerId,
           entityName: attacker.name,
@@ -340,7 +352,7 @@ export class CombatSystem {
           result: "miss",
           description: `${attacker.name} swings ${weaponName} but there are no hostile targets in range`,
         });
-        
+
         this.notifySubscribers();
         return true; // Return true to indicate animation played
       }
@@ -402,7 +414,7 @@ export class CombatSystem {
         // Apply damage to target
         target.hp = Math.max(0, target.hp - finalDamage);
         target.lastDamageTime = Date.now(); // Track when damage was applied for hit effects
-        
+
         hitCount++;
         totalDamage += finalDamage;
         attackResults.push(`${target.name}: ${finalDamage} damage`);
@@ -494,32 +506,32 @@ export class CombatSystem {
     if (!player) return;
 
     const hostileEntities = this.state.entities.filter(e => e.type === "hostile" && e.hp > 0);
-    
+
     hostileEntities.forEach(entity => {
       // Calculate distance to player
       const distance = this.calculateDistance(entity.position, player.position);
-      
+
       // If player is within detection range (30 units), move toward them
       if (distance <= 30 && distance > 8) {
         const dx = player.position.x - entity.position.x;
         const dy = player.position.y - entity.position.y;
         const magnitude = Math.sqrt(dx * dx + dy * dy);
-        
+
         if (magnitude > 0) {
           // Normalize and apply movement speed
           const moveSpeed = (entity.speed || 10) * 0.3; // Scale down for smoother movement
           const newX = Math.max(0, Math.min(100, entity.position.x + (dx / magnitude) * moveSpeed));
           const newY = Math.max(0, Math.min(100, entity.position.y + (dy / magnitude) * moveSpeed));
-          
+
           // Update position
           entity.position = { x: newX, y: newY };
-          
+
           // Update facing to look at player
           const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
           entity.facing = angle < 0 ? angle + 360 : angle;
         }
       }
-      
+
       // If close enough and can attack, attempt to attack player
       if (distance <= 8 && this.canUseAction(entity.id, "basic_attack")) {
         this.executeAttack(entity.id, "player");
@@ -533,7 +545,7 @@ export class CombatSystem {
       this.state.isInCombat = true;
       this.state.combatStartTime = Date.now();
       console.log("Combat started");
-      
+
       // Start AI update loop
       this.startAILoop();
     }
@@ -543,10 +555,10 @@ export class CombatSystem {
 
   startAILoop(): void {
     if (this.aiLoopId) return; // Already running
-    
+
     this.aiLoopId = setInterval(() => {
       this.updateCombatState(); // Check for combat start/end conditions
-      
+
       if (this.state.isInCombat) {
         this.updateAI();
         this.notifySubscribers();
@@ -579,7 +591,7 @@ export class CombatSystem {
         const distance = this.calculateDistance(player.position, hostile.position);
         return distance <= 25;
       });
-      
+
       if (nearbyHostiles) {
         this.startCombat();
       }

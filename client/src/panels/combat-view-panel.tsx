@@ -35,8 +35,13 @@ export default function CombatViewPanel({
     canvas.width = 600;
     canvas.height = 400;
 
-    // Initialize combat system
-    combatSystem.initialize(canvas);
+    try {
+      // Initialize combat system
+      combatSystem.initialize(canvas);
+    } catch (error) {
+      console.error('Failed to initialize combat system:', error);
+      return;
+    }
 
     // Add crawler entity
     const crawlerEntity = combatSystem.addEntity({
