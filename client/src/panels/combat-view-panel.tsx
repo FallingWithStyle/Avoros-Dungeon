@@ -1,8 +1,8 @@
 
 /**
  * File: combat-view-panel.tsx
- * Responsibility: Combat interface panel using the new combat system with proper canvas rendering
- * Notes: Updated to match test combat implementation with smooth movement and proper rendering
+ * Responsibility: Combat interface panel using the test combat arena styling and structure
+ * Notes: Reuses the polished arena design from test-combat.tsx for consistent experience
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { combatSystem, type CombatEntity, type CombatState } from "@shared/combat-system";
 import type { CrawlerWithDetails } from "@shared/schema";
+import { Sword, Shield, Zap, Heart, Target, Move, Skull } from "lucide-react";
 
 interface CombatViewPanelProps {
   crawler: CrawlerWithDetails;
@@ -23,7 +24,6 @@ export default function CombatViewPanel({
   tacticalData, 
   handleRoomMovement 
 }: CombatViewPanelProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [combatState, setCombatState] = useState<CombatState>(combatSystem.getState());
   const [selectedEntity, setSelectedEntity] = useState<CombatEntity | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -60,28 +60,21 @@ export default function CombatViewPanel({
     };
   }, [selectedEntity]);
 
-  // Initialize combat system and canvas
+  // Initialize combat system
   useEffect(() => {
-    if (!canvasRef.current || isInitialized) return;
+    if (isInitialized) return;
 
-    const canvas = canvasRef.current;
-    canvas.width = 600;
-    canvas.height = 400;
-
-    try {
-      // Initialize combat system
-      combatSystem.initialize(canvas);
-    } catch (error) {
-      console.error('Failed to initialize combat system:', error);
-      return;
-    }
+    // Clear existing entities
+    combatState.entities.forEach(entity => {
+      combatSystem.removeEntity(entity.id);
+    });
 
     // Add crawler entity
     const playerEntity: CombatEntity = {
       id: "player",
       name: crawler.name,
       type: "player",
-      position: { x: 50, y: 50 },
+      position: { x: 25, y: 50 },
       hp: crawler.health,
       maxHp: crawler.maxHealth,
       energy: crawler.energy || 50,
@@ -120,8 +113,8 @@ export default function CombatViewPanel({
             name: mobData.name || "Enemy",
             type: "hostile",
             position: { 
-              x: parseFloat(entity.position_x) * 6, 
-              y: parseFloat(entity.position_y) * 4 
+              x: parseFloat(entity.position_x), 
+              y: parseFloat(entity.position_y) 
             },
             hp: mobData.health || 50,
             maxHp: mobData.health || 50,
@@ -153,32 +146,10 @@ export default function CombatViewPanel({
 
     setIsInitialized(true);
 
-    // Start render loop
-    let animationFrameId: number;
-    const renderLoop = () => {
-      combatSystem.render();
-      animationFrameId = requestAnimationFrame(renderLoop);
-    };
-    renderLoop();
-
-    // Handle canvas clicks
-    const handleCanvasClick = (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      const entity = combatSystem.getEntityAt(x, y);
-      setSelectedEntity(entity);
-    };
-
-    canvas.addEventListener('click', handleCanvasClick);
-
     // Start AI loop
     combatSystem.startAILoop();
 
     return () => {
-      canvas.removeEventListener('click', handleCanvasClick);
-      cancelAnimationFrame(animationFrameId);
       combatSystem.stopAILoop();
     };
   }, [combatSystem, crawler, tacticalData, isInitialized]);
@@ -196,7 +167,7 @@ export default function CombatViewPanel({
     const crawlerEntity = combatState.entities.find(e => e.id === "player");
     if (!crawlerEntity) return;
 
-    const moveDistance = 20;
+    const moveDistance = 5;
     let newX = crawlerEntity.position.x;
     let newY = crawlerEntity.position.y;
 
@@ -216,155 +187,303 @@ export default function CombatViewPanel({
     }
 
     // Ensure entity stays within bounds
-    newX = Math.max(10, Math.min(590, newX));
-    newY = Math.max(10, Math.min(390, newY));
+    newX = Math.max(0, Math.min(100, newX));
+    newY = Math.max(0, Math.min(100, newY));
 
     combatSystem.moveEntity(crawlerEntity.id, { x: newX, y: newY });
   }, [combatState.entities]);
 
   // Get current room info
   const currentRoom = tacticalData?.currentRoom || { name: "Unknown Room", type: "chamber" };
+  const player = combatState.entities.find(e => e.id === "player");
+  const enemies = combatState.entities.filter(e => e.type === "hostile");
 
   return (
-    <Card className="bg-game-surface border-game-border h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center justify-between">
-          <span className="flex items-center">
-            <i className="fas fa-crosshairs mr-2 text-red-400"></i>
-            Combat View
-          </span>
-          <Badge variant="outline" className="text-xs">
-            {currentRoom.name}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Combat Canvas */}
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            className="w-full border border-game-border rounded bg-slate-900"
-            style={{ maxHeight: "400px", imageRendering: "pixelated" }}
-          />
-          {selectedEntity && (
-            <div className="absolute top-2 left-2 bg-black/80 text-white p-2 rounded text-xs">
-              <div className="font-semibold">{selectedEntity.name}</div>
-              <div>HP: {selectedEntity.hp}/{selectedEntity.maxHp}</div>
-              <div>Type: {selectedEntity.type}</div>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={handleAttack}
-            disabled={!selectedEntity || selectedEntity.type !== "hostile"}
-            variant="destructive"
-            size="sm"
-          >
-            <i className="fas fa-sword mr-1"></i>
-            Attack
-          </Button>
-          <Button
-            onClick={() => setSelectedEntity(null)}
-            variant="outline"
-            size="sm"
-          >
-            <i className="fas fa-hand-pointer mr-1"></i>
-            Deselect
-          </Button>
-        </div>
-
-        {/* Movement Controls */}
-        <div className="grid grid-cols-3 gap-1 max-w-32 mx-auto">
-          <div></div>
-          <Button
-            onClick={() => handleMove("north")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-up"></i>
-          </Button>
-          <div></div>
-
-          <Button
-            onClick={() => handleMove("west")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-left"></i>
-          </Button>
-          <div></div>
-          <Button
-            onClick={() => handleMove("east")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-right"></i>
-          </Button>
-
-          <div></div>
-          <Button
-            onClick={() => handleMove("south")}
-            variant="outline"
-            size="sm"
-            className="p-2"
-          >
-            <i className="fas fa-arrow-down"></i>
-          </Button>
-          <div></div>
-        </div>
-
-        {/* Room Navigation */}
-        <div className="grid grid-cols-4 gap-1 pt-2 border-t border-game-border">
-          <Button
-            onClick={() => handleRoomMovement("north")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            N
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("east")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            E
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("south")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            S
-          </Button>
-          <Button
-            onClick={() => handleRoomMovement("west")}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            W
-          </Button>
-        </div>
-
-        {/* Combat Status */}
-        {combatState.isInCombat && (
-          <div className="text-center">
-            <Badge variant="destructive" className="text-xs">
-              IN COMBAT
+    <div className="h-full">
+      <Card className="border-amber-600/30 bg-black/40 backdrop-blur-sm h-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-amber-300 flex items-center gap-2">
+            <Sword className="w-5 h-5" />
+            Combat Arena
+          </CardTitle>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
+              {combatState.isInCombat ? "IN COMBAT" : "READY"}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {currentRoom.name}
             </Badge>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Combat Arena - Using test combat styling */}
+          <div 
+            className="relative bg-gradient-to-br from-green-900/20 to-brown-800/20 border border-amber-600/20 rounded-lg overflow-hidden mx-auto"
+            style={{ 
+              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)',
+              width: 'min(90vw, 90vh, 500px)',
+              height: 'min(90vw, 90vh, 500px)',
+              aspectRatio: '1'
+            }}
+          >
+            {/* Grid overlay */}
+            <div className="absolute inset-0 opacity-10">
+              {Array.from({ length: 11 }).map((_, i) => (
+                <div key={`v-${i}`} className="absolute h-full w-px bg-amber-400" style={{ left: `${i * 10}%` }} />
+              ))}
+              {Array.from({ length: 11 }).map((_, i) => (
+                <div key={`h-${i}`} className="absolute w-full h-px bg-amber-400" style={{ top: `${i * 10}%` }} />
+              ))}
+            </div>
+
+            {/* Entities */}
+            {combatState.entities.map((entity) => {
+              return (
+                <div
+                  key={entity.id}
+                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
+                    entity.hp <= 0 
+                      ? 'cursor-not-allowed opacity-50' 
+                      : entity.id !== "player"
+                        ? 'cursor-pointer hover:scale-105' 
+                        : 'cursor-default'
+                  } ${selectedEntity?.id === entity.id ? 'scale-110 z-10' : ''}`}
+                  style={{
+                    left: `${entity.position.x}%`,
+                    top: `${entity.position.y}%`,
+                  }}
+                  onClick={() => entity.id !== "player" && entity.hp > 0 ? setSelectedEntity(entity) : null}
+                >
+                  {/* Main entity circle */}
+                  <div className={`relative w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                    entity.type === "player" 
+                      ? "bg-blue-600 border-blue-400" 
+                      : entity.hp <= 0
+                      ? "bg-gray-600 border-gray-500"
+                      : entity.type === "hostile"
+                      ? "bg-red-600 border-red-400"
+                      : entity.type === "neutral"
+                      ? "bg-yellow-600 border-yellow-400"
+                      : entity.type === "friendly" || entity.type === "ally"
+                      ? "bg-green-600 border-green-400"
+                      : "bg-gray-600 border-gray-400"
+                  }`}>
+                    {entity.type === "player" && <Shield className="w-4 h-4 text-white" />}
+                    {entity.type === "hostile" && <Skull className="w-4 h-4 text-white" />}
+
+                    {/* Facing direction indicator */}
+                    {entity.facing !== undefined && (
+                      <div
+                        className="absolute w-12 h-12 pointer-events-none z-10"
+                        style={{
+                          transform: `rotate(${entity.facing}deg)`,
+                          transformOrigin: "center",
+                        }}
+                      >
+                        <div className="w-full h-full flex items-start justify-center">
+                          <div
+                            className={`w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent ${
+                              entity.hp <= 0 ? "border-b-gray-500" :
+                              entity.type === "player" 
+                                ? "border-b-blue-400" 
+                                : entity.type === "hostile"
+                                ? "border-b-red-400"
+                                : entity.type === "neutral"
+                                ? "border-b-yellow-400"
+                                : entity.type === "friendly" || entity.type === "ally"
+                                ? "border-b-green-400"
+                                : "border-b-gray-400"
+                            }`}
+                            style={{
+                              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.8))",
+                              marginTop: "-6px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Health bar */}
+                    <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-700 rounded">
+                      <div 
+                        className={`h-full rounded transition-all duration-300 ${
+                          entity.hp <= 0 ? "bg-gray-500" :
+                          entity.hp > entity.maxHp * 0.6 ? "bg-green-500" :
+                          entity.hp > entity.maxHp * 0.3 ? "bg-yellow-500" : "bg-red-500"
+                        }`}
+                        style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+                      />
+                    </div>
+
+                    {/* Selection indicator */}
+                    {selectedEntity?.id === entity.id && entity.hp > 0 && (
+                      <div className="absolute -inset-1 rounded-full border-2 border-yellow-400 animate-pulse" />
+                    )}
+
+                    {/* Hit Impact Effect */}
+                    {(() => {
+                      const recentDamageTime = entity.lastDamageTime || 0;
+                      const timeSinceDamage = Date.now() - recentDamageTime;
+                      if (timeSinceDamage < 500) {
+                        const impactProgress = timeSinceDamage / 500;
+                        return (
+                          <div className="absolute -inset-2 pointer-events-none">
+                            <div 
+                              className="w-full h-full rounded-full border-4 border-red-400"
+                              style={{
+                                opacity: (1 - impactProgress) * 0.8,
+                                transform: `scale(${1 + impactProgress * 0.5})`,
+                                filter: "drop-shadow(0 0 8px rgba(239,68,68,0.6))",
+                              }}
+                            />
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Player Status */}
+          {player && (
+            <Card className="border-blue-600/30 bg-black/40 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-blue-300 text-sm flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  {player.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-red-300">HP:</span>
+                  <span className="text-white">{player.hp}/{player.maxHp}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-blue-300">Energy:</span>
+                  <span className="text-white">{player.energy}/{player.maxEnergy}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-purple-300">Power:</span>
+                  <span className="text-white">{player.power}/{player.maxPower}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={handleAttack}
+              disabled={!selectedEntity || selectedEntity.type !== "hostile"}
+              variant="destructive"
+              size="sm"
+            >
+              <Sword className="w-4 h-4 mr-1" />
+              Attack
+            </Button>
+            <Button
+              onClick={() => setSelectedEntity(null)}
+              variant="outline"
+              size="sm"
+            >
+              <Target className="w-4 h-4 mr-1" />
+              Deselect
+            </Button>
+          </div>
+
+          {/* Movement Controls */}
+          <div className="grid grid-cols-3 gap-1 max-w-32 mx-auto">
+            <div></div>
+            <Button
+              onClick={() => handleMove("north")}
+              variant="outline"
+              size="sm"
+              className="p-2"
+            >
+              <i className="fas fa-arrow-up"></i>
+            </Button>
+            <div></div>
+
+            <Button
+              onClick={() => handleMove("west")}
+              variant="outline"
+              size="sm"
+              className="p-2"
+            >
+              <i className="fas fa-arrow-left"></i>
+            </Button>
+            <div></div>
+            <Button
+              onClick={() => handleMove("east")}
+              variant="outline"
+              size="sm"
+              className="p-2"
+            >
+              <i className="fas fa-arrow-right"></i>
+            </Button>
+
+            <div></div>
+            <Button
+              onClick={() => handleMove("south")}
+              variant="outline"
+              size="sm"
+              className="p-2"
+            >
+              <i className="fas fa-arrow-down"></i>
+            </Button>
+            <div></div>
+          </div>
+
+          {/* Room Navigation */}
+          <div className="grid grid-cols-4 gap-1 pt-2 border-t border-game-border">
+            <Button
+              onClick={() => handleRoomMovement("north")}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              N
+            </Button>
+            <Button
+              onClick={() => handleRoomMovement("east")}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              E
+            </Button>
+            <Button
+              onClick={() => handleRoomMovement("south")}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              S
+            </Button>
+            <Button
+              onClick={() => handleRoomMovement("west")}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              W
+            </Button>
+          </div>
+
+          {/* Combat Status */}
+          {combatState.isInCombat && (
+            <div className="text-center">
+              <Badge variant="destructive" className="text-xs">
+                IN COMBAT
+              </Badge>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
