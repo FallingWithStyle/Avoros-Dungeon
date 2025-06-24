@@ -64,16 +64,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   } = useTacticalData(crawler);
 
-  // Fallback to batch data if current-room fails
-  const { data: batchData } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
-    refetchInterval: 5000,
-    staleTime: 3000,
-    enabled: !roomData?.room, // Only fetch if we don't have room data
-  });
+  // REMOVED: Redundant fallback query that was slowing down transitions
+  // The main tactical data hook already handles fallbacks efficiently
 
-  // Use batch data as fallback - fix room data structure access
-  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
+  // Use primary room data source - prefetched data should be available immediately
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room;
 
   // Prefetch adjacent rooms for faster movement transitions
   const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
@@ -96,7 +91,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  const effectiveTacticalData = tacticalData || batchData?.tacticalData;
+  const effectiveTacticalData = tacticalData;
 
   // Extract room connections from various possible data structures
   const roomConnections = effectiveRoomData?.connections || 
@@ -802,11 +797,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               {effectiveRoomData?.environment || effectiveRoomData?.room?.environment}
             </Badge>
           )}
-          {!roomData?.currentRoom && !roomData?.room && batchData?.currentRoom && (
-            <Badge variant="outline" className="text-xs text-amber-400">
-              Fallback Data
-            </Badge>
-          )}
+          
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
