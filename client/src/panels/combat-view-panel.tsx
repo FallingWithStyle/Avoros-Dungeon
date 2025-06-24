@@ -380,11 +380,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
           {/* Room Layout Elements */}
           {layoutEntities.map((entity: any) => {
-
-                const x = entity.position.x;
-                const y = entity.position.y;
-
-                const x = entity.position.x;
+            const x = entity.position.x;
             const y = entity.position.y;
 
             return (
