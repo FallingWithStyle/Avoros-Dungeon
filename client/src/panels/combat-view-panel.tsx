@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
 interface Equipment {
   id: string;
@@ -59,6 +60,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     isLoading: roomLoading,
     tacticalLoading,
     tacticalError,
+    handleRoomChange,
   } = useTacticalData(crawler);
 
   // Fallback to batch data if current-room fails
@@ -283,6 +285,63 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     tacticalEntities,
   ]);
 
+  const handleRotation = useCallback(
+    (direction: "left" | "right") => {
+      const player = combatState.entities.find((e) => e.id === "player");
+      if (!player) return;
+
+      const rotationAmount = 15; // degrees
+      const currentFacing = player.facing || 0;
+      const newFacing =
+        direction === "left"
+          ? (currentFacing - rotationAmount + 360) % 360
+          : (currentFacing + rotationAmount) % 360;
+
+      combatSystem.updateEntity("player", { facing: newFacing });
+    },
+    [combatState.entities],
+  );
+
+  // Room transition handler for combat view
+  const handleRoomTransition = useCallback(
+    async (direction: string) => {
+      if (!crawler?.id) {
+        console.error("No crawler ID available for room transition");
+        return;
+      }
+
+      try {
+        // Use the same room change logic as other panels
+        const success = await handleRoomChangeWithRefetch(crawler.id, direction);
+
+        if (success) {
+          // Refetch tactical data to get new room information
+          handleRoomChange();
+
+          toast({
+            title: "Room Changed",
+            description: "Successfully moved to " + direction + " room",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Movement Failed",
+            description: "Could not move to the " + direction + " room",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Room transition error:", error);
+        toast({
+          title: "Movement Error",
+          description: "Failed to change rooms. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+    [crawler?.id, handleRoomChange, toast],
+  );
+
   // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback(
     (direction: { x: number; y: number }) => {
@@ -363,23 +422,27 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         if (newX >= gateAreaStart && newX <= gateAreaEnd) {
           exitDirection = "north";
           toast({
-            title: "Exit Detected",
-            description: "Moving north through gate (room transitions not implemented in combat view)",
+            title: "Room Transition",
+            description: "Moving north to next room...",
             variant: "default",
           });
+          handleRoomTransition("north");
+          return true; // Stop movement processing since we're transitioning
         }
       } else if (
         newY >= 100 - exitBoundary &&
         direction.y > 0 &&
         availableDirections.includes("south")
       ) {
-        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
+        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "south";
           toast({
-            title: "Exit Detected", 
-            description: "Moving south through gate (room transitions not implemented in combat view)",
+            title: "Room Transition",
+            description: "Moving south to next room...",
             variant: "default",
           });
+          handleRoomTransition("south");
+          return true; // Stop movement processing since we're transitioning
         }
       } else if (
         newX >= 100 - exitBoundary &&
@@ -389,10 +452,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "east";
           toast({
-            title: "Exit Detected",
-            description: "Moving east through gate (room transitions not implemented in combat view)",
+            title: "Room Transition",
+            description: "Moving east to next room...",
             variant: "default",
           });
+          handleRoomTransition("east");
+          return true; // Stop movement processing since we're transitioning
         }
       } else if (
         newX <= exitBoundary &&
@@ -402,10 +467,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "west";
           toast({
-            title: "Exit Detected",
-            description: "Moving west through gate (room transitions not implemented in combat view)",
+            title: "Room Transition",
+            description: "Moving west to next room...",
             variant: "default",
           });
+          handleRoomTransition("west");
+          return true; // Stop movement processing since we're transitioning
         }
       }
 
@@ -497,6 +564,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       tacticalEntities,
       effectiveRoomData,
       isInitialized,
+      handleRoomTransition,
     ],
   );
 
@@ -793,7 +861,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             ? tacticalEntities.map((entity: any) => {
                 if (
                   entity.type !== "cover" &&
-                  entity.type !== "wall" &&
+                  ```text
+  entity.type !== "wall" &&
                   entity.type !== "door"
                 )
                   return null;
@@ -929,7 +998,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                     }`}
                   />
                 </div>
-                
+
                 {/* Directional arrow for vertical/horizontal gates */}
                 {(connection.direction === "north" || connection.direction === "south" || 
                   connection.direction === "east" || connection.direction === "west") && (
