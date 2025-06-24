@@ -382,7 +382,12 @@ export class ExplorationStorage extends BaseStorage {
         },
         isSafe: result[0].room.type === 'safe',
         hasLoot: ['treasure', 'normal', 'chamber'].includes(result[0].room.type),
-        connections: connections
+        connections: connections,
+        // Also include connections at room level for compatibility
+        room: {
+          ...result[0].room,
+          connections: connections
+        }
       };
 
       return roomData;

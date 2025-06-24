@@ -86,6 +86,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
+  // Extract room connections from various possible data structures
+  const roomConnections = effectiveRoomData?.connections || 
+                         (effectiveRoomData && effectiveRoomData.room?.connections) ||
+                         (roomData?.currentRoom?.connections) ||
+                         (roomData?.room?.connections) ||
+                         (roomData?.connections) ||
+                         [];
+
   // Debug logging to understand room data structure
   if (IS_DEBUG_MODE && roomData) {
     console.log('Combat View - Room data structure:', {
@@ -338,7 +346,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       // Check if we're trying to move through an exit
       let exitDirection = "";
-      const roomConnections = effectiveRoomData?.connections || [];
       const availableDirections = roomConnections.map(
         (conn: any) => conn.direction,
       );
@@ -828,14 +835,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             : null}
 
           {/* Debug: Show room connections data */}
-          {IS_DEBUG_MODE && effectiveRoomData?.connections && (
+          {IS_DEBUG_MODE && roomConnections.length > 0 && (
             <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded z-30">
-              Connections: {effectiveRoomData.connections.map((c: any) => c.direction).join(", ")}
+              Connections: {roomConnections.map((c: any) => c.direction).join(", ")}
             </div>
           )}
 
           {/* Gate-style exit indicators */}
-          {effectiveRoomData?.connections?.map((connection: any) => {
+          {roomConnections.map((connection: any) => {
             let gateStyle = {};
             let gateClass = "";
 
