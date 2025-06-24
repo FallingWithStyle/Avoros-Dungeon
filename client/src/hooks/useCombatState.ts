@@ -87,6 +87,14 @@ export function useCombatState({
     // Initialize player first to ensure they're always present
     combatSystem.initializePlayer(playerPosition, crawler);
 
+    // Store room connection data for instant availability
+    if (tacticalData?.availableDirections) {
+      const roomConnections = tacticalData.roomConnections || 
+        tacticalData.availableDirections.map((dir: string) => ({ direction: dir, isLocked: false }));
+      combatSystem.setRoomConnections(roomConnections);
+      console.log(`🚪 Loaded ${roomConnections.length} room exits: ${tacticalData.availableDirections.join(', ')}`);
+    }
+
     // Immediately load tactical entities from cached data if available
     if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
       console.log(`🏃‍♂️ Loading ${tacticalData.tacticalEntities.length} cached tactical entities immediately...`);

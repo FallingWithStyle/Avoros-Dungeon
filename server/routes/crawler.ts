@@ -379,7 +379,8 @@ export function registerCrawlerRoutes(app: Express) {
         tacticalData: tacticalData || [],
         scannedRooms: scannedRooms || [],
         exploredRooms: exploredRooms || [],
-        crawlerHistory: [] // This can be expanded later if needed
+        crawlerHistory: [], // This can be expanded later if needed
+        availableDirections: availableDirections || [] // Include at top level for compatibility
       };
 
       // Cache the response for 60 seconds (shorter TTL for fresher data)
