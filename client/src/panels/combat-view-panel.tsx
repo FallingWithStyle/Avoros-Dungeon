@@ -1,4 +1,3 @@
-
 /**
  * File: combat-view-panel.tsx
  * Responsibility: Clean combat interface panel using only the proven test combat system logic
@@ -54,6 +53,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [movementOptions, setMovementOptions] = useState<any>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [, forceUpdate] = useState({});
+  const [currentRoomId, setCurrentRoomId] = useState<string | undefined>(undefined);
 
   // Use the same tactical data hooks as the tactical view panel
   const {
@@ -74,7 +74,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const effectiveTacticalData = tacticalData;
 
   // PERFORMANCE: Extract data early to prevent repeated processing
-  const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
   const roomName = effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room";
   const roomEnvironment = effectiveRoomData?.environment || effectiveRoomData?.room?.environment;
 
@@ -174,147 +173,192 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     },
   ];
 
-  // Initialize combat system with crawler data
+  // Enhanced entity integration from tactical data with comprehensive management
   const initializeCombatSystem = useCallback(() => {
-    if (!effectiveTacticalData || !tacticalEntities.length) {
-      return;
-    }
+    if (!crawler || !effectiveTacticalData) return;
 
-    // Clear existing entities first
+    // Get current combat state and ensure clean initialization
     const currentState = combatSystem.getState();
-    currentState.entities.forEach((entity) => {
-      combatSystem.removeEntity(entity.id);
+
+    // Clear all existing entities except player to avoid duplicates
+    currentState.entities.forEach(entity => {
+      if (entity.id !== "player") {
+        combatSystem.removeEntity(entity.id);
+      }
     });
 
-    // Initialize player from crawler data
-    const playerEntity: CombatEntity = {
-      id: "player",
-      name: crawler.name,
-      type: "player",
-      hp: crawler.health,
-      maxHp: crawler.maxHealth,
-      energy: crawler.energy,
-      maxEnergy: crawler.maxEnergy,
-      power: crawler.power,
-      maxPower: crawler.maxPower,
-      might: crawler.might,
-      agility: crawler.agility,
-      endurance: crawler.endurance,
-      intellect: crawler.intellect,
-      charisma: crawler.charisma,
-      wisdom: crawler.wisdom,
-      attack: Math.floor(crawler.might * 1.2) + 8,
-      defense: Math.floor(crawler.endurance * 0.8) + 5,
-      speed: Math.floor(crawler.agility * 1.1),
-      accuracy: crawler.wisdom + crawler.intellect,
-      evasion: Math.floor(crawler.agility * 1.2),
-      position: { x: 25, y: 50 },
-      facing: 0,
-      level: crawler.level,
-      serial: crawler.serial,
-      isSelected: false,
-      isAlive: true,
-      cooldowns: {},
-      equippedWeapon: availableWeapons[0],
-    };
+    // Initialize player position at center
+    const playerPosition = { x: 50, y: 50 };
 
-    combatSystem.addEntity(playerEntity);
-    setEquippedWeapon(availableWeapons[0]);
+    // Check if player already exists and update position, or create new player
+    const existingPlayer = currentState.entities.find(e => e.id === "player");
+    if (existingPlayer) {
+      combatSystem.updateEntity("player", { position: playerPosition });
+    } else {
+      // Initialize player with comprehensive crawler data
+      combatSystem.initializePlayer(playerPosition, {
+        name: crawler.name,
+        serial: crawler.serial,
+        currentHealth: crawler.currentHealth,
+        maxHealth: crawler.maxHealth,
+        currentEnergy: crawler.currentEnergy,
+        maxEnergy: crawler.maxEnergy,
+        currentPower: crawler.currentPower,
+        maxPower: crawler.maxPower,
+        level: crawler.level,
+        might: crawler.might,
+        agility: crawler.agility,
+        endurance: crawler.endurance,
+        intellect: crawler.intellect,
+        charisma: crawler.charisma,
+        wisdom: crawler.wisdom,
+        attack: crawler.attack,
+        defense: crawler.defense,
+      });
+    }
 
-    // Enhanced entity integration from tactical data
+    // Update player equipment if available
+    if (availableWeapons && availableWeapons.length > 0) {
+      const equippedWeapon = availableWeapons.find(w => w.isEquipped);
+      if (equippedWeapon) {
+        combatSystem.updateEntity("player", { 
+          equippedWeapon: equippedWeapon 
+        });
+      }
+    }
+
+    // Process and add tactical entities from server data with validation
+    const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
+    let entitiesAdded = 0;
+
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       tacticalEntities.forEach((tacticalEntity: any, index: number) => {
+        // Validate entity data before processing
+        if (!tacticalEntity || !tacticalEntity.type) {
+          console.warn(`Skipping invalid tactical entity at index ${index}:`, tacticalEntity);
+          return;
+        }
+
         if (tacticalEntity.type === "mob") {
-          // Use enhanced combat stats if available from processed tactical data
+          // Enhanced mob entity creation with comprehensive combat stats
           const combatStats = tacticalEntity.combatStats || {};
+          const entityData = tacticalEntity.data || {};
 
           const mobEntity: CombatEntity = {
-            id: tacticalEntity.id || "mob_" + (tacticalEntity.data?.id || index),
-            name: tacticalEntity.name || tacticalEntity.data?.name || "Unknown Mob",
+            id: tacticalEntity.id || `mob_${entityData.id || index}_${Date.now()}`,
+            name: tacticalEntity.name || entityData.name || "Unknown Mob",
             type: tacticalEntity.hostile !== false ? "hostile" : "neutral",
 
             // Enhanced health and resource management
-            hp: combatStats.hp || tacticalEntity.data?.hp || tacticalEntity.data?.currentHealth || 100,
-            maxHp: combatStats.maxHp || tacticalEntity.data?.maxHp || tacticalEntity.data?.maxHealth || 100,
-            energy: combatStats.energy || 20,
-            maxEnergy: combatStats.maxEnergy || 20,
-            power: combatStats.power || 10,
-            maxPower: combatStats.maxPower || 10,
+            hp: combatStats.hp || entityData.hp || entityData.currentHealth || 100,
+            maxHp: combatStats.maxHp || entityData.maxHp || entityData.maxHealth || 100,
+            energy: combatStats.energy || entityData.energy || 20,
+            maxEnergy: combatStats.maxEnergy || entityData.maxEnergy || 20,
+            power: combatStats.power || entityData.power || 10,
+            maxPower: combatStats.maxPower || entityData.maxPower || 10,
 
-            // Enhanced primary stats from tactical data
-            might: combatStats.might || tacticalEntity.data?.might || 10,
-            agility: combatStats.agility || tacticalEntity.data?.agility || 14,
-            endurance: combatStats.endurance || tacticalEntity.data?.endurance || 8,
-            intellect: combatStats.intellect || tacticalEntity.data?.intellect || 6,
-            charisma: combatStats.charisma || tacticalEntity.data?.charisma || 4,
-            wisdom: combatStats.wisdom || tacticalEntity.data?.wisdom || 7,
+            // Enhanced primary stats from combat stats or entity data
+            might: combatStats.might || entityData.might || 10,
+            agility: combatStats.agility || entityData.agility || 10,
+            endurance: combatStats.endurance || entityData.endurance || 10,
+            intellect: combatStats.intellect || entityData.intellect || 10,
+            charisma: combatStats.charisma || entityData.charisma || 10,
+            wisdom: combatStats.wisdom || entityData.wisdom || 10,
 
-            // Enhanced derived combat stats
-            attack: combatStats.attack || tacticalEntity.data?.attack || 12,
-            defense: combatStats.defense || tacticalEntity.data?.defense || 8,
-            speed: tacticalEntity.data?.speed || 16,
-            accuracy: combatStats.accuracy || (combatStats.wisdom || 7) + (combatStats.intellect || 6),
-            evasion: combatStats.evasion || Math.floor((combatStats.agility || 14) * 1.2),
+            // Enhanced derived combat stats with proper calculations
+            attack: combatStats.attack || entityData.attack || Math.floor((combatStats.might || entityData.might || 10) * 1.2),
+            defense: combatStats.defense || entityData.defense || Math.floor((combatStats.endurance || entityData.endurance || 10) * 0.8),
+            speed: combatStats.speed || entityData.speed || Math.floor((combatStats.agility || entityData.agility || 10) * 1.1),
+            accuracy: (combatStats.wisdom || entityData.wisdom || 10) + (combatStats.intellect || entityData.intellect || 10),
+            evasion: Math.floor((combatStats.agility || entityData.agility || 10) * 1.2),
 
-            // Enhanced positioning
+            // Enhanced positioning with proper validation and fallback
             position: {
-              x: tacticalEntity.position?.x || 50,
-              y: tacticalEntity.position?.y || 50,
+              x: Math.max(5, Math.min(95, tacticalEntity.position?.x || (20 + Math.random() * 60))),
+              y: Math.max(5, Math.min(95, tacticalEntity.position?.y || (20 + Math.random() * 60)))
             },
-            facing: 180,
-            level: 3,
+            facing: Math.random() * 360, // Random initial facing
+
+            level: combatStats.level || entityData.level || 1,
             isAlive: true,
-            cooldowns: {},
+            cooldowns: {}
           };
 
-          combatSystem.addEntity(mobEntity);
-        }
-        // Handle old format where mob data is in the entity field
-        else if (tacticalEntity.entity) {
-          const mobEntity: CombatEntity = {
-            id: "mob_" + (tacticalEntity.entity.id || index),
-            name:
-              tacticalEntity.entity.displayName ||
-              tacticalEntity.entity.name ||
-              "Unknown Mob",
-            type:
-              tacticalEntity.entity.disposition === "hostile"
-                ? "hostile"
-                : "neutral",
-            hp: tacticalEntity.entity.currentHealth || 100,
-            maxHp: tacticalEntity.entity.maxHealth || 100,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: tacticalEntity.entity.attack || 12,
-            defense: tacticalEntity.entity.defense || 8,
-            speed: tacticalEntity.entity.speed || 16,
-            accuracy: 16,
-            evasion: 18,
+          // Add mob to combat system with validation
+          try {
+            combatSystem.addEntity(mobEntity);
+            entitiesAdded++;
+            console.log(`Added mob entity: ${mobEntity.name} at position (${mobEntity.position.x.toFixed(1)}, ${mobEntity.position.y.toFixed(1)})`);
+          } catch (error) {
+            console.error(`Failed to add mob entity ${mobEntity.name}:`, error);
+          }
+
+        } else if (tacticalEntity.type === "npc") {
+          // Enhanced NPC entity creation
+          const entityData = tacticalEntity.data || {};
+
+          const npcEntity: CombatEntity = {
+            id: tacticalEntity.id || `npc_${index}_${Date.now()}`,
+            name: tacticalEntity.name || entityData.name || "Unknown NPC",
+            type: "neutral",
+
+            hp: 100,
+            maxHp: 100,
+            energy: 50,
+            maxEnergy: 50,
+            power: 25,
+            maxPower: 25,
+
+            might: 8,
+            agility: 8,
+            endurance: 12,
+            intellect: 12,
+            charisma: 15,
+            wisdom: 12,
+
+            attack: 10,
+            defense: 15,
+            speed: 8,
+            accuracy: 24,
+            evasion: 10,
+
             position: {
-              x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50,
-              y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50,
+              x: Math.max(5, Math.min(95, tacticalEntity.position?.x || (30 + Math.random() * 40))),
+              y: Math.max(5, Math.min(95, tacticalEntity.position?.y || (30 + Math.random() * 40)))
             },
-            facing: 180,
-            level: 3,
-            isAlive: tacticalEntity.entity.isAlive !== false,
-            cooldowns: {},
+            facing: Math.random() * 360,
+
+            level: 1,
+            isAlive: true,
+            cooldowns: {}
           };
 
-          combatSystem.addEntity(mobEntity);
+          // Add NPC to combat system with validation
+          try {
+            combatSystem.addEntity(npcEntity);
+            entitiesAdded++;
+            console.log(`Added NPC entity: ${npcEntity.name} at position (${npcEntity.position.x.toFixed(1)}, ${npcEntity.position.y.toFixed(1)})`);
+          } catch (error) {
+            console.error(`Failed to add NPC entity ${npcEntity.name}:`, error);
+          }
         }
       });
     }
 
+    console.log(`Combat system initialized: ${entitiesAdded} tactical entities added to combat system`);
+
+    // Set room data in combat system for context
+    if (effectiveTacticalData?.room) {
+      combatSystem.setCurrentRoomData(effectiveTacticalData.room);
+    }
+
+    // Start AI loop if enabled and there are hostile entities
     if (aiEnabled) {
-      combatSystem.startAILoop();
+      const hostileCount = combatSystem.getState().entities.filter(e => e.type === "hostile").length;
+      if (hostileCount > 0) {
+        combatSystem.startAILoop();
+        console.log(`AI enabled for ${hostileCount} hostile entities`);
+      }
     }
 
     setIsInitialized(true);
@@ -323,7 +367,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     aiEnabled,
     availableWeapons,
     effectiveTacticalData,
-    tacticalEntities,
   ]);
 
   const handleRotation = useCallback(
@@ -789,6 +832,82 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     return () => clearInterval(interval);
   }, [combatState.entities]);
+
+  // Process tactical data for display components with enhanced filtering
+  const tacticalMobs = useMemo(() => {
+    if (!effectiveTacticalData?.tacticalEntities) return [];
+
+    return effectiveTacticalData.tacticalEntities
+      .filter((entity: any) => entity.type === "mob")
+      .map((entity: any) => ({
+        ...entity,
+        // Ensure position is valid for rendering
+        position: {
+          x: Math.max(0, Math.min(100, entity.position?.x || 50)),
+          y: Math.max(0, Math.min(100, entity.position?.y || 50))
+        }
+      }));
+  }, [effectiveTacticalData]);
+
+  const tacticalNpcs = useMemo(() => {
+    if (!effectiveTacticalData?.tacticalEntities) return [];
+
+    return effectiveTacticalData.tacticalEntities
+      .filter((entity: any) => entity.type === "npc")
+      .map((entity: any) => ({
+        ...entity,
+        // Ensure position is valid for rendering
+        position: {
+          x: Math.max(0, Math.min(100, entity.position?.x || 50)),
+          y: Math.max(0, Math.min(100, entity.position?.y || 50))
+        }
+      }));
+  }, [effectiveTacticalData]);
+
+  const tacticalLoot = useMemo(() => {
+    if (!effectiveTacticalData?.tacticalEntities) return [];
+
+    return effectiveTacticalData.tacticalEntities
+      .filter((entity: any) => entity.type === "loot")
+      .map((entity: any, index: number) => ({
+        ...entity,
+        // Convert to format expected by TacticalGrid
+        x: Math.max(0, Math.min(100, entity.position?.x || 50)),
+        y: Math.max(0, Math.min(100, entity.position?.y || 50)),
+        name: entity.name || "Unknown Item",
+        type: entity.data?.itemType || "treasure"
+      }));
+  }, [effectiveTacticalData]);
+
+  // Enhanced room change handling with proper entity cleanup
+  useEffect(() => {
+    if (roomData?.room && roomData.room.id !== currentRoomId) {
+      const prevRoomId = currentRoomId;
+      setCurrentRoomId(roomData.room.id);
+      setIsInitialized(false); // Trigger re-initialization
+
+      console.log(`Room transition: ${prevRoomId || 'unknown'} -> ${roomData.room.id} (${roomData.room.name})`);
+
+      // Enhanced combat system cleanup for room transition
+      combatSystem.endCombat(); // End any active combat first
+
+      // Clear all entities except player, then clear room data
+      const currentState = combatSystem.getState();
+      const nonPlayerEntities = currentState.entities.filter(e => e.id !== "player");
+
+      nonPlayerEntities.forEach(entity => {
+        combatSystem.removeEntity(entity.id);
+      });
+
+      console.log(`Cleared ${nonPlayerEntities.length} entities for room transition`);
+
+      // Clear room-specific data
+      combatSystem.clearRoomData();
+
+      // Reset selected target
+      setSelectedTarget(null);
+    }
+  }, [roomData?.room, currentRoomId]);
 
   // CONDITIONAL LOGIC AFTER ALL HOOKS
   const player = combatState.entities.find((e) => e.id === "player");
