@@ -56,6 +56,9 @@ export function useCombatMovement({
       setIsMoving(true);
       lastMoveTime.current = now;
 
+      // Store the movement direction for proper entry positioning
+      sessionStorage.setItem('entryDirection', direction);
+
       // INSTANT: Clear combat state and update UI immediately
       onRoomTransition();
       handleRoomChange();
