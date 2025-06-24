@@ -117,7 +117,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Log combat entities after combat state is available
   useEffect(() => {
-    if (!combatState) return;
+    if (!combatState?.entities) return;
     
     const now = new Date().toLocaleTimeString();
 
@@ -194,6 +194,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
+      if (!combatState?.entities) return;
+      
       const player = combatState.entities.find((e) => e.id === "player");
       if (!player) return;
 
@@ -206,7 +208,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       combatSystem.updateEntity("player", { facing: newFacing });
     },
-    [combatState.entities],
+    [combatState?.entities],
   );
 
   // Add movement state tracking
@@ -314,6 +316,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       // Check for collision with other entities (hostile mobs)
       const checkCollisionWithEntities = (x: number, y: number): boolean => {
+        if (!combatState?.entities) return false;
+        
         return combatState.entities.some((entity: any) => {
           if (entity.id === "player" || entity.hp <= 0) return false;
 
