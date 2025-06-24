@@ -106,10 +106,15 @@ export class RoomChangeManager {
    * Used for position resets, teleports, or any forced room transition
    */
   static handleRoomChange(crawlerId: number): void {
-    // Only invalidate the batch query - it contains all room data we need
-    queryClient.invalidateQueries({
-      queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
-    });
+    // Check if we have cached data for immediate transition
+    const hasImmediateData = this.getCachedRoomData(crawlerId);
+    
+    if (!hasImmediateData) {
+      // Only invalidate if we don't have cached data
+      queryClient.invalidateQueries({
+        queryKey: ["/api/crawlers/" + crawlerId + "/room-data-batch"]
+      });
+    }
 
     // Keep map queries cached since they don't change often
     queryClient.invalidateQueries({
@@ -122,6 +127,14 @@ export class RoomChangeManager {
    */
   static getCachedRoomData(roomId: number) {
     const cachedData = queryClient.getQueryData([`/api/room/${roomId}/basic-data`]);
+    return cachedData || null;
+  }
+
+  /**
+   * Check if batch room data is cached for immediate access
+   */
+  static getCachedBatchData(crawlerId: number) {
+    const cachedData = queryClient.getQueryData([`/api/crawlers/${crawlerId}/room-data-batch`]);
     return cachedData || null;
   }
 }
