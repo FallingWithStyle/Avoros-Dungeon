@@ -1,0 +1,336 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=6wr7ChFQASeo' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=6wr7ChFQASeo' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+tactical-data-hooks.tsx:26 useTacticalData - Initializing for crawler: 5 Florence Peterson
+tactical-data-hooks.tsx:26 useTacticalData - Initializing for crawler: 5 Florence Peterson
+tactical-data-hooks.tsx:26 useTacticalData - Initializing for crawler: 5 Florence Peterson
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:464
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:474
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:321 Movement blocked - concurrent or too frequent
+combat-view-panel.tsx:321 Movement blocked - concurrent or too frequent
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:454
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:444
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:444
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+roomChangeUtils.ts:244 ❌ Room change request failed: TypeError: direction.toLowerCase is not a function
+    at performRoomChange (roomChangeUtils.ts:174:44)
+    at handleRoomChangeWithRefetch (roomChangeUtils.ts:150:26)
+    at tactical-data-hooks.tsx:174:7
+    at combat-view-panel.tsx:334:11
+performRoomChange @ roomChangeUtils.ts:244
+handleRoomChangeWithRefetch @ roomChangeUtils.ts:150
+(anonymous) @ tactical-data-hooks.tsx:174
+(anonymous) @ combat-view-panel.tsx:334
+await in (anonymous)
+(anonymous) @ combat-view-panel.tsx:474
+(anonymous) @ useKeyboardMovement.ts:58
+setInterval
+startMovement @ useKeyboardMovement.ts:55
+handleKeyDown @ useKeyboardMovement.ts:112
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
+combat-view-panel.tsx:101 Combat View - Room data structure: {roomData: {…}, batchData: {…}, effectiveRoomData: {…}, connections: undefined}
