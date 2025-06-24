@@ -465,11 +465,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Update combat system with tactical entities
   useEffect(() => {
     if (tacticalEntities && tacticalEntities.length > 0) {
+      console.log(`🎯 Loading ${tacticalEntities.length} tactical entities:`, 
+        tacticalEntities.map(e => `${e.type}: ${e.name}`));
+
       // Clear existing non-player entities
       const currentState = combatSystem.getState();
       const playerEntity = currentState.entities.find(e => e.id === "player");
 
-      // Reset entities to just the player
+      // Reset entities to just the player (keep player if exists)
       combatSystem.setState({
         ...currentState,
         entities: playerEntity ? [playerEntity] : []
@@ -510,6 +513,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             abilities: [],
             serial: entity.data?.id || index,
           };
+          console.log(`➕ Adding mob entity: ${mobEntity.name} at (${mobEntity.position.x}, ${mobEntity.position.y})`);
           combatSystem.addEntity(mobEntity);
         } else if (entity.type === "npc") {
           const npcEntity = {
@@ -544,12 +548,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
             abilities: [],
             serial: entity.data?.id || index,
           };
+          console.log(`➕ Adding NPC entity: ${npcEntity.name} at (${npcEntity.position.x}, ${npcEntity.position.y})`);
           combatSystem.addEntity(npcEntity);
         }
       });
 
       // Trigger a state update
-      setCombatState(combatSystem.getState());
+      const newState = combatSystem.getState();
+      console.log(`🎮 Combat system now has ${newState.entities.length} entities:`, 
+        newState.entities.map(e => `${e.type}: ${e.name}`));
+      setCombatState(newState);
+    } else {
+      console.log(`⚠️ No tactical entities to load`);
     }
   }, [tacticalEntities]);
 
