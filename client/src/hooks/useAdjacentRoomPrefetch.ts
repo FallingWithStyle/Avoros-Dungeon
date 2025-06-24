@@ -38,13 +38,12 @@ export function useAdjacentRoomPrefetch({
           const isAdjacent = roomData.distance === 1;
           
           // INCREASED cache times for instant transitions
-          const staleTime = isAdjacent ? 15 * 60 * 1000 : 10 * 60 * 1000; // 15min for adjacent, 10min for distance 2
-          const gcTime = isAdjacent ? 30 * 60 * 1000 : 20 * 60 * 1000; // Keep much longer
+          const staleTime = isAdjacent ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10min for adjacent, 5min for distance 2
+          const gcTime = isAdjacent ? 20 * 60 * 1000 : 10 * 60 * 1000; // Keep much longer
 
           // Cache room data in multiple expected formats for instant access
           const roomDataFormatted = {
             room: roomData.room,
-            currentRoom: roomData.room, // Add currentRoom for compatibility
             scannedRooms: roomData.scannedRooms || [],
             playersInRoom: roomData.playersInRoom || [],
             factions: roomData.factions || [],
@@ -55,14 +54,16 @@ export function useAdjacentRoomPrefetch({
             _prefetchedAt: Date.now()
           };
 
-          // ENHANCED: Pre-cache the exact query key that will be used during transitions
-          const batchQueryKey = [`/api/crawlers/${crawler.id}/room-data-batch`];
-          
-          // Pre-populate cache for immediate access during room transitions
+          // Cache in room-data-batch format for immediate loading
           queryClient.setQueryData(
-            [`/api/room/${roomData.room.id}/batch-data`],
-            roomDataFormatted,
-            { staleTime, gcTime }
+            [`/api/crawlers/${crawler.id}/room-data-batch`],
+            (oldData: any) => {
+              // Only replace if this room becomes current
+              if (oldData?.room?.id === roomData.room.id) {
+                return roomDataFormatted;
+              }
+              return oldData;
+            }
           );
 
           // Cache individual room data
@@ -72,35 +73,21 @@ export function useAdjacentRoomPrefetch({
             { staleTime, gcTime }
           );
 
-          // Pre-cache tactical structure with base entities for faster combat view loading
-          const tacticalData = {
-            room: roomData.room,
-            availableDirections: roomData.availableDirections || [],
-            playersInRoom: roomData.playersInRoom || [],
-            tacticalEntities: roomData.tacticalEntities || [], // Include if available
-            factions: roomData.factions || [],
-            connections: roomData.room?.connections || [],
-            _isCached: true,
-            _cachedAt: Date.now()
-          };
-
+          // Pre-cache tactical structure for faster combat view loading
           queryClient.setQueryData(
             [`/api/room/${roomData.room.id}/cached-tactical`],
-            tacticalData,
-            { staleTime: staleTime, gcTime: gcTime }
-          );
-
-          // CRITICAL: Pre-cache the most commonly used queries for instant access
-          queryClient.setQueryData(
-            [`room-tactical-${roomData.room.id}`],
-            tacticalData,
+            {
+              room: roomData.room,
+              availableDirections: roomData.availableDirections || [],
+              playersInRoom: roomData.playersInRoom || [],
+              tacticalEntities: [], // Tactical entities fetched on-demand
+              factions: roomData.factions || [],
+              _isCached: true,
+              _cachedAt: Date.now()
+            },
             { staleTime: staleTime, gcTime: gcTime }
           );
         });
-
-        // Log successful prefetch for debugging
-        const adjacentCount = data.adjacentRooms.filter((r: any) => r.distance === 1).length;
-        console.log(`🔮 Prefetched ${adjacentCount} adjacent rooms for instant transitions`);
       }
 
       return data;

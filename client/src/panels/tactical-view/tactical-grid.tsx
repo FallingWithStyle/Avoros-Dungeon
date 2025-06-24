@@ -160,9 +160,63 @@ export default function TacticalGrid({
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
       )}
 
-      {/* Note: Tactical entities are now rendered through the Combat Entities section below */}
+      {/* Tactical Mobs from Server */}
+      {tacticalMobs.map((mob, index) => (
+        <div
+          key={`tactical-mob-${index}`}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+          style={{
+            left: `${mob.position.x}%`,
+            top: `${mob.position.y}%`,
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`Clicked on tactical mob: ${mob.name}`);
+          }}
+          title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || "Unknown"}`}
+        >
+          <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
+            <Skull className="w-3 h-3 text-white" />
+          </div>
 
-      {/* All Entities (including tactical entities added to combat system) */}
+          {/* HP bar for tactical mobs */}
+          {mob.data?.hp !== undefined &&
+            mob.data?.maxHp !== undefined &&
+            mob.data.hp < mob.data.maxHp && (
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+                <div
+                  className="h-full rounded transition-all duration-300 bg-red-400"
+                  style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
+                ></div>
+              </div>
+            )}
+        </div>
+      ))}
+
+      {/* Tactical NPCs from Server */}
+      {tacticalNpcs.map((npc, index) => (
+        <div
+          key={`tactical-npc-${index}`}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+          style={{
+            left: `${npc.position.x}%`,
+            top: `${npc.position.y}%`,
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`Clicked on tactical NPC: ${npc.name}`);
+          }}
+          title={`${npc.name} (NPC)`}
+        >
+          <div className="w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg">
+            <Users className="w-3 h-3 text-white" />
+          </div>
+        </div>
+      ))}
+
+      {/* Combat Entities */}
       {entities.map((entity) => (
         <TacticalEntity
           key={entity.id}
@@ -266,11 +320,6 @@ function TacticalEntity({
   onRightClick: (entityId: string, event: React.MouseEvent) => void;
   onHover: (entityId: string | null) => void;
 }) {
-  // Handle both standard entities and tactical entities
-  const displayName = entity.name || "Unknown Entity";
-  const displayHP = entity.hp || 0;
-  const displayMaxHP = entity.maxHp || 100;
-
   return (
     <div
       className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
@@ -281,7 +330,7 @@ function TacticalEntity({
       onContextMenu={(e) => onRightClick(entity.id, e)}
       onMouseEnter={() => onHover(entity.id)}
       onMouseLeave={() => onHover(null)}
-      title={`${displayName} (${displayHP}/${displayMaxHP} HP)`}
+      title={`${entity.name} (${entity.hp}/${entity.maxHp} HP)`}
     >
       <div
         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative ${
@@ -336,13 +385,15 @@ function TacticalEntity({
 
       {/* HP bar for non-player entities */}
       {entity.type !== "player" &&
-        displayHP < displayMaxHP && (
+        entity.hp !== undefined &&
+        entity.maxHp !== undefined &&
+        entity.hp < entity.maxHp && (
           <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
             <div
               className={`h-full rounded transition-all duration-300 ${
                 entity.type === "hostile" ? "bg-red-400" : "bg-green-400"
               }`}
-              style={{ width: `${(displayHP / displayMaxHP) * 100}%` }}
+              style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
             ></div>
           </div>
         )}

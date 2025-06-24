@@ -727,29 +727,26 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return unsubscribe;
   }, [selectedTarget]);
 
-  // OPTIMIZED: Faster initialization with immediate cache access and smart loading
+  // OPTIMIZED: Faster initialization with better caching
   const prevRoomIdRef = useRef<string | undefined>();
   const prevEntitiesLenRef = useRef<number | undefined>();
 
   useEffect(() => {
     const entitiesLen = tacticalEntities?.length ?? 0;
 
-    // Only reset isInitialized if room has actually changed
+    // Only reset isInitialized if room or entities have changed
     if (
       prevRoomIdRef.current !== undefined &&
-      prevRoomIdRef.current !== currentRoomId
+      (prevRoomIdRef.current !== currentRoomId ||
+        prevEntitiesLenRef.current !== entitiesLen)
     ) {
       setIsInitialized(false);
     }
     prevRoomIdRef.current = currentRoomId;
     prevEntitiesLenRef.current = entitiesLen;
 
-    // ENHANCED: Initialize immediately if we have any room data, even if tactical data is still loading
-    const hasMinimalRoomData = effectiveRoomData?.id || effectiveRoomData?.name;
-    const shouldInitialize = hasMinimalRoomData && !isInitialized;
-
-    if (shouldInitialize) {
-      // Initialize immediately with available data - don't wait for all tactical data
+    // OPTIMIZED: Initialize immediately with cached data, don't wait for loading states
+    if (effectiveTacticalData && entitiesLen >= 0 && !isInitialized) {
       initializeCombatSystem();
     }
 
@@ -759,7 +756,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   }, [
     initializeCombatSystem,
     currentRoomId,
-    effectiveRoomData?.id,
+    tacticalEntities?.length,
+    effectiveTacticalData,
     isInitialized,
   ]);
 

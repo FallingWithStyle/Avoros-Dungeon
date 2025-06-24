@@ -462,119 +462,18 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { room, availableDirections = [], playersInRoom = [] } = effectiveTacticalData || {};
   const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
 
-  // Update combat system with tactical entities
-  useEffect(() => {
-    if (tacticalEntities && tacticalEntities.length > 0) {
-      console.log(`🎯 Loading ${tacticalEntities.length} tactical entities:`, 
-        tacticalEntities.map(e => `${e.type}: ${e.name}`));
-
-      // Clear existing non-player entities
-      const currentState = combatSystem.getState();
-      const playerEntity = currentState.entities.find(e => e.id === "player");
-
-      // Reset entities to just the player (keep player if exists)
-      combatSystem.setState({
-        ...currentState,
-        entities: playerEntity ? [playerEntity] : []
-      });
-
-      // Add tactical entities to combat system
-      tacticalEntities.forEach((entity: any, index: number) => {
-        if (entity.type === "mob") {
-          const mobEntity = {
-            id: "mob_" + (entity.data?.id || index),
-            name: entity.name || entity.data?.name || "Unknown Mob",
-            type: "hostile" as const,
-            hp: entity.data?.hp || entity.data?.currentHealth || 100,
-            maxHp: entity.data?.maxHp || entity.data?.maxHealth || 100,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 10,
-            agility: 14,
-            endurance: 8,
-            intellect: 6,
-            charisma: 4,
-            wisdom: 7,
-            attack: entity.data?.attack || 12,
-            defense: entity.data?.defense || 8,
-            speed: entity.data?.speed || 16,
-            accuracy: 16,
-            evasion: 18,
-            position: {
-              x: entity.position?.x || 50,
-              y: entity.position?.y || 50,
-            },
-            effects: [],
-            conditions: [],
-            inventory: [],
-            equipment: {},
-            abilities: [],
-            serial: entity.data?.id || index,
-          };
-          console.log(`➕ Adding mob entity: ${mobEntity.name} at (${mobEntity.position.x}, ${mobEntity.position.y})`);
-          combatSystem.addEntity(mobEntity);
-        } else if (entity.type === "npc") {
-          const npcEntity = {
-            id: "npc_" + (entity.data?.id || index),
-            name: entity.name || entity.data?.name || "Unknown NPC",
-            type: "neutral" as const,
-            hp: entity.data?.hp || 50,
-            maxHp: entity.data?.maxHp || 50,
-            energy: 20,
-            maxEnergy: 20,
-            power: 10,
-            maxPower: 10,
-            might: 8,
-            agility: 10,
-            endurance: 8,
-            intellect: 12,
-            charisma: 14,
-            wisdom: 10,
-            attack: entity.data?.attack || 5,
-            defense: entity.data?.defense || 5,
-            speed: entity.data?.speed || 12,
-            accuracy: 12,
-            evasion: 12,
-            position: {
-              x: entity.position?.x || 50,
-              y: entity.position?.y || 50,
-            },
-            effects: [],
-            conditions: [],
-            inventory: [],
-            equipment: {},
-            abilities: [],
-            serial: entity.data?.id || index,
-          };
-          console.log(`➕ Adding NPC entity: ${npcEntity.name} at (${npcEntity.position.x}, ${npcEntity.position.y})`);
-          combatSystem.addEntity(npcEntity);
-        }
-      });
-
-      // Trigger a state update
-      const newState = combatSystem.getState();
-      console.log(`🎮 Combat system now has ${newState.entities.length} entities:`, 
-        newState.entities.map(e => `${e.type}: ${e.name}`));
-      setCombatState(newState);
-    } else {
-      console.log(`⚠️ No tactical entities to load`);
-    }
-  }, [tacticalEntities]);
-
   const gridData = {
-    background: getRoomBackgroundType(room?.environment || "indoor", room?.type || "normal"),
+    background: getRoomBackgroundType(room?.environment || 'underground', room?.type || 'normal'),
+    loot: tacticalEntities.filter(e => e.type === 'loot'),
+    mobs: tacticalEntities.filter(e => e.type === 'mob'),
+    npcs: tacticalEntities.filter(e => e.type === 'npc'),
     exits: {
       north: availableDirections.includes("north"),
       south: availableDirections.includes("south"),
       east: availableDirections.includes("east"),
       west: availableDirections.includes("west"),
     },
-    loot: tacticalEntities.filter((e: any) => e.type === "loot"),
-    mobs: tacticalEntities.filter((e: any) => e.type === "mob"),
-    npcs: tacticalEntities.filter((e: any) => e.type === "npc"),
-    otherPlayers: playersInRoom || [],
+    otherPlayers: playersInRoom.filter((p) => p.id !== crawler.id),
   };
 
   return (
