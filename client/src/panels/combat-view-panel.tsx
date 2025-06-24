@@ -1,3 +1,4 @@
+
 /**
  * File: combat-view-panel.tsx
  * Responsibility: Clean combat interface panel using only the proven test combat system logic
@@ -57,10 +58,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Use the same tactical data hooks as the tactical view panel
   const {
     roomData,
+    exploredRooms,
     tacticalData,
     isLoading: roomLoading,
     tacticalLoading,
     tacticalError,
+    refetchTacticalData,
+    refetchExploredRooms,
+    refetchRoomData,
     handleRoomChange,
   } = useTacticalData(crawler);
 
@@ -266,45 +271,44 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         }
         // Handle old format where mob data is in the entity field
         else if (tacticalEntity.entity) {
-            const mobEntity: CombatEntity = {
-              id: "mob_" + (tacticalEntity.entity.id || index),
-              name:
-                tacticalEntity.entity.displayName ||
-                tacticalEntity.entity.name ||
-                "Unknown Mob",
-              type:
-                tacticalEntity.entity.disposition === "hostile"
-                  ? "hostile"
-                  : "neutral",
-              hp: tacticalEntity.entity.currentHealth || 100,
-              maxHp: tacticalEntity.entity.maxHealth || 100,
-              energy: 20,
-              maxEnergy: 20,
-              power: 10,
-              maxPower: 10,
-              might: 10,
-              agility: 14,
-              endurance: 8,
-              intellect: 6,
-              charisma: 4,
-              wisdom: 7,
-              attack: tacticalEntity.entity.attack || 12,
-              defense: tacticalEntity.entity.defense || 8,
-              speed: tacticalEntity.entity.speed || 16,
-              accuracy: 16,
-              evasion: 18,
-              position: {
-                x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50,
-                y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50,
-              },
-              facing: 180,
-              level: 3,
-              isAlive: tacticalEntity.entity.isAlive !== false,
-              cooldowns: {},
-            };
+          const mobEntity: CombatEntity = {
+            id: "mob_" + (tacticalEntity.entity.id || index),
+            name:
+              tacticalEntity.entity.displayName ||
+              tacticalEntity.entity.name ||
+              "Unknown Mob",
+            type:
+              tacticalEntity.entity.disposition === "hostile"
+                ? "hostile"
+                : "neutral",
+            hp: tacticalEntity.entity.currentHealth || 100,
+            maxHp: tacticalEntity.entity.maxHealth || 100,
+            energy: 20,
+            maxEnergy: 20,
+            power: 10,
+            maxPower: 10,
+            might: 10,
+            agility: 14,
+            endurance: 8,
+            intellect: 6,
+            charisma: 4,
+            wisdom: 7,
+            attack: tacticalEntity.entity.attack || 12,
+            defense: tacticalEntity.entity.defense || 8,
+            speed: tacticalEntity.entity.speed || 16,
+            accuracy: 16,
+            evasion: 18,
+            position: {
+              x: tacticalEntity.x ? (tacticalEntity.x / 10) * 100 : 50,
+              y: tacticalEntity.y ? (tacticalEntity.y / 10) * 100 : 50,
+            },
+            facing: 180,
+            level: 3,
+            isAlive: tacticalEntity.entity.isAlive !== false,
+            cooldowns: {},
+          };
 
-            combatSystem.addEntity(mobEntity);
-          }
+          combatSystem.addEntity(mobEntity);
         }
       });
     }
@@ -602,6 +606,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       effectiveRoomData,
       isInitialized,
       handleRoomTransition,
+      roomConnections,
+      isMoving,
     ],
   );
 
@@ -639,6 +645,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
+    onRotation: handleRotation,
     isEnabled: !combatState.isInCombat, // Only enable when not in combat
   });
 
@@ -829,7 +836,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               {roomEnvironment}
             </Badge>
           )}
-
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
