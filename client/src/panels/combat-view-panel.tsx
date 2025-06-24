@@ -87,6 +87,28 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                          roomData?.availableDirections?.map(dir => ({ direction: dir })) ||
                          [];
 
+  // Mock weapons for testing - in real implementation these would come from crawler equipment
+  const availableWeapons: Equipment[] = [
+    {
+      id: "sword1",
+      name: "Iron Sword",
+      description: "A sturdy iron blade",
+      type: "weapon",
+      damageAttribute: "might",
+      range: 1.5,
+      mightBonus: 5,
+    },
+    {
+      id: "bow1",
+      name: "Hunting Bow",
+      description: "A flexible ranged weapon",
+      type: "weapon",
+      damageAttribute: "agility",
+      range: 3,
+      agilityBonus: 3,
+    },
+  ];
+
   // Use the combat state management hook (must be called early to avoid hook order issues)
   const {
     combatState,
@@ -169,28 +191,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // Mock weapons for testing - in real implementation these would come from crawler equipment
-  const availableWeapons: Equipment[] = [
-    {
-      id: "sword1",
-      name: "Iron Sword",
-      description: "A sturdy iron blade",
-      type: "weapon",
-      damageAttribute: "might",
-      range: 1.5,
-      mightBonus: 5,
-    },
-    {
-      id: "bow1",
-      name: "Hunting Bow",
-      description: "A flexible ranged weapon",
-      type: "weapon",
-      damageAttribute: "agility",
-      range: 3,
-      agilityBonus: 3,
-    },
-  ];
 
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
