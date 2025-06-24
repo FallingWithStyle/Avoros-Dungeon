@@ -17,6 +17,7 @@ import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { useCombatState } from "@/hooks/useCombatState";
 import { useCombatMovement } from "@/hooks/useCombatMovement";
+import { useCombatActions } from "@/hooks/useCombatActions";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
 
 interface Equipment {
@@ -38,11 +39,6 @@ interface CombatViewPanelProps {
 export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
   const { toast } = useToast();
-  const [activeActionMode, setActiveActionMode] = useState<{
-    type: "move" | "attack" | "ability";
-    actionId: string;
-    actionName: string;
-  } | null>(null);
   const [manualRotation, setManualRotation] = useState(false);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [aiEnabled, setAiEnabled] = useState(true);
@@ -110,20 +106,31 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Use the combat state management hook (must be called early to avoid hook order issues)
   const {
     combatState,
-    selectedTarget,
-    selectedEntity,
     isInitialized,
     player,
     enemies,
-    setSelectedTarget,
     initializeCombatSystem,
     handleRoomTransition: onRoomTransition,
-    getCooldownPercentage,
   } = useCombatState({
     crawler,
     tacticalData: effectiveTacticalData,
     aiEnabled,
     availableWeapons,
+  });
+
+  // Use combat actions hook for hotbar, targeting, and attacks
+  const {
+    selectedTarget,
+    selectedEntity,
+    activeActionMode,
+    setSelectedTarget,
+    setActiveActionMode,
+    handleHotbarAction,
+    handleTargetSelection,
+    getCooldownPercentage,
+  } = useCombatActions({
+    combatState,
+    equippedWeapon,
   });
 
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
@@ -210,80 +217,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   
 
-  // Handle target cycling with Tab key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Tab") {
-        event.preventDefault();
-
-        if (!combatState?.entities) return;
-
-        const hostileTargets = combatState.entities.filter(
-          (e) => e.type === "hostile" && e.hp > 0,
-        );
-
-        if (hostileTargets.length === 0) {
-          setSelectedTarget(null);
-          return;
-        }
-
-        if (!selectedTarget) {
-          setSelectedTarget(hostileTargets[0].id);
-        } else {
-          const currentIndex = hostileTargets.findIndex(
-            (e) => e.id === selectedTarget,
-          );
-          const nextIndex = (currentIndex + 1) % hostileTargets.length;
-          setSelectedTarget(hostileTargets[nextIndex].id);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [combatState?.entities, selectedTarget, setSelectedTarget]);
-
   
-
-  // Hotbar action handler
-  const handleHotbarAction = useCallback(
-    (actionId: string, actionType: string, actionName: string) => {
-      if (!combatState?.entities) return;
-
-      if (actionType === "attack" && actionId === "basic_attack") {
-        if (selectedTarget) {
-          const player = combatState.entities.find((e) => e.id === "player");
-          const target = combatState.entities.find(
-            (e) => e.id === selectedTarget,
-          );
-
-          if (player && target) {
-            const weaponRange = equippedWeapon ? equippedWeapon.range * 10 : 10;
-            const distance = Math.sqrt(
-              Math.pow(target.position.x - player.position.x, 2) +
-                Math.pow(target.position.y - player.position.y, 2),
-            );
-
-            if (distance <= weaponRange) {
-              combatSystem.executeAttack("player", selectedTarget);
-            } else {
-              toast({
-                title: "Out of Range",
-                description: "Target is too far away to attack",
-                variant: "destructive",
-              });
-            }
-          }
-        } else {
-          combatSystem.executeAttack("player");
-        }
-        setActiveActionMode(null);
-      } else if (actionType === "ability") {
-        setActiveActionMode({ type: actionType as any, actionId, actionName });
-      }
-    },
-    [selectedTarget, combatState?.entities, equippedWeapon, toast],
-  );
 
   // OPTIMIZED: Faster initialization with better caching
   const prevRoomIdRef = useRef<string | undefined>();
@@ -650,7 +584,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               }}
               onClick={() =>
                 entity.id !== "player" && entity.hp > 0
-                  ? setSelectedTarget(entity.id)
+                  ? handleTargetSelection(entity.id)
                   : null
               }
             >

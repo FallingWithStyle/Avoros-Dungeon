@@ -1,4 +1,3 @@
-
 /**
  * File: useCombatState.ts
  * Responsibility: Manages combat system state, subscriptions, and entity operations for combat view
@@ -35,7 +34,6 @@ export function useCombatState({
   availableWeapons = []
 }: UseCombatStateProps) {
   const [combatState, setCombatState] = useState(combatSystem.getState());
-  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [, forceUpdate] = useState({});
 
@@ -239,20 +237,10 @@ export function useCombatState({
   useEffect(() => {
     const unsubscribe = combatSystem.subscribe((state) => {
       setCombatState(state);
-
-      // Clear selectedTarget if the currently selected entity is dead or no longer exists
-      if (selectedTarget) {
-        const selectedEntity = state.entities.find(
-          (e) => e.id === selectedTarget,
-        );
-        if (!selectedEntity || selectedEntity.hp <= 0) {
-          setSelectedTarget(null);
-        }
-      }
     });
 
     return unsubscribe;
-  }, [selectedTarget]);
+  }, []);
 
   // Force re-render during cooldowns
   useEffect(() => {
@@ -295,9 +283,6 @@ export function useCombatState({
 
     // Clear room-specific data
     combatSystem.clearRoomData();
-
-    // Reset selected target
-    setSelectedTarget(null);
   }, []);
 
   // Get cooldown percentage for hotbar display
@@ -325,21 +310,15 @@ export function useCombatState({
   // Computed values
   const player = combatState.entities.find((e) => e.id === "player");
   const enemies = combatState.entities.filter((e) => e.type === "hostile");
-  const selectedEntity = combatState.entities.find(
-    (e) => e.id === selectedTarget,
-  );
 
   return {
     // State
     combatState,
-    selectedTarget,
-    selectedEntity,
     isInitialized,
     player,
     enemies,
 
     // Actions
-    setSelectedTarget,
     initializeCombatSystem,
     handleRoomTransition,
     getCooldownPercentage,
