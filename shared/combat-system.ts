@@ -681,6 +681,12 @@ export class CombatSystem {
     return this.currentRoomData;
   }
 
+  clearEntities(): void {
+    this.state.entities = [];
+    this.state.selectedEntityId = undefined;
+    this.notifySubscribers();
+  }
+
   clearRoomData(): void {
     this.currentRoomData = null;
     // Keep only player when changing rooms
