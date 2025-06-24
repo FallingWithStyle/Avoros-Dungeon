@@ -46,7 +46,7 @@ export function useCombatState({
       return;
     }
 
-    // Clear existing entities
+    // Always clear existing entities first to ensure clean slate
     combatSystem.clearEntities();
 
     // Get stored entry direction and calculate proper position
@@ -84,6 +84,7 @@ export function useCombatState({
       playerPosition = { x: 50, y: 50 };
     }
 
+    // Initialize player first to ensure they're always present
     combatSystem.initializePlayer(playerPosition, crawler);
 
     setIsInitialized(true);
@@ -128,15 +129,14 @@ export function useCombatState({
     // Enhanced combat system cleanup for room transition
     combatSystem.endCombat();
 
-    // Clear all entities except player, then clear room data
+    // Immediately clear ALL entities including player for clean slate
     const currentState = combatSystem.getState();
-    const nonPlayerEntities = currentState.entities.filter(e => e.id !== "player");
-
-    nonPlayerEntities.forEach(entity => {
-      combatSystem.removeEntity(entity.id);
-    });
-
-    console.log(`Cleared ${nonPlayerEntities.length} entities for room transition`);
+    const entityCount = currentState.entities.length;
+    
+    // Clear all entities completely
+    combatSystem.clearEntities();
+    
+    console.log(`Cleared ${entityCount} entities for room transition`);
 
     // Clear room-specific data
     combatSystem.clearRoomData();
