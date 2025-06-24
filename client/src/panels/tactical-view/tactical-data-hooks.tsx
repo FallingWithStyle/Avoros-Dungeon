@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
+import { queryClient } from "@/lib/queryClient";
 
 interface TacticalDataHooks {
   roomData: any;
@@ -23,12 +24,11 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   // Initialize hook without debug logging
   const hasLoggedRef = useRef(false);
 
-  // Fetch current room data - OPTIMIZED for speed
+  // OPTIMIZED: Batch room data query with immediate cache access and smart fallbacks
   const {
     data: roomData,
-    isLoading,
+    isLoading: roomLoading,
     error: roomError,
-    refetch: refetchRoomData
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
     queryFn: async () => {
@@ -37,43 +37,66 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       }
 
       try {
+        // ENHANCED: First check if we have prefetched data available
+        const currentRoomId = queryClient.getQueryData<any>([`crawler-${crawler?.id}-current-room`])?.id;
+
+        if (currentRoomId) {
+          const prefetchedData = queryClient.getQueryData<any>([`/api/room/${currentRoomId}/batch-data`]);
+          if (prefetchedData && prefetchedData._prefetched) {
+            console.log(`🚀 Using prefetched room data for instant transition to room ${currentRoomId}`);
+            return prefetchedData;
+          }
+        }
+
         const response = await fetch(`/api/crawlers/${crawler.id}/room-data-batch`);
 
         if (!response.ok) {
-          if (response.status === 502) {
-            throw new Error('Server temporarily unavailable (502)');
-          }
-          throw new Error(`Failed to fetch room data: ${response.status}`);
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
 
-        return {
+        // Cache the fresh data immediately for future use
+        const formattedData = {
           room: data.room || null,
+          currentRoom: data.room || null,
           scannedRooms: Array.isArray(data.scannedRooms) ? data.scannedRooms : [],
           playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
           factions: Array.isArray(data.factions) ? data.factions : [],
           availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
           connections: data.room?.connections || [],
-          fallback: data.fallback || false
+          fallback: data.fallback || false,
+          _fetchedAt: Date.now(),
+          _prefetched: true // Flag this data as prefetched to prevent re-fetching
         };
+
+        // Cache for future prefetching
+        if (data.room?.id) {
+          queryClient.setQueryData(
+            [`/api/room/${data.room.id}/batch-data`],
+            formattedData,
+            { staleTime: 15 * 60 * 1000, gcTime: 30 * 60 * 1000 }
+          );
+        }
+
+        return formattedData;
       } catch (error) {
         console.error('Room data fetch error:', error);
         throw error;
       }
     },
-    staleTime: 30000, // INCREASED: 30 seconds for better caching
-    gcTime: 10 * 60 * 1000, // INCREASED: 10 minutes cache retention
+    staleTime: 60000, // INCREASED: 60 seconds for better caching
+    gcTime: 15 * 60 * 1000, // INCREASED: 15 minutes cache retention
     refetchOnWindowFocus: false,
     enabled: !!crawler?.id,
     retry: 1, // REDUCED: Only 1 retry for faster failure
-    retryDelay: 1000, // REDUCED: Faster retry
+    retryDelay: 500, // REDUCED: Even faster retry
     select: (data) => {
-      if (data && data.connections) {
+      if (data && data.room) {
         return {
           ...data,
-          currentRoom: { ...data, connections: data.connections },
-          room: { ...data, connections: data.connections }
+          currentRoom: data.room,
+          room: data.room
         };
       }
       return data;
@@ -176,7 +199,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     roomData,
     exploredRooms: Array.isArray(exploredRooms) ? exploredRooms : [],
     tacticalData,
-    isLoading,
+    isLoading: roomLoading || isLoading, // Use roomLoading here
     tacticalLoading,
     tacticalError,
     refetchTacticalData,

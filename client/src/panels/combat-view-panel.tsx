@@ -64,18 +64,29 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   } = useTacticalData(crawler);
 
-  // REMOVED: Redundant fallback query that was slowing down transitions
-  // The main tactical data hook already handles fallbacks efficiently
-
-  // Use primary room data source - prefetched data should be available immediately
-  const effectiveRoomData = roomData?.currentRoom || roomData?.room;
+  // OPTIMIZED: Use cached data immediately with intelligent fallbacks
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room || roomData;
   const effectiveTacticalData = tacticalData;
+
+  // PERFORMANCE: Extract data early to prevent repeated processing
+  const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
+  const roomName = effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room";
+  const roomEnvironment = effectiveRoomData?.environment || effectiveRoomData?.room?.environment;
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities =
     effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
 
-  // Add console logging for room loading stages
+  // OPTIMIZED: Extract room connections from all possible sources immediately
+  const roomConnections = effectiveRoomData?.connections || 
+                         effectiveRoomData?.room?.connections ||
+                         roomData?.currentRoom?.connections ||
+                         roomData?.room?.connections ||
+                         roomData?.connections ||
+                         roomData?.availableDirections?.map(dir => ({ direction: dir })) ||
+                         [];
+
+  // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
     
@@ -84,33 +95,24 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       return;
     }
     
-    console.log(now + " - Combat View: Loaded room - " + (effectiveRoomData.name || "Unknown Room"));
-  }, [effectiveRoomData]);
-
-  useEffect(() => {
-    const now = new Date().toLocaleTimeString();
+    const roomName = effectiveRoomData.name || effectiveRoomData.room?.name || "Unknown Room";
+    console.log(now + " - Combat View: Loaded room - " + roomName);
     
+    // Log connections immediately if available
+    if (roomConnections && roomConnections.length > 0) {
+      const directions = roomConnections.map(c => c.direction).join(", ");
+      console.log(now + " - Combat View: Loaded exits - " + directions);
+    }
+    
+    // Log entities if available
     if (tacticalEntities && tacticalEntities.length > 0) {
       const mobCount = tacticalEntities.filter(e => e.type === 'mob').length;
       const npcCount = tacticalEntities.filter(e => e.type === 'npc').length;
       const lootCount = tacticalEntities.filter(e => e.type === 'loot').length;
       
       console.log(now + " - Combat View: Loaded entities - " + mobCount + " mobs, " + npcCount + " npcs, " + lootCount + " loot");
-    } else if (tacticalEntities) {
-      console.log(now + " - Combat View: Loaded empty room (no entities)");
     }
-  }, [tacticalEntities]);
-
-  useEffect(() => {
-    const now = new Date().toLocaleTimeString();
-    
-    if (roomConnections && roomConnections.length > 0) {
-      const directions = roomConnections.map(c => c.direction).join(", ");
-      console.log(now + " - Combat View: Loaded exits - " + directions);
-    } else if (effectiveRoomData) {
-      console.log(now + " - Combat View: No exits available");
-    }
-  }, [roomConnections, effectiveRoomData]);
+  }, [currentRoomId, roomConnections.length, tacticalEntities?.length]);
 
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
@@ -124,8 +126,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
   }, [combatState.entities.length]);
 
-  // Prefetch adjacent rooms for faster movement transitions
-  const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
+  // OPTIMIZED: Prefetch adjacent rooms using cached room ID
   useAdjacentRoomPrefetch({
     crawler,
     currentRoomId,
@@ -145,14 +146,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // Extract room connections from various possible data structures
-  const roomConnections = effectiveRoomData?.connections || 
-                         (effectiveRoomData && effectiveRoomData.room?.connections) ||
-                         (roomData?.currentRoom?.connections) ||
-                         (roomData?.room?.connections) ||
-                         (roomData?.connections) ||
-                         [];
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
@@ -734,32 +727,29 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return unsubscribe;
   }, [selectedTarget]);
 
-  // Only reset isInitialized if room or tactical entities actually changed
+  // OPTIMIZED: Faster initialization with immediate cache access and smart loading
   const prevRoomIdRef = useRef<string | undefined>();
   const prevEntitiesLenRef = useRef<number | undefined>();
 
   useEffect(() => {
-    const currentRoomId = effectiveRoomData?.room?.id;
     const entitiesLen = tacticalEntities?.length ?? 0;
 
-    // Only reset isInitialized if room or entities have changed
+    // Only reset isInitialized if room has actually changed
     if (
       prevRoomIdRef.current !== undefined &&
-      (prevRoomIdRef.current !== currentRoomId ||
-        prevEntitiesLenRef.current !== entitiesLen)
+      prevRoomIdRef.current !== currentRoomId
     ) {
       setIsInitialized(false);
     }
     prevRoomIdRef.current = currentRoomId;
     prevEntitiesLenRef.current = entitiesLen;
 
-    if (
-      !roomLoading &&
-      !tacticalLoading &&
-      effectiveTacticalData &&
-      entitiesLen > 0 &&
-      !isInitialized
-    ) {
+    // ENHANCED: Initialize immediately if we have any room data, even if tactical data is still loading
+    const hasMinimalRoomData = effectiveRoomData?.id || effectiveRoomData?.name;
+    const shouldInitialize = hasMinimalRoomData && !isInitialized;
+
+    if (shouldInitialize) {
+      // Initialize immediately with available data - don't wait for all tactical data
       initializeCombatSystem();
     }
 
@@ -768,11 +758,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     };
   }, [
     initializeCombatSystem,
-    roomLoading,
-    tacticalLoading,
-    effectiveRoomData?.room?.id,
-    tacticalEntities?.length,
-    effectiveTacticalData,
+    currentRoomId,
+    effectiveRoomData?.id,
     isInitialized,
   ]);
 
@@ -835,13 +822,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
-          Combat View - {effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room"}
+          Combat View - {roomName}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
             {combatState.isInCombat ? "IN COMBAT" : isMoving ? "MOVING..." : "READY"}
           </Badge>
-          {(effectiveRoomData?.environment || effectiveRoomData?.room?.environment) && (
+          {roomEnvironment && (
             <Badge variant="outline" className="text-xs">
-              {effectiveRoomData?.environment || effectiveRoomData?.room?.environment}
+              {roomEnvironment}
             </Badge>
           )}
           
@@ -852,21 +839,21 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div
           ref={containerRef}
           className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
-            (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
+            roomEnvironment === "outdoor"
               ? "bg-gradient-to-br from-green-900/20 to-blue-800/20"
-              : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
+              : roomEnvironment === "cave"
                 ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
-                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
+                : roomEnvironment === "dungeon"
                   ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
                   : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
           }`}
           style={{
             backgroundImage:
-              (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
+              roomEnvironment === "outdoor"
                 ? "radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)"
-                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
+                : roomEnvironment === "cave"
                   ? "radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)"
-                  : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
+                  : roomEnvironment === "dungeon"
                     ? "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)"
                     : "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)",
             width: "min(90vw, 90vh, 400px)",
