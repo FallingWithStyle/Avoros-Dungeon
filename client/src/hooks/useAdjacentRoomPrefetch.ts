@@ -136,16 +136,28 @@ export function useAdjacentRoomPrefetch({
               staleTime: 30 * 60 * 1000
             });
             
-            // Also prefetch tactical data
+            // Also prefetch tactical data with actual entities
             queryClient.prefetchQuery({
               queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-              queryFn: async () => ({
-                room: roomData.room,
-                availableDirections: roomData.availableDirections || [],
-                playersInRoom: roomData.playersInRoom || [],
-                tacticalEntities: [],
-                factions: roomData.factions || []
-              }),
+              queryFn: async () => {
+                try {
+                  const tacticalResponse = await fetch(`/api/crawlers/${crawler.id}/tactical-data`);
+                  if (tacticalResponse.ok) {
+                    return await tacticalResponse.json();
+                  }
+                } catch (e) {
+                  console.log('Failed to prefetch tactical data:', e);
+                }
+                
+                // Fallback tactical data structure
+                return {
+                  room: roomData.room,
+                  availableDirections: roomData.availableDirections || [],
+                  playersInRoom: roomData.playersInRoom || [],
+                  tacticalEntities: [],
+                  factions: roomData.factions || []
+                };
+              },
               staleTime: 15 * 60 * 1000
             });
           }
