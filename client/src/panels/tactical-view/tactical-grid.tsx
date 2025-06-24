@@ -160,73 +160,99 @@ export default function TacticalGrid({
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-green-400 rounded-r"></div>
       )}
 
-      {/* Tactical Mobs from Server */}
-      {tacticalMobs.map((mob, index) => (
-        <div
-          key={`tactical-mob-${index}`}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
-          style={{
-            left: `${mob.position.x}%`,
-            top: `${mob.position.y}%`,
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log(`Clicked on tactical mob: ${mob.name}`);
-          }}
-          title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || "Unknown"}`}
-        >
-          <div className="w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg">
-            <Skull className="w-3 h-3 text-white" />
-          </div>
+      {/* Tactical Mobs from Server - Only render if not already in combat system */}
+      {tacticalMobs
+        .filter(mob => !entities.find(e => e.id === mob.id || e.id === `mob_${mob.data?.id}`))
+        .map((mob, index) => (
+          <div
+            key={`tactical-mob-${mob.id || index}`}
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+            style={{
+              left: `${mob.position.x}%`,
+              top: `${mob.position.y}%`,
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityClick?.(mob.id || `tactical-mob-${index}`, e);
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityRightClick?.(mob.id || `tactical-mob-${index}`, e);
+            }}
+            onMouseEnter={() => onEntityHover?.(mob.id || `tactical-mob-${index}`)}
+            onMouseLeave={() => onEntityHover?.(null)}
+            title={`${mob.name} (Tactical Entity) - HP: ${mob.data?.hp || "Unknown"}`}
+          >
+            <div className={cn(
+              "w-6 h-6 bg-red-600 border-2 border-red-400 shadow-red-400/30 rounded-full flex items-center justify-center shadow-lg",
+              hoveredEntity === (mob.id || `tactical-mob-${index}`) ? "scale-110 shadow-xl" : ""
+            )}>
+              <Skull className="w-3 h-3 text-white" />
+            </div>
 
-          {/* HP bar for tactical mobs */}
-          {mob.data?.hp !== undefined &&
-            mob.data?.maxHp !== undefined &&
-            mob.data.hp < mob.data.maxHp && (
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
-                <div
-                  className="h-full rounded transition-all duration-300 bg-red-400"
-                  style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
-                ></div>
-              </div>
-            )}
-        </div>
-      ))}
-
-      {/* Tactical NPCs from Server */}
-      {tacticalNpcs.map((npc, index) => (
-        <div
-          key={`tactical-npc-${index}`}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
-          style={{
-            left: `${npc.position.x}%`,
-            top: `${npc.position.y}%`,
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log(`Clicked on tactical NPC: ${npc.name}`);
-          }}
-          title={`${npc.name} (NPC)`}
-        >
-          <div className="w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg">
-            <Users className="w-3 h-3 text-white" />
+            {/* HP bar for tactical mobs */}
+            {mob.data?.hp !== undefined &&
+              mob.data?.maxHp !== undefined &&
+              mob.data.hp < mob.data.maxHp && (
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
+                  <div
+                    className="h-full rounded transition-all duration-300 bg-red-400"
+                    style={{ width: `${(mob.data.hp / mob.data.maxHp) * 100}%` }}
+                  ></div>
+                </div>
+              )}
           </div>
-        </div>
-      ))}
+        ))}
+
+      {/* Tactical NPCs from Server - Only render if not already in combat system */}
+      {tacticalNpcs
+        .filter(npc => !entities.find(e => e.id === npc.id || e.id === `npc_${npc.data?.id}`))
+        .map((npc, index) => (
+          <div
+            key={`tactical-npc-${npc.id || index}`}
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200"
+            style={{
+              left: `${npc.position.x}%`,
+              top: `${npc.position.y}%`,
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityClick?.(npc.id || `tactical-npc-${index}`, e);
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityRightClick?.(npc.id || `tactical-npc-${index}`, e);
+            }}
+            onMouseEnter={() => onEntityHover?.(npc.id || `tactical-npc-${index}`)}
+            onMouseLeave={() => onEntityHover?.(null)}
+            title={`${npc.name} (NPC)`}
+          >
+            <div className={cn(
+              "w-6 h-6 bg-cyan-500 border-2 border-cyan-300 shadow-cyan-400/30 rounded-full flex items-center justify-center shadow-lg",
+              hoveredEntity === (npc.id || `tactical-npc-${index}`) ? "scale-110 shadow-xl" : ""
+            )}>
+              <Users className="w-3 h-3 text-white" />
+            </div>
+          </div>
+        ))}
 
       {/* Combat Entities - All entities from combat system */}
-      {entities.map((entity) => (
-        <TacticalEntity
-          key={entity.id}
-          entity={entity}
-          isHovered={hoveredEntity === entity.id}
-          onClick={onEntityClick}
-          onRightClick={onEntityRightClick}
-          onHover={onEntityHover}
-        />
-      ))}
+      {entities
+        .filter(entity => entity.id !== "player") // Player handled separately below
+        .map((entity) => (
+          <TacticalEntity
+            key={entity.id}
+            entity={entity}
+            isHovered={hoveredEntity === entity.id}
+            onClick={onEntityClick}
+            onRightClick={onEntityRightClick}
+            onHover={onEntityHover}
+          />
+        ))}
 
       {/* Debug: Show entity count */}
       {entities.length > 0 && (
@@ -271,12 +297,12 @@ export default function TacticalGrid({
       })}
 
       
-        {/* Player */}
+        {/* Player Entity - Rendered separately for special handling */}
         {playerEntity && (
           <div
             key={playerEntity.id}
             className={cn(
-              "absolute w-6 h-6 rounded-full border-2 transition-all duration-200 flex items-center justify-center text-xs font-bold cursor-pointer z-20 overflow-hidden",
+              "absolute w-6 h-6 rounded-full border-2 transition-all duration-200 flex items-center justify-center text-xs font-bold cursor-pointer z-30 overflow-hidden",
               playerEntity.isSelected
                 ? "border-blue-300 shadow-lg shadow-blue-500/50"
                 : "border-blue-400",
@@ -291,10 +317,19 @@ export default function TacticalGrid({
               top: playerEntity.position.y + "%",
               transform: "translate(-50%, -50%)",
             }}
-            onClick={(e) => onEntityClick?.(playerEntity.id, e)}
-            onContextMenu={(e) => onEntityRightClick?.(playerEntity.id, e)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityClick?.(playerEntity.id, e);
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEntityRightClick?.(playerEntity.id, e);
+            }}
             onMouseEnter={() => onEntityHover?.(playerEntity.id)}
             onMouseLeave={() => onEntityHover?.(null)}
+            title={`${playerEntity.name} (Player) - HP: ${playerEntity.hp || 0}/${playerEntity.maxHp || 0}`}
           >
             {/* Player Avatar */}
             <img
@@ -302,6 +337,27 @@ export default function TacticalGrid({
               alt={playerEntity.name}
               className="w-full h-full rounded-full object-cover"
             />
+
+            {/* Player facing direction indicator */}
+            {playerEntity.facing !== undefined && (
+              <div
+                className="absolute w-8 h-8 pointer-events-none z-10"
+                style={{
+                  transform: `rotate(${playerEntity.facing}deg)`,
+                  transformOrigin: "center",
+                }}
+              >
+                <div className="w-full h-full flex items-start justify-center">
+                  <div
+                    className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-blue-400"
+                    style={{
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                      marginTop: "-2px",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Attack animation effect */}
             {playerEntity.attackAnimation && Date.now() - playerEntity.attackAnimation.timestamp < playerEntity.attackAnimation.duration && (
@@ -327,40 +383,66 @@ function TacticalEntity({
   onRightClick: (entityId: string, event: React.MouseEvent) => void;
   onHover: (entityId: string | null) => void;
 }) {
+  // Better entity type detection
+  const getEntityTypeClass = () => {
+    if (entity.type === "player") {
+      return "border-blue-300 animate-pulse shadow-blue-400/50";
+    } else if (entity.type === "hostile" || entity.type === "mob") {
+      return "bg-red-600 border-red-400 shadow-red-400/30";
+    } else if (entity.type === "neutral" || entity.type === "npc") {
+      return "bg-orange-500 border-orange-300 shadow-orange-400/30";
+    } else if (entity.type === "friendly") {
+      return "bg-green-500 border-green-300 shadow-green-400/30";
+    } else {
+      return "bg-cyan-500 border-cyan-300 shadow-cyan-400/30";
+    }
+  };
+
+  const getEntityIcon = () => {
+    if (entity.type === "player") {
+      return (
+        <img
+          src={getAvatarUrl(entity.name, entity.serial || entity.id)}
+          alt={entity.name}
+          className="w-full h-full rounded-full object-cover"
+        />
+      );
+    } else if (entity.type === "hostile" || entity.type === "mob") {
+      return <Skull className="w-3 h-3 text-white" />;
+    } else {
+      return <Users className="w-3 h-3 text-white" />;
+    }
+  };
+
   return (
     <div
-      className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 ${
+      className={cn(
+        "absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all duration-200",
         isHovered ? "scale-110 z-30" : ""
-      } transition-all duration-200`}
+      )}
       style={{ left: `${entity.position.x}%`, top: `${entity.position.y}%` }}
-      onClick={(e) => onClick(entity.id, e)}
-      onContextMenu={(e) => onRightClick(entity.id, e)}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick(entity.id, e);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onRightClick(entity.id, e);
+      }}
       onMouseEnter={() => onHover(entity.id)}
       onMouseLeave={() => onHover(null)}
-      title={`${entity.name} (${entity.hp}/${entity.maxHp} HP)`}
+      title={`${entity.name} (${entity.hp || 0}/${entity.maxHp || 0} HP) - ${entity.type}`}
     >
       <div
-        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative ${
-          entity.type === "player"
-            ? "border-blue-300 animate-pulse shadow-blue-400/50"
-            : entity.type === "hostile"
-              ? "bg-red-600 border-red-400 shadow-red-400/30"
-              : entity.type === "neutral"
-                ? "bg-orange-500 border-orange-300 shadow-orange-400/30"
-                : "bg-cyan-500 border-cyan-300 shadow-cyan-400/30"
-        } ${isHovered ? "shadow-xl" : ""}`}
+        className={cn(
+          "w-6 h-6 rounded-full border-2 flex items-center justify-center shadow-lg relative",
+          getEntityTypeClass(),
+          isHovered ? "shadow-xl" : ""
+        )}
       >
-        {entity.type === "player" && (
-          <img
-            src={getAvatarUrl(entity.name, entity.serial || entity.id)}
-            alt={entity.name}
-            className="w-full h-full rounded-full object-cover"
-          />
-        )}
-        {entity.type === "hostile" && <Skull className="w-3 h-3 text-white" />}
-        {(entity.type === "neutral" || entity.type === "npc") && (
-          <Users className="w-3 h-3 text-white" />
-        )}
+        {getEntityIcon()}
 
         {/* Facing direction indicator - colored arrows based on entity type */}
         {entity.facing !== undefined && (
@@ -376,13 +458,13 @@ function TacticalEntity({
                 className={`w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent ${
                   entity.type === "player" 
                     ? "border-b-blue-400" 
-                    : entity.type === "hostile"
+                    : entity.type === "hostile" || entity.type === "mob"
                     ? "border-b-red-400"
                     : "border-b-green-400"
                 }`}
                 style={{
                   filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
-                  marginTop: "-2px", // Position arrow to extend from behind the circle
+                  marginTop: "-2px",
                 }}
               />
             </div>
@@ -398,9 +480,9 @@ function TacticalEntity({
           <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-700 rounded overflow-hidden">
             <div
               className={`h-full rounded transition-all duration-300 ${
-                entity.type === "hostile" ? "bg-red-400" : "bg-green-400"
+                entity.type === "hostile" || entity.type === "mob" ? "bg-red-400" : "bg-green-400"
               }`}
-              style={{ width: `${(entity.hp / entity.maxHp) * 100}%` }}
+              style={{ width: `${Math.max(0, Math.min(100, (entity.hp / entity.maxHp) * 100))}%` }}
             ></div>
           </div>
         )}
