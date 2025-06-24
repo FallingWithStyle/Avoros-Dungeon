@@ -18,6 +18,7 @@ import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { useCombatState } from "@/hooks/useCombatState";
 import { useCombatMovement } from "@/hooks/useCombatMovement";
 import { useCombatActions } from "@/hooks/useCombatActions";
+import { useCombatEntities } from "@/hooks/useCombatEntities";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
 
 interface Equipment {
@@ -131,6 +132,24 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   } = useCombatActions({
     combatState,
     equippedWeapon,
+  });
+
+  // Use combat entities hook for entity processing and management
+  const {
+    tacticalMobs,
+    tacticalNpcs,
+    tacticalLoot,
+    layoutEntities,
+    initializeCombatEntities,
+    getEntityById,
+    isEntityInWeaponRange,
+    getWeaponRange,
+  } = useCombatEntities({
+    crawler,
+    tacticalData: effectiveTacticalData,
+    availableWeapons,
+    combatState,
+    isInitialized,
   });
 
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
@@ -254,51 +273,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     isInitialized,
   ]);
 
-  // Process tactical data for display components with enhanced filtering
-  const tacticalMobs = useMemo(() => {
-    if (!effectiveTacticalData?.tacticalEntities) return [];
-
-    return effectiveTacticalData.tacticalEntities
-      .filter((entity: any) => entity.type === "mob")
-      .map((entity: any) => ({
-        ...entity,
-        // Ensure position is valid for rendering
-        position: {
-          x: Math.max(0, Math.min(100, entity.position?.x || 50)),
-          y: Math.max(0, Math.min(100, entity.position?.y || 50))
-        }
-      }));
-  }, [effectiveTacticalData]);
-
-  const tacticalNpcs = useMemo(() => {
-    if (!effectiveTacticalData?.tacticalEntities) return [];
-
-    return effectiveTacticalData.tacticalEntities
-      .filter((entity: any) => entity.type === "npc")
-      .map((entity: any) => ({
-        ...entity,
-        // Ensure position is valid for rendering
-        position: {
-          x: Math.max(0, Math.min(100, entity.position?.x || 50)),
-          y: Math.max(0, Math.min(100, entity.position?.y || 50))
-        }
-      }));
-  }, [effectiveTacticalData]);
-
-  const tacticalLoot = useMemo(() => {
-    if (!effectiveTacticalData?.tacticalEntities) return [];
-
-    return effectiveTacticalData.tacticalEntities
-      .filter((entity: any) => entity.type === "loot")
-      .map((entity: any, index: number) => ({
-        ...entity,
-        // Convert to format expected by TacticalGrid
-        x: Math.max(0, Math.min(100, entity.position?.x || 50)),
-        y: Math.max(0, Math.min(100, entity.position?.y || 50)),
-        name: entity.name || "Unknown Item",
-        type: entity.data?.itemType || "treasure"
-      }));
-  }, [effectiveTacticalData]);
+  
 
   // Enhanced room change handling with proper entity cleanup
   useEffect(() => {
@@ -404,50 +379,45 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           </div>
 
           {/* Room Layout Elements */}
-          {tacticalEntities && Array.isArray(tacticalEntities)
-            ? tacticalEntities.map((entity: any) => {
-                if (
-                  entity.type !== "cover" &&
-                  entity.type !== "wall" &&
-                  entity.type !== "door"
-                )
-                  return null;
+          {layoutEntities.map((entity: any) => {
 
                 const x = entity.position.x;
                 const y = entity.position.y;
 
-                return (
-                  <div
-                    key={entity.id || entity.type + "-" + x + "-" + y}
-                    className={`absolute ${
-                      entity.type === "wall"
-                        ? "bg-stone-600 border-2 border-stone-500"
-                        : entity.type === "door"
-                          ? "bg-amber-700 border-2 border-amber-500"
-                          : "bg-stone-400 border-2 border-stone-300 opacity-80"
-                    } rounded-sm shadow-lg`}
-                    style={{
-                      left: `${x - 2}%`,
-                      top: `${y - 2}%`,
-                      width: `4%`,
-                      height: `4%`,
-                      zIndex:
-                        entity.type === "wall"
-                          ? 15
-                          : entity.type === "door"
-                            ? 12
-                            : 10,
-                      filter:
-                        entity.type === "wall"
-                          ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
-                          : entity.type === "door"
-                            ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
-                            : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))",
-                    }}
-                  />
-                );
-              })
-            : null}
+                const x = entity.position.x;
+            const y = entity.position.y;
+
+            return (
+              <div
+                key={entity.id || entity.type + "-" + x + "-" + y}
+                className={`absolute ${
+                  entity.type === "wall"
+                    ? "bg-stone-600 border-2 border-stone-500"
+                    : entity.type === "door"
+                      ? "bg-amber-700 border-2 border-amber-500"
+                      : "bg-stone-400 border-2 border-stone-300 opacity-80"
+                } rounded-sm shadow-lg`}
+                style={{
+                  left: `${x - 2}%`,
+                  top: `${y - 2}%`,
+                  width: `4%`,
+                  height: `4%`,
+                  zIndex:
+                    entity.type === "wall"
+                      ? 15
+                      : entity.type === "door"
+                        ? 12
+                        : 10,
+                  filter:
+                    entity.type === "wall"
+                      ? "drop-shadow(2px 2px 4px rgba(0,0,0,0.6))"
+                      : entity.type === "door"
+                        ? "drop-shadow(1px 1px 3px rgba(245,158,11,0.5))"
+                        : "drop-shadow(1px 1px 2px rgba(0,0,0,0.4))",
+                }}
+              />
+            );
+          })}
 
           {/* Debug: Show room connections data */}
           {IS_DEBUG_MODE && roomConnections.length > 0 && (
