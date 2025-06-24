@@ -200,7 +200,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     roomData,
     exploredRooms: Array.isArray(exploredRooms) ? exploredRooms : [],
     tacticalData,
-    isLoading: roomLoading || isLoading, // Use roomLoading here
+    isLoading: roomLoading || exploredRoomsLoading, // Use proper loading states
     tacticalLoading,
     tacticalError,
     refetchTacticalData,
