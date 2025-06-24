@@ -23,7 +23,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
   // Initialize hook without debug logging
   const hasLoggedRef = useRef(false);
 
-  // Fetch current room data
+  // Fetch current room data - OPTIMIZED for speed
   const {
     data: roomData,
     isLoading,
@@ -43,20 +43,18 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
           if (response.status === 502) {
             throw new Error('Server temporarily unavailable (502)');
           }
-          const errorText = await response.text();
           throw new Error(`Failed to fetch room data: ${response.status}`);
         }
 
         const data = await response.json();
 
-        // Always ensure we have fallback data structure
         return {
           room: data.room || null,
           scannedRooms: Array.isArray(data.scannedRooms) ? data.scannedRooms : [],
           playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
           factions: Array.isArray(data.factions) ? data.factions : [],
           availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
-          connections: data.room?.connections || [], // Ensure connections are included and default to an empty array if missing
+          connections: data.room?.connections || [],
           fallback: data.fallback || false
         };
       } catch (error) {
@@ -64,37 +62,25 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
         throw error;
       }
     },
-    staleTime: 15000, // 15 seconds to reduce frequency
-    refetchOnWindowFocus: false, // Disable to reduce requests
+    staleTime: 30000, // INCREASED: 30 seconds for better caching
+    gcTime: 10 * 60 * 1000, // INCREASED: 10 minutes cache retention
+    refetchOnWindowFocus: false,
     enabled: !!crawler?.id,
-    retry: (failureCount, error) => {
-      // More conservative retry logic
-      if (error.message.includes('502') || error.message.includes('503')) {
-        return failureCount < 1; // Only retry once for server errors
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(2000 * 2 ** attemptIndex, 10000), // Longer delays
+    retry: 1, // REDUCED: Only 1 retry for faster failure
+    retryDelay: 1000, // REDUCED: Faster retry
     select: (data) => {
-      // Ensure connections are available at multiple paths for compatibility
       if (data && data.connections) {
         return {
           ...data,
-          currentRoom: {
-            ...data,
-            connections: data.connections
-          },
-          room: {
-            ...data,
-            connections: data.connections
-          }
+          currentRoom: { ...data, connections: data.connections },
+          room: { ...data, connections: data.connections }
         };
       }
       return data;
     }
   });
 
-  // Fetch explored rooms
+  // Fetch explored rooms - OPTIMIZED with longer cache
   const { 
     data: exploredRooms = [], 
     isLoading: exploredRoomsLoading,
@@ -112,7 +98,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
 
         if (!response.ok) {
           if (response.status === 502) {
-            return []; // Return empty array for server errors
+            return [];
           }
           throw new Error('Failed to fetch explored rooms');
         }
@@ -121,16 +107,17 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
         return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Explored rooms fetch error:', error);
-        return []; // Return empty array on error
+        return [];
       }
     },
-    staleTime: 60000, // 60 seconds to reduce frequency
+    staleTime: 5 * 60 * 1000, // INCREASED: 5 minutes - explored rooms change slowly
+    gcTime: 15 * 60 * 1000, // INCREASED: 15 minutes cache retention
     refetchOnWindowFocus: false,
     enabled: !!crawler?.id,
-    retry: false, // Don't retry this query
+    retry: false,
   });
 
-  // Fetch tactical data
+  // Fetch tactical data - OPTIMIZED for immediate display
   const { 
     data: tacticalData, 
     isLoading: tacticalLoading,
@@ -148,7 +135,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
 
         if (!response.ok) {
           if (response.status === 502) {
-            return null; // Return null for server errors
+            return null;
           }
           throw new Error('Failed to fetch tactical data');
         }
@@ -156,13 +143,14 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
         return response.json();
       } catch (error) {
         console.error('Tactical data fetch error:', error);
-        return null; // Return null on error
+        return null;
       }
     },
-    staleTime: 20000, // 20 seconds to reduce frequency
+    staleTime: 10000, // REDUCED: 10 seconds for more current tactical data
+    gcTime: 5 * 60 * 1000, // INCREASED: 5 minutes cache retention
     refetchOnWindowFocus: false,
-    enabled: !!crawler?.id,
-    retry: false, // Don't retry this query
+    enabled: !!crawler?.id && !!roomData, // DEPENDENCY: Wait for room data first
+    retry: false,
   });
 
   const handleRoomChange = useCallback(() => {

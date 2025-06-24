@@ -32,31 +32,60 @@ export function useAdjacentRoomPrefetch({
 
       const data = await response.json();
 
-      // Cache individual room data for instant access
+      // OPTIMIZED: Aggressive caching for instant room transitions
       if (data.adjacentRooms) {
         data.adjacentRooms.forEach((roomData: any) => {
-          // Prioritize caching based on distance - shorter times for real-time updates
-          const staleTime = roomData.distance === 1 ? 2 * 60 * 1000 : 90 * 1000; // 2min for distance 1, 90s for distance 2+
-          const gcTime = roomData.distance === 1 ? 5 * 60 * 1000 : 3 * 60 * 1000; // Keep in memory longer
+          const isAdjacent = roomData.distance === 1;
+          
+          // INCREASED cache times for instant transitions
+          const staleTime = isAdjacent ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10min for adjacent, 5min for distance 2
+          const gcTime = isAdjacent ? 20 * 60 * 1000 : 10 * 60 * 1000; // Keep much longer
 
+          // Cache room data in multiple expected formats for instant access
+          const roomDataFormatted = {
+            room: roomData.room,
+            scannedRooms: roomData.scannedRooms || [],
+            playersInRoom: roomData.playersInRoom || [],
+            factions: roomData.factions || [],
+            availableDirections: roomData.availableDirections || [],
+            connections: roomData.room?.connections || [],
+            fallback: false,
+            _prefetched: true,
+            _prefetchedAt: Date.now()
+          };
+
+          // Cache in room-data-batch format for immediate loading
           queryClient.setQueryData(
-            [`/api/room/${roomData.room.id}/basic-data`],
-            roomData,
-            { staleTime }
+            [`/api/crawlers/${crawler.id}/room-data-batch`],
+            (oldData: any) => {
+              // Only replace if this room becomes current
+              if (oldData?.room?.id === roomData.room.id) {
+                return roomDataFormatted;
+              }
+              return oldData;
+            }
           );
 
-          // Also cache the data in a format expected by tactical data
+          // Cache individual room data
+          queryClient.setQueryData(
+            [`/api/room/${roomData.room.id}/basic-data`],
+            roomDataFormatted,
+            { staleTime, gcTime }
+          );
+
+          // Pre-cache tactical structure for faster combat view loading
           queryClient.setQueryData(
             [`/api/room/${roomData.room.id}/cached-tactical`],
             {
               room: roomData.room,
-              availableDirections: roomData.availableDirections,
-              playersInRoom: [],
-              tacticalEntities: [], // Will be fetched when actually needed
+              availableDirections: roomData.availableDirections || [],
+              playersInRoom: roomData.playersInRoom || [],
+              tacticalEntities: [], // Tactical entities fetched on-demand
+              factions: roomData.factions || [],
               _isCached: true,
               _cachedAt: Date.now()
             },
-            { staleTime: staleTime / 2 } // Shorter cache for tactical data (45s for distance 1, 45s for distance 2+)
+            { staleTime: staleTime, gcTime: gcTime }
           );
         });
       }
@@ -68,34 +97,23 @@ export function useAdjacentRoomPrefetch({
     }
   }, [crawler.id, currentRoomId, radius, enabled]);
 
-  // Query for adjacent rooms with automatic refetching
+  // OPTIMIZED: Query for adjacent rooms with aggressive caching
   const { data: adjacentRoomsData, isLoading, error } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/adjacent-rooms`, currentRoomId, radius],
     queryFn: prefetchAdjacentRooms,
     enabled: enabled && !!currentRoomId,
-    staleTime: 90 * 1000, // 90 seconds - shorter for faster real-time updates
-    gcTime: 5 * 60 * 1000, // Keep for 5 minutes
+    staleTime: 5 * 60 * 1000, // INCREASED: 5 minutes for better performance
+    gcTime: 15 * 60 * 1000, // INCREASED: 15 minutes retention
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: (failureCount, error) => {
-      // Don't retry if it's a 404 or auth error
-      if (error && 'status' in error && (error.status === 404 || error.status === 403)) {
-        return false;
-      }
-      // Retry up to 2 times for other errors
-      return failureCount < 2;
-    },
+    retry: 1, // REDUCED: Only 1 retry for faster failure
   });
 
-  // Prefetch when room changes
+  // OPTIMIZED: Immediate prefetching without delay
   useEffect(() => {
     if (currentRoomId && enabled) {
-      // Delay prefetching to not interfere with current room loading
-      const timer = setTimeout(() => {
-        prefetchAdjacentRooms();
-      }, 1000);
-
-      return () => clearTimeout(timer);
+      // Start prefetching immediately for instant transitions
+      prefetchAdjacentRooms();
     }
   }, [currentRoomId, prefetchAdjacentRooms, enabled]);
 

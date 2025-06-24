@@ -202,11 +202,9 @@ async function performRoomChange(
     RoomChangeManager.clearStoredMovementDirection();
 
     // Store the movement direction for entry positioning BEFORE the API call
-    // This ensures it's available immediately when the new room loads
     const validDirections = ['north', 'south', 'east', 'west', 'staircase'];
     if (validDirections.includes(direction.toLowerCase())) {
       sessionStorage.setItem('lastMovementDirection', direction);
-      // Also store as entry direction for immediate use
       sessionStorage.setItem('entryDirection', direction);
     }
 
@@ -221,13 +219,6 @@ async function performRoomChange(
         console.error("❌ Server temporarily unavailable (502)");
         RoomChangeManager.clearStoredMovementDirection();
         return false;
-      }
-
-      let errorText = "Unknown error";
-      try {
-        errorText = await response.text();
-      } catch (e) {
-        // Ignore text parsing errors
       }
 
       console.error("❌ Room change failed:", response.status, response.statusText);
@@ -250,25 +241,41 @@ async function performRoomChange(
       return false;
     }
 
-    // Invalidate queries only if movement was successful
+    // OPTIMIZED: Only invalidate essential queries, preserve prefetched data
     try {
+      // Update crawler position immediately if we have the new room data
+      if (result.newRoom) {
+        queryClient.setQueryData(
+          [`/api/crawlers/${crawlerId}/room-data-batch`],
+          (oldData: any) => ({
+            ...oldData,
+            room: result.newRoom,
+            currentRoom: result.newRoom,
+            fallback: false
+          })
+        );
+      }
+
+      // Only invalidate crawler stats (not room data since we just updated it)
       queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawlerId}`]
+        queryKey: [`/api/crawlers/${crawlerId}`],
+        exact: true
       });
 
+      // Invalidate tactical data for the new room only
       queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawlerId}/room-data-batch`]
+        queryKey: [`/api/crawlers/${crawlerId}/tactical-data`],
+        exact: true
       });
 
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawlerId}/tactical-data`]
+      // Keep explored rooms cached longer - only refetch if stale
+      queryClient.refetchQueries({
+        queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`],
+        type: 'inactive'
       });
-
-      queryClient.invalidateQueries({
-        queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`]
-      });
+      
     } catch (e) {
-      console.error("Error invalidating queries:", e);
+      console.error("Error updating queries:", e);
     }
 
     return true;

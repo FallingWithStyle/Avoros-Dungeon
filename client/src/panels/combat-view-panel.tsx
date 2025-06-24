@@ -64,6 +64,61 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   } = useTacticalData(crawler);
 
+  // REMOVED: Redundant fallback query that was slowing down transitions
+  // The main tactical data hook already handles fallbacks efficiently
+
+  // Use primary room data source - prefetched data should be available immediately
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room;
+
+  // Add console logging for room loading stages
+  useEffect(() => {
+    const now = new Date().toLocaleTimeString();
+    
+    if (!effectiveRoomData) {
+      console.log(now + " - Combat View: No room data");
+      return;
+    }
+    
+    console.log(now + " - Combat View: Loaded room - " + (effectiveRoomData.name || "Unknown Room"));
+  }, [effectiveRoomData]);
+
+  useEffect(() => {
+    const now = new Date().toLocaleTimeString();
+    
+    if (tacticalEntities && tacticalEntities.length > 0) {
+      const mobCount = tacticalEntities.filter(e => e.type === 'mob').length;
+      const npcCount = tacticalEntities.filter(e => e.type === 'npc').length;
+      const lootCount = tacticalEntities.filter(e => e.type === 'loot').length;
+      
+      console.log(now + " - Combat View: Loaded entities - " + mobCount + " mobs, " + npcCount + " npcs, " + lootCount + " loot");
+    } else if (tacticalEntities) {
+      console.log(now + " - Combat View: Loaded empty room (no entities)");
+    }
+  }, [tacticalEntities]);
+
+  useEffect(() => {
+    const now = new Date().toLocaleTimeString();
+    
+    if (roomConnections && roomConnections.length > 0) {
+      const directions = roomConnections.map(c => c.direction).join(", ");
+      console.log(now + " - Combat View: Loaded exits - " + directions);
+    } else if (effectiveRoomData) {
+      console.log(now + " - Combat View: No exits available");
+    }
+  }, [roomConnections, effectiveRoomData]);
+
+  useEffect(() => {
+    const now = new Date().toLocaleTimeString();
+    
+    if (combatState.entities.length > 0) {
+      const playerCount = combatState.entities.filter(e => e.type === 'player').length;
+      const hostileCount = combatState.entities.filter(e => e.type === 'hostile').length;
+      const neutralCount = combatState.entities.filter(e => e.type === 'neutral').length;
+      
+      console.log(now + " - Combat View: Initialized combat entities - " + playerCount + " players, " + hostileCount + " hostiles, " + neutralCount + " neutrals");
+    }
+  }, [combatState.entities.length]);
+
   // Prefetch adjacent rooms for faster movement transitions
   const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
   useAdjacentRoomPrefetch({
@@ -71,14 +126,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     currentRoomId,
     enabled: !!currentRoomId && !roomLoading,
     radius: 2 // Prefetch 2 rooms in each direction
-  });
-
-  // Fallback to batch data if current-room fails
-  const { data: batchData } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
-    refetchInterval: 5000,
-    staleTime: 3000,
-    enabled: !roomData?.room, // Only fetch if we don't have room data
   });
 
   // Detect mobile device
@@ -93,10 +140,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // Use batch data as fallback - fix room data structure access
-  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
-  const effectiveTacticalData = tacticalData || batchData?.tacticalData;
+  const effectiveTacticalData = tacticalData;
 
   // Extract room connections from various possible data structures
   const roomConnections = effectiveRoomData?.connections || 
@@ -802,11 +846,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               {effectiveRoomData?.environment || effectiveRoomData?.room?.environment}
             </Badge>
           )}
-          {!roomData?.currentRoom && !roomData?.room && batchData?.currentRoom && (
-            <Badge variant="outline" className="text-xs text-amber-400">
-              Fallback Data
-            </Badge>
-          )}
+          
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
