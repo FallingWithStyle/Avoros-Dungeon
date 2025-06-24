@@ -1,0 +1,90 @@
+client:536 WebSocket connection to 'wss://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/?token=LlneuSqezjfV' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=LlneuSqezjfV' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-WERSD76P.js?v=c64965cc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+combat-view-panel.tsx:186 10:41:21 AM - Combat View: No room data
+combat-view-panel.tsx:191 10:41:22 AM - Combat View: Loaded room - Ruined Barracks
+combat-view-panel.tsx:196 10:41:22 AM - Combat View: Loaded exits - north, south, east, west
+combat-view-panel.tsx:191 10:41:23 AM - Combat View: Loaded room - Ruined Barracks
+combat-view-panel.tsx:196 10:41:23 AM - Combat View: Loaded exits - north, south, east, west
+combat-view-panel.tsx:205 10:41:23 AM - Combat View: Loaded entities - 2 mobs, 4 npcs, 6 loot
+useCombatState.ts:42 🎮 Initializing combat system...
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught TypeError: combatSystem.clearEntities is not a function
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=c64965cc
+main.tsx:42 Line: 16670
+main.tsx:43 Column: 15
+main.tsx:44 Error object: TypeError: combatSystem.clearEntities is not a function
+    at useCombatState.ts:50:18
+    at combat-view-panel.tsx:284:7
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+chunk-WERSD76P.js?v=c64965cc:16670 Uncaught TypeError: combatSystem.clearEntities is not a function
+    at useCombatState.ts:50:18
+    at combat-view-panel.tsx:284:7
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+chunk-WERSD76P.js?v=c64965cc:14032 The above error occurred in the <CombatViewPanel> component:
+
+    at CombatViewPanel (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/panels/combat-view-panel.tsx:33:43)
+    at div
+    at div
+    at div
+    at div
+    at CrawlerView (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/views/crawler-view.tsx:34:39)
+    at CrawlerMode (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/pages/crawler-mode.tsx:18:39)
+    at component (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=66AcDlvXY1RUH_ahxN4f9:65:161)
+    at Route (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:323:16)
+    at Switch (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c64965cc:379:17)
+    at div
+    at Router (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/src/App.tsx?v=66AcDlvXY1RUH_ahxN4f9:36:42)
+    at Provider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=c64965cc:38:15)
+    at TooltipProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=c64965cc:63:5)
+    at QueryClientProvider (https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=c64965cc:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=c64965cc:14032
+main.tsx:39 🚨 Global error detected:
+main.tsx:40 Message: Uncaught TypeError: combatSystem.clearEntities is not a function
+main.tsx:41 Source: https://5a0a7ce3-7181-4e3c-bcc3-73cbeff34b58-00-348bhgn4lerzz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=c64965cc
+main.tsx:42 Line: 9129
+main.tsx:43 Column: 15
+main.tsx:44 Error object: TypeError: combatSystem.clearEntities is not a function
+    at useCombatState.ts:50:18
+    at combat-view-panel.tsx:284:7
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)
+chunk-WERSD76P.js?v=c64965cc:9129 Uncaught TypeError: combatSystem.clearEntities is not a function
+    at useCombatState.ts:50:18
+    at combat-view-panel.tsx:284:7
+    at commitHookEffectListMount (chunk-WERSD76P.js?v=c64965cc:16915:34)
+    at commitPassiveMountOnFiber (chunk-WERSD76P.js?v=c64965cc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-WERSD76P.js?v=c64965cc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-WERSD76P.js?v=c64965cc:18119:15)
+    at commitPassiveMountEffects (chunk-WERSD76P.js?v=c64965cc:18109:11)
+    at flushPassiveEffectsImpl (chunk-WERSD76P.js?v=c64965cc:19490:11)
+    at flushPassiveEffects (chunk-WERSD76P.js?v=c64965cc:19447:22)
+    at commitRootImpl (chunk-WERSD76P.js?v=c64965cc:19416:13)

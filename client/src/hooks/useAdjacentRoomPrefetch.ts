@@ -37,9 +37,9 @@ export function useAdjacentRoomPrefetch({
         data.adjacentRooms.forEach((roomData: any) => {
           const isAdjacent = roomData.distance === 1;
           
-          // INCREASED cache times for instant transitions
-          const staleTime = isAdjacent ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10min for adjacent, 5min for distance 2
-          const gcTime = isAdjacent ? 20 * 60 * 1000 : 10 * 60 * 1000; // Keep much longer
+          // AGGRESSIVE cache times for instant transitions
+          const staleTime = isAdjacent ? 30 * 60 * 1000 : 15 * 60 * 1000; // 30min for adjacent, 15min for distance 2
+          const gcTime = isAdjacent ? 60 * 60 * 1000 : 30 * 60 * 1000; // Keep 1 hour for adjacent, 30min for distance 2
 
           // Cache room data in multiple expected formats for instant access
           const roomDataFormatted = {
@@ -114,8 +114,45 @@ export function useAdjacentRoomPrefetch({
     if (currentRoomId && enabled) {
       // Start prefetching immediately for instant transitions
       prefetchAdjacentRooms();
+      
+      // Also aggressively prefetch individual room data for each adjacent room
+      const cachedData = queryClient.getQueryData([`/api/crawlers/${crawler.id}/adjacent-rooms`, currentRoomId, radius]);
+      if (cachedData?.adjacentRooms) {
+        cachedData.adjacentRooms.forEach((roomData: any) => {
+          if (roomData.distance === 1) {
+            // Pre-cache all room data formats that might be needed
+            queryClient.prefetchQuery({
+              queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+              queryFn: async () => ({
+                room: roomData.room,
+                scannedRooms: roomData.scannedRooms || [],
+                playersInRoom: roomData.playersInRoom || [],
+                factions: roomData.factions || [],
+                availableDirections: roomData.availableDirections || [],
+                connections: roomData.room?.connections || [],
+                fallback: false,
+                _prefetched: true
+              }),
+              staleTime: 30 * 60 * 1000
+            });
+            
+            // Also prefetch tactical data
+            queryClient.prefetchQuery({
+              queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
+              queryFn: async () => ({
+                room: roomData.room,
+                availableDirections: roomData.availableDirections || [],
+                playersInRoom: roomData.playersInRoom || [],
+                tacticalEntities: [],
+                factions: roomData.factions || []
+              }),
+              staleTime: 15 * 60 * 1000
+            });
+          }
+        });
+      }
     }
-  }, [currentRoomId, prefetchAdjacentRooms, enabled]);
+  }, [currentRoomId, prefetchAdjacentRooms, enabled, crawler.id, radius]);
 
   return {
     adjacentRoomsData,
