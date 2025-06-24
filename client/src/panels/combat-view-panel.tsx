@@ -861,8 +861,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             ? tacticalEntities.map((entity: any) => {
                 if (
                   entity.type !== "cover" &&
-                  ```text
-  entity.type !== "wall" &&
+                  entity.type !== "wall" &&
                   entity.type !== "door"
                 )
                   return null;
@@ -872,7 +871,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
                 return (
                   <div
-                    key={entity.id || `${entity.type}-${x}-${y}`}
+                    key={entity.id || entity.type + "-" + x + "-" + y}
                     className={`absolute ${
                       entity.type === "wall"
                         ? "bg-stone-600 border-2 border-stone-500"
