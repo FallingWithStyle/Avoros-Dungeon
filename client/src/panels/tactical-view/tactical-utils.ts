@@ -1,4 +1,3 @@
-
 /**
  * File: tactical-utils.ts
  * Responsibility: Provides utility functions for tactical grid calculations, positioning, and data generation
@@ -55,53 +54,72 @@ export const getRoomBackgroundType = (environment: string, type: string): string
 };
 
 // Generate client-side fallback tactical data when server data is unavailable
-export const generateFallbackTacticalData = (roomData: any) => {
+export function generateFallbackTacticalData(roomData: any) {
   if (!roomData?.room) return null;
 
-  const fallbackEntities: any[] = [];
-  const occupiedCells = new Set<string>();
+  // Generate basic tactical entities based on room type for fallback
+  const tacticalEntities = [];
+  const room = roomData.room;
 
-  // Generate some basic entities based on room properties
-  if (roomData.room.hasLoot && roomData.room.type !== 'safe') {
-    const lootCell = getRandomEmptyCell(occupiedCells);
-    const lootPos = gridToPercentage(lootCell.gridX, lootCell.gridY);
-    fallbackEntities.push({
+  // Add basic loot if room has loot flag
+  if (room.hasLoot) {
+    tacticalEntities.push({
       type: 'loot',
-      name: 'Treasure',
-      position: lootPos,
-      data: { type: 'treasure' },
-      x: lootPos.x,
-      y: lootPos.y
+      id: 'fallback_loot_1',
+      name: 'Mysterious Item',
+      data: { value: 50 },
+      position: { x: 25 + Math.random() * 50, y: 25 + Math.random() * 50 },
+      interactable: true
     });
   }
 
-  // Add basic enemies for non-safe rooms
-  if (!roomData.room.isSafe && roomData.room.type !== 'entrance' && roomData.room.type !== 'safe') {
-    if (Math.random() > 0.5) {
-      const mobCell = getRandomEmptyCell(occupiedCells);
-      const mobPos = gridToPercentage(mobCell.gridX, mobCell.gridY);
-      fallbackEntities.push({
-        type: 'mob',
-        name: 'Unknown Enemy',
-        position: mobPos,
-        data: { 
-          hp: 50,
-          maxHp: 50,
-          attack: 10,
-          defense: 5,
-          hostile: true
-        }
-      });
-    }
+  // Add basic hostile mob if room is not safe
+  if (!room.isSafe && room.type !== 'safe_zone') {
+    tacticalEntities.push({
+      type: 'mob',
+      id: 'fallback_mob_1',
+      name: 'Unknown Threat',
+      data: {
+        hp: 50,
+        maxHp: 50,
+        attack: 8,
+        defense: 5,
+        level: 1,
+        disposition: 'hostile'
+      },
+      position: { x: 25 + Math.random() * 50, y: 25 + Math.random() * 50 },
+      combatReady: true,
+      hostile: true,
+      combatStats: {
+        hp: 50,
+        maxHp: 50,
+        attack: 8,
+        defense: 5,
+        speed: 10,
+        level: 1,
+        might: 8,
+        agility: 10,
+        endurance: 8,
+        intellect: 6,
+        charisma: 4,
+        wisdom: 6
+      }
+    });
   }
 
   return {
     room: roomData.room,
     availableDirections: roomData.availableDirections || [],
     playersInRoom: roomData.playersInRoom || [],
-    tacticalEntities: fallbackEntities
+    tacticalEntities,
+    entityCount: tacticalEntities.length,
+    mobCount: tacticalEntities.filter(e => e.type === 'mob').length,
+    lootCount: tacticalEntities.filter(e => e.type === 'loot').length,
+    npcCount: tacticalEntities.filter(e => e.type === 'npc').length,
+    connections: roomData.room.connections || [],
+    fallback: true
   };
-};
+}
 
 // Helper function to get party entry positions based on direction
 export const getPartyEntryPositions = (

@@ -216,45 +216,45 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     combatSystem.addEntity(playerEntity);
     setEquippedWeapon(availableWeapons[0]);
 
-    // Add entities from tactical data (mobs, etc.)
+    // Enhanced entity integration from tactical data
     if (tacticalEntities && Array.isArray(tacticalEntities)) {
       tacticalEntities.forEach((tacticalEntity: any, index: number) => {
         if (tacticalEntity.type === "mob") {
-          // Handle new format where mob data is in the data field
-          if (tacticalEntity.data) {
-            const mobEntity: CombatEntity = {
-              id: "mob_" + (tacticalEntity.data.id || index),
-              name:
-                tacticalEntity.name ||
-                tacticalEntity.data.name ||
-                "Unknown Mob",
-              type: "hostile", // Default to hostile for now
-              hp:
-                tacticalEntity.data.hp ||
-                tacticalEntity.data.currentHealth ||
-                100,
-              maxHp:
-                tacticalEntity.data.maxHp ||
-                tacticalEntity.data.maxHealth ||
-                100,
-              energy: 20,
-              maxEnergy: 20,
-              power: 10,
-              maxPower: 10,
-              might: 10,
-              agility: 14,
-              endurance: 8,
-              intellect: 6,
-              charisma: 4,
-              wisdom: 7,
-              attack: tacticalEntity.data.attack || 12,
-              defense: tacticalEntity.data.defense || 8,
-              speed: tacticalEntity.data.speed || 16,
-              accuracy: 16,
-              evasion: 18,
-              position: {
-                x: tacticalEntity.position?.x || 50,
-                y: tacticalEntity.position?.y || 50,
+          // Use enhanced combat stats if available from processed tactical data
+          const combatStats = tacticalEntity.combatStats || {};
+          
+          const mobEntity: CombatEntity = {
+            id: tacticalEntity.id || "mob_" + (tacticalEntity.data?.id || index),
+            name: tacticalEntity.name || tacticalEntity.data?.name || "Unknown Mob",
+            type: tacticalEntity.hostile !== false ? "hostile" : "neutral",
+            
+            // Enhanced health and resource management
+            hp: combatStats.hp || tacticalEntity.data?.hp || tacticalEntity.data?.currentHealth || 100,
+            maxHp: combatStats.maxHp || tacticalEntity.data?.maxHp || tacticalEntity.data?.maxHealth || 100,
+            energy: combatStats.energy || 20,
+            maxEnergy: combatStats.maxEnergy || 20,
+            power: combatStats.power || 10,
+            maxPower: combatStats.maxPower || 10,
+            
+            // Enhanced primary stats from tactical data
+            might: combatStats.might || tacticalEntity.data?.might || 10,
+            agility: combatStats.agility || tacticalEntity.data?.agility || 14,
+            endurance: combatStats.endurance || tacticalEntity.data?.endurance || 8,
+            intellect: combatStats.intellect || tacticalEntity.data?.intellect || 6,
+            charisma: combatStats.charisma || tacticalEntity.data?.charisma || 4,
+            wisdom: combatStats.wisdom || tacticalEntity.data?.wisdom || 7,
+            
+            // Enhanced derived combat stats
+            attack: combatStats.attack || tacticalEntity.data?.attack || 12,
+            defense: combatStats.defense || tacticalEntity.data?.defense || 8,
+            speed: combatStats.speed || tacticalEntity.data?.speed || 16,
+            accuracy: combatStats.accuracy || (combatStats.wisdom || 7) + (combatStats.intellect || 6),
+            evasion: combatStats.evasion || Math.floor((combatStats.agility || 14) * 1.2),
+            
+            // Enhanced positioning
+            position: {
+              x: tacticalEntity.position?.x || 50,
+              y: tacticalEntity.position?.y || 50,
               },
               facing: 180,
               level: 3,

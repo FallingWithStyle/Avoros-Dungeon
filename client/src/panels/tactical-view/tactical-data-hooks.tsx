@@ -117,7 +117,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     retry: false,
   });
 
-  // Fetch tactical data - OPTIMIZED for immediate display
+  // Fetch tactical data with enhanced integration - OPTIMIZED for immediate display
   const { 
     data: tacticalData, 
     isLoading: tacticalLoading,
@@ -140,7 +140,57 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
           throw new Error('Failed to fetch tactical data');
         }
 
-        return response.json();
+        const data = await response.json();
+        
+        // Enhanced tactical data processing with proper entity integration
+        if (data && data.tacticalEntities) {
+          const processedEntities = data.tacticalEntities.map((entity: any, index: number) => {
+            // Ensure each entity has proper structure for combat system integration
+            const processedEntity = {
+              ...entity,
+              id: entity.id || `${entity.type}_${index}`,
+              name: entity.name || `Unknown ${entity.type}`,
+              data: entity.data || {},
+              position: entity.position || { x: 50, y: 50 },
+              // Add combat system compatibility fields
+              combatReady: entity.type === 'mob' || entity.type === 'npc',
+              hostile: entity.type === 'mob' && (!entity.data?.disposition || entity.data.disposition === 'hostile'),
+              interactable: entity.type === 'loot' || entity.type === 'npc'
+            };
+
+            // Enhanced mob entity processing for combat integration
+            if (entity.type === 'mob' && entity.data) {
+              processedEntity.combatStats = {
+                hp: entity.data.hp || entity.data.currentHealth || 100,
+                maxHp: entity.data.maxHp || entity.data.maxHealth || 100,
+                attack: entity.data.attack || 10,
+                defense: entity.data.defense || 5,
+                speed: entity.data.speed || 10,
+                level: entity.data.level || 1,
+                // Copy all primary stats if available
+                might: entity.data.might || 10,
+                agility: entity.data.agility || 10,
+                endurance: entity.data.endurance || 10,
+                intellect: entity.data.intellect || 10,
+                charisma: entity.data.charisma || 10,
+                wisdom: entity.data.wisdom || 10
+              };
+            }
+
+            return processedEntity;
+          });
+
+          return {
+            ...data,
+            tacticalEntities: processedEntities,
+            entityCount: processedEntities.length,
+            mobCount: processedEntities.filter(e => e.type === 'mob').length,
+            lootCount: processedEntities.filter(e => e.type === 'loot').length,
+            npcCount: processedEntities.filter(e => e.type === 'npc').length
+          };
+        }
+
+        return data;
       } catch (error) {
         console.error('Tactical data fetch error:', error);
         return null;
@@ -153,11 +203,44 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     retry: false,
   });
 
+  // Enhanced room change handler with tactical data integration
   const handleRoomChange = useCallback(() => {
     if (crawler?.id) {
       handleRoomChangeWithRefetch(refetchRoomData, refetchExploredRooms, refetchTacticalData);
     }
   }, [crawler?.id, refetchRoomData, refetchExploredRooms, refetchTacticalData]);
+
+  // Enhanced tactical data processing with fallback generation
+  const processedTacticalData = useMemo(() => {
+    if (!roomData?.room) return null;
+
+    // If we have tactical data, return it processed
+    if (tacticalData) {
+      return {
+        ...tacticalData,
+        room: roomData.room,
+        availableDirections: roomData.availableDirections || [],
+        playersInRoom: roomData.playersInRoom || [],
+        // Ensure tactical entities are properly structured
+        tacticalEntities: tacticalData.tacticalEntities || []
+      };
+    }
+
+    // Generate fallback tactical data if no tactical data available
+    const fallbackData = {
+      room: roomData.room,
+      availableDirections: roomData.availableDirections || [],
+      playersInRoom: roomData.playersInRoom || [],
+      tacticalEntities: [],
+      entityCount: 0,
+      mobCount: 0,
+      lootCount: 0,
+      npcCount: 0,
+      fallback: true
+    };
+
+    return fallbackData;
+  }, [roomData, tacticalData]);
 
   // Early return if no crawler - AFTER all hooks are called
   if (!crawler) {
@@ -165,9 +248,16 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       roomData: null,
       exploredRooms: [],
       tacticalData: null,
-      refetchRoomData: () => {},
-      refetchExploredRooms: () => {},
+      processedTacticalData: null,
+      isLoading: false,
+      exploredRoomsLoading: false,
+      tacticalLoading: false,
+      roomError: null,
+      exploredRoomsError: null,
+      tacticalError: null,
       refetchTacticalData: () => {},
+      refetchExploredRooms: () => {},
+      refetchRoomData: () => {},
       handleRoomChange: () => {},
     };
   }
@@ -176,6 +266,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     roomData,
     exploredRooms: Array.isArray(exploredRooms) ? exploredRooms : [],
     tacticalData,
+    processedTacticalData,
     isLoading,
     exploredRoomsLoading,
     tacticalLoading,

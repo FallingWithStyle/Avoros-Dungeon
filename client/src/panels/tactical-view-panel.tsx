@@ -42,11 +42,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // ALL HOOKS MUST BE CALLED FIRST - NO CONDITIONAL CALLING
   const { toast } = useToast();
 
-  // Use the extracted tactical data hooks
+  // Use the extracted tactical data hooks with enhanced integration
   const {
     roomData,
     exploredRooms,
     tacticalData,
+    processedTacticalData,
     isLoading: roomLoading,
     tacticalLoading,
     tacticalError,
@@ -78,8 +79,8 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Use fallback data when tactical data is unavailable
-  const effectiveTacticalData = tacticalData || generateFallbackTacticalData(roomData);
+  // Use enhanced processed tactical data with fallback generation
+  const effectiveTacticalData = processedTacticalData || generateFallbackTacticalData(roomData);
 
   // Room movement handler with better fallback functionality
   const handleRoomMovement = useCallback(
@@ -432,7 +433,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   }, [contextMenu]);
 
   // Show loading state while data is being fetched
-  if (roomLoading || (tacticalLoading && !tacticalData)) {
+  if (roomLoading || (tacticalLoading && !processedTacticalData)) {
     return (
       <Card className="bg-game-panel border-game-border">
         <CardHeader className="pb-3">
@@ -507,7 +508,12 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
           <Eye className="w-4 h-4" />
           Tactical View
           {!tacticalData && effectiveTacticalData && (
-            <span className="text-xs text-amber-400 ml-2">(Limited Data)</span>
+            <span className="text-xs text-amber-400 ml-2">(Fallback Data)</span>
+          )}
+          {processedTacticalData && processedTacticalData.entityCount > 0 && (
+            <span className="text-xs text-green-400 ml-2">
+              ({processedTacticalData.entityCount} entities)
+            </span>
           )}
         </CardTitle>
       </CardHeader>
