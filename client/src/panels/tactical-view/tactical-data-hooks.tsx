@@ -29,6 +29,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     data: roomData,
     isLoading: roomLoading,
     error: roomError,
+    refetch: refetchRoomData,
   } = useQuery({
     queryKey: [`/api/crawlers/${crawler?.id}/room-data-batch`],
     queryFn: async () => {
