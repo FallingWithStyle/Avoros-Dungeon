@@ -76,7 +76,7 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
-      "q", "e", "z"
+      "q", "e", "z", "tab"
     ];
 
     if (!validKeys.includes(key)) return;
@@ -120,7 +120,7 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
-      "q", "e", "z"
+      "q", "e", "z", "tab"
     ];
 
     if (!validKeys.includes(key)) return;

@@ -184,72 +184,32 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [tabTimerExpired, setTabTimerExpired] = useState(false);
 
   // TAB key handling for target selection/deselection
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Tab" && !isTabHeld) {
-        e.preventDefault();
-        setIsTabHeld(true);
-        setTabTimerExpired(false);
+  const handleTargetCycle = () => {
+    const enemies = combatState.entities.filter(
+      (e) => e.type === "hostile" && e.hp > 0
+    );
 
-        const timer = setTimeout(() => {
-          setTabTimerExpired(true);
-          // Clear target if TAB is held long enough
-          setSelectedTarget(null);
-          combatSystem.selectEntity(null);
-        }, 500); // 500ms hold to clear target
-
-        setTabHoldTimer(timer);
+    if (enemies.length > 0) {
+      if (!selectedTarget) {
+        // No target selected, select first enemy
+        setSelectedTarget(enemies[0].id);
+        combatSystem.selectEntity(enemies[0].id);
+      } else {
+        // Find current target index and cycle to next
+        const currentIndex = enemies.findIndex(
+          (e) => e.id === selectedTarget
+        );
+        const nextIndex = (currentIndex + 1) % enemies.length;
+        setSelectedTarget(enemies[nextIndex].id);
+        combatSystem.selectEntity(enemies[nextIndex].id);
       }
-    };
+    }
+  };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === "Tab" && isTabHeld) {
-        e.preventDefault();
-        setIsTabHeld(false);
-
-        if (tabHoldTimer) {
-          clearTimeout(tabHoldTimer);
-          setTabHoldTimer(null);
-        }
-
-        // If TAB was released quickly (not held), cycle to next target
-        if (!tabTimerExpired) {
-          const enemies = combatState.entities.filter(
-            (e) => e.type === "hostile" && e.hp > 0
-          );
-
-          if (enemies.length > 0) {
-            if (!selectedTarget) {
-              // No target selected, select first enemy
-              setSelectedTarget(enemies[0].id);
-              combatSystem.selectEntity(enemies[0].id);
-            } else {
-              // Find current target index and cycle to next
-              const currentIndex = enemies.findIndex(
-                (e) => e.id === selectedTarget
-              );
-              const nextIndex = (currentIndex + 1) % enemies.length;
-              setSelectedTarget(enemies[nextIndex].id);
-              combatSystem.selectEntity(enemies[nextIndex].id);
-            }
-          }
-        }
-
-        setTabTimerExpired(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      if (tabHoldTimer) {
-        clearTimeout(tabHoldTimer);
-      }
-    };
-  }, [isTabHeld, tabHoldTimer, tabTimerExpired, selectedTarget, combatState.entities]);
+  const handleTargetClear = () => {
+    setSelectedTarget(null);
+    combatSystem.selectEntity(null);
+  };
 
   // Auto-face towards selected target
   useEffect(() => {
@@ -354,6 +314,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const {
     handleMovement,
     handleRotation,
+    handleRoomTransition,
     isMoving,
     containerRef,
     bind,
@@ -364,8 +325,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     roomConnections,
     selectedTarget,
     isMobile,
-    onRoomTransition,
+    onRoomTransition: onRoomTransition,
     handleRoomChange,
+    onTargetCycle: handleTargetCycle,
+    onTargetClear: handleTargetClear,
   });
 
   // OPTIMIZED: Faster initialization with better caching
