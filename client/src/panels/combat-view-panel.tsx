@@ -87,6 +87,25 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                          roomData?.availableDirections?.map(dir => ({ direction: dir })) ||
                          [];
 
+  // Use the combat state management hook (must be called early to avoid hook order issues)
+  const {
+    combatState,
+    selectedTarget,
+    selectedEntity,
+    isInitialized,
+    player,
+    enemies,
+    setSelectedTarget,
+    initializeCombatSystem,
+    handleRoomTransition: onRoomTransition,
+    getCooldownPercentage,
+  } = useCombatState({
+    crawler,
+    tacticalData: effectiveTacticalData,
+    aiEnabled,
+    availableWeapons,
+  });
+
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
@@ -172,25 +191,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       agilityBonus: 3,
     },
   ];
-
-  // Use the combat state management hook
-  const {
-    combatState,
-    selectedTarget,
-    selectedEntity,
-    isInitialized,
-    player,
-    enemies,
-    setSelectedTarget,
-    initializeCombatSystem,
-    handleRoomTransition: onRoomTransition,
-    getCooldownPercentage,
-  } = useCombatState({
-    crawler,
-    tacticalData: effectiveTacticalData,
-    aiEnabled,
-    availableWeapons,
-  });
 
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
@@ -475,7 +475,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       }
     },
     [
-      combatState.entities,
+      combatState?.entities,
       selectedTarget,
       tacticalEntities,
       effectiveRoomData,
@@ -569,7 +569,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         setActiveActionMode({ type: actionType as any, actionId, actionName });
       }
     },
-    [selectedTarget, combatState?.entities, equippedWeapon, toast, setActiveActionMode],
+    [selectedTarget, combatState?.entities, equippedWeapon, toast],
   );
 
   // OPTIMIZED: Faster initialization with better caching
