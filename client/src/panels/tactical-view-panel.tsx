@@ -45,12 +45,14 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   // Use the extracted tactical data hooks
   const {
     roomData,
+    exploredRooms,
     tacticalData,
-    isLoading,
+    isLoading: roomLoading,
     tacticalLoading,
     tacticalError,
     refetchTacticalData,
     refetchExploredRooms,
+    refetchRoomData,
     handleRoomChange
   } = useTacticalData(crawler);
 
@@ -58,7 +60,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
   const { prefetchAdjacentRooms } = useAdjacentRoomPrefetch({
     crawler,
     currentRoomId: roomData?.room?.id,
-    enabled: !isLoading && !!roomData?.room,
+    enabled: !roomLoading && !!roomData?.room,
     radius: 2
   });
 
@@ -159,7 +161,7 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
     onMovement: handleTacticalMovement,
     onRotation: handleRotation,
     onStairs: handleStairs,
-    isEnabled: !isLoading && !combatState.isInCombat,
+    isEnabled: !roomLoading && !combatState.isInCombat,
   });
 
   // Use gesture movement hook for mobile
@@ -428,6 +430,28 @@ export default function TacticalViewPanel({ crawler }: TacticalViewPanelProps) {
       document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [contextMenu]);
+
+  // Show loading state while data is being fetched
+  if (roomLoading || (tacticalLoading && !tacticalData)) {
+    return (
+      <Card className="bg-game-panel border-game-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-slate-200 flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Tactical View
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-48 bg-gray-800/20 border border-gray-600/20 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <span className="text-slate-400">Loading tactical data...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // CONDITIONAL RENDERING ONLY AFTER ALL HOOKS HAVE BEEN CALLED
   // Early return if no data - MUST be after all hooks
