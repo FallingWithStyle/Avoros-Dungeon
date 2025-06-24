@@ -23,6 +23,7 @@ interface UseCombatMovementProps {
   onRoomTransition: () => void;
   handleRoomChange: () => void;
   onTargetCycle?: () => void;
+  onTargetCycleAll?: () => void;
   onTargetClear?: () => void;
 }
 
@@ -36,6 +37,7 @@ export function useCombatMovement({
   onRoomTransition,
   handleRoomChange,
   onTargetCycle,
+  onTargetCycleAll,
   onTargetClear,
 }: UseCombatMovementProps) {
   const { toast } = useToast();
@@ -332,6 +334,7 @@ export function useCombatMovement({
     onMovement: handleMovement,
     onRotation: handleRotation,
     onTargetCycle,
+    onTargetCycleAll,
     onTargetClear,
     isEnabled: !combatState?.isInCombat, // Only enable when not in combat
   });

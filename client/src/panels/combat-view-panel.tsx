@@ -211,6 +211,28 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     combatSystem.selectEntity(null);
   };
 
+  const handleTargetCycleAll = () => {
+    const allEntities = combatState.entities.filter(
+      (e) => e.id !== "player" && e.hp > 0
+    );
+
+    if (allEntities.length > 0) {
+      if (!selectedTarget) {
+        // No target selected, select first entity
+        setSelectedTarget(allEntities[0].id);
+        combatSystem.selectEntity(allEntities[0].id);
+      } else {
+        // Find current target index and cycle to next
+        const currentIndex = allEntities.findIndex(
+          (e) => e.id === selectedTarget
+        );
+        const nextIndex = (currentIndex + 1) % allEntities.length;
+        setSelectedTarget(allEntities[nextIndex].id);
+        combatSystem.selectEntity(allEntities[nextIndex].id);
+      }
+    }
+  };
+
   // Auto-face towards selected target
   useEffect(() => {
     if (!selectedTarget || !combatState?.entities) return;
@@ -328,6 +350,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     onRoomTransition: onRoomTransition,
     handleRoomChange,
     onTargetCycle: handleTargetCycle,
+    onTargetCycleAll: handleTargetCycleAll,
     onTargetClear: handleTargetClear,
   });
 
@@ -445,7 +468,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <div>
             {isMobile
               ? "Touch & Drag: Move | Tap: Actions"
-              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"}
+              : "WASD: Move | 1-3: Actions | Tab: Hostiles | Shift+Tab: All"}
           </div>
           {selectedTarget && (
             <div className="text-yellow-400">
