@@ -1,0 +1,55 @@
+Looking at the current state of the combat system and the codebase, here's the updated list of remaining tasks to get the new combat system fully integrated:
+
+Remaining Combat Integration Tasks
+1. ✅ COMPLETED: Basic Combat System Architecture
+Combat system core logic is implemented
+Entity management working
+Position tracking functional
+2. ✅ COMPLETED: Combat View Panel
+Combat view panel exists and displays entities
+Movement and basic attacks work
+Cooldown system functional
+3. ❌ NEEDS FIXING: Room Connections Data Access
+Combat view is trying to access roomData?.connections but getting undefined
+Need to ensure room data includes connection information
+Current issue: effectiveRoomData?.connections is undefined
+4. ❌ MISSING: Room Transition Integration
+Combat view detects exits but doesn't actually transition rooms
+Need to integrate with existing room navigation system
+Should use the same mechanism as the navigation panel
+5. ❌ MISSING: Tactical Entity Spawning
+Need to spawn combat entities from tactical data when entering rooms
+Mob entities should be created from room's tactical entities
+Position mapping between tactical grid and combat grid
+6. ❌ MISSING: Combat State Persistence
+Combat state should persist across room changes
+Player health/status should sync with crawler data
+Equipment changes should update combat stats
+7. ❌ MISSING: WebSocket Integration
+Combat actions should broadcast to other players
+Real-time updates for multiplayer scenarios
+Position updates should sync across clients
+8. ❌ MISSING: Encounter System Integration
+Combat should trigger/resolve encounters
+Victory conditions should process rewards
+Defeat should handle appropriate consequences
+9. ❌ MISSING: Equipment System Integration
+Equipped weapons should affect combat stats
+Armor should modify defense values
+Equipment abilities should be available in combat
+10. ❌ MISSING: Effect System Integration
+Status effects from encounters should apply in combat
+Temporary buffs/debuffs should affect combat performance
+Healing items should be usable during combat
+11. ❌ PARTIALLY DONE: Mobile/Touch Controls
+Basic gesture movement exists but needs refinement
+Touch targeting for attacks needs implementation
+Mobile-specific UI considerations
+12. ❌ MISSING: Combat Logging Integration
+Combat actions should create activity feed entries
+Damage/healing should be logged for history
+Combat results should be recorded
+Immediate Priority Fix
+The most pressing issue is #3 - Room Connections Data Access. The combat view is showing "Connections: undefined" which means the room data structure isn't providing the connection information properly.
+
+Would you like me to start by fixing the room connections issue first, or would you prefer to tackle a different item from this list?

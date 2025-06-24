@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
+import { IS_DEBUG_MODE } from "@/components/debug-panel";
 
 interface Equipment {
   id: string;
@@ -81,9 +82,19 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Use batch data as fallback
-  const effectiveRoomData = roomData || batchData?.currentRoom;
+  // Use batch data as fallback - fix room data structure access
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
+
+  // Debug logging to understand room data structure
+  if (IS_DEBUG_MODE && roomData) {
+    console.log('Combat View - Room data structure:', {
+      roomData,
+      batchData,
+      effectiveRoomData,
+      connections: effectiveRoomData?.connections
+    });
+  }
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities =
@@ -332,45 +343,70 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         (conn: any) => conn.direction,
       );
 
+      // More lenient gate detection - larger gate area
+      const gateAreaStart = 35;
+      const gateAreaEnd = 65;
+      const exitBoundary = 8; // Slightly larger boundary for exit detection
+
       if (
-        newY <= boundary &&
+        newY <= exitBoundary &&
         direction.y < 0 &&
         availableDirections.includes("north")
       ) {
-        if (newX >= gateStart && newX <= gateEnd) {
+        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
           exitDirection = "north";
+          toast({
+            title: "Exit Detected",
+            description: "Moving north through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newY >= 100 - boundary &&
+        newY >= 100 - exitBoundary &&
         direction.y > 0 &&
         availableDirections.includes("south")
       ) {
-        if (newX >= gateStart && newX <= gateEnd) {
+        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
           exitDirection = "south";
+          toast({
+            title: "Exit Detected", 
+            description: "Moving south through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newX >= 100 - boundary &&
+        newX >= 100 - exitBoundary &&
         direction.x > 0 &&
         availableDirections.includes("east")
       ) {
-        if (newY >= gateStart && newY <= gateEnd) {
+        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "east";
+          toast({
+            title: "Exit Detected",
+            description: "Moving east through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       } else if (
-        newX <= boundary &&
+        newX <= exitBoundary &&
         direction.x < 0 &&
         availableDirections.includes("west")
       ) {
-        if (newY >= gateStart && newY <= gateEnd) {
+        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
           exitDirection = "west";
+          toast({
+            title: "Exit Detected",
+            description: "Moving west through gate (room transitions not implemented in combat view)",
+            variant: "default",
+          });
         }
       }
 
-      // If trying to exit, just clamp to boundary for now (room transitions not implemented in combat view)
+      // If trying to exit, clamp to boundary but allow closer approach to gates
       if (exitDirection) {
-        // Clamp to boundary
-        newX = Math.max(boundary, Math.min(100 - boundary, newX));
-        newY = Math.max(boundary, Math.min(100 - boundary, newY));
+        // Allow player to get closer to the gate
+        newX = Math.max(3, Math.min(97, newX));
+        newY = Math.max(3, Math.min(97, newY));
       } else {
         // Normal boundary clamping
         newX = Math.max(boundary, Math.min(100 - boundary, newX));
@@ -680,16 +716,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
-          Combat View - {effectiveRoomData?.room?.name || "Unknown Room"}
+          Combat View - {effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
             {combatState.isInCombat ? "IN COMBAT" : "READY"}
           </Badge>
-          {effectiveRoomData?.room?.environment && (
+          {(effectiveRoomData?.environment || effectiveRoomData?.room?.environment) && (
             <Badge variant="outline" className="text-xs">
-              {effectiveRoomData.room.environment}
+              {effectiveRoomData?.environment || effectiveRoomData?.room?.environment}
             </Badge>
           )}
-          {!roomData?.room && batchData?.currentRoom && (
+          {!roomData?.currentRoom && !roomData?.room && batchData?.currentRoom && (
             <Badge variant="outline" className="text-xs text-amber-400">
               Fallback Data
             </Badge>
@@ -701,21 +737,21 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <div
           ref={containerRef}
           className={`relative border border-amber-600/20 rounded-lg overflow-hidden mx-auto ${
-            effectiveRoomData?.room?.environment === "outdoor"
+            (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
               ? "bg-gradient-to-br from-green-900/20 to-blue-800/20"
-              : effectiveRoomData?.room?.environment === "cave"
+              : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
                 ? "bg-gradient-to-br from-gray-900/40 to-stone-800/40"
-                : effectiveRoomData?.room?.environment === "dungeon"
+                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
                   ? "bg-gradient-to-br from-purple-900/20 to-gray-800/30"
                   : "bg-gradient-to-br from-green-900/20 to-brown-800/20"
           }`}
           style={{
             backgroundImage:
-              effectiveRoomData?.room?.environment === "outdoor"
+              (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "outdoor"
                 ? "radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)"
-                : effectiveRoomData?.room?.environment === "cave"
+                : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "cave"
                   ? "radial-gradient(circle at 30% 70%, rgba(75, 85, 99, 0.2) 0%, transparent 60%)"
-                  : effectiveRoomData?.room?.environment === "dungeon"
+                  : (effectiveRoomData?.environment || effectiveRoomData?.room?.environment) === "dungeon"
                     ? "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)"
                     : "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255, 119, 48, 0.1) 0%, transparent 50%)",
             width: "min(90vw, 90vh, 400px)",
@@ -791,50 +827,120 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               })
             : null}
 
-          {/* Exit indicators based on room connections */}
+          {/* Debug: Show room connections data */}
+          {IS_DEBUG_MODE && effectiveRoomData?.connections && (
+            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded z-30">
+              Connections: {effectiveRoomData.connections.map((c: any) => c.direction).join(", ")}
+            </div>
+          )}
+
+          {/* Gate-style exit indicators */}
           {effectiveRoomData?.connections?.map((connection: any) => {
-            let position = { x: 50, y: 50 };
+            let gateStyle = {};
+            let gateClass = "";
 
             switch (connection.direction) {
               case "north":
-                position = { x: 50, y: 5 };
+                gateStyle = {
+                  top: "2px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "48px",
+                  height: "12px",
+                };
+                gateClass = "rounded-b-lg";
                 break;
               case "south":
-                position = { x: 50, y: 95 };
+                gateStyle = {
+                  bottom: "2px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "48px",
+                  height: "12px",
+                };
+                gateClass = "rounded-t-lg";
                 break;
               case "east":
-                position = { x: 95, y: 50 };
+                gateStyle = {
+                  right: "2px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "12px",
+                  height: "48px",
+                };
+                gateClass = "rounded-l-lg";
                 break;
               case "west":
-                position = { x: 5, y: 50 };
+                gateStyle = {
+                  left: "2px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "12px",
+                  height: "48px",
+                };
+                gateClass = "rounded-r-lg";
                 break;
               case "up":
               case "down":
-                position = { x: 50, y: 50 };
+                gateStyle = {
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "32px",
+                  height: "32px",
+                };
+                gateClass = "rounded-full";
                 break;
+              default:
+                return null;
             }
 
             return (
               <div
                 key={connection.direction}
-                className={`absolute w-6 h-6 border-2 rounded-full flex items-center justify-center ${
+                className={`absolute ${gateClass} ${
                   connection.isLocked
-                    ? "bg-red-500/70 border-red-300"
-                    : "bg-blue-500/70 border-blue-300"
-                }`}
+                    ? "bg-red-400 border-2 border-red-300"
+                    : "bg-green-400 border-2 border-green-300"
+                } transition-all duration-200 hover:scale-110 cursor-pointer`}
                 style={{
-                  left: `${position.x}%`,
-                  top: `${position.y}%`,
-                  transform: "translate(-50%, -50%)",
-                  zIndex: 20,
+                  ...gateStyle,
+                  zIndex: 25,
+                  boxShadow: connection.isLocked 
+                    ? "0 0 8px rgba(239, 68, 68, 0.4)" 
+                    : "0 0 8px rgba(34, 197, 94, 0.4)",
                 }}
-                title={`${connection.isLocked ? "Locked " : ""}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
+                title={`${connection.isLocked ? "🔒 Locked " : "🚪 "}Exit: ${connection.direction}${connection.keyRequired ? ` (Key: ${connection.keyRequired})` : ""}`}
               >
+                {/* Gate indicator dot */}
                 <div
-                  className={`w-2 h-2 rounded-full animate-pulse ${
-                    connection.isLocked ? "bg-red-200" : "bg-blue-200"
-                  }`}
-                />
+                  className={`absolute inset-0 flex items-center justify-center`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full animate-pulse ${
+                      connection.isLocked ? "bg-red-100" : "bg-green-100"
+                    }`}
+                  />
+                </div>
+                
+                {/* Directional arrow for vertical/horizontal gates */}
+                {(connection.direction === "north" || connection.direction === "south" || 
+                  connection.direction === "east" || connection.direction === "west") && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <div
+                      className={`text-xs font-bold ${
+                        connection.isLocked ? "text-red-100" : "text-green-100"
+                      }`}
+                    >
+                      {connection.direction === "north" && "↑"}
+                      {connection.direction === "south" && "↓"}
+                      {connection.direction === "east" && "→"}
+                      {connection.direction === "west" && "←"}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1012,30 +1118,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             )}
           </Button>
         </div>
-
-        {/* Player Status */}
-        {player && (
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-red-300">HP:</span>
-              <span className="text-white">
-                {player.hp}/{player.maxHp}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-blue-300">Energy:</span>
-              <span className="text-white">
-                {player.energy}/{player.maxEnergy}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-purple-300">Power:</span>
-              <span className="text-white">
-                {player.power}/{player.maxPower}
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Controls hint */}
         <div className="text-xs text-muted-foreground text-center space-y-1">

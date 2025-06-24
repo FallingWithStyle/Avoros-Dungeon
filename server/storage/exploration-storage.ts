@@ -358,6 +358,12 @@ export class ExplorationStorage extends BaseStorage {
         return null;
       }
 
+      // Get room connections
+      const connections = await db
+        .select()
+        .from(roomConnections)
+        .where(eq(roomConnections.fromRoomId, currentPosition.roomId));
+
       const roomData = {
         id: result[0].room.id,
         name: result[0].room.name,
@@ -375,7 +381,8 @@ export class ExplorationStorage extends BaseStorage {
           name: result[0].floor.name
         },
         isSafe: result[0].room.type === 'safe',
-        hasLoot: ['treasure', 'normal', 'chamber'].includes(result[0].room.type)
+        hasLoot: ['treasure', 'normal', 'chamber'].includes(result[0].room.type),
+        connections: connections
       };
 
       return roomData;

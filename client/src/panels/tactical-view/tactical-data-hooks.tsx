@@ -60,6 +60,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
           playersInRoom: Array.isArray(data.playersInRoom) ? data.playersInRoom : [],
           factions: Array.isArray(data.factions) ? data.factions : [],
           availableDirections: Array.isArray(data.availableDirections) ? data.availableDirections : [],
+          connections: data.room?.connections || [], // Ensure connections are included and default to an empty array if missing
           fallback: data.fallback || false
         };
       } catch (error) {

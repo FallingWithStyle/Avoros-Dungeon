@@ -32,8 +32,6 @@ export function useKeyboardMovement({
     onStairsRef.current = onStairs;
   }, [onMovement, onRotation, onStairs]);
 
-  // console.log(`⌨️ useKeyboardMovement hook initialized - enabled: ${isEnabled}`);
-
   // Compute movement vector from keys
   const calculateMovementVector = () => {
     let x = 0, y = 0;
@@ -54,11 +52,9 @@ export function useKeyboardMovement({
   const startMovement = () => {
     if (movementInterval.current) return;
 
-    // console.log('⌨️ Starting continuous keyboard movement');
     movementInterval.current = setInterval(() => {
       const direction = calculateMovementVector();
       if (direction.x !== 0 || direction.y !== 0) {
-        // console.log('⌨️ Sending continuous movement:', direction);
         onMovementRef.current(direction);
       }
     }, 50); // 20 FPS movement updates, consistent with gesture movement
@@ -69,7 +65,6 @@ export function useKeyboardMovement({
       clearInterval(movementInterval.current);
       movementInterval.current = null;
     }
-    // console.log('⌨️ Stopped keyboard movement - sending stop signal');
     onMovementRef.current({ x: 0, y: 0 });
   };
 
@@ -102,7 +97,6 @@ export function useKeyboardMovement({
 
     if (key === 'z' && onStairsRef.current) {
       event.preventDefault();
-      console.log('⌨️ Keyboard: Stairs/down action');
       onStairsRef.current();
       return;
     }
@@ -132,8 +126,6 @@ export function useKeyboardMovement({
     if (!validKeys.includes(key)) return;
 
     keysPressed.current.delete(key);
-
-    console.log('⌨️ Keyboard: Key released:', key, 'Keys now:', Array.from(keysPressed.current));
 
     // Only stop movement when no keys are pressed
     if (keysPressed.current.size === 0) {
