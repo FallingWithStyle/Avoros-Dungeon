@@ -187,17 +187,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       }
     });
 
-    // Initialize or update player position
-    const entryDirection = RoomChangeManager.getStoredMovementDirection();
-    let playerPosition: { x: number; y: number };
-
-    if (entryDirection) {
-      playerPosition = RoomChangeManager.getEntryPosition(entryDirection);
-      RoomChangeManager.clearStoredMovementDirection();
-    } else {
-      // Default center position if no entry direction
-      playerPosition = { x: 50, y: 50 };
-    }
+    // Initialize player position at center
+    const playerPosition = { x: 50, y: 50 };
 
     // Check if player already exists and update position, or create new player
     const existingPlayer = currentState.entities.find(e => e.id === "player");
