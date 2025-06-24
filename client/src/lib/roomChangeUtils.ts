@@ -241,17 +241,43 @@ async function performRoomChange(
       return false;
     }
 
-    // OPTIMIZED: Only invalidate essential queries, preserve prefetched data
+    // OPTIMISTIC: Update UI immediately, then validate with server
     try {
-      // Update crawler position immediately if we have the new room data
-      if (result.newRoom) {
+      // Get cached adjacent room data for instant update
+      const cachedAdjacentData = queryClient.getQueryData([`/api/crawlers/${crawlerId}/adjacent-rooms`]);
+      let optimisticRoomData = null;
+      
+      if (cachedAdjacentData?.adjacentRooms) {
+        // Find the room we're moving to in cached data
+        optimisticRoomData = cachedAdjacentData.adjacentRooms.find((roomData: any) => {
+          const room = roomData.room;
+          const currentRoom = queryClient.getQueryData([`/api/crawlers/${crawlerId}/room-data-batch`])?.room;
+          
+          if (!currentRoom) return false;
+          
+          // Match room based on direction
+          switch (direction.toLowerCase()) {
+            case 'north': return room.y === currentRoom.y + 1 && room.x === currentRoom.x;
+            case 'south': return room.y === currentRoom.y - 1 && room.x === currentRoom.x;
+            case 'east': return room.x === currentRoom.x + 1 && room.y === currentRoom.y;
+            case 'west': return room.x === currentRoom.x - 1 && room.y === currentRoom.y;
+            default: return false;
+          }
+        });
+      }
+      
+      // Use optimistic data first, fallback to server response
+      const roomDataToUse = optimisticRoomData?.room || result.newRoom;
+      
+      if (roomDataToUse) {
         queryClient.setQueryData(
           [`/api/crawlers/${crawlerId}/room-data-batch`],
           (oldData: any) => ({
             ...oldData,
-            room: result.newRoom,
-            currentRoom: result.newRoom,
-            fallback: false
+            room: roomDataToUse,
+            currentRoom: roomDataToUse,
+            fallback: false,
+            _optimistic: !!optimisticRoomData
           })
         );
       }

@@ -22,6 +22,7 @@ import { useCombatEntities } from "@/hooks/useCombatEntities";
 import CombatArena from "@/components/combat/CombatArena";
 import CombatHotbar from "@/components/combat/CombatHotbar";
 import * as CombatUtils from "@/utils/combat-utils";
+import { useCombatStatePreloader } from "@/hooks/useCombatStatePreloader";
 
 interface Equipment {
   id: string;
@@ -185,7 +186,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Log combat entities after combat state is available
   useEffect(() => {
     if (!combatState?.entities) return;
-    
+
     const now = new Date().toLocaleTimeString();
 
     if (combatState.entities.length > 0) {
@@ -236,10 +237,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   });
 
-  
-
-  
-
   // OPTIMIZED: Faster initialization with better caching
   const prevRoomIdRef = useRef<string | undefined>();
   const prevEntitiesLenRef = useRef<number | undefined>();
@@ -274,8 +271,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     effectiveTacticalData,
     isInitialized,
   ]);
-
-  
 
   // Enhanced room change handling with proper entity cleanup
   useEffect(() => {

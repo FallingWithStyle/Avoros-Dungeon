@@ -39,7 +39,7 @@ export function useCombatMovement({
   const lastMoveTime = useRef<number>(0);
   const MOVE_COOLDOWN = 1000; // 1 second cooldown between moves
 
-  // Room transition handler for combat view
+  // Room transition handler for combat view - INSTANT with background validation
   const handleRoomTransition = useCallback(
     async (direction: string) => {
       if (!crawler?.id) {
@@ -56,36 +56,32 @@ export function useCombatMovement({
       setIsMoving(true);
       lastMoveTime.current = now;
 
+      // INSTANT: Clear combat state and update UI immediately
+      onRoomTransition();
+      handleRoomChange();
+
+      // Show optimistic feedback immediately
+      toast({
+        title: "Moving...",
+        description: "Transitioning to " + direction + " room",
+        variant: "default",
+      });
+
+      // Background validation - don't block UI
       try {
-        // Use the same room change logic as other panels
         const success = await handleRoomChangeWithRefetch(crawler.id, direction);
 
-        if (success) {
-          // Clear combat state for room transition
-          onRoomTransition();
-
-          // Refetch tactical data to get new room information
-          handleRoomChange();
-
+        if (!success) {
+          // Only show error if server rejects - UI already updated optimistically
           toast({
-            title: "Room Changed",
-            description: "Successfully moved to " + direction + " room",
-            variant: "default",
-          });
-        } else {
-          toast({
-            title: "Movement Failed",
-            description: "Could not move to the " + direction + " room",
+            title: "Movement Issue",
+            description: "Room transition may need validation",
             variant: "destructive",
           });
         }
       } catch (error) {
-        console.error("Room transition error:", error);
-        toast({
-          title: "Movement Error",
-          description: "Failed to change rooms. Please try again.",
-          variant: "destructive",
-        });
+        console.error("Background room transition validation:", error);
+        // Don't show error toast - movement already happened optimistically
       } finally {
         setIsMoving(false);
       }

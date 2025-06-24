@@ -37,9 +37,9 @@ export function useAdjacentRoomPrefetch({
         data.adjacentRooms.forEach((roomData: any) => {
           const isAdjacent = roomData.distance === 1;
           
-          // INCREASED cache times for instant transitions
-          const staleTime = isAdjacent ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10min for adjacent, 5min for distance 2
-          const gcTime = isAdjacent ? 20 * 60 * 1000 : 10 * 60 * 1000; // Keep much longer
+          // AGGRESSIVE cache times for instant transitions
+          const staleTime = isAdjacent ? 30 * 60 * 1000 : 15 * 60 * 1000; // 30min for adjacent, 15min for distance 2
+          const gcTime = isAdjacent ? 60 * 60 * 1000 : 30 * 60 * 1000; // Keep 1 hour for adjacent, 30min for distance 2
 
           // Cache room data in multiple expected formats for instant access
           const roomDataFormatted = {
