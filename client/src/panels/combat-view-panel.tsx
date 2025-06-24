@@ -64,6 +64,17 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   } = useTacticalData(crawler);
 
+  // Fallback to batch data if current-room fails
+  const { data: batchData } = useQuery({
+    queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+    refetchInterval: 5000,
+    staleTime: 3000,
+    enabled: !roomData?.room, // Only fetch if we don't have room data
+  });
+
+  // Use batch data as fallback - fix room data structure access
+  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
+
   // Prefetch adjacent rooms for faster movement transitions
   const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
   useAdjacentRoomPrefetch({
@@ -71,14 +82,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     currentRoomId,
     enabled: !!currentRoomId && !roomLoading,
     radius: 2 // Prefetch 2 rooms in each direction
-  });
-
-  // Fallback to batch data if current-room fails
-  const { data: batchData } = useQuery({
-    queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
-    refetchInterval: 5000,
-    staleTime: 3000,
-    enabled: !roomData?.room, // Only fetch if we don't have room data
   });
 
   // Detect mobile device
@@ -93,9 +96,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // Use batch data as fallback - fix room data structure access
-  const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
 
   // Extract room connections from various possible data structures
