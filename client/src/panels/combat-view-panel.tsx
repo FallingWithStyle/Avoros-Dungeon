@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
+import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
 interface Equipment {
   id: string;
@@ -59,6 +60,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     isLoading: roomLoading,
     tacticalLoading,
     tacticalError,
+    handleRoomChange,
   } = useTacticalData(crawler);
 
   // Fallback to batch data if current-room fails
@@ -85,6 +87,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Use batch data as fallback - fix room data structure access
   const effectiveRoomData = roomData?.currentRoom || roomData?.room || batchData?.currentRoom;
   const effectiveTacticalData = tacticalData || batchData?.tacticalData;
+
+  // Extract room connections from various possible data structures
+  const roomConnections = effectiveRoomData?.connections || 
+                         (effectiveRoomData && effectiveRoomData.room?.connections) ||
+                         (roomData?.currentRoom?.connections) ||
+                         (roomData?.room?.connections) ||
+                         (roomData?.connections) ||
+                         [];
 
   // Debug logging to understand room data structure
   if (IS_DEBUG_MODE && roomData) {
@@ -275,6 +285,80 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     tacticalEntities,
   ]);
 
+  const handleRotation = useCallback(
+    (direction: "left" | "right") => {
+      const player = combatState.entities.find((e) => e.id === "player");
+      if (!player) return;
+
+      const rotationAmount = 15; // degrees
+      const currentFacing = player.facing || 0;
+      const newFacing =
+        direction === "left"
+          ? (currentFacing - rotationAmount + 360) % 360
+          : (currentFacing + rotationAmount) % 360;
+
+      combatSystem.updateEntity("player", { facing: newFacing });
+    },
+    [combatState.entities],
+  );
+
+  // Add movement state tracking
+  const [isMoving, setIsMoving] = useState(false);
+  const lastMoveTime = useRef<number>(0);
+  const MOVE_COOLDOWN = 1000; // 1 second cooldown between moves
+
+  // Room transition handler for combat view
+  const handleRoomTransition = useCallback(
+    async (direction: string) => {
+      if (!crawler?.id) {
+        console.error("No crawler ID available for room transition");
+        return;
+      }
+
+      // Prevent concurrent movements and enforce cooldown
+      const now = Date.now();
+      if (isMoving || (now - lastMoveTime.current) < MOVE_COOLDOWN) {
+        console.log("Movement blocked - concurrent or too frequent");
+        return;
+      }
+
+      setIsMoving(true);
+      lastMoveTime.current = now;
+
+      try {
+        // Use the same room change logic as other panels
+        const success = await handleRoomChangeWithRefetch(crawler.id, direction);
+
+        if (success) {
+          // Refetch tactical data to get new room information
+          handleRoomChange();
+
+          toast({
+            title: "Room Changed",
+            description: "Successfully moved to " + direction + " room",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Movement Failed",
+            description: "Could not move to the " + direction + " room",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Room transition error:", error);
+        toast({
+          title: "Movement Error",
+          description: "Failed to change rooms. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsMoving(false);
+      }
+    },
+    [crawler?.id, handleRoomChange, toast, isMoving],
+  );
+
   // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback(
     (direction: { x: number; y: number }) => {
@@ -336,69 +420,58 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       const gateEnd = 60;
       const boundary = 5;
 
-      // Check if we're trying to move through an exit
-      let exitDirection = "";
-      const roomConnections = effectiveRoomData?.connections || [];
-      const availableDirections = roomConnections.map(
-        (conn: any) => conn.direction,
-      );
+      // Check if we're trying to move through an exit (only if not already moving)
+      if (!isMoving) {
+        let exitDirection = "";
+        const availableDirections = roomConnections.map(
+          (conn: any) => conn.direction,
+        );
 
-      // More lenient gate detection - larger gate area
-      const gateAreaStart = 35;
-      const gateAreaEnd = 65;
-      const exitBoundary = 8; // Slightly larger boundary for exit detection
+        // More lenient gate detection - larger gate area
+        const gateAreaStart = 35;
+        const gateAreaEnd = 65;
+        const exitBoundary = 8; // Slightly larger boundary for exit detection
 
-      if (
-        newY <= exitBoundary &&
-        direction.y < 0 &&
-        availableDirections.includes("north")
-      ) {
-        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
-          exitDirection = "north";
-          toast({
-            title: "Exit Detected",
-            description: "Moving north through gate (room transitions not implemented in combat view)",
-            variant: "default",
-          });
-        }
-      } else if (
-        newY >= 100 - exitBoundary &&
-        direction.y > 0 &&
-        availableDirections.includes("south")
-      ) {
-        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
-          exitDirection = "south";
-          toast({
-            title: "Exit Detected", 
-            description: "Moving south through gate (room transitions not implemented in combat view)",
-            variant: "default",
-          });
-        }
-      } else if (
-        newX >= 100 - exitBoundary &&
-        direction.x > 0 &&
-        availableDirections.includes("east")
-      ) {
-        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
-          exitDirection = "east";
-          toast({
-            title: "Exit Detected",
-            description: "Moving east through gate (room transitions not implemented in combat view)",
-            variant: "default",
-          });
-        }
-      } else if (
-        newX <= exitBoundary &&
-        direction.x < 0 &&
-        availableDirections.includes("west")
-      ) {
-        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
-          exitDirection = "west";
-          toast({
-            title: "Exit Detected",
-            description: "Moving west through gate (room transitions not implemented in combat view)",
-            variant: "default",
-          });
+        if (
+          newY <= exitBoundary &&
+          direction.y < 0 &&
+          availableDirections.includes("north")
+        ) {
+          if (newX >= gateAreaStart && newX <= gateAreaEnd) {
+            exitDirection = "north";
+            handleRoomTransition("north");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newY >= 100 - exitBoundary &&
+          direction.y > 0 &&
+          availableDirections.includes("south")
+        ) {
+          if (newX >= gateAreaStart && newX <= gateAreaEnd) {
+            exitDirection = "south";
+            handleRoomTransition("south");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newX >= 100 - exitBoundary &&
+          direction.x > 0 &&
+          availableDirections.includes("east")
+        ) {
+          if (newY >= gateAreaStart && newY <= gateAreaEnd) {
+            exitDirection = "east";
+            handleRoomTransition("east");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newX <= exitBoundary &&
+          direction.x < 0 &&
+          availableDirections.includes("west")
+        ) {
+          if (newY >= gateAreaStart && newY <= gateAreaEnd) {
+            exitDirection = "west";
+            handleRoomTransition("west");
+            return true; // Stop movement processing since we're transitioning
+          }
         }
       }
 
@@ -490,6 +563,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       tacticalEntities,
       effectiveRoomData,
       isInitialized,
+      handleRoomTransition,
     ],
   );
 
@@ -527,7 +601,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
-    isEnabled: !combatState.isInCombat && isInitialized, // Only enable when not in combat and initialized
+    isEnabled: !combatState.isInCombat, // Only enable when not in combat
   });
 
   // Use gesture movement hook for mobile
@@ -718,7 +792,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <Eye className="w-4 h-4" />
           Combat View - {effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
-            {combatState.isInCombat ? "IN COMBAT" : "READY"}
+            {combatState.isInCombat ? "IN COMBAT" : isMoving ? "MOVING..." : "READY"}
           </Badge>
           {(effectiveRoomData?.environment || effectiveRoomData?.room?.environment) && (
             <Badge variant="outline" className="text-xs">
@@ -796,7 +870,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
                 return (
                   <div
-                    key={entity.id || `${entity.type}-${x}-${y}`}
+                    key={entity.id || entity.type + "-" + x + "-" + y}
                     className={`absolute ${
                       entity.type === "wall"
                         ? "bg-stone-600 border-2 border-stone-500"
@@ -828,14 +902,14 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             : null}
 
           {/* Debug: Show room connections data */}
-          {IS_DEBUG_MODE && effectiveRoomData?.connections && (
+          {IS_DEBUG_MODE && roomConnections.length > 0 && (
             <div className="absolute top-2 left-2 bg-black/70 text-white text-xs p-2 rounded z-30">
-              Connections: {effectiveRoomData.connections.map((c: any) => c.direction).join(", ")}
+              Connections: {roomConnections.map((c: any) => c.direction).join(", ")}
             </div>
           )}
 
           {/* Gate-style exit indicators */}
-          {effectiveRoomData?.connections?.map((connection: any) => {
+          {roomConnections.map((connection: any) => {
             let gateStyle = {};
             let gateClass = "";
 
@@ -922,7 +996,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                     }`}
                   />
                 </div>
-                
+
                 {/* Directional arrow for vertical/horizontal gates */}
                 {(connection.direction === "north" || connection.direction === "south" || 
                   connection.direction === "east" || connection.direction === "west") && (

@@ -221,6 +221,22 @@ export class ExplorationStorage extends BaseStorage {
     console.log(`=== MOVE TO ROOM ===`);
     console.log(`Crawler ID: ${crawlerId}, Direction: ${direction}`);
 
+    const cacheKey = `crawler:${crawlerId}:move:${direction}`;
+
+    // Check for cached result
+    try {
+      const cached = await redisService.get(cacheKey);
+      if (cached) {
+        const { result, timestamp } = cached as any;
+        if (Date.now() - timestamp < 3000) {
+          console.log("Returning cached movement result");
+          return result;
+        }
+      }
+    } catch (error) {
+      // Continue without cache
+    }
+
     const [currentPosition] = await db
       .select()
       .from(crawlerPositions)
@@ -258,59 +274,58 @@ export class ExplorationStorage extends BaseStorage {
       return await this.handleStaircaseMovement(crawlerId, currentRoom);
     }
 
-    // Get available directions for debugging
-    const availableDirections = await this.getAvailableDirections(
-      currentPosition.roomId,
-    );
-    console.log(
-      `Available directions from room ${currentPosition.roomId}:`,
-      availableDirections,
-    );
-
-    const [connection] = await db
-      .select()
+    // Get available directions and target room in one optimized query
+    const connectionsWithTargetRoom = await db
+      .select({
+        connection: roomConnections,
+        targetRoom: rooms
+      })
       .from(roomConnections)
-      .where(
-        and(
-          eq(roomConnections.fromRoomId, currentPosition.roomId),
-          eq(roomConnections.direction, direction),
-        ),
-      );
+      .innerJoin(rooms, eq(roomConnections.toRoomId, rooms.id))
+      .where(eq(roomConnections.fromRoomId, currentRoom.id));
 
-    if (!connection) {
-      console.log(
-        `ERROR: No connection found for direction ${direction} from room ${currentPosition.roomId}`,
-      );
-      console.log(`Available directions:`, availableDirections);
+    const availableDirections = connectionsWithTargetRoom.map((c) => c.connection.direction);
+
+    if (direction !== "staircase" && !availableDirections.includes(direction)) {
+      const result = {
+        success: false,
+        error: `No exit ${direction} from current room`,
+      };
+
+      // Cache failed result briefly to prevent repeated attempts
+      try {
+        await redisService.set(cacheKey, { result, timestamp: Date.now() }, 2);
+      } catch (error) {
+        // Continue without cache
+      }
+
+      return result;
+    }
+
+    // Find the target room
+    const targetConnectionData = connectionsWithTargetRoom.find((c) => c.connection.direction === direction);
+    if (!targetConnectionData) {
       return {
         success: false,
         error: `No exit ${direction} from current room`,
       };
     }
 
-    console.log(
-      `Found connection: ${connection.fromRoomId} -> ${connection.toRoomId} (${connection.direction})`,
-    );
+    const { connection: targetConnection, targetRoom } = targetConnectionData;
 
-    if (connection.isLocked) {
+    if (targetConnection.isLocked) {
       console.log(`ERROR: Connection is locked`);
       return { success: false, error: `The ${direction} exit is locked` };
     }
 
-    const newRoom = await this.getRoom(connection.toRoomId);
-    if (!newRoom) {
-      console.log(`ERROR: Destination room ${connection.toRoomId} not found`);
-      return { success: false, error: "Destination room not found" };
-    }
-
     console.log(
-      `Destination room: ${newRoom.name} (${newRoom.x}, ${newRoom.y})`,
+      `Destination room: ${targetRoom.name} (${targetRoom.x}, ${targetRoom.y})`,
     );
 
     console.log(`Inserting new crawler position...`);
     await db.insert(crawlerPositions).values({
       crawlerId,
-      roomId: connection.toRoomId,
+      roomId: targetConnection.toRoomId,
       enteredAt: new Date(),
     });
 
@@ -323,10 +338,21 @@ export class ExplorationStorage extends BaseStorage {
       console.log("Failed to invalidate position caches:", error);
     }
 
-    console.log(
-      `Movement successful: Crawler ${crawlerId} moved ${direction} to room ${newRoom.id} (${newRoom.name})`,
-    );
-    return { success: true, newRoom };
+    console.log(`Movement successful: Crawler ${crawlerId} moved ${direction} to room ${targetRoom.id} (${targetRoom.name})`);
+
+    // Invalidate related caches
+    await this.invalidateMovementCaches(crawlerId);
+
+    const result = { success: true, newRoom: targetRoom };
+
+    // Cache successful result briefly
+    try {
+      await redisService.set(cacheKey, { result, timestamp: Date.now() }, 3);
+    } catch (error) {
+      // Continue without cache
+    }
+
+    return result;
   }
 
   async getCrawlerCurrentRoom(crawlerId: number): Promise<any> {
@@ -382,7 +408,12 @@ export class ExplorationStorage extends BaseStorage {
         },
         isSafe: result[0].room.type === 'safe',
         hasLoot: ['treasure', 'normal', 'chamber'].includes(result[0].room.type),
-        connections: connections
+        connections: connections,
+        // Also include connections at room level for compatibility
+        room: {
+          ...result[0].room,
+          connections: connections
+        }
       };
 
       return roomData;
@@ -848,6 +879,16 @@ export class ExplorationStorage extends BaseStorage {
     } catch (error) {
       console.error("Error getting rooms within radius:", error);
       return [];
+    }
+  }
+
+  private async invalidateMovementCaches(crawlerId: number): Promise<void> {
+    try {
+      await redisService.del(`crawler:${crawlerId}:current-room`);
+      await redisService.del(`crawler:${crawlerId}:explored`);
+      await redisService.del(`crawler:${crawlerId}:scanned_rooms`);
+    } catch (error) {
+      console.log("Failed to invalidate movement caches");
     }
   }
 }

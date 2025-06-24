@@ -79,6 +79,23 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(2000 * 2 ** attemptIndex, 10000), // Longer delays
+    select: (data) => {
+      // Ensure connections are available at multiple paths for compatibility
+      if (data && data.connections) {
+        return {
+          ...data,
+          currentRoom: {
+            ...data,
+            connections: data.connections
+          },
+          room: {
+            ...data,
+            connections: data.connections
+          }
+        };
+      }
+      return data;
+    }
   });
 
   // Fetch explored rooms
@@ -180,6 +197,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
     tacticalError,
     refetchTacticalData,
     refetchExploredRooms,
+    refetchRoomData,
     handleRoomChange,
   };
 }

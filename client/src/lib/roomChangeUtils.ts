@@ -1,4 +1,3 @@
-
 /**
  * File: roomChangeUtils.ts
  * Responsibility: Unified room change and entry positioning logic
@@ -40,19 +39,19 @@ export class RoomChangeManager {
       case "north":
         // Player moved NORTH, so they enter from the SOUTH edge (bottom) of the new room
         return { x: 50, y: 85 };
-      
+
       case "south":
         // Player moved SOUTH, so they enter from the NORTH edge (top) of the new room
         return { x: 50, y: 15 };
-      
+
       case "east":
         // Player moved EAST, so they enter from the WEST edge (left) of the new room
         return { x: 15, y: 50 };
-      
+
       case "west":
         // Player moved WEST, so they enter from the EAST edge (right) of the new room
         return { x: 85, y: 50 };
-      
+
       default:
         console.warn(`Unknown movement direction: ${movementDirection}, using center position`);
         return { x: 50, y: 50 };
@@ -95,10 +94,10 @@ export class RoomChangeManager {
   ): void {
     // Get the correct entry position (don't store direction here - it's already stored)
     const entryPosition = this.getEntryPosition(direction);
-    
+
     // Position player at the correct entry point
     combatSystem.initializePlayer(entryPosition, crawler);
-    
+
     // Note: Direction clearing is handled by the caller after successful positioning
   }
 
@@ -127,6 +126,9 @@ export class RoomChangeManager {
   }
 }
 
+// Request deduplication map
+const pendingRequests = new Map<string, Promise<boolean>>();
+
 /**
  * Handles room change with immediate refetch for responsive UI
  * Uses optimistic updates and cached data for instant feel
@@ -135,12 +137,45 @@ export async function handleRoomChangeWithRefetch(
   crawlerId: number,
   direction: string
 ): Promise<boolean> {
+  // Create a unique key for this request
+  const requestKey = `${crawlerId}-${direction}`;
+  
+  // If there's already a pending request for this exact move, return it
+  if (pendingRequests.has(requestKey)) {
+    console.log(`Deduplicating request: ${requestKey}`);
+    return pendingRequests.get(requestKey)!;
+  }
+
+  // Create the request promise
+  const requestPromise = performRoomChange(crawlerId, direction);
+  
+  // Store it in the pending requests map
+  pendingRequests.set(requestKey, requestPromise);
+  
+  // Clean up after completion
+  requestPromise.finally(() => {
+    pendingRequests.delete(requestKey);
+  });
+  
+  return requestPromise;
+}
+
+async function performRoomChange(
+  crawlerId: number,
+  direction: string
+): Promise<boolean> {
   try {
     // Clear any existing entry direction since we're moving
     RoomChangeManager.clearStoredMovementDirection();
 
-    // Store the movement direction for entry positioning
-    RoomChangeManager.storeMovementDirection(direction);
+    // Store the movement direction for entry positioning BEFORE the API call
+    // This ensures it's available immediately when the new room loads
+    const validDirections = ['north', 'south', 'east', 'west', 'staircase'];
+    if (validDirections.includes(direction.toLowerCase())) {
+      sessionStorage.setItem('lastMovementDirection', direction);
+      // Also store as entry direction for immediate use
+      sessionStorage.setItem('entryDirection', direction);
+    }
 
     const response = await fetch(`/api/crawlers/${crawlerId}/move`, {
       method: "POST",
@@ -154,14 +189,14 @@ export async function handleRoomChangeWithRefetch(
         RoomChangeManager.clearStoredMovementDirection();
         return false;
       }
-      
+
       let errorText = "Unknown error";
       try {
         errorText = await response.text();
       } catch (e) {
         // Ignore text parsing errors
       }
-      
+
       console.error("❌ Room change failed:", response.status, response.statusText);
       RoomChangeManager.clearStoredMovementDirection();
       return false;
@@ -175,7 +210,7 @@ export async function handleRoomChangeWithRefetch(
       RoomChangeManager.clearStoredMovementDirection();
       return false;
     }
-    
+
     if (!result.success) {
       console.error("❌ Room change unsuccessful:", result.error);
       RoomChangeManager.clearStoredMovementDirection();
