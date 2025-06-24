@@ -49,6 +49,7 @@ export function useAdjacentRoomPrefetch({
             factions: roomData.factions || [],
             availableDirections: roomData.availableDirections || [],
             connections: roomData.room?.connections || [],
+            roomConnections: roomData.availableDirections?.map((dir: string) => ({ direction: dir, isLocked: false })) || [],
             fallback: false,
             _prefetched: true,
             _prefetchedAt: Date.now()
@@ -82,6 +83,7 @@ export function useAdjacentRoomPrefetch({
               playersInRoom: roomData.playersInRoom || [],
               tacticalEntities: [], // Tactical entities fetched on-demand
               factions: roomData.factions || [],
+              roomConnections: roomData.availableDirections?.map((dir: string) => ({ direction: dir, isLocked: false })) || [],
               _isCached: true,
               _cachedAt: Date.now()
             },
@@ -124,28 +126,47 @@ export function useAdjacentRoomPrefetch({
             queryClient.prefetchQuery({
               queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
               queryFn: async () => ({
-                room: roomData.room,
+                currentRoom: {
+                  room: roomData.room,
+                  availableDirections: roomData.availableDirections || [],
+                  playersInRoom: roomData.playersInRoom || []
+                },
                 scannedRooms: roomData.scannedRooms || [],
-                playersInRoom: roomData.playersInRoom || [],
+                exploredRooms: [],
+                tacticalData: [],
                 factions: roomData.factions || [],
                 availableDirections: roomData.availableDirections || [],
                 connections: roomData.room?.connections || [],
+                roomConnections: roomData.availableDirections?.map((dir: string) => ({ direction: dir, isLocked: false })) || [],
                 fallback: false,
                 _prefetched: true
               }),
               staleTime: 30 * 60 * 1000
             });
             
-            // Also prefetch tactical data
+            // Also prefetch tactical data with actual entities
             queryClient.prefetchQuery({
               queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
-              queryFn: async () => ({
-                room: roomData.room,
-                availableDirections: roomData.availableDirections || [],
-                playersInRoom: roomData.playersInRoom || [],
-                tacticalEntities: [],
-                factions: roomData.factions || []
-              }),
+              queryFn: async () => {
+                try {
+                  const tacticalResponse = await fetch(`/api/crawlers/${crawler.id}/tactical-data`);
+                  if (tacticalResponse.ok) {
+                    return await tacticalResponse.json();
+                  }
+                } catch (e) {
+                  console.log('Failed to prefetch tactical data:', e);
+                }
+                
+                // Fallback tactical data structure
+                return {
+                  room: roomData.room,
+                  availableDirections: roomData.availableDirections || [],
+                  playersInRoom: roomData.playersInRoom || [],
+                  tacticalEntities: [],
+                  factions: roomData.factions || [],
+                  roomConnections: roomData.availableDirections?.map((dir: string) => ({ direction: dir, isLocked: false })) || []
+                };
+              },
               staleTime: 15 * 60 * 1000
             });
           }

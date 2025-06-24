@@ -46,7 +46,7 @@ export function useCombatState({
       return;
     }
 
-    // Clear existing entities
+    // Always clear existing entities first to ensure clean slate
     combatSystem.clearEntities();
 
     // Get stored entry direction and calculate proper position
@@ -84,10 +84,71 @@ export function useCombatState({
       playerPosition = { x: 50, y: 50 };
     }
 
+    // Initialize player first to ensure they're always present
     combatSystem.initializePlayer(playerPosition, crawler);
 
+    // Store room connection data for instant availability
+    if (tacticalData?.availableDirections) {
+      const roomConnections = tacticalData.roomConnections || 
+        tacticalData.availableDirections.map((dir: string) => ({ direction: dir, isLocked: false }));
+      combatSystem.setRoomConnections(roomConnections);
+      console.log(`🚪 Loaded ${roomConnections.length} room exits: ${tacticalData.availableDirections.join(', ')}`);
+    }
+
+    // Immediately load tactical entities from cached data if available
+    if (tacticalData?.tacticalEntities && Array.isArray(tacticalData.tacticalEntities)) {
+      console.log(`🏃‍♂️ Loading ${tacticalData.tacticalEntities.length} cached tactical entities immediately...`);
+      
+      tacticalData.tacticalEntities.forEach((entity: any) => {
+        try {
+          const combatEntity = {
+            id: entity.id || `entity-${Math.random().toString(36).substr(2, 9)}`,
+            name: entity.name || entity.displayName || "Unknown Entity",
+            type: entity.type === "mob" ? "hostile" : entity.type || "neutral",
+            position: entity.position || { x: entity.x || 50, y: entity.y || 50 },
+            facing: entity.facing || 0,
+            
+            // Health stats
+            hp: entity.currentHealth || entity.hp || entity.hitPoints || 100,
+            maxHp: entity.maxHealth || entity.maxHp || entity.hitPoints || 100,
+            
+            // Combat stats with proper fallbacks
+            attack: entity.attack || Math.floor((entity.might || 10) * 1.2),
+            defense: entity.defense || Math.floor((entity.endurance || 10) * 0.8),
+            speed: entity.speed || Math.floor((entity.agility || 10) * 1.1),
+            accuracy: (entity.wisdom || 10) + (entity.intellect || 10),
+            evasion: Math.floor((entity.agility || 10) * 1.2),
+            
+            // Primary stats
+            might: entity.might || 10,
+            agility: entity.agility || 10,
+            endurance: entity.endurance || 10,
+            intellect: entity.intellect || 10,
+            
+            // Entity state
+            level: entity.level || 1,
+            isAlive: entity.isAlive !== false && (entity.hp || entity.currentHealth || 100) > 0,
+            cooldowns: {},
+            
+            // Additional properties for specific entity types
+            rarity: entity.rarity,
+            disposition: entity.disposition,
+            serial: entity.serial
+          };
+          
+          combatSystem.addEntity(combatEntity);
+        } catch (entityError) {
+          console.warn(`Failed to load entity ${entity.name}:`, entityError);
+        }
+      });
+      
+      console.log(`✅ Loaded ${tacticalData.tacticalEntities.length} entities from cache immediately`);
+    } else {
+      console.log("⚠️ No cached tactical entities available for immediate loading");
+    }
+
     setIsInitialized(true);
-    console.log("✅ Combat system initialized successfully");
+    console.log("✅ Combat system initialized successfully with cached entities");
   }, [tacticalData, crawler]);
 
   // Subscribe to combat system updates
@@ -128,15 +189,14 @@ export function useCombatState({
     // Enhanced combat system cleanup for room transition
     combatSystem.endCombat();
 
-    // Clear all entities except player, then clear room data
+    // Immediately clear ALL entities including player for clean slate
     const currentState = combatSystem.getState();
-    const nonPlayerEntities = currentState.entities.filter(e => e.id !== "player");
-
-    nonPlayerEntities.forEach(entity => {
-      combatSystem.removeEntity(entity.id);
-    });
-
-    console.log(`Cleared ${nonPlayerEntities.length} entities for room transition`);
+    const entityCount = currentState.entities.length;
+    
+    // Clear all entities completely
+    combatSystem.clearEntities();
+    
+    console.log(`Cleared ${entityCount} entities for room transition`);
 
     // Clear room-specific data
     combatSystem.clearRoomData();

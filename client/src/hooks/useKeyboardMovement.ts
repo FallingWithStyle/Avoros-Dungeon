@@ -10,6 +10,9 @@ interface UseKeyboardMovementProps {
   onMovement: (direction: { x: number; y: number }) => void;
   onRotation?: (direction: 'clockwise' | 'counter-clockwise') => void;
   onStairs?: () => void;
+  onTargetCycle?: () => void;
+  onTargetCycleAll?: () => void;
+  onTargetClear?: () => void;
   isEnabled: boolean;
 }
 
@@ -17,6 +20,9 @@ export function useKeyboardMovement({
   onMovement,
   onRotation,
   onStairs,
+  onTargetCycle,
+  onTargetCycleAll,
+  onTargetClear,
   isEnabled,
 }: UseKeyboardMovementProps) {
   const keysPressed = useRef<Set<string>>(new Set());
@@ -24,13 +30,19 @@ export function useKeyboardMovement({
   const onMovementRef = useRef(onMovement);
   const onRotationRef = useRef(onRotation);
   const onStairsRef = useRef(onStairs);
+  const onTargetCycleRef = useRef(onTargetCycle);
+  const onTargetCycleAllRef = useRef(onTargetCycleAll);
+  const onTargetClearRef = useRef(onTargetClear);
 
   // Keep the refs updated
   useEffect(() => {
     onMovementRef.current = onMovement;
     onRotationRef.current = onRotation;
     onStairsRef.current = onStairs;
-  }, [onMovement, onRotation, onStairs]);
+    onTargetCycleRef.current = onTargetCycle;
+    onTargetCycleAllRef.current = onTargetCycleAll;
+    onTargetClearRef.current = onTargetClear;
+  }, [onMovement, onRotation, onStairs, onTargetCycle, onTargetCycleAll, onTargetClear]);
 
   // Compute movement vector from keys
   const calculateMovementVector = () => {
@@ -76,7 +88,7 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
-      "q", "e", "z"
+      "q", "e", "z", "tab"
     ];
 
     if (!validKeys.includes(key)) return;
@@ -101,6 +113,20 @@ export function useKeyboardMovement({
       return;
     }
 
+    // Handle Tab targeting - check for Shift modifier
+    if (key === 'tab') {
+      event.preventDefault();
+      
+      if (event.shiftKey && onTargetCycleAllRef.current) {
+        // Shift+Tab: cycle through ALL entities
+        onTargetCycleAllRef.current();
+      } else if (onTargetCycleRef.current) {
+        // Tab: cycle through hostile entities only
+        onTargetCycleRef.current();
+      }
+      return;
+    }
+
     // Prevent key repeat for movement keys
     if (keysPressed.current.has(key)) return;
 
@@ -120,7 +146,7 @@ export function useKeyboardMovement({
     const validKeys = [
       "w", "a", "s", "d",
       "arrowup", "arrowdown", "arrowleft", "arrowright",
-      "q", "e", "z"
+      "q", "e", "z", "tab"
     ];
 
     if (!validKeys.includes(key)) return;

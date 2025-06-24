@@ -379,7 +379,8 @@ export function registerCrawlerRoutes(app: Express) {
         tacticalData: tacticalData || [],
         scannedRooms: scannedRooms || [],
         exploredRooms: exploredRooms || [],
-        crawlerHistory: [] // This can be expanded later if needed
+        crawlerHistory: [], // This can be expanded later if needed
+        availableDirections: availableDirections || [] // Include at top level for compatibility
       };
 
       // Cache the response for 60 seconds (shorter TTL for fresher data)
@@ -575,6 +576,58 @@ export function registerCrawlerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching room data batch:", error);
       res.status(500).json({ message: "Failed to fetch room data" });
+    }
+  });
+
+    app.get("/api/crawlers/:id/room", isAuthenticated, async (req: any, res) => {
+    try {
+      const crawlerId = parseInt(req.params.id);
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const crawler = await storage.getCrawler(crawlerId);
+      if (!crawler || crawler.sponsorId !== userId) {
+        return res.status(404).json({ error: "Crawler not found" });
+      }
+
+      // Get all necessary room data in parallel for faster loading
+      const [currentRoom, scannedRooms, playersInRoom, factions, tacticalEntities] = await Promise.all([
+        storage.getCrawlerCurrentRoom(crawlerId),
+        storage.getScannedRooms(crawlerId, crawler.scanRange || 2),
+        storage.getPlayersInRoom(crawler.currentRoomId),
+        storage.getFactions(),
+        // Include tactical entities for immediate combat loading
+        storage.tacticalStorage ? storage.tacticalStorage.generateAndSaveTacticalData(
+          crawler.currentRoomId,
+          {
+            type: currentRoom?.type || 'normal',
+            hasLoot: currentRoom?.hasLoot || false,
+            isSafe: currentRoom?.isSafe || false,
+            factionId: currentRoom?.factionId || null,
+            environment: currentRoom?.environment || 'indoor'
+          }
+        ).catch(() => []) : Promise.resolve([])
+      ]);
+
+      const response = {
+        room: currentRoom,
+        scannedRooms: scannedRooms || [],
+        playersInRoom: playersInRoom || [],
+        factions: factions || [],
+        availableDirections: currentRoom ? await storage.getAvailableDirections(currentRoom.id) : [],
+        connections: currentRoom?.connections || [],
+        tacticalEntities: tacticalEntities || [],
+        fallback: false
+      };
+
+      res.json(response);
+
+    } catch (error) {
+      console.error("Error fetching room data:", error);
+      res.status(500).json({ error: "Failed to fetch room data" });
     }
   });
 }

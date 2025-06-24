@@ -178,6 +178,96 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }));
   }, [effectiveTacticalData?.availableDirections, crawler.id, initialRoomConnections]);
 
+  // State for TAB hold detection
+  const [isTabHeld, setIsTabHeld] = useState(false);
+  const [tabHoldTimer, setTabHoldTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tabTimerExpired, setTabTimerExpired] = useState(false);
+
+  // TAB key handling for target selection/deselection
+  const handleTargetCycle = () => {
+    const enemies = combatState.entities.filter(
+      (e) => e.type === "hostile" && e.hp > 0
+    );
+
+    if (enemies.length > 0) {
+      if (!selectedTarget) {
+        // No target selected, select first enemy
+        setSelectedTarget(enemies[0].id);
+        combatSystem.selectEntity(enemies[0].id);
+      } else {
+        // Find current target index and cycle to next
+        const currentIndex = enemies.findIndex(
+          (e) => e.id === selectedTarget
+        );
+        const nextIndex = (currentIndex + 1) % enemies.length;
+        setSelectedTarget(enemies[nextIndex].id);
+        combatSystem.selectEntity(enemies[nextIndex].id);
+      }
+    }
+  };
+
+  const handleTargetClear = () => {
+    setSelectedTarget(null);
+    combatSystem.selectEntity(null);
+  };
+
+  const handleTargetCycleAll = () => {
+    const allEntities = combatState.entities.filter(
+      (e) => e.id !== "player" && e.hp > 0
+    );
+
+    if (allEntities.length > 0) {
+      if (!selectedTarget) {
+        // No target selected, select first entity
+        setSelectedTarget(allEntities[0].id);
+        combatSystem.selectEntity(allEntities[0].id);
+      } else {
+        // Find current target index and cycle to next
+        const currentIndex = allEntities.findIndex(
+          (e) => e.id === selectedTarget
+        );
+        const nextIndex = (currentIndex + 1) % allEntities.length;
+        setSelectedTarget(allEntities[nextIndex].id);
+        combatSystem.selectEntity(allEntities[nextIndex].id);
+      }
+    }
+  };
+
+  // Auto-face towards selected target
+  useEffect(() => {
+    if (!selectedTarget || !combatState?.entities) return;
+
+    const player = combatState.entities.find((e) => e.id === "player");
+    const target = combatState.entities.find((e) => e.id === selectedTarget);
+
+    if (player && target) {
+      // Calculate angle to target
+      const dx = target.position.x - player.position.x;
+      const dy = target.position.y - player.position.y;
+
+      if (dx !== 0 || dy !== 0) {
+        // Calculate angle in degrees (0° = North, positive clockwise)
+        let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+
+        // Normalize angle to 0-360
+        if (angle < 0) {
+          angle += 360;
+        }
+
+        const newFacing = Math.round(angle);
+        const currentFacing = player.facing || 0;
+
+        // Only update if facing has changed significantly to avoid jitter
+        const facingDiff = Math.abs(newFacing - currentFacing);
+        const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
+
+        if (normalizedDiff > 5) {
+          combatSystem.updateEntity("player", { facing: newFacing });
+        }
+      }
+    }
+  }, [selectedTarget, combatState?.entities]);
+
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
@@ -246,6 +336,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const {
     handleMovement,
     handleRotation,
+    handleRoomTransition,
     isMoving,
     containerRef,
     bind,
@@ -256,8 +347,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     roomConnections,
     selectedTarget,
     isMobile,
-    onRoomTransition,
+    onRoomTransition: onRoomTransition,
     handleRoomChange,
+    onTargetCycle: handleTargetCycle,
+    onTargetCycleAll: handleTargetCycleAll,
+    onTargetClear: handleTargetClear,
   });
 
   // OPTIMIZED: Faster initialization with better caching
@@ -374,7 +468,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <div>
             {isMobile
               ? "Touch & Drag: Move | Tap: Actions"
-              : "WASD: Move | 1-3: Actions | Tab: Cycle Targets"}
+              : "WASD: Move | 1-3: Actions | Tab: Hostiles | Shift+Tab: All"}
           </div>
           {selectedTarget && (
             <div className="text-yellow-400">

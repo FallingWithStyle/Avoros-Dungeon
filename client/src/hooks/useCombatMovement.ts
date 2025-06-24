@@ -22,6 +22,9 @@ interface UseCombatMovementProps {
   isMobile: boolean;
   onRoomTransition: () => void;
   handleRoomChange: () => void;
+  onTargetCycle?: () => void;
+  onTargetCycleAll?: () => void;
+  onTargetClear?: () => void;
 }
 
 export function useCombatMovement({
@@ -33,6 +36,9 @@ export function useCombatMovement({
   isMobile,
   onRoomTransition,
   handleRoomChange,
+  onTargetCycle,
+  onTargetCycleAll,
+  onTargetClear,
 }: UseCombatMovementProps) {
   const { toast } = useToast();
   const [isMoving, setIsMoving] = useState(false);
@@ -288,7 +294,7 @@ export function useCombatMovement({
         const facingDiff = Math.abs(newFacing - currentFacing);
         const normalizedDiff = Math.min(facingDiff, 360 - facingDiff);
 
-        if (normalizedDiff > 2) {
+        if (normalizedDiff > 5) { // Increased threshold to reduce jitter
           combatSystem.updateEntity("player", { facing: newFacing });
         }
       }
@@ -327,6 +333,9 @@ export function useCombatMovement({
   useKeyboardMovement({
     onMovement: handleMovement,
     onRotation: handleRotation,
+    onTargetCycle,
+    onTargetCycleAll,
+    onTargetClear,
     isEnabled: !combatState?.isInCombat, // Only enable when not in combat
   });
 

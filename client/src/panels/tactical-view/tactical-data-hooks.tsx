@@ -142,6 +142,14 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
 
         const data = await response.json();
 
+        // Ensure room connections are always available
+        if (data.availableDirections && !data.roomConnections) {
+          data.roomConnections = data.availableDirections.map((dir: string) => ({ 
+            direction: dir, 
+            isLocked: false 
+          }));
+        }
+
         // Enhanced tactical data processing with proper entity integration
         if (data && data.tacticalEntities) {
           const processedEntities = data.tacticalEntities.map((entity: any, index: number) => {
