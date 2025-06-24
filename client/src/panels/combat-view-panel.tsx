@@ -420,9 +420,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       const gateEnd = 60;
       const boundary = 5;
 
+      // Declare exitDirection outside the condition
+      let exitDirection = "";
+      
       // Check if we're trying to move through an exit (only if not already moving)
       if (!isMoving) {
-        let exitDirection = "";
         const availableDirections = roomConnections.map(
           (conn: any) => conn.direction,
         );
