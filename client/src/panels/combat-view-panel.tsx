@@ -601,7 +601,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
-    isEnabled: !combatState.isInCombat && isInitialized, // Only enable when not in combat and initialized
+    isEnabled: !combatState.isInCombat, // Only enable when not in combat
   });
 
   // Use gesture movement hook for mobile
