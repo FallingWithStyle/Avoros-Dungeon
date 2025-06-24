@@ -77,7 +77,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
 
   // OPTIMIZED: Extract room connections from all possible sources immediately
-  const roomConnections = effectiveRoomData?.connections || 
+  const initialRoomConnections = effectiveRoomData?.connections || 
                          effectiveRoomData?.room?.connections ||
                          roomData?.currentRoom?.connections ||
                          roomData?.room?.connections ||
@@ -165,14 +165,18 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       return cachedRoomData.roomConnections;
     }
 
-    // Fallback to tactical data
+    // Fallback to initial room connections or tactical data
+    if (initialRoomConnections && initialRoomConnections.length > 0) {
+      return initialRoomConnections;
+    }
+
     if (!effectiveTacticalData?.availableDirections) return [];
 
     return effectiveTacticalData.availableDirections.map((direction: string) => ({
       direction,
       isLocked: false, // TODO: Add locked status from server
     }));
-  }, [effectiveTacticalData?.availableDirections, crawler.id]);
+  }, [effectiveTacticalData?.availableDirections, crawler.id, initialRoomConnections]);
 
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {
