@@ -89,39 +89,39 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
-    
+
     if (!effectiveRoomData) {
       console.log(now + " - Combat View: No room data");
       return;
     }
-    
+
     const roomName = effectiveRoomData.name || effectiveRoomData.room?.name || "Unknown Room";
     console.log(now + " - Combat View: Loaded room - " + roomName);
-    
+
     // Log connections immediately if available
     if (roomConnections && roomConnections.length > 0) {
       const directions = roomConnections.map(c => c.direction).join(", ");
       console.log(now + " - Combat View: Loaded exits - " + directions);
     }
-    
+
     // Log entities if available
     if (tacticalEntities && tacticalEntities.length > 0) {
       const mobCount = tacticalEntities.filter(e => e.type === 'mob').length;
       const npcCount = tacticalEntities.filter(e => e.type === 'npc').length;
       const lootCount = tacticalEntities.filter(e => e.type === 'loot').length;
-      
+
       console.log(now + " - Combat View: Loaded entities - " + mobCount + " mobs, " + npcCount + " npcs, " + lootCount + " loot");
     }
   }, [currentRoomId, roomConnections.length, tacticalEntities?.length]);
 
   useEffect(() => {
     const now = new Date().toLocaleTimeString();
-    
+
     if (combatState.entities.length > 0) {
       const playerCount = combatState.entities.filter(e => e.type === 'player').length;
       const hostileCount = combatState.entities.filter(e => e.type === 'hostile').length;
       const neutralCount = combatState.entities.filter(e => e.type === 'neutral').length;
-      
+
       console.log(now + " - Combat View: Initialized combat entities - " + playerCount + " players, " + hostileCount + " hostiles, " + neutralCount + " neutrals");
     }
   }, [combatState.entities.length]);
@@ -222,12 +222,12 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         if (tacticalEntity.type === "mob") {
           // Use enhanced combat stats if available from processed tactical data
           const combatStats = tacticalEntity.combatStats || {};
-          
+
           const mobEntity: CombatEntity = {
             id: tacticalEntity.id || "mob_" + (tacticalEntity.data?.id || index),
             name: tacticalEntity.name || tacticalEntity.data?.name || "Unknown Mob",
             type: tacticalEntity.hostile !== false ? "hostile" : "neutral",
-            
+
             // Enhanced health and resource management
             hp: combatStats.hp || tacticalEntity.data?.hp || tacticalEntity.data?.currentHealth || 100,
             maxHp: combatStats.maxHp || tacticalEntity.data?.maxHp || tacticalEntity.data?.maxHealth || 100,
@@ -235,7 +235,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             maxEnergy: combatStats.maxEnergy || 20,
             power: combatStats.power || 10,
             maxPower: combatStats.maxPower || 10,
-            
+
             // Enhanced primary stats from tactical data
             might: combatStats.might || tacticalEntity.data?.might || 10,
             agility: combatStats.agility || tacticalEntity.data?.agility || 14,
@@ -243,29 +243,29 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
             intellect: combatStats.intellect || tacticalEntity.data?.intellect || 6,
             charisma: combatStats.charisma || tacticalEntity.data?.charisma || 4,
             wisdom: combatStats.wisdom || tacticalEntity.data?.wisdom || 7,
-            
+
             // Enhanced derived combat stats
             attack: combatStats.attack || tacticalEntity.data?.attack || 12,
             defense: combatStats.defense || tacticalEntity.data?.defense || 8,
-            speed: combatStats.speed || tacticalEntity.data?.speed || 16,
+            speed: tacticalEntity.data?.speed || 16,
             accuracy: combatStats.accuracy || (combatStats.wisdom || 7) + (combatStats.intellect || 6),
             evasion: combatStats.evasion || Math.floor((combatStats.agility || 14) * 1.2),
-            
+
             // Enhanced positioning
             position: {
               x: tacticalEntity.position?.x || 50,
               y: tacticalEntity.position?.y || 50,
-              },
-              facing: 180,
-              level: 3,
-              isAlive: true,
-              cooldowns: {},
-            };
+            },
+            facing: 180,
+            level: 3,
+            isAlive: true,
+            cooldowns: {},
+          };
 
-            combatSystem.addEntity(mobEntity);
-          }
-          // Handle old format where mob data is in the entity field
-          else if (tacticalEntity.entity) {
+          combatSystem.addEntity(mobEntity);
+        }
+        // Handle old format where mob data is in the entity field
+        else if (tacticalEntity.entity) {
             const mobEntity: CombatEntity = {
               id: "mob_" + (tacticalEntity.entity.id || index),
               name:
@@ -458,7 +458,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       // Declare exitDirection outside the condition
       let exitDirection = "";
-      
+
       // Check if we're trying to move through an exit (only if not already moving)
       if (!isMoving) {
         const availableDirections = roomConnections.map(
@@ -829,7 +829,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               {roomEnvironment}
             </Badge>
           )}
-          
+
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
