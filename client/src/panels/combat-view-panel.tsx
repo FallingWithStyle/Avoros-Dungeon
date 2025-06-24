@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
+import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
@@ -63,6 +64,15 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     handleRoomChange,
   } = useTacticalData(crawler);
 
+  // Prefetch adjacent rooms for faster movement transitions
+  const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
+  useAdjacentRoomPrefetch({
+    crawler,
+    currentRoomId,
+    enabled: !!currentRoomId && !roomLoading,
+    radius: 2 // Prefetch 2 rooms in each direction
+  });
+
   // Fallback to batch data if current-room fails
   const { data: batchData } = useQuery({
     queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
@@ -96,15 +106,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                          (roomData?.connections) ||
                          [];
 
-  // Debug logging to understand room data structure
-  if (IS_DEBUG_MODE && roomData) {
-    console.log('Combat View - Room data structure:', {
-      roomData,
-      batchData,
-      effectiveRoomData,
-      connections: effectiveRoomData?.connections
-    });
-  }
+  // Debug logging reduced for performance
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities =
@@ -318,7 +320,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       // Prevent concurrent movements and enforce cooldown
       const now = Date.now();
       if (isMoving || (now - lastMoveTime.current) < MOVE_COOLDOWN) {
-        console.log("Movement blocked - concurrent or too frequent");
         return;
       }
 

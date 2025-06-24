@@ -136,7 +136,34 @@ const pendingRequests = new Map<string, Promise<boolean>>();
 export async function handleRoomChangeWithRefetch(
   crawlerId: number,
   direction: string
-): Promise<boolean> {
+): Promise<boolean>;
+export async function handleRoomChangeWithRefetch(
+  refetchRoomData: () => void,
+  refetchExploredRooms: () => void,
+  refetchTacticalData: () => void
+): Promise<void>;
+export async function handleRoomChangeWithRefetch(
+  crawlerIdOrRefetch: number | (() => void),
+  directionOrRefetchExplored?: string | (() => void),
+  refetchTactical?: () => void
+): Promise<boolean | void> {
+  // Handle overloaded function signatures
+  if (typeof crawlerIdOrRefetch === 'function') {
+    // Legacy signature: refetch functions only
+    const refetchRoomData = crawlerIdOrRefetch;
+    const refetchExploredRooms = directionOrRefetchExplored as () => void;
+    const refetchTacticalData = refetchTactical as () => void;
+    
+    // Just call the refetch functions
+    refetchRoomData();
+    refetchExploredRooms();
+    refetchTacticalData();
+    return;
+  }
+  
+  // New signature: crawler ID and direction
+  const crawlerId = crawlerIdOrRefetch;
+  const direction = directionOrRefetchExplored as string;
   // Create a unique key for this request
   const requestKey = `${crawlerId}-${direction}`;
   
@@ -165,6 +192,12 @@ async function performRoomChange(
   direction: string
 ): Promise<boolean> {
   try {
+    // Validate direction parameter
+    if (!direction || typeof direction !== 'string') {
+      console.error("❌ Invalid direction parameter:", direction);
+      return false;
+    }
+
     // Clear any existing entry direction since we're moving
     RoomChangeManager.clearStoredMovementDirection();
 
