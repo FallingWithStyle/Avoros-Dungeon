@@ -20,12 +20,8 @@ interface TacticalDataHooks {
 }
 
 export function useTacticalData(crawler: CrawlerWithDetails) {
-  // Only log on first call, not on every re-render
+  // Initialize hook without debug logging
   const hasLoggedRef = useRef(false);
-  if (process.env.NODE_ENV === 'development' && !hasLoggedRef.current && crawler) {
-    console.log('useTacticalData - Initializing for crawler:', crawler.id, crawler.name);
-    hasLoggedRef.current = true;
-  }
 
   // Fetch current room data
   const {

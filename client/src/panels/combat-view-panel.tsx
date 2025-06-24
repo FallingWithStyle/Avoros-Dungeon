@@ -96,15 +96,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                          (roomData?.connections) ||
                          [];
 
-  // Debug logging to understand room data structure
-  if (IS_DEBUG_MODE && roomData) {
-    console.log('Combat View - Room data structure:', {
-      roomData,
-      batchData,
-      effectiveRoomData,
-      connections: effectiveRoomData?.connections
-    });
-  }
+  // Debug logging reduced for performance
 
   // Extract the actual tactical entities array from the data structure
   const tacticalEntities =
@@ -318,7 +310,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       // Prevent concurrent movements and enforce cooldown
       const now = Date.now();
       if (isMoving || (now - lastMoveTime.current) < MOVE_COOLDOWN) {
-        console.log("Movement blocked - concurrent or too frequent");
         return;
       }
 
