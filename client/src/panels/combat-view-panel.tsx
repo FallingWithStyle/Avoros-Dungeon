@@ -867,10 +867,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         ...entity,
         // Ensure position is valid for rendering
         position: {
-          x:Analysis: The code modifications primarily focus on enhancing the combat system's entity management, improving room change handling, refining tactical data processing, and ensuring proper positioning and rendering of entities on the tactical grid.
-
-```typescript
-Math.max(0, Math.min(100, entity.position?.x || 50)),
+          x: Math.max(0, Math.min(100, entity.position?.x || 50)),
           y: Math.max(0, Math.min(100, entity.position?.y || 50))
         }
       }));
