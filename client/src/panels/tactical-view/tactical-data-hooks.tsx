@@ -3,7 +3,7 @@
  * Responsibility: Provides React hooks for fetching tactical combat data including room data, explored rooms, and tactical entities
  * Notes: Handles data fetching with proper refetch intervals and error handling for tactical view components
  */
-import React, { useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";
@@ -141,7 +141,7 @@ export function useTacticalData(crawler: CrawlerWithDetails) {
         }
 
         const data = await response.json();
-        
+
         // Enhanced tactical data processing with proper entity integration
         if (data && data.tacticalEntities) {
           const processedEntities = data.tacticalEntities.map((entity: any, index: number) => {
