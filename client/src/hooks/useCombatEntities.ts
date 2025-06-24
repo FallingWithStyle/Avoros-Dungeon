@@ -1,7 +1,3 @@
-Refactored useCombatEntities to use combat-utils for distance calculations, position validation, and weapon range calculations.
-```
-
-```typescript
 /**
  * File: useCombatEntities.ts
  * Responsibility: Handles entity initialization, tactical data processing, and combat entity management
