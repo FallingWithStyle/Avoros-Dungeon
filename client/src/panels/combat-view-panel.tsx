@@ -115,7 +115,10 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     }
   }, [currentRoomId, roomConnections.length, tacticalEntities?.length]);
 
+  // Log combat entities after combat state is available
   useEffect(() => {
+    if (!combatState) return;
+    
     const now = new Date().toLocaleTimeString();
 
     if (combatState.entities.length > 0) {
@@ -125,7 +128,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
       console.log(now + " - Combat View: Initialized combat entities - " + playerCount + " players, " + hostileCount + " hostiles, " + neutralCount + " neutrals");
     }
-  }, [combatState.entities.length]);
+  }, [combatState?.entities?.length]);
 
   // OPTIMIZED: Prefetch adjacent rooms using cached room ID
   useAdjacentRoomPrefetch({
@@ -188,8 +191,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     aiEnabled,
     availableWeapons,
   });
-
-  
 
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
@@ -270,6 +271,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // Movement handler with enhanced collision detection and room transitions
   const handleMovement = useCallback(
     (direction: { x: number; y: number }) => {
+      if (!combatState?.entities) return;
+      
       const player = combatState.entities.find((e) => e.id === "player");
       if (!player) return;
 
@@ -485,6 +488,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       if (event.key === "Tab") {
         event.preventDefault();
 
+        if (!combatState?.entities) return;
+
         const hostileTargets = combatState.entities.filter(
           (e) => e.type === "hostile" && e.hp > 0,
         );
@@ -508,24 +513,26 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [combatState.entities, selectedTarget]);
+  }, [combatState?.entities, selectedTarget, setSelectedTarget]);
 
   // Enable keyboard movement
   useKeyboardMovement({
     onMovement: handleMovement,
     onRotation: handleRotation,
-    isEnabled: !combatState.isInCombat, // Only enable when not in combat
+    isEnabled: !combatState?.isInCombat, // Only enable when not in combat
   });
 
   // Use gesture movement hook for mobile
   const { containerRef, bind } = useGestureMovement({
     onMovement: handleMovement,
-    isEnabled: isMobile && !combatState.isInCombat,
+    isEnabled: isMobile && !combatState?.isInCombat,
   });
 
   // Hotbar action handler
   const handleHotbarAction = useCallback(
     (actionId: string, actionType: string, actionName: string) => {
+      if (!combatState?.entities) return;
+
       if (actionType === "attack" && actionId === "basic_attack") {
         if (selectedTarget) {
           const player = combatState.entities.find((e) => e.id === "player");
@@ -558,7 +565,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         setActiveActionMode({ type: actionType as any, actionId, actionName });
       }
     },
-    [selectedTarget, combatState.entities, equippedWeapon, toast],
+    [selectedTarget, combatState?.entities, equippedWeapon, toast, setActiveActionMode],
   );
 
   // OPTIMIZED: Faster initialization with better caching
@@ -686,8 +693,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         <CardTitle className="text-base text-slate-200 flex items-center gap-2">
           <Eye className="w-4 h-4" />
           Combat View - {roomName}
-          <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
-            {combatState.isInCombat ? "IN COMBAT" : isMoving ? "MOVING..." : "READY"}
+          <Badge variant={combatState?.isInCombat ? "destructive" : "secondary"}>
+            {combatState?.isInCombat ? "IN COMBAT" : isMoving ? "MOVING..." : "READY"}
           </Badge>
           {roomEnvironment && (
             <Badge variant="outline" className="text-xs">
@@ -910,7 +917,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           })}
 
           {/* Entities */}
-          {combatState.entities.map((entity) => (
+          {combatState?.entities?.map((entity) => (
             <div
               key={entity.id}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
@@ -1095,7 +1102,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
               Target: {selectedEntity?.name}
             </div>
           )}
-          {combatState.isInCombat && (
+          {combatState?.isInCombat && (
             <div className="text-red-400">
               Combat Mode: Movement restricted near enemies
             </div>
