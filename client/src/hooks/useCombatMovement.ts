@@ -7,7 +7,7 @@
 import { useState, useCallback, useRef } from "react";
 import { combatSystem } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import * as CombatUtils from "@/utils/combat-utils";
+import * as CombatUtils from "../utils/combat-utils";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";

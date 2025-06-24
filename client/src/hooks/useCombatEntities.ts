@@ -7,7 +7,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import type { CrawlerWithDetails } from "@shared/schema";
-import * as CombatUtils from "./combat-utils"; // Import combat utils
+import * as CombatUtils from "../utils/combat-utils"; // Import combat utils
 
 interface Equipment {
   id: string;
