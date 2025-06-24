@@ -69,6 +69,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
 
   // Use primary room data source - prefetched data should be available immediately
   const effectiveRoomData = roomData?.currentRoom || roomData?.room;
+  const effectiveTacticalData = tacticalData;
+
+  // Extract the actual tactical entities array from the data structure
+  const tacticalEntities =
+    effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
 
   // Add console logging for room loading stages
   useEffect(() => {
@@ -140,7 +145,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  const effectiveTacticalData = tacticalData;
 
   // Extract room connections from various possible data structures
   const roomConnections = effectiveRoomData?.connections || 
@@ -149,12 +153,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
                          (roomData?.room?.connections) ||
                          (roomData?.connections) ||
                          [];
-
-  // Debug logging reduced for performance
-
-  // Extract the actual tactical entities array from the data structure
-  const tacticalEntities =
-    effectiveTacticalData?.tacticalEntities || effectiveTacticalData || [];
 
   // Mock weapons for testing - in real implementation these would come from crawler equipment
   const availableWeapons: Equipment[] = [
