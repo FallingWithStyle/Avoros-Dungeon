@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
+import { useCombatState } from "@/hooks/useCombatState";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
@@ -39,8 +40,6 @@ interface CombatViewPanelProps {
 export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
   const { toast } = useToast();
-  const [combatState, setCombatState] = useState(combatSystem.getState());
-  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [activeActionMode, setActiveActionMode] = useState<{
     type: "move" | "attack" | "ability";
     actionId: string;
@@ -49,10 +48,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
   const [manualRotation, setManualRotation] = useState(false);
   const [equippedWeapon, setEquippedWeapon] = useState<Equipment | null>(null);
   const [aiEnabled, setAiEnabled] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [movementOptions, setMovementOptions] = useState<any>([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [, forceUpdate] = useState({});
   const [currentRoomId, setCurrentRoomId] = useState<string | undefined>(undefined);
 
   // Use the same tactical data hooks as the tactical view panel
@@ -173,201 +170,26 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     },
   ];
 
-  // Enhanced entity integration from tactical data with comprehensive management
-  const initializeCombatSystem = useCallback(() => {
-    if (!crawler || !effectiveTacticalData) return;
-
-    // Get current combat state and ensure clean initialization
-    const currentState = combatSystem.getState();
-
-    // Clear all existing entities except player to avoid duplicates
-    currentState.entities.forEach(entity => {
-      if (entity.id !== "player") {
-        combatSystem.removeEntity(entity.id);
-      }
-    });
-
-    // Initialize player position at center
-    const playerPosition = { x: 50, y: 50 };
-
-    // Check if player already exists and update position, or create new player
-    const existingPlayer = currentState.entities.find(e => e.id === "player");
-    if (existingPlayer) {
-      combatSystem.updateEntity("player", { position: playerPosition });
-    } else {
-      // Initialize player with comprehensive crawler data
-      combatSystem.initializePlayer(playerPosition, {
-        name: crawler.name,
-        serial: crawler.serial,
-        currentHealth: crawler.currentHealth,
-        maxHealth: crawler.maxHealth,
-        currentEnergy: crawler.currentEnergy,
-        maxEnergy: crawler.maxEnergy,
-        currentPower: crawler.currentPower,
-        maxPower: crawler.maxPower,
-        level: crawler.level,
-        might: crawler.might,
-        agility: crawler.agility,
-        endurance: crawler.endurance,
-        intellect: crawler.intellect,
-        charisma: crawler.charisma,
-        wisdom: crawler.wisdom,
-        attack: crawler.attack,
-        defense: crawler.defense,
-      });
-    }
-
-    // Update player equipment if available
-    if (availableWeapons && availableWeapons.length > 0) {
-      const equippedWeapon = availableWeapons.find(w => w.isEquipped);
-      if (equippedWeapon) {
-        combatSystem.updateEntity("player", { 
-          equippedWeapon: equippedWeapon 
-        });
-      }
-    }
-
-    // Process and add tactical entities from server data with validation
-    const tacticalEntities = effectiveTacticalData?.tacticalEntities || [];
-    let entitiesAdded = 0;
-
-    if (tacticalEntities && Array.isArray(tacticalEntities)) {
-      tacticalEntities.forEach((tacticalEntity: any, index: number) => {
-        // Validate entity data before processing
-        if (!tacticalEntity || !tacticalEntity.type) {
-          console.warn(`Skipping invalid tactical entity at index ${index}:`, tacticalEntity);
-          return;
-        }
-
-        if (tacticalEntity.type === "mob") {
-          // Enhanced mob entity creation with comprehensive combat stats
-          const combatStats = tacticalEntity.combatStats || {};
-          const entityData = tacticalEntity.data || {};
-
-          const mobEntity: CombatEntity = {
-            id: tacticalEntity.id || `mob_${entityData.id || index}_${Date.now()}`,
-            name: tacticalEntity.name || entityData.name || "Unknown Mob",
-            type: tacticalEntity.hostile !== false ? "hostile" : "neutral",
-
-            // Enhanced health and resource management
-            hp: combatStats.hp || entityData.hp || entityData.currentHealth || 100,
-            maxHp: combatStats.maxHp || entityData.maxHp || entityData.maxHealth || 100,
-            energy: combatStats.energy || entityData.energy || 20,
-            maxEnergy: combatStats.maxEnergy || entityData.maxEnergy || 20,
-            power: combatStats.power || entityData.power || 10,
-            maxPower: combatStats.maxPower || entityData.maxPower || 10,
-
-            // Enhanced primary stats from combat stats or entity data
-            might: combatStats.might || entityData.might || 10,
-            agility: combatStats.agility || entityData.agility || 10,
-            endurance: combatStats.endurance || entityData.endurance || 10,
-            intellect: combatStats.intellect || entityData.intellect || 10,
-            charisma: combatStats.charisma || entityData.charisma || 10,
-            wisdom: combatStats.wisdom || entityData.wisdom || 10,
-
-            // Enhanced derived combat stats with proper calculations
-            attack: combatStats.attack || entityData.attack || Math.floor((combatStats.might || entityData.might || 10) * 1.2),
-            defense: combatStats.defense || entityData.defense || Math.floor((combatStats.endurance || entityData.endurance || 10) * 0.8),
-            speed: combatStats.speed || entityData.speed || Math.floor((combatStats.agility || entityData.agility || 10) * 1.1),
-            accuracy: (combatStats.wisdom || entityData.wisdom || 10) + (combatStats.intellect || entityData.intellect || 10),
-            evasion: Math.floor((combatStats.agility || entityData.agility || 10) * 1.2),
-
-            // Enhanced positioning with proper validation and fallback
-            position: {
-              x: Math.max(5, Math.min(95, tacticalEntity.position?.x || (20 + Math.random() * 60))),
-              y: Math.max(5, Math.min(95, tacticalEntity.position?.y || (20 + Math.random() * 60)))
-            },
-            facing: Math.random() * 360, // Random initial facing
-
-            level: combatStats.level || entityData.level || 1,
-            isAlive: true,
-            cooldowns: {}
-          };
-
-          // Add mob to combat system with validation
-          try {
-            combatSystem.addEntity(mobEntity);
-            entitiesAdded++;
-            console.log(`Added mob entity: ${mobEntity.name} at position (${mobEntity.position.x.toFixed(1)}, ${mobEntity.position.y.toFixed(1)})`);
-          } catch (error) {
-            console.error(`Failed to add mob entity ${mobEntity.name}:`, error);
-          }
-
-        } else if (tacticalEntity.type === "npc") {
-          // Enhanced NPC entity creation
-          const entityData = tacticalEntity.data || {};
-
-          const npcEntity: CombatEntity = {
-            id: tacticalEntity.id || `npc_${index}_${Date.now()}`,
-            name: tacticalEntity.name || entityData.name || "Unknown NPC",
-            type: "neutral",
-
-            hp: 100,
-            maxHp: 100,
-            energy: 50,
-            maxEnergy: 50,
-            power: 25,
-            maxPower: 25,
-
-            might: 8,
-            agility: 8,
-            endurance: 12,
-            intellect: 12,
-            charisma: 15,
-            wisdom: 12,
-
-            attack: 10,
-            defense: 15,
-            speed: 8,
-            accuracy: 24,
-            evasion: 10,
-
-            position: {
-              x: Math.max(5, Math.min(95, tacticalEntity.position?.x || (30 + Math.random() * 40))),
-              y: Math.max(5, Math.min(95, tacticalEntity.position?.y || (30 + Math.random() * 40)))
-            },
-            facing: Math.random() * 360,
-
-            level: 1,
-            isAlive: true,
-            cooldowns: {}
-          };
-
-          // Add NPC to combat system with validation
-          try {
-            combatSystem.addEntity(npcEntity);
-            entitiesAdded++;
-            console.log(`Added NPC entity: ${npcEntity.name} at position (${npcEntity.position.x.toFixed(1)}, ${npcEntity.position.y.toFixed(1)})`);
-          } catch (error) {
-            console.error(`Failed to add NPC entity ${npcEntity.name}:`, error);
-          }
-        }
-      });
-    }
-
-    console.log(`Combat system initialized: ${entitiesAdded} tactical entities added to combat system`);
-
-    // Set room data in combat system for context
-    if (effectiveTacticalData?.room) {
-      combatSystem.setCurrentRoomData(effectiveTacticalData.room);
-    }
-
-    // Start AI loop if enabled and there are hostile entities
-    if (aiEnabled) {
-      const hostileCount = combatSystem.getState().entities.filter(e => e.type === "hostile").length;
-      if (hostileCount > 0) {
-        combatSystem.startAILoop();
-        console.log(`AI enabled for ${hostileCount} hostile entities`);
-      }
-    }
-
-    setIsInitialized(true);
-  }, [
+  // Use the combat state management hook
+  const {
+    combatState,
+    selectedTarget,
+    selectedEntity,
+    isInitialized,
+    player,
+    enemies,
+    setSelectedTarget,
+    initializeCombatSystem,
+    handleRoomTransition: onRoomTransition,
+    getCooldownPercentage,
+  } = useCombatState({
     crawler,
+    tacticalData: effectiveTacticalData,
     aiEnabled,
     availableWeapons,
-    effectiveTacticalData,
-  ]);
+  });
+
+  
 
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
@@ -413,6 +235,9 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         const success = await handleRoomChangeWithRefetch(crawler.id, direction);
 
         if (success) {
+          // Clear combat state for room transition
+          onRoomTransition();
+          
           // Refetch tactical data to get new room information
           handleRoomChange();
 
@@ -439,7 +264,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         setIsMoving(false);
       }
     },
-    [crawler?.id, handleRoomChange, toast, isMoving],
+    [crawler?.id, handleRoomChange, toast, isMoving, onRoomTransition],
   );
 
   // Movement handler with enhanced collision detection and room transitions
@@ -736,47 +561,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     [selectedTarget, combatState.entities, equippedWeapon, toast],
   );
 
-  // Get cooldown percentage for hotbar display
-  const getCooldownPercentage = useCallback(
-    (actionId: string): number => {
-      const player = combatState.entities.find((e) => e.id === "player");
-      if (!player || !player.cooldowns) return 0;
-
-      const now = Date.now();
-      const lastUsed = player.cooldowns[actionId] || 0;
-
-      const cooldowns: Record<string, number> = {
-        basic_attack: 800,
-        defend: 3000,
-        special: 5000,
-      };
-
-      const cooldown = cooldowns[actionId] || 1000;
-      const timeLeft = Math.max(0, lastUsed + cooldown - now);
-      return (timeLeft / cooldown) * 100;
-    },
-    [combatState.entities],
-  );
-
-  // Subscribe to combat system updates
-  useEffect(() => {
-    const unsubscribe = combatSystem.subscribe((state) => {
-      setCombatState(state);
-
-      // Clear selectedTarget if the currently selected entity is dead or no longer exists
-      if (selectedTarget) {
-        const selectedEntity = state.entities.find(
-          (e) => e.id === selectedTarget,
-        );
-        if (!selectedEntity || selectedEntity.hp <= 0) {
-          setSelectedTarget(null);
-        }
-      }
-    });
-
-    return unsubscribe;
-  }, [selectedTarget]);
-
   // OPTIMIZED: Faster initialization with better caching
   const prevRoomIdRef = useRef<string | undefined>();
   const prevEntitiesLenRef = useRef<number | undefined>();
@@ -790,7 +574,8 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       (prevRoomIdRef.current !== currentRoomId ||
         prevEntitiesLenRef.current !== entitiesLen)
     ) {
-      setIsInitialized(false);
+      // Trigger re-initialization in the hook
+      initializeCombatSystem();
     }
     prevRoomIdRef.current = currentRoomId;
     prevEntitiesLenRef.current = entitiesLen;
@@ -810,28 +595,6 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     effectiveTacticalData,
     isInitialized,
   ]);
-
-  // Force re-render during cooldowns
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const player = combatState.entities.find((e) => e.id === "player");
-      if (player?.cooldowns) {
-        const now = Date.now();
-        const hasActiveCooldowns = Object.values(player.cooldowns).some(
-          (lastUsed) => {
-            const timeSince = now - lastUsed;
-            return timeSince < 5000;
-          },
-        );
-
-        if (hasActiveCooldowns) {
-          forceUpdate({});
-        }
-      }
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [combatState.entities]);
 
   // Process tactical data for display components with enhanced filtering
   const tacticalMobs = useMemo(() => {
@@ -884,37 +647,13 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     if (roomData?.room && roomData.room.id !== currentRoomId) {
       const prevRoomId = currentRoomId;
       setCurrentRoomId(roomData.room.id);
-      setIsInitialized(false); // Trigger re-initialization
 
       console.log(`Room transition: ${prevRoomId || 'unknown'} -> ${roomData.room.id} (${roomData.room.name})`);
 
-      // Enhanced combat system cleanup for room transition
-      combatSystem.endCombat(); // End any active combat first
-
-      // Clear all entities except player, then clear room data
-      const currentState = combatSystem.getState();
-      const nonPlayerEntities = currentState.entities.filter(e => e.id !== "player");
-
-      nonPlayerEntities.forEach(entity => {
-        combatSystem.removeEntity(entity.id);
-      });
-
-      console.log(`Cleared ${nonPlayerEntities.length} entities for room transition`);
-
-      // Clear room-specific data
-      combatSystem.clearRoomData();
-
-      // Reset selected target
-      setSelectedTarget(null);
+      // Trigger room transition cleanup in the combat state hook
+      onRoomTransition();
     }
-  }, [roomData?.room, currentRoomId]);
-
-  // CONDITIONAL LOGIC AFTER ALL HOOKS
-  const player = combatState.entities.find((e) => e.id === "player");
-  const enemies = combatState.entities.filter((e) => e.type === "hostile");
-  const selectedEntity = combatState.entities.find(
-    (e) => e.id === selectedTarget,
-  );
+  }, [roomData?.room, currentRoomId, onRoomTransition]);
 
   // Show loading state
   if (
