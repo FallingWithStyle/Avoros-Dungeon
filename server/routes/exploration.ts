@@ -210,9 +210,19 @@ export function registerExplorationRoutes(app: Express) {
       console.log(`Direction: ${direction}`);
       console.log(`User ID: ${req.user.claims.sub}`);
 
-      if (!direction) {
-        console.log(`ERROR: No direction provided`);
-        return res.status(400).json({ message: "Direction is required" });
+      // Validate input
+      if (!direction || typeof direction !== 'string') {
+        console.log(`ERROR: Invalid direction provided: ${direction}`);
+        return res.status(400).json({ message: "Direction is required and must be a string" });
+      }
+
+      // Allow standard directions plus staircase
+      const validDirections = ['north', 'south', 'east', 'west', 'staircase'];
+      if (!validDirections.includes(direction.toLowerCase())) {
+        console.log(`ERROR: Invalid direction: ${direction}`);
+        return res.status(400).json({ 
+          message: "Invalid direction. Must be north, south, east, west, or staircase." 
+        });
       }
 
       // Ensure crawler has a position first
@@ -231,15 +241,35 @@ export function registerExplorationRoutes(app: Express) {
         return res.status(400).json({ message: "Dead crawlers cannot move" });
       }
 
+      // Check if crawler has enough energy (if energy system is implemented)
+      if (crawler.energy !== undefined && crawler.energy <= 0) {
+        console.log(`ERROR: Crawler has no energy`);
+        return res.status(400).json({ message: "Not enough energy to move" });
+      }
+
       console.log(`Attempting to move crawler ${crawlerId} ${direction}...`);
       const result = await storage.moveToRoom(crawlerId, direction);
 
       console.log(`Move result:`, result.success ? `Success - moved to ${result.newRoom?.name}` : `Failed - ${result.error}`);
 
       if (!result.success) {
-        return res
-          .status(400)
-          .json({ message: result.error || "Cannot move in that direction" });
+        // Provide more specific error messages
+        let errorMessage = result.error || "Movement failed";
+
+        if (errorMessage.includes("not found")) {
+          errorMessage = "Current room not found. Try refreshing the page.";
+        } else if (errorMessage.includes("locked")) {
+          errorMessage = `The ${direction} exit is locked and requires a key.`;
+        } else if (errorMessage.includes("No exit")) {
+          errorMessage = `There is no exit to the ${direction} from this room.`;
+        } else if (errorMessage.includes("No staircase")) {
+          errorMessage = "There is no staircase in this room.";
+        } else if (errorMessage.includes("No deeper floor")) {
+          errorMessage = "You have reached the deepest floor available.";
+        }
+
+        console.log(`Movement failed: ${errorMessage}`);
+        return res.status(400).json({ message: errorMessage });
       }
 
       await storage.createActivity({
