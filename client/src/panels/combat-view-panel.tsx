@@ -21,6 +21,7 @@ import { useCombatActions } from "@/hooks/useCombatActions";
 import { useCombatEntities } from "@/hooks/useCombatEntities";
 import CombatArena from "@/components/combat/CombatArena";
 import CombatHotbar from "@/components/combat/CombatHotbar";
+import * as CombatUtils from "@/utils/combat-utils";
 
 interface Equipment {
   id: string;

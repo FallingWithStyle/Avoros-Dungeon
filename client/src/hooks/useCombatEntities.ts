@@ -1,4 +1,7 @@
+Refactored useCombatEntities to use combat-utils for distance calculations, position validation, and weapon range calculations.
+```
 
+```typescript
 /**
  * File: useCombatEntities.ts
  * Responsibility: Handles entity initialization, tactical data processing, and combat entity management
@@ -8,6 +11,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import type { CrawlerWithDetails } from "@shared/schema";
+import * as CombatUtils from "./combat-utils"; // Import combat utils
 
 interface Equipment {
   id: string;
@@ -124,7 +128,7 @@ export function useCombatEntities({
     let playerEntity = currentState.entities.find(e => e.id === "player");
     if (!playerEntity) {
       console.log("🧑 Adding player entity...");
-      
+
       // Calculate player stats from crawler
       const totalMight = (crawler.might || 10) + (crawler.mightBonus || 0);
       const totalAgility = (crawler.agility || 10) + (crawler.agilityBonus || 0);
@@ -250,18 +254,9 @@ export function useCombatEntities({
   }, [combatState?.entities]);
 
   // Check if position is valid (not occupied by walls/obstacles)
-  const isPositionValid = useCallback((position: { x: number; y: number }): boolean => {
-    // Check against layout entities (walls, doors, cover)
-    return !processedEntityData.layoutEntities.some((entity: any) => {
-      const distance = Math.sqrt(
-        Math.pow(entity.position.x - position.x, 2) + 
-        Math.pow(entity.position.y - position.y, 2)
-      );
-      
-      // Consider position blocked if within 4% of a wall/door
-      return distance < 4 && (entity.type === "wall" || entity.type === "door");
-    });
-  }, [processedEntityData.layoutEntities]);
+  const isPositionValid = useCallback((position: any): boolean => {
+    return CombatUtils.isPositionValid(position) && CombatUtils.isPositionInGrid(position);
+  }, []);
 
   // Get weapon range helper
   const getWeaponRange = useCallback((weapon: Equipment | null): number => {
@@ -276,7 +271,7 @@ export function useCombatEntities({
   ): boolean => {
     const entity = getEntityById(entityId);
     const player = getEntityById("player");
-    
+
     if (!entity || !player) return false;
 
     const weaponRange = getWeaponRange(weapon);

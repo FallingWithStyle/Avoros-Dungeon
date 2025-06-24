@@ -1,4 +1,3 @@
-
 /**
  * File: useCombatMovement.ts
  * Responsibility: Handle player movement, rotation, keyboard/gesture controls, and room transitions for combat view
@@ -7,9 +6,10 @@
 
 import { useState, useCallback, useRef } from "react";
 import { combatSystem } from "@shared/combat-system";
+import { useToast } from "@/hooks/use-toast";
+import * as CombatUtils from "@/utils/combat-utils";
 import { useKeyboardMovement } from "@/hooks/useKeyboardMovement";
 import { useGestureMovement } from "@/hooks/useGestureMovement";
-import { useToast } from "@/hooks/use-toast";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 import type { CrawlerWithDetails } from "@shared/schema";
 
@@ -63,7 +63,7 @@ export function useCombatMovement({
         if (success) {
           // Clear combat state for room transition
           onRoomTransition();
-          
+
           // Refetch tactical data to get new room information
           handleRoomChange();
 
@@ -97,7 +97,7 @@ export function useCombatMovement({
   const handleMovement = useCallback(
     (direction: { x: number; y: number }) => {
       if (!combatState?.entities) return;
-      
+
       const player = combatState.entities.find((e) => e.id === "player");
       if (!player) return;
 
@@ -140,14 +140,11 @@ export function useCombatMovement({
       // Check for collision with other entities (hostile mobs)
       const checkCollisionWithEntities = (x: number, y: number): boolean => {
         if (!combatState?.entities) return false;
-        
+
         return combatState.entities.some((entity: any) => {
           if (entity.id === "player" || entity.hp <= 0) return false;
 
-          const distance = Math.sqrt(
-            Math.pow(x - entity.position.x, 2) +
-              Math.pow(y - entity.position.y, 2),
-          );
+          const distance = CombatUtils.calculateDistance({x, y}, entity.position);
 
           return distance < 4; // Minimum distance to other entities
         });
@@ -311,7 +308,7 @@ export function useCombatMovement({
   const handleRotation = useCallback(
     (direction: "left" | "right") => {
       if (!combatState?.entities) return;
-      
+
       const player = combatState.entities.find((e) => e.id === "player");
       if (!player) return;
 
