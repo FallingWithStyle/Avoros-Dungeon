@@ -153,20 +153,20 @@ export async function handleRoomChangeWithRefetch(
     const refetchRoomData = crawlerIdOrRefetch;
     const refetchExploredRooms = directionOrRefetchExplored as () => void;
     const refetchTacticalData = refetchTactical as () => void;
-    
+
     // Just call the refetch functions
     refetchRoomData();
     refetchExploredRooms();
     refetchTacticalData();
     return;
   }
-  
+
   // New signature: crawler ID and direction
   const crawlerId = crawlerIdOrRefetch;
   const direction = directionOrRefetchExplored as string;
   // Create a unique key for this request
   const requestKey = `${crawlerId}-${direction}`;
-  
+
   // If there's already a pending request for this exact move, return it
   if (pendingRequests.has(requestKey)) {
     console.log(`Deduplicating request: ${requestKey}`);
@@ -175,15 +175,15 @@ export async function handleRoomChangeWithRefetch(
 
   // Create the request promise
   const requestPromise = performRoomChange(crawlerId, direction);
-  
+
   // Store it in the pending requests map
   pendingRequests.set(requestKey, requestPromise);
-  
+
   // Clean up after completion
   requestPromise.finally(() => {
     pendingRequests.delete(requestKey);
   });
-  
+
   return requestPromise;
 }
 
@@ -246,15 +246,15 @@ async function performRoomChange(
       // Get cached adjacent room data for instant update
       const cachedAdjacentData = queryClient.getQueryData([`/api/crawlers/${crawlerId}/adjacent-rooms`]);
       let optimisticRoomData = null;
-      
+
       if (cachedAdjacentData?.adjacentRooms) {
         // Find the room we're moving to in cached data
         optimisticRoomData = cachedAdjacentData.adjacentRooms.find((roomData: any) => {
           const room = roomData.room;
           const currentRoom = queryClient.getQueryData([`/api/crawlers/${crawlerId}/room-data-batch`])?.room;
-          
+
           if (!currentRoom) return false;
-          
+
           // Match room based on direction
           switch (direction.toLowerCase()) {
             case 'north': return room.y === currentRoom.y + 1 && room.x === currentRoom.x;
@@ -265,10 +265,10 @@ async function performRoomChange(
           }
         });
       }
-      
+
       // Use optimistic data first, fallback to server response
       const roomDataToUse = optimisticRoomData?.room || result.newRoom;
-      
+
       if (roomDataToUse) {
         queryClient.setQueryData(
           [`/api/crawlers/${crawlerId}/room-data-batch`],
@@ -299,7 +299,7 @@ async function performRoomChange(
         queryKey: [`/api/crawlers/${crawlerId}/explored-rooms`],
         type: 'inactive'
       });
-      
+
     } catch (e) {
       console.error("Error updating queries:", e);
     }

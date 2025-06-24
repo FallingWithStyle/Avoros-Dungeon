@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Sword, Shield, Zap, Target, Heart, Skull } from "lucide-react";
 import { combatSystem, type CombatEntity } from "@shared/combat-system";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
 import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
@@ -154,6 +154,25 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     combatState,
     isInitialized,
   });
+
+    const queryClient = useQueryClient();
+
+  // Room connections for exit indicators - use cached data if available
+  const roomConnections = useMemo(() => {
+    // First try to get from cached room data
+    const cachedRoomData = queryClient.getQueryData([`/api/crawlers/${crawler.id}/room-data-batch`]);
+    if (cachedRoomData?.roomConnections) {
+      return cachedRoomData.roomConnections;
+    }
+
+    // Fallback to tactical data
+    if (!effectiveTacticalData?.availableDirections) return [];
+
+    return effectiveTacticalData.availableDirections.map((direction: string) => ({
+      direction,
+      isLocked: false, // TODO: Add locked status from server
+    }));
+  }, [effectiveTacticalData?.availableDirections, crawler.id]);
 
   // OPTIMIZED: Single effect for all room data logging to reduce overhead
   useEffect(() => {

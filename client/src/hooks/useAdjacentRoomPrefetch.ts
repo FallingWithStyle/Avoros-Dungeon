@@ -114,8 +114,45 @@ export function useAdjacentRoomPrefetch({
     if (currentRoomId && enabled) {
       // Start prefetching immediately for instant transitions
       prefetchAdjacentRooms();
+      
+      // Also aggressively prefetch individual room data for each adjacent room
+      const cachedData = queryClient.getQueryData([`/api/crawlers/${crawler.id}/adjacent-rooms`, currentRoomId, radius]);
+      if (cachedData?.adjacentRooms) {
+        cachedData.adjacentRooms.forEach((roomData: any) => {
+          if (roomData.distance === 1) {
+            // Pre-cache all room data formats that might be needed
+            queryClient.prefetchQuery({
+              queryKey: [`/api/crawlers/${crawler.id}/room-data-batch`],
+              queryFn: async () => ({
+                room: roomData.room,
+                scannedRooms: roomData.scannedRooms || [],
+                playersInRoom: roomData.playersInRoom || [],
+                factions: roomData.factions || [],
+                availableDirections: roomData.availableDirections || [],
+                connections: roomData.room?.connections || [],
+                fallback: false,
+                _prefetched: true
+              }),
+              staleTime: 30 * 60 * 1000
+            });
+            
+            // Also prefetch tactical data
+            queryClient.prefetchQuery({
+              queryKey: [`/api/crawlers/${crawler.id}/tactical-data`],
+              queryFn: async () => ({
+                room: roomData.room,
+                availableDirections: roomData.availableDirections || [],
+                playersInRoom: roomData.playersInRoom || [],
+                tacticalEntities: [],
+                factions: roomData.factions || []
+              }),
+              staleTime: 15 * 60 * 1000
+            });
+          }
+        });
+      }
     }
-  }, [currentRoomId, prefetchAdjacentRooms, enabled]);
+  }, [currentRoomId, prefetchAdjacentRooms, enabled, crawler.id, radius]);
 
   return {
     adjacentRoomsData,

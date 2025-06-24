@@ -60,10 +60,10 @@ export function useCombatMovement({
       onRoomTransition();
       handleRoomChange();
 
-      // Show optimistic feedback immediately
+      // Show immediate feedback with room loading indicator
       toast({
-        title: "Moving...",
-        description: "Transitioning to " + direction + " room",
+        title: "🚪 Moving " + direction,
+        description: "Loading new area...",
         variant: "default",
       });
 
@@ -160,10 +160,10 @@ export function useCombatMovement({
           (conn: any) => conn.direction,
         );
 
-        // More lenient gate detection - larger gate area
-        const gateAreaStart = 35;
-        const gateAreaEnd = 65;
-        const exitBoundary = 8; // Slightly larger boundary for exit detection
+        // Tight gate detection - require player to actually reach the edge
+        const gateAreaStart = 42;
+        const gateAreaEnd = 58;
+        const exitBoundary = 3; // Much tighter - must be very close to edge
 
         if (
           newY <= exitBoundary &&
