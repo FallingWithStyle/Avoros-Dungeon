@@ -126,11 +126,41 @@ export class RoomChangeManager {
   }
 }
 
+// Request deduplication map
+const pendingRequests = new Map<string, Promise<boolean>>();
+
 /**
  * Handles room change with immediate refetch for responsive UI
  * Uses optimistic updates and cached data for instant feel
  */
 export async function handleRoomChangeWithRefetch(
+  crawlerId: number,
+  direction: string
+): Promise<boolean> {
+  // Create a unique key for this request
+  const requestKey = `${crawlerId}-${direction}`;
+  
+  // If there's already a pending request for this exact move, return it
+  if (pendingRequests.has(requestKey)) {
+    console.log(`Deduplicating request: ${requestKey}`);
+    return pendingRequests.get(requestKey)!;
+  }
+
+  // Create the request promise
+  const requestPromise = performRoomChange(crawlerId, direction);
+  
+  // Store it in the pending requests map
+  pendingRequests.set(requestKey, requestPromise);
+  
+  // Clean up after completion
+  requestPromise.finally(() => {
+    pendingRequests.delete(requestKey);
+  });
+  
+  return requestPromise;
+}
+
+async function performRoomChange(
   crawlerId: number,
   direction: string
 ): Promise<boolean> {

@@ -302,6 +302,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     [combatState.entities],
   );
 
+  // Add movement state tracking
+  const [isMoving, setIsMoving] = useState(false);
+  const lastMoveTime = useRef<number>(0);
+  const MOVE_COOLDOWN = 1000; // 1 second cooldown between moves
+
   // Room transition handler for combat view
   const handleRoomTransition = useCallback(
     async (direction: string) => {
@@ -309,6 +314,16 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
         console.error("No crawler ID available for room transition");
         return;
       }
+
+      // Prevent concurrent movements and enforce cooldown
+      const now = Date.now();
+      if (isMoving || (now - lastMoveTime.current) < MOVE_COOLDOWN) {
+        console.log("Movement blocked - concurrent or too frequent");
+        return;
+      }
+
+      setIsMoving(true);
+      lastMoveTime.current = now;
 
       try {
         // Use the same room change logic as other panels
@@ -337,9 +352,11 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           description: "Failed to change rooms. Please try again.",
           variant: "destructive",
         });
+      } finally {
+        setIsMoving(false);
       }
     },
-    [crawler?.id, handleRoomChange, toast],
+    [crawler?.id, handleRoomChange, toast, isMoving],
   );
 
   // Movement handler with enhanced collision detection and room transitions
@@ -403,76 +420,58 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
       const gateEnd = 60;
       const boundary = 5;
 
-      // Check if we're trying to move through an exit
-      let exitDirection = "";
-      const availableDirections = roomConnections.map(
-        (conn: any) => conn.direction,
-      );
+      // Check if we're trying to move through an exit (only if not already moving)
+      if (!isMoving) {
+        let exitDirection = "";
+        const availableDirections = roomConnections.map(
+          (conn: any) => conn.direction,
+        );
 
-      // More lenient gate detection - larger gate area
-      const gateAreaStart = 35;
-      const gateAreaEnd = 65;
-      const exitBoundary = 8; // Slightly larger boundary for exit detection
+        // More lenient gate detection - larger gate area
+        const gateAreaStart = 35;
+        const gateAreaEnd = 65;
+        const exitBoundary = 8; // Slightly larger boundary for exit detection
 
-      if (
-        newY <= exitBoundary &&
-        direction.y < 0 &&
-        availableDirections.includes("north")
-      ) {
-        if (newX >= gateAreaStart && newX <= gateAreaEnd) {
-          exitDirection = "north";
-          toast({
-            title: "Room Transition",
-            description: "Moving north to next room...",
-            variant: "default",
-          });
-          handleRoomTransition("north");
-          return true; // Stop movement processing since we're transitioning
-        }
-      } else if (
-        newY >= 100 - exitBoundary &&
-        direction.y > 0 &&
-        availableDirections.includes("south")
-      ) {
-        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
-          exitDirection = "south";
-          toast({
-            title: "Room Transition",
-            description: "Moving south to next room...",
-            variant: "default",
-          });
-          handleRoomTransition("south");
-          return true; // Stop movement processing since we're transitioning
-        }
-      } else if (
-        newX >= 100 - exitBoundary &&
-        direction.x > 0 &&
-        availableDirections.includes("east")
-      ) {
-        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
-          exitDirection = "east";
-          toast({
-            title: "Room Transition",
-            description: "Moving east to next room...",
-            variant: "default",
-          });
-          handleRoomTransition("east");
-          return true; // Stop movement processing since we're transitioning
-        }
-      } else if (
-        newX <= exitBoundary &&
-        direction.x < 0 &&
-        availableDirections.includes("west")
-      ) {
-        if (newY >= gateAreaStart && newY <= gateAreaEnd) {
-          exitDirection = "west";
-          toast({
-            title: "Room Transition",
-            description: "Moving west to next room...",
-            variant: "default",
-          });
-          handleRoomTransition("west");
-          return true; // Stop movement processing since we're transitioning
+        if (
+          newY <= exitBoundary &&
+          direction.y < 0 &&
+          availableDirections.includes("north")
+        ) {
+          if (newX >= gateAreaStart && newX <= gateAreaEnd) {
+            exitDirection = "north";
+            handleRoomTransition("north");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newY >= 100 - exitBoundary &&
+          direction.y > 0 &&
+          availableDirections.includes("south")
+        ) {
+          if (newX >= gateAreaStart && newX <= gateAreaEnd) {
+            exitDirection = "south";
+            handleRoomTransition("south");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newX >= 100 - exitBoundary &&
+          direction.x > 0 &&
+          availableDirections.includes("east")
+        ) {
+          if (newY >= gateAreaStart && newY <= gateAreaEnd) {
+            exitDirection = "east";
+            handleRoomTransition("east");
+            return true; // Stop movement processing since we're transitioning
+          }
+        } else if (
+          newX <= exitBoundary &&
+          direction.x < 0 &&
+          availableDirections.includes("west")
+        ) {
+          if (newY >= gateAreaStart && newY <= gateAreaEnd) {
+            exitDirection = "west";
+            handleRoomTransition("west");
+            return true; // Stop movement processing since we're transitioning
+          }
         }
       }
 
@@ -793,7 +792,7 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
           <Eye className="w-4 h-4" />
           Combat View - {effectiveRoomData?.name || effectiveRoomData?.room?.name || "Unknown Room"}
           <Badge variant={combatState.isInCombat ? "destructive" : "secondary"}>
-            {combatState.isInCombat ? "IN COMBAT" : "READY"}
+            {combatState.isInCombat ? "IN COMBAT" : isMoving ? "MOVING..." : "READY"}
           </Badge>
           {(effectiveRoomData?.environment || effectiveRoomData?.room?.environment) && (
             <Badge variant="outline" className="text-xs">
