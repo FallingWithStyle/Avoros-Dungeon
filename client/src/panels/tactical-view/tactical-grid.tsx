@@ -216,7 +216,7 @@ export default function TacticalGrid({
         </div>
       ))}
 
-      {/* Combat Entities */}
+      {/* Combat Entities - All entities from combat system */}
       {entities.map((entity) => (
         <TacticalEntity
           key={entity.id}
@@ -227,6 +227,13 @@ export default function TacticalGrid({
           onHover={onEntityHover}
         />
       ))}
+
+      {/* Debug: Show entity count */}
+      {entities.length > 0 && (
+        <div className="absolute top-2 left-2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded">
+          Entities: {entities.length} ({entities.filter(e => e.type === "hostile").length} hostile, {entities.filter(e => e.type === "neutral").length} neutral)
+        </div>
+      )}
 
       {/* Loot Items */}
       {lootItems.map((item, index) => (
