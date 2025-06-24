@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
-import { queryClient } from "@/lib/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 interface TacticalDataHooks {
   roomData: any;
