@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import type { CrawlerWithDetails } from "@shared/schema";
 import { useTacticalData } from "./tactical-view/tactical-data-hooks";
+import { useAdjacentRoomPrefetch } from "@/hooks/useAdjacentRoomPrefetch";
 import { IS_DEBUG_MODE } from "@/components/debug-panel";
 import { handleRoomChangeWithRefetch } from "@/lib/roomChangeUtils";
 
@@ -62,6 +63,15 @@ export default function CombatViewPanel({ crawler }: CombatViewPanelProps) {
     tacticalError,
     handleRoomChange,
   } = useTacticalData(crawler);
+
+  // Prefetch adjacent rooms for faster movement transitions
+  const currentRoomId = effectiveRoomData?.id || effectiveRoomData?.room?.id;
+  useAdjacentRoomPrefetch({
+    crawler,
+    currentRoomId,
+    enabled: !!currentRoomId && !roomLoading,
+    radius: 2 // Prefetch 2 rooms in each direction
+  });
 
   // Fallback to batch data if current-room fails
   const { data: batchData } = useQuery({
